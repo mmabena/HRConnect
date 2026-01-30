@@ -167,6 +167,42 @@ For detailed information, see:
 
 ---
 
+## Local secrets with `dotnet user-secrets`
+
+For local development you can store secrets in the per-user `dotnet user-secrets` store (these values do not get checked into source control).
+
+1. Open a terminal in the API project folder:
+
+```powershell
+cd Server/HRConnect.Api
+```
+
+2. Initialize user-secrets (one-time per project):
+
+```powershell
+dotnet user-secrets init
+```
+
+3. Set secrets used by the application (examples):
+
+```powershell
+dotnet user-secrets set "JwtSettings:Secret" "<your-secret-or-base64>"
+dotnet user-secrets set "SendGrid:ApiKey" "SG.xxxxx"
+```
+
+List stored secrets:
+
+```powershell
+dotnet user-secrets list
+```
+
+Notes:
+- Keys use configuration naming (colon-delimited) and map to `IConfiguration`/`IOptions<T>` in the app.
+- In production, set environment variables `JwtSettings__Secret` and `SendGrid__ApiKey` instead of using user-secrets.
+
+
+---
+
 ## What's Working
 
 - Login with email/password  

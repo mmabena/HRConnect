@@ -2,6 +2,8 @@ namespace HRConnect.Api.Utils
 {
     using SendGrid;
     using SendGrid.Helpers.Mail;
+    using Microsoft.Extensions.Options;
+    using HRConnect.Api.Settings;
     public interface IEmailService
     {
         Task SendEmailAsync(string recipientEmail, string subject, string body);
@@ -13,11 +15,13 @@ namespace HRConnect.Api.Utils
         private readonly string _fromEmail;
         private readonly string _fromName;
 
-        public EmailService(IConfiguration configuration)
+        public EmailService(IOptions<SendGridSettings> options)
         {
-            var sendGridApiKey = configuration["SendGrid:ApiKey"];
-            _fromEmail = configuration["SendGrid:FromEmail"] ?? "noreply@hrconnect.com";
-            _fromName = configuration["SendGrid:FromName"] ?? "HRConnect";
+            var settings = options?.Value ?? throw new ArgumentNullException(nameof(options));
+
+            var sendGridApiKey = settings.ApiKey;
+            _fromEmail = string.IsNullOrWhiteSpace(settings.FromEmail) ? "noreply@hrconnect.com" : settings.FromEmail;
+            _fromName = string.IsNullOrWhiteSpace(settings.FromName) ? "HRConnect" : settings.FromName;
 
             if (string.IsNullOrWhiteSpace(sendGridApiKey))
                 throw new InvalidOperationException("SendGrid API key is not configured.");
