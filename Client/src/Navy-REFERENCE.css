@@ -1,0 +1,18 @@
+/* 
+  Navy.css - Component-specific styles for authentication and form pages
+  
+  NOTE: This file now relies on global.css for the following standardized styles:
+  - Button styles: .btn, .btn-primary, .btn-secondary, .btn-success, .save-button, .btn-edit, .sign-in-button, .request-button
+  - Input styles: .input-field, .input-group, .input-label, .form-label, .otp-input, .password-input-group
+  - Form elements: .input-row, .bottom-line-container, .grey-text, .blue-text
+  - Grid & Layout: .grid-item, .actions-grid, .center-frame, .column, .left-column, .right-column
+  - Table styles: .styled-table, .user-table, .empty-table-message, .action-buttons
+  - Modal styles: .actions-modal, .actions-modal-overlay, .actions-modal-header, .actions-modal-content, .toast-confirm-containers, .toast-confirm-buttons
+  - Typography: .page-title, .instruction-text, .back-to-login, .footer-text
+  - Backgrounds: .full-screen-bg, .signin-container, .edit-employee-background
+  
+  Component-specific overrides and custom variations are preserved below.
+  For shared styles, always use classes from styles/global.css
+*/
+
+/* Navy Component Styles - Page-specific and form styling */

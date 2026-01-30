@@ -1,0 +1,874 @@
+/**
+ * HRConnect Global Styles
+ * This file contains standardized styles for commonly used components across the application
+ * Includes: buttons, forms, grids, tables, modals, and input fields
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;600;700&display=swap');
+
+/* ==================== GLOBAL VARIABLES & RESETS ==================== */
+
+:root {
+  --primary-color: #002D40;
+  --primary-dark: #001a25;
+  --primary-light: #004d6b;
+  --accent-blue: #006088;
+  --accent-blue-dark: #004d6b;
+  --success-color: #AFBF74;
+  --background-light: #EEEEF1;
+  --background-light-alt: #EFF1F3;
+  --background-light-alt-2: #E7EAEB;
+  --background-light-alt-3: #D6D6D9;
+  --background-light-alt-4: #C4C4C5;
+  --text-primary: #002D40;
+  --text-secondary: #3D3D3D;
+  --text-light: #666666;
+  --border-color: #cccccc;
+  --error-color: #d32f2f;
+  --warning-color: #f57c00;
+  --success-text-color: #2e7d32;
+  --border-radius-small: 5px;
+  --border-radius-medium: 10px;
+  --transition-default: 0.2s ease;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background-color: var(--primary-color);
+  min-height: 100vh;
+  font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+/* ==================== BUTTONS ==================== */
+
+/* Primary Button - Standard action button */
+.btn,
+.btn-primary {
+  font-family: 'Instrument Sans', sans-serif;
+  width: 360px;
+  height: 37px;
+  background-color: var(--accent-blue);
+  border: none;
+  border-radius: var(--border-radius-medium);
+  padding: 0 39px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--transition-default);
+}
+
+.btn:hover,
+.btn-primary:hover {
+  background-color: var(--accent-blue-dark);
+}
+
+.btn:active,
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn:disabled,
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Secondary Button - Alternative action */
+.btn-secondary {
+  font-family: 'Instrument Sans', sans-serif;
+  background-color: transparent;
+  border: 1px solid var(--accent-blue);
+  border-radius: var(--border-radius-medium);
+  padding: 8px 16px;
+  color: var(--accent-blue);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-default);
+}
+
+.btn-secondary:hover {
+  background-color: var(--accent-blue);
+  color: white;
+}
+
+/* Success Button - Positive action (Save, Submit) */
+.save-button,
+.btn-success {
+  font-family: 'Instrument Sans', sans-serif;
+  width: 360px;
+  height: 37px;
+  background-color: var(--success-color);
+  border: none;
+  border-radius: var(--border-radius-medium);
+  padding: 0 39px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--transition-default);
+  margin-top: 25px;
+}
+
+.save-button:hover,
+.btn-success:hover {
+  background-color: #95a860;
+}
+
+/* Edit Button - Specific to edit actions */
+.em-edit-button,
+.btn-edit {
+  width: 150px;
+  height: 47px;
+  background-color: var(--success-color);
+  border: none;
+  border-radius: var(--border-radius-medium);
+  padding: 5px 10px;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: background-color var(--transition-default);
+  font-family: 'Anek Bangla', serif;
+  letter-spacing: 2%;
+}
+
+.em-edit-button:hover,
+.btn-edit:hover {
+  background-color: #95a860;
+}
+
+/* Request Button - Form submission */
+.request-button,
+.btn-request {
+  width: 386px;
+  height: 37px;
+  background-color: var(--accent-blue);
+  border: none;
+  border-radius: var(--border-radius-medium);
+  color: white;
+  font-family: 'Instrument Sans', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 26px;
+  padding: 0 39px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+  position: relative;
+  left: 34px;
+  margin-bottom: 17px;
+  transition: background-color var(--transition-default);
+}
+
+.request-button:hover,
+.btn-request:hover {
+  background-color: var(--accent-blue-dark);
+}
+
+/* Sign-in Button */
+.sign-in-button {
+  background-color: var(--accent-blue);
+  border: none;
+  border-radius: var(--border-radius-medium);
+  color: white;
+  cursor: pointer;
+  font-family: 'Instrument Sans', sans-serif;
+  font-weight: 600;
+  padding: 10px 20px;
+  transition: background-color var(--transition-default);
+}
+
+.sign-in-button:hover {
+  background-color: var(--accent-blue-dark);
+}
+
+/* ==================== FORMS & INPUT FIELDS ==================== */
+
+/* Input Group Container */
+.input-group {
+  display: flex;
+  align-items: center;
+  width: 386px;
+  height: 33px;
+  padding: 5px;
+  border-bottom: 1.5px solid var(--accent-blue);
+  border-radius: var(--border-radius-small);
+  box-sizing: border-box;
+  gap: 5px;
+  position: relative;
+}
+
+.input-group.small {
+  width: 324px;
+}
+
+/* Generic Input Field */
+.input-field {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: 'Instrument Sans', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 26px;
+  letter-spacing: 0;
+  padding-left: 5px;
+  height: 26px;
+}
+
+.input-field::placeholder {
+  color: var(--text-light);
+  font-weight: 400;
+}
+
+/* Input Error State */
+.input-field.input-error,
+.input-error {
+  color: var(--error-color);
+  border-color: var(--error-color);
+}
+
+.input-field.input-error::placeholder {
+  color: var(--error-color);
+}
+
+/* Specific Input Types */
+.name-input,
+.surname-input,
+.city-input,
+.postal-input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-small);
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.name-input::placeholder,
+.surname-input::placeholder,
+.city-input::placeholder,
+.postal-input::placeholder {
+  color: var(--text-light);
+  font-weight: 400;
+}
+
+/* Email and Search Inputs */
+.search-bar input[type="text"],
+.email-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-small);
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+/* OTP Input */
+.otp-input {
+  width: 75px;
+  height: 68px;
+  border: 1px solid var(--accent-blue);
+  border-radius: var(--border-radius-medium);
+  text-align: center;
+  font-size: 24px;
+  background-color: transparent;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.otp-input:focus {
+  outline: none;
+  border-color: var(--accent-blue-dark);
+  box-shadow: 0 0 5px rgba(0, 96, 136, 0.3);
+}
+
+/* Password Input Group */
+.password-input-group {
+  display: flex;
+  align-items: center;
+  width: 386px;
+  height: 33px;
+  padding: 5px;
+  border-bottom: 1.5px solid var(--accent-blue);
+  border-radius: var(--border-radius-small);
+  box-sizing: border-box;
+  gap: 5px;
+  position: relative;
+  left: 32px;
+  margin-bottom: 27px;
+}
+
+/* Input Labels */
+.input-label,
+.form-label {
+  font-family: 'Anek Bangla', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  display: block;
+}
+
+/* Input Row - For grouped inputs */
+.input-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+/* Bottom Line Container - For border styling */
+.bottom-line-container {
+  width: 360px;
+  border-bottom: 1.5px solid var(--accent-blue);
+  padding-bottom: 5px;
+}
+
+/* Input Icons */
+.input-icon,
+.input-icon-mail,
+.input-icon-key,
+.visibility-icon,
+.key-icon {
+  width: 20px;
+  height: 16px;
+  margin-top: 5px;
+  margin-left: 2px;
+  flex-shrink: 0;
+}
+
+.key-icon {
+  width: 23px;
+  height: 12px;
+  position: relative;
+  top: 7px;
+  left: 1px;
+}
+
+/* ==================== GRIDS & LAYOUTS ==================== */
+
+/* Standard Grid Item */
+.grid-item {
+  background-color: #f0f0f0;
+  border: 1px solid var(--border-color);
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Responsive Grid */
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+  margin-top: 20px;
+}
+
+/* Two Column Layout */
+.center-frame {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+/* ==================== TABLES ==================== */
+
+/* User Table Container */
+.user-table,
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: var(--border-radius-small);
+  overflow: hidden;
+}
+
+.styled-table th,
+.styled-table td {
+  padding: 12px;
+  text-align: left;
+}
+
+.styled-table th {
+  background-color: var(--primary-color);
+  color: white;
+  font-weight: 600;
+  font-family: 'Anek Bangla', sans-serif;
+}
+
+.styled-table tbody tr {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.styled-table tbody tr:hover {
+  background-color: #f5f5f5;
+}
+
+/* Empty Table Message */
+.empty-table-message {
+  text-align: center;
+  padding: 20px;
+  color: #999;
+  font-style: italic;
+}
+
+/* Table Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.action-buttons span {
+  cursor: pointer;
+  transition: opacity var(--transition-default);
+}
+
+.action-buttons span:hover {
+  opacity: 0.7;
+}
+
+.action-buttons .edit,
+.action-buttons .view-payslip {
+  text-decoration: underline;
+  color: var(--accent-blue);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ==================== MODALS ==================== */
+
+/* Modal Overlay */
+.actions-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* Modal Container */
+.actions-modal {
+  background-color: white;
+  border-radius: var(--border-radius-medium);
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  z-index: 1001;
+}
+
+.actions-modal h3,
+.actions-modal h4 {
+  margin: 0;
+  color: var(--text-primary);
+}
+
+/* Modal Header */
+.actions-modal-header {
+  padding: 20px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.actions-modal-header h3 {
+  font-size: 20px;
+  font-weight: 700;
+  font-family: 'Anek Bangla', sans-serif;
+}
+
+/* Modal Content */
+.actions-modal-content {
+  padding: 20px;
+}
+
+/* Toast Confirm Buttons */
+.toast-confirm-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.toast-confirm-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ==================== TEXT & TYPOGRAPHY ==================== */
+
+/* Placeholder Styles */
+.grey-text::placeholder,
+.blue-text::placeholder {
+  color: var(--text-light);
+  font-weight: 400;
+}
+
+.blue-text::placeholder {
+  color: var(--text-primary);
+  font-weight: 400;
+}
+
+/* Error & Success Messages */
+.error-message {
+  color: var(--error-color);
+  font-size: 14px;
+  margin-top: 5px;
+  margin-left: 34px;
+  text-align: left;
+  display: block;
+}
+
+.success-message {
+  color: var(--success-text-color);
+  font-size: 14px;
+  margin-top: 5px;
+  margin-left: 34px;
+  text-align: left;
+  display: block;
+}
+
+.loader {
+  font-weight: bold;
+  font-size: 14px;
+  margin-top: 5px;
+  margin-left: 34px;
+  text-align: left;
+  color: var(--success-text-color);
+  display: block;
+}
+
+/* ==================== HEADINGS & TYPOGRAPHY ==================== */
+
+.heading-item {
+  width: 83px;
+  height: 30px;
+  font-family: 'Anek Bangla', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 100%;
+  letter-spacing: 2%;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+/* Page Title */
+.page-title {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 36px;
+  line-height: 26px;
+  color: var(--text-primary);
+  text-align: left;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+/* Instructions/Help Text */
+.instruction-text {
+  font-family: 'Instrument Sans', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 21px;
+  letter-spacing: 0;
+  color: var(--text-primary);
+  text-align: center;
+  width: 338px;
+  height: 42px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+/* Link Text */
+.back-to-login,
+.link-text {
+  width: 324px;
+  height: 26px;
+  font-family: 'Instrument Sans', sans-serif;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 0px;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 26px;
+  letter-spacing: 0;
+  color: var(--text-primary);
+  text-align: center;
+  margin-top: 10px;
+  cursor: pointer;
+  transition: color var(--transition-default);
+}
+
+.back-to-login:hover,
+.link-text:hover {
+  color: var(--accent-blue);
+}
+
+/* Footer Text */
+.footer-text {
+  width: 304px;
+  height: 52px;
+  font-family: 'Instrument Sans', sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 26px;
+  letter-spacing: 0;
+  color: var(--text-primary);
+  text-align: center;
+  margin-top: 26px;
+}
+
+/* ==================== BACKGROUNDS & CONTAINERS ==================== */
+
+/* Full Screen Background */
+.full-screen-bg {
+  background-color: var(--primary-color);
+  height: 100vh;
+  width: 100vw;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+/* Sign In Container */
+.signin-container {
+  width: 1187px;
+  min-height: 828px;
+  position: relative;
+  margin: 122.5px auto;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--border-radius-medium);
+  background: linear-gradient(135deg,
+      var(--background-light-alt-4) 0%,
+      var(--background-light) 20%,
+      var(--background-light-alt) 40%,
+      var(--background-light-alt-2) 60%,
+      var(--background-light-alt-3) 80%,
+      var(--background-light-alt-4) 100%);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  padding: 40px;
+  box-sizing: border-box;
+  z-index: 1;
+}
+
+/* Edit Employee Background */
+.edit-employee-background {
+  position: fixed;
+  top: 0;
+  left: 375px;
+  right: 0;
+  bottom: 0;
+  padding: 26px 20px 20px 20px;
+  border-top-left-radius: var(--border-radius-medium);
+  border-bottom-left-radius: var(--border-radius-medium);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: linear-gradient(135deg,
+      var(--background-light) 0%,
+      var(--background-light-alt) 25%,
+      var(--background-light-alt-2) 50%,
+      var(--background-light-alt-3) 75%,
+      var(--background-light-alt-4) 100%);
+  color: black;
+  box-sizing: border-box;
+  text-align: center;
+  overflow: hidden;
+  z-index: 1;
+  overflow-y: auto;
+}
+
+/* Grey Box Container */
+.grey-box {
+  background-color: #e0e0e0;
+  padding: 10px;
+  margin: 0 1rem;
+  border-radius: var(--border-radius-small);
+}
+
+/* Top Bar */
+.top-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+.top-bar-container {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.top-bar h2,
+.top-bar h3 {
+  font-family: 'Instrument Sans', sans-serif;
+}
+
+/* ==================== UTILITIES ==================== */
+
+/* Column Layout */
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.left-column {
+  flex: 1;
+  position: relative;
+  justify-content: center;
+  align-items: center;
+}
+
+.right-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding-left: 40px;
+}
+
+/* Clickable Elements */
+.clickable-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: color var(--transition-default);
+  cursor: pointer;
+}
+
+.clickable-tab:hover {
+  opacity: 0.8;
+}
+
+.active-tab {
+  color: #004f6b;
+  font-weight: 600;
+}
+
+/* Visibility/Display Utilities */
+.hidden {
+  display: none;
+}
+
+.visible {
+  display: block;
+}
+
+/* ==================== RESPONSIVE DESIGN ==================== */
+
+@media (max-width: 768px) {
+  .input-group,
+  .password-input-group,
+  .btn,
+  .btn-primary,
+  .save-button,
+  .btn-success,
+  .request-button,
+  .btn-request {
+    width: 100%;
+    max-width: 360px;
+  }
+
+  .signin-container {
+    width: 90%;
+    min-height: auto;
+    padding: 20px;
+  }
+
+  .center-frame {
+    grid-template-columns: 1fr;
+  }
+
+  .actions-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .left-column,
+  .right-column {
+    flex: 1;
+    padding-left: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .input-group,
+  .password-input-group {
+    width: 100%;
+  }
+
+  .btn,
+  .btn-primary,
+  .save-button,
+  .btn-success {
+    width: 100%;
+    height: 44px;
+  }
+
+  .otp-input {
+    width: 60px;
+    height: 60px;
+    font-size: 18px;
+  }
+
+  .page-title {
+    font-size: 24px;
+  }
+
+  .styled-table th,
+  .styled-table td {
+    padding: 8px;
+    font-size: 12px;
+  }
+}

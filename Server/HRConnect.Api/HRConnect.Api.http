@@ -1,0 +1,6 @@
+@HRConnect.Api_HostAddress = http://localhost:5147
+
+GET {{HRConnect.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

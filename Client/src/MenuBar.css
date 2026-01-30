@@ -1,0 +1,2395 @@
+/**
+ * MenuBar.css - Menu navigation component styles
+ * 
+ * DEPENDENCIES: This file relies on styles/global.css for shared button, input,
+ * and form styles. Component-specific menu navigation styles are defined below.
+ */
+
+/* MenuBar Component Styles */
+
+
+
+/*Menu css------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+
+
+.menu-bar-container {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 375px;
+  padding: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 51px;
+  background-color: #002D40;
+  color: white;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.menu-inner {
+  display: flex;
+  flex-direction: column;
+  width: 279px;
+  height: 556.14px;
+  gap: 32px;
+}
+
+.menu-logo-wrapper {
+  font-size: 0;
+  display: inline-flex;
+  align-items: center;
+  width: 279.32px;
+  height: 35.14px;
+}
+
+.menu-bar-logo-text-bold,
+.menu-bar-logo-text-light {
+  font-family: 'Anek Bangla', serif;
+  font-size: 40px;
+  line-height: 100%;
+  letter-spacing: 2%;
+  color: white;
+  display: inline-block;
+  user-select: none;
+}
+
+.menu-bar-logo-text-bold {
+  font-weight: 700;
+}
+
+.menu-bar-logo-text-light {
+  font-weight: 300;
+}
+
+.menu-list {
+  list-style: none;
+  padding: 5px 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 468px;
+  gap: 37px;
+  box-sizing: border-box;
+
+}
+
+
+
+.menu-item-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 37px;
+  cursor: pointer;
+}
+
+.menu-heading {
+  font-family: 'Anek Bangla', serif;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 2%;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-grow: 1;
+  user-select: none;
+}
+
+.menu-dropdown {
+  font-size: 0.7rem;
+  margin-left: 8px;
+}
+
+.submenu {
+  margin-top: 0.5rem;
+  padding-left: 34px;
+  list-style: none;
+   display: none;
+   
+
+}
+.submenu.show {
+  display: block; 
+  display: block;
+
+
+  z-index: 999;
+ 
+
+
+}
+
+.menu-subitem {
+  font-family: 'Anek Bangla', serif;
+  font-size: 17px;
+  font-weight: 400;
+  letter-spacing: 2%;
+  color: white;
+  cursor: pointer;
+  line-height: 37px;
+  display: block;
+  user-select: none;
+  text-align: left;
+}
+
+.menu-footer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 92px;
+  gap: 12px;
+  margin-top: auto;
+}
+
+
+.menu-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.user-details-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: -5px;
+  margin-top: 30px; 
+}
+
+
+.user-text-details {
+  display: flex;
+  flex-direction: column; 
+  align-items: flex-start; 
+}
+
+
+.user-job-title {
+  font-family: 'Anek Bangla', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 15px;
+  letter-spacing: -0.43px;
+  margin-top: 5px; 
+}
+
+
+.user-full-name {
+  font-family: 'Anek Bangla', sans-serif;
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 15px;
+  letter-spacing: -0.43px;
+}
+
+
+.menu-initials-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: #002D40;
+  background-color: #ffffff;
+  font-weight: 600;
+  font-size: 14px;
+  font-family: 'Anek Bangla', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+/*Edit Employee css------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+
+.edit-employee-form-container {
+  position: absolute;
+  top: calc(130px + 65px + 2px);
+
+  left: -375px;
+
+  right: 70px;
+
+  height: 496px;
+  padding: 30px 50px;
+  box-sizing: border-box;
+  background: transparent;
+
+  z-index: 2;
+}
+
+.custom-header {
+  width: 1446px;
+  height: 45px;
+  padding: 0 16px 0 13px;
+  border-top-left-radius: 10px;
+  /* Rounded top-left corner */
+  border-top-right-radius: 10px;
+  /* Rounded top-right corner */
+  border-bottom-left-radius: 0;
+  /* Square bottom-left corner */
+  border-bottom-right-radius: 0;
+  /* Square bottom-right corner */
+  background-color: #C7D9E5;
+  display: flex;
+  align-items: center;
+
+  box-sizing: border-box;
+  box-shadow: none;
+  border: none;
+  margin-left: 370px;
+  margin-right: 70px;
+
+
+  font-family: 'Anek Bangla', sans-serif;
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 100%;
+  letter-spacing: 2%;
+  color: #002D40;
+}
+
+.sub-container {
+  width: 1446px;
+  height: 391px;
+
+  padding: 20px 31px 34px 31px;
+  background-color: #FFFFFF;
+  border-radius: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  margin-left: 370px;
+  margin-right: 70px;
+  margin-top: 0;
+}
+
+.fields-container {
+  display: flex;
+  flex-direction: row;
+  gap: 65px;
+  height: 70px;
+  margin-bottom: 20px;
+
+}
+
+/* For rows with 6 fields */
+.fields-container.row-6 {
+  width: 1384px;
+  /* fixed width */
+  justify-content: space-between;
+}
+
+.fields-container.row-6 .field {
+  width: 176.5px;
+  /* per field */
+}
+
+/* Row container for 3 fields */
+.fields-container.row-3 {
+  width: 1384px;
+  /* same width as row-6 */
+  display: flex;
+  justify-content: space-between;
+  /* equal spacing between fields */
+  gap: 65px;
+  margin-bottom: 20px;
+  /* spacing between rows */
+}
+
+/* Each field in row-3 */
+.fields-container.row-3 .field {
+  width: 418px;
+  height: 70px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  /* Inherit width from row-specific styles */
+  height: 70px;
+  box-sizing: border-box;
+}
+
+.field-label {
+  font-family: 'Anek Bangla', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 100%;
+  letter-spacing: 2%;
+  color: #002D40;
+  margin: 0;
+
+  padding-left: 10px;
+
+  height: 30px;
+  /* fixed height for label to help layout */
+  display: flex;
+  align-items: center;
+  /* vertical center the label text */
+  user-select: none;
+}
+
+.field-input {
+  width: 100%;
+  /* Stretch to fill parent .field */
+  height: 40px;
+  border-radius: 5px;
+  border: 2px solid #C7D9E5;
+  padding: 5px 10px;
+  background-color: #FFFFFF;
+  box-sizing: border-box;
+  font-family: 'Anek Bangla', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  outline-offset: 2px;
+
+}
+
+.edit-employee-top-container {
+  position: relative;
+  height: 200px;
+  display: flex;
+  align-items: flex-start;
+  padding-left: 20px;
+  margin-top: -180px;
+}
+
+/* Image block */
+.photo-block {
+  width: 241px;
+  height: 185px;
+  padding: 0;
+  background-color: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 0;
+  margin-right: 30px;
+}
+
+/* Image styling */
+.photo-block img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+}
+
+/* Text beside image */
+.photo-text-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+}
+
+/* Name */
+.photo-text-container .title {
+  font-family: 'Anek Bangla', sans-serif;
+  font-weight: 700;
+  font-size: 40px;
+  color: #006088;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Job Title */
+.photo-text-container .subtitle {
+  font-family: 'Anek Bangla', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: #006088;
+  margin-top: -10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-left: 0;
+}
+
+
+/* Active tab color */
+.heading-item.selected {
+  color: #01A19A;
+}
+
+.toast-confirm-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toast-confirm-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.toast-confirm-btn {
+  padding: 6px 12px;
+  border: none;
+  cursor: pointer;
+  color: white;
+  font-weight: 600;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.toast-confirm-btn.confirm {
+  background-color: #4caf50;
+}
+
+.toast-confirm-btn.confirm:hover {
+  background-color: #45a049;
+}
+
+.toast-confirm-btn.cancel {
+  background-color: #f44336;
+}
+
+.toast-confirm-btn.cancel:hover {
+  background-color: #da190b;
+}
+
+
+
+/*-------------------------------------- Position Management CSS ----------------------------------------------------------------------------------------------------- */
+
+
+
+
+.position-management-container {
+  padding: 40px 40px;            
+  margin-left: 280px;            
+  width: calc(100% - 280px);     
+  background: linear-gradient(to bottom, #EEEEF1, #EFF1F3, #E7EAEB, #D6D6D9, #C4C4C5);
+  min-height: 100vh;
+  overflow-x: hidden;
+  box-sizing: border-box;
+   padding: 40px 40px 40px 80px; 
+}
+
+
+.position-management-title {
+  font-size: 40px;
+  font-family: 'Anek Bangla', sans-serif;
+  font-weight: bold;
+  color: #0075A6;
+  margin-bottom: 16px;
+  margin-left: 50px;
+  margin-top: -0px; 
+}
+
+
+.add-position-wrapper {
+  margin-top: 10px; 
+}
+
+.nav-tabs-wrapper {
+  margin-bottom: 24px;
+}
+
+.table-wrapper {
+  margin-left: 50px;
+  margin-right: 50px;  
+  max-width: 1550px;
+  width: calc(100% - 100px); 
+  padding: 0;
+  background-color: #ffffff;
+  border-radius: 6px;
+  margin-top: 20px;
+  overflow-x: auto;
+  box-sizing: border-box;
+}
+
+/* Apply this to your position-table.css */
+
+/* Exact column widths from Figma */
+
+.position-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-family: 'Anek Bangla', sans-serif; 
+  font-size: 16px;                         
+}
+
+.position-table th,
+.position-table td {
+  padding: 12px 20px;
+  border-bottom: 1px solid #0075A6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #002D40;
+  font-size: 16px;                         /* 👈 Ensure font size consistency */
+  font-family: 'Anek Bangla', sans-serif;  /* 👈 Reinforce font at cell level */
+}
+/* Column 1: Description (~63%) */
+.position-table th:nth-child(1),
+.position-table td:nth-child(1) {
+  width: 63%;
+  text-align: left;
+}
+
+/* Column 2: Effective Date (~18%) */
+/* Column 2: Effective Date (~18%) */
+.position-table th:nth-child(2),
+.position-table td:nth-child(2) {
+  width: 18%;
+  text-align: left;
+  border-left: 1px solid #d4d4d4;
+  padding-left: 12px;
+  padding-right: 12px; /* ✅ Reduce from 110px to avoid squashing */
+}
+
+/* Column 4: Action (~9%) */
+.position-table th:nth-child(3),
+.position-table td:nth-child(3) {
+  width: 20%;
+  text-align: left;
+}
+
+/* Table header style */
+.position-table th {
+  background-color: #0075A6;
+  color: #ffffff;
+  font-weight: bold;
+  border-bottom: 1px solid #0075A6;
+}
+
+
+.view-edit-button {
+  color: #002D40;
+  background: none;
+  font-family: 'Anek Bangla', sans-serif;
+  padding: 6px 12px;
+  border: none;
+  cursor: pointer;
+  transition: none;
+}
+/* No hover effect */
+
+
+.position-table thead {
+  background-color: #0075A6;
+  color: #ffffff;
+}
+
+.position-table td {
+  color: #002D40;
+  font-family: 'Anek Bangla', sans-serif; /* Update to your font name if different */
+  font-size: 14px;
+  padding: 12px 20px;
+  border-bottom: 1px solid #0075A6;
+}
+
+.position-navbar-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-top: 20px;
+  margin-left: -5px; /* Align with table */
+  margin-right: 30px; /* Optional, to balance spacing */
+}
+
+
+
+.pagination-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 30px;
+  margin-left: 300px;
+  max-width: 1100px;
+  margin-right: 50px;
+}
+
+
+.pagination-left {
+  display: flex;
+  align-items: left;
+  gap: 10px;
+  margin-left: -250px; /* Try reducing this if it was set higher */
+}
+
+
+.pagination-range {
+  font-family: 'Anek Bangla';
+  font-size: 20px;
+  font-weight: 500;
+  color: #002D40;
+}
+
+.pagination-bold {
+  font-weight: 700;
+}
+
+.per-page-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 60px;
+  height: 32px;
+  border: 1px solid #0075A6;
+  border-radius: 4px;
+  padding: 0 8px;
+  cursor: pointer;
+  background-color: #9C9C9C29;
+  font-family: 'Anek Bangla', sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+}
+
+.per-page-dropdown {
+  position: absolute;
+  top: 36px;
+  left: 0;
+  background-color: white;
+  border: 1px solid #0075A6;
+  border-radius: 4px;
+  width: 100%;
+  z-index: 10;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.per-page-option {
+  padding: 6px 8px;
+  font-family: 'Anek Bangla', sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.per-page-option:hover {
+  background-color: #218bac;
+}
+
+.per-page-number {
+  font-family: 'Anek Bangla', sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: #002D40;
+}
+
+
+.per-page-label {
+  font-family: 'Anek Bangla', sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: #002D40;
+  margin-left: 8px; /* Optional spacing */
+}
+
+.pagination-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 6px;
+}
+
+.page-number {
+  font-family: 'Anek Bangla';
+  font-size: 16px;
+  font-weight: 700;
+  color: #0075A6;
+  cursor: pointer;
+}
+
+.dropdown-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.pagination-info {
+  font-family: 'Anek Bangla';
+  font-size: 20px;  
+  font-weight: 500;
+  color: #002D40;
+  margin-left: 10px;
+}
+
+
+.page-number.active-page {
+  color: #01A19A;
+  font-weight: bold;
+}
+
+.top-bar {
+  padding-top: 0;  /* Adjust this if needed */
+  margin-top: 0;
+}
+
+.button-row {
+  margin-top: 20px; /* 👈 space between title and button */
+}
+
+.position-navbar-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-right: 20px; /* Align with page layout */
+  margin-top: 10px;
+}
+
+.add-position-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 40px; /* pushes only the button down */
+  margin-right: 20px; /* optional: aligns with content padding */
+}
+
+.add-position-button:hover {
+  background-color: #9AAC60;
+}
+
+.add-position-management-container {
+  padding: 40px 60px;
+  margin-left: 300px; /* if you’re using a sidebar */
+  max-width: 1446px;
+  box-sizing: border-box;
+  background-color: #002D40; /* ✅ dark background */
+  min-height: 100vh; /* ensure it covers full height */
+  color: white; /* optional: make text readable */
+}
+
+/* ------------------------------------------------------------------Add Position Management CSS ---------------------------------------------------------------------- */
+
+
+
+/* Background */
+.apm-background {
+  background-color: #002D40;
+  height: 100vh;
+  width: 100vw;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 0;
+}
+
+/* Main container */
+.apm-frame {
+  width: 1186px;
+  height: 828px;
+  margin-top: 50px;
+   margin-bottom: 80px;
+  margin-left: auto;
+  margin-right: auto;
+  transform: translateX(150px); /* pushed more to the right */
+  display: flex;
+  background: linear-gradient(
+    135deg,
+    #EEEEF1,
+    #EFF1F3,
+    #E7EAEB,
+    #D6D6D9,
+    #C4C4C5
+  );
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+
+
+/* Left frame */
+.apm-left {
+  width: 100%;
+  height: 100%;
+  padding: 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Push footer to bottom */
+  position: relative;
+}
+/* Heading Section */
+.apm-headings {
+  width: 360px;
+  margin: 0 auto 30px;
+  text-align: center;
+}
+.apm-highlight {
+  display: block;
+  margin: 0 0 30px 90px;;
+}
+
+.apm-logo {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin: 0 0 30px 60px; 
+}
+
+.apm-logo-bold,
+.apm-logo-light {
+  font-family: 'Anek Bangla', serif;
+  font-size: 40px;
+  line-height: 100%;
+  letter-spacing: 2%;
+  user-select: none;
+}
+
+.apm-logo-bold {
+  font-weight: 700;
+  color: #002D40;
+}
+
+.apm-logo-light {
+  font-weight: 300;
+  color: #006088;
+}
+
+.apm-title {
+  font-family: 'Anek Bangla', serif;
+  font-weight: 700;
+  font-size: 36px;
+  line-height: 26px;
+  color: #002D40;
+  text-align: left;
+  margin-left: 65px; 
+  margin-bottom: 10px;
+}
+
+.apm-subtitle {
+  font-family: 'Instrument Sans', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 21px;
+  color: #002D40;
+  text-align: left;
+  margin-left: 65px; 
+  margin-top: 15px;
+}
+
+/* Form Section */
+
+.apm-form {
+  width: 420px;
+  margin-left: 20px;
+  margin-top: 26px; 
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  flex-grow: 1;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 14px;
+}
+
+
+
+.apm-input-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 15px;
+}
+
+.apm-input {
+  width: 100%;
+  height: 33px;
+  border: none;
+  border-bottom: 1.5px solid #006088;
+  padding-left: 5px;
+  padding-bottom: 5px;
+  font-size: 14px;
+  font-family: 'Instrument Sans', sans-serif;
+  outline: none;
+  box-sizing: border-box;
+  background-color: transparent;
+}
+
+.apm-input::placeholder {
+  font-family: "Instrument Sans", sans-serif;
+  font-weight: 600;
+  color: #121212;
+}
+
+.nav-bar-with-button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  margin-top: 20px;
+}
+.add-position-button {
+  background-color: #9AAC60;
+  color: white;
+  padding: 10px 50px; /* thinner vertically, wider horizontally */
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  white-space: nowrap; /* Prevent text wrapping */
+}
+
+
+.apm-save-button {
+  width: 100%; /* Match .apm-input */
+  height: 37px;
+  background-color: #006088;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 20px;
+
+  /* Remove this to allow full width */
+  /* max-width: 360px; */
+}
+
+
+.apm-save-button:hover {
+  background-color: #004d6b;
+}
+
+
+.apm-footer {
+  margin-top: 99px; 
+  text-align: center;
+  font-size: 14px;
+  color: #002D40;
+  font-family: 'Instrument Sans', sans-serif;
+}
+
+
+/* Right side */
+.apm-right {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.apm-right .apm-image-wrapper {
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.apm-right .apm-image-wrapper img {
+  width: 120%;
+  height: 80%;
+  border-radius: 0;
+}
+
+.apm-bg-shape {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 60%;
+  height: 38%;
+  background-color: #C7D9E5;
+  opacity: 0.5;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+
+.apm-dropdown-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.apm-select {
+  appearance: none; /* Hide default dropdown arrow */
+  padding-right: 30px; 
+}
+
+.apm-dropdown-wrapper select.apm-input {
+  -webkit-appearance: none; /* Remove default arrow for Safari */
+  -moz-appearance: none;    /* Remove default arrow for Firefox */
+  appearance: none;         /* Remove default arrow for all */
+  padding-right: 30px;      /* Space for the icon */
+}
+
+
+.apm-dropdown-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+
+.apm-input::placeholder {
+  font-family: 'Instrument Sans', sans-serif;
+  font-weight: 400; /* Make placeholder normal weight */
+  color: #121212; /* Optional color */
+}
+
+.apm-ellipse-wrapper {
+  position: absolute;
+  top: 180px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1; /* Behind the standing person */
+}
+
+.apm-ellipse-background {
+  position: absolute;
+  width: 320px;         /* Wider ellipse */
+  height: 300px;        /* Taller to cover from knees to shoulders */
+  background: rgba(0, 117, 166, 0.08);
+  border-radius: 50%;
+  z-index: 1;
+  top: 80px;            /* Moved higher to start around the knees */
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.apm-image {
+  z-index: 2;
+  width: 120%;
+  height: 80%;
+  object-fit: contain;
+}
+
+.apm-label {
+  font-size: 14px;
+  font-weight: 400;
+  font-family: 'Instrument Sans', sans-serif;
+  color: #000000;
+  margin-bottom: 2px;
+  display: block;
+  margin-left: 4px;
+}
+
+.view-edit-button-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.text-button {
+  background: none;
+  border: none;
+  color: #002D40;
+  font-weight: 500;
+  font-size: 14px;
+  font-family: 'Instrument Sans', sans-serif;
+  cursor: pointer;
+  padding: 2px 6px;
+  transition: color 0.2s;
+}
+
+.text-button:hover {
+  color: #004A65; /* slightly brighter on hover */
+  text-decoration: underline;
+}
+
+
+.custom-autocomplete {
+  position: relative;
+  width: 100%;
+}
+
+.autocomplete-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ccc;
+  z-index: 10;
+  max-height: 150px;
+  overflow-y: auto;
+  border-radius: 4px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.autocomplete-item {
+  padding: 8px 12px;
+  cursor: pointer;
+   color: #121212;
+}
+
+.autocomplete-item:hover {
+  background-color: #f0f0f0;
+}
+
+
+.react-confirm-alert-button-group > button {
+    outline: none;
+    background: #006088;         /* Updated color */
+    border: none;
+    display: inline-block;
+    padding: 6px 18px;
+    color: #ffffff;
+    margin-right: 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s ease; /* Smooth hover effect */
+}
+
+.react-confirm-alert-button-group > button:hover {
+    background-color: #006088;  /* Darker shade on hover */
+}
+
+
+.custom-autocomplete {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.autocomplete-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  z-index: 10;
+  margin-top: 4px;
+  padding: 0;
+  list-style: none;
+  max-height: 160px;
+  overflow-y: auto;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 14px;
+}
+
+.autocomplete-item {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.autocomplete-item:hover {
+  background-color: #f2f2f2;
+}
+
+.apm-dropdown-icon {
+  position: absolute;
+  right: 10px;
+  pointer-events: none;
+}
+
+.react-datepicker-wrapper {
+  width: 100%;
+}
+
+.react-datepicker__input-container input {
+  width: 100%;
+  height: 38px; 
+  padding: 8px 12px;
+  font-size: 14px;
+  font-family: 'Instrument Sans', sans-serif;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+.apm-input-group {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  box-sizing: border-box;
+}
+
+
+/*Employee List css------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+.wrapper-container {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+
+  width: 1441px;
+
+  box-sizing: border-box;
+  padding-left: 20px;
+  overflow: visible;
+  position: relative;
+
+
+}
+
+.singular-staff-heading-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 1441px;
+  min-height: 75px;
+  padding: 10px;
+  gap: 33px;
+  box-sizing: border-box;
+
+
+  font-family: 'Anek Bangla', sans-serif;
+  font-weight: 700;
+  font-size: 40px;
+  line-height: 100%;
+  letter-spacing: 2%;
+  color: #006088;
+}
+
+
+.icons-container {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+  /* push icons to the right side */
+}
+
+.icon-wrapper {
+  display: flex;
+  flex-direction: row;
+  gap: 15px;
+  width: 320px;
+  height: 34px;
+  align-items: center;
+  justify-content: flex-start;
+  box-sizing: border-box;
+
+
+
+  align-self: flex-start;
+  margin-left: auto;
+  margin-top: 10px;
+  margin-right: -35px;
+}
+
+.icon-bar {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  margin-left: auto;
+  margin-top: 10px;
+  margin-right: 10px;
+}
+
+/* Shared box styling */
+.utility-box {
+  background-color: #9C9C9C29;
+  border-radius: 6px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 22px;
+  letter-spacing: -0.43px;
+  color: #007AFF;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+/* Time box */
+.small-box {
+  width: 76px;
+  padding: 6px 11px;
+  margin-right: 2px;
+}
+
+/* Date box */
+.large-box {
+  width: 109px;
+  padding: 6px 11px;
+}
+
+.heading-icon {
+  width: 31px;
+  height: 31px;
+  object-fit: contain;
+}
+
+.employee-list-heading-row {
+  display: flex;
+  align-items: center;
+  gap: 45px;
+  padding: 5px 145px 5px 0;
+  height: 66px;
+  box-sizing: border-box;
+  width: 1441px;
+}
+
+
+
+
+.heading-item {
+  padding: 0.5rem 1rem;
+  background-color: transparent;
+  border-radius: 4px;
+
+}
+
+/* Wrapper: Filter + Search bar */
+.filter-search-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 56px;
+  margin-left: auto;
+
+}
+
+
+/* Label: "Filter" */
+.filter-label {
+  font-weight: 500;
+  white-space: nowrap;
+  /* Prevent line break */
+  font-family: 'Anek Bangla', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 100%;
+  letter-spacing: 2%;
+  color: #002D40;
+}
+
+.search-bar-container {
+  display: flex;
+  flex-direction: row;
+  width: 360px;
+  height: 56px;
+  gap: 4px;
+  align-items: center;
+  background-color: #9C9C9C29;
+  box-sizing: border-box;
+  padding: 0 6px;
+
+}
+
+.search-icon {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.input-wrapper {
+  width: 248px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+}
+
+.search-input {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  padding: 0 8px;
+  font-family: 'Anek Bangla', sans-serif;
+  color: #49454F;
+  outline: none;
+}
+
+.search-input::placeholder {
+  color: #49454F;
+  opacity: 1;
+}
+
+.content-container {
+  display: flex;
+  flex-direction: column;
+  width: 1461px;
+  height: 615px;
+  padding: 10px;
+  gap: 10px;
+  box-sizing: border-box;
+
+
+
+}
+
+
+.table-grid {
+  display: grid;
+  grid-template-columns: 66px 40px 309px 207px 211px 275px 141px 192px;
+  grid-template-rows: 59px repeat(10, 1fr);
+  /*1 header + 10 rows */
+  width: 1441px;
+  height: 777px;
+  row-gap: 5px;
+  border-radius: 10px 10px 5px 10px;
+  box-sizing: border-box;
+  overflow: hidden;
+  background-color: #f5f5f5;
+}
+
+/* Header cell styling */
+.table-header {
+  background-color: #006088;
+  color: white;
+  font-family: 'Anek Bangla', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 15px;
+  letter-spacing: -0.43px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  /* Left align text */
+  height: 59px;
+  text-align: left;
+  padding-left: 12px;
+}
+
+
+/* Regular cell styling */
+.table-cell {
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  font-size: 14px;
+  font-family: 'Anek Bangla', sans-serif;
+  color: #002D40;
+  text-align: left;
+  padding-left: 8px;
+
+
+
+}
+
+.name-surname-cell {
+  font-family: 'Anek Bangla', sans-serif;
+  font-weight: 600;
+  font-style: normal;
+  font-size: 16px;
+  line-height: 15px;
+  letter-spacing: -0.43px;
+  color: #002D40;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+
+}
+
+.initials-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  font-family: 'Anek Bangla', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.name-text {
+  font-family: 'Anek Bangla', sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 15px;
+  letter-spacing: -0.43px;
+  color: #002D40;
+}
+
+.view-btn {
+  color: #006088;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.edit-btn {
+  color: #006088;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.view-edit-cell {
+  font-family: 'Anek Bangla', sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 15px;
+  letter-spacing: 0;
+  color: #006088;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.view-edit-cell a+a::before {
+  content: " | ";
+  margin: 0 8px;
+
+}
+
+
+.pagination-container {
+  display: flex;
+  flex-direction: row;
+  width: 1461px;
+  height: 47px;
+  padding: 10px 0 10px 10px;
+  gap: 16px;
+
+  box-sizing: border-box;
+  align-items: center;
+  margin-top: 20px;
+  margin-left: 20px;
+}
+
+.pagination-right-section {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  height: 37px;
+  width: 1119px;
+  align-items: center;
+  justify-content: flex-end;
+  box-sizing: border-box;
+
+  margin-left: auto;
+}
+
+.employee-count {
+  font-family: 'Anek Bangla', sans-serif;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 100%;
+  letter-spacing: 2%;
+  color: #002D40;
+  white-space: nowrap;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pagination-arrow {
+  width: 24px;
+  height: 24px;
+  transform: rotate(90deg);
+  /* rotates arrow 90 degrees */
+  cursor: pointer;
+}
+
+.pagination-arrow.next {
+  transform: rotate(-90deg);
+  /* flips for "next" direction */
+}
+.pagination-arrow.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.page-count {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.page-number {
+  background: none;
+  border: none;
+  font-family: 'Anek Bangla', sans-serif;
+  font-size: 16px;
+  color: #000;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.page-number.active {
+  color: #01A19A;
+  font-weight: 700;
+}
+
+.pagination-left-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'Anek Bangla', sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  color: #002D40;
+  white-space: nowrap;
+}
+
+.pagination-range {
+  font-size: 16px;
+  font-family: 'Anek Bangla', sans-serif;
+}
+
+.range-bold {
+  font-weight: 700;
+  font-family: 'Anek Bangla', sans-serif;
+}
+
+.per-page-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  background-color: transparent;
+  border-radius: 6px;
+  padding: 4px 10px;
+  height: 32px;
+  min-width: 50px;
+  border: 1px solid #9A9A9A;
+}
+
+.per-page-number {
+  font-family: 'Anek Bangla', sans-serif;
+  font-size: 16px;
+  color: #007AFF;
+}
+
+.dropdown-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.per-page-label {
+  font-family: 'Anek Bangla', sans-serif;
+  font-size: 16px;
+  color: #002D40;
+}
+
+/* Dropdown menu */
+.dropdown-options {
+  position: absolute;
+  top: 36px;
+  left: 0;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  z-index: 999;
+  width: 100%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  overflow-y: auto;
+}
+
+.dropdown-option {
+  padding: 8px 12px;
+  font-family: 'Anek Bangla', sans-serif;
+  cursor: pointer;
+}
+
+.dropdown-option:hover {
+  background-color: #f0f0f0;
+}
+
+
+/*Company Management Section*/
+
+/* Header styles */
+
+.cm-header-main-frame {
+  width: 100%;
+  min-height: 75px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  gap: 33px;
+  position: relative;
+}
+
+/* Left Section (Logo/Text) */
+.cm-header-left-section {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  box-sizing: border-box;
+  height: auto;
+  flex-shrink: 0;
+}
+
+/* Company Logo Text */
+.cm-logo-text {
+  font-family: 'Anek Bangla', sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 40px;
+  line-height: 100%;
+  letter-spacing: 0.02em;
+  color: #006088;
+  margin: 0;
+  white-space: nowrap;
+}
+
+/* Right Section (Icons & Date/Time) */
+.cm-header-right-section {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 15px;
+  height: auto;
+  box-sizing: border-box;
+  margin-left: auto;
+}
+
+/* Icons */
+.cm-notification-icon-wrapper,
+.cm-settings-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background-color: transparent;
+  cursor: pointer;
+}
+
+/* Icon Styles */
+.cm-notification-icon,
+.cm-settings-icon {
+  font-size: 18px;
+  color: #333;
+}
+
+/* Date/Time Container */
+.cm-datetime-wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  height: 34px;
+  box-sizing: border-box;
+}
+
+/* Date & Time Grouping */
+.cm-datetime-date-container,
+.cm-datetime-time-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  box-sizing: border-box;
+  gap: 10px;
+}
+
+/* Shared Box Style */
+.cm-datetime-month,
+.cm-datetime-year,
+.cm-datetime-time {
+  background-color: #9C9C9C29;
+  border-radius: 6px;
+  height: 34px;
+  padding: 6px 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'League Spartan', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 22px;
+  letter-spacing: -0.43px;
+  color: #007AFF;
+  margin: 0;
+  white-space: nowrap;
+}
+
+
+/* cm-navbar styles */
+
+.cm-navbar-container {
+  position: static;            
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;        
+  padding: 5px 0;
+  gap: 45px;
+  width: 100%;
+  max-width: 1446px;            
+  margin: 0 auto;               
+  height: 40px;                 
+  box-sizing: border-box;
+}
+
+
+.cm-navbar-tab-button {
+  height: 30px;
+  font-family: 'Anek Bangla', sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 30px;
+  letter-spacing: 0.02em;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  outline: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  text-align: center;
+  box-sizing: border-box;
+  color: #002D40;
+  position: relative;
+  }
+
+.cm-navbar-tab-button--active {
+  color: #01A19A;
+  padding-bottom: 5px;
+  }
+
+.cm-navbar-tab-button--width-168 { width: 168px; }
+.cm-navbar-tab-button--width-133 { width: 133px; }
+.cm-navbar-tab-button--width-122 { width: 122px; }
+.cm-navbar-tab-button--width-134 { width: 134px; }
+.cm-navbar-tab-button--width-154 { width: 154px; }
+.cm-navbar-tab-button--width-125 { width: 125px; }
+
+/* Company Management Form Elements & Fields */
+.cm-form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.cm-form-label-wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px 10px;
+  gap: 10px;
+  height: 30px;
+  width: auto;
+}
+
+.cm-form-field-label {
+  font-family: 'Anek Bangla';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 30px;
+  letter-spacing: 0.02em;
+  color: #002D40;
+  margin: 0;
+}
+
+.cm-form-field {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 5px 10px;
+  width: 100%;
+  height: 40px;
+  background: #FFFFFF;
+  border: 2px solid #C7D9E5;
+  border-radius: 5px;
+}
+
+.cm-form-field--input,
+.cm-form-field--select {
+  width: 100%;
+  height: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: 'Anek Bangla';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 30px;
+  color: #002D40;
+  padding: 0;
+}
+
+.cm-form-field--textarea {
+  min-height: 90px;
+  resize: vertical;
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: 'Anek Bangla';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 30px;
+  color: #002D40;
+  padding: 0;
+}
+
+.cm-form-field--input::placeholder {
+  color: #A0A0A0;
+}
+
+.cm-form-field--select {
+  appearance: none;
+  background-position: right 15px center;
+  background-size: 14px;
+  padding-right: 40px;
+}
+
+.cm-form-field.cm-form-field--c7d9e5-background {
+  background: #C7D9E5;
+  border: 2px solid #FFFFFF;
+}
+
+.cm-form-field--error {
+  border-color: #FF4C4C !important;
+}
+
+.cm-form-error {
+  font-family: 'Anek Bangla', sans-serif;
+  font-size: 12px;
+  color: #FF4C4C;
+  margin-top: 2px;
+  text-align: left;
+  width: 100%;
+}
+
+.cm-form-row-grid {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px;
+  gap: 65px;
+  width: 100%;
+  min-height: 70px;
+  align-self: stretch;
+  box-sizing: border-box;
+  flex-wrap: wrap;
+}
+
+.cm-form-column-item {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
+  min-width: 300px;
+  height: auto;
+  box-sizing: border-box;
+}
+
+.cm-form-label-wrapper,.drop-field-label {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 0px;
+  width: 100%;
+  height: 19px;
+  box-sizing: border-box;
+  margin-bottom: 5px;
+}
+
+.cm-form-field-label {
+  height: 19px;
+  font-family: 'Anek Bangla', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 19px;
+  letter-spacing: 0.02em;
+  color: #002D40;
+  margin: 0;
+}
+
+.cm-form-field--input:focus,
+.cm-form-field--select:focus,
+.cm-form-field--textarea:focus {
+  outline: none;
+  border-color: #01A19A;
+  box-shadow: 0 0 0 3px rgba(1, 161, 154, 0.2);
+}
+
+.cm-placeholder-section {
+  width: 100%;
+  max-width: 1496px;
+  padding: 50px;
+  background-color: #f0f0f0;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-sizing: border-box;
+}
+
+.cm-placeholder-title {
+  font-family: 'Anek Bangla', sans-serif;
+  font-size: 28px;
+  color: #002D40;
+  margin-bottom: 15px;
+}
+
+.cm-app-container-layout {
+  display: flex;
+}
+
+.cm-main-content-wrapper {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  padding-left: 50px;
+  padding-right: 50px;
+  padding-top: 30px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  width: calc(100vw - 375px);
+  max-width: 1500px;
+  margin-left: 350px;
+  margin-right: auto;
+  align-items: center;
+}
+
+.cm-sections-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+  width: 100%;
+  padding-top: 30px;
+  box-sizing: border-box;
+}
+
+.cm-section-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0;
+  width: 100%;
+  max-width: 1496px;
+  box-sizing: border-box;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.cm-section-title-bar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px 16px 0px 13px;
+  gap: 10px;
+  width: 100%;
+  height: 45px;
+  background: #C7D9E5;
+  border-radius: 10px 10px 0px 0px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.cm-section-title {
+  height: 45px;
+  font-family: 'Anek Bangla', sans-serif;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 45px;
+  letter-spacing: 0.02em;
+  color: #002D40;
+  margin: 0;
+  flex-grow: 1;
+  text-align: left;
+}
+
+.cm-section-content-area {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 20px 31px 34px;
+  gap: 8px;
+  width: 100%;
+  background: #FFFFFF;
+  box-sizing: border-box;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.cancel-button {
+  font-family: 'Instrument Sans', sans-serif;
+  width: 360px;
+  height: 37px;
+  background-color: maroon;
+  border: none;
+  border-radius: 10px;
+  padding: 0 39px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-top: 25px;
+}
+
+.cancel-button:hover {
+  background-color: #A94442; 
+}
+
+
+.company-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.company-table th,
+.company-table td {
+  padding: 10px;
+  border: 1px solid #C7D9E5;
+  text-align: left;
+  font-family: 'Anek Bangla', sans-serif;
+  font-size: 14px;
+  color: #002D40;
+}
+
+.company-table th {
+  background-color: #C7D9E5;
+  font-weight: 600;
+}
+
+.company-table td {
+  background-color: #FFFFFF;
+}
+
+.cm-edit-button {
+  background-color: #01A19A;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+  font-family: 'Anek Bangla', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  margin-right: 5px;
+
+}
+
+.summary-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.summary-container p {
+  font-family: 'Anek Bangla', sans-serif;
+  font-size: 16px;
+  color: #002D40;
+  margin: 0;
+}
+
+.cm-section-title-bar {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center; 
+
+}
+
+.add-new-company-button {
+  background-color: #002D40; 
+  color: white;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+ 
+}
+
+.add-new-company-button:hover {
+  background-color: #0a5b7e; /* Darker shade on hover */
+}
+
+.input-error {
+  border: 1px solid #e53935 !important;
+  background-color: #fff0f0;
+}
+
+.error-message {
+  color: #e53935;
+  font-size: 0.85rem;
+  margin-top: 4px;
+  display: block;
+}
+
+.cm-section-title-bar {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center; 
+ 
+}
+
+/* Company Cards */
+
+.cm-form-row-grid--margin-top {
+  margin-top: 1rem;
+}
+
+.cm-company-card {
+  width: 97%;
+  border: 1px solid #C7D9E5;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  background-color: #f9f9f9;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.cm-section-title-bar--margin-top {
+  margin-top: 20px;
+}
+
+
+/* Custom Scrollbar for the overall container (e.g., .edit-employee-background) */
+.custom-scrollbar {
+  overflow-y: auto; 
+}
+
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1; 
+  border-radius: 5px; 
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #002D40; 
+  box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.1); 
+  border-radius: 10px; 
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #002D40; 
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px; 
+}
+
+/* For Firefox */
+.custom-scrollbar {
+  scrollbar-width: thin; 
+  scrollbar-color: #002D40 #f1f1f1; 
+}
+
+/* Toggle Switch Styles */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px; 
+  height: 20px; 
+  margin-top: 5px; 
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px; 
+  width: 16px; 
+  left: 2px; 
+  bottom: 2px; 
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #4CAF50; 
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #4CAF50;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(20px); 
+  -ms-transform: translateX(20px);
+  transform: translateX(20px);
+}
+
+
+.slider.round {
+  border-radius: 20px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+/* Dropdown label */
+
+.drop-field-label {
+
+  font-family: 'Anek Bangla', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 30px;
+  letter-spacing: 0.02em;
+  color: #002D40;
+  margin-bottom: 5px;
+
+}
+
+/* End of Company Management Section */
