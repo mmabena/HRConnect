@@ -50,6 +50,12 @@ appsettings.*.local.json
 *.key
 *.pem
 
+# Ignore service-level appsettings containing secrets (keep examples in repo)
+/Server/HRConnect.Api/appsettings.json
+
+# Temporary or replacement files that may contain secrets
+/replace.txt
+
 ########################################
 # DATABASE / SQL SERVER
 ########################################
