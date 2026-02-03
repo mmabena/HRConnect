@@ -77,7 +77,7 @@ namespace HRConnect.Api.Services
       }
 
       // successful login: clear attempt info
-        _loginAttempts.TryRemove(email.ToLowerInvariant(), out _);
+      _loginAttempts.TryRemove(email.ToLowerInvariant(), out _);
 
       return GenerateJwtToken(user);
     }
@@ -201,6 +201,6 @@ namespace HRConnect.Api.Services
 
       return new JwtSecurityTokenHandler().WriteToken(token);
     }
-}
+  }
 
 }

@@ -16,28 +16,28 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "HRConnect.Api", Version = "v1" });
+  c.SwaggerDoc("v1", new OpenApiInfo { Title = "HRConnect.Api", Version = "v1" });
 
-    var securityScheme = new OpenApiSecurityScheme
+  var securityScheme = new OpenApiSecurityScheme
+  {
+    Name = "Authorization",
+    Type = SecuritySchemeType.Http,
+    Scheme = "bearer",
+    BearerFormat = "JWT",
+    In = ParameterLocation.Header,
+    Description = "Enter 'Bearer' [space] and then your JWT token.",
+    Reference = new OpenApiReference
     {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "Enter 'Bearer' [space] and then your JWT token.",
-        Reference = new OpenApiReference
-        {
-            Type = ReferenceType.SecurityScheme,
-            Id = "Bearer"
-        }
-    };
+      Type = ReferenceType.SecurityScheme,
+      Id = "Bearer"
+    }
+  };
 
-    c.AddSecurityDefinition("Bearer", securityScheme);
+  c.AddSecurityDefinition("Bearer", securityScheme);
 
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+  c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
-    { securityScheme, Array.Empty<string>() } 
+    { securityScheme, Array.Empty<string>() }
     });
 
 });
@@ -48,36 +48,36 @@ builder.Services.AddDbContext<ApplicationDBContext>(options =>
 
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+  options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+  options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
 .AddJwtBearer(options =>
 {
-    var jwt = builder.Configuration.GetSection("JwtSettings");
-    // Read secret and support base64-encoded secrets (recommended) or plain-text fallback
-    var secretValue = jwt["Secret"] ?? string.Empty;
-    byte[] keyBytes;
-    try
-    {
-        // Try to interpret as base64 first
-        keyBytes = Convert.FromBase64String(secretValue);
-    }
-    catch (FormatException)
-    {
-        // Fallback to UTF8 bytes if not base64
-        keyBytes = Encoding.UTF8.GetBytes(secretValue);
-    }
+  var jwt = builder.Configuration.GetSection("JwtSettings");
+  // Read secret and support base64-encoded secrets (recommended) or plain-text fallback
+  var secretValue = jwt["Secret"] ?? string.Empty;
+  byte[] keyBytes;
+  try
+  {
+    // Try to interpret as base64 first
+    keyBytes = Convert.FromBase64String(secretValue);
+  }
+  catch (FormatException)
+  {
+    // Fallback to UTF8 bytes if not base64
+    keyBytes = Encoding.UTF8.GetBytes(secretValue);
+  }
 
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = jwt["Issuer"],
-        ValidAudience = jwt["Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(keyBytes)
-    };
+  options.TokenValidationParameters = new TokenValidationParameters
+  {
+    ValidateIssuer = true,
+    ValidateAudience = true,
+    ValidateLifetime = true,
+    ValidateIssuerSigningKey = true,
+    ValidIssuer = jwt["Issuer"],
+    ValidAudience = jwt["Audience"],
+    IssuerSigningKey = new SymmetricSecurityKey(keyBytes)
+  };
 });
 
 builder.Services.AddAuthorizationBuilder()
@@ -92,23 +92,23 @@ builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.Services.AuthService>();
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowReact",
-        policy => policy
-            .WithOrigins("http://localhost:3000", "http://localhost:5147")
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials());
+  options.AddPolicy("AllowReact",
+      policy => policy
+          .WithOrigins("http://localhost:3000", "http://localhost:5147")
+          .AllowAnyHeader()
+          .AllowAnyMethod()
+          .AllowCredentials());
 });
 
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "HRConnect.Api v1");
-    });
+  app.UseSwagger();
+  app.UseSwaggerUI(c =>
+  {
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "HRConnect.Api v1");
+  });
 }
 
 // app.UseHttpsRedirection();

@@ -4,6 +4,11 @@ namespace HRConnect.Api.Utils
 
   public static partial class PasswordValidator
   {
+    [GeneratedRegex(
+      @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$",
+      RegexOptions.None,
+      matchTimeoutMilliseconds: 100)]
+    private static partial Regex PasswordRegexGenerated();
     private static readonly Regex PasswordRegex = PasswordRegexGenerated();
 
     public static bool IsValidPassword(string? password)
@@ -16,11 +21,6 @@ namespace HRConnect.Api.Utils
       return PasswordRegex.IsMatch(password);
     }
 
-    [GeneratedRegex(
-      @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$",
-      RegexOptions.None,
-      matchTimeoutMilliseconds: 100)]
-    private static partial Regex PasswordRegexGenerated();
   }
 }
 
