@@ -22,7 +22,6 @@ dist/
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
-*.code-workspace
 
 ########################################
 # NODE / REACT FRONTEND
