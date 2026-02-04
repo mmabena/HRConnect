@@ -41,6 +41,7 @@ pnpm-debug.log*
 .env
 .env.*
 secrets.json
+appsettings.json
 appsettings.Development.json
 appsettings.Local.json
 appsettings.*.local.json
