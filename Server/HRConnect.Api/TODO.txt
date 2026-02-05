@@ -1,0 +1,12 @@
+﻿TODO:
+Date: 2026-02-05 - 2026-02-06
+-Create DTOs (Relevant to the PUT and GET endpoint Requirement)
+-Create Mappers
+-Create Repository for :
+--> MedicalOptions
+--> MedicalOptionCategory
+-Create Interfaces for the Services to be used 
+-Create Services for :
+--> MedicalOptions
+--> MedicalOptionCategory
+-Create Validations either within Services or as a utility class

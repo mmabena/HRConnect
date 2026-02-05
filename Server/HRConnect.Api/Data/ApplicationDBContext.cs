@@ -7,6 +7,7 @@ namespace HRConnect.Api.Data
     public DbSet<User> Users { get; set; }
     public DbSet<PasswordResetPin> PasswordResetPins { get; set; }
     public DbSet<PasswordHistory> PasswordHistories { get; set; }
-
+    public DbSet<MedicalOption> MedicalOptions { get; set; }
+    public DbSet<MedicalOptionCategory> MedicalOptionCategories { get; set; }
   }
 }
