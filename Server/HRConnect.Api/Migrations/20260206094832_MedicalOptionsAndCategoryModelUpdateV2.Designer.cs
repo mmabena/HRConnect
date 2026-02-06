@@ -4,6 +4,7 @@ using HRConnect.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRConnect.Api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260206094832_MedicalOptionsAndCategoryModelUpdateV2")]
+    partial class MedicalOptionsAndCategoryModelUpdateV2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -31,12 +34,24 @@ namespace HRConnect.Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MedicalOptionId"));
 
+                    b.Property<decimal>("AdultAmount")
+                        .HasColumnType("decimal(15, 2)");
+
+                    b.Property<decimal>("Child1Amount")
+                        .HasColumnType("decimal(15, 2)");
+
+                    b.Property<decimal?>("Child2Amount")
+                        .HasColumnType("decimal(15, 2)");
+
                     b.Property<int>("MedicalOptionCategoryId")
                         .HasColumnType("int");
 
                     b.Property<string>("MedicalOptionName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("PrincipalAmount")
+                        .HasColumnType("decimal(15, 2)");
 
                     b.Property<decimal?>("SalaryBracketMax")
                         .HasColumnType("decimal(15, 2)");
@@ -83,19 +98,7 @@ namespace HRConnect.Api.Migrations
                     b.Property<decimal?>("MonthlyRiskContributionChild2")
                         .HasColumnType("decimal(15, 2)");
 
-                    b.Property<decimal?>("MonthlyRiskContributionPrincipal")
-                        .HasColumnType("decimal(15, 2)");
-
-                    b.Property<decimal>("TotalMonthlyContributionsAdult")
-                        .HasColumnType("decimal(15, 2)");
-
-                    b.Property<decimal>("TotalMonthlyContributionsChild")
-                        .HasColumnType("decimal(15, 2)");
-
-                    b.Property<decimal?>("TotalMonthlyContributionsChild2")
-                        .HasColumnType("decimal(15, 2)");
-
-                    b.Property<decimal?>("TotalMonthlyContributionsPrincipal")
+                    b.Property<decimal>("MonthlyRiskContributionPrincipal")
                         .HasColumnType("decimal(15, 2)");
 
                     b.HasKey("MedicalOptionCategoryId");
