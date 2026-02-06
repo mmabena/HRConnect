@@ -13,6 +13,7 @@
 
     public decimal? MonthlyRiskContributionPrincipal { get; set; }
 
+
     public decimal MonthlyRiskContributionAdult { get; set; }
 
     public decimal MonthlyRiskContributionChild { get; set; }
