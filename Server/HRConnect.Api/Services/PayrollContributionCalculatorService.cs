@@ -3,47 +3,65 @@ namespace HRConnect.Api.Services
 {
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
+  using HRConnect.Api.Utils;
 
   public class PayrollContributionCalculatorService : IPayrollDeductionService
   {
     private readonly ISeedEmployeeRepo _seedEmployeeRepo;
+    private readonly PayrollContributionCalculator _deductionsCalculator;
     private readonly IPayrollContributionsRepo _payrollContributionsRepo;
     public PayrollContributionCalculatorService(ISeedEmployeeRepo seedEmployeeRepo, IPayrollContributionsRepo payrollContributionsRepo)
     {
       _seedEmployeeRepo = seedEmployeeRepo;
       _payrollContributionsRepo = payrollContributionsRepo;
+      _deductionsCalculator = new PayrollContributionCalculator();
     }
+    /// <summary>
+    /// Getting a Seeded Employee
+    /// </summary>
+    /// <param name="employeeCode"></param>
+    /// <returns></returns>
     public async Task<Employee?> GetEmployeeByCodeAsync(string employeeCode)
     {
       return await _seedEmployeeRepo.GetEmployeeByCodeAsync(employeeCode);
     }
-    public async Task<List<PayrollDeduction>> GetAllUifDeductions()
+    /// <summary>
+    /// Getting deductions by Seeded Employee id
+    /// </summary>
+    /// <param name="employeeId"></param>
+    /// <returns></returns>
+    public async Task<PayrollDeduction?> GetDeductionsByEmployeeIdAsync(int employeeId)
     {
-      return await _payrollContributionsRepo.GetAllUifDeductionsAsync();
+      return await _payrollContributionsRepo.GetDeductionsByEmployeeIdAsync(employeeId);
     }
-    public async Task<Employee?> DeductUifAsync(int employeeId)
+
+    public async Task<List<PayrollDeduction>> GetAllDeductionsAsync()
     {
-      var employee = await _seedEmployeeRepo.GetEmployeeByIdAsync(employeeId);
+      return await _payrollContributionsRepo.GetAllDeductionsAsync();
+    }
+    public async Task<PayrollDeduction?> AddDeductionsAsync(int employeeId)
+    {
+      Employee? employee = await _seedEmployeeRepo.GetEmployeeByIdAsync(employeeId);
       if (employee == null) return null;
 
-      decimal employeeContribution = employee.MonthlySalary * UIFConstants.UIFEmployeeAmount;
+      var (employeeAmount, employerAmount) = _deductionsCalculator.CalculateUif(employee.MonthlySalary);
+      var sdlDeduction = _deductionsCalculator.CalculateSdlAmount(employee.MonthlySalary);
 
-      decimal employerContribution = employee.MonthlySalary * UIFConstants.UIFEmployeeAmount;
-      //Ensure contribution cannot be more than R17 712.00
-      if (employeeContribution >= UIFConstants.UIFCap)
+      var deductions = new PayrollDeduction
       {
-        employeeContribution = UIFConstants.UIFCap;
-      }
-      else if (employeeContribution == 0m)
-      {
-        employeeContribution = 0m;
-      }
+        EmployeeId = employee.EmployeeId,
+        MonthlySalary = employee.MonthlySalary,
+        PassportNumber = employee.PassportNumber,
+        IdNumber = employee.IdNumber,
+        UifEmployeeAmount = employeeAmount,
+        UifEmployerAmount = employerAmount,
+        SdlAmount = sdlDeduction
+      };
 
-      employee.MonthlySalary -= employeeContribution;
+      employee.MonthlySalary -= employeeAmount;
 
-      _ = await _payrollContributionsRepo.AddUifDeductionAsync(employeeContribution, employerContribution, 0m, employee.EmployeeId);
-      return await _seedEmployeeRepo.UpdateEmployeeAsync(employeeId, employee);
+      _ = await _seedEmployeeRepo.UpdateEmployeeAsync(employeeId, employee);
+      return await _payrollContributionsRepo.AddDeductionsAsync(deductions);
     }
-
   }
 }

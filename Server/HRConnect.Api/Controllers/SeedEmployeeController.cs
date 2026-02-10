@@ -4,7 +4,6 @@ namespace HRConnect.Api.Controllers
   using HRConnect.Api.Mappers;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
-  using HRConnect.Api.Services;
 
   [Route("api/seedemployee")]
   [ApiController]
@@ -30,14 +29,24 @@ namespace HRConnect.Api.Controllers
       var employee = await _seederService.GetEmployeeByIdAsync(employeeId);
       if (employee == null) return NotFound();
 
-      employee = await _payrollDeductionService.DeductUifAsync(employee.EmployeeId);
+      // employee = await _payrollDeductionService.AddDeductionsAsync(employee.EmployeeId);
       return Ok(employee.ToEmployeeDto());
     }
+
     [HttpGet("payrollDeductions")]
     public async Task<IActionResult> GetAllDeductions()
     {
-      List<PayrollDeduction> deductions = await _payrollDeductionService.GetAllUifDeductions();
+      List<PayrollDeduction> deductions = await _payrollDeductionService.
+      GetAllDeductionsAsync();
       return Ok(deductions.Select(d => d.ToPayrollDeductionsDto()));
+    }
+    [HttpGet("payrollDeductions/{employeeId}")]
+    public async Task<IActionResult> GetDeductionsByEmployeeId(int employeeId)
+    {
+      var deductions = await _payrollDeductionService.GetDeductionsByEmployeeIdAsync(employeeId);
+      if (deductions == null) return NotFound();
+
+      return Ok(deductions.ToPayrollDeductionsDto());
     }
   }
 }

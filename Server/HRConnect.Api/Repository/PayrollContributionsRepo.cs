@@ -12,30 +12,23 @@ namespace HRConnect.Api.Repository
     {
       _context = context;
     }
-    public async Task<PayrollDeduction> AddUifDeductionAsync(decimal uifEmployee, decimal uifEmployer, decimal sdlAmount, int employeeId)
+    public async Task<PayrollDeduction> AddDeductionsAsync(PayrollDeduction payrollDeductions)
     {
-      PayrollDeduction deduction = new()
-      {
-        // SdlAmount = sdlAmount,
-        UifEmployeeAmount = uifEmployee,
-        UifEmployerAmount = uifEmployer,
-        EmployeeId = employeeId
-      };
 
-      _ = await _context.PayrollDeductions.AddAsync(deduction);
+      _ = await _context.PayrollDeductions.AddAsync(payrollDeductions);
       _ = await _context.SaveChangesAsync();
-      return deduction;
+      return payrollDeductions;
     }
-    public async Task<List<PayrollDeduction>> GetAllUifDeductionsAsync()
+    public async Task<List<PayrollDeduction>> GetAllDeductionsAsync()
     {
       return await _context.PayrollDeductions.ToListAsync();
     }
-    public async Task<PayrollDeduction?> GetUifDeductionsByIdAsync(int id)
-    {
-      return await _context.PayrollDeductions
-      .FirstOrDefaultAsync(p => p.PayrollDeductionId == id);
-    }
-    public async Task<PayrollDeduction?> GetUifDeductionsByEmployeeIdAsync(int employeeId)
+    // public async Task<PayrollDeduction?> GetDeductionsByIdAsync(int id)
+    // {
+    //   return await _context.PayrollDeductions
+    //   .FirstOrDefaultAsync(p => p.PayrollDeductionId == id);
+    // }
+    public async Task<PayrollDeduction?> GetDeductionsByEmployeeIdAsync(int employeeId)
     {
       return await _context.PayrollDeductions.FirstOrDefaultAsync(p => p.EmployeeId == employeeId);
     }

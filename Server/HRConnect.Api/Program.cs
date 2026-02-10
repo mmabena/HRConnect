@@ -9,6 +9,8 @@ using HRConnect.Api.Repository;
 using Microsoft.AspNetCore.Identity;
 using HRConnect.Api.Models;
 using HRConnect.Api.Utils;
+using Microsoft.Build.Framework;
+using HRConnect.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -90,6 +92,10 @@ builder.Services.AddScoped<HRConnect.Api.Interfaces.IUserService, HRConnect.Api.
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.Services.AuthService>();
+builder.Services.AddScoped<ISeedEmployeeRepo, SeedEmployeeRepo>();
+builder.Services.AddScoped<ISeederService, EmployeeSeederService>();
+builder.Services.AddScoped<IPayrollContributionsRepo, PayrollContributionsRepo>();
+builder.Services.AddScoped<IPayrollDeductionService, PayrollContributionCalculatorService>();
 builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowReact",
@@ -102,6 +108,20 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+using (IServiceScope scope = app.Services.CreateScope())
+{
+  IServiceProvider seedProvider = scope.ServiceProvider;
+  try
+  {
+    ISeederService seeder = seedProvider.GetRequiredService<ISeederService>();
+    await seeder.SeedEmployeeAsync();
+    Console.WriteLine($"Seeded Employees");
+  }
+  catch (Exception ex)
+  {
+    Console.WriteLine($"Failed To Seed Employees: {ex}");
+  }
+}
 if (app.Environment.IsDevelopment())
 {
   app.UseSwagger();
