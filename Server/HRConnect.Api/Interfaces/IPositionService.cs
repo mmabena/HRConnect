@@ -16,6 +16,5 @@ namespace HRConnect.Api.Services
 
         Task<ReadPositionDto?> UpdatePositionAsync(int id, UpdatePositionDto updatePositionDto);
 
-        Task<bool> DeletePositionAsync(int id);
     }
 }

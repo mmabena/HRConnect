@@ -17,6 +17,5 @@ using System.Threading.Tasks;
 
         Task<Position?> UpdatePositionAsync(int id, Position position);
 
-        Task<bool> DeletePositionAsync(int id);
     }
 }
