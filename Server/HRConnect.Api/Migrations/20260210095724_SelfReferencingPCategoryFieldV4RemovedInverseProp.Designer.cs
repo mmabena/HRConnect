@@ -4,6 +4,7 @@ using HRConnect.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRConnect.Api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260210095724_SelfReferencingPCategoryFieldV4RemovedInverseProp")]
+    partial class SelfReferencingPCategoryFieldV4RemovedInverseProp
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -65,9 +68,6 @@ namespace HRConnect.Api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("MedicalOptionParentCategoryId")
-                        .HasColumnType("int");
-
                     b.Property<decimal?>("MonthlyMsaContributionAdult")
                         .HasColumnType("decimal(15, 2)");
 
@@ -89,6 +89,9 @@ namespace HRConnect.Api.Migrations
                     b.Property<decimal?>("MonthlyRiskContributionPrincipal")
                         .HasColumnType("decimal(15, 2)");
 
+                    b.Property<int?>("ParentCategoryIdMedicalOptionCategoryId")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("TotalMonthlyContributionsAdult")
                         .HasColumnType("decimal(15, 2)");
 
@@ -103,7 +106,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("MedicalOptionCategoryId");
 
-                    b.HasIndex("MedicalOptionParentCategoryId");
+                    b.HasIndex("ParentCategoryIdMedicalOptionCategoryId");
 
                     b.ToTable("MedicalOptionCategories");
                 });
@@ -204,11 +207,11 @@ namespace HRConnect.Api.Migrations
 
             modelBuilder.Entity("HRConnect.Api.Models.MedicalOptionCategory", b =>
                 {
-                    b.HasOne("HRConnect.Api.Models.MedicalOptionCategory", "ParentCategory")
+                    b.HasOne("HRConnect.Api.Models.MedicalOptionCategory", "ParentCategoryId")
                         .WithMany()
-                        .HasForeignKey("MedicalOptionParentCategoryId");
+                        .HasForeignKey("ParentCategoryIdMedicalOptionCategoryId");
 
-                    b.Navigation("ParentCategory");
+                    b.Navigation("ParentCategoryId");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.MedicalOptionCategory", b =>

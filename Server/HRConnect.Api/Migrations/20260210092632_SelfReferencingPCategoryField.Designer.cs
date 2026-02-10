@@ -4,6 +4,7 @@ using HRConnect.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRConnect.Api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260210092632_SelfReferencingPCategoryField")]
+    partial class SelfReferencingPCategoryField
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -89,6 +92,9 @@ namespace HRConnect.Api.Migrations
                     b.Property<decimal?>("MonthlyRiskContributionPrincipal")
                         .HasColumnType("decimal(15, 2)");
 
+                    b.Property<int?>("ParentCategoryMedicalOptionCategoryId")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("TotalMonthlyContributionsAdult")
                         .HasColumnType("decimal(15, 2)");
 
@@ -103,7 +109,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("MedicalOptionCategoryId");
 
-                    b.HasIndex("MedicalOptionParentCategoryId");
+                    b.HasIndex("ParentCategoryMedicalOptionCategoryId");
 
                     b.ToTable("MedicalOptionCategories");
                 });
@@ -206,7 +212,7 @@ namespace HRConnect.Api.Migrations
                 {
                     b.HasOne("HRConnect.Api.Models.MedicalOptionCategory", "ParentCategory")
                         .WithMany()
-                        .HasForeignKey("MedicalOptionParentCategoryId");
+                        .HasForeignKey("ParentCategoryMedicalOptionCategoryId");
 
                     b.Navigation("ParentCategory");
                 });

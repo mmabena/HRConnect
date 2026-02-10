@@ -5,27 +5,28 @@
   /// Used ONLY inside the repository layer - never exposed to controllers/clients
   /// </summary>
   
-  internal record MedicalOptionFlatRow
+  public record MedicalOptionFlatRow
   (
     // ALL fields from base MedicalPolicyOptionCategory (the parent, like "Policy A")
-    int MedicalPolicyOptionCategoryId,
-    string MedicalPolicyOptionCategoryName,
-    decimal? MonthlyRiskContributionPrincipal,
-    decimal MonthlyRiskContributionAdult,
-    decimal MonthlyRiskContributionChild,
-    decimal? MonthlyRiskContributionChild2,
-    decimal? MonthlyMsaContributionPrincipal,
-    decimal? MonthlyMsaContributionAdult,
-    decimal? MonthlyMsaContributionChild,
-    decimal? TotalMonthlyContributionsPrincipal,
-    decimal TotalMonthlyContributionsAdult,
-    decimal TotalMonthlyContributionsChild,
-    decimal? TotalMonthlyContributionsChild2,
+    int BaseMedicalPolicyOptionCategoryId,
+    int? BaseMedicalOptionParentCategoryId,
+    string BaseMedicalPolicyOptionCategoryName,
+    decimal? BaseMonthlyRiskContributionPrincipal,
+    decimal BaseMonthlyRiskContributionAdult,
+    decimal BaseMonthlyRiskContributionChild,
+    decimal? BaseMonthlyRiskContributionChild2,
+    decimal? BaseMonthlyMsaContributionPrincipal,
+    decimal? BaseMonthlyMsaContributionAdult,
+    decimal? BaseMonthlyMsaContributionChild,
+    decimal? BaseTotalMonthlyContributionsPrincipal,
+    decimal BaseTotalMonthlyContributionsAdult,
+    decimal BaseTotalMonthlyContributionsChild,
+    decimal? BaseTotalMonthlyContributionsChild2,
     // ALL fields from PolicyOption
-    int MedicalOptionId,
-    string MedicalOptionName,
-    int MedicalOptionCategoryId,
-    decimal? SalaryBracketMin,
-    decimal? SalaryBracketMax
+    int BaseMedicalOptionId,
+    string BaseMedicalOptionName,
+    int BaseMedicalOptionCategoryId,
+    decimal? BaseSalaryBracketMin,
+    decimal? BaseSalaryBracketMax
   );
 }

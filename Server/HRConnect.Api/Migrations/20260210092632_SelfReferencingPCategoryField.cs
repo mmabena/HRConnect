@@ -1,0 +1,58 @@
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace HRConnect.Api.Migrations
+{
+    /// <inheritdoc />
+    public partial class SelfReferencingPCategoryField : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.AddColumn<int>(
+                name: "MedicalOptionParentCategoryId",
+                table: "MedicalOptionCategories",
+                type: "int",
+                nullable: true);
+
+            migrationBuilder.AddColumn<int>(
+                name: "ParentCategoryMedicalOptionCategoryId",
+                table: "MedicalOptionCategories",
+                type: "int",
+                nullable: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MedicalOptionCategories_ParentCategoryMedicalOptionCategoryId",
+                table: "MedicalOptionCategories",
+                column: "ParentCategoryMedicalOptionCategoryId");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_MedicalOptionCategories_MedicalOptionCategories_ParentCategoryMedicalOptionCategoryId",
+                table: "MedicalOptionCategories",
+                column: "ParentCategoryMedicalOptionCategoryId",
+                principalTable: "MedicalOptionCategories",
+                principalColumn: "MedicalOptionCategoryId");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropForeignKey(
+                name: "FK_MedicalOptionCategories_MedicalOptionCategories_ParentCategoryMedicalOptionCategoryId",
+                table: "MedicalOptionCategories");
+
+            migrationBuilder.DropIndex(
+                name: "IX_MedicalOptionCategories_ParentCategoryMedicalOptionCategoryId",
+                table: "MedicalOptionCategories");
+
+            migrationBuilder.DropColumn(
+                name: "MedicalOptionParentCategoryId",
+                table: "MedicalOptionCategories");
+
+            migrationBuilder.DropColumn(
+                name: "ParentCategoryMedicalOptionCategoryId",
+                table: "MedicalOptionCategories");
+        }
+    }
+}

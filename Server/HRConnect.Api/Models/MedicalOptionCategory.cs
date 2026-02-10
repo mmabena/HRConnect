@@ -10,6 +10,9 @@
     public int MedicalOptionCategoryId { get; set; }
     [Required]
     public string MedicalOptionCategoryName { get; set; } = string.Empty;
+    // Self-referencing parent-child relationship
+    [ForeignKey(nameof(ParentCategory))]
+    public int? MedicalOptionParentCategoryId { get; set; }
     [Column(TypeName = "decimal(15, 2)")]
     public decimal? MonthlyRiskContributionPrincipal { get; set; }
     [Required]
@@ -37,5 +40,9 @@
     public decimal? TotalMonthlyContributionsChild2 { get; set; }
     [Required]
     public MedicalOption MedicalOption { get; set; } = null!;
+    
+    //Navigation property to Self-referencing FK
+    //[InverseProperty("Children")]
+    public MedicalOptionCategory? ParentCategory { get; set; }
   }
 }
