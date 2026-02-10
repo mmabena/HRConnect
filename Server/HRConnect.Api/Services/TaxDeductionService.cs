@@ -97,12 +97,12 @@ namespace HRConnect.Api.Services
       {
         throw new ArgumentException("Tax deduction not found.");
       }
-        
+
       if (entity.TaxYear != dto.TaxYear)
       {
         throw new InvalidOperationException("Cannot change TaxYear.");
       }
-        
+
       entity.Remuneration = dto.Remuneration;
       entity.AnnualEquivalent = dto.AnnualEquivalent;
       entity.TaxUnder65 = dto.TaxUnder65;
@@ -121,19 +121,13 @@ namespace HRConnect.Api.Services
     /// <exception cref="ArgumentException">Thrown if the file type is invalid, headers are missing, or data is non-numeric.</exception>
     public async Task UploadTaxTableAsync(int taxYear, IFormFile file)
     {
-      var existsForYear = await _context
-      .TaxTableUploads.AnyAsync(x => x.TaxYear == taxYear && x.IsActive);
+      if (file == null)
+        throw new ArgumentException("File is required.");
 
-      if (existsForYear)
-      {
-        throw new ArgumentException($"A tax table for the year {taxYear} already exists");
-      }
-      
-      if (file == null || (Path.GetExtension(file.FileName) != ".xlsx" && Path.GetExtension(file.FileName) != ".xls"))
-      {
-        throw new ArgumentException("Invalid file type. Only Excel files are allowed.");
-      }
-        
+      var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+      if (extension != ".xlsx" && extension != ".xls")
+        throw new ArgumentException("Only Excel files are allowed.");
+
       using var stream = new MemoryStream();
       await file.CopyToAsync(stream);
 
@@ -141,28 +135,30 @@ namespace HRConnect.Api.Services
       var worksheet = package.Workbook.Worksheets.FirstOrDefault();
 
       if (worksheet == null)
-      {
         throw new ArgumentException("Excel file contains no worksheets.");
-      }
-        
-      // Expected headers
-      var expectedHeaders = new[] { "Remuneration", "AnnualEquivalent", "TaxUnder65", "Tax65To74", "TaxOver75" };
+
+      var expectedHeaders = new[]
+      {
+        "Remuneration",
+        "AnnualEquivalent",
+        "TaxUnder65",
+        "Tax65To74",
+        "TaxOver75"
+    };
+
       for (int i = 0; i < expectedHeaders.Length; i++)
       {
-        if (worksheet.Cells[1, i + 1].Text.Trim() != expectedHeaders[i])
-        {
-          throw new ArgumentException($"Invalid Excel format. Missing header: {expectedHeaders[i]}");
-        }
-          
+        if (worksheet.Cells[1, i + 1].Text != expectedHeaders[i])
+          throw new ArgumentException(
+              $"Invalid Excel format. Missing header: {expectedHeaders[i]}");
       }
 
       int rowCount = worksheet.Dimension.Rows;
 
       for (int row = 2; row <= rowCount; row++)
       {
-        string remunerationText = worksheet.Cells[row, 1].Text.Trim(); // e.g., "R0-R4,979"
+        string remunerationText = worksheet.Cells[row, 1].Text.Trim();
 
-        // Parse the upper bound of the range(the higher value)
         decimal remunerationUpper;
         try
         {
@@ -175,7 +171,6 @@ namespace HRConnect.Api.Services
           throw new ArgumentException($"Invalid Remuneration range at row {row}: {remunerationText}");
         }
 
-        // Parse the rest of the columns as decimals
         decimal annualEquivalent = decimal.Parse(
             worksheet.Cells[row, 2].Text.Replace("R", "").Replace(",", "").Trim(),
             System.Globalization.CultureInfo.InvariantCulture);
@@ -192,7 +187,7 @@ namespace HRConnect.Api.Services
             worksheet.Cells[row, 5].Text.Replace("R", "").Replace(",", "").Trim(),
             System.Globalization.CultureInfo.InvariantCulture);
 
-        var taxDeduction = new TaxDeduction
+        _context.TaxDeductions.Add(new TaxDeduction
         {
           TaxYear = taxYear,
           Remuneration = remunerationUpper,
@@ -201,16 +196,15 @@ namespace HRConnect.Api.Services
           Tax65To74 = tax65To74,
           TaxOver75 = taxOver75,
           CreatedAt = DateTime.UtcNow
-        };
-
-        _context.TaxDeductions.Add(taxDeduction);
+        });
       }
 
-      // Deactivate old uploads for this year
-      var oldUploads = await _context.TaxTableUploads
-          .Where(x => x.TaxYear == taxYear && x.IsActive)
+      // Deactivate all active uploads, regardless of year
+      var activeUploads = await _context.TaxTableUploads
+          .Where(x => x.IsActive)
           .ToListAsync();
-      oldUploads.ForEach(x => x.IsActive = false);
+
+      activeUploads.ForEach(x => x.IsActive = false);
 
       var newUpload = new TaxTableUpload
       {

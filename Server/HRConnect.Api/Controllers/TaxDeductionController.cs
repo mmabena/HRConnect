@@ -7,9 +7,11 @@ namespace HRConnect.Api.Controllers
   using Microsoft.AspNetCore.Http;
   using HRConnect.Api.DTOs;
   using HRConnect.Api.Interfaces;
+  using Microsoft.AspNetCore.Authorization;
 
   [ApiController]
   [Route("api/tax-deductions")]
+  [Authorize(Roles = "SuperUser")]
   public class TaxDeductionController : ControllerBase
   {
     private readonly ITaxDeductionService _taxDeductionService;

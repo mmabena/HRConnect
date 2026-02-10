@@ -15,9 +15,8 @@ namespace HRConnect.Api.Interfaces
   /// </summary>
   public interface ITaxTableUploadService
   {
-    Task<List<TaxTableUploadDto>> GetAllUploadAsync();
+    Task<List<TaxTableUploadDto>> GetAllUploadsAsync();
     Task<TaxTableUploadDto?> GetUploadByYearAsync(int taxYear);
     Task UploadTaxTableAsync(int taxYear, IFormFile file);
-    Task<List<TaxTableUploadDto>> GetAllUploadsAsync();
   }
 }

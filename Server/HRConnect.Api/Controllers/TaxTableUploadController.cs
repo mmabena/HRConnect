@@ -9,7 +9,8 @@ namespace HRConnect.Api.Controllers
   using System.IO;
   using System.Linq;
   using System.Threading.Tasks;
-
+  using Microsoft.AspNetCore.Authorization;
+  
   /// <summary>
   /// Handles tax table retrieval and upload operations
   /// This controller allows administrators to upload annual tax tables
@@ -17,6 +18,7 @@ namespace HRConnect.Api.Controllers
   /// </summary>
   [ApiController]
   [Route("api/[controller]")]
+  [Authorize(Roles = "SuperUser")]
   public class TaxTableUploadController : ControllerBase
   {
     private readonly ITaxDeductionService _taxDeductionService;
