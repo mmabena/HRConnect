@@ -24,18 +24,6 @@ namespace HRConnect.Api.Controllers
     }
 
     /// <summary>
-    /// Retrieves all tax deductions for a given tax year
-    /// </summary>
-    /// <param name="taxYear">Starting year of the tax year (e.g. 2025 for 2025/2026)</param>
-    /// <returns>A list of tax deductions</returns>
-    [HttpGet("{taxYear:int}")]
-    public async Task<ActionResult<List<TaxDeductionDto>>> GetByYear(int taxYear)
-    {
-      var result = await _taxDeductionService.GetAllTaxDeductionsAsync(taxYear);
-      return Ok(result);
-    }
-
-    /// <summary>
     /// Calculates the tax payable based on tax year, remuneration and age
     /// </summary>
     [HttpGet("calculate")]
