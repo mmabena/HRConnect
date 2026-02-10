@@ -126,7 +126,7 @@ namespace HRConnect.Api.Services
 
       if (existsForYear)
       {
-        throw new InvalidOperationException($"A tax table for the year {taxYear} already exists");
+        throw new ArgumentException($"A tax table for the year {taxYear} already exists");
       }
       
       if (file == null || (Path.GetExtension(file.FileName) != ".xlsx" && Path.GetExtension(file.FileName) != ".xls"))
