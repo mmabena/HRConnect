@@ -1,7 +1,8 @@
 namespace HRConnect.Api.Mappers
 {
+    using HRConnect.Api.Models;
   using System.Collections.Generic;
-  using HRConnect.Api.DTOs.Position;
+  using HRConnect.Api.DTOs.JobGrade;
     public static class JobGradeMapper
     {
         public static JobGradeDto ToJobGradeDto(this JobGrade jobGrade)

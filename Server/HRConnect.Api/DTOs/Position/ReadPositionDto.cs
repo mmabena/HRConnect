@@ -1,5 +1,9 @@
 namespace HRConnect.Api.DTOs.Position
 {
+  using HRConnect.Api.DTOs;
+  using HRConnect.Api.DTOs.JobGrade;
+  using HRConnect.Api.DTOs.OccupationalLevel;
+
   public class ReadPositionDto
   {
     public int PositionId  { get; set; }

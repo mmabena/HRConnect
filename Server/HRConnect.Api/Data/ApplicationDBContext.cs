@@ -2,6 +2,9 @@ namespace HRConnect.Api.Data
 {
   using HRConnect.Api.Models;
   using Microsoft.EntityFrameworkCore;
+  using System.Collections.Generic;
+  using System;
+
 
   public class ApplicationDBContext(DbContextOptions dbContextOptions) : DbContext(dbContextOptions)
   {
@@ -22,7 +25,7 @@ namespace HRConnect.Api.Data
 
       // Position - OccupationalLevel
       _ = modelBuilder.Entity<Position>()
-      .HasOne(p => p.OccupationalLevel)
+      .HasOne(p => p.OccupationalLevels)
       .WithMany(o => o.Positions)
       .HasForeignKey(p => p.OccupationalLevelId);
 

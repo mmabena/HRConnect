@@ -3,6 +3,8 @@ namespace HRConnect.Api.Mappers
     using System;
     using Api.DTOs.Position;
     using Api.Models;
+    using HRConnect.Api.DTOs.JobGrade;
+    using HRConnect.Api.DTOs.OccupationalLevel;
 
     public static class PositionMapper
     {
@@ -22,7 +24,7 @@ namespace HRConnect.Api.Mappers
         {
             return new ReadPositionDto
             {
-                Id = position.Id,
+                PositionId = position.PositionId,
                 Title = position.Title,
                 JobGradeId = position.JobGradeId,
                 OccupationalLevelId = position.OccupationalLevelId,
@@ -35,11 +37,12 @@ namespace HRConnect.Api.Mappers
                     Description = position.JobGrade.Description,
                     IsActive = position.JobGrade.IsActive
                 } : null,
-                OccupationalLevel = position.OccupationalLevel != null ? new OccupationalLevelDto
-                {
-                    Name = position.OccupationalLevel.Name,
-                    Description = position.OccupationalLevel.Description
+               OccupationalLevel = position.OccupationalLevels != null ? new OccupationalLevelDto
+               {
+                 Name = position.OccupationalLevels.Name,
+                 Description = position.OccupationalLevels.Description,
                 } : null
+
             };
         }
     }
