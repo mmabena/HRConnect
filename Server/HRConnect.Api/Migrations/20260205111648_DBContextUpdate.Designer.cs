@@ -4,6 +4,7 @@ using HRConnect.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRConnect.Api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260205111648_DBContextUpdate")]
+    partial class DBContextUpdate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,7 +33,7 @@ namespace HRConnect.Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("JobGradeId"));
 
-                    b.Property<DateTime>("CreatedDate")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
@@ -44,7 +47,7 @@ namespace HRConnect.Api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("UpdatedDate")
+                    b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("JobGradeId");
@@ -52,15 +55,15 @@ namespace HRConnect.Api.Migrations
                     b.ToTable("JobGrades");
                 });
 
-            modelBuilder.Entity("HRConnect.Api.Models.OccupationalLevel", b =>
+            modelBuilder.Entity("HRConnect.Api.Models.OccuptionalLevel", b =>
                 {
-                    b.Property<int>("OccupationalLevelId")
+                    b.Property<int>("OccuptionalLevelId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OccupationalLevelId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OccuptionalLevelId"));
 
-                    b.Property<DateTime>("CreatedDate")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
@@ -71,9 +74,9 @@ namespace HRConnect.Api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("OccupationalLevelId");
+                    b.HasKey("OccuptionalLevelId");
 
-                    b.ToTable("OccupationalLevels");
+                    b.ToTable("OccuptionalLevels");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.PasswordHistory", b =>
@@ -140,7 +143,7 @@ namespace HRConnect.Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PositionId"));
 
-                    b.Property<DateTime>("CreatedDate")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsActive")
@@ -149,21 +152,29 @@ namespace HRConnect.Api.Migrations
                     b.Property<int>("JobGradeId")
                         .HasColumnType("int");
 
-                    b.Property<int>("OccupationalLevelId")
+                    b.Property<string>("JobGrades")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("OccuptionalLevelId")
                         .HasColumnType("int");
+
+                    b.Property<string>("OcuptionalLevels")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("UpdatedDate")
+                    b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("PositionId");
 
                     b.HasIndex("JobGradeId");
 
-                    b.HasIndex("OccupationalLevelId");
+                    b.HasIndex("OccuptionalLevelId");
 
                     b.ToTable("Positions");
                 });
@@ -197,21 +208,17 @@ namespace HRConnect.Api.Migrations
 
             modelBuilder.Entity("HRConnect.Api.Models.Position", b =>
                 {
-                    b.HasOne("HRConnect.Api.Models.JobGrade", "JobGrade")
+                    b.HasOne("HRConnect.Api.Models.JobGrade", null)
                         .WithMany("Positions")
                         .HasForeignKey("JobGradeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("HRConnect.Api.Models.OccupationalLevel", "OccupationalLevels")
+                    b.HasOne("HRConnect.Api.Models.OccuptionalLevel", null)
                         .WithMany("Positions")
-                        .HasForeignKey("OccupationalLevelId")
+                        .HasForeignKey("OccuptionalLevelId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("JobGrade");
-
-                    b.Navigation("OccupationalLevels");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.JobGrade", b =>
@@ -219,7 +226,7 @@ namespace HRConnect.Api.Migrations
                     b.Navigation("Positions");
                 });
 
-            modelBuilder.Entity("HRConnect.Api.Models.OccupationalLevel", b =>
+            modelBuilder.Entity("HRConnect.Api.Models.OccuptionalLevel", b =>
                 {
                     b.Navigation("Positions");
                 });

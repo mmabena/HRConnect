@@ -4,6 +4,7 @@ using HRConnect.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRConnect.Api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260205122452_UpdatedTables")]
+    partial class UpdatedTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -73,7 +76,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("OccupationalLevelId");
 
-                    b.ToTable("OccupationalLevels");
+                    b.ToTable("OccuptionalLevels");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.PasswordHistory", b =>
@@ -197,7 +200,7 @@ namespace HRConnect.Api.Migrations
 
             modelBuilder.Entity("HRConnect.Api.Models.Position", b =>
                 {
-                    b.HasOne("HRConnect.Api.Models.JobGrade", "JobGrade")
+                    b.HasOne("HRConnect.Api.Models.JobGrade", "JobGrades")
                         .WithMany("Positions")
                         .HasForeignKey("JobGradeId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -209,7 +212,7 @@ namespace HRConnect.Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("JobGrade");
+                    b.Navigation("JobGrades");
 
                     b.Navigation("OccupationalLevels");
                 });
