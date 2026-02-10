@@ -39,6 +39,18 @@ namespace HRConnect.Api.Services
           Name = "CEO",
           EmployeeCode = "CEO004",
           MonthlySalary=1771200m
+      },
+      new Employee
+      {
+          Name ="Huncho",
+          EmployeeCode =" HUN005",
+          MonthlySalary =2000000m
+      },
+      new Employee
+      {
+          Name ="NPC",
+          EmployeeCode ="NPC006",
+          MonthlySalary =0m
       }
     };
     public EmployeeSeederService(ApplicationDBContext context, ISeedEmployeeRepo seedEmployeeRepo)
