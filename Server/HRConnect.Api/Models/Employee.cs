@@ -9,19 +9,21 @@ namespace HRConnect.Api.Models
     public class Employee
     {
         [Required]
-        public int EmployeeId { get; set; }
+        public string EmployeeId { get; set; } = string.Empty;
+        [Required]
+        public string Title { get; set; } = string.Empty;
         [Required]
         public string Name { get; set; } = string.Empty;
         [Required]
         public string Surname { get; set; } = string.Empty;
         [StringLength(13)]
-        public int IDNumber { get; set; }
-        public int PassportNumber { get; set; }
+        public string IdNumber { get; set; } = string.Empty;
+        public string PassportNumber { get; set; } = string.Empty;
         [Required]
         public string Gender { get; set; } = string.Empty;
         [Required]
         [StringLength(10)]
-        public int ContactNumber { get; set; }
+        public string ContactNumber { get; set; } = string.Empty;
         [Required]
         [EmailAddress]
         public string Email { get; set; } = string.Empty;
@@ -35,14 +37,14 @@ namespace HRConnect.Api.Models
         public string Branch { get; set; } = string.Empty;
         [Required]
         [Column(TypeName = "decimal(18,2)")]
-        public decimal MontlySalary { get; set; }
+        public decimal MonthlySalary { get; set; }
         [Required]
         public int  PositionId { get; set; }
         public Position? Position { get; set; }
         [Required]
         public string EmploymentStatus { get; set; } = string.Empty;
         [Required]
-        public string CareerManger { get; set; } = string.Empty;
+        public string CareerManager { get; set; } = string.Empty;
         [Required]
         public string EmpPicture { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

@@ -8,6 +8,7 @@ using HRConnect.Api.Interfaces;
 using HRConnect.Api.Repository;
 using Microsoft.AspNetCore.Identity;
 using HRConnect.Api.Models;
+using HRConnect.Api.Services;
 using HRConnect.Api.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -85,6 +86,8 @@ builder.Services.AddAuthorizationBuilder()
     .AddPolicy("NormalUserOnly", policy => policy.RequireRole("NormalUser"));
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IUserService, HRConnect.Api.Services.UserService>();
 builder.Services.AddScoped<IEmailService, EmailService>();

@@ -1,9 +1,11 @@
 namespace HRConnect.Api.Mappers
 {
     using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using HRConnect.Api.Models;
+    using HRConnect.Api.DTOs.Employee;
     public static class EmployeeMapper
     {
         public static EmployeeDto ToEmployeeDto(this Employee employeeModel)
@@ -11,9 +13,10 @@ using System.Threading.Tasks;
             return new EmployeeDto
             {
                 EmployeeId = employeeModel.EmployeeId,
+                Title = employeeModel.Title,
                 Name = employeeModel.Name,
                 Surname = employeeModel.Surname,
-                IDNumber = employeeModel.IDNumber,
+                IdNumber = employeeModel.IdNumber,
                 PassportNumber = employeeModel.PassportNumber,
                 Gender = employeeModel.Gender,
                 ContactNumber = employeeModel.ContactNumber,
@@ -21,13 +24,13 @@ using System.Threading.Tasks;
                 PhysicalAddress = employeeModel.PhysicalAddress,
                 DateOfBirth = employeeModel.DateOfBirth,
                 StartDate = employeeModel.StartDate,
-                Branch = employeeModel.Banch,
+                Branch = employeeModel.Branch,
                 MonthlySalary = employeeModel.MonthlySalary,
                 PositionId = employeeModel.PositionId,
-                CareerManager = employeeModel.CareerManger,
-                EmpPicture = employeeModel.EmPicture,
-                CreatedAt = employeeModel.CreatedAt ?? DateTime.UtcNow,
-                UpdatedAt = employeeModel.UpdatedAt ?? DateTime.UtcNow
+                CareerManager = employeeModel.CareerManager,
+                EmpPicture = employeeModel.EmpPicture,
+                CreatedAt = employeeModel.CreatedAt,
+                UpdatedAt = employeeModel.UpdatedAt
             };
         }
 
@@ -36,9 +39,11 @@ using System.Threading.Tasks;
         {
             return new Employee
             {
+                EmployeeId = employeeRequestDto.EmployeeId,
+                Title = employeeRequestDto.Title,
                 Name = employeeRequestDto.Name,
                 Surname = employeeRequestDto.Surname,
-                IDNumber = employeeRequestDto.IDNumber,
+                IdNumber = employeeRequestDto.IdNumber,
                 PassportNumber = employeeRequestDto.PassportNumber,
                 Gender = employeeRequestDto.Gender,
                 ContactNumber = employeeRequestDto.ContactNumber,
@@ -47,12 +52,12 @@ using System.Threading.Tasks;
                 DateOfBirth = employeeRequestDto.DateOfBirth,
                 StartDate = employeeRequestDto.StartDate,
                 Branch = employeeRequestDto.Branch,
-                MontlySalary = employeeRequestDto.MontlySalary,
+                MonthlySalary = employeeRequestDto.MonthlySalary,
                 PositionId = employeeRequestDto.PositionId,
                 EmploymentStatus = employeeRequestDto.EmploymentStatus,
-                CareerManger = employeeRequestDto.CareerManger,
+                CareerManager = employeeRequestDto.CareerManager,
                 EmpPicture = employeeRequestDto.EmpPicture
             };
-        }    
+        }
     }
 }
