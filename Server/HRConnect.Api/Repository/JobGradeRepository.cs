@@ -23,5 +23,13 @@ namespace HRConnect.Api.Repository
             .OrderByDescending(j => j.CreatedDate)
             .FirstOrDefaultAsync();
         }
+        public async Task AddAsync(JobGrade jobGrade)
+        {
+            await _context.JobGrades.AddAsync(jobGrade);
+        }
+        public async Task SaveChangesAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
     }
 }

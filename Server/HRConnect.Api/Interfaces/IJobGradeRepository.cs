@@ -6,5 +6,7 @@ namespace HRConnect.Api.Interfaces
     public interface IJobGradeRepository
     {
         Task<JobGrade?> GetLatestByEmployeeIdAsync(int employeeId);
+        Task AddAsync(JobGrade jobGrade);
+        Task SaveChangesAsync();
     }
 }

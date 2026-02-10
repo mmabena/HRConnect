@@ -90,6 +90,16 @@ namespace HRConnect.Api.Services
             // =====================
             await AllocateSickLeaveAsync(employee, jobGrade, yearsOfService);
 
+            // =============================
+            // FAMILY RESPONSIBILITY LEAVE
+            // =============================
+            await AllocateFamilyResponsibilityLeaveAsync(employee, jobGrade, yearsOfService);
+
+            // =====================
+            // MATERNITY LEAVE
+            // =====================
+            await AllocateMaternityLeaveAsync(employee, jobGrade, yearsOfService);
+
             // =====================
             // PERSIST ONCE
             // =====================
@@ -199,5 +209,86 @@ namespace HRConnect.Api.Services
 
             await _employeeLeaveBalanceRepository.AddAsync(balance);
         }
+        /// <summary>
+        /// Allocates Family Responsibility Leave (FRL).
+        /// </summary>
+        public async Task AllocateFamilyResponsibilityLeaveAsync(
+            Employee employee,
+            JobGrade jobGrade,
+            int yearsOfService)
+        {
+            var leaveTypes = await _leaveTypeRepository.GetAllAsync();
+            var familyResponsibilityLeave = leaveTypes.FirstOrDefault(l => l.Code == "FRL");
+            if (familyResponsibilityLeave == null)
+            {
+                throw new InvalidOperationException("Family Responsibility Leave type not found");
+            }
+            //entitlement is always 3
+            var entitlement = new LeaveEntitlementRule
+            {
+                EmployeeId = employee.EmployeeId,
+                LeaveTypeId = familyResponsibilityLeave.LeaveTypeId,
+                JobGradeId = jobGrade.JobGradeId,
+                EmployeeName = $"{employee.Name} {employee.Surname}",
+                JobGrade = jobGrade.JobGradeName,
+                YearsOfService = yearsOfService,
+                DaysEntitled = 3,
+                Status = "Active"
+            };
+            await _leaveEntitlementRepository.AddAsync(entitlement);
+
+            //balance starts at full entitlement (resets on anniversary logic later)
+            var balance = new EmployeeLeaveBalance
+            {
+                EmployeeId = employee.EmployeeId,
+                LeaveTypeId = familyResponsibilityLeave.LeaveTypeId,
+                DaysAvailable = 3,
+                LastUpdated = DateTime.UtcNow
+            };
+            await _employeeLeaveBalanceRepository.AddAsync(balance);
+        }
+        /// <summary>
+        /// Allocates Maternity Leave (ML) for female employees only.
+        /// Fixed 120 days including weekends.
+        /// </summary>
+        private async Task AllocateMaternityLeaveAsync(
+            Employee employee,
+            JobGrade jobGrade,
+            int yearsOfService)
+        {
+            if (!employee.Gender.Equals("Female", StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+            var leaveTypes = await _leaveTypeRepository.GetAllAsync();
+            var maternityLeave = leaveTypes.FirstOrDefault(l => l.Code == "ML");
+            if (maternityLeave == null)
+            {
+                throw new InvalidOperationException("Maternity Leave type not found");
+            }
+            var entitlement = new LeaveEntitlementRule
+            {
+                EmployeeId = employee.EmployeeId,
+                LeaveTypeId = maternityLeave.LeaveTypeId,
+                JobGradeId = jobGrade.JobGradeId,
+                EmployeeName = $"{employee.Name} {employee.Surname}",
+                JobGrade = jobGrade.JobGradeName,
+                YearsOfService = yearsOfService,
+                DaysEntitled = 120,
+                Status = "Active"
+            };
+            await _leaveEntitlementRepository.AddAsync(entitlement);
+
+            var balance = new EmployeeLeaveBalance
+            {
+                EmployeeId = employee.EmployeeId,
+                LeaveTypeId = maternityLeave.LeaveTypeId,
+                DaysAvailable = 120,
+                LastUpdated = DateTime.UtcNow
+            };
+            await _employeeLeaveBalanceRepository.AddAsync(balance);
+
+        }
+
     }
 }
