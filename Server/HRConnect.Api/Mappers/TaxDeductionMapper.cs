@@ -3,13 +3,13 @@ namespace HRConnect.Api.Mappers
   using HRConnect.Api.DTOs;
   using HRConnect.Api.Services;
   using HRConnect.Api.Models;
-    using System.Xml;
-    using System.Linq.Expressions;
+  using System.Xml;
+  using System.Linq.Expressions;
 
-    /// <summary>
-    /// Provides mapping methods between TaxDeduction entities and DTOs.
-    /// </summary>
-    public static class TaxDeductionMapper
+  /// <summary>
+  /// Provides mapping methods between TaxDeduction entities and DTOs.
+  /// </summary>
+  public static class TaxDeductionMapper
   {
     /// <summary>
     /// Maps a TaxDeduction entity to a TaxDeductionDto.
@@ -18,11 +18,6 @@ namespace HRConnect.Api.Mappers
     /// <returns>A mapped TaxDeductionDto.</returns>
     public static TaxDeductionDto ToDto(TaxDeduction entity)
     {
-      if (entity == null)
-      {
-        throw new ArgumentException(nameof(entity));
-      }
-
       return new TaxDeductionDto
       {
         Id = entity.Id,
@@ -41,11 +36,6 @@ namespace HRConnect.Api.Mappers
     /// <returns>a new TaxDeduction entity</returns>
     public static TaxDeduction ToEntity(CreateTaxDeductionDto dto)
     {
-      if (dto == null)
-      {
-        throw new ArgumentException(nameof(dto));
-      }
-
       return new TaxDeduction
       {
         TaxYear = dto.TaxYear,
@@ -63,16 +53,7 @@ namespace HRConnect.Api.Mappers
     /// <param name="dto">The update DTO.</param>
     public static void UpdateEntity(TaxDeduction entity, UpdateTaxDeductionDto dto)
     {
-      if (entity == null)
-      {
-        throw new ArgumentException(nameof(entity));
-      }
 
-      if (dto == null)
-      {
-        throw new ArgumentException(nameof(dto));
-      }
-      
       entity.Remuneration = dto.Remuneration;
       entity.AnnualEquivalent = dto.AnnualEquivalent;
       entity.TaxUnder65 = dto.TaxUnder65;

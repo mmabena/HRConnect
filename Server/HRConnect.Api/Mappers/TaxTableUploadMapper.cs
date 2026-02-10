@@ -19,8 +19,6 @@ namespace HRConnect.Api.Mappers
     /// <returns>A mapped <see cref="TaxTableUploadDto"/>.</returns>
     public static TaxTableUploadDto ToDto(TaxTableUpload entity)
     {
-      if (entity == null)
-        throw new ArgumentNullException(nameof(entity));
 
       return new TaxTableUploadDto
       {
