@@ -44,57 +44,5 @@ namespace HRConnect.Api.Controllers
         return BadRequest(ex.Message);
       }
     }
-
-    /// <summary>
-    /// Uploads a tax deduction Excel document for a specific tax year.
-    /// The uploaded document replaces all existing tax deductions for that year.
-    /// </summary>
-    /// <param name="request">Excel file and tax year</param>
-    /// <returns>No content if successful</returns>
-    [HttpPut("upload")]
-    public async Task<IActionResult> UploadTaxTable(
-     [FromForm] TaxTableUploadRequest request)
-    {
-      if (request.File == null || request.File.Length == 0)
-      {
-        return BadRequest("Excel file is required.");
-      }
-
-      
-      var extension = Path.GetExtension(request.File.FileName).ToLowerInvariant();
-      if (extension != ".xlsx" && extension != ".xls")
-      {
-        return BadRequest("Invalid file type. Only .xlsx or .xls files are allowed.");
-      }
-
-      var allowedContentTypes = new[]
-      {
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    "application/vnd.ms-excel"
-  };
-
-      if (!allowedContentTypes.Contains(request.File.ContentType))
-      {
-        return BadRequest("Invalid Excel file format.");
-      }
-
-      if (request.TaxYear < 2000 || request.TaxYear > DateTime.UtcNow.Year + 1)
-      {
-        return BadRequest("Invalid tax year.");
-      }
-
-      try
-      {
-        await _taxDeductionService
-          .UploadTaxTableAsync(request.TaxYear, request.File);
-
-        return NoContent();
-      }
-      catch (ArgumentException ex)
-      {
-        return BadRequest(ex.Message);
-      }
-    }
-
   }
 }
