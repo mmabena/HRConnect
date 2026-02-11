@@ -136,8 +136,8 @@ namespace HRConnect.Tests
 
       var uploads = await context.TaxTableUploads.ToListAsync();
 
-      // Older years remain active because service only deactivates same-year uploads
-      Assert.All(uploads.Where(x => x.TaxYear < newTaxYear), x => Assert.True(x.IsActive));
+      // Older years will be inactive
+      Assert.All(uploads.Where(x => x.TaxYear < newTaxYear), x => Assert.False(x.IsActive));
 
       // New upload is active
       var latest = uploads.First(x => x.TaxYear == newTaxYear);

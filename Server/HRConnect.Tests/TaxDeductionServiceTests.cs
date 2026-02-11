@@ -1,4 +1,4 @@
-using HRConnect.Api.Data;        // Your real DbContext
+using HRConnect.Api.Data;
 using HRConnect.Api.DTOs;
 using HRConnect.Api.Models;
 using HRConnect.Api.Services;
@@ -27,7 +27,6 @@ namespace HRConnect.Tests
     {
       var context = GetDbContext();
 
-      // Seed data exactly like your real DbContext
       context.TaxDeductions.AddRange(new List<TaxDeduction>
             {
                 new TaxDeduction
