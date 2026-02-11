@@ -15,7 +15,7 @@
     /// into a client-friendly DTO structure that contains the category information
     /// and all associated medical options.
     /// </summary>
-    /// <param name="group">
+    /// <param name="group"
     /// The IGrouping result from the repository containing the MedicalOptions entities
     /// grouped by MedicalOptionCategoryId, Then the collection contains all MedicalOptions
     /// entities belonging to that category.
