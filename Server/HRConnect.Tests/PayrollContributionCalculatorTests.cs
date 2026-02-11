@@ -1,5 +1,7 @@
 namespace HRConnect.Tests
 {
+  using System.Net.NetworkInformation;
+  using System.Reflection;
   using HRConnect.Api.Utils;
   public class PayrollContributionCalculatorTests
   {
@@ -17,19 +19,36 @@ namespace HRConnect.Tests
 
     [Theory]
     [InlineData(0)]
-    public void CalculateDeductionsShouldReturnZeroForZeroSalary(decimal monthlySalary)
+    public void CalculateDeductionsShouldReturnZeroForZeroSalary(decimal monthlySalary, decimal expectedAmount = 0)
     {
-      // Arrange
-      var result;
-      // Act
-      result = _payrollContributionCalculator.CalculateUif(monthlySalary);
+      // Arrange and Act
+      var result = _payrollContributionCalculator.CalculateUif(monthlySalary);
 
       // Assert
-      result.Should().Be(0);
+      Assert.Equal(expectedAmount, result.employeeAmount);
+      Assert.Equal(expectedAmount, result.employerAmount);
     }
 
-    // [Theory]
-    // public void CalculateDeductionsShouldCalculateSdlCorrectly(decimal monthlySalary) { }
+    [Theory]
+    [MemberData(nameof(SdlAmountTestData))]
+    public void CalculateDeductionsShouldCalculateSdlCorrectly(decimal monthlySalary, decimal expectedSdlAmount)
+    {
+      //Arrange
+      decimal testResult;
+
+      //Act
+      testResult = _payrollContributionCalculator.CalculateSdlAmount(monthlySalary);
+
+      testResult.Should().Be(expectedSdlAmount);
+    }
+
+    public static TheoryData<decimal, decimal> SdlAmountTestData =>
+        new TheoryData<decimal, decimal>
+    {
+     {35000m,350m},
+     {1771200m,17712m},
+     {0m,0m}
+    };
     // [Theory]
     // public void CalculateDeductionsShouldCalculateUifEmployeeAndEmployerCorrectly(decimal monthlySalary) { }
   }
