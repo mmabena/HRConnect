@@ -20,7 +20,7 @@ namespace HRConnect.Api.Data
       // Position - JobGrade
       _ = modelBuilder.Entity<Position>()
       .HasOne(p => p.JobGrade)
-      .WithMany(j => j.Positions)
+      .WithMany(jg=> jg.Positions)
       .HasForeignKey(p => p.JobGradeId);
 
       // Position - OccupationalLevel

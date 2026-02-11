@@ -9,8 +9,8 @@ namespace HRConnect.Api.Mappers
         {
         return new JobGradeDto
         {
+           
             Name = jobGrade.Name,
-            Description = jobGrade.Description,
             IsActive = jobGrade.IsActive
         };
         }

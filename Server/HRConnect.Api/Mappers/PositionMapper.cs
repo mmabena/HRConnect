@@ -34,12 +34,11 @@ namespace HRConnect.Api.Mappers
                 JobGrade = position.JobGrade != null ? new JobGradeDto
                 {
                     Name = position.JobGrade.Name,
-                    Description = position.JobGrade.Description,
                     IsActive = position.JobGrade.IsActive
                 } : null,
                OccupationalLevel = position.OccupationalLevels != null ? new OccupationalLevelDto
                {
-                 Name = position.OccupationalLevels.Name,
+
                  Description = position.OccupationalLevels.Description,
                 } : null
 

@@ -24,7 +24,7 @@ namespace HRConnect.Api.Services
         // ----------------------
         public async Task<IEnumerable<ReadPositionDto>> GetAllPositionsAsync()
         {
-            var positions = await _positionRepo.GetAllPositionsAsync();
+          var positions = await _positionRepo.GetAllPositionsAsync();
             return positions.Select(MapToReadDto).ToList();
         }
 
@@ -39,7 +39,7 @@ namespace HRConnect.Api.Services
         }
 
         // ----------------------
-        // GET BY TITLE
+        // GET /api/positions/title
         // ----------------------
         public async Task<ReadPositionDto?> GetPositionByTitleAsync(string title)
         {
@@ -53,7 +53,7 @@ namespace HRConnect.Api.Services
         }
 
         // ----------------------
-        // CREATE
+        // post/Aapi/positions
         // ----------------------
         public async Task<ReadPositionDto> CreatePositionAsync(CreatePositionDto createPositionDto)
         {
@@ -114,12 +114,10 @@ namespace HRConnect.Api.Services
                 JobGrade = p.JobGrade != null ? new JobGradeDto
                 {
                     Name = p.JobGrade.Name,
-                    Description = p.JobGrade.Description,
                     IsActive = p.JobGrade.IsActive
                 } : null,
                 OccupationalLevel = p.OccupationalLevels != null ? new OccupationalLevelDto
                 {
-                    Name = p.OccupationalLevels.Name,
                     Description = p.OccupationalLevels.Description
                 } : null
             };
