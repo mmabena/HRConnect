@@ -53,7 +53,6 @@ namespace HRConnect.Api.Mappers
     /// <param name="dto">The update DTO.</param>
     public static void UpdateEntity(TaxDeduction entity, UpdateTaxDeductionDto dto)
     {
-
       entity.Remuneration = dto.Remuneration;
       entity.AnnualEquivalent = dto.AnnualEquivalent;
       entity.TaxUnder65 = dto.TaxUnder65;

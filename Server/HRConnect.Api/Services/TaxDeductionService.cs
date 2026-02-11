@@ -12,13 +12,10 @@ namespace HRConnect.Api.Services
   using System.IO;
   using System.Linq;
   using System.Threading.Tasks;
-  using System.Runtime.CompilerServices;
   using System.ComponentModel;
-  using System.Diagnostics.Contracts;
   using System.Linq.Expressions;
   using System.Data.Common;
   using HRConnect.Api.Mappers;
-  using System.Security.Cryptography.X509Certificates;
 
   /// <summary>
   /// This service is responsible for handling tax deduction operations which includes:
@@ -122,11 +119,23 @@ namespace HRConnect.Api.Services
     public async Task UploadTaxTableAsync(int taxYear, IFormFile file)
     {
       if (file == null)
+      {
         throw new ArgumentException("File is required.");
+      }
 
       var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
       if (extension != ".xlsx" && extension != ".xls")
+      {
         throw new ArgumentException("Only Excel files are allowed.");
+      }
+
+      var existingUploadForYear = await _context.TaxTableUploads
+      .AnyAsync(x => x.TaxYear == taxYear);
+
+      if (existingUploadForYear)
+      {
+        throw new ArgumentException($"A tax table for this year {taxYear} has already been uploaded.");
+      }
 
       using var stream = new MemoryStream();
       await file.CopyToAsync(stream);
@@ -135,7 +144,9 @@ namespace HRConnect.Api.Services
       var worksheet = package.Workbook.Worksheets.FirstOrDefault();
 
       if (worksheet == null)
+      {
         throw new ArgumentException("Excel file contains no worksheets.");
+      }
 
       var expectedHeaders = new[]
       {

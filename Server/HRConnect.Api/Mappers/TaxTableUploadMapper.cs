@@ -19,7 +19,6 @@ namespace HRConnect.Api.Mappers
     /// <returns>A mapped <see cref="TaxTableUploadDto"/>.</returns>
     public static TaxTableUploadDto ToDto(TaxTableUpload entity)
     {
-
       return new TaxTableUploadDto
       {
         Id = entity.Id,

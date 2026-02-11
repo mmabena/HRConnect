@@ -10,7 +10,7 @@ namespace HRConnect.Api.Controllers
   using System.Linq;
   using System.Threading.Tasks;
   using Microsoft.AspNetCore.Authorization;
-  
+
   /// <summary>
   /// Handles tax table retrieval and upload operations
   /// This controller allows administrators to upload annual tax tables
@@ -65,11 +65,15 @@ namespace HRConnect.Api.Controllers
     {
       // Validations
       if (request.File == null || request.File.Length == 0)
+      {
         return BadRequest("Excel file is required.");
+      }
 
       var extension = Path.GetExtension(request.File.FileName).ToLowerInvariant();
       if (extension != ".xlsx" && extension != ".xls")
+      {
         return BadRequest("Invalid file type. Only .xlsx or .xls files are allowed.");
+      }
 
       var allowedContentTypes = new[]
       {
@@ -78,10 +82,14 @@ namespace HRConnect.Api.Controllers
     };
 
       if (!allowedContentTypes.Contains(request.File.ContentType))
+      {
         return BadRequest("Invalid Excel file format.");
+      }
 
       if (request.TaxYear < 2000 || request.TaxYear > DateTime.UtcNow.Year + 1)
+      {
         return BadRequest("Invalid tax year.");
+      }
 
       try
       {
