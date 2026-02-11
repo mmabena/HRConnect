@@ -14,7 +14,6 @@ namespace HRConnect.Api.Repository
     }
     public async Task<PayrollDeduction> AddDeductionsAsync(PayrollDeduction payrollDeductions)
     {
-
       _ = await _context.PayrollDeductions.AddAsync(payrollDeductions);
       _ = await _context.SaveChangesAsync();
       return payrollDeductions;
@@ -23,11 +22,7 @@ namespace HRConnect.Api.Repository
     {
       return await _context.PayrollDeductions.ToListAsync();
     }
-    // public async Task<PayrollDeduction?> GetDeductionsByIdAsync(int id)
-    // {
-    //   return await _context.PayrollDeductions
-    //   .FirstOrDefaultAsync(p => p.PayrollDeductionId == id);
-    // }
+
     public async Task<PayrollDeduction?> GetDeductionsByEmployeeIdAsync(int employeeId)
     {
       return await _context.PayrollDeductions.FirstOrDefaultAsync(p => p.EmployeeId == employeeId);

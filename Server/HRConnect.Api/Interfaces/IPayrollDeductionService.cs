@@ -5,7 +5,7 @@ namespace HRConnect.Api.Interfaces
   {
     Task<List<PayrollDeduction>> GetAllDeductionsAsync();
     Task<PayrollDeduction?> AddDeductionsAsync(int employeeId);
-    Task<Employee?> GetEmployeeByCodeAsync(string employeeCode);
+    // Task<Employee?> GetEmployeeByCodeAsync(string employeeCode);
     Task<PayrollDeduction?> GetDeductionsByEmployeeIdAsync(int employeeId);
 
   }
