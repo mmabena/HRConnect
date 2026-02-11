@@ -10,39 +10,7 @@
     public int MedicalOptionCategoryId { get; set; }
     [Required]
     public string MedicalOptionCategoryName { get; set; } = string.Empty;
-    // Self-referencing parent-child relationship
-    [ForeignKey(nameof(ParentCategory))]
-    public int? MedicalOptionParentCategoryId { get; set; }
-    [Column(TypeName = "decimal(15, 2)")]
-    public decimal? MonthlyRiskContributionPrincipal { get; set; }
-    [Required]
-    [Column(TypeName = "decimal(15, 2)")]
-    public decimal MonthlyRiskContributionAdult { get; set; }
-    [Required]
-    [Column(TypeName = "decimal(15, 2)")]
-    public decimal MonthlyRiskContributionChild { get; set; }
-    [Column(TypeName = "decimal(15, 2)")]
-    public decimal? MonthlyRiskContributionChild2 { get; set; }
-    [Column(TypeName = "decimal(15, 2)")] 
-    public decimal? MonthlyMsaContributionPrincipal { get; set; }
-    [Column(TypeName = "decimal(15, 2)")]
-    public decimal? MonthlyMsaContributionAdult { get; set; }
-    [Column(TypeName = "decimal(15, 2)")]
-    public decimal? MonthlyMsaContributionChild { get; set; }
-    //TODO: Add Total Monthly Contributions field - Done
-    [Column(TypeName = "decimal(15, 2)")]
-    public decimal? TotalMonthlyContributionsPrincipal { get; set; }
-    [Column(TypeName = "decimal(15, 2)")]
-    public decimal TotalMonthlyContributionsAdult { get; set; }
-    [Column(TypeName = "decimal(15, 2)")]
-    public decimal TotalMonthlyContributionsChild { get; set; }
-    [Column(TypeName = "decimal(15, 2)")]
-    public decimal? TotalMonthlyContributionsChild2 { get; set; }
-    [Required]
-    public MedicalOption MedicalOption { get; set; } = null!;
-    
-    //Navigation property to Self-referencing FK
-    //[InverseProperty("Children")]
-    public MedicalOptionCategory? ParentCategory { get; set; }
+    //Navigation property to MedicalOption
+    public ICollection<MedicalOption> MedicalOptions { get; set; } = new List<MedicalOption>();
   }
 }
