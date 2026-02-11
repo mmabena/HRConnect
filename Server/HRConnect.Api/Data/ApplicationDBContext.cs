@@ -2,6 +2,7 @@ namespace HRConnect.Api.Data
 {
   using HRConnect.Api.Models;
   using Microsoft.EntityFrameworkCore;
+
   public class ApplicationDBContext(DbContextOptions dbContextOptions) : DbContext(dbContextOptions)
   {
     public DbSet<User> Users { get; set; }
@@ -9,5 +10,13 @@ namespace HRConnect.Api.Data
     public DbSet<PasswordHistory> PasswordHistories { get; set; }
     public DbSet<Employee> Employees { get; set; }
     public DbSet<PayrollDeduction> PayrollDeductions { get; set; }
+    // protected override void OnModelCreating(ModelBuilder modelBuilder)
+    // {
+    //   base.OnModelCreating(modelBuilder);
+    //   modelBuilder.Entity<PayrollDeduction>(entity =>
+    //   {
+    //     entity.HasKey(d => d.EmployeeId);
+    //   });
+    // }
   }
 }

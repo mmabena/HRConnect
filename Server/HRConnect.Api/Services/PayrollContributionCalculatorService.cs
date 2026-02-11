@@ -4,15 +4,14 @@ namespace HRConnect.Api.Services
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
   using HRConnect.Api.Utils;
-
   public class PayrollContributionCalculatorService : IPayrollDeductionService
   {
-    private readonly ISeedEmployeeRepo _seedEmployeeRepo;
+    private readonly ISeedEmployeeRepo _employeeRepo;
     private readonly PayrollContributionCalculator _deductionsCalculator;
     private readonly IPayrollContributionsRepo _payrollContributionsRepo;
-    public PayrollContributionCalculatorService(ISeedEmployeeRepo seedEmployeeRepo, IPayrollContributionsRepo payrollContributionsRepo)
+    public PayrollContributionCalculatorService(ISeedEmployeeRepo employeeRepo, IPayrollContributionsRepo payrollContributionsRepo)
     {
-      _seedEmployeeRepo = seedEmployeeRepo;
+      _employeeRepo = employeeRepo;
       _payrollContributionsRepo = payrollContributionsRepo;
       _deductionsCalculator = new PayrollContributionCalculator();
     }
@@ -23,7 +22,7 @@ namespace HRConnect.Api.Services
     /// <returns></returns>
     public async Task<Employee?> GetEmployeeByCodeAsync(string employeeCode)
     {
-      return await _seedEmployeeRepo.GetEmployeeByCodeAsync(employeeCode);
+      return await _employeeRepo.GetEmployeeByCodeAsync(employeeCode);
     }
     /// <summary>
     /// Getting deductions by Seeded Employee id
@@ -34,19 +33,17 @@ namespace HRConnect.Api.Services
     {
       return await _payrollContributionsRepo.GetDeductionsByEmployeeIdAsync(employeeId);
     }
-
     public async Task<List<PayrollDeduction>> GetAllDeductionsAsync()
     {
       return await _payrollContributionsRepo.GetAllDeductionsAsync();
     }
     public async Task<PayrollDeduction?> AddDeductionsAsync(int employeeId)
     {
-      Employee? employee = await _seedEmployeeRepo.GetEmployeeByIdAsync(employeeId);
+      Employee? employee = await _employeeRepo.GetEmployeeByIdAsync(employeeId);
       if (employee == null) return null;
 
       var (employeeAmount, employerAmount) = _deductionsCalculator.CalculateUif(employee.MonthlySalary);
       var sdlDeduction = _deductionsCalculator.CalculateSdlAmount(employee.MonthlySalary);
-
       var deductions = new PayrollDeduction
       {
         EmployeeId = employee.EmployeeId,
@@ -60,7 +57,7 @@ namespace HRConnect.Api.Services
 
       employee.MonthlySalary -= employeeAmount;
 
-      _ = await _seedEmployeeRepo.UpdateEmployeeAsync(employeeId, employee);
+      _ = await _employeeRepo.UpdateEmployeeAsync(employeeId, employee);
       return await _payrollContributionsRepo.AddDeductionsAsync(deductions);
     }
   }

@@ -14,43 +14,53 @@ namespace HRConnect.Api.Services
     {
       new Employee
       {
-          // Id = 1,
           Name = "Worker",
           EmployeeCode = "WOR001",
-          MonthlySalary = 8500m
+          MonthlySalary = 8500m,
+          IdNumber="0201065054888"
       },
       new Employee
       {
-          // Id = 2,
           Name = "Sideman",
           EmployeeCode = "SID002",
-          MonthlySalary = 12500m
+          MonthlySalary = 12500m,
+          PassportNumber="123"
       },
       new Employee
       {
-          // Id =3,
           Name = "Bossman",
           EmployeeCode = "BOS003",
-          MonthlySalary = 35000m
+          MonthlySalary = 35000m,
+          IdNumber="1234567891025"
       }
       ,
       new Employee
       {
           Name = "CEO",
           EmployeeCode = "CEO004",
-          MonthlySalary=1771200m
+          MonthlySalary=1771200m,
+        IdNumber="0210205054088"
       },
       new Employee
       {
           Name ="Huncho",
           EmployeeCode =" HUN005",
-          MonthlySalary =2000000m
+          MonthlySalary =2000000m,
+          PassportNumber="123154"
       },
       new Employee
       {
           Name ="NPC",
           EmployeeCode ="NPC006",
-          MonthlySalary =0m
+          MonthlySalary =0m,
+          IdNumber="11111111111111"
+      },
+      new Employee
+      {
+        Name = "Johnny Test",
+        EmployeeCode="JOH007",
+      MonthlySalary=-1,
+      IdNumber="213454455"
       }
     };
     public EmployeeSeederService(ApplicationDBContext context, ISeedEmployeeRepo seedEmployeeRepo)
