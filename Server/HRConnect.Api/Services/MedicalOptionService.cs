@@ -1,6 +1,9 @@
 ﻿namespace HRConnect.Api.Services
 {
+  using System.Linq;
+  using HRConnect.Api.DTOs.MedicalOption;
   using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Mappers;
 
   public class MedicalOptionService:IMedicalOptionService
   {
@@ -10,6 +13,116 @@
     public MedicalOptionService(IMedicalOptionRepository medicalOptionRepository)
     {
       _medicalOptionRepository = medicalOptionRepository;
+    }
+    
+    /// <summary>
+    /// Retrieves medical options grouped by their categories in a client-friendly DTO format.
+    /// This method uses the repository to get grouped medical options and transforms them
+    /// using the MedicalOptionMapper extension methods for clean seperation of concerns.
+    /// </summary>
+    /// <returns>
+    /// A list of MedicalOptionCategoryDto objects, each containing:
+    /// - MedicalOptionCategoryId: Unique identifier for the category
+    /// - MedicaloptionCategoryName: Human-readable category name
+    /// - Medicaloptions: List of MedicalOptionDto objects with detailed plan information
+    ///
+    /// Example structure:
+    /// [
+    ///   MedicalOptionCategoryDto {
+    ///     MedicalOptionCategoryId: 1,
+    ///     MedicalOptionCategoryName: "Vital"
+    ///     MedicalOptions: [
+    ///       MedicalOptionDto {
+    ///         MedicalOptionId: 1,
+    ///         MedicalOptionName: "Plan A",
+    ///         MedicalOptionCategoryId: 1,
+    ///         SalaryBracketMin: 0,
+    ///         SalaryBracketMax: 15000,
+    ///         MonthlyRiskContributionPrincipal: 250.00,
+    ///         MonthlyRiskContributionAdult: 175.00,
+    ///         MonthlyRiskContributionChild: 125.00,
+    ///         TotalMonthlyContributionsPrincipal: 250.00,
+    ///         TotalMonthlyContributionsAdult: 175.00,
+    ///         TotalMonthlyContributionsChild: 125.00,
+    ///       },
+    ///       MedicalOptionDto {
+    ///         MedicalOptionId: 2,
+    ///         MedicalOptionName: "Plan B",
+    ///         MedicalOptionCategoryId: 1,
+    ///         SalaryBracketMin: 15001,
+    ///         SalaryBracketMax: 30000,
+    ///         MonthlyRiskContributionPrincipal: 550.50,
+    ///         MonthlyRiskContributionAdult: 450.00,
+    ///         MonthlyRiskContributionChild: 350.00,
+    ///         TotalMonthlyContributionsPrincipal: 550.50,
+    ///         TotalMonthlyContributionsAdult: 450.00,
+    ///         TotalMonthlyContributionsChild: 350.00, 
+    ///       }
+    ///     ]
+    ///   },
+    ///   MedicalOptionCategoryDto {
+    ///     MedicalOptionCategoryId: 2,
+    ///     MedicalOptionCategoryName: "Essential",
+    ///     MedicalOptions: [
+    ///       MedicalOptionDto {
+    ///         MedicalOptionId: 3,
+    ///         MedicalOptionName: "Plan C",
+    ///         MedicalOptionCategoryId: 2,
+    ///         SalaryBracketMin: 0,
+    ///         SalaryBracketMax: 20000,
+    ///         MonthlyRiskContributionAdult: 180.00,
+    ///         MonthlyRiskContributionChild: 120.00,
+    ///         TotalMonthlyContributionsAdult: 180.00,
+    ///         TotalMonthlyContributionsChild: 120.00,
+    ///       }
+    ///     ]
+    ///   }
+    /// ]
+    /// </returns>
+    /// <remarks>
+    /// <para>
+    /// This method is asynchronous to prevent thread blocking during database operations.
+    /// The underlying repository query uses Entity Framework's Include() method to eagerly load
+    /// the MedicalOptionCategory navigation property, preventing N+1 query problems.
+    /// </para>
+    /// <para>
+    /// Uses MedicalOptionMapper.ToMedicalOptionCategoryDto() extension method for transformation,
+    /// which internally calls MedicalOptionMapper.ToMedicalOptionDto() for each medical option.
+    /// </para>
+    /// <para>
+    /// If a medical option category is not properly loaded, the MedicalOptionCategoryName
+    /// will default to an empty string rather than throwing a null reference exception.
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// Service usage in a controller or a business logic
+    /// <code>
+    /// var medicalOptionService = new medicalOptionService(medicalOptionRepository);
+    /// var categories = await medicalOptionService.GetGroupedMedicalOptionsAsync();
+    ///
+    /// // Process the results
+    /// foreach (var category in categories)
+    /// {
+    ///     Console.WriteLine($"Category: {category.MedicalOptionCategoryName}");
+    ///     Console.WriteLine($"Total Options: {category.MedicalOptions.Count}");
+    ///     
+    ///     foreach (var option in category.MedicalOptions)
+    ///     {
+    ///         Console.WriteLine($"  - {option.MedicalOptionName}: R{option.TotalMonthlyContributionsAdult}/month");
+    ///     }
+    /// }
+    /// </code>
+    /// </example>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the database context is disposed or unavailable.
+    /// </exception>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when the repository dependency is null.
+    /// </exception>
+    public async Task<List<MedicalOptionCategoryDto>> GetGroupedMedicalOptionsAsync()
+    {
+      var groupedOptions = await _medicalOptionRepository.GetGroupedMedicalOptionsAsync();
+      return groupedOptions.Select(group => group.ToMedicalOptionCategoryDto()).ToList();
     }
   }  
 }
