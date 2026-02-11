@@ -1,6 +1,7 @@
 ﻿namespace HRConnect.Api.Controllers
 {
 
+  using System.Linq;
   using HRConnect.Api.Mappers;
   using HRConnect.Api.Interfaces;
   using Microsoft.AspNetCore.Authorization;
@@ -9,7 +10,7 @@
   
   [Route("api/medical-options")]
   [ApiController]
-  public class MedicalOptionController
+  public class MedicalOptionController:Controller
   {
     private readonly IMedicalOptionService _medicalOptionService;
     public MedicalOptionController(IMedicalOptionService medicalOptionService)
@@ -21,7 +22,10 @@
     //[Authorize(Roles = "SuperUser")]
     public async Task<IActionResult> GetGroupedMedicalOptions()
     {
-      return null;
+      //TODO: Wrap in a try catch block for error handling
+      var groupedOptions = await _medicalOptionService.GetGroupedMedicalOptionsAsync();
+      
+      return Ok(groupedOptions);
     }
   }
 }
