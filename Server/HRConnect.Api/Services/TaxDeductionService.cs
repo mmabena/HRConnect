@@ -37,16 +37,30 @@ namespace HRConnect.Api.Services
     }
 
     /// <summary>
-    /// Calculates the tax payable based on the tax year, remuneration, and age.
+    /// Calculates the tax payable based on the 
+    /// tax year(which is automatic based on the active tax table), remuneration, and age.
     /// Matches the remuneration to the correct tax bracket based on the upper bound.
     /// </summary>
     /// <param name="taxYear">The tax year being used</param>
     /// <param name="remuneration">Employee's salary</param>
     /// <param name="age">Employee's age</param>
     /// <returns>The tax amount applicable for the given parameter</returns>
-    public async Task<decimal> CalculateTaxAsync(int taxYear, decimal remuneration, int age)
+    public async Task<decimal> CalculateTaxAsync(decimal remuneration, int age)
     {
-      // Find the first tax bracket where the salary is less than or equal to the upper bound
+      var today = DateTime.UtcNow.Date;
+
+      var activeUpload = await _context.TaxTableUploads
+          .Where(x =>
+              x.EffectiveFrom <= today &&
+              (x.EffectiveTo == null || x.EffectiveTo >= today))
+          .OrderByDescending(x => x.EffectiveFrom)
+          .FirstOrDefaultAsync();
+
+      if (activeUpload == null)
+        throw new ArgumentException("No active tax table found for the current date.");
+
+      int taxYear = activeUpload.TaxYear;
+
       var taxRow = await _context.TaxDeductions
           .Where(x => x.TaxYear == taxYear && remuneration <= x.Remuneration)
           .OrderBy(x => x.Remuneration)
@@ -55,7 +69,6 @@ namespace HRConnect.Api.Services
       if (taxRow == null)
         throw new ArgumentException("No tax bracket found for this remuneration.");
 
-      // Return tax based on age
       return age switch
       {
         <= 64 => taxRow.TaxUnder65,
@@ -63,7 +76,6 @@ namespace HRConnect.Api.Services
         _ => taxRow.TaxOver75
       };
     }
-
 
     /// <summary>
     /// Retrieves all tax deductions for the tax year
@@ -119,23 +131,18 @@ namespace HRConnect.Api.Services
     public async Task UploadTaxTableAsync(int taxYear, IFormFile file)
     {
       if (file == null)
-      {
         throw new ArgumentException("File is required.");
-      }
 
       var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
       if (extension != ".xlsx" && extension != ".xls")
-      {
         throw new ArgumentException("Only Excel files are allowed.");
-      }
 
+      // Prevent duplicate tax year uploads
       var existingUploadForYear = await _context.TaxTableUploads
-      .AnyAsync(x => x.TaxYear == taxYear);
+          .AnyAsync(x => x.TaxYear == taxYear);
 
       if (existingUploadForYear)
-      {
-        throw new ArgumentException($"A tax table for this year {taxYear} has already been uploaded.");
-      }
+        throw new ArgumentException($"A tax table for year {taxYear} has already been uploaded.");
 
       using var stream = new MemoryStream();
       await file.CopyToAsync(stream);
@@ -175,11 +182,14 @@ namespace HRConnect.Api.Services
         {
           var parts = remunerationText.Split('-');
           var upperPart = parts[1].Replace("R", "").Replace(",", "").Trim();
-          remunerationUpper = decimal.Parse(upperPart, System.Globalization.CultureInfo.InvariantCulture);
+          remunerationUpper = decimal.Parse(
+              upperPart,
+              System.Globalization.CultureInfo.InvariantCulture);
         }
         catch
         {
-          throw new ArgumentException($"Invalid Remuneration range at row {row}: {remunerationText}");
+          throw new ArgumentException(
+              $"Invalid Remuneration range at row {row}: {remunerationText}");
         }
 
         decimal annualEquivalent = decimal.Parse(
@@ -210,21 +220,31 @@ namespace HRConnect.Api.Services
         });
       }
 
-      // Deactivate all active uploads, regardless of year
-      var activeUploads = await _context.TaxTableUploads
-          .Where(x => x.IsActive)
-          .ToListAsync();
+      // Financial-year logic
+      var effectiveFrom = new DateTime(taxYear, 3, 1);
+      var previousExpiry = new DateTime(taxYear, 2, 28);
 
-      activeUploads.ForEach(x => x.IsActive = false);
+      // Expire currently active table (if exists)
+      var currentActive = await _context.TaxTableUploads
+          .Where(x => x.EffectiveTo == null)
+          .OrderByDescending(x => x.EffectiveFrom)
+          .FirstOrDefaultAsync();
+
+      if (currentActive != null)
+      {
+        currentActive.EffectiveTo = previousExpiry;
+      }
 
       var newUpload = new TaxTableUpload
       {
         TaxYear = taxYear,
         FileName = file.FileName,
         FileUrl = $"uploads/tax_{taxYear}.xlsx",
-        IsActive = true,
+        EffectiveFrom = effectiveFrom,
+        EffectiveTo = null,
         UploadedAt = DateTime.UtcNow
       };
+
       _context.TaxTableUploads.Add(newUpload);
 
       await _context.SaveChangesAsync();

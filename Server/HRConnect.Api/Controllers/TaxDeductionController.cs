@@ -30,14 +30,13 @@ namespace HRConnect.Api.Controllers
     /// </summary>
     [HttpGet("calculate")]
     public async Task<ActionResult<decimal>> CalculateTax(
-      [FromQuery] int taxYear,
       [FromQuery] decimal remuneration,
       [FromQuery] int age)
     {
       try
       {
         var tax = await _taxDeductionService
-          .CalculateTaxAsync(taxYear, remuneration, age);
+          .CalculateTaxAsync(remuneration, age);
 
         return Ok(tax);
       }

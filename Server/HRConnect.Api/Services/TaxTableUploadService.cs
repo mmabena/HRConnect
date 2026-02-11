@@ -42,14 +42,20 @@ namespace HRConnect.Api.Services
     }
 
     /// <summary>
-    /// Retrieves the active tax table upload for a specific tax year.
+    /// Retrieves the active tax table that is effective for that tax year..
     /// </summary>
     /// <param name="taxYear">The tax year to retreive </param>
     /// <returns>The tax table upload DTO if found; otherwise its null.</returns>
     public async Task<TaxTableUploadDto?> GetUploadByYearAsync(int taxYear)
     {
+      var today = DateTime.UtcNow.Date;
+
       var upload = await _context.TaxTableUploads
-      .FirstOrDefaultAsync(x => x.TaxYear == taxYear && x.IsActive);
+          .Where(x => x.TaxYear == taxYear &&
+                      x.EffectiveFrom <= today &&
+                      (x.EffectiveTo == null || x.EffectiveTo >= today))
+          .OrderByDescending(x => x.EffectiveFrom)
+          .FirstOrDefaultAsync();
 
       return upload == null ? null : TaxTableUploadMapper.ToDto(upload);
     }

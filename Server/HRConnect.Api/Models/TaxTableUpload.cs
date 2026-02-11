@@ -6,7 +6,9 @@ namespace HRConnect.Api.Models
     public int TaxYear { get; set; }
     public string FileName { get; set; } = null!;
     public string FileUrl { get; set; } = null!;
-    public bool IsActive { get; set; } = true;
     public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
+    public DateTime EffectiveFrom { get; set; }
+    public DateTime? EffectiveTo { get; set; }
+
   }
 }

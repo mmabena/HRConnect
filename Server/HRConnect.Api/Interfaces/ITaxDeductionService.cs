@@ -9,7 +9,7 @@ namespace HRConnect.Api.Interfaces
   /// </summary>
   public interface ITaxDeductionService
   {
-    Task<decimal> CalculateTaxAsync(int taxYear, decimal remuneration, int age);
+    Task<decimal> CalculateTaxAsync(decimal remuneration, int age);
     Task<List<TaxDeductionDto>> GetAllTaxDeductionsAsync(int taxYear);
     Task UpdateTaxDeductionAsync(UpdateTaxDeductionDto dto);
     Task UploadTaxTableAsync(int taxYear, IFormFile file);

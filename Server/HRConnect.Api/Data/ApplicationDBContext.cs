@@ -34,12 +34,9 @@ namespace HRConnect.Api.Data
         entity.Property(e => e.TaxYear).IsRequired();
         entity.Property(e => e.FileName).IsRequired();
         entity.Property(e => e.FileUrl).IsRequired();
-        entity.Property(e => e.IsActive).HasDefaultValue(true);
         entity.Property(e => e.UploadedAt);
-
-        entity.HasIndex(e => e.TaxYear)
-              .IsUnique()
-              .HasFilter("[IsActive] = 1"); // only one active upload per year
+        entity.Property(e => e.EffectiveFrom).IsRequired();
+        entity.Property(e => e.EffectiveTo);
       });
 
     }

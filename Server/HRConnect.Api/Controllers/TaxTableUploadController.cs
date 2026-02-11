@@ -52,7 +52,7 @@ namespace HRConnect.Api.Controllers
 
     /// <summary>
     /// Uploads an Excel tax table for a specific tax year.
-    /// Only one active tax table per year is allowed.
+    /// Taax Tables will only be made active on the 1st of March.
     /// </summary>
     /// <param name="request">
     /// The upload request containing the tax year and Excel file.
@@ -65,15 +65,11 @@ namespace HRConnect.Api.Controllers
     {
       // Validations
       if (request.File == null || request.File.Length == 0)
-      {
         return BadRequest("Excel file is required.");
-      }
 
       var extension = Path.GetExtension(request.File.FileName).ToLowerInvariant();
       if (extension != ".xlsx" && extension != ".xls")
-      {
         return BadRequest("Invalid file type. Only .xlsx or .xls files are allowed.");
-      }
 
       var allowedContentTypes = new[]
       {
@@ -82,23 +78,36 @@ namespace HRConnect.Api.Controllers
     };
 
       if (!allowedContentTypes.Contains(request.File.ContentType))
-      {
         return BadRequest("Invalid Excel file format.");
-      }
 
       if (request.TaxYear < 2000 || request.TaxYear > DateTime.UtcNow.Year + 1)
-      {
         return BadRequest("Invalid tax year.");
-      }
 
       try
       {
         await _taxDeductionService.UploadTaxTableAsync(request.TaxYear, request.File);
-        return NoContent();
+
+        var effectiveDate = new DateTime(DateTime.UtcNow.Year, 3, 1);
+
+        // Return a message to the client about effective date
+        return Ok(new
+        {
+          Message = $"Tax table for year {request.TaxYear} uploaded successfully.",
+          EffectiveFrom = effectiveDate.ToString("dd MMMM yyyy", System.Globalization.CultureInfo.InvariantCulture)
+        });
+
       }
       catch (ArgumentException ex)
       {
         return BadRequest(ex.Message);
+      }
+      catch (InvalidOperationException ex)
+      {
+        return BadRequest(ex.Message);
+      }
+      catch (Exception)
+      {
+        return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred while uploading the tax table.");
       }
     }
   }
