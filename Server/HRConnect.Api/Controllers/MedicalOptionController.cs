@@ -1,6 +1,6 @@
 ﻿namespace HRConnect.Api.Controllers
 {
-  using HRConnect.Api.DTOs.MedicalOption;
+
   using HRConnect.Api.Mappers;
   using HRConnect.Api.Interfaces;
   using Microsoft.AspNetCore.Authorization;
@@ -21,7 +21,6 @@
     //[Authorize(Roles = "SuperUser")]
     public async Task<IActionResult> GetGroupedMedicalOptions()
     {
-      var categories = await _medicalOptionService.GetGroupedMedicalOptionsAsync();
       return null;
     }
   }
