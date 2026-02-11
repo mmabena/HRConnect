@@ -14,79 +14,7 @@
     {
       _context = context;
     }
-
-    /// <summary>
-    /// Retrieves medical options grouped by their category ID from the database.
-    /// This method uses Entity Framework Core to query medical options with their
-    /// associated category data and groups them by their MedicalOptionCategoryId
-    /// (marked as the Key in the Grouping interface)
-    /// </summary>
-    /// <returns>
-    /// A list of MedicalOptionCategory objects, where:
-    /// - Key: the MedicalOptionCategoryId (int)
-    /// - Group: Collection of MedicalOptions entities belonging to that category
-    ///
-    /// Each MedicalOption includes the eagerly loaded MedicalOptionCategory navigation property.
-    ///
-    /// Example structure:
-    /// [
-    ///   IGrouping<Key=1, [Medicaloption,MedicalOption]>,
-    ///   IGrouping<Key=2, [Medicaloption,MedicalOption,MedicalOption,MedicalOption]>,
-    ///   IGrouping<Key=3, [Medicaloption,MedicalOption,MedicalOption]>
-    /// ]
-    /// </returns>
-    /// <remarks>
-    /// <para>
-    /// Uses Entity Frmework's Include() method to eagerly load the MedicalOptionCategory
-    /// navigation property, preventing N+1 query problems when accessing category information.
-    /// </para>
-    /// <para>
-    /// The GroupBy() operation is performed in-memory after data retrieval, which is efficient
-    /// for typical medical option datasets (ranging between small to slightly large datasets).
-    /// For very large datasets, consider using a database-specific grouping function or
-    /// implementing a custom grouping strategy.
-    /// </para>
-    /// <para>
-    /// This method returns the raw entity grouping. For client consumption, use the service layer
-    /// to transform this info into MedicalOptionCategoryDto objects.
-    /// </para>
-    /// </remarks>
-    /// <example>
-    /// <code>
-    /// // Repository usage
-    /// var repository = new MedicalOptionRepository(context);
-    /// var groupedOptions = await repository.GetGroupedMedicalOptionsAsync();
-    ///
-    ///  // Process the grouped results
-    /// foreach (var group in groupedOptions)
-    /// {
-    ///     int categoryId = group.Key;
-    ///     var categoryName = group.First().MedicalOptionCategory?.MedicalOptionCategoryName;
-    ///     var optionCount = group.Count();
-    ///     
-    ///     Console.WriteLine($"Category {categoryId} ({categoryName}): {optionCount} options");
-    /// }
-    /// </code>
-    /// </example>
-    /// <exception cref="InvalidOperationExceotion">
-    /// Thrown when the database context is disposed or unavailable.
-    /// </exception>
-    /// <exception cref="SqlException">
-    /// Thrown when there's a database connectivity or query execution error.
-    /// </exception>
-    /// <exception cref="operationCanceledException">
-    /// Thrown when the operation is cancelled via the cancellation token (ct).
-    /// </exception>
-    public async Task<List<IGrouping<int, MedicalOption>>> GetGroupedMedicalOptionsAsync()
-    {
-      var groupedMedicalOptions = await _context.MedicalOptions
-        .Include(mo => mo.MedicalOptionCategory)
-        .GroupBy(mo => mo.MedicalOptionCategoryId)
-        .ToListAsync();
-      
-      return groupedMedicalOptions;
-    }
-
+    
     /// <summary>
     /// Retrieves medical options grouped by their category ID from the database.
     /// This method uses Entity Framework Core to query medical options with their
@@ -128,8 +56,9 @@
     /// </para>
     /// </remarks>
     /// <example>
-    /// <code>
     /// // Repository usage
+    /// <code>
+    /// 
     /// var repository = new MedicalOptionRepository(context);
     /// var groupedOptions = await repository.GetGroupedMedicalOptionsAsync();
     /// 
