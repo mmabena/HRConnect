@@ -1,5 +1,6 @@
 ﻿namespace HRConnect.Api.Repository
 {
+  using DTOs.MedicalOption;
   using HRConnect.Api.Data;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
@@ -90,6 +91,46 @@
         .ToListAsync();
       
       return groupedMedicalOptions;
+    }
+
+    public async Task<MedicalOption?> GetMedicalOptionByIdAsync(int id)
+    {
+      /*return await _context.MedicalOptions
+        .Include(mo => mo.MedicalOptionCategory)
+        .FirstOrDefaultAsync(mo => mo.MedicalOptionId == id);*/
+      return await _context.MedicalOptions.FindAsync(id);
+    }
+
+    public async Task<MedicalOption?> UpdateSalaryBracketAsync(int id, 
+      UpdateMedicalOptionSalaryBracketRequestDto requestDto)
+    {
+      var exisitingOption = await _context.MedicalOptions.FindAsync(id);
+      if (exisitingOption == null) return null;
+      
+      _context.Entry(exisitingOption).CurrentValues.SetValues(requestDto);
+      await _context.SaveChangesAsync();
+      
+      return exisitingOption;
+    }
+
+    public async Task<MedicalOption?> GetMedicalOptionCategoryByIdAsync(int id)
+    {
+      return await _context.MedicalOptions
+        .Include(mo => mo.MedicalOptionCategory)
+        .FirstOrDefaultAsync(mo => mo.MedicalOptionCategoryId == id);
+    }
+
+    public async Task<List<MedicalOption?>> GetAllMedicalOptionsUnderCategoryVarientAsync( 
+      string optionName)
+    {
+      //TODO: Place in a util the below code
+      // Map to MedicalOptionDto
+      // thinking here is to use a sql query to get all medical options under a category variant
+      // using "like" so that i can avoid a lot of complexity
+      optionName =  optionName.Replace(optionName.Last().ToString(), "").TrimEnd();
+      return await _context.MedicalOptions
+        .FromSqlRaw("SELECT * FROM MedicalOptions WHERE MedicalOptionCategoryName is like {0}", optionName)
+        .ToListAsync();
     }
   }
 }

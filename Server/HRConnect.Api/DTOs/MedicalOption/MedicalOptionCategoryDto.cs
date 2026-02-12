@@ -10,6 +10,7 @@
   {
     public int MedicalOptionCategoryId { get; set; }
     public string MedicalOptionCategoryName { get; set; } = string.Empty;
-    public ICollection<MedicalOptionDto> MedicalOptions { get; set; } = new List<MedicalOptionDto>();
+    public ICollection<MedicalOptionDto> MedicalOptions { get; set; } = 
+      new List<MedicalOptionDto>();
   }  
 }

@@ -37,7 +37,8 @@
     /// Usage in service:
     /// <code>
     /// var groupedOptions = await _medicalOptionRepository.GetGroupedMedicalOptionsAsync();
-    /// var categoryDtos = groupedOptions.Select(group => group.ToMedicalOptionCategoryDto()).ToList();
+    /// var categoryDtos = groupedOptions.Select(group => group.
+    ///       ToMedicalOptionCategoryDto()).ToList();
     /// </code>
     /// </example>
     public static MedicalOptionCategoryDto ToMedicalOptionCategoryDto(

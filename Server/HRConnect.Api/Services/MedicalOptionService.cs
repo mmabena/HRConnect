@@ -1,15 +1,51 @@
 ﻿namespace HRConnect.Api.Services
 {
+  using System;
+  using System.Collections.Generic;
   using System.Linq;
   using HRConnect.Api.DTOs.MedicalOption;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Mappers;
+  using HRConnect.Api.Models;
+  using HRConnect.Api.Utils;
 
+  
   public class MedicalOptionService:IMedicalOptionService
   {
     // TODO: Implement methods
+    // TODO: Document methods
     private readonly IMedicalOptionRepository _medicalOptionRepository;
-
+    /// <summary>
+    /// Cached HashSet containing the string names of all medical option categories that are
+    /// restricted from salary bracket updates. This provides O(1) lookup performance for
+    /// validation checks.
+    /// </summary>
+    /// <remarks>
+    /// This HashSet is populated at application startup by converting the
+    /// <see cref="NoUpdateOnMedicalOptionCategory"/> 
+    /// enum values to their string representations ("Alliance", "Double") and contains
+    /// categories that have special business rules preventing salary bracket modifications.
+    ///
+    /// Usage Example:
+    /// <code>
+    /// if (_restrictedPolicyCategoryUpdates
+    ///   .Contains(existingOption.MedicalOptionCategory?.MedicalOptionCategoryName))
+    /// {
+    ///     throw new
+    ///       InvalidOperationException("Salary bracket cannot be updated for this category");
+    /// }
+    /// </code>
+    ///
+    /// The static readonly modifier ensures this collection is initialized only once per
+    /// application lifetime and shared across all service instances for optimal performance.
+    /// Using string values allows direct 
+    /// comparison with database category names without enum parsing overhead.
+    /// </remarks>
+    private static readonly HashSet<string> _restrictedPolicyCategoryUpdates = Enum
+      .GetValues<NoUpdateOnMedicalOptionCategory>()
+      .Select(e => e.ToString())
+      .ToHashSet();
+    
     public MedicalOptionService(IMedicalOptionRepository medicalOptionRepository)
     {
       _medicalOptionRepository = medicalOptionRepository;
@@ -108,7 +144,8 @@
     ///     
     ///     foreach (var option in category.MedicalOptions)
     ///     {
-    ///         Console.WriteLine($"  - {option.MedicalOptionName}: R{option.TotalMonthlyContributionsAdult}/month");
+    ///         Console.WriteLine($"  -
+    ///           {option.MedicalOptionName}: R{option.TotalMonthlyContributionsAdult}/month");
     ///     }
     /// }
     /// </code>
@@ -121,8 +158,45 @@
     /// </exception>
     public async Task<List<MedicalOptionCategoryDto>> GetGroupedMedicalOptionsAsync()
     {
-      var groupedOptions = await _medicalOptionRepository.GetGroupedMedicalOptionsAsync();
-      return groupedOptions.Select(group => group.ToMedicalOptionCategoryDto()).ToList();
+      var groupedOptions = await _medicalOptionRepository
+        .GetGroupedMedicalOptionsAsync();
+      return groupedOptions.Select(group => group
+        .ToMedicalOptionCategoryDto()).ToList();
+    }
+
+    public async Task<MedicalOption?> UpdateSalaryBracketAsync(
+      int id, UpdateMedicalOptionSalaryBracketRequestDto requestDto)
+    {
+      var existingOption = await _medicalOptionRepository.GetMedicalOptionByIdAsync(id);
+      if (existingOption == null) return null;
+      
+      //TODO : Now I need to validate the Min and Max amount if they are valid
+      
+      // Checking Category Name
+      if (_restrictedPolicyCategoryUpdates
+          .Contains(existingOption.MedicalOptionCategory?.MedicalOptionCategoryName)) throw 
+        new InvalidOperationException("Salary bracket cannot be updated for this category");
+
+      //Checking Min and Max from request
+      if (requestDto.SalaryBracketMin <= 0 ) throw 
+        new ArgumentException("Minimum salary must be greater than or equal to 0.");
+
+
+      if (requestDto.SalaryBracketMax < requestDto.SalaryBracketMin) throw 
+        new ArgumentException("Maximum salary must be greater than minimum salary.");
+      
+
+      if (requestDto.SalaryBracketMin > requestDto.SalaryBracketMax) throw 
+        new ArgumentException("Minimum salary cannot be greater than or equal to Maximum salary.");
+      
+      
+      //existingOption.MedicalOptionCategory?.MedicalOptionCategoryName = requestDto.SalaryBracketMin;
+      return await _medicalOptionRepository.UpdateSalaryBracketAsync(id, requestDto);
+    }
+
+    public async Task<MedicalOption?> GetMedicalOptionByIdAsync(int id)
+    {
+      return await _medicalOptionRepository.GetMedicalOptionByIdAsync(id);
     }
   }  
 }
