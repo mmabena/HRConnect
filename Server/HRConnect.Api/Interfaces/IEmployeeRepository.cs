@@ -2,7 +2,7 @@
 namespace HRConnect.Api.Interfaces
 {
   using HRConnect.Api.Models;
-  public interface ISeedEmployeeRepo
+  public interface IEmployeeRepository
   {
     Task<Employee?> GetEmployeeByIdAsync(int id);
     Task<List<Employee>> GetEmployeesAsync();

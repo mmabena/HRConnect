@@ -13,7 +13,8 @@ namespace HRConnect.Api.Mappers
         EmployeeCode = employeeModel.EmployeeCode,
         MonthlySalary = employeeModel.MonthlySalary,
         IdNumber = employeeModel.IdNumber,
-        PassportNumber = employeeModel.PassportNumber
+        PassportNumber = employeeModel.PassportNumber,
+        EmployeeId = employeeModel.EmployeeId
       };
     }
   }

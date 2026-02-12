@@ -5,10 +5,10 @@ namespace HRConnect.Api.Repository
   using HRConnect.Api.Interfaces;
   using Microsoft.EntityFrameworkCore;
 
-  public class SeedEmployeeRepo : ISeedEmployeeRepo
+  public class EmployeeRepository : IEmployeeRepository
   {
     private readonly ApplicationDBContext _context;
-    public SeedEmployeeRepo(ApplicationDBContext context)
+    public EmployeeRepository(ApplicationDBContext context)
     {
       _context = context;
     }

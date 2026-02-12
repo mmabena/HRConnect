@@ -5,10 +5,10 @@ namespace HRConnect.Api.Repository
   using HRConnect.Api.Interfaces;
   using Microsoft.EntityFrameworkCore;
 
-  public class PayrollContributionsRepo : IPayrollContributionsRepo
+  public class PayrollDeductionsRepository : IPayrollDeductionsRepository
   {
     private readonly ApplicationDBContext _context;
-    public PayrollContributionsRepo(ApplicationDBContext context)
+    public PayrollDeductionsRepository(ApplicationDBContext context)
     {
       _context = context;
     }

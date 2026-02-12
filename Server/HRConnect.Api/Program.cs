@@ -92,10 +92,10 @@ builder.Services.AddScoped<HRConnect.Api.Interfaces.IUserService, HRConnect.Api.
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.Services.AuthService>();
-builder.Services.AddScoped<ISeedEmployeeRepo, SeedEmployeeRepo>();
-builder.Services.AddScoped<ISeederService, EmployeeSeederService>();
-builder.Services.AddScoped<IPayrollContributionsRepo, PayrollContributionsRepo>();
-builder.Services.AddScoped<IPayrollDeductionService, PayrollContributionCalculatorService>();
+builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+builder.Services.AddScoped<IPayrollDeductionsRepository, PayrollDeductionsRepository>();
+builder.Services.AddScoped<IPayrollDeductionsService, PayrollDeductionsService>();
 builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowReact",
@@ -113,7 +113,7 @@ using (IServiceScope scope = app.Services.CreateScope())
   IServiceProvider seedProvider = scope.ServiceProvider;
   try
   {
-    ISeederService seeder = seedProvider.GetRequiredService<ISeederService>();
+    var seeder = seedProvider.GetRequiredService<IEmployeeService>();
     await seeder.SeedEmployeeAsync();
     Console.WriteLine($"Seeded Employees");
   }

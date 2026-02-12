@@ -9,9 +9,9 @@ namespace HRConnect.Api.Controllers
   [ApiController]
   public class SeedEmployeeController : ControllerBase
   {
-    private readonly ISeederService _seederService;
-    private readonly IPayrollDeductionService _payrollDeductionService;
-    public SeedEmployeeController(ISeederService seederService, IPayrollDeductionService payrollDeductionService)
+    private readonly IEmployeeService _seederService;
+    private readonly IPayrollDeductionsService _payrollDeductionService;
+    public SeedEmployeeController(IEmployeeService seederService, IPayrollDeductionsService payrollDeductionService)
     {
       _payrollDeductionService = payrollDeductionService;
       _seederService = seederService;

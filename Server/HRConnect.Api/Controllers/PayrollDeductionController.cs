@@ -7,10 +7,10 @@ namespace HRConnect.Api.Controllers
 
   [Route("api/payrollDeduction")]
   [ApiController]
-  public class PayrollContributionController : ControllerBase
+  public class PayrollDeductionController : ControllerBase
   {
-    private readonly IPayrollDeductionService _payrollDeductionService;
-    public PayrollContributionController(IPayrollDeductionService payrollDeductionService)
+    private readonly IPayrollDeductionsService _payrollDeductionService;
+    public PayrollDeductionController(IPayrollDeductionsService payrollDeductionService)
     {
       _payrollDeductionService = payrollDeductionService;
     }
