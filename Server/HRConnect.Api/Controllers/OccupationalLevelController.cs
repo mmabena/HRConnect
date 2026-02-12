@@ -1,0 +1,51 @@
+namespace HRConnect.Api.Controllers
+{
+  using System.Collections.Generic;
+    using System.Runtime.ExceptionServices;
+    using System.Threading.Tasks;
+  using HRConnect.Api.DTOs.OccupationalLevel;
+  using HRConnect.Api.Interfaces;
+  using Microsoft.AspNetCore.Mvc;
+
+  [ApiController]
+  [Route("api/[controller]")]
+  public class OccupationalLevelController : ControllerBase
+  {
+    private readonly IOccupationalLevelService _occupationalLevelService;
+
+    public OccupationalLevelController(IOccupationalLevelService occupationalLevelService)
+    {
+      _occupationalLevelService = occupationalLevelService;
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<List<OccupationalLevelDto>>> GetAllOccupationalLevels()
+    {
+      var occupationalLevels = await _occupationalLevelService.GetAllOccupationalLevelsAsync();
+      return Ok(occupationalLevels);
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<OccupationalLevelDto>> CreateOccupationalLevel([FromBody] CreateOccupationalLevelDto createOccupationalLevelDto)
+    {
+      
+        var createdOccupationalLevel = await _occupationalLevelService.AddOccupationalLevelAsync(createOccupationalLevelDto);
+        return CreatedAtAction(
+            nameof(GetAllOccupationalLevels), 
+            new { id = createdOccupationalLevel.OccupationalLevelId }, 
+            createdOccupationalLevel);
+      
+    }
+
+    [HttpPut("{id}")]
+    public async Task<ActionResult<OccupationalLevelDto>> UpdateOccupationalLevel(int id, [FromBody] UpdateOccupationalLevelDto updateOccupationalLevelDto)
+    {
+      var updatedOccupationalLevel = await _occupationalLevelService.UpdateOccupationalLevelAsync(id, updateOccupationalLevelDto);
+
+      if (updatedOccupationalLevel == null)
+        return NotFound();
+
+      return Ok(updatedOccupationalLevel);
+    }
+  }
+}

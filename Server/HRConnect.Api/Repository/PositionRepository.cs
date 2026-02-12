@@ -1,9 +1,9 @@
 namespace HRConnect.Api.Repository
 {
      using HRConnect.Api.Data;
-  using HRConnect.Api.Interfaces;
-  using HRConnect.Api.Models;
-  using Microsoft.EntityFrameworkCore;
+     using HRConnect.Api.Interfaces;
+     using HRConnect.Api.Models;
+     using Microsoft.EntityFrameworkCore;
 
     public class PositionRepository : IPositionRepository
     {

@@ -1,9 +1,11 @@
 namespace HRConnect.Api.Data
 {
-  using HRConnect.Api.Models;
-  using Microsoft.EntityFrameworkCore;
-  using System.Collections.Generic;
-  using System;
+using HRConnect.Api.Data;
+using HRConnect.Api.Interfaces;
+using HRConnect.Api.Models;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 
   public class ApplicationDBContext(DbContextOptions dbContextOptions) : DbContext(dbContextOptions)

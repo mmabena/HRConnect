@@ -10,7 +10,6 @@ namespace HRConnect.Api.Mappers
     {
       return new OccupationalLevelDto
       {
- 
         Description = occupationalLevel.Description
       };
     }

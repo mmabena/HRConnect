@@ -1,14 +1,11 @@
-
-
 namespace HRConnect.Api.Repository
 {
-
     using HRConnect.Api.Interfaces;
-using HRConnect.Api.Models;
-using HRConnect.Api.Data;
-using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+    using HRConnect.Api.Models;
+    using HRConnect.Api.Data;
+    using Microsoft.EntityFrameworkCore;
+    using System.Collections.Generic;
+    using System.Threading.Tasks;
     public class JobGradeRepository : IJobGradeRepository
     {
         private readonly ApplicationDBContext _context;
@@ -28,13 +25,13 @@ using System.Threading.Tasks;
             return await _context.JobGrades.FindAsync(id);
         }
 
-    public async Task<JobGrade?> GetJobGradeByNameAsync(string name)
-{
-    var jobGrade = await _context.JobGrades
-        .FirstOrDefaultAsync(j => j.Name == name);
+         public async Task<JobGrade?> GetJobGradeByNameAsync(string name)
+        {
+            var jobGrade = await _context.JobGrades
+            .FirstOrDefaultAsync(j => j.Name == name);
 
-    return jobGrade;
-}
+            return jobGrade;
+        }
 
 
         public async Task<JobGrade> AddJobGradeAsync(JobGrade jobGrade)
@@ -52,7 +49,7 @@ using System.Threading.Tasks;
 
             existing.Name = updatedJobGrade.Name;
             existing.IsActive = updatedJobGrade.IsActive;
-            existing.UpdatedDate = System.DateTime.UtcNow;
+            existing.UpdatedDate = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
             return existing;

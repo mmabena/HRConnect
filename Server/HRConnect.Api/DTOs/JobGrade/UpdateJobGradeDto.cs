@@ -1,3 +1,4 @@
+
 namespace HRConnect.Api.DTOs.JobGrade
 {
 using HRConnect.Api.Models;

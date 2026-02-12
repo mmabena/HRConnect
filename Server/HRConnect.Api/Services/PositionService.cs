@@ -59,6 +59,11 @@ namespace HRConnect.Api.Services
         {
             ValidateCreateDto(createPositionDto);
             await EnsureUniqueTitle(createPositionDto.Title);
+            
+            //Prevents duplicate titles
+            var existing = await _positionRepo.GetPositionByTitleAsync(createPositionDto.Title);
+            if (existing != null)
+                throw new InvalidOperationException("A position with this name already exists.");
 
             var position = new Position
             {

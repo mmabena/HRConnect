@@ -1,8 +1,8 @@
 namespace HRConnect.Api.Interfaces
 {
     using HRConnect.Api.DTOs.JobGrade;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+    using System.Collections.Generic;
+    using System.Threading.Tasks;   
 
     public interface IJobGradeService
     {
