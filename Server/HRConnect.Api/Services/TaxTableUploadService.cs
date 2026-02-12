@@ -14,49 +14,43 @@ namespace HRConnect.Api.Services
   using System.Linq;
   using System.Threading.Tasks;
 
-
   public class TaxTableUploadService : ITaxTableUploadService
   {
-    private readonly ApplicationDBContext _context;
+    private readonly ITaxTableUploadRepository _repository;
 
     /// <summary>
-    /// Initializes a new instance of the TaxTableUploadService
+    /// Initializes a new instance of the <see cref="TaxTableUploadService"/>.
     /// </summary>
-    /// <param name="context">The application database context</param>
-    public TaxTableUploadService(ApplicationDBContext context)
+    /// <param name="repository">
+    /// The repository used to access tax table upload data.
+    /// </param>
+    public TaxTableUploadService(ITaxTableUploadRepository repository)
     {
-      _context = context;
+      _repository = repository;
     }
 
     /// <summary>
-    /// Retrievers all tax table uploads
+    /// Retrieves all tax table uploads.
     /// </summary>
-    /// <returns>A list of the tax table upload DTOs</returns>
+    /// <returns>
+    /// A list of <see cref="TaxTableUploadDto"/> objects ordered by most recent upload.
+    /// </returns>
     public async Task<List<TaxTableUploadDto>> GetAllUploadsAsync()
     {
-      var uploads = await _context.TaxTableUploads
-      .OrderByDescending(x => x.UploadedAt).ToListAsync();
-
-      return uploads
-      .Select(TaxTableUploadMapper.ToDto).ToList();
+      var uploads = await _repository.GetAllAsync();
+      return uploads.Select(TaxTableUploadMapper.ToDto).ToList();
     }
 
     /// <summary>
-    /// Retrieves the active tax table that is effective for that tax year..
+    /// Retrieves the active tax table upload for a given tax year.
     /// </summary>
-    /// <param name="taxYear">The tax year to retreive </param>
-    /// <returns>The tax table upload DTO if found; otherwise its null.</returns>
+    /// <param name="taxYear">The tax year to retrieve.</param>
+    /// <returns>
+    /// A <see cref="TaxTableUploadDto"/> if an active upload exists; otherwise <c>null</c>.
+    /// </returns>
     public async Task<TaxTableUploadDto?> GetUploadByYearAsync(int taxYear)
     {
-      var today = DateTime.UtcNow.Date;
-
-      var upload = await _context.TaxTableUploads
-          .Where(x => x.TaxYear == taxYear &&
-                      x.EffectiveFrom <= today &&
-                      (x.EffectiveTo == null || x.EffectiveTo >= today))
-          .OrderByDescending(x => x.EffectiveFrom)
-          .FirstOrDefaultAsync();
-
+      var upload = await _repository.GetActiveByYearAsync(taxYear);
       return upload == null ? null : TaxTableUploadMapper.ToDto(upload);
     }
   }

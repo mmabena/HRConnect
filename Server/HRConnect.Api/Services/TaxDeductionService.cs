@@ -25,15 +25,15 @@ namespace HRConnect.Api.Services
   /// </summary>
   public class TaxDeductionService : ITaxDeductionService
   {
-    private readonly ApplicationDBContext _context;
+    private readonly ITaxRepository _repository;
 
     /// <summary>
-    /// Constructor injecting the database context
+    /// Initializes a new instance of <see cref="TaxDeductionService"/> with the specified repository.
     /// </summary>
-    /// <param name="context">Application database context</param>
-    public TaxDeductionService(ApplicationDBContext context)
+    /// <param name="repository">this is the repository instance for tax deductions</param>
+    public TaxDeductionService(ITaxRepository repository)
     {
-      _context = context;
+      _repository = repository;
     }
 
     /// <summary>
@@ -41,7 +41,6 @@ namespace HRConnect.Api.Services
     /// tax year(which is automatic based on the active tax table), remuneration, and age.
     /// Matches the remuneration to the correct tax bracket based on the upper bound.
     /// </summary>
-    /// <param name="taxYear">The tax year being used</param>
     /// <param name="remuneration">Employee's salary</param>
     /// <param name="age">Employee's age</param>
     /// <returns>The tax amount applicable for the given parameter</returns>
@@ -49,7 +48,8 @@ namespace HRConnect.Api.Services
     {
       var today = DateTime.UtcNow.Date;
 
-      var activeUpload = await _context.TaxTableUploads
+      // Find the active tax table for today
+      var activeUpload = await _repository.TaxTableUploads
           .Where(x =>
               x.EffectiveFrom <= today &&
               (x.EffectiveTo == null || x.EffectiveTo >= today))
@@ -57,24 +57,47 @@ namespace HRConnect.Api.Services
           .FirstOrDefaultAsync();
 
       if (activeUpload == null)
+      {
         throw new ArgumentException("No active tax table found for the current date.");
+      }
 
       int taxYear = activeUpload.TaxYear;
 
-      var taxRow = await _context.TaxDeductions
+      // Try to find a tax row in the table
+      var taxRow = await _repository.TaxDeductions
           .Where(x => x.TaxYear == taxYear && remuneration <= x.Remuneration)
           .OrderBy(x => x.Remuneration)
           .FirstOrDefaultAsync();
 
-      if (taxRow == null)
-        throw new ArgumentException("No tax bracket found for this remuneration.");
-
-      return age switch
+      if (taxRow != null)
       {
-        <= 64 => taxRow.TaxUnder65,
-        <= 74 => taxRow.Tax65To74,
-        _ => taxRow.TaxOver75
-      };
+        //calculation
+        return age switch
+        {
+          <= 64 => taxRow.TaxUnder65,
+          <= 74 => taxRow.Tax65To74,
+          _ => taxRow.TaxOver75
+        };
+      }
+      else
+      {
+        // High-earner fallback calculation
+        // [45% x (actual monthly remuneration - R156,328)] + age-specific base
+        decimal monthlyRemuneration = remuneration / 12;
+
+        decimal baseAmount = age switch
+        {
+          <= 64 => 54481m,
+          <= 74 => 53694m,
+          _ => 53432m
+        };
+
+        decimal excess = Math.Max(0, monthlyRemuneration - 156_328m / 12); // Monthly threshold
+        decimal tax = baseAmount + (0.45m * excess);
+
+        // Disregard cents (round down)
+        return Math.Floor(tax);
+      }
     }
 
     /// <summary>
@@ -84,7 +107,7 @@ namespace HRConnect.Api.Services
     /// <returns>List of tax deductions as DTOs</returns>
     public async Task<List<TaxDeductionDto>> GetAllTaxDeductionsAsync(int taxYear)
     {
-      var entities = await _context.TaxDeductions
+      var entities = await _repository.TaxDeductions
       .Where(x => x.TaxYear == taxYear)
       .OrderBy(x => x.Remuneration)
       .ToListAsync();
@@ -101,7 +124,7 @@ namespace HRConnect.Api.Services
     /// <exception cref="InvalidOperationException">Thrown if attempting to change the TaxYear.</exception>
     public async Task UpdateTaxDeductionAsync(UpdateTaxDeductionDto dto)
     {
-      var entity = await _context.TaxDeductions.FindAsync(dto.Id);
+      var entity = await _repository.TaxDeductions.FindAsync(dto.Id);
       if (entity == null)
       {
         throw new ArgumentException("Tax deduction not found.");
@@ -118,7 +141,7 @@ namespace HRConnect.Api.Services
       entity.Tax65To74 = dto.Tax65To74;
       entity.TaxOver75 = dto.TaxOver75;
 
-      await _context.SaveChangesAsync();
+      await _repository.SaveChangesAsync();
     }
 
     /// <summary>
@@ -138,11 +161,13 @@ namespace HRConnect.Api.Services
         throw new ArgumentException("Only Excel files are allowed.");
 
       // Prevent duplicate tax year uploads
-      var existingUploadForYear = await _context.TaxTableUploads
+      var existingUploadForYear = await _repository.TaxTableUploads
           .AnyAsync(x => x.TaxYear == taxYear);
 
       if (existingUploadForYear)
+      {
         throw new ArgumentException($"A tax table for year {taxYear} has already been uploaded.");
+      }
 
       using var stream = new MemoryStream();
       await file.CopyToAsync(stream);
@@ -208,7 +233,7 @@ namespace HRConnect.Api.Services
             worksheet.Cells[row, 5].Text.Replace("R", "").Replace(",", "").Trim(),
             System.Globalization.CultureInfo.InvariantCulture);
 
-        _context.TaxDeductions.Add(new TaxDeduction
+        _repository.TaxDeductions.Add(new TaxDeduction
         {
           TaxYear = taxYear,
           Remuneration = remunerationUpper,
@@ -225,7 +250,7 @@ namespace HRConnect.Api.Services
       var previousExpiry = new DateTime(taxYear, 2, 28);
 
       // Expire currently active table (if exists)
-      var currentActive = await _context.TaxTableUploads
+      var currentActive = await _repository.TaxTableUploads
           .Where(x => x.EffectiveTo == null)
           .OrderByDescending(x => x.EffectiveFrom)
           .FirstOrDefaultAsync();
@@ -245,9 +270,9 @@ namespace HRConnect.Api.Services
         UploadedAt = DateTime.UtcNow
       };
 
-      _context.TaxTableUploads.Add(newUpload);
+      _repository.TaxTableUploads.Add(newUpload);
 
-      await _context.SaveChangesAsync();
+      await _repository.SaveChangesAsync();
     }
   }
 }
