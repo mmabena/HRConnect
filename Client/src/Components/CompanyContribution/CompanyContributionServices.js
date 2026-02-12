@@ -2,6 +2,11 @@ import axios from "axios";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
+// SECURITY NOTE:
+// This module only generates and exports Excel files using xlsx.
+// No user-uploaded or untrusted files are parsed here, so prototype pollution and ReDoS risks are minimized.
+// If you add any xlsx file reading/parsing in the future, validate file type, size, and content before parsing.
+
 const API_BASE_URL = "http://localhost:5037/api";
 
 export const fetchLatestChange = async () => {

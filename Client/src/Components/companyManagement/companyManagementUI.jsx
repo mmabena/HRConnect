@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import CompanyManagementHeader from './companyManagementHeader.jsx';
-import CompanyManagementNavBar from './companyManagementNavBar.jsx';
-import TaxTableUpload from '../TaxTableUpload';
+import CompanyManagementHeader from './CompanyManagementHeader.jsx';
+import CompanyManagementNavBar from './CompanyManagementNavBar.jsx';
+import TaxTableUpload from '../TaxTableUpload.jsx';
 
 
 import '../../MenuBar.css';

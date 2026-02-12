@@ -36,9 +36,27 @@ export default function TaxTableUpload() {
       return;
     }
 
+    // Validate file extension
     const ext = selected.name.split(".").pop().toLowerCase();
     if (!["xls", "xlsx"].includes(ext)) {
       setError("Only Excel files (.xls, .xlsx) are allowed.");
+      setFile(null);
+      fileInputRef.current.value = "";
+      return;
+    }
+
+    // Validate file type (MIME)
+    if (!selected.type.includes("excel") && !selected.type.includes("spreadsheet")) {
+      setError("Invalid file type. Please upload a valid Excel file.");
+      setFile(null);
+      fileInputRef.current.value = "";
+      return;
+    }
+
+    // Validate file size (e.g., max 2MB)
+    const maxSize = 2 * 1024 * 1024; // 2MB
+    if (selected.size > maxSize) {
+      setError("File is too large. Maximum allowed size is 2MB.");
       setFile(null);
       fileInputRef.current.value = "";
       return;
@@ -56,6 +74,10 @@ export default function TaxTableUpload() {
       const formData = new FormData();
       formData.append("year", year);
       formData.append("file", selected);
+
+      // SECURITY NOTE:
+      // The backend should also validate and sanitize the uploaded file before parsing with xlsx.
+      // Never trust file extension or MIME type alone—always check file content server-side.
 
       const response = await axios.post(
         "http://localhost:5037/api/tax-tables/upload",
