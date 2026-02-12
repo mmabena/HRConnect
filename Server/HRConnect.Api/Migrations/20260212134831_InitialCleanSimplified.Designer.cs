@@ -4,6 +4,7 @@ using HRConnect.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRConnect.Api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260212134831_InitialCleanSimplified")]
+    partial class InitialCleanSimplified
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -356,24 +359,6 @@ namespace HRConnect.Api.Migrations
                             DaysAllocated = 3,
                             IsActive = true,
                             JobGradeId = 1,
-                            LeaveTypeId = 4,
-                            MinYearsService = 0m
-                        },
-                        new
-                        {
-                            Id = 15,
-                            DaysAllocated = 3,
-                            IsActive = true,
-                            JobGradeId = 2,
-                            LeaveTypeId = 4,
-                            MinYearsService = 0m
-                        },
-                        new
-                        {
-                            Id = 16,
-                            DaysAllocated = 3,
-                            IsActive = true,
-                            JobGradeId = 3,
                             LeaveTypeId = 4,
                             MinYearsService = 0m
                         });

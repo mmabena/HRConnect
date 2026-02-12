@@ -1,32 +1,33 @@
+
 namespace HRConnect.Api.Models
 {
     using System;
-    /// <summary>
-    /// Represents leave requests reviewed by SuperUser / Reporting Manager.
-    /// </summary>
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+
     public class LeaveApplication
     {
-        public int LeaveApplicationId { get; set; }
+        public int Id { get; set; }
 
-        public int EmployeeId { get; set; }
+        public Guid EmployeeId { get; set; }
+        public Employee Employee { get; set; } = null!;
 
         public int LeaveTypeId { get; set; }
+        public LeaveType LeaveType { get; set; } = null!;
 
-        public string Name { get; set; }
+        public string Description { get; set; } = null!;
 
-        public string Code { get; set; }
+        public DateOnly StartDate { get; set; }
+        public DateOnly EndDate { get; set; }
 
-        public string Description { get; set; }
+        public decimal DaysRequested { get; set; }
 
-        public int DaysNeeded { get; set; }
+        public string Status { get; set; } = "Pending";
 
-        public int DaysAvailable { get; set; }
+        public DateTime AppliedDate { get; set; }
+        public DateTime? DecisionDate { get; set; }
 
-        public DateTime Date { get; set; }
-
-        public string Status { get; set; }
-
-        public Employee Employee { get; set; }
-        public LeaveType LeaveType { get; set; }
+        public string? ApprovedBy { get; set; }
     }
 }

@@ -55,7 +55,7 @@ builder.Services.AddAuthentication(options =>
 .AddJwtBearer(options =>
 {
   var jwt = builder.Configuration.GetSection("JwtSettings");
-  // Read secret and support base64-encoded secrets (recommended) or plain-text fallback
+  // Read secret and support base64-encoded secrets (recommended) or plain-text fallback ILeaveEntitlementService
   var secretValue = jwt["Secret"] ?? string.Empty;
   byte[] keyBytes;
   try
@@ -85,21 +85,12 @@ builder.Services.AddAuthorizationBuilder()
     .AddPolicy("SuperUserOnly", policy => policy.RequireRole("SuperUser"))
     .AddPolicy("NormalUserOnly", policy => policy.RequireRole("NormalUser"));
 
-//Mpho Mosia
-builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
-builder.Services.AddScoped<IJobGradeRepository, JobGradeRepository>();
-builder.Services.AddScoped<ILeaveTypeRepository, LeaveTypeRepository>();
-builder.Services.AddScoped<ILeaveEntitlementRepository, LeaveEntitlementRepository>();
-builder.Services.AddScoped<IEmployeeLeaveBalanceRepository, EmployeeLeaveBalanceRepository>();
-
-
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IUserService, HRConnect.Api.Services.UserService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.Services.AuthService>();
-builder.Services.AddScoped<ILeaveEntitlementService, LeaveEntitlementService>();
 builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowReact",

@@ -1,18 +1,35 @@
+
 namespace HRConnect.Api.Models
 {
     using System;
-    /// <summary>
-    /// Represents an employee in the organization.
-    /// This table is the root for leave entitlement and applications.
-    /// </summary>
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+
     public class Employee
     {
-        public int EmployeeId { get; set; }
-        public string Name { get; set; }
-        public string Surname { get; set; }
-        public string Gender { get; set; }
-        public string ReportingManager { get; set; }
-        public string JobGrade { get; set; }
-        public DateTime DateCreated { get; set; }
+        public Guid EmployeeId { get; set; }
+
+        public int PositionId { get; set; }
+        public Position Position { get; set; } = null!;
+
+        public string ReportingManagerId { get; set; } = null!;
+
+        public string FirstName { get; set; } = null!;
+        public string LastName { get; set; } = null!;
+        public string Gender { get; set; } = null!;
+
+        public DateOnly StartDate { get; set; }
+
+        public bool IsActive { get; set; }
+
+        public DateTime CreatedDate { get; set; }
+        public DateTime? UpdatedDate { get; set; }
+
+        public ICollection<EmployeeLeaveBalance> LeaveBalances { get; set; }
+            = new List<EmployeeLeaveBalance>();
+
+        public ICollection<LeaveApplication> LeaveApplications { get; set; }
+            = new List<LeaveApplication>();
     }
 }

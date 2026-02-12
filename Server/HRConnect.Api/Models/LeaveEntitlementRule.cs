@@ -1,22 +1,26 @@
 namespace HRConnect.Api.Models
 {
-    /// <summary>
-    /// Stores calculated leave entitlements per employee.
-    /// This table is system-managed and updated automatically.
-    /// </summary>
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using HRConnect.Api.Models;
     public class LeaveEntitlementRule
     {
-        public int LeaveEntitlementRuleId { get; set; }
+        public int Id { get; set; }
+
         public int LeaveTypeId { get; set; }
-        public int EmployeeId { get; set; }
+        public LeaveType LeaveType { get; set; } = null!;
+
         public int JobGradeId { get; set; }
-        public string EmployeeName { get; set; }
-        public string JobGrade { get; set; }
-        public int YearsOfService { get; set; }
-        public int DaysEntitled { get; set; }
-        public string Status { get; set; }
-        public Employee Employee { get; set; }
-        public LeaveType LeaveType { get; set; }
-        public JobGrade JobGradeRecord { get; set; }
+        public JobGrade JobGrade { get; set; } = null!;
+
+        public decimal MinYearsService { get; set; }
+        public decimal? MaxYearsService { get; set; }
+
+        public int DaysAllocated { get; set; }
+
+        public bool IsActive { get; set; }
+            
     }
 }

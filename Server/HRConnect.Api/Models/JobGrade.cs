@@ -1,19 +1,18 @@
+
 namespace HRConnect.Api.Models
 {
     using System;
-    /// <summary>
-    /// Stores job grade history for an employee.
-    /// A new record is created whenever the employee is promoted or demoted.
-    /// </summary>
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+
     public class JobGrade
     {
-        public int JobGradeId { get; set; }
-        public int EmployeeId { get; set; }
-        public string EmployeeName { get; set; }
-        public string ReportingManager { get; set; }
-        public string JobGradeName { get; set; }
-        public DateTime CreatedDate { get; set; }
-        public DateTime UpdatedDate { get; set; }
-        public Employee Employee { get; set; }
+        public int Id { get; set; }
+
+        public string Name { get; set; } = null!;
+
+        public ICollection<LeaveEntitlementRule> LeaveEntitlementRules { get; set; }
+            = new List<LeaveEntitlementRule>();
     }
 }
