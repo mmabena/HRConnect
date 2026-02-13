@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Identity;
 using HRConnect.Api.Models;
 using HRConnect.Api.Utils;
 using Resend;
+using HRConnect.Api.Interfaces.Finance;
+using HRConnect.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -98,6 +100,7 @@ builder.Services.AddScoped<HRConnect.Api.Interfaces.IUserService, HRConnect.Api.
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.Services.AuthService>();
+builder.Services.AddTransient<IPensionProjectionService, PensionProjectionService>();
 builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowReact",
