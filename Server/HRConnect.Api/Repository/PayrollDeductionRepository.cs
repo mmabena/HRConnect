@@ -23,7 +23,7 @@ namespace HRConnect.Api.Repository
       return await _context.PayrollDeductions.ToListAsync();
     }
 
-    public async Task<PayrollDeduction?> GetDeductionsByEmployeeIdAsync(int employeeId)
+    public async Task<PayrollDeduction?> GetDeductionsByEmployeeIdAsync(string employeeId)
     {
       return await _context.PayrollDeductions.FirstOrDefaultAsync(p => p.EmployeeId == employeeId);
     }

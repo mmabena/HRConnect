@@ -93,7 +93,6 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.Services.AuthService>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
-builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IPayrollDeductionsRepository, PayrollDeductionsRepository>();
 builder.Services.AddScoped<IPayrollDeductionsService, PayrollDeductionsService>();
 builder.Services.AddCors(options =>
@@ -108,20 +107,6 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-using (IServiceScope scope = app.Services.CreateScope())
-{
-  IServiceProvider seedProvider = scope.ServiceProvider;
-  try
-  {
-    var seeder = seedProvider.GetRequiredService<IEmployeeService>();
-    await seeder.SeedEmployeeAsync();
-    Console.WriteLine($"Seeded Employees");
-  }
-  catch (Exception ex)
-  {
-    Console.WriteLine($"Failed To Seed Employees: {ex}");
-  }
-}
 if (app.Environment.IsDevelopment())
 {
   app.UseSwagger();

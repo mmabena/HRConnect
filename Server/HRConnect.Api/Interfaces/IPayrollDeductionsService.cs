@@ -4,9 +4,7 @@ namespace HRConnect.Api.Interfaces
   public interface IPayrollDeductionsService
   {
     Task<List<PayrollDeduction>> GetAllDeductionsAsync();
-    Task<PayrollDeduction?> AddDeductionsAsync(int employeeId);
-    // Task<Employee?> GetEmployeeByCodeAsync(string employeeCode);
-    Task<PayrollDeduction?> GetDeductionsByEmployeeIdAsync(int employeeId);
-
+    Task<PayrollDeduction?> AddDeductionsAsync(string employeeId);
+    Task<PayrollDeduction?> GetDeductionsByEmployeeIdAsync(string employeeId);
   }
 }

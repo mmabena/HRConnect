@@ -15,21 +15,8 @@ namespace HRConnect.Api.Services
       _payrollDeductionRepo = payrollContributionsRepo;
       _deductionsCalculator = new PayrollDeductionsCalculator();
     }
-    /// <summary>
-    /// Getting a Seeded Employee
-    /// </summary>
-    /// <param name="employeeCode"></param>
-    /// <returns></returns>
-    public async Task<Employee?> GetEmployeeByCodeAsync(string employeeCode)
-    {
-      return await _employeeRepo.GetEmployeeByCodeAsync(employeeCode);
-    }
-    /// <summary>
-    /// Getting deductions by Seeded Employee id
-    /// </summary>
-    /// <param name="employeeId"></param>
-    /// <returns></returns>
-    public async Task<PayrollDeduction?> GetDeductionsByEmployeeIdAsync(int employeeId)
+
+    public async Task<PayrollDeduction?> GetDeductionsByEmployeeIdAsync(string employeeId)
     {
       return await _payrollDeductionRepo.GetDeductionsByEmployeeIdAsync(employeeId);
     }
@@ -37,7 +24,7 @@ namespace HRConnect.Api.Services
     {
       return await _payrollDeductionRepo.GetAllDeductionsAsync();
     }
-    public async Task<PayrollDeduction?> AddDeductionsAsync(int employeeId)
+    public async Task<PayrollDeduction?> AddDeductionsAsync(string employeeId)
     {
       Employee? employee = await _employeeRepo.GetEmployeeByIdAsync(employeeId);
       if (employee == null) return null;

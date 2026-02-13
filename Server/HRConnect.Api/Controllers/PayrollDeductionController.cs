@@ -16,7 +16,7 @@ namespace HRConnect.Api.Controllers
     }
 
     [HttpGet("{employeeId}")]
-    public async Task<IActionResult> GetDeductionsByEmployeeId(int employeeId)
+    public async Task<IActionResult> GetDeductionsByEmployeeId(string employeeId)
     {
       PayrollDeduction? deduction = await _payrollDeductionService.GetDeductionsByEmployeeIdAsync(employeeId);
       if (deduction == null) return NotFound();
@@ -31,7 +31,7 @@ namespace HRConnect.Api.Controllers
       return Ok(deductions.Select(d => d.ToPayrollDeductionsDto()));
     }
     [HttpPost("{employeeId}")]
-    public async Task<IActionResult> TakeDeductions(int employeeId)
+    public async Task<IActionResult> TakeDeductions(string employeeId)
     {
       try
       {
