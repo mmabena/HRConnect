@@ -5,14 +5,6 @@ namespace HRConnect.Tests
   using HRConnect.Api.Models;
   using HRConnect.Api.Utils;
   using HRConnect.Api.Services;
-  using System.Runtime.CompilerServices;
-  using System.Reflection;
-  using System.Security.Cryptography.X509Certificates;
-  using Microsoft.VisualBasic;
-  using Microsoft.AspNetCore.Mvc;
-  using System.Reflection.Metadata.Ecma335;
-  using System.Data.Common;
-  using System.Net.Cache;
 
   public class PayrollContributionsServiceTests
   {
@@ -51,41 +43,29 @@ namespace HRConnect.Tests
     public async Task AddDeductionsAsyncReturnsDeductions()
     {
       //Arrange
-      //Deductions depend on employee existing
+      //Deductions depend on an Employee existing
       int employeeId = 1;
       var employee = new Employee
       {
         EmployeeId = employeeId,
-        Name = "Employee Name",
-        EmployeeCode = "EMP001",
-        MonthlySalary = 5000m,
-        IdNumber = "1234567891013",
+        Name = "Worker",
+        EmployeeCode = "WOR001",
+        MonthlySalary = 8500m,
+        IdNumber = "0201065054888",
         PassportNumber = ""
       };
-      _employeeRepoMock.Setup(repo => repo.GetEmployeeByIdAsync(employeeId))
-      .ReturnsAsync(employee);
-      var emp = await _employeeRepoMock.Object.GetEmployeeByIdAsync(1);
-      Assert.NotNull(emp);
-      _employeeRepoMock
-    .Setup(r => r.UpdateEmployeeAsync(1, It.IsAny<Employee>()))
-    .ReturnsAsync(employee);
 
-      var deduction = new PayrollDeduction
-      {
-        EmployeeId = employeeId,
-        MonthlySalary = employee.MonthlySalary,
-        SdlAmount = employee.MonthlySalary * 0.01m,
-        UifEmployeeAmount = employee.MonthlySalary * 0.01m,
-        UifEmployerAmount = employee.MonthlySalary * 0.01m,
-      };
+      _employeeRepoMock.Setup(repo => repo.GetEmployeeByIdAsync(employeeId)).ReturnsAsync(employee);
 
-      _payrollDeductionRepoMock.Setup(repo => repo.GetDeductionsByEmployeeIdAsync(employeeId))
-      .ReturnsAsync((PayrollDeduction d) => d);
+      //Mock Setup of Employee Update As this is used by AddDeduction service method
+      _employeeRepoMock.Setup(r => r.UpdateEmployeeAsync(1, It.IsAny<Employee>())).ReturnsAsync(employee);
+
+      _payrollDeductionRepoMock.Setup(repo => repo.AddDeductionsAsync(It.IsAny<PayrollDeduction>())).ReturnsAsync((PayrollDeduction d) => d);
+
       //Act 
       var result = await _payrollDeductionService.AddDeductionsAsync(employeeId);
 
       //Assert
-      // var okResult = Assert.IsType<OkObjectResult>(result);
       Assert.NotNull(result);
     }
   }
