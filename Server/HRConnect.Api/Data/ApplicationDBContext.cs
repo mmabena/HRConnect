@@ -31,6 +31,7 @@ using System.Threading.Tasks;
       .WithMany(o => o.Positions)
       .HasForeignKey(p => p.OccupationalLevelId);
 
+      // Unique index on Position.Title
       _ =modelBuilder.Entity<Position>()
       .HasIndex(p => p.Title)
       .IsUnique();

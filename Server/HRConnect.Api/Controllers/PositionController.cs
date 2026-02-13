@@ -1,15 +1,16 @@
 namespace HRConnect.Api.Controllers
 {
-
+    using System.Collections.Generic;
+    using Microsoft.AspNetCore.Authorization;
+    using System.Runtime.ExceptionServices;
+    using System.Threading.Tasks;
     using HRConnect.Api.DTOs.Position;
-using HRConnect.Api.Services;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
+    using HRConnect.Api.Interfaces;
+    using Microsoft.AspNetCore.Mvc; 
 
     [Route("api/position")]
     [ApiController]
-    [Authorize] // Require authentication
+    [Authorize(Roles = "SuperUser")] // Require authentication and SuperAdmin role
     public class PositionController : ControllerBase
     {
     private readonly IPositionService _positionService;
@@ -43,7 +44,7 @@ using System.Threading.Tasks;
         }
 
         [HttpPost("Create")]
-        [Authorize(Roles = "Admin")] // Only Admin can create
+      
         public async Task<IActionResult> CreatePosition([FromBody] CreatePositionDto dto)
         {
             var created = await _positionService.CreatePositionAsync(dto);
@@ -51,7 +52,6 @@ using System.Threading.Tasks;
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "Admin")] // Only Admin can update
         public async Task<IActionResult> UpdatePosition(int id, [FromBody] UpdatePositionDto dto)
         {
             var updated = await _positionService.UpdatePositionAsync(id, dto);

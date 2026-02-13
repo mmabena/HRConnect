@@ -1,14 +1,17 @@
 namespace HRConnect.Api.Controllers
 {
   using System.Collections.Generic;
-    using System.Runtime.ExceptionServices;
-    using System.Threading.Tasks;
+  using Microsoft.AspNetCore.Authorization;
+  using System.Runtime.ExceptionServices;
+  using System.Threading.Tasks;
   using HRConnect.Api.DTOs.OccupationalLevel;
   using HRConnect.Api.Interfaces;
   using Microsoft.AspNetCore.Mvc;
 
   [ApiController]
   [Route("api/[controller]")]
+  [Authorize(Roles = "SuperUser")] // Require authentication and SuperAdmin role
+ 
   public class OccupationalLevelController : ControllerBase
   {
     private readonly IOccupationalLevelService _occupationalLevelService;

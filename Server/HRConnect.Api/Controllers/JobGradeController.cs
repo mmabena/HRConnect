@@ -3,9 +3,12 @@ namespace HRConnect.Api.Controllers
     using HRConnect.Api.DTOs.JobGrade;
     using HRConnect.Api.Interfaces;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Authorization;
 
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Roles = "SuperUser")] // Require authentication and SuperAdmin role
+
     public class JobGradeController : ControllerBase
     {
         private readonly IJobGradeService _jobGradeService;

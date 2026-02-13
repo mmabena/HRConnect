@@ -90,9 +90,11 @@ builder.Services.AddScoped<HRConnect.Api.Interfaces.IUserService, HRConnect.Api.
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.Services.AuthService>();
+builder.Services.AddScoped<IPositionRepository, PositionRepository>();
 builder.Services.AddScoped<IJobGradeRepository, JobGradeRepository>();
-builder.Services.AddScoped<HRConnect.Api.Interfaces.IJobGradeService, HRConnect.Api.Services.JobGradeService>();
 builder.Services.AddScoped<IOccupationalLevelRepository, OccupationalLevelRepository>();
+builder.Services.AddScoped<HRConnect.Api.Interfaces.IPositionService, HRConnect.Api.Services.PositionService>();
+builder.Services.AddScoped<HRConnect.Api.Interfaces.IJobGradeService, HRConnect.Api.Services.JobGradeService>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IOccupationalLevelService, HRConnect.Api.Services.OccupationalLevelService>();
 
 builder.Services.AddCors(options =>

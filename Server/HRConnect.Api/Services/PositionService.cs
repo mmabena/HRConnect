@@ -70,9 +70,9 @@ namespace HRConnect.Api.Services
                 Title = createPositionDto.Title,
                 JobGradeId = createPositionDto.JobGradeId,
                 OccupationalLevelId = createPositionDto.OccupationalLevelId,
-                IsActive = createPositionDto.IsActive,
                 CreatedDate = DateTime.UtcNow,
-                UpdatedDate = DateTime.UtcNow
+                UpdatedDate = DateTime.UtcNow,
+                IsActive = createPositionDto.IsActive
             };
 
             var created = await _positionRepo.CreatePositionAsync(position);
