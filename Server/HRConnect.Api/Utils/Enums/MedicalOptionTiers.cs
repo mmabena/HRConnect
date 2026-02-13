@@ -1,8 +1,9 @@
-﻿namespace HRConnect.Api.Repository.Enums
+﻿namespace HRConnect.Api.Utils.Enums
 {
-  public enum NetworkChoice : ushort
+  public enum Choice
   {
-    //Example:  NetworkChoice1, NetworkChoice2, NetworkChoice3, NetworkChoice4, NetworkChoice5
+    Network,
+    First
   }
   public enum FirstChoice
   {

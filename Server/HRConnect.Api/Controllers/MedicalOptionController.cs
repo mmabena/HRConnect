@@ -50,12 +50,17 @@
     {
       try
       {
-        return null;
+        var results = await _medicalOptionService.UpdateSalaryBracketAsync(optionId,
+          requestDto);
+
+        if (results == null) return NotFound();
+        
+        return Created();
       }
-      catch (Exception ex)
+      catch (ArgumentException ex)
       {
-        /*Console.WriteLine(ex);
-        throw;*/
+        ModelState.AddModelError("Validation", ex.Message);
+        return ValidationProblem(ModelState);
       }
     }
 

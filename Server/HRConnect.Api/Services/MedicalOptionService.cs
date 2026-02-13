@@ -8,6 +8,7 @@
   using HRConnect.Api.Mappers;
   using HRConnect.Api.Models;
   using HRConnect.Api.Utils;
+  using HRConnect.Api.Utils.Enums;
 
   
   public class MedicalOptionService:IMedicalOptionService
@@ -167,6 +168,8 @@
     public async Task<MedicalOption?> UpdateSalaryBracketAsync(
       int id, UpdateMedicalOptionSalaryBracketRequestDto requestDto)
     {
+      string filterName = null, selectedVariant = null;
+      Task<List<MedicalOption?>> medicalOptionsVariants;
       var existingOption = await _medicalOptionRepository.GetMedicalOptionByIdAsync(id);
       if (existingOption == null) return null;
       
@@ -189,10 +192,153 @@
       if (requestDto.SalaryBracketMin > requestDto.SalaryBracketMax) throw 
         new ArgumentException("Minimum salary cannot be greater than or equal to Maximum salary.");
       
+      //Check which category is from
+      switch (existingOption.MedicalOptionCategory?.MedicalOptionCategoryName)
+      {
+        case "Network Choice":
+        case "First Choice" :
+          //get variant name of the subcategory under the category
+          var firstAndNetworkVariants = MedicalOptionEnumMapper
+            .GetEnumVariant<Choice>(existingOption.MedicalOptionName);
+          if (firstAndNetworkVariants.HasValue)
+          {
+              Choice choice = firstAndNetworkVariants.Value;
+              selectedVariant = choice.ToString();
+          }
+          
+          //Use CategoryName as the filterName 
+          filterName = existingOption.MedicalOptionCategory?.MedicalOptionCategoryName.ToString();
+          
+          //Fetching the filtered option variants
+          var trimmedDownOptions = (await _medicalOptionRepository
+           .GetAllMedicalOptionsUnderCategoryVarientAsync(filterName))
+           .Where(option => option != null && option.MedicalOptionCategoryId == 
+             existingOption.MedicalOptionCategoryId)
+           .Select(option => new MedicalOptionSalaryDto
+            {
+             MedicalOptionID = option!.MedicalOptionId,
+             MedicalOptionName = option.MedicalOptionName,
+             MedicalOptionCategoryId = option.MedicalOptionCategoryId,
+             SalaryBracketMin = option.SalaryBracketMin,
+             SalaryBracketMax = option.SalaryBracketMax
+            }).ToList();
+          
+          //Validate salary bracks to check for overlaps
+          var overlappingOptions = trimmedDownOptions
+            .Where(option => option.MedicalOptionID != id) //excludes current option
+            .FirstOrDefault(option => !(requestDto.SalaryBracketMax < option.SalaryBracketMin ||
+                                        requestDto.SalaryBracketMin > option.SalaryBracketMax));
+          
+          //Checking for any overlaps
+          if (overlappingOptions != null)
+          {
+            throw new ArgumentException(
+              $"Salary bracket {requestDto.SalaryBracketMin}-{requestDto.SalaryBracketMax} " +
+              $"overlaps with existing option '{overlappingOptions.MedicalOptionName}' " +
+              $"({overlappingOptions.SalaryBracketMin}-{overlappingOptions.SalaryBracketMax})"
+            );
+          }
+          //else proceed with the update
+          break;
+        
+        case ("Essential"):
+          var essentialVariant = MedicalOptionEnumMapper.GetEnumVariant<Essential>(existingOption
+            .MedicalOptionName);
+          //check and return the variant
+          if (essentialVariant.HasValue)
+          {
+            Essential essential = essentialVariant.Value;
+            selectedVariant = essential.ToString();
+          }
+          
+          //Use categoryName as FilterName (Concated with OptionName)
+          filterName = existingOption.MedicalOptionCategory?.MedicalOptionCategoryName + " " +
+                       selectedVariant;
+          
+          //Fetching the filtered option variants
+          var trimmedEssentialVariants = (await _medicalOptionRepository
+              .GetAllMedicalOptionsUnderCategoryVarientAsync(filterName))
+            .Where(option =>
+              option != null && option.MedicalOptionCategoryId ==
+              existingOption.MedicalOptionCategoryId)
+            .Select(option => new MedicalOptionSalaryDto
+            {
+              MedicalOptionID = option!.MedicalOptionId,
+              MedicalOptionName = option.MedicalOptionName,
+              MedicalOptionCategoryId = option.MedicalOptionCategoryId,
+              SalaryBracketMin = option.SalaryBracketMin,
+              SalaryBracketMax = option.SalaryBracketMax
+            }).ToList();
+
+            //Validate salary brackets to check for overlaps
+            var overlappingEssentialOptions = trimmedEssentialVariants
+             .Where(options => options.MedicalOptionID != id)
+             .FirstOrDefault(options => !(
+               requestDto.SalaryBracketMax < options.SalaryBracketMin ||
+               requestDto.SalaryBracketMin > options.SalaryBracketMax));
+            //checking for any overlaps
+            if (overlappingEssentialOptions != null)
+            {
+              throw new ArgumentException(
+                $"Salary bracket {requestDto.SalaryBracketMin}-{requestDto.SalaryBracketMax} " +
+                $"overlaps with existing option '{overlappingEssentialOptions.MedicalOptionName}'"+
+                $" ({overlappingEssentialOptions.SalaryBracketMin}-" +
+                $"{overlappingEssentialOptions.SalaryBracketMax})"
+              );
+            }
+
+          break;
+        
+        case ("Vital"):
+          var vitalVariants =
+            MedicalOptionEnumMapper.GetEnumVariant<Vital>(existingOption.MedicalOptionName);
+          if (vitalVariants.HasValue)
+          {
+            Vital vital = vitalVariants.Value;
+            selectedVariant = vital.ToString();
+          }
+
+          filterName = existingOption.MedicalOptionCategory?.MedicalOptionCategoryName + " " +
+                       selectedVariant;
+
+          var trimmedVitaloptions = (await _medicalOptionRepository
+              .GetAllMedicalOptionsUnderCategoryVarientAsync(filterName))
+            .Where(opt =>
+              opt != null && opt.MedicalOptionCategoryId == existingOption.MedicalOptionCategoryId)
+            .Select(opt => new MedicalOptionSalaryDto
+            {
+              MedicalOptionID = opt!.MedicalOptionId,
+              MedicalOptionName = opt.MedicalOptionName,
+              MedicalOptionCategoryId = opt.MedicalOptionCategoryId,
+              SalaryBracketMin = opt.SalaryBracketMin,
+              SalaryBracketMax = opt.SalaryBracketMax
+            }).ToList();
+
+          var overlappingVitalOptions = trimmedVitaloptions
+            .Where(opt => opt.MedicalOptionID != id)
+            .FirstOrDefault(opt => !(
+              requestDto.SalaryBracketMax < opt.SalaryBracketMin ||
+              requestDto.SalaryBracketMin > opt.SalaryBracketMax));
+
+          if (overlappingVitalOptions != null)
+          {
+            throw new ArgumentException(
+              $"Salary bracket {requestDto.SalaryBracketMin}-{requestDto.SalaryBracketMax} " +
+              $"overlaps with existing option '{overlappingVitalOptions.MedicalOptionName}' " +
+              $"({overlappingVitalOptions.SalaryBracketMin}-" +
+              $"{overlappingVitalOptions.SalaryBracketMax})"
+            );
+          }
+
+          break;
+      }
       
-      //existingOption.MedicalOptionCategory?.MedicalOptionCategoryName = requestDto.SalaryBracketMin;
+      //existingOption.MedicalOptionCategory?.MedicalOptionCategoryName =
+      //requestDto.SalaryBracketMin;
       return await _medicalOptionRepository.UpdateSalaryBracketAsync(id, requestDto);
     }
+    
+    
 
     public async Task<MedicalOption?> GetMedicalOptionByIdAsync(int id)
     {

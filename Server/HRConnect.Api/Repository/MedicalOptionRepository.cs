@@ -6,14 +6,17 @@
   using HRConnect.Api.Models;
   using Microsoft.EntityFrameworkCore;
   using Microsoft.EntityFrameworkCore.Infrastructure;
+  using HRConnect.Api.Utils;
 
   public class MedicalOptionRepository: IMedicalOptionRepository
   {
     private readonly ApplicationDBContext _context;
+
     
     public MedicalOptionRepository(ApplicationDBContext context)
     {
       _context = context;
+
     }
     
     /// <summary>
@@ -127,9 +130,10 @@
       // Map to MedicalOptionDto
       // thinking here is to use a sql query to get all medical options under a category variant
       // using "like" so that i can avoid a lot of complexity
-      optionName =  optionName.Replace(optionName.Last().ToString(), "").TrimEnd();
+      //optionName = _optionUtils.OptionNameFormatter(optionName); //TODO document this
+      //optionName =  optionName.Replace(optionName.Last().ToString(), "").TrimEnd();
       return await _context.MedicalOptions
-        .FromSqlRaw("SELECT * FROM MedicalOptions WHERE MedicalOptionCategoryName is like {0}", optionName)
+        .FromSqlRaw("SELECT * FROM MedicalOptions WHERE MedicalOptionCategoryName like N'{0}'", optionName)
         .ToListAsync();
     }
   }
