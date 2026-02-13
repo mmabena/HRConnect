@@ -92,7 +92,7 @@ builder.Services.AddScoped<HRConnect.Api.Interfaces.IUserService, HRConnect.Api.
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.Services.AuthService>();
-builder.Services.AddScoped<IPensionProjectionService, PensionProjectionService>();
+builder.Services.AddTransient<IPensionProjectionService, PensionProjectionService>();
 builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowReact",

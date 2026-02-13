@@ -9,8 +9,13 @@ namespace HRConnect.Api.Controllers
   [ApiController]
   public class PensionProjectionController(IPensionProjectionService pensionProjectionService) : ControllerBase
   {
+    ///<summary>
+    ///Project options
+    ///</summary>
+    ///<returns>
+    ///All pension percentage options
+    ///</returns>
     private readonly IPensionProjectionService _pensionProjectionService = pensionProjectionService;
-
     [HttpGet("options")]
     public async Task<IActionResult> GetPensionOptions()
     {
@@ -19,6 +24,13 @@ namespace HRConnect.Api.Controllers
       return Ok(pensionOptions);
     }
 
+    ///<summary>
+    ///Project pension
+    ///</summary>
+    ///<param name="pensionProjectRequestDto">Pension Project Request Data Transfer Object</param>
+    ///<returns>
+    ///IActionResult with projected pension data
+    ///</returns>
     [HttpPost("projection")]
     public async Task<IActionResult> ProjectPensionFund([FromBody] PensionProjectionRequestDto pensionProjectionRequestDto)
     {
@@ -26,12 +38,5 @@ namespace HRConnect.Api.Controllers
 
       return Ok(pensionProjectionResultDto);
     }
-
-    [HttpGet]
-    public IActionResult Connected()
-    {
-      return Ok("You are connected");
-    }
-
   }
 }

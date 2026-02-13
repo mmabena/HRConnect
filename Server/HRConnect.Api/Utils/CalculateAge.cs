@@ -2,6 +2,13 @@ namespace HRConnect.Api.Utils
 {
   public static class CalculateAge
   {
+    ///<summary>
+    ///Calculate age using date of birth
+    ///</summary>
+    ///<param name="DOB">Date of Birth</param>
+    ///<returns>
+    ///Current age
+    ///</returns>
     public static int UsingDOB(DateTime DOB)
     {
       DateTime today = DateTime.Today;
