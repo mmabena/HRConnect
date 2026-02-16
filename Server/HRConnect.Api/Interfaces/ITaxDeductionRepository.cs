@@ -8,10 +8,10 @@ namespace HRConnect.Api.Repositories
   /// <summary>
   /// Repository interface for accessing TaxTableUploads and TaxDeductions in the database.
   /// </summary>
-  public interface ITaxRepository
+  public interface ITaxDeductionRepository
   {
-    Task<List<TaxTableUpload>> GetActiveTaxTableUploadsAsync();
-    Task<List<TaxDeduction>> GetTaxDeductionsByYearAsync(int taxYear);
+    Task<List<TaxTableUpload>> GetActiveTaxTableUploadsAsync(); 
+    Task<List<TaxDeduction>> GetTaxDeductionsByYearAsync(int taxYear); 
     Task AddTaxTableUploadAsync(TaxTableUpload upload);
     Task AddTaxDeductionsAsync(List<TaxDeduction> deductions);
     Task DeactivateTaxTableUploadsAsync(List<TaxTableUpload> uploads);

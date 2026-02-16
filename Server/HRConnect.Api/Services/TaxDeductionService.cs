@@ -4,6 +4,7 @@ namespace HRConnect.Api.Services
   using HRConnect.Api.Data;
   using HRConnect.Api.Models;
   using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Repositories;
   using Microsoft.AspNetCore.Http;
   using Microsoft.EntityFrameworkCore;
   using OfficeOpenXml;
@@ -25,13 +26,13 @@ namespace HRConnect.Api.Services
   /// </summary>
   public class TaxDeductionService : ITaxDeductionService
   {
-    private readonly ITaxRepository _repository;
+    private readonly ITaxDeductionRepository _repository;
 
     /// <summary>
     /// Initializes a new instance of <see cref="TaxDeductionService"/> with the specified repository.
     /// </summary>
     /// <param name="repository">this is the repository instance for tax deductions</param>
-    public TaxDeductionService(ITaxRepository repository)
+    public TaxDeductionService(ITaxDeductionRepository repository)
     {
       _repository = repository;
     }
@@ -49,12 +50,11 @@ namespace HRConnect.Api.Services
       var today = DateTime.UtcNow.Date;
 
       // Find the active tax table for today
-      var activeUpload = await _repository.TaxTableUploads
-          .Where(x =>
-              x.EffectiveFrom <= today &&
-              (x.EffectiveTo == null || x.EffectiveTo >= today))
+      var activeUploads = await _repository.GetActiveTaxTableUploadsAsync();
+      var activeUpload = activeUploads
           .OrderByDescending(x => x.EffectiveFrom)
-          .FirstOrDefaultAsync();
+          .FirstOrDefault(x => x.EffectiveFrom <= today &&
+                               (x.EffectiveTo == null || x.EffectiveTo >= today));
 
       if (activeUpload == null)
       {
@@ -64,10 +64,11 @@ namespace HRConnect.Api.Services
       int taxYear = activeUpload.TaxYear;
 
       // Try to find a tax row in the table
-      var taxRow = await _repository.TaxDeductions
-          .Where(x => x.TaxYear == taxYear && remuneration <= x.Remuneration)
-          .OrderBy(x => x.Remuneration)
-          .FirstOrDefaultAsync();
+      var allDeductions = await _repository.GetTaxDeductionsByYearAsync(taxYear);
+      var taxRow = allDeductions
+                .Where(x => remuneration <= x.Remuneration)
+                .OrderBy(x => x.Remuneration)
+                .FirstOrDefault();
 
       if (taxRow != null)
       {
@@ -107,14 +108,11 @@ namespace HRConnect.Api.Services
     /// <returns>List of tax deductions as DTOs</returns>
     public async Task<List<TaxDeductionDto>> GetAllTaxDeductionsAsync(int taxYear)
     {
-      var entities = await _repository.TaxDeductions
-      .Where(x => x.TaxYear == taxYear)
-      .OrderBy(x => x.Remuneration)
-      .ToListAsync();
-
-      return entities
-      .Select(TaxDeductionMapper.ToDto).ToList();
+      var entities = await _repository.GetTaxDeductionsByYearAsync(taxYear);
+      var ordered = entities.OrderBy(x => x.Remuneration).ToList();
+      return ordered.Select(TaxDeductionMapper.ToDto).ToList();
     }
+
 
     /// <summary>
     /// Updates a single tax deduction row with new values.
@@ -124,7 +122,8 @@ namespace HRConnect.Api.Services
     /// <exception cref="InvalidOperationException">Thrown if attempting to change the TaxYear.</exception>
     public async Task UpdateTaxDeductionAsync(UpdateTaxDeductionDto dto)
     {
-      var entity = await _repository.TaxDeductions.FindAsync(dto.Id);
+      var deductions = await _repository.GetTaxDeductionsByYearAsync(dto.TaxYear);
+      var entity = deductions.FirstOrDefault(x => x.Id == dto.Id);
       if (entity == null)
       {
         throw new ArgumentException("Tax deduction not found.");
@@ -140,137 +139,6 @@ namespace HRConnect.Api.Services
       entity.TaxUnder65 = dto.TaxUnder65;
       entity.Tax65To74 = dto.Tax65To74;
       entity.TaxOver75 = dto.TaxOver75;
-
-      await _repository.SaveChangesAsync();
-    }
-
-    /// <summary>
-    /// Uploads a new tax table Excel file for a specific tax year.
-    /// Validates headers and numeric data, and deactivates previous uploads.
-    /// </summary>
-    /// <param name="taxYear">The tax year for the upload.</param>
-    /// <param name="file">The Excel file to upload.</param>
-    /// <exception cref="ArgumentException">Thrown if the file type is invalid, headers are missing, or data is non-numeric.</exception>
-    public async Task UploadTaxTableAsync(int taxYear, IFormFile file)
-    {
-      if (file == null)
-        throw new ArgumentException("File is required.");
-
-      var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-      if (extension != ".xlsx" && extension != ".xls")
-        throw new ArgumentException("Only Excel files are allowed.");
-
-      // Prevent duplicate tax year uploads
-      var existingUploadForYear = await _repository.TaxTableUploads
-          .AnyAsync(x => x.TaxYear == taxYear);
-
-      if (existingUploadForYear)
-      {
-        throw new ArgumentException($"A tax table for year {taxYear} has already been uploaded.");
-      }
-
-      using var stream = new MemoryStream();
-      await file.CopyToAsync(stream);
-
-      using var package = new ExcelPackage(stream);
-      var worksheet = package.Workbook.Worksheets.FirstOrDefault();
-
-      if (worksheet == null)
-      {
-        throw new ArgumentException("Excel file contains no worksheets.");
-      }
-
-      var expectedHeaders = new[]
-      {
-        "Remuneration",
-        "AnnualEquivalent",
-        "TaxUnder65",
-        "Tax65To74",
-        "TaxOver75"
-    };
-
-      for (int i = 0; i < expectedHeaders.Length; i++)
-      {
-        if (worksheet.Cells[1, i + 1].Text != expectedHeaders[i])
-          throw new ArgumentException(
-              $"Invalid Excel format. Missing header: {expectedHeaders[i]}");
-      }
-
-      int rowCount = worksheet.Dimension.Rows;
-
-      for (int row = 2; row <= rowCount; row++)
-      {
-        string remunerationText = worksheet.Cells[row, 1].Text.Trim();
-
-        decimal remunerationUpper;
-        try
-        {
-          var parts = remunerationText.Split('-');
-          var upperPart = parts[1].Replace("R", "").Replace(",", "").Trim();
-          remunerationUpper = decimal.Parse(
-              upperPart,
-              System.Globalization.CultureInfo.InvariantCulture);
-        }
-        catch
-        {
-          throw new ArgumentException(
-              $"Invalid Remuneration range at row {row}: {remunerationText}");
-        }
-
-        decimal annualEquivalent = decimal.Parse(
-            worksheet.Cells[row, 2].Text.Replace("R", "").Replace(",", "").Trim(),
-            System.Globalization.CultureInfo.InvariantCulture);
-
-        decimal taxUnder65 = decimal.Parse(
-            worksheet.Cells[row, 3].Text.Replace("R", "").Replace(",", "").Trim(),
-            System.Globalization.CultureInfo.InvariantCulture);
-
-        decimal tax65To74 = decimal.Parse(
-            worksheet.Cells[row, 4].Text.Replace("R", "").Replace(",", "").Trim(),
-            System.Globalization.CultureInfo.InvariantCulture);
-
-        decimal taxOver75 = decimal.Parse(
-            worksheet.Cells[row, 5].Text.Replace("R", "").Replace(",", "").Trim(),
-            System.Globalization.CultureInfo.InvariantCulture);
-
-        _repository.TaxDeductions.Add(new TaxDeduction
-        {
-          TaxYear = taxYear,
-          Remuneration = remunerationUpper,
-          AnnualEquivalent = annualEquivalent,
-          TaxUnder65 = taxUnder65,
-          Tax65To74 = tax65To74,
-          TaxOver75 = taxOver75,
-          CreatedAt = DateTime.UtcNow
-        });
-      }
-
-      // Financial-year logic
-      var effectiveFrom = new DateTime(taxYear, 3, 1);
-      var previousExpiry = new DateTime(taxYear, 2, 28);
-
-      // Expire currently active table (if exists)
-      var currentActive = await _repository.TaxTableUploads
-          .Where(x => x.EffectiveTo == null)
-          .OrderByDescending(x => x.EffectiveFrom)
-          .FirstOrDefaultAsync();
-
-      if (currentActive != null)
-      {
-        currentActive.EffectiveTo = previousExpiry;
-      }
-
-      var newUpload = new TaxTableUpload
-      {
-        TaxYear = taxYear,
-        FileName = file.FileName,
-        FileUrl = $"uploads/tax_{taxYear}.xlsx",
-        EffectiveFrom = effectiveFrom,
-        EffectiveTo = null,
-        UploadedAt = DateTime.UtcNow
-      };
-
-      _repository.TaxTableUploads.Add(newUpload);
 
       await _repository.SaveChangesAsync();
     }

@@ -21,32 +21,32 @@ namespace HRConnect.Api.Controllers
   [Authorize(Roles = "SuperUser")]
   public class TaxTableUploadController : ControllerBase
   {
-    private readonly ITaxDeductionService _taxDeductionService;
+    private readonly ITaxTableUploadService _taxTableUploadService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TaxTableUploadController"/>.
     /// </summary>
-    /// <param name="taxDeductionService">
-    /// Service responsible for tax deduction business logic.
+    /// <param name="taxTableUploadService">
+    /// Service responsible for tax table upload business logic.
     /// </param>
-    public TaxTableUploadController(ITaxDeductionService taxDeductionService)
+    public TaxTableUploadController(ITaxTableUploadService taxTableUploadService)
     {
-      _taxDeductionService = taxDeductionService;
+      _taxTableUploadService = taxTableUploadService;
     }
 
     /// <summary>
-    /// Retrieves all tax deduction brackets for a given tax year.
+    /// Retrieves all tax table uploads.
     /// </summary>
     /// <param name="taxYear">
     /// The tax year for which tax deductions should be retrieved.
     /// </param>
     /// <returns>
-    /// A list of tax deduction records for the specified tax year.
+    /// A list of tax table upload records.
     /// </returns>
     [HttpGet]
     public async Task<IActionResult> GetAll(int taxYear)
     {
-      var allDeductions = await _taxDeductionService.GetAllTaxDeductionsAsync(taxYear);
+      var allDeductions = await _taxTableUploadService.GetAllUploadsAsync();
       return Ok(allDeductions);
     }
 
@@ -63,39 +63,15 @@ namespace HRConnect.Api.Controllers
     [HttpPost("upload")]
     public async Task<IActionResult> UploadTaxTable([FromForm] TaxTableUploadRequest request)
     {
-      // Validations
       if (request.File == null || request.File.Length == 0)
         return BadRequest("Excel file is required.");
 
-      var extension = Path.GetExtension(request.File.FileName).ToLowerInvariant();
-      if (extension != ".xlsx" && extension != ".xls")
-        return BadRequest("Invalid file type. Only .xlsx or .xls files are allowed.");
-
-      var allowedContentTypes = new[]
-      {
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        "application/vnd.ms-excel"
-    };
-
-      if (!allowedContentTypes.Contains(request.File.ContentType))
-        return BadRequest("Invalid Excel file format.");
-
-      if (request.TaxYear < 2000 || request.TaxYear > DateTime.UtcNow.Year + 1)
-        return BadRequest("Invalid tax year.");
-
       try
       {
-        await _taxDeductionService.UploadTaxTableAsync(request.TaxYear, request.File);
+        var result = await _taxTableUploadService
+            .UploadTaxTableAsync(request.TaxYear, request.File);
 
-        var effectiveDate = new DateTime(DateTime.UtcNow.Year, 3, 1);
-
-        // Return a message to the client about effective date
-        return Ok(new
-        {
-          Message = $"Tax table for year {request.TaxYear} uploaded successfully.",
-          EffectiveFrom = effectiveDate.ToString("dd MMMM yyyy", System.Globalization.CultureInfo.InvariantCulture)
-        });
-
+        return Ok(result);
       }
       catch (ArgumentException ex)
       {
@@ -107,7 +83,8 @@ namespace HRConnect.Api.Controllers
       }
       catch (Exception)
       {
-        return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred while uploading the tax table.");
+        return StatusCode(StatusCodes.Status500InternalServerError,
+            "An unexpected error occurred while uploading the tax table.");
       }
     }
   }

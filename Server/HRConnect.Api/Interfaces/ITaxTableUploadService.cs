@@ -17,6 +17,6 @@ namespace HRConnect.Api.Interfaces
   {
     Task<List<TaxTableUploadDto>> GetAllUploadsAsync();
     Task<TaxTableUploadDto?> GetUploadByYearAsync(int taxYear);
-    
+    Task<TaxTableUploadResultDto> UploadTaxTableAsync(int taxYear, IFormFile file);
   }
 }
