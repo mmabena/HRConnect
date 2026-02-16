@@ -2,7 +2,7 @@ namespace HRConnect.Api.Interfaces
 {
   using HRConnect.Api.Models;
 
-  public interface ISeederService
+  public interface IEmployeeService
   {
     Task SeedEmployeeAsync();
     Task<Employee?> GetEmployeeByIdAsync(int id);

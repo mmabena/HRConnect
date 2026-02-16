@@ -4,16 +4,16 @@ namespace HRConnect.Api.Services
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
   using HRConnect.Api.Utils;
-  public class PayrollContributionCalculatorService : IPayrollDeductionService
+  public class PayrollDeductionsService : IPayrollDeductionsService
   {
-    private readonly ISeedEmployeeRepo _employeeRepo;
-    private readonly PayrollContributionCalculator _deductionsCalculator;
-    private readonly IPayrollContributionsRepo _payrollContributionsRepo;
-    public PayrollContributionCalculatorService(ISeedEmployeeRepo employeeRepo, IPayrollContributionsRepo payrollContributionsRepo)
+    private readonly IEmployeeRepository _employeeRepo;
+    private readonly PayrollDeductionsCalculator _deductionsCalculator;
+    private readonly IPayrollDeductionsRepository _payrollDeductionRepo;
+    public PayrollDeductionsService(IEmployeeRepository employeeRepo, IPayrollDeductionsRepository payrollContributionsRepo)
     {
       _employeeRepo = employeeRepo;
-      _payrollContributionsRepo = payrollContributionsRepo;
-      _deductionsCalculator = new PayrollContributionCalculator();
+      _payrollDeductionRepo = payrollContributionsRepo;
+      _deductionsCalculator = new PayrollDeductionsCalculator();
     }
     /// <summary>
     /// Getting a Seeded Employee
@@ -31,11 +31,11 @@ namespace HRConnect.Api.Services
     /// <returns></returns>
     public async Task<PayrollDeduction?> GetDeductionsByEmployeeIdAsync(int employeeId)
     {
-      return await _payrollContributionsRepo.GetDeductionsByEmployeeIdAsync(employeeId);
+      return await _payrollDeductionRepo.GetDeductionsByEmployeeIdAsync(employeeId);
     }
     public async Task<List<PayrollDeduction>> GetAllDeductionsAsync()
     {
-      return await _payrollContributionsRepo.GetAllDeductionsAsync();
+      return await _payrollDeductionRepo.GetAllDeductionsAsync();
     }
     public async Task<PayrollDeduction?> AddDeductionsAsync(int employeeId)
     {
@@ -58,7 +58,7 @@ namespace HRConnect.Api.Services
       employee.MonthlySalary -= employeeAmount;
 
       _ = await _employeeRepo.UpdateEmployeeAsync(employeeId, employee);
-      return await _payrollContributionsRepo.AddDeductionsAsync(deductions);
+      return await _payrollDeductionRepo.AddDeductionsAsync(deductions);
     }
   }
 }

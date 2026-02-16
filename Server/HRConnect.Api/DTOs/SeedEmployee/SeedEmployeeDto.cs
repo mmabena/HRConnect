@@ -7,5 +7,6 @@ namespace HRConnect.Api.DTOs.SeedEmployee
     public decimal MonthlySalary { get; set; }
     public string IdNumber { get; set; } = string.Empty;
     public string PassportNumber { get; set; } = string.Empty;
+    public int EmployeeId { get; set; }
   }
 }

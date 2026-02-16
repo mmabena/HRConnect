@@ -2,7 +2,7 @@ namespace HRConnect.Api.Utils
 {
   using HRConnect.Api.Models;
 
-  public class PayrollContributionCalculator
+  public class PayrollDeductionsCalculator
   {
     public decimal CalculateUifEmployee(decimal monthlySalary)
     {

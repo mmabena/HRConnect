@@ -6,10 +6,10 @@ namespace HRConnect.Api.Services
   using Microsoft.EntityFrameworkCore;
   using Microsoft.EntityFrameworkCore.ChangeTracking;
 
-  public class EmployeeSeederService : ISeederService
+  public class EmployeeService : IEmployeeService
   {
     private readonly ApplicationDBContext _context;
-    private readonly ISeedEmployeeRepo _seedEmployeeRepo;
+    private readonly IEmployeeRepository _employeeRepo;
     private readonly List<Employee> _seedEmployees = new()
     {
       new Employee
@@ -63,10 +63,10 @@ namespace HRConnect.Api.Services
       IdNumber="213454455"
       }
     };
-    public EmployeeSeederService(ApplicationDBContext context, ISeedEmployeeRepo seedEmployeeRepo)
+    public EmployeeService(ApplicationDBContext context, IEmployeeRepository employeeRepo)
     {
       _context = context;
-      _seedEmployeeRepo = seedEmployeeRepo;
+      _employeeRepo = employeeRepo;
     }
 
     public async Task SeedEmployeeAsync()
@@ -95,12 +95,12 @@ namespace HRConnect.Api.Services
 
     public async Task<Employee?> GetEmployeeByIdAsync(int id)
     {
-      return await _seedEmployeeRepo.GetEmployeeByIdAsync(id);
+      return await _employeeRepo.GetEmployeeByIdAsync(id);
     }
 
     public async Task<List<Employee>> GetEmployeesAsync()
     {
-      return await _seedEmployeeRepo.GetEmployeesAsync();
+      return await _employeeRepo.GetEmployeesAsync();
     }
   }
 }
