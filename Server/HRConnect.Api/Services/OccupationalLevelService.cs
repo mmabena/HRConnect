@@ -22,63 +22,74 @@ namespace HRConnect.Api.Services
     {
       var occupationalLevels = await _occupationalLevelRepo.GetAllOccupationalLevelsAsync();
       return occupationalLevels
-      .OrderBy(ol => ol.Description)
-      .Select(ol => ol.ToOccupationalLevelDto())
-      .ToList();
+        .OrderBy(ol => ol.OccupationalLevelId)
+        .Select(ol => ol.ToOccupationalLevelDto())
+        .ToList();
     }
 
     public async Task<OccupationalLevelDto?> GetOccupationalLevelByIdAsync(int id)
     {
-      var occupationalLevel = await _occupationalLevelRepo.GetOccupationalLevelByIdAsync(id);
-      return occupationalLevel?.ToOccupationalLevelDto();
+     
+            if (id <= 0)
+                throw new ArgumentException("OccupationalLevelId must exist", nameof(id));
+
+            var occupationalLevel = await _occupationalLevelRepo.GetOccupationalLevelByIdAsync(id);
+
+            if (occupationalLevel is null)
+                throw new KeyNotFoundException($"OccupationalLevel with Id {id} does not exist.");
+
+            return occupationalLevel.ToOccupationalLevelDto();
     }
 
     public async Task<OccupationalLevelDto> AddOccupationalLevelAsync(CreateOccupationalLevelDto createOccupationalLevelDto)
     {
         
-        ArgumentNullException.ThrowIfNull(createOccupationalLevelDto);
+          ArgumentNullException.ThrowIfNull(createOccupationalLevelDto);
 
-      if (string.IsNullOrWhiteSpace(createOccupationalLevelDto.Description))
-        throw new ArgumentException("Description is required.");
+        if (string.IsNullOrWhiteSpace(createOccupationalLevelDto.Description))
+          throw new ArgumentException("Description is required.");
 
-      var trimmedDescription = createOccupationalLevelDto.Description.Trim();
+        var trimmedDescription = createOccupationalLevelDto.Description.Trim();
 
-      // Prevent duplicate
-      var existing = await _occupationalLevelRepo.GetOccupationalLevelByDescriptionAsync(trimmedDescription);
-      if (existing != null)
-        throw new InvalidOperationException("Occupational level already exists.");
+        // Prevent duplicate
+        var existing = await _occupationalLevelRepo.GetOccupationalLevelByDescriptionAsync(trimmedDescription);
+        if (existing != null)
+          throw new InvalidOperationException("Occupational level already exists.");
 
-      var occupationalLevel = new OccupationalLevel
-      {
-        Description = trimmedDescription,
-        CreatedDate = DateTime.UtcNow
-      };
+        var occupationalLevel = new OccupationalLevel
+        {
+          Description = trimmedDescription,
+          CreatedDate = DateTime.UtcNow,
+          UpdatedDate = DateTime.UtcNow
+        };
 
-      await _occupationalLevelRepo.AddOccupationalLevelAsync(occupationalLevel);
-      return occupationalLevel.ToOccupationalLevelDto();
+        await _occupationalLevelRepo.AddOccupationalLevelAsync(occupationalLevel);
+        
+        return occupationalLevel.ToOccupationalLevelDto();
     }
 
     public async Task<OccupationalLevelDto?> UpdateOccupationalLevelAsync(int id, UpdateOccupationalLevelDto updateOccupationalLevelDto)
     {
-        ArgumentNullException.ThrowIfNull(updateOccupationalLevelDto);
+          ArgumentNullException.ThrowIfNull(updateOccupationalLevelDto);
 
-      var occupationalLevel = await _occupationalLevelRepo.GetOccupationalLevelByIdAsync(id); 
-        if (occupationalLevel == null) return null;
-    
-     var trimmedDescription = updateOccupationalLevelDto.Description.Trim();
+        var occupationalLevel = await _occupationalLevelRepo.GetOccupationalLevelByIdAsync(id); 
+          if (occupationalLevel == null) return null;
+      
+        var trimmedDescription = updateOccupationalLevelDto.Description.Trim();
 
-      // Prevent duplicate
-      if (!string.Equals(trimmedDescription, occupationalLevel.Description, StringComparison.OrdinalIgnoreCase))
-      {
-          var existing = await _occupationalLevelRepo.GetOccupationalLevelByDescriptionAsync(trimmedDescription);
-          if (existing != null && existing.OccupationalLevelId != id)
-              throw new InvalidOperationException("Another occupational level with this description already exists.");
-      }
-      occupationalLevel.Description = trimmedDescription;
-      occupationalLevel.CreatedDate = DateTime.UtcNow;
+        // Prevent duplicate
+        if (!string.Equals(trimmedDescription, occupationalLevel.Description, StringComparison.OrdinalIgnoreCase))
+        {
+            var existing = await _occupationalLevelRepo.GetOccupationalLevelByDescriptionAsync(trimmedDescription);
+            if (existing != null && existing.OccupationalLevelId != id)
+                throw new InvalidOperationException("Another occupational level with this description already exists.");
+        }
+          //Update properties
+          occupationalLevel.Description = trimmedDescription;
+          occupationalLevel.UpdatedDate = DateTime.UtcNow;
 
-      await _occupationalLevelRepo.UpdateOccupationalLevelAsync(occupationalLevel);
-      return occupationalLevel.ToOccupationalLevelDto();
+          await _occupationalLevelRepo.UpdateOccupationalLevelAsync(occupationalLevel);
+          return occupationalLevel.ToOccupationalLevelDto();
     }
 
 }

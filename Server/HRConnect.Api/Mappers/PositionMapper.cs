@@ -8,7 +8,7 @@ namespace HRConnect.Api.Mappers
 
     public static class PositionMapper
     {
-        public static Position ToPosition(this CreatePositionDto createPositionDto)
+        public static Position ToPositionDto(this CreatePositionDto createPositionDto)
         {
             return new Position
             {
@@ -20,9 +20,9 @@ namespace HRConnect.Api.Mappers
             };
         }
 
-        public static ReadPositionDto ToReadPositionDto(this Position position)
+        public static PositionDto ToPositionDto(this Position position)
         {
-            return new ReadPositionDto
+            return new PositionDto
             {
                 PositionId = position.PositionId,
                 Title = position.Title,

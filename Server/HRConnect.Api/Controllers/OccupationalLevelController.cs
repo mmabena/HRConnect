@@ -28,6 +28,16 @@ namespace HRConnect.Api.Controllers
       return Ok(occupationalLevels);
     }
 
+    [HttpGet("{id}")]
+    public async Task<ActionResult<OccupationalLevelDto>> GetOccupationalLevelById(int id)
+    {
+      var occupationalLevel = await _occupationalLevelService.GetOccupationalLevelByIdAsync(id);
+      if (occupationalLevel == null)
+        return NotFound();
+
+      return Ok(occupationalLevel);
+    }
+
     [HttpPost]
     public async Task<ActionResult<OccupationalLevelDto>> CreateOccupationalLevel([FromBody] CreateOccupationalLevelDto createOccupationalLevelDto)
     {

@@ -26,6 +26,17 @@ namespace HRConnect.Api.Controllers
             return jobGrades;
         }
 
+        [HttpGet("{id}")]
+        public async Task<ActionResult<JobGradeDto>> GetJobGradeById(int id)
+        {
+            var jobGrade = await _jobGradeService.GetJobGradeByIdAsync(id);
+            if (jobGrade == null)
+            {
+                return NotFound();
+            }
+            return Ok(jobGrade);
+        }
+
         // POST /api/jobgrade
         [HttpPost]
         public async Task<ActionResult<JobGradeDto>> CreateJobGrade([FromBody] CreateJobGradeDto createJobGradeDto)

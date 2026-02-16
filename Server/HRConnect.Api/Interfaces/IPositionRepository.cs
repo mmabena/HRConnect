@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
     public interface IPositionRepository
     {
-        Task<IEnumerable<Position>> GetAllPositionsAsync();
+        Task<List<Position>> GetAllPositionsAsync();
 
         Task<Position?> GetPositionByIdAsync(int id);
 
@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
         Task<bool> TitleExistsAsync(string title, int excludeId = 0);
 
-        Task<Position> CreatePositionAsync(Position position);
+        Task<Position> AddPositionAsync(Position position);
 
         Task<Position?> UpdatePositionAsync(int id, Position position);
 

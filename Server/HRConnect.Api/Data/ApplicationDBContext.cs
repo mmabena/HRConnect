@@ -16,6 +16,7 @@ using System.Threading.Tasks;
     public DbSet<OccupationalLevel> OccupationalLevels { get; set; }
     public DbSet<PasswordResetPin> PasswordResetPins { get; set; }
     public DbSet<PasswordHistory> PasswordHistories { get; set; }
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
       base.OnModelCreating(modelBuilder);
