@@ -184,7 +184,7 @@ namespace HRConnect.Api.Services
         {
             var employee = await _context.Employees
                 .Include(e => e.Position)
-                    .ThenInclude(p => p.JobGrade)
+                .ThenInclude(p => p.JobGrade)
                 .FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
 
             if (employee == null)
@@ -199,11 +199,13 @@ namespace HRConnect.Api.Services
                 .FirstAsync(l => l.Code == "AL" && l.IsActive);
 
             var balance = await _context.EmployeeLeaveBalances
-                .FirstAsync(b => b.EmployeeId == employeeId &&
-                                 b.LeaveTypeId == annualLeave.Id);
+                .FirstAsync(b =>
+                    b.EmployeeId == employeeId &&
+                    b.LeaveTypeId == annualLeave.Id);
 
             var yearsOfService = CalculateYearsOfService(employee.StartDate);
 
+            // 🔹 NEW rule (after promotion)
             var newRule = await _context.LeaveEntitlementRules
                 .FirstAsync(r =>
                     r.LeaveTypeId == annualLeave.Id &&
@@ -212,10 +214,19 @@ namespace HRConnect.Api.Services
                     (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
                     r.IsActive);
 
+            // 🔹 OLD rule (before promotion)
+            var oldRule = await _context.LeaveEntitlementRules
+                .FirstAsync(r =>
+                    r.LeaveTypeId == annualLeave.Id &&
+                    r.JobGradeId != employee.Position.JobGradeId &&
+                    r.MinYearsService <= yearsOfService &&
+                    (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
+                    r.IsActive);
+
             int monthsBefore = changeDate.Month - 1;
             int monthsAfter = 12 - monthsBefore;
 
-            decimal before = (balance.EntitledDays / 12m) * monthsBefore;
+            decimal before = (oldRule.DaysAllocated / 12m) * monthsBefore;
             decimal after = (newRule.DaysAllocated / 12m) * monthsAfter;
 
             var total = Math.Round(before + after, 2);
@@ -225,6 +236,7 @@ namespace HRConnect.Api.Services
 
             await _context.SaveChangesAsync();
         }
+
 
         // ============================================================
         // YEARS CALCULATION
