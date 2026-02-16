@@ -47,8 +47,8 @@
     private static readonly Dictionary<string, (string Category, Type EnumType)> CategoryPatterns =
       new()
       {
-        { @"Choice.*Network", ("Network Choice", typeof(Choice)) },
-        { @"Choice.*First", ("First Choice", typeof(Choice)) },
+        { @"Network.*Choice", ("Network Choice", typeof(Choice)) },
+        { @"First.*Choice", ("First Choice", typeof(Choice)) },
         { @"Essential.*Plus", ("Essential", typeof(Essential)) },
         { @"Essential.*Network", ("Essential", typeof(Essential)) },
         { @"Vital.*Plus", ("Vital", typeof(Vital)) },

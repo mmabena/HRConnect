@@ -170,7 +170,7 @@
       int id, UpdateMedicalOptionSalaryBracketRequestDto requestDto)
     {
       //string filterName = null, selectedVariant = null;
-      Task<List<MedicalOption?>> medicalOptionsVariants;
+      //Task<List<MedicalOption?>> medicalOptionsVariants;
       var existingOption = await _medicalOptionRepository.GetMedicalOptionByIdAsync(id);
       if (existingOption == null) return null;
       
@@ -182,8 +182,8 @@
         throw new InvalidOperationException("Salary bracket cannot be updated for this category");
 
       //Checking Min and Max from request
-      if (requestDto.SalaryBracketMin <= 0 ) throw 
-        new ArgumentException("Minimum salary must be greater than or equal to 0.");
+      if (requestDto.SalaryBracketMin < 0 ) throw 
+        new ArgumentException("Minimum salary must be greater than 0.");
       
       if (requestDto.SalaryBracketMax < requestDto.SalaryBracketMin) throw 
         new ArgumentException("Maximum salary must be greater than minimum salary.");

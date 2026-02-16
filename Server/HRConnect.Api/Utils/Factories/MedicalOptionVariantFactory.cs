@@ -61,8 +61,8 @@
     {
       try
       {
-        var (categoryName, enumType) = MedicalOptionEnumMapper.GetCategoryInfoFromVariant(option.
-          MedicalOptionName);
+        var trimmedOptionName = MedicalOptionUtils.OptionNameFormatter(option.MedicalOptionName);
+        var (categoryName, enumType) = MedicalOptionEnumMapper.GetCategoryInfoFromVariant(trimmedOptionName);
 
         if (categoryName == null || enumType == null)
         {
@@ -71,7 +71,13 @@
 
         var variant = GetVariantByName(enumType.Name, categoryName);
         var variantName = variant?.ToString() ?? string.Empty;
-        
+        string altFilterName = null;
+        if (categoryName.Contains("Choice"))
+        {
+          altFilterName = categoryName;
+          return (categoryName, variantName, altFilterName);
+        }
+
         var filterName = option.MedicalOptionCategory?.MedicalOptionCategoryName + " " + 
                          variantName;
         

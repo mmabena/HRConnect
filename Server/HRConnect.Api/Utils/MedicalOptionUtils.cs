@@ -18,14 +18,14 @@
       object? filterName, object? categoryName, IMedicalOptionRepository medicalOptionRepository, 
       MedicalOption? option)
     {
-      if (!categoryName.ToString().Contains("Choice"))
+      /*if (!categoryName.ToString().Contains("Choice"))
       {
         filterName = categoryName.ToString() + " " + filterName.ToString();
       }
       else
       {
         filterName = filterName.ToString();
-      }
+      }*/
       
       var trimmedDownOptions = (await medicalOptionRepository
           .GetAllMedicalOptionsUnderCategoryVarientAsync(filterName.ToString()))

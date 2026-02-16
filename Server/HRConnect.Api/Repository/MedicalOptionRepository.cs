@@ -102,7 +102,10 @@
       /*return await _context.MedicalOptions
         .Include(mo => mo.MedicalOptionCategory)
         .FirstOrDefaultAsync(mo => mo.MedicalOptionId == id);*/
-      return await _context.MedicalOptions.FindAsync(id);
+      return await _context.MedicalOptions
+        .Include(opt => opt.MedicalOptionCategory)
+        .Where(opt => opt.MedicalOptionId == id)
+        .FirstOrDefaultAsync();
     }
 
     public async Task<MedicalOption?> UpdateSalaryBracketAsync(int id, 

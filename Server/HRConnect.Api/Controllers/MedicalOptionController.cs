@@ -54,13 +54,18 @@
           requestDto);
 
         if (results == null) return NotFound();
-        
+
         return Created();
       }
       catch (ArgumentException ex)
       {
         ModelState.AddModelError("Validation", ex.Message);
         return ValidationProblem(ModelState);
+      }
+      catch (InvalidOperationException ex)
+      {
+        //ModelState.AddModelError("Unauthorized Operation", ex.Message);
+        return NotFound($"Unauthorized operation: {ex.Message}");
       }
     }
 
