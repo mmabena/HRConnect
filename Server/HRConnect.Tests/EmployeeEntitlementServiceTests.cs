@@ -351,6 +351,256 @@ namespace HRConnect.Tests
 
             Assert.Equal(firstResult, secondResult);
         }
+        [Fact]
+        public async Task MidYearHireShouldProrateAnnualCorrectly()
+        {
+            var context = GetInMemoryDb();
+
+            // Arrange
+            context.JobGrades.Add(new JobGrade { Id = 1, Name = "Unskilled–Middle" });
+            context.Positions.Add(new Position { PositionId = 1, Title = "Unskilled", JobGradeId = 1 });
+            await context.SaveChangesAsync();
+
+            var hireDate = new DateTime(DateTime.UtcNow.Year, 3, 1);
+
+            var employee = new Employee
+            {
+                EmployeeId = Guid.NewGuid(),
+                PositionId = 1,
+                Gender = "Male",
+                FirstName = "Test",
+                LastName = "User",
+                ReportingManagerId = "RM001",
+                StartDate = DateOnly.FromDateTime(hireDate),
+                IsActive = true
+            };
+
+            context.Employees.Add(employee);
+            await context.SaveChangesAsync();
+
+            context.LeaveTypes.Add(
+                new LeaveType
+                {
+                    Id = 1,
+                    Name = "Annual",
+                    Code = "AL",
+                    Description = "Annual Leave",
+                    IsActive = true
+                });
+
+            context.LeaveEntitlementRules.Add(
+                new LeaveEntitlementRule
+                {
+                    Id = 1,
+                    LeaveTypeId = 1,
+                    JobGradeId = 1,
+                    MinYearsService = 0,
+                    MaxYearsService = null,
+                    DaysAllocated = 12,
+                    IsActive = true
+                });
+
+            await context.SaveChangesAsync();
+
+            var service = new EmployeeEntitlementService(context);
+
+            // Act
+            await service.InitializeEmployeeLeaveBalancesAsync(employee.EmployeeId);
+
+            var balance = context.EmployeeLeaveBalances.Single();
+
+            // March hire = 10 months remaining
+            Assert.Equal(10m, balance.EntitledDays);
+        }
+
+        [Fact]
+        public async Task NonAnnualLeaveShouldNotBeProratedForMidYearHire()
+        {
+            var context = GetInMemoryDb();
+
+            context.JobGrades.Add(new JobGrade { Id = 1, Name = "Unskilled–Middle" });
+            context.Positions.Add(new Position { PositionId = 1, Title = "Unskilled", JobGradeId = 1 });
+            await context.SaveChangesAsync();
+
+            var hireDate = new DateTime(DateTime.UtcNow.Year, 6, 1);
+
+            var employee = new Employee
+            {
+                EmployeeId = Guid.NewGuid(),
+                PositionId = 1,
+                Gender = "Male",
+                FirstName = "Test",
+                LastName = "User",
+                ReportingManagerId = "RM001",
+                StartDate = DateOnly.FromDateTime(hireDate),
+                IsActive = true
+            };
+
+            context.Employees.Add(employee);
+            await context.SaveChangesAsync();
+
+            context.LeaveTypes.Add(
+                new LeaveType
+                {
+                    Id = 1,
+                    Name = "Sick",
+                    Code = "SL",
+                    Description = "Sick Leave",
+                    IsActive = true
+                });
+
+            context.LeaveEntitlementRules.Add(
+                new LeaveEntitlementRule
+                {
+                    Id = 1,
+                    LeaveTypeId = 1,
+                    JobGradeId = 1,
+                    MinYearsService = 0,
+                    MaxYearsService = null,
+                    DaysAllocated = 30,
+                    IsActive = true
+                });
+
+            await context.SaveChangesAsync();
+
+            var service = new EmployeeEntitlementService(context);
+
+            await service.InitializeEmployeeLeaveBalancesAsync(employee.EmployeeId);
+
+            var balance = context.EmployeeLeaveBalances.Single();
+
+            Assert.Equal(30m, balance.EntitledDays);
+        }
+
+        [Fact]
+        public async Task ShouldApplyCorrectRuleBasedOnYearsOfService()
+        {
+            var context = GetInMemoryDb();
+
+            context.JobGrades.Add(new JobGrade { Id = 1, Name = "Unskilled–Middle" });
+            context.Positions.Add(new Position { PositionId = 1, Title = "Unskilled", JobGradeId = 1 });
+            await context.SaveChangesAsync();
+
+            var employee = new Employee
+            {
+                EmployeeId = Guid.NewGuid(),
+                PositionId = 1,
+                Gender = "Male",
+                FirstName = "Test",
+                LastName = "User",
+                ReportingManagerId = "RM001",
+                StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-4)),
+                IsActive = true
+            };
+
+            context.Employees.Add(employee);
+            await context.SaveChangesAsync();
+
+            context.LeaveTypes.Add(
+                new LeaveType
+                {
+                    Id = 1,
+                    Name = "Annual",
+                    Code = "AL",
+                    Description = "Annual Leave",
+                    IsActive = true
+                });
+
+            context.LeaveEntitlementRules.AddRange(
+                new LeaveEntitlementRule
+                {
+                    Id = 1,
+                    LeaveTypeId = 1,
+                    JobGradeId = 1,
+                    MinYearsService = 0,
+                    MaxYearsService = 3,
+                    DaysAllocated = 15,
+                    IsActive = true
+                },
+                new LeaveEntitlementRule
+                {
+                    Id = 2,
+                    LeaveTypeId = 1,
+                    JobGradeId = 1,
+                    MinYearsService = 3,
+                    MaxYearsService = null,
+                    DaysAllocated = 18,
+                    IsActive = true
+                });
+
+            await context.SaveChangesAsync();
+
+            var service = new EmployeeEntitlementService(context);
+
+            await service.InitializeEmployeeLeaveBalancesAsync(employee.EmployeeId);
+
+            var balance = context.EmployeeLeaveBalances.Single();
+
+            Assert.Equal(18m, balance.EntitledDays);
+        }
+
+        [Fact]
+        public async Task PromotionInJanuaryShouldApplyFullNewRule()
+        {
+            var context = GetInMemoryDb();
+
+            context.JobGrades.AddRange(
+                new JobGrade { Id = 1, Name = "Grade1" },
+                new JobGrade { Id = 2, Name = "Grade2" });
+
+            context.Positions.AddRange(
+                new Position { PositionId = 1, Title = "P1", JobGradeId = 1 },
+                new Position { PositionId = 2, Title = "P2", JobGradeId = 2 });
+
+            await context.SaveChangesAsync();
+
+            var employee = new Employee
+            {
+                EmployeeId = Guid.NewGuid(),
+                PositionId = 1,
+                Gender = "Male",
+                FirstName = "Test",
+                LastName = "User",
+                ReportingManagerId = "RM001",
+                StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
+                IsActive = true
+            };
+
+            context.Employees.Add(employee);
+            await context.SaveChangesAsync();
+
+            context.LeaveTypes.Add(
+                new LeaveType
+                {
+                    Id = 1,
+                    Name = "Annual",
+                    Code = "AL",
+                    Description = "Annual Leave",
+                    IsActive = true
+                });
+
+            context.LeaveEntitlementRules.AddRange(
+                new LeaveEntitlementRule { Id = 1, LeaveTypeId = 1, JobGradeId = 1, MinYearsService = 0, DaysAllocated = 15, IsActive = true },
+                new LeaveEntitlementRule { Id = 2, LeaveTypeId = 1, JobGradeId = 2, MinYearsService = 0, DaysAllocated = 20, IsActive = true });
+
+            await context.SaveChangesAsync();
+
+            var service = new EmployeeEntitlementService(context);
+
+            await service.InitializeEmployeeLeaveBalancesAsync(employee.EmployeeId);
+
+            employee.PositionId = 2;
+            employee.UpdatedDate = new DateTime(DateTime.UtcNow.Year, 1, 1);
+            await context.SaveChangesAsync();
+
+            await service.RecalculateAnnualLeaveAsync(employee.EmployeeId);
+
+            var balance = context.EmployeeLeaveBalances.Single();
+
+            Assert.Equal(20m, balance.EntitledDays);
+        }
+
+
 
     }
 }

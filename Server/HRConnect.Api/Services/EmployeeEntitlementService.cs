@@ -244,9 +244,14 @@ namespace HRConnect.Api.Services
         private decimal CalculateYearsOfService(DateOnly startDate)
         {
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
+            if (startDate > today)
+                return 0;
+
             var totalDays = today.DayNumber - startDate.DayNumber;
             return Math.Round(totalDays / 365.25m, 2);
         }
+
 
         // ============================================================
         // MAPPING
