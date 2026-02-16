@@ -1,4 +1,4 @@
-﻿namespace HRConnect.Api.Utils
+﻿namespace HRConnect.Api.Utils.Enums
 {
   /// <summary>
   /// Defines medical option categories that are restricted from Salary Bracket updates.
@@ -10,8 +10,8 @@
   /// protected categories cannot have their salary brackets modified.
   ///
   /// And this has been implemented to cater for any future changes to the policy structure.
-  /// where more policy would require such restriction. Therefore, this enum makes it easier to track and 
-  /// manage any future changes to the policy structure (categories).
+  /// where more policy would require such restriction. Therefore, this enum makes it easier to
+  /// track and manage any future changes to the policy structure (categories).
   /// 
   /// Example usage:
   /// <code>

@@ -90,6 +90,7 @@
     {
       var groupedMedicalOptions = await _context.MedicalOptions
         .Include(mo => mo.MedicalOptionCategory)
+        .Where(mo => mo.MedicalOptionCategory != null && mo.MedicalOptionCategoryId != null) // Filter out null categories
         .GroupBy(mo => mo.MedicalOptionCategoryId)
         .ToListAsync();
       

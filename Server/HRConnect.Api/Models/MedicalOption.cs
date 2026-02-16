@@ -12,17 +12,17 @@
     [ForeignKey(nameof(MedicalOptionCategory))]
     public int MedicalOptionCategoryId { get; set; }
     [Column(TypeName = "decimal(15, 2)")] 
-    public decimal SalaryBracketMin { get; set; }
+    public decimal? SalaryBracketMin { get; set; }
     [Column(TypeName = "decimal(15, 2)")] 
-    public decimal SalaryBracketMax { get; set; }
+    public decimal? SalaryBracketMax { get; set; }
     [Column(TypeName = "decimal(15, 2)")]
     public decimal? MonthlyRiskContributionPrincipal { get; set; }
     [Required]
     [Column(TypeName = "decimal(15, 2)")]
-    public decimal MonthlyRiskContributionAdult { get; set; }
+    public decimal? MonthlyRiskContributionAdult { get; set; }
     [Required]
     [Column(TypeName = "decimal(15, 2)")]
-    public decimal MonthlyRiskContributionChild { get; set; }
+    public decimal? MonthlyRiskContributionChild { get; set; }
     [Column(TypeName = "decimal(15, 2)")]
     public decimal? MonthlyRiskContributionChild2 { get; set; }
     [Column(TypeName = "decimal(15, 2)")] 

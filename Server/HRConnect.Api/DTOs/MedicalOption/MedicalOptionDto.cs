@@ -14,8 +14,8 @@
     public decimal? SalaryBracketMin { get; set; }
     public decimal? SalaryBracketMax { get; set; }
     public decimal? MonthlyRiskContributionPrincipal { get; set; }
-    public decimal MonthlyRiskContributionAdult { get; set; }
-    public decimal MonthlyRiskContributionChild { get; set; }
+    public decimal? MonthlyRiskContributionAdult { get; set; }
+    public decimal? MonthlyRiskContributionChild { get; set; }
     public decimal? MonthlyRiskContributionChild2 { get; set; }
     public decimal? MonthlyMsaContributionPrincipal { get; set; }
     public decimal? MonthlyMsaContributionAdult { get; set; }

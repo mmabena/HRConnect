@@ -15,7 +15,7 @@
     /// into a client-friendly DTO structure that contains the category information
     /// and all associated medical options.
     /// </summary>
-    /// <param name="group"
+    /// <param name="group">
     /// The IGrouping result from the repository containing the MedicalOptions entities
     /// grouped by MedicalOptionCategoryId, Then the collection contains all MedicalOptions
     /// entities belonging to that category.
@@ -44,11 +44,22 @@
     public static MedicalOptionCategoryDto ToMedicalOptionCategoryDto(
       this IGrouping<int, MedicalOption> group)
     {
+      var firstOption = group.FirstOrDefault();
+      if (firstOption == null)
+      {
+        return new MedicalOptionCategoryDto
+        {
+          MedicalOptionCategoryId = group.Key,
+          MedicalOptionCategoryName = "Uncategorized",
+          MedicalOptions = new List<MedicalOptionDto>()
+        };
+      }
+
       return new MedicalOptionCategoryDto
       {
         MedicalOptionCategoryId = group.Key,
         MedicalOptionCategoryName =
-          group.First().MedicalOptionCategory?.MedicalOptionCategoryName ?? "",
+          group.First().MedicalOptionCategory?.MedicalOptionCategoryName ?? "Uncategorized",
         MedicalOptions = group.Select(ToMedicalOptionDto).ToList()
       };
     }
