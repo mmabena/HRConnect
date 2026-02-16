@@ -72,7 +72,7 @@ namespace HRConnect.Tests.Services
     {
       // Arrange
       var newPosition = new Position { Title = "Data Scientist" };
-      _positionRepoMock.Setup(r => r.CreatePositionAsync(It.IsAny<Position>()))
+      _positionRepoMock.Setup(r => r.AddPositionAsync(It.IsAny<Position>()))
                        .ReturnsAsync((Position pos) => 
                        {
                          pos.PositionId = 3; 
@@ -80,7 +80,7 @@ namespace HRConnect.Tests.Services
                        });
 
       // Act
-      var result = await _positionService.CreatePositionAsync(createPositionDto: new CreatePositionDto { Title = "Data Scientist", JobGradeId = 1 });
+      var result = await _positionService.AddPositionAsync(createPositionDto: new CreatePositionDto { Title = "Data Scientist", JobGradeId = 1 });
 
       // Assert
       Assert.NotNull(result);

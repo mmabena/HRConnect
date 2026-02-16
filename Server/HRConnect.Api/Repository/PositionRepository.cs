@@ -69,17 +69,6 @@ namespace HRConnect.Api.Repository
             return existingPosition;
         }
 
-        public async Task<bool> DeletePositionAsync(int id)
-        {
-            var position = await _context.Positions
-                .FirstOrDefaultAsync(p => p.PositionId == id);
-
-            if (position == null)
-                return false;
-
-            _context.Positions.Remove(position);
-            await _context.SaveChangesAsync();
-            return true;
-        }
+        
     }
 }

@@ -9,6 +9,7 @@ namespace HRConnect.Api.Services
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Security.Cryptography.X509Certificates;
     using System.Threading.Tasks;
 
     public class PositionService : IPositionService
@@ -95,12 +96,21 @@ namespace HRConnect.Api.Services
             ValidateUpdateDto(updatePositionDto);
             await EnsureUniqueTitle(updatePositionDto.Title, id);
 
+            if(updatePositionDto.JobGradeId > 0)
+            {
+
             var jobGrade = await _positionRepo.GetPositionByIdAsync(updatePositionDto.JobGradeId);
             if (jobGrade == null)
                 throw new KeyNotFoundException($"JobGrade with ID {updatePositionDto.JobGradeId} not found.");
 
             if(!jobGrade.IsActive)
                 throw new InvalidOperationException("Cannot assign a position to an inactive Job Grade.");
+
+                position.JobGradeId = updatePositionDto.JobGradeId;
+
+            }
+            if(updatePositionDto.OccupationalLevelId > 0)
+            {
             
             var occupationalLevel = await _positionRepo.GetPositionByIdAsync(updatePositionDto.OccupationalLevelId);
             if (occupationalLevel == null)
@@ -108,6 +118,10 @@ namespace HRConnect.Api.Services
             
             if(!occupationalLevel.IsActive)
                 throw new InvalidOperationException("Occupational level does not exist.");
+
+                position.OccupationalLevelId = updatePositionDto.OccupationalLevelId;
+
+            }
 
             // Update properties
             position.Title = updatePositionDto.Title;
