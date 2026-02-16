@@ -30,5 +30,8 @@ namespace HRConnect.Api.Data
 
     }
 
+    public DbSet<PasswordResetPin> PasswordResetPins { get; set; }
+    public DbSet<PasswordHistory> PasswordHistories { get; set; }
+
   }
 }

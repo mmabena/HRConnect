@@ -13,7 +13,6 @@ namespace HRConnect.Api.Mappers
         /// for security reasons. The password is intentionally not included to prevent exposing
         /// sensitive information.
         /// </summary>
-        
         Email = userModel.Email,
         Password = string.Empty
       };
