@@ -10,8 +10,8 @@ using Microsoft.AspNetCore.Identity;
 using HRConnect.Api.Models;
 using HRConnect.Api.Utils;
 using Resend;
-using HRConnect.Api.Interfaces.Finance;
 using HRConnect.Api.Services;
+using HRConnect.Api.Interfaces.PensionProjection;
 
 var builder = WebApplication.CreateBuilder(args);
 

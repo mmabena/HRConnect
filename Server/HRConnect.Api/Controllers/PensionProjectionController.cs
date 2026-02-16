@@ -1,29 +1,14 @@
 namespace HRConnect.Api.Controllers
 {
   using HRConnect.Api.DTOs.Employee.Pension;
-  using HRConnect.Api.Interfaces.Finance;
-  using HRConnect.Api.Utils;
+  using HRConnect.Api.Interfaces.PensionProjection;
   using Microsoft.AspNetCore.Mvc;
 
   [Route("api/pension")]
   [ApiController]
   public class PensionProjectionController(IPensionProjectionService pensionProjectionService) : ControllerBase
   {
-    ///<summary>
-    ///Project options
-    ///</summary>
-    ///<returns>
-    ///All pension percentage options
-    ///</returns>
     private readonly IPensionProjectionService _pensionProjectionService = pensionProjectionService;
-    [HttpGet("options")]
-    public async Task<IActionResult> GetPensionOptions()
-    {
-      float[] pensionOptions = await Task.FromResult(PensionOption.options);
-
-      return Ok(pensionOptions);
-    }
-
     ///<summary>
     ///Project pension
     ///</summary>

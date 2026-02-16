@@ -1,4 +1,4 @@
-namespace HRConnect.Api.Interfaces.Finance
+namespace HRConnect.Api.Interfaces.PensionProjection
 {
   using HRConnect.Api.DTOs.Employee.Pension;
 

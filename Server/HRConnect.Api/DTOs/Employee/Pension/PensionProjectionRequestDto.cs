@@ -10,7 +10,7 @@ namespace HRConnect.Api.DTOs.Employee.Pension
   {
     public int SelectedPensionPercentage { get; set; }
     public DateTime DOB { get; set; }
-    public required string EmploymentEmploymentStatus { get; set; }
+    public required string EmploymentStatus { get; set; }
     public decimal Salary { get; set; }
     public decimal VoluntaryContribution { get; set; }
     public ContributionFrequency VoluntaryContributionFrequency { get; set; }

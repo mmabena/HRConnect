@@ -2,7 +2,7 @@ namespace HRConnect.Api.Services
 {
   using System.Globalization;
   using HRConnect.Api.DTOs.Employee.Pension;
-  using HRConnect.Api.Interfaces.Finance;
+  using HRConnect.Api.Interfaces.PensionProjection;
   using HRConnect.Api.Utils;
 
   public class PensionProjectionService : IPensionProjectionService
@@ -13,6 +13,12 @@ namespace HRConnect.Api.Services
     private static readonly decimal MAX_MONTHLYCONTRIBUTION = 29166.66M;
     private readonly float SALARYINCREASE_PERCENTAGE = 0.05f;
     private readonly float PENSIONGROWTH_PRECENTAGE = 0.06f;
+    private decimal[][]? _monthlyContributions;
+    private decimal[][]? _voluntaryContributions;
+    private decimal _totalProjectedSavings = 0.00M;
+    private int _yearWhenMonthlyContributionWasCapped;
+    private int _monthWhenMonthlyContributionWasCapped;
+
     ///<summary>
     ///Project pension
     ///</summary>
@@ -22,25 +28,26 @@ namespace HRConnect.Api.Services
     ///</returns>
     public PensionProjectionResultDto ProjectPension(PensionProjectionRequestDto pensionProjectRequestDto)
     {
-      if (ValidEmployeeForPensionProjection(pensionProjectRequestDto.DOB, pensionProjectRequestDto.EmploymentEmploymentStatus) != "")
+      if (ValidEmployeeForPensionProjection(pensionProjectRequestDto.DOB, pensionProjectRequestDto.EmploymentStatus) != "")
       {
         return new PensionProjectionResultDto
         {
           WarningMessage = ValidEmployeeForPensionProjection(
             pensionProjectRequestDto.DOB,
-            pensionProjectRequestDto.EmploymentEmploymentStatus)
+            pensionProjectRequestDto.EmploymentStatus)
         };
       }
 
       if (pensionProjectRequestDto.VoluntaryContribution != 0)
       {
-        if (ValidVoluntaryContribution(pensionProjectRequestDto.VoluntaryContribution, PensionOption.options[pensionProjectRequestDto.SelectedPensionPercentage - 1], pensionProjectRequestDto.Salary) != "")
+        if (ValidVoluntaryContribution(pensionProjectRequestDto.VoluntaryContribution, PensionOption.GetPensionPercentage(pensionProjectRequestDto.SelectedPensionPercentage),
+          pensionProjectRequestDto.Salary) != "")
         {
           return new PensionProjectionResultDto
           {
             WarningMessage = ValidVoluntaryContribution(
                 pensionProjectRequestDto.VoluntaryContribution,
-                PensionOption.options[pensionProjectRequestDto.SelectedPensionPercentage - 1],
+                PensionOption.GetPensionPercentage(pensionProjectRequestDto.SelectedPensionPercentage),
                 pensionProjectRequestDto.Salary
               )
           };
@@ -50,126 +57,26 @@ namespace HRConnect.Api.Services
       PensionProjectionResultDto pensionProjectionResultDto = new()
       {
         CurrentAge = CalculateAge.UsingDOB(pensionProjectRequestDto.DOB),
-        YearsUntilRetirement = PENSION_PROJECTION_AGE_LIMIT - CalculateAge.UsingDOB(pensionProjectRequestDto.DOB),
+        YearsUntilRetirement = (DateTime.Today.Month < pensionProjectRequestDto.DOB.Month) ? PENSION_PROJECTION_AGE_LIMIT - CalculateAge.UsingDOB(pensionProjectRequestDto.DOB) - 1
+        : PENSION_PROJECTION_AGE_LIMIT - CalculateAge.UsingDOB(pensionProjectRequestDto.DOB),
         TotalProjectedSavings = 0
       };
 
-      DateTime targetDate = pensionProjectRequestDto.DOB.AddYears(PENSION_PROJECTION_AGE_LIMIT);
-      DateTime today = DateTime.Today;
-      pensionProjectionResultDto.YearsUntilRetirement = targetDate.Year - today.Year;
-      int yearWhenMonthlyContributionWasCapped = 0;
-      int monthWhenMonthlyContributionWasCapped = 0;
+      CalculateMonthlyContributions(pensionProjectRequestDto.DOB, pensionProjectionResultDto.YearsUntilRetirement, pensionProjectRequestDto.Salary,
+        pensionProjectRequestDto.SelectedPensionPercentage, pensionProjectRequestDto.VoluntaryContribution, pensionProjectRequestDto.VoluntaryContributionFrequency);
+      pensionProjectionResultDto.MonthlyContribution = _monthlyContributions;
+      pensionProjectionResultDto.MonthlyVoluntaryContribution = _voluntaryContributions;
+      pensionProjectionResultDto.TotalProjectedSavings = _totalProjectedSavings;
 
-
-      int numberOfMonthsUntilRetirement = (pensionProjectionResultDto.YearsUntilRetirement * 12) + targetDate.Month - today.Month;
-      if (today.Day > 25)
+      if ((_yearWhenMonthlyContributionWasCapped != 0) && (_monthWhenMonthlyContributionWasCapped != 0))
       {
-        numberOfMonthsUntilRetirement--;
-      }
-      int monthsUntilEndOfTheYear = 12 - today.Month;
-
-      if (pensionProjectRequestDto.VoluntaryContributionFrequency == ContributionFrequency.OnceOff)
-      {
-        pensionProjectionResultDto.InitialVoluntaryContribution = pensionProjectRequestDto.VoluntaryContribution;
-        pensionProjectionResultDto.TotalProjectedSavings += pensionProjectRequestDto.VoluntaryContribution;
-      }
-      else if (pensionProjectRequestDto.VoluntaryContributionFrequency == ContributionFrequency.Permanent)
-      {
-        pensionProjectionResultDto.InitialVoluntaryContribution = pensionProjectRequestDto.VoluntaryContribution;
-        pensionProjectionResultDto.MonthlyVoluntaryContribution = new decimal[pensionProjectionResultDto.YearsUntilRetirement + 1][];
-        for (int i = 0; i < pensionProjectionResultDto.YearsUntilRetirement + 1; i++)
-        {
-          pensionProjectionResultDto.MonthlyVoluntaryContribution[i] = new decimal[12];
-        }
-      }
-
-      pensionProjectionResultDto.MonthlyContribution = new decimal[pensionProjectionResultDto.YearsUntilRetirement + 1][];
-      for (int i = 0; i < pensionProjectionResultDto.YearsUntilRetirement + 1; i++)
-      {
-        pensionProjectionResultDto.MonthlyContribution[i] = new decimal[12];
-      }
-      decimal empSalary = pensionProjectRequestDto.Salary;
-
-      for (int i = today.Month; i <= monthsUntilEndOfTheYear + today.Month; i++)
-      {
-        if (i == (DetermineWhenIsApril() + today.Month))
-        {
-          empSalary *= (decimal)(SALARYINCREASE_PERCENTAGE + 1);
-        }
-
-        if (pensionProjectRequestDto.VoluntaryContributionFrequency == ContributionFrequency.Permanent)
-        {
-          decimal voluntaryContributionAfterSalaryIncrease = CalculateExcessAmountFromVoluntaryContribution(empSalary * (decimal)PensionOption.options[pensionProjectRequestDto.SelectedPensionPercentage - 1], pensionProjectRequestDto.VoluntaryContribution);
-          pensionProjectionResultDto.MonthlyVoluntaryContribution[0][i - 1] = voluntaryContributionAfterSalaryIncrease;
-          pensionProjectionResultDto.TotalProjectedSavings += Math.Round(PensionMonthlyContributionCap((empSalary * (decimal)PensionOption.options[pensionProjectRequestDto.SelectedPensionPercentage - 1]) + voluntaryContributionAfterSalaryIncrease), 2);
-          pensionProjectionResultDto.MonthlyContribution[0][i - 1] = PensionMonthlyContributionCap((empSalary * (decimal)PensionOption.options[pensionProjectRequestDto.SelectedPensionPercentage - 1]) + voluntaryContributionAfterSalaryIncrease);
-        }
-        else
-        {
-          pensionProjectionResultDto.TotalProjectedSavings += Math.Round(PensionMonthlyContributionCap(empSalary * (decimal)PensionOption.options[pensionProjectRequestDto.SelectedPensionPercentage - 1]), 2);
-          pensionProjectionResultDto.MonthlyContribution[0][i - 1] = PensionMonthlyContributionCap(empSalary * (decimal)PensionOption.options[pensionProjectRequestDto.SelectedPensionPercentage - 1]);
-        }
-
-        if (i == (monthsUntilEndOfTheYear + today.Month))
-        {
-          pensionProjectionResultDto.TotalProjectedSavings = Math.Round(pensionProjectionResultDto.TotalProjectedSavings * (decimal)(PENSIONGROWTH_PRECENTAGE + 1), 2);
-        }
-
-        if ((pensionProjectionResultDto.MonthlyContribution[0][i - 1] == MAX_MONTHLYCONTRIBUTION) && (yearWhenMonthlyContributionWasCapped == 0) && (monthWhenMonthlyContributionWasCapped == 0))
-        {
-          yearWhenMonthlyContributionWasCapped = today.Year;
-          monthWhenMonthlyContributionWasCapped = i;
-        }
-      }
-
-      numberOfMonthsUntilRetirement -= monthsUntilEndOfTheYear;
-      int year = 1;
-      int monthlyIndex = 0;
-
-      for (int i = 0; i < numberOfMonthsUntilRetirement; i++)
-      {
-        if (monthlyIndex == 3)
-        {
-          empSalary *= (decimal)(SALARYINCREASE_PERCENTAGE + 1);
-        }
-
-        if (pensionProjectRequestDto.VoluntaryContributionFrequency == ContributionFrequency.Permanent)
-        {
-          decimal voluntaryContributionAfterSalaryIncrease = CalculateExcessAmountFromVoluntaryContribution(empSalary * (decimal)PensionOption.options[pensionProjectRequestDto.SelectedPensionPercentage - 1], pensionProjectRequestDto.VoluntaryContribution);
-          pensionProjectionResultDto.MonthlyVoluntaryContribution[year][monthlyIndex] = voluntaryContributionAfterSalaryIncrease;
-          pensionProjectionResultDto.TotalProjectedSavings += Math.Round(PensionMonthlyContributionCap((empSalary * (decimal)PensionOption.options[pensionProjectRequestDto.SelectedPensionPercentage - 1]) + voluntaryContributionAfterSalaryIncrease), 2);
-          pensionProjectionResultDto.MonthlyContribution[year][monthlyIndex] = PensionMonthlyContributionCap((empSalary * (decimal)PensionOption.options[pensionProjectRequestDto.SelectedPensionPercentage - 1]) + voluntaryContributionAfterSalaryIncrease);
-        }
-        else
-        {
-          pensionProjectionResultDto.TotalProjectedSavings += Math.Round(PensionMonthlyContributionCap(empSalary * (decimal)PensionOption.options[pensionProjectRequestDto.SelectedPensionPercentage - 1]), 2);
-          pensionProjectionResultDto.MonthlyContribution[year][monthlyIndex] = PensionMonthlyContributionCap(empSalary * (decimal)PensionOption.options[pensionProjectRequestDto.SelectedPensionPercentage - 1]);
-        }
-
-        if ((pensionProjectionResultDto.MonthlyContribution[year][monthlyIndex] == MAX_MONTHLYCONTRIBUTION) && (yearWhenMonthlyContributionWasCapped == 0) && (monthWhenMonthlyContributionWasCapped == 0))
-        {
-          yearWhenMonthlyContributionWasCapped = today.Year + year;
-          monthWhenMonthlyContributionWasCapped = monthlyIndex + 1;
-          //pensionProjectionResultDto.WarningMessage = $"From {today.Year + year}, {CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(monthlyIndex + 1)} your  was contribution capped at the maximum allowable monthly amount. ";
-        }
-
-        if (monthlyIndex == 11)
-        {
-          pensionProjectionResultDto.TotalProjectedSavings = Math.Round(pensionProjectionResultDto.TotalProjectedSavings * (decimal)(PENSIONGROWTH_PRECENTAGE + 1), 2);
-          year++;
-          monthlyIndex = 0;
-          continue;
-        }
-        monthlyIndex++;
+        pensionProjectionResultDto.WarningMessage = $"From {_yearWhenMonthlyContributionWasCapped}, " +
+          $"{CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(_monthWhenMonthlyContributionWasCapped)} your monthly contribution was " +
+          $"capped at the maximum allowable monthly amount (R29166,66). ";
       }
 
       pensionProjectionResultDto.LumpSum = CalculateRetirementLumpSum(pensionProjectionResultDto.TotalProjectedSavings);
       pensionProjectionResultDto.MonthlyIncomeAfterRetirement = CalculateMonthlyIncomeAfterRetirement(pensionProjectionResultDto.TotalProjectedSavings);
-
-      if ((yearWhenMonthlyContributionWasCapped != 0) && (monthWhenMonthlyContributionWasCapped != 0))
-      {
-        pensionProjectionResultDto.WarningMessage = $"From {yearWhenMonthlyContributionWasCapped}, {CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(monthWhenMonthlyContributionWasCapped)} your monthly contribution was capped at the maximum allowable monthly amount (R29166,66). ";
-      }
 
       return pensionProjectionResultDto;
     }
@@ -295,5 +202,109 @@ namespace HRConnect.Api.Services
       }
     }
 
+    ///<summary>
+    ///Initialize monthly salary contributions array according to years until retirement 
+    ///</summary>
+    ///<param name="yearsUntilRetirement">Number of years until retirement starting today</param>
+    private void InitializeMonthlyContributionArray(int yearsUntilRetirement)
+    {
+      _monthlyContributions = new decimal[yearsUntilRetirement + 1][];
+      for (int i = 0; i < yearsUntilRetirement + 1; i++)
+      {
+        _monthlyContributions[i] = new decimal[12];
+      }
+    }
+
+    ///<summary>
+    ///Initialize monthly voluntary contributions array according to years until retirement 
+    ///</summary>
+    ///<param name="yearsUntilRetirement">Number of years until retirement starting today</param>
+    private void InitializeVoluntaryContributionArray(int yearsUntilRetirement)
+    {
+      _voluntaryContributions = new decimal[yearsUntilRetirement + 1][];
+      for (int i = 0; i < yearsUntilRetirement + 1; i++)
+      {
+        _voluntaryContributions[i] = new decimal[12];
+      }
+    }
+
+    ///<summary>
+    ///Caculates total projected pension savings 
+    ///</summary>
+    ///<param name="dateOfBirth">Date of birth</param>
+    ///<param name="yearsUntilRetirement">Number of years until retirement starting today</param>
+    ///<param name="salary">Employee Salary</param>
+    ///<param name="selectedPercentage">Pension percentage deducted from employee salary</param>
+    ///<param name="voluntaryContribution">Bonus contribution to the employee's salary percentage monthly contribution</param>
+    ///<param name="voluntaryContributionFrequency">Is the voluntary contribution a single payment or frequent monthly payment</param>
+    private void CalculateMonthlyContributions(DateTime dateOfBirth, int yearsUntilRetirement, decimal salary, int selectedPercentage, decimal voluntaryContribution = 0.00M,
+      ContributionFrequency voluntaryContributionFrequency = 0)
+    {
+      DateTime targetDate = dateOfBirth.AddYears(PENSION_PROJECTION_AGE_LIMIT);
+      DateTime today = DateTime.Today;
+      decimal empSalary = salary;
+      InitializeMonthlyContributionArray(yearsUntilRetirement);
+
+      if (voluntaryContributionFrequency == ContributionFrequency.OnceOff)
+      {
+        _totalProjectedSavings += voluntaryContribution;
+      }
+      else if (voluntaryContributionFrequency == ContributionFrequency.Permanent)
+      {
+        InitializeVoluntaryContributionArray(yearsUntilRetirement);
+      }
+
+      int determineWhenIsApril = DetermineWhenIsApril();
+      int currentMonth = (today.Day < 25) ? today.Month : today.Month + 1;
+      bool stopYearLoop = false;
+      for (int year = 0; year < yearsUntilRetirement + 1 && !stopYearLoop; year++)
+      {
+        for (int month = currentMonth; month <= 12; month++)
+        {
+          if ((month == determineWhenIsApril + today.Month) && currentMonth == today.Month)
+          {
+            empSalary = Math.Round(empSalary * (decimal)(SALARYINCREASE_PERCENTAGE + 1), 2);
+          }
+          else if (month == 4)
+          {
+            empSalary = Math.Round(empSalary * (decimal)(SALARYINCREASE_PERCENTAGE + 1), 2);
+          }
+
+          decimal monthlyContribution = Math.Round(empSalary * (decimal)PensionOption.GetPensionPercentage(selectedPercentage), 2);
+
+          if (voluntaryContributionFrequency == ContributionFrequency.Permanent)
+          {
+            decimal voluntaryContributionAfterSalaryIncrease = CalculateExcessAmountFromVoluntaryContribution(monthlyContribution, voluntaryContribution);
+            _monthlyContributions[year][month - 1] = PensionMonthlyContributionCap(monthlyContribution + voluntaryContributionAfterSalaryIncrease);
+            _voluntaryContributions[year][month - 1] = voluntaryContributionAfterSalaryIncrease;
+            _totalProjectedSavings += Math.Round(PensionMonthlyContributionCap(monthlyContribution + voluntaryContribution), 2);
+          }
+          else
+          {
+            _monthlyContributions[year][month - 1] = PensionMonthlyContributionCap(monthlyContribution);
+            _totalProjectedSavings += Math.Round(monthlyContribution, 2);
+          }
+
+          if ((_monthlyContributions[year][month - 1] == MAX_MONTHLYCONTRIBUTION) && (_yearWhenMonthlyContributionWasCapped == 0) && (_monthWhenMonthlyContributionWasCapped == 0))
+          {
+            _yearWhenMonthlyContributionWasCapped = today.Year + year;
+            _monthWhenMonthlyContributionWasCapped = month;
+          }
+
+          if (month == 12)
+          {
+            _totalProjectedSavings = Math.Round(_totalProjectedSavings * (decimal)(PENSIONGROWTH_PRECENTAGE + 1), 2);
+            currentMonth = 1;
+            continue;
+          }
+
+          if (year == yearsUntilRetirement && month == targetDate.Month)
+          {
+            stopYearLoop = true;
+            break;
+          }
+        }
+      }
+    }
   }
 }
