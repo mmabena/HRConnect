@@ -28,12 +28,13 @@ namespace HRConnect.Api.Services
     ///</returns>
     public PensionProjectionResultDto ProjectPension(PensionProjectionRequestDto pensionProjectRequestDto)
     {
-      if (ValidEmployeeForPensionProjection(pensionProjectRequestDto.DOB, pensionProjectRequestDto.EmploymentStatus) != "")
+      int currentAge = CalculateAge.UsingDOB(pensionProjectRequestDto.DOB);
+      if (ValidEmployeeForPensionProjection(currentAge, pensionProjectRequestDto.EmploymentStatus) != "")
       {
         return new PensionProjectionResultDto
         {
           WarningMessage = ValidEmployeeForPensionProjection(
-            pensionProjectRequestDto.DOB,
+            currentAge,
             pensionProjectRequestDto.EmploymentStatus)
         };
       }
@@ -56,9 +57,9 @@ namespace HRConnect.Api.Services
 
       PensionProjectionResultDto pensionProjectionResultDto = new()
       {
-        CurrentAge = CalculateAge.UsingDOB(pensionProjectRequestDto.DOB),
-        YearsUntilRetirement = (DateTime.Today.Month < pensionProjectRequestDto.DOB.Month) ? PENSION_PROJECTION_AGE_LIMIT - CalculateAge.UsingDOB(pensionProjectRequestDto.DOB) - 1
-        : PENSION_PROJECTION_AGE_LIMIT - CalculateAge.UsingDOB(pensionProjectRequestDto.DOB),
+        CurrentAge = currentAge,
+        YearsUntilRetirement = (DateTime.Today.Month < pensionProjectRequestDto.DOB.Month) ? PENSION_PROJECTION_AGE_LIMIT - currentAge - 1
+        : PENSION_PROJECTION_AGE_LIMIT - currentAge,
         TotalProjectedSavings = 0
       };
 
@@ -89,14 +90,13 @@ namespace HRConnect.Api.Services
     ///<returns>
     ///Warning message to state if employee employment status is invalid
     ///</returns>
-    private string ValidEmployeeForPensionProjection(DateTime DOB, string EmploymentStatus)
+    private string ValidEmployeeForPensionProjection(int currentAge, string EmploymentStatus)
     {
       string warningMessage = "";
-      int age = CalculateAge.UsingDOB(DOB);
 
-      if (age >= PENSION_PROJECTION_AGE_LIMIT)
+      if (currentAge >= PENSION_PROJECTION_AGE_LIMIT)
       {
-        warningMessage += "You have reached retirement age — projections not available.\n";
+        warningMessage += "You have reached retirement age — projections not available.";
       }
       if (EmploymentStatus != EMPLOYEE_EMPLOYEMENT_TYPE)
       {
