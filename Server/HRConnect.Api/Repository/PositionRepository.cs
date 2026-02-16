@@ -14,7 +14,7 @@ namespace HRConnect.Api.Repository
             _context = context;
         }
 
-        public async Task<IEnumerable<Position>> GetAllPositionsAsync()
+        public async Task<List<Position>> GetAllPositionsAsync()
         {
             return await _context.Positions
                 .Include(p => p.JobGrade)
@@ -44,7 +44,7 @@ namespace HRConnect.Api.Repository
                 .AnyAsync(p => p.Title == title && p.PositionId != excludeId);
         }
 
-        public async Task<Position> CreatePositionAsync(Position position)
+        public async Task<Position> AddPositionAsync(Position position)
         {
             _context.Positions.Add(position);
             await _context.SaveChangesAsync();

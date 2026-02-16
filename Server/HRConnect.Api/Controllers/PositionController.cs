@@ -47,7 +47,7 @@ namespace HRConnect.Api.Controllers
       
         public async Task<IActionResult> CreatePosition([FromBody] CreatePositionDto dto)
         {
-            var created = await _positionService.CreatePositionAsync(dto);
+            var created = await _positionService.AddPositionAsync(dto);
             return CreatedAtAction(nameof(GetPositionById), new { id = created.PositionId }, created);
         }
 

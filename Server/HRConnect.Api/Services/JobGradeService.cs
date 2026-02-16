@@ -25,7 +25,7 @@ namespace HRConnect.Api.Services
         {
             var jobGrades = await _jobGradeRepo.GetAllJobGradesAsync();
             return jobGrades
-                .OrderBy(jg => jg.Name)
+                .OrderBy(jg => jg.JobGradeId)
                 .Select(jg => jg.ToJobGradeDto())
                 .ToList();
         }
@@ -33,42 +33,52 @@ namespace HRConnect.Api.Services
          // ----------------------
         // GET BY ID
         // ----------------------
-        public async Task<JobGradeDto?> GetJobGradeByIdAsync(int id)
+      public async Task<JobGradeDto?> GetJobGradeByIdAsync(int id)
         {
+            if (id <= 0)
+                throw new ArgumentException("JobGradeId must exist", nameof(id));
+
             var jobGrade = await _jobGradeRepo.GetJobGradeByIdAsync(id);
-            return jobGrade?.ToJobGradeDto();
+
+            if (jobGrade is null)
+                throw new KeyNotFoundException($"JobGrade with Id {id} does not exist.");
+
+            return jobGrade.ToJobGradeDto();
         }
 
          // ----------------------
         // GET /api/JobGrades/name
         // ----------------------
        public async Task<JobGradeDto> AddJobGradeAsync(CreateJobGradeDto createJobGradeDto)
-       {
-            // Null check
-            ArgumentNullException.ThrowIfNull(createJobGradeDto);
+        {
+                // Null check
+                ArgumentNullException.ThrowIfNull(createJobGradeDto);
 
-            if (string.IsNullOrWhiteSpace(createJobGradeDto.Name))
-                throw new ArgumentException("Name is required.");
+                if (string.IsNullOrWhiteSpace(createJobGradeDto.Name))
+                    throw new ArgumentException("Name is required.");
 
-            var trimmedName = createJobGradeDto.Name.Trim();
+                var trimmedName = createJobGradeDto.Name.Trim();
 
-            // Prevent duplicate
-            var existing = await _jobGradeRepo.GetJobGradeByNameAsync(trimmedName);
-            if (existing != null)
-                throw new InvalidOperationException("Job grade already exists.");
+                // Prevent duplicate
+                var existing = await _jobGradeRepo.GetJobGradeByNameAsync(trimmedName);
+                if (existing != null)
+                    throw new InvalidOperationException("Job grade already exists.");
 
-            var jobGrade = new JobGrade
-            {
-                Name = trimmedName,
-                IsActive = createJobGradeDto.IsActive,
-                CreatedDate = DateTime.UtcNow,
-                UpdatedDate = DateTime.UtcNow
-            };
+                if (!createJobGradeDto.IsActive)
+                throw new InvalidOperationException("New job grades must be active.");
 
-            await _jobGradeRepo.AddJobGradeAsync(jobGrade);
+                var jobGrade = new JobGrade
+                {
+                    Name = trimmedName,
+                    IsActive = createJobGradeDto.IsActive,
+                    CreatedDate = DateTime.UtcNow,
+                    UpdatedDate = DateTime.UtcNow
+                };
 
-            return jobGrade.ToJobGradeDto();
-        }
+                await _jobGradeRepo.AddJobGradeAsync(jobGrade);
+
+                return jobGrade.ToJobGradeDto();
+            }
 
          public async Task<JobGradeDto?> EditJobGradeAsync(int id, UpdateJobGradeDto updateJobGradeDto)
         {

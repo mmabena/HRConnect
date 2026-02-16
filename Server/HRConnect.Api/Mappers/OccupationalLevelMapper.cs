@@ -6,11 +6,23 @@ namespace HRConnect.Api.Mappers
 
   public static class OccupationalLevelMapper
   {
+    public static OccupationalLevelDto ToOccupationalLevelDto(this CreateOccupationalLevelDto createoccupationalLevelDto)
+    {
+      return new OccupationalLevelDto
+      {
+         Description = createoccupationalLevelDto.Description,
+         CreatedDate = DateTime.UtcNow
+      };        
+    }
+
     public static OccupationalLevelDto ToOccupationalLevelDto(this OccupationalLevel occupationalLevel)
     {
       return new OccupationalLevelDto
       {
-        Description = occupationalLevel.Description
+        OccupationalLevelId = occupationalLevel.OccupationalLevelId,
+        Description = occupationalLevel.Description,
+        CreatedDate = occupationalLevel.CreatedDate,
+        UpdatedDate = occupationalLevel.UpdatedDate,
       };
     }
   }
