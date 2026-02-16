@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Identity;
 using HRConnect.Api.Models;
 using HRConnect.Api.Utils;
 using OfficeOpenXml;
+using Resend;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -89,6 +90,13 @@ builder.Services.AddAuthorizationBuilder()
     .AddPolicy("SuperUserOnly", policy => policy.RequireRole("SuperUser"))
     .AddPolicy("NormalUserOnly", policy => policy.RequireRole("NormalUser"));
 
+// Register Resend
+builder.Services.AddOptions<ResendClientOptions>().Configure<IConfiguration>((o, c) =>
+{
+  o.ApiToken = c["Resend:ApiKey"] ?? throw new InvalidOperationException("Resend API key is not configured.");
+});
+builder.Services.AddHttpClient<ResendClient>();
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IUserService, HRConnect.Api.Services.UserService>();
@@ -111,6 +119,12 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+  var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+  dbContext.Database.Migrate();
+}
+
 if (app.Environment.IsDevelopment())
 {
   app.UseSwagger();
@@ -120,7 +134,7 @@ if (app.Environment.IsDevelopment())
   });
 }
 
-// app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 app.UseCors("AllowReact");
 app.UseAuthentication();
 app.UseAuthorization();
