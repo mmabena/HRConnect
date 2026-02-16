@@ -40,6 +40,22 @@ namespace HRConnect.Tests.Services
     }
 
     [Fact]
+    public async Task GetOccupationalLevelByIdAsyncReturnsOccupationalLevel()
+    {
+      // Arrange
+      var occupationalLevel = new OccupationalLevel { OccupationalLevelId = 1, Description = "Entry Level" };
+      _occupationalLevelRepoMock.Setup(r => r.GetOccupationalLevelByIdAsync(1))
+                       .ReturnsAsync(occupationalLevel);
+
+      // Act
+      var result = await _occupationalLevelService.GetOccupationalLevelByIdAsync(1);
+
+      // Assert
+      Assert.NotNull(result);
+      Assert.Equal("Entry Level", result.Description);
+    }
+
+    [Fact]
     public async Task AddOccupationalLevelAsyncAddsOccupationalLevel()
     {
       // Arrange

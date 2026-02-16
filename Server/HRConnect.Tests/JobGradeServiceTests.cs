@@ -40,6 +40,21 @@ namespace HRConnect.Tests.Services
     }
 
     [Fact]
+    public async Task GetJobGradeByIdAsyncReturnsJobGrade()
+    {
+      // Arrange
+      var jobGrade = new JobGrade { JobGradeId = 1, Name = "Junior" };
+      _jobGradeRepoMock.Setup(r => r.GetJobGradeByIdAsync(1))
+                       .ReturnsAsync(jobGrade);
+
+      // Act
+      var result = await _jobGradeService.GetJobGradeByIdAsync(1);
+
+      // Assert
+      Assert.NotNull(result);
+      Assert.Equal("Junior", result.Name);
+    }
+    [Fact]
     public async Task AddJobGradeAsyncAddsJobGrade()
     {
       // Arrange

@@ -33,7 +33,7 @@ namespace HRConnect.Tests.Services
       var list = result.ToList();
       // Assert
       Assert.NotNull(result);
-      Assert.Equal(2, result.Count());
+      Assert.Equal(2, result.Count);
       Assert.Equal("Software Engineer", list[0].Title);
     }
 
@@ -75,7 +75,7 @@ namespace HRConnect.Tests.Services
       _positionRepoMock.Setup(r => r.CreatePositionAsync(It.IsAny<Position>()))
                        .ReturnsAsync((Position pos) => 
                        {
-                         pos.PositionId = 3; // Simulate database assigning an ID
+                         pos.PositionId = 3; 
                          return pos;
                        });
 
