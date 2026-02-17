@@ -111,13 +111,13 @@
     public async Task<MedicalOption?> UpdateSalaryBracketAsync(int id, 
       UpdateMedicalOptionSalaryBracketRequestDto requestDto)
     {
-      var exisitingOption = await _context.MedicalOptions.FindAsync(id);
-      if (exisitingOption == null) return null;
+      var existingOption = await _context.MedicalOptions.FindAsync(id);
+      if (existingOption == null) return null;
       
-      _context.Entry(exisitingOption).CurrentValues.SetValues(requestDto);
+      _context.Entry(existingOption).CurrentValues.SetValues(requestDto);
       await _context.SaveChangesAsync();
       
-      return exisitingOption;
+      return existingOption;
     }
 
     public async Task<MedicalOption?> GetMedicalOptionCategoryByIdAsync(int id)
@@ -137,7 +137,8 @@
       //optionName = _optionUtils.OptionNameFormatter(optionName); //TODO document this
       //optionName =  optionName.Replace(optionName.Last().ToString(), "").TrimEnd();
       return await _context.MedicalOptions
-        .FromSqlRaw("SELECT * FROM MedicalOptions WHERE MedicalOptionCategoryName like N'{0}'", optionName)
+        .Include(mo => mo.MedicalOptionCategory)
+        .Where(mo => mo.MedicalOptionName.Contains(optionName))
         .ToListAsync();
     }
   }

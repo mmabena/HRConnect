@@ -57,7 +57,7 @@
       var overlappingSalaryBrackets = trimmedDownOptions
         .Where(o => o.MedicalOptionID != optionId) // excludes current option
         .FirstOrDefault(o => !(requestDto.SalaryBracketMax <
-          option.SalaryBracketMin || requestDto.SalaryBracketMax > option.SalaryBracketMin));
+          o.SalaryBracketMin || requestDto.SalaryBracketMax > o.SalaryBracketMin));
 
       if (overlappingSalaryBrackets != null)
       {
