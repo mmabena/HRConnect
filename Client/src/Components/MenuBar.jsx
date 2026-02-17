@@ -193,7 +193,6 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
                   <li>
                     <span
                       className="menu-subitem"
-                      style={{ cursor: "pointer" }}
                       onClick={() => navigate("/positionManagement")}
                     >
                       Position Management
@@ -202,7 +201,6 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
                   <li>
                     <span
                       className="menu-subitem"
-                      style={{ cursor: "pointer" }}
                       onClick={() => navigate("/company-contribution")}
                     >
                       Company Details
@@ -211,7 +209,6 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
                   <li>
                     <span
                       className="menu-subitem"
-                      style={{ cursor: "pointer" }}
                       onClick={() => navigate("/salarybudgets")}
                     >
                       Salary Budgets
