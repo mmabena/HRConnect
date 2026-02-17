@@ -75,5 +75,19 @@ namespace HRConnect.Api.Controllers
             await _employeeService.DeleteEmployeeAsync(id);
             return NoContent();
         }
+        [HttpPost("process-carryover-notifications")]
+        public async Task<IActionResult> TriggerCarryoverNotifications()
+        {
+            await _employeeService.ProcessCarryOverNotificationAsync();
+            return Ok("Carryover notifications processed.");
+        }
+
+        [HttpPost("process-annual-reset")]
+        public async Task<IActionResult> TriggerAnnualReset()
+        {
+            await _employeeService.ProcessAnnualResetAsync();
+            return Ok("Annual reset processed.");
+        }
+
     }
 }

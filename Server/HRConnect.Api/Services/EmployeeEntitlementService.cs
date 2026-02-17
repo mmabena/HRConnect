@@ -5,14 +5,17 @@ namespace HRConnect.Api.Services
     using HRConnect.Api.Interfaces;
     using HRConnect.Api.Models;
     using Microsoft.EntityFrameworkCore;
+    using HRConnect.Api.Utils;
 
     public class EmployeeEntitlementService : IEmployeeEntitlementService
     {
         private readonly ApplicationDBContext _context;
+        private readonly IEmailService _emailService;
 
-        public EmployeeEntitlementService(ApplicationDBContext context)
+        public EmployeeEntitlementService(ApplicationDBContext context, IEmailService emailService)
         {
             _context = context;
+            _emailService = emailService;
         }
 
         // ============================================================
@@ -76,7 +79,7 @@ namespace HRConnect.Api.Services
         }
 
         // ============================================================
-        // UPDATE POSITION
+        // UPDATE POSITION (Promotion/Demotion)
         // ============================================================
         public async Task<EmployeeResponse> UpdateEmployeePositionAsync(Guid employeeId, int newPositionId)
         {
@@ -97,7 +100,7 @@ namespace HRConnect.Api.Services
         }
 
         // ============================================================
-        // DELETE
+        // DELETE (Will be removed)
         // ============================================================
         public async Task DeleteEmployeeAsync(Guid id)
         {
@@ -205,7 +208,7 @@ namespace HRConnect.Api.Services
 
             var yearsOfService = CalculateYearsOfService(employee.StartDate);
 
-            // 🔹 NEW rule (after promotion)
+            //NEW rule (after promotion/demotion)
             var newRule = await _context.LeaveEntitlementRules
                 .FirstAsync(r =>
                     r.LeaveTypeId == annualLeave.Id &&
@@ -214,7 +217,7 @@ namespace HRConnect.Api.Services
                     (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
                     r.IsActive);
 
-            // 🔹 OLD rule (before promotion)
+            //OLD rule (before promotion/demotion)
             var oldRule = await _context.LeaveEntitlementRules
                 .FirstAsync(r =>
                     r.LeaveTypeId == annualLeave.Id &&
@@ -251,7 +254,102 @@ namespace HRConnect.Api.Services
             var totalDays = today.DayNumber - startDate.DayNumber;
             return Math.Round(totalDays / 365.25m, 2);
         }
+        //Annual Carryover Logic Methods
+        private decimal CalculateCarryover(decimal remaining)
+        {
+            if (remaining <= 0)
+                return 0;
 
+            return remaining <= 5 ? remaining : 5;
+        }
+        public async Task ProcessCarryOverNotificationAsync()
+        {
+            var today = DateTime.UtcNow.Date;
+
+            if (today.Month != 12 || today.Day != 1)
+                return;
+
+            var annualLeave = await _context.LeaveTypes
+            .FirstOrDefaultAsync(l => l.Code == "AL" && l.IsActive);
+
+            if (annualLeave == null)
+                throw new InvalidOperationException("Annual Leave not configured");
+
+            var balances = await _context.EmployeeLeaveBalances
+            .Include(b => b.Employee)
+            .Where(b =>
+                b.LeaveTypeId == annualLeave.Id &&
+                b.RemainingDays > 5)
+            .ToListAsync();
+
+            foreach (var balance in balances)
+            {
+                var forfeited = balance.RemainingDays - 5;
+                var subject = "Annual Leave Carryover Warning";
+                var body = $@"
+                Dear {balance.Employee.FirstName},
+                
+                You currently have {balance.RemainingDays} days of Annual Leave remaining.
+                
+                Only 5 days can be carried over into the next year. 
+                {forfeited} days will be forfeited if its not used before 31 December.
+                
+                Regards,
+                HRConnect
+                ";
+
+                await _emailService.SendEmailAsync(
+                    balance.Employee.ReportingManagerId, //Change this Later
+                    subject,
+                    body
+                );
+            }
+        }
+        public async Task ProcessAnnualResetAsync()
+        {
+            var today = DateTime.UtcNow.Date;
+
+            if (today.Month != 1 || today.Day != 1)
+                return;
+
+            var annualLeave = await _context.LeaveTypes
+                .FirstOrDefaultAsync(l => l.Code == "AL" && l.IsActive);
+
+            if (annualLeave == null)
+                throw new InvalidOperationException("Annual Leave not configured.");
+
+            var balances = await _context.EmployeeLeaveBalances
+                .Include(b => b.Employee)
+                    .ThenInclude(e => e.Position)
+                    .ThenInclude(p => p.JobGrade)
+                .Where(b => b.LeaveTypeId == annualLeave.Id)
+                .ToListAsync();
+
+            foreach (var balance in balances)
+            {
+                var employee = balance.Employee;
+
+                var years = CalculateYearsOfService(employee.StartDate);
+
+                var rule = await _context.LeaveEntitlementRules
+                    .FirstAsync(r =>
+                        r.LeaveTypeId == annualLeave.Id &&
+                        r.JobGradeId == employee.Position.JobGradeId &&
+                        r.MinYearsService <= years &&
+                        (r.MaxYearsService == null || r.MaxYearsService >= years) &&
+                        r.IsActive);
+
+                var carryover = CalculateCarryover(balance.RemainingDays);
+
+                var newEntitlement = rule.DaysAllocated + carryover;
+
+                balance.EntitledDays = newEntitlement;
+                balance.UsedDays = 0;
+                balance.RemainingDays = newEntitlement;
+            }
+
+            await _context.SaveChangesAsync();
+        }
 
         // ============================================================
         // MAPPING
