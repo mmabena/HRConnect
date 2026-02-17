@@ -6,6 +6,8 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
   const [reportOpen, setReportOpen] = useState(false);
   const [companyOpen, setCompanyOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
+  const [deductionsOpen, setDeductionsOpen] = useState(false);
+  const [payOpen, setPayOpen] = useState(false);
   const [manualReportToggle, setManualReportToggle] = useState(false);
   const [manualAdminToggle, setManualAdminToggle] = useState(false);
 
@@ -68,6 +70,16 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
     onAccessDenied && onAccessDenied("");
   };
 
+  const toggleDeductions = (e) => {
+    e.stopPropagation(); // prevents parent click
+    setDeductionsOpen((prev) => !prev);
+  };
+
+  const togglePay = () => {
+    setPayOpen((prev) => !prev);
+    onAccessDenied && onAccessDenied("");
+  };
+
   const handleSubmenuClick = (path) => {
     navigate(path);
     onAccessDenied && onAccessDenied("");
@@ -90,7 +102,7 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
                 alt="Personal icon"
                 className="menu-icon"
               />
-              <span className="menu-heading">Personal</span>
+              <span className="menu-heading">Personal Information</span>
             </div>
           </li>
 
@@ -115,28 +127,45 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
                       className="menu-subitem"
                       onClick={() => handleSubmenuClick("/addEmployee")}
                     >
-                      Add Employee
+                      Add New Employee
                     </span>
                   </li>
                   <li>
                     <span
                       className="menu-subitem"
-                      onClick={() => handleSubmenuClick("/employeeList")}
+                      onClick={() => handleSubmenuClick("/terminateemployee")}
                     >
-                      Employee List
+                      Terminate Employee
+                    </span>
+                  </li>
+                  <li>
+                    <span
+                      className="menu-subitem"
+                      onClick={() => handleSubmenuClick("/transferemployee")}
+                    >
+                      Transfer Employee
+                    </span>
+                  </li>
+                  <li>
+                    <span
+                      className="menu-subitem"
+                      onClick={() => handleSubmenuClick("/trnsferhistory")}
+                    >
+                      Transfer History
                     </span>
                   </li>
                 </ul>
               )}
             </li>
           )}
+          
 
           {/* ✅ Company Management */}
           {isAdminOrSuperUser && (
             <li>
               <div className="menu-item-wrapper" onClick={toggleCompany}>
                 <img
-                  src="/images/autostop.png"
+                  src="/images/building-2.png"
                   alt="Company Management"
                   className="menu-icon"
                 />
@@ -150,27 +179,45 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
                   <li>
                     <span
                       className="menu-subitem"
-                      onClick={() => handleSubmenuClick("/addCompany")}
+                      onClick={() => handleSubmenuClick("/taxtable-management")}
                     >
-                      Add Company
+                      Tax Table Management
                     </span>
                   </li>
               
                   <li>
                     <span
                       className="menu-subitem"
-                      onClick={() => handleSubmenuClick("/companyManagement")}
+                      onClick={() => handleSubmenuClick("/leavemanagement")}
                     >
-                      Company List
+                      Leave Management
                     </span>
                   </li>
-                        <li>
+                  <li>
+                    <span
+                      className="menu-subitem"
+                      style={{ cursor: "pointer" }}
+                      onClick={() => navigate("/positionmanage")}
+                    >
+                      Position Management
+                    </span>
+                  </li>
+                  <li>
                     <span
                       className="menu-subitem"
                       style={{ cursor: "pointer" }}
                       onClick={() => navigate("/company-contribution")}
                     >
-                      Company Contribution
+                      Company Details
+                    </span>
+                  </li>
+                  <li>
+                    <span
+                      className="menu-subitem"
+                      style={{ cursor: "pointer" }}
+                      onClick={() => navigate("/salarybudgets")}
+                    >
+                      Salary Budgets
                     </span>
                   </li>
                 </ul>
@@ -179,22 +226,103 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
           )}
 
           {/* Payroll Management */}
-          {isAdminOrSuperUser && (
+            {isAdminOrSuperUser && (
              <li>
             <div 
               className="menu-item-wrapper"
-              onClick={() => navigate("/compensationPlanning")} // <-- Add this onClick handler
+              onClick={togglePay} // <-- Add this onClick handler
             >
               <img
-                src="/images/regular_expression.png"
+                src="/images/hand-coins.png"
                 alt="Payroll icon"
                 className="menu-icon"
               />
-              <span className="menu-heading">Compensation Planning</span>
-            </div>
-          </li>
+              <span className="menu-heading">Payroll Management
+                <span className="menu-dropdown">{payOpen ? "▲" : "▼"}</span>
+               </span>
+              </div>
+                 {payOpen && (
+                <ul className="submenu show">
+                  <li>
+                    <span
+                      className="menu-subitem"
+                      onClick={() => handleSubmenuClick("/earnings")}
+                    >
+                      Earnings
+                    </span>
+                  </li>
+              
+                  <li>
+                  <div className="menu-item-wrapper"  onClick={toggleDeductions}>
+                    <span>Deductions</span>
+                    <span className="menu-dropdown">{deductionsOpen ? "▲" : "▼"}</span>
+                  </div>
+                  {deductionsOpen && (
+                    <ul className="submenu show">
+                      <li>
+                        <span className="menu-subitem" onClick={() => handleSubmenuClick("/pension-funds")}>
+                          Pension Funds
+                         </span>
+                          </li>
+                          <li>
+                            <span
+                              className="menu-subitem"
+                              onClick={() => handleSubmenuClick("/assign-pension")}
+                            >
+                              Assign Pension
+                            </span>
+                      </li>
+                      <li>
+                            <span
+                              className="menu-subitem"
+                              onClick={() => handleSubmenuClick("/medical-aid")}
+                            >
+                              Medical Aid
+                            </span>
+                          </li>
+                        </ul>
+                      )}
+                    </li>
+                                    
+                 <li>
+                    <span
+                      className="menu-subitem"
+                      onClick={() => handleSubmenuClick("/company-contributions")}
+                    >
+                    Company Contributions
+                    
+                    </span>
+                </li>
+                 <li>
+                    <span
+                      className="menu-subitem"
+                      onClick={() => handleSubmenuClick("/bcea")}
+                    >
+                    BCEA
+                    </span>
+                </li>
+                 <li>
+                    <span
+                      className="menu-subitem"
+                      onClick={() => handleSubmenuClick("/oid")}
+                    >
+                    OID
+                    </span>
+                </li>
+                 <li>
+                    <span
+                      className="menu-subitem"
+                      onClick={() => handleSubmenuClick("/stock")}
+                    >
+                    Stock
+                    </span>
+                  
+                </li>  
+                </ul>
+              )}
+            </li>
           )}
-
+                
           {/* Document Management */}
           {isAdminOrSuperUser && (
             <li>
@@ -210,11 +338,11 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
           )}
 
           {/* Admin tools (SuperUser only) */}
-          {role === "superuser" && (
+            {isAdminOrSuperUser && (
             <li>
               <div className="menu-item-wrapper" onClick={toggleAdmin}>
                 <img
-                  src="/images/attach_file.png"
+                  src="/images/user-star.png"
                   alt="Admin Tools icon"
                   className="menu-icon"
                 />
@@ -230,7 +358,7 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
                       className="menu-subitem"
                       onClick={() => handleSubmenuClick("/userManagement")}
                     >
-                      User Management
+                      Roles
                     </span>
                   </li>
                 </ul>
@@ -238,6 +366,7 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
             </li>
           )}
         </ul>
+            
       </div>
 
       <div className="menu-footer">
