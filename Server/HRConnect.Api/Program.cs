@@ -13,6 +13,8 @@ using HRConnect.Api.Models;
 using HRConnect.Api.Utils;
 using OfficeOpenXml;
 using Resend;
+using HRConnect.Api.Services;
+using HRConnect.Api.Interfaces.PensionProjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -107,6 +109,7 @@ builder.Services.AddScoped<ITaxDeductionService, TaxDeductionService>();
 builder.Services.AddScoped<ITaxDeductionRepository, TaxDeductionRepository>();
 builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.Services.AuthService>();
+builder.Services.AddTransient<IPensionProjectionService, PensionProjectionService>();
 builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowReact",
