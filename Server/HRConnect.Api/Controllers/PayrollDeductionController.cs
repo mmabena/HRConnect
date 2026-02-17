@@ -27,23 +27,15 @@ namespace HRConnect.Api.Controllers
     [HttpGet]
     public async Task<IActionResult> GetAllDeductions()
     {
-      List<PayrollDeduction> deductions = await _payrollDeductionService.GetAllDeductionsAsync();
-      return Ok(deductions.Select(d => d.ToPayrollDeductionsDto()));
+      var deductions = await _payrollDeductionService.GetAllDeductionsAsync();
+      return Ok(deductions);
     }
     [HttpPost("{employeeId}")]
     public async Task<IActionResult> TakeDeductions(string employeeId)
     {
-      try
-      {
-        var added_deduction = await _payrollDeductionService.AddDeductionsAsync(employeeId);
-        return CreatedAtAction(nameof(GetDeductionsByEmployeeId),
-        new { employeeId = added_deduction!.EmployeeId }, added_deduction);
-      }
-      catch (ArgumentException ex)
-      {
-        ModelState.AddModelError(string.Empty, ex.Message);
-        return ValidationProblem(ModelState);
-      }
+      var added_deduction = await _payrollDeductionService.AddDeductionsAsync(employeeId);
+      return CreatedAtAction(nameof(GetDeductionsByEmployeeId),
+      new { employeeId = added_deduction!.EmployeeId }, added_deduction);
     }
   }
 }
