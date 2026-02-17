@@ -107,7 +107,6 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
           </li>
 
           {/* Employee Management */}
-          {isAdminOrSuperUser && (
             <li>
               <div className="menu-item-wrapper" onClick={toggleReport}>
                 <img
@@ -157,11 +156,9 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
                 </ul>
               )}
             </li>
-          )}
           
 
           {/* ✅ Company Management */}
-          {isAdminOrSuperUser && (
             <li>
               <div className="menu-item-wrapper" onClick={toggleCompany}>
                 <img
@@ -179,7 +176,7 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
                   <li>
                     <span
                       className="menu-subitem"
-                      onClick={() => handleSubmenuClick("/taxtable-management")}
+                      onClick={() => handleSubmenuClick("/taxTableUpload")}
                     >
                       Tax Table Management
                     </span>
@@ -197,7 +194,7 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
                     <span
                       className="menu-subitem"
                       style={{ cursor: "pointer" }}
-                      onClick={() => navigate("/positionmanage")}
+                      onClick={() => navigate("/positionManagement")}
                     >
                       Position Management
                     </span>
@@ -223,10 +220,8 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
                 </ul>
               )}
             </li>
-          )}
 
           {/* Payroll Management */}
-            {isAdminOrSuperUser && (
              <li>
             <div 
               className="menu-item-wrapper"
@@ -321,7 +316,6 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
                 </ul>
               )}
             </li>
-          )}
                 
           {/* Document Management */}
           {isAdminOrSuperUser && (
@@ -338,7 +332,6 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
           )}
 
           {/* Admin tools (SuperUser only) */}
-            {isAdminOrSuperUser && (
             <li>
               <div className="menu-item-wrapper" onClick={toggleAdmin}>
                 <img
@@ -364,7 +357,6 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
                 </ul>
               )}
             </li>
-          )}
         </ul>
             
       </div>
