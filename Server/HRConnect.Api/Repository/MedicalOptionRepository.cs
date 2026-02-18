@@ -127,7 +127,7 @@
         .FirstOrDefaultAsync(mo => mo.MedicalOptionCategoryId == id);
     }
 
-    public async Task<List<MedicalOption?>> GetAllMedicalOptionsUnderCategoryVarientAsync( 
+    public async Task<List<MedicalOption?>> GetAllMedicalOptionsUnderCategoryVariantAsync( 
       string optionName)
     {
       //TODO: Place in a util the below code
@@ -140,6 +140,48 @@
         .Include(mo => mo.MedicalOptionCategory)
         .Where(mo => mo.MedicalOptionName.Contains(optionName))
         .ToListAsync();
+    }
+
+    public async Task<bool> MedicalOptionCategoryExistsAsync(int categoryId)
+    {
+      var categoryExists = await _context.MedicalOptionCategories
+        .FirstOrDefaultAsync(moc => moc.MedicalOptionCategoryId == categoryId);
+
+      if (categoryExists == null) return false;
+
+      return true;
+    }
+
+    public async Task<bool> MedicalOptionExistsAsync(int optionId)
+    {
+      var optionExists = await _context.MedicalOptions
+        .AnyAsync(o => o.MedicalOptionCategoryId == optionId);
+
+      if (optionExists == null) return false;
+
+      return true;
+    }
+
+    public async Task<List<MedicalOption>> GetAllOptionsUnderCategoryAsync(int categoryId)
+    {
+      if (await (MedicalOptionCategoryExistsAsync(categoryId)) != true) return null;
+        // if true: 
+        // return list else null
+      var allOptions = await _context.MedicalOptions
+        .Where(co => co.MedicalOptionCategoryId == categoryId)
+        .ToListAsync();
+      return allOptions;
+      //Will be transformed to the bulk update dto in the service layer
+      
+    }
+
+    public async Task<IReadOnlyList<MedicalOption>> BulkUpdateByCategoryIdAsync(int categoryId,
+      IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto)
+    {
+      return null;
+      /*return await _context.MedicalOptions
+        .Where(o => o.MedicalOptionCategoryId == categoryId)
+        .ToListAsync();*/
     }
   }
 }

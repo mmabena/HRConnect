@@ -19,7 +19,16 @@
     Task<MedicalOption?> UpdateSalaryBracketAsync(int id, 
       UpdateMedicalOptionSalaryBracketRequestDto requestDto);
     Task<MedicalOption?> GetMedicalOptionCategoryByIdAsync(int id);
-    Task<List<MedicalOption?>> GetAllMedicalOptionsUnderCategoryVarientAsync(string optionName);
+    Task<List<MedicalOption?>> GetAllMedicalOptionsUnderCategoryVariantAsync(string optionName);
+    //helper functions within Repository
+    Task<Boolean> MedicalOptionCategoryExistsAsync(int categoryId);
+    Task<Boolean> MedicalOptionExistsAsync(int optionId);
+    
+    Task<List<MedicalOption>> GetAllOptionsUnderCategoryAsync(int categoryId);
+    
+    Task<IReadOnlyList<MedicalOption>> BulkUpdateByCategoryIdAsync(int categoryId,
+      IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto);
+    
     //Task<List<MedicalOption?>> GetMedicalOptionsByCategoryAsync(int categoryId);
     //Task<List<MedicalOption>> GetMedicalOptionBySalaryBracketAsync(
     //decimal salaryBracketMin, decimal salaryBracketMax);
