@@ -38,7 +38,7 @@ namespace HRConnect.Api.Services
     {
       if (string.IsNullOrWhiteSpace(email) || !email.EndsWith("@singular.co.za", StringComparison.OrdinalIgnoreCase))
       {
-        throw new ArgumentException("Email must be a @singular.co.za address.");
+        return null;
       }
 
 
@@ -51,7 +51,7 @@ namespace HRConnect.Api.Services
       // If currently locked
       if (info.LockoutEnd.HasValue && info.LockoutEnd.Value > DateTime.UtcNow)
       {
-        throw new ArgumentException("Account is locked. Try again later.");
+        return null;
       }
 
       // If lockout expired and user hasn't been prompted to reset yet

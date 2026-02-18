@@ -5,14 +5,22 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using HRConnect.Api.Interfaces;
+using HRConnect.Api.Repositories;
+using HRConnect.Api.Services;
 using HRConnect.Api.Repository;
 using Microsoft.AspNetCore.Identity;
 using HRConnect.Api.Models;
 using HRConnect.Api.Utils;
 using Microsoft.Build.Framework;
 using HRConnect.Api.Services;
+using OfficeOpenXml;
+using Resend;
+using HRConnect.Api.Services;
+using HRConnect.Api.Interfaces.PensionProjection;
 
 var builder = WebApplication.CreateBuilder(args);
+
+ExcelPackage.License.SetNonCommercialPersonal("YourName");
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -86,15 +94,27 @@ builder.Services.AddAuthorizationBuilder()
     .AddPolicy("SuperUserOnly", policy => policy.RequireRole("SuperUser"))
     .AddPolicy("NormalUserOnly", policy => policy.RequireRole("NormalUser"));
 
+// Register Resend
+builder.Services.AddOptions<ResendClientOptions>().Configure<IConfiguration>((o, c) =>
+{
+  o.ApiToken = c["Resend:ApiKey"] ?? throw new InvalidOperationException("Resend API key is not configured.");
+});
+builder.Services.AddHttpClient<ResendClient>();
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IUserService, HRConnect.Api.Services.UserService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<ITaxTableUploadService, TaxTableUploadService>();
+builder.Services.AddScoped<ITaxTableUploadRepository, TaxTableUploadRepository>();
+builder.Services.AddScoped<ITaxDeductionService, TaxDeductionService>();
+builder.Services.AddScoped<ITaxDeductionRepository, TaxDeductionRepository>();
 builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.Services.AuthService>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IPayrollDeductionsRepository, PayrollDeductionsRepository>();
 builder.Services.AddScoped<IPayrollDeductionsService, PayrollDeductionsService>();
+builder.Services.AddTransient<IPensionProjectionService, PensionProjectionService>();
 builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowReact",
@@ -107,6 +127,12 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+  var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+  dbContext.Database.Migrate();
+}
+
 if (app.Environment.IsDevelopment())
 {
   app.UseSwagger();
@@ -116,7 +142,7 @@ if (app.Environment.IsDevelopment())
   });
 }
 
-// app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 app.UseCors("AllowReact");
 app.UseAuthentication();
 app.UseAuthorization();
