@@ -19,5 +19,6 @@ namespace HRConnect.Api.Interfaces
         Task RecalculateAnnualLeaveAsync(Guid employeeId);
         Task ProcessCarryOverNotificationAsync();
         Task ProcessAnnualResetAsync();
+
     }
 }

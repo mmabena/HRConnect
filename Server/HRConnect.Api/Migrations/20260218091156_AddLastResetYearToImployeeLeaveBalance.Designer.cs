@@ -4,6 +4,7 @@ using HRConnect.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRConnect.Api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260218091156_AddLastResetYearToImployeeLeaveBalance")]
+    partial class AddLastResetYearToImployeeLeaveBalance
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -77,16 +80,10 @@ namespace HRConnect.Api.Migrations
                     b.Property<decimal>("AccruedDays")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("CarryoverDays")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<Guid>("EmployeeId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("EntitledDays")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("ForfeitedDays")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int?>("LastResetYear")

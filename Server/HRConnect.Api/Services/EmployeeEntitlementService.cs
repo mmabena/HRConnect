@@ -308,9 +308,7 @@ namespace HRConnect.Api.Services
         public async Task ProcessAnnualResetAsync()
         {
             var today = DateTime.UtcNow.Date;
-
-            if (today.Month != 1 || today.Day != 1)
-                return;
+            var currentYear = today.Year;
 
             var annualLeave = await _context.LeaveTypes
                 .FirstOrDefaultAsync(l => l.Code == "AL" && l.IsActive);
@@ -327,8 +325,11 @@ namespace HRConnect.Api.Services
 
             foreach (var balance in balances)
             {
-                var employee = balance.Employee;
+                // IDEMPOTENCY CHECK
+                if (balance.LastResetYear == currentYear)
+                    continue;
 
+                var employee = balance.Employee;
                 var years = CalculateYearsOfService(employee.StartDate);
 
                 var rule = await _context.LeaveEntitlementRules
@@ -339,18 +340,28 @@ namespace HRConnect.Api.Services
                         (r.MaxYearsService == null || r.MaxYearsService >= years) &&
                         r.IsActive);
 
-                var carryover = CalculateCarryover(balance.RemainingDays);
+                var remainingBeforeReset = balance.RemainingDays;
+
+                var carryover = CalculateCarryover(remainingBeforeReset);
+                var forfeited = remainingBeforeReset > 5
+                    ? remainingBeforeReset - 5
+                    : 0;
 
                 var newEntitlement = rule.DaysAllocated + carryover;
+
+                // STORE AUDIT VALUES
+                balance.CarryoverDays = carryover;
+                balance.ForfeitedDays = forfeited;
 
                 balance.EntitledDays = newEntitlement;
                 balance.UsedDays = 0;
                 balance.RemainingDays = newEntitlement;
+
+                balance.LastResetYear = currentYear;
             }
 
             await _context.SaveChangesAsync();
         }
-
         // ============================================================
         // MAPPING
         // ============================================================

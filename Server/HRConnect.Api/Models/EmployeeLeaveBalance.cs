@@ -20,5 +20,8 @@ namespace HRConnect.Api.Models
         public decimal AccruedDays { get; set; }
         public decimal UsedDays { get; set; }
         public decimal RemainingDays { get; set; }
+        public decimal CarryoverDays { get; set; }
+        public decimal ForfeitedDays { get; set; }
+        public int? LastResetYear { get; set; }
     }
 }
