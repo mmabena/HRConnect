@@ -21,7 +21,7 @@
       {
         SelectedPensionPercentage = 3,
         DOB = DateTime.Parse("1997-08-26", CultureInfo.InvariantCulture),
-        EmploymentEmploymentStatus = "Permanent",
+        EmploymentStatus = "Permanent",
         Salary = 30000.00M,
         VoluntaryContribution = 5000.00M,
         VoluntaryContributionFrequency = ContributionFrequency.Permanent
