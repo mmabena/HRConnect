@@ -1,7 +1,7 @@
 ﻿namespace HRConnect.Api.Mappers
 {
   using HRConnect.Api.DTOs.MedicalOption;
-  using Models;
+  using HRConnect.Api.Models;
 
 
   public static class MedicalOptionMapper
@@ -112,6 +112,28 @@
         TotalMonthlyContributionsAdult = option.TotalMonthlyContributionsAdult,
         TotalMonthlyContributionsChild = option.TotalMonthlyContributionsChild,
         TotalMonthlyContributionsChild2 = option.TotalMonthlyContributionsChild2
+      };
+    }
+
+    public static UpdateMedicalOptionVariantsDto ToUpdateMedicalOptionVariantDto(
+      this MedicalOption bulkUpdate)
+    {
+      return new UpdateMedicalOptionVariantsDto
+      {
+        MedicalOptionId = bulkUpdate.MedicalOptionId,
+        SalaryBracketMin = bulkUpdate.SalaryBracketMin,
+        SalaryBracketMax = bulkUpdate.SalaryBracketMax,
+        MonthlyRiskContributionPrincipal = bulkUpdate.MonthlyRiskContributionPrincipal,
+        MonthlyRiskContributionAdult = bulkUpdate.MonthlyRiskContributionAdult,
+        MonthlyRiskContributionChild = bulkUpdate.MonthlyRiskContributionChild,
+        MonthlyRiskContributionChild2 = bulkUpdate.MonthlyRiskContributionChild2,
+        MonthlyMsaContributionPrincipal = bulkUpdate.MonthlyMsaContributionPrincipal,
+        MonthlyMsaContributionAdult = bulkUpdate.MonthlyMsaContributionAdult,
+        MonthlyMsaContributionChild = bulkUpdate.MonthlyMsaContributionChild,
+        TotalMonthlyContributionsPrincipal = bulkUpdate.TotalMonthlyContributionsPrincipal,
+        TotalMonthlyContributionsAdult = bulkUpdate.TotalMonthlyContributionsAdult,
+        TotalMonthlyContributionsChild = bulkUpdate.TotalMonthlyContributionsChild,
+        TotalMonthlyContributionsChild2 = bulkUpdate.TotalMonthlyContributionsChild2
       };
     }
   }

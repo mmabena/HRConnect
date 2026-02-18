@@ -9,7 +9,7 @@
   using HRConnect.Api.Models;
   using HRConnect.Api.Utils;
   using HRConnect.Api.Utils.Enums;
-  using Utils.Factories;
+  using HRConnect.Api.Utils.Factories;
 
 
   public class MedicalOptionService:IMedicalOptionService
@@ -220,6 +220,63 @@
     public async Task<MedicalOption?> GetMedicalOptionByIdAsync(int id)
     {
       return await _medicalOptionRepository.GetMedicalOptionByIdAsync(id);
+    }
+
+    public async Task<bool> MedicalOptionCategoryExistsAsync(int categoryId)
+    {
+      return await _medicalOptionRepository.MedicalOptionCategoryExistsAsync(categoryId);
+    }
+
+    public async Task<bool> MedicalOptionExistsAsync(int optionId)
+    {
+      return await _medicalOptionRepository.MedicalOptionExistsAsync(optionId);
+    }
+
+    public async Task<List<MedicalOption>> GetAllOptionsUnderCategoryAsync(int categoryId)
+    {
+      return await _medicalOptionRepository.GetAllOptionsUnderCategoryAsync(categoryId);
+    }
+
+    public async Task<bool> MedicalOptionExistsWithinCategoryAsync(int categoryId, int optionId)
+    {
+      // This method assume the category ID and option ID is valid
+      return await _medicalOptionRepository.MedicalOptionExistsWithinCategoryAsync(categoryId, optionId);
+    }
+
+    public async Task<IReadOnlyList<MedicalOption?>> BulkUpdateByCategoryIdAsync(int categoryId,
+      IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto)
+    {
+      // Check if the update is done outside the update period (Nov - Dev) || Approach used is enum(Named Period) + Extension Method
+      
+      
+      
+      // Validations (Strict)
+      // Check if category is valid
+      if (await _medicalOptionRepository.MedicalOptionCategoryExistsAsync(categoryId) is false)
+        throw
+          new ArgumentException("Bulk update operation cannot be executed on this category");
+      //get db copy of the options under the category
+      var dbData = await _medicalOptionRepository
+        .GetAllOptionsUnderCategoryAsync(categoryId);
+      
+      // First check if the count of entity is the same as that in the db
+      if (dbData.Count != bulkUpdateDto.Count)
+        throw new InvalidOperationException(
+          "One or more medical options not found in the specified category");
+      // Check if all id's within the payload are valid
+      foreach (var entity in bulkUpdateDto)
+      {
+        // Check the ID first 
+        if (await _medicalOptionRepository.MedicalOptionExistsAsync(entity.MedicalOptionId) is false)
+          throw new InvalidOperationException("One or more medical options are invalid");
+        
+        // Then validate if it belongs in the category
+        if (await _medicalOptionRepository.MedicalOptionExistsWithinCategoryAsync(categoryId, entity.MedicalOptionId) is false)
+          throw new InvalidOperationException("One or more medical options are invalid within the specified category");
+          
+      }
+
+      return null;
     }
   }  
 }

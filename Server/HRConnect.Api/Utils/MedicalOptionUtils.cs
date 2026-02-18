@@ -28,7 +28,7 @@
       }*/
       
       var trimmedDownOptions = (await medicalOptionRepository
-          .GetAllMedicalOptionsUnderCategoryVarientAsync(filterName.ToString()))
+          .GetAllMedicalOptionsUnderCategoryVariantAsync(filterName.ToString()))
         .Where(opt => opt.MedicalOptionCategoryId == option.MedicalOptionCategoryId)
         .Select(opt => new MedicalOptionSalaryDto
         {

@@ -76,7 +76,7 @@
       return categoryName;
     }
 
-    public static T? GetEnumVariant<T>(string categoryName) where T : struct, Enum
+    public static T? GetEnumVariant<T>(string categoryName) where T : struct, System.Enum
     {
       return typeof(T) switch
       {
@@ -101,7 +101,7 @@
       };
     }
 
-    public static bool ContainsCategory<T>(string categoryName) where T : struct, Enum
+    public static bool ContainsCategory<T>(string categoryName) where T : struct, System.Enum
     {
       return GetEnumVariant<T>(categoryName).HasValue;
     }
