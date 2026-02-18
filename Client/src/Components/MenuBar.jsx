@@ -179,7 +179,7 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
           
 
           {/* ✅ Company Management */}
-          {isAdminOrSuperUser && (
+          {/* {isAdminOrSuperUser && ( */}
             <li>
               <div className="menu-item-wrapper" onClick={toggleCompany}>
                 <img
@@ -238,7 +238,7 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
                 </ul>
               )}
             </li>
-          )}
+          {/* )} */}
 
           {/* Payroll Management */}
           {isAdminOrSuperUser && (

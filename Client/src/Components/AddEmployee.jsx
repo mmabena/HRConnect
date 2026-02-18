@@ -340,7 +340,7 @@ const AddEmployee = () => {
     employee.idType === "passport" ? "Passport Number" : "ID Number";
 
   return (
-    <div className="full-screen-bg">
+    <div className="menu-background custom-scrollbar">
       {/* Background shapes and layout */}
       <div className="shape-1"></div>
       <div className="shape-2"></div>
