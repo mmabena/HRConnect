@@ -79,13 +79,7 @@ export default function TaxTableUpload() {
   };
 
   return (
-    <div className="full-screen-bg tax-table-page">
-      {/* Reusable background shapes */}
-      <div className="shape-1" />
-      <div className="shape-2" />
-      <div className="shape-3" />
-      <div className="shape-4" />
-      <div className="shape-5" />
+    <div className="menu-background custom-scrollbar">
 
       <div className="tax-table-frame">
   <div className="tax-table-content-centered">
