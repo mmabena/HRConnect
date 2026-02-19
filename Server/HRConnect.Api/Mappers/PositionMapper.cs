@@ -22,27 +22,20 @@ namespace HRConnect.Api.Mappers
 
         public static PositionDto ToPositionDto(this Position position)
         {
-            return new PositionDto
-            {
-                PositionId = position.PositionId,
-                Title = position.Title,
-                JobGradeId = position.JobGradeId,
-                OccupationalLevelId = position.OccupationalLevelId,
-                CreatedDate = position.CreatedDate,
-                UpdatedDate = position.UpdatedDate,
-                IsActive = position.IsActive,
-                JobGrade = position.JobGrade != null ? new JobGradeDto
-                {
-                    Name = position.JobGrade.Name,
-                    IsActive = position.JobGrade.IsActive
-                } : null,
-               OccupationalLevel = position.OccupationalLevels != null ? new OccupationalLevelDto
-               {
+           return new PositionDto
+    {
+        PositionId = position.PositionId,
+        Title = position.Title,
+        JobGradeId = position.JobGradeId,
+        OccupationalLevelId = position.OccupationalLevelId,
+        CreatedDate = position.CreatedDate,
+        UpdatedDate = position.UpdatedDate,
+        IsActive = position.IsActive,
 
-                 Description = position.OccupationalLevels.Description,
-                } : null
+       JobGrade = position.JobGrade?.ToJobGradeDto(),
+    OccupationalLevel = position.OccupationalLevels?.ToOccupationalLevelDto()
 
-            };
+    };
         }
     }
 }

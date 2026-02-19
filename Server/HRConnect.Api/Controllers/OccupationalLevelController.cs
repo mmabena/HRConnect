@@ -9,7 +9,7 @@ namespace HRConnect.Api.Controllers
   using Microsoft.AspNetCore.Mvc;
 
   [ApiController]
-  [Route("api/[controller]")]
+  [Route("api/[occupationallevels]")]
   [Authorize(Roles = "SuperUser")] // Require authentication and SuperAdmin role
  
   public class OccupationalLevelController : ControllerBase

@@ -6,7 +6,7 @@ namespace HRConnect.Api.Controllers
     using Microsoft.AspNetCore.Authorization;
 
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/jobgrades")]
     [Authorize(Roles = "SuperUser")] // Require authentication and SuperAdmin role
 
     public class JobGradeController : ControllerBase

@@ -18,24 +18,28 @@ using System.Threading.Tasks;
     public DbSet<PasswordHistory> PasswordHistories { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-      base.OnModelCreating(modelBuilder);
-      // Position - JobGrade
-      _ = modelBuilder.Entity<Position>()
-      .HasOne(p => p.JobGrade)
-      .WithMany(jg=> jg.Positions)
-      .HasForeignKey(p => p.JobGradeId);
+{
+    base.OnModelCreating(modelBuilder);
 
-      // Position - OccupationalLevel
-      _ = modelBuilder.Entity<Position>()
-      .HasOne(p => p.OccupationalLevels)
-      .WithMany(o => o.Positions)
-      .HasForeignKey(p => p.OccupationalLevelId);
+    // Position - JobGrade
+    modelBuilder.Entity<Position>()
+        .HasOne(p => p.JobGrade)
+        .WithMany(jg => jg.Positions)
+        .HasForeignKey(p => p.JobGradeId)
+        .OnDelete(DeleteBehavior.Restrict);  // <-- prevent cascade
 
-      // Unique index on Position.Title
-      _ =modelBuilder.Entity<Position>()
-      .HasIndex(p => p.Title)
-      .IsUnique();
-    }
+    // Position - OccupationalLevel
+    modelBuilder.Entity<Position>()
+        .HasOne(p => p.OccupationalLevels)
+        .WithMany(o => o.Positions)
+        .HasForeignKey(p => p.OccupationalLevelId)
+        .OnDelete(DeleteBehavior.Restrict);  // <-- prevent cascade
+
+    // Unique index on Position.Title
+    modelBuilder.Entity<Position>()
+        .HasIndex(p => p.Title)
+        .IsUnique();
+}
+
   }
 }

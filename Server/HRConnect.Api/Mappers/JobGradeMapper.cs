@@ -21,7 +21,9 @@ namespace HRConnect.Api.Mappers
         {
             JobGradeId = jobGrade.JobGradeId,   
             Name = jobGrade.Name,
-            IsActive = jobGrade.IsActive
+            IsActive = jobGrade.IsActive,
+            CreatedDate = jobGrade.CreatedDate,
+            UpdatedDate = jobGrade.UpdatedDate
         };
         }
     }
