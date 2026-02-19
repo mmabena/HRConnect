@@ -68,6 +68,5 @@
         return NotFound($"Unauthorized operation: {ex.Message}");
       }
     }
-
   }
 }

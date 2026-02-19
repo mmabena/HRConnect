@@ -10,6 +10,8 @@
   using HRConnect.Api.Utils;
   using HRConnect.Api.Utils.Enums;
   using HRConnect.Api.Utils.Factories;
+  using Models.MedicalOptions.Records;
+  using Utils.Enums.Mappers;
 
 
   public class MedicalOptionService:IMedicalOptionService
@@ -222,6 +224,11 @@
       return await _medicalOptionRepository.GetMedicalOptionByIdAsync(id);
     }
 
+    public async Task<MedicalOption?> GetMedicalOptionCategoryByIdAsync(int categoryId)
+    {
+      return await _medicalOptionRepository.GetMedicalOptionCategoryByIdAsync(categoryId);
+    }
+
     public async Task<bool> MedicalOptionCategoryExistsAsync(int categoryId)
     {
       return await _medicalOptionRepository.MedicalOptionCategoryExistsAsync(categoryId);
@@ -246,8 +253,18 @@
     public async Task<IReadOnlyList<MedicalOption?>> BulkUpdateByCategoryIdAsync(int categoryId,
       IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto)
     {
+      //Define validations dictionary
+      var validationDictionary =
+        new Dictionary<string, (bool isValid, string? Message, Func<string, Exception> Throw)>();
+      int updateCounter = 0;
       // Check if the update is done outside the update period (Nov - Dev) || Approach used is enum(Named Period) + Extension Method
-      
+      if (!(DateRangeUpdatePeriod.CategoryOptionsUpdatePeriod.Contains(DateTime.Now)))
+      {
+        throw new InvalidOperationException(
+          "Bulk update operation cannot be executed outside the update period");
+      }
+
+
       
       
       // Validations (Strict)
@@ -255,6 +272,7 @@
       if (await _medicalOptionRepository.MedicalOptionCategoryExistsAsync(categoryId) is false)
         throw
           new ArgumentException("Bulk update operation cannot be executed on this category");
+      
       //get db copy of the options under the category
       var dbData = await _medicalOptionRepository
         .GetAllOptionsUnderCategoryAsync(categoryId);
@@ -263,6 +281,11 @@
       if (dbData.Count != bulkUpdateDto.Count)
         throw new InvalidOperationException(
           "One or more medical options not found in the specified category");
+      
+      // variables to store the Previous and Current Variant
+      string previousVariantName = null;
+      string currentVariantName = null;
+      
       // Check if all id's within the payload are valid
       foreach (var entity in bulkUpdateDto)
       {
@@ -273,7 +296,53 @@
         // Then validate if it belongs in the category
         if (await _medicalOptionRepository.MedicalOptionExistsWithinCategoryAsync(categoryId, entity.MedicalOptionId) is false)
           throw new InvalidOperationException("One or more medical options are invalid within the specified category");
+        // TODO : Might consider adding the option to use as a way to confirm if what is updated really exists and that no one is trying to update a non existing option with a valid id
+        // TODO: Add Dict as a storage for validations
+        
+        //--- Salary Bracket Validation (Alliance and Double are restricted) ---
+        
+        // Check if cat if Double or Alliance has a salary bracket update
+        // Check via ID since we do not have names:
+        var getOptionTable = await GetMedicalOptionCategoryByIdAsync(categoryId);
+            
+        if ((bool)(getOptionTable.MedicalOptionCategory?.MedicalOptionCategoryName.Contains(
+              "Double")) ||
+            (bool)getOptionTable.MedicalOptionCategory?.MedicalOptionCategoryName.Contains(
+              "Alliance"))
+        {
+          throw new InvalidOperationException("Salary bracket cannot be updated for this category");
+        }
+        else
+        {
+          // If not restricted, proceed with salary bracket check
+          // Get variant info like Name in this case (Will be used in the Salary Validations)
+          var (categoryName, variantName, filterName ) = MedicalOptionVariantFactory
+            .GetVariantInfoSafe(getOptionTable);
+          // use the filterName as the tracking Name
+          currentVariantName = filterName;
           
+          //check if it is the first iteration or not 
+          if (previousVariantName != null)
+          {
+           previousVariantName = currentVariantName; 
+          }
+          else
+          {
+            //check if the current variant is the same as the same as the previous
+            if (previousVariantName != currentVariantName)
+            {
+              //update variant and reset counter
+            }
+          }
+          
+          // Mark the start of contribution validations :
+          var salaryBracketValidatorRecord = new SalaryBracketValidatorRecord(
+            entity.MedicalOptionId,
+            getOptionTable.MedicalOptionName,
+            entity.SalaryBracketMin,
+            entity.SalaryBracketMax);
+        }
+
       }
 
       return null;
