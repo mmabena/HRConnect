@@ -10,299 +10,295 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace HRConnect.Api.Migrations
 {
-    [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+  [DbContext(typeof(ApplicationDBContext))]
+  partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+  {
+    protected override void BuildModel(ModelBuilder modelBuilder)
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
-        {
 #pragma warning disable 612, 618
-            modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.11")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+      modelBuilder
+          .HasAnnotation("ProductVersion", "9.0.11")
+          .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+      SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("HRConnect.Api.Models.Employee", b =>
-                {
-                    b.Property<string>("EmployeeId")
-                        .HasColumnType("nvarchar(450)");
+      modelBuilder.Entity("HRConnect.Api.Models.Employee", b =>
+          {
+            b.Property<string>("EmployeeId")
+                      .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("Branch")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<string>("Branch")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("CareerManager")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<string>("CareerManager")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ContactNumber")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+            b.Property<string>("ContactNumber")
+                      .IsRequired()
+                      .HasMaxLength(10)
+                      .HasColumnType("nvarchar(10)");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+            b.Property<DateTime>("CreatedAt")
+                      .HasColumnType("datetime2");
 
-                    b.Property<DateOnly>("DateOfBirth")
-                        .HasColumnType("date");
+            b.Property<DateOnly>("DateOfBirth")
+                      .HasColumnType("date");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<string>("Email")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("EmpPicture")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<string>("EmpPicture")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("EmploymentStatus")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<string>("EmploymentStatus")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Gender")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<string>("Gender")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("IdNumber")
-                        .IsRequired()
-                        .HasMaxLength(13)
-                        .HasColumnType("nvarchar(13)");
+            b.Property<string>("IdNumber")
+                      .IsRequired()
+                      .HasMaxLength(13)
+                      .HasColumnType("nvarchar(13)");
 
-                    b.Property<decimal>("MonthlySalary")
-                        .HasColumnType("decimal(18,2)");
+            b.Property<decimal>("MonthlySalary")
+                      .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<string>("Name")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PassportNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<string>("PassportNumber")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PhysicalAddress")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<string>("PhysicalAddress")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("PositionId")
-                        .HasColumnType("int");
+            b.Property<int>("PositionId")
+                      .HasColumnType("int");
 
-                    b.Property<DateOnly>("StartDate")
-                        .HasColumnType("date");
+            b.Property<DateOnly>("StartDate")
+                      .HasColumnType("date");
 
-                    b.Property<string>("Surname")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<string>("Surname")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<string>("Title")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
+            b.Property<DateTime>("UpdatedAt")
+                      .HasColumnType("datetime2");
 
-                    b.HasKey("EmployeeId");
+            b.HasKey("EmployeeId");
 
-                    b.ToTable("Employees");
-                });
+            b.ToTable("Employees");
+          });
 
-            modelBuilder.Entity("HRConnect.Api.Models.PasswordHistory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+      modelBuilder.Entity("HRConnect.Api.Models.PasswordHistory", b =>
+          {
+            b.Property<int>("Id")
+                      .ValueGeneratedOnAdd()
+                      .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("ChangedAt")
-                        .HasColumnType("datetime2");
+            b.Property<DateTime>("ChangedAt")
+                      .HasColumnType("datetime2");
 
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<string>("PasswordHash")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+            b.Property<int>("UserId")
+                      .HasColumnType("int");
 
-                    b.HasKey("Id");
+            b.HasKey("Id");
 
-                    b.ToTable("PasswordHistories");
-                });
+            b.ToTable("PasswordHistories");
+          });
 
-            modelBuilder.Entity("HRConnect.Api.Models.PasswordResetPin", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+      modelBuilder.Entity("HRConnect.Api.Models.PasswordResetPin", b =>
+          {
+            b.Property<int>("Id")
+                      .ValueGeneratedOnAdd()
+                      .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+            b.Property<DateTime>("CreatedAt")
+                      .HasColumnType("datetime2");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<string>("Email")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("datetime2");
+            b.Property<DateTime>("ExpiresAt")
+                      .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsUsed")
-                        .HasColumnType("bit");
+            b.Property<bool>("IsUsed")
+                      .HasColumnType("bit");
 
-                    b.Property<string>("Pin")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<string>("Pin")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+            b.Property<int>("UserId")
+                      .HasColumnType("int");
 
-                    b.HasKey("Id");
+            b.HasKey("Id");
 
-                    b.ToTable("PasswordResetPins");
-                });
+            b.ToTable("PasswordResetPins");
+          });
 
-            modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction", b =>
-<<<<<<< HEAD
-=======
-            modelBuilder.Entity("HRConnect.Api.Models.TaxDeduction", b =>
->>>>>>> 6f925a0edeaed929a59e86c64f891a0419502b7b
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+      modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction", b =>
+          {
+            b.Property<int>("Id")
+                      .ValueGeneratedOnAdd()
+                      .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("DeductedAt")
-                        .HasColumnType("datetime2");
+            b.Property<DateTime>("DeductedAt")
+                      .HasColumnType("datetime2");
 
-                    b.Property<string>("EmployeeId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<string>("EmployeeId")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("IdNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<string>("IdNumber")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("MonthlySalary")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+            b.Property<decimal>("MonthlySalary")
+                      .HasPrecision(18, 2)
+                      .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("PassportNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<string>("PassportNumber")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("SdlAmount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+            b.Property<decimal>("SdlAmount")
+                      .HasPrecision(18, 2)
+                      .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("UifEmployeeAmount")
-                        .HasPrecision(7, 2)
-                        .HasColumnType("decimal(7,2)");
+            b.Property<decimal>("UifEmployeeAmount")
+                      .HasPrecision(7, 2)
+                      .HasColumnType("decimal(7,2)");
 
-                    b.Property<decimal>("UifEmployerAmount")
-                        .HasPrecision(7, 2)
-                        .HasColumnType("decimal(7,2)");
+            b.Property<decimal>("UifEmployerAmount")
+                      .HasPrecision(7, 2)
+                      .HasColumnType("decimal(7,2)");
 
-                    b.HasKey("Id");
+            b.HasKey("Id");
 
-                    b.ToTable("PayrollDeductions");
-<<<<<<< HEAD
-=======
-                    b.Property<decimal>("AnnualEquivalent")
-                        .HasPrecision(12, 2)
-                        .HasColumnType("decimal(12,2)");
+            b.ToTable("PayrollDeductions");
+          });
+      modelBuilder.Entity("HRConnect.Api.Models.TaxDeduction", b =>
+      {
+        b.Property<decimal>("AnnualEquivalent")
+            .HasPrecision(12, 2)
+            .HasColumnType("decimal(12,2)");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+        b.Property<DateTime>("CreatedAt")
+            .HasColumnType("datetime2");
 
-                    b.Property<decimal>("Remuneration")
-                        .HasPrecision(12, 2)
-                        .HasColumnType("decimal(12,2)");
+        b.Property<decimal>("Remuneration")
+            .HasPrecision(12, 2)
+            .HasColumnType("decimal(12,2)");
 
-                    b.Property<decimal>("Tax65To74")
-                        .HasPrecision(12, 2)
-                        .HasColumnType("decimal(12,2)");
+        b.Property<decimal>("Tax65To74")
+            .HasPrecision(12, 2)
+            .HasColumnType("decimal(12,2)");
 
-                    b.Property<decimal>("TaxOver75")
-                        .HasPrecision(12, 2)
-                        .HasColumnType("decimal(12,2)");
+        b.Property<decimal>("TaxOver75")
+            .HasPrecision(12, 2)
+            .HasColumnType("decimal(12,2)");
 
-                    b.Property<decimal>("TaxUnder65")
-                        .HasPrecision(12, 2)
-                        .HasColumnType("decimal(12,2)");
+        b.Property<decimal>("TaxUnder65")
+            .HasPrecision(12, 2)
+            .HasColumnType("decimal(12,2)");
 
-                    b.Property<int>("TaxYear")
-                        .HasColumnType("int");
+        b.Property<int>("TaxYear")
+            .HasColumnType("int");
 
-                    b.HasKey("Id");
+        b.HasKey("Id");
 
-                    b.HasIndex("TaxYear", "Remuneration")
-                        .IsUnique();
+        b.HasIndex("TaxYear", "Remuneration")
+            .IsUnique();
 
-                    b.ToTable("TaxDeduction", (string)null);
-                });
+        b.ToTable("TaxDeduction", (string)null);
+      });
 
-            modelBuilder.Entity("HRConnect.Api.Models.TaxTableUpload", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+      modelBuilder.Entity("HRConnect.Api.Models.TaxTableUpload", b =>
+          {
+            b.Property<int>("Id")
+                      .ValueGeneratedOnAdd()
+                      .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("EffectiveFrom")
-                        .HasColumnType("datetime2");
+            b.Property<DateTime>("EffectiveFrom")
+                      .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("EffectiveTo")
-                        .HasColumnType("datetime2");
+            b.Property<DateTime?>("EffectiveTo")
+                      .HasColumnType("datetime2");
 
-                    b.Property<string>("FileName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<string>("FileName")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("FileUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<string>("FileUrl")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("TaxYear")
-                        .HasColumnType("int");
+            b.Property<int>("TaxYear")
+                      .HasColumnType("int");
 
-                    b.Property<DateTime>("UploadedAt")
-                        .HasColumnType("datetime2");
+            b.Property<DateTime>("UploadedAt")
+                      .HasColumnType("datetime2");
 
-                    b.HasKey("Id");
+            b.HasKey("Id");
 
-                    b.ToTable("TaxTableUpload", (string)null);
->>>>>>> 6f925a0edeaed929a59e86c64f891a0419502b7b
-                });
+            b.ToTable("TaxTableUpload", (string)null);
+          });
 
-            modelBuilder.Entity("HRConnect.Api.Models.User", b =>
-                {
-                    b.Property<int>("UserId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+      modelBuilder.Entity("HRConnect.Api.Models.User", b =>
+          {
+            b.Property<int>("UserId")
+                      .ValueGeneratedOnAdd()
+                      .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
+            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+            b.Property<DateTime>("CreatedAt")
+                      .HasColumnType("datetime2");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<string>("Email")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<string>("PasswordHash")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Role")
-                        .HasColumnType("int");
+            b.Property<int>("Role")
+                      .HasColumnType("int");
 
-                    b.HasKey("UserId");
+            b.HasKey("UserId");
 
-                    b.ToTable("Users");
-                });
+            b.ToTable("Users");
+          });
 #pragma warning restore 612, 618
-        }
     }
+  }
 }

@@ -31,7 +31,7 @@ namespace HRConnect.Api.Repository
       if (existingEmployee == null) return null;
 
       _context.Entry(existingEmployee).CurrentValues.SetValues(employeeModel);
-      _ = await _context.SaveChangesAsync();
+      await _context.SaveChangesAsync();
 
       return existingEmployee;
     }

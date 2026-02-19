@@ -11,16 +11,6 @@ namespace HRConnect.Api.Data
     public DbSet<PasswordHistory> PasswordHistories { get; set; }
     public DbSet<Employee> Employees { get; set; }
     public DbSet<PayrollDeduction> PayrollDeductions { get; set; }
-<<<<<<< HEAD
-    // protected override void OnModelCreating(ModelBuilder modelBuilder)
-    // {
-    //   base.OnModelCreating(modelBuilder);
-    //   modelBuilder.Entity<PayrollDeduction>(entity =>
-    //   {
-    //     entity.HasKey(d => d.EmployeeId);
-    //   });
-    // }
-=======
     public DbSet<TaxTableUpload> TaxTableUploads { get; set; }
     public DbSet<TaxDeduction> TaxDeductions { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -53,6 +43,5 @@ namespace HRConnect.Api.Data
       });
 
     }
->>>>>>> 6f925a0edeaed929a59e86c64f891a0419502b7b
   }
 }

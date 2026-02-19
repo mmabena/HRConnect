@@ -12,11 +12,11 @@ using Microsoft.AspNetCore.Identity;
 using HRConnect.Api.Models;
 using HRConnect.Api.Utils;
 using Microsoft.Build.Framework;
-using HRConnect.Api.Services;
 using OfficeOpenXml;
 using Resend;
 using HRConnect.Api.Services;
 using HRConnect.Api.Interfaces.PensionProjection;
+using Audit.EntityFramework;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -54,7 +54,10 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    {
+      options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+      options.AddInterceptors(new AuditSaveChangesInterceptor());
+    });
 
 builder.Services.AddAuthentication(options =>
 {
@@ -114,10 +117,7 @@ builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IPayrollDeductionsRepository, PayrollDeductionsRepository>();
 builder.Services.AddScoped<IPayrollDeductionsService, PayrollDeductionsService>();
-<<<<<<< HEAD
-=======
 builder.Services.AddTransient<IPensionProjectionService, PensionProjectionService>();
->>>>>>> 6f925a0edeaed929a59e86c64f891a0419502b7b
 builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowReact",
