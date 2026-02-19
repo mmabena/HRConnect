@@ -534,8 +534,11 @@
 
 body,
 .App {
-  background-color: #002D40;
-  min-height: 1080px;
+  background-color: var(--primary-color);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   margin: 0;
   padding: 0;
   position: relative;
@@ -861,16 +864,6 @@ body {
   height: 100%;
   margin: 0;
 }
-
-body,
-.App {
-  background-color: #002D40;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
 
 .signin-container {
   width: 1187px;

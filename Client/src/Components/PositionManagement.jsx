@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import CompanyManagementHeader from "./companyManagement/companyManagementHeader";
-import CompanyManagementNavBar from "./companyManagement/companyManagementNavBar";
+import CompanyManagementHeader from "./CompanyManagement/companyManagementHeader";
+import CompanyManagementNavBar from "./CompanyManagement/companyManagementNavBar";
 import { useNavigate } from "react-router-dom";
 
-import "../MenuBar.css";
+import "./MenuBar/MenuBar.css";
+
 
 const PositionManagement = () => {
   const [positions, setPositions] = useState([]);

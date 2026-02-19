@@ -10,7 +10,7 @@
 /* ==================== GLOBAL VARIABLES & RESETS ==================== */
 
 :root {
-  --primary-color: #002D40;
+  --primary-color: #355867;
   --primary-dark: #001a25;
   --primary-light: #004d6b;
   --accent-blue: #006088;
@@ -59,7 +59,7 @@ body {
   font-family: 'Instrument Sans', sans-serif;
   width: 360px;
   height: 37px;
-  background-color: var(--accent-blue);
+  background-color: var(--primary-color);
   border: none;
   border-radius: var(--border-radius-medium);
   padding: 0 39px;

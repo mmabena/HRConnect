@@ -4,13 +4,11 @@ import SignIn from "./Components/SignIn/SignIn";
 import ForgotPassword from "./Components/ForgotPassword/ForgotPassword";
 import AddEmployee from "./Components/AddEmployee";
 import EditEmployee from "./Components/EditEmployee";
-import MenuBar from "./Components/MenuBar";
 import AddCompany from "./addCompany";
-import EditCompany from "./Components/companyManagement/editCompany";
+import EditCompany from "./Components/CompanyManagement/editCompany";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
-import "./MenuBar.css";
 import EmployeeList from "./Components/EmployeeList";
 import UserManagement from "./Components/UserManagement";
 import PositionManagement from "./Components/PositionManagement";
@@ -22,6 +20,7 @@ import CompanyManagement from './companyManagement';
 import CompanyContribution from './Components/CompanyContribution/CompanyContribution'; 
 import Profile from './Components/MyProfile';
 import CompensationPlanning from './Components/CompensationPlanning';
+import MenuBar from "./Components/MenuBar/MenuBar";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getCompanyById, updateCompany } from '../Services/companyService';
-import '../../MenuBar.css';
+import "../MenuBar/MenuBar.css";
 
 
 const CmInputField = ({ id, value, onChange, placeholder, isTextArea = false, inputClassName = '', error }) => {
