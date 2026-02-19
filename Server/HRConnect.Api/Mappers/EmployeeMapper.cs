@@ -33,14 +33,12 @@ namespace HRConnect.Api.Mappers
                 MonthlySalary = employeeModel.MonthlySalary,
                 PositionId = employeeModel.PositionId,
                 EmploymentStatus = employeeModel.EmploymentStatus,
-                CareerManager = employeeModel.CareerManager,
-                EmpPicture = employeeModel.EmpPicture,
+                CareerManagerID = employeeModel.CareerManagerID,
+                ProfileImage = employeeModel.ProfileImage,
                 CreatedAt = employeeModel.CreatedAt,
                 UpdatedAt = employeeModel.UpdatedAt
             };
         }
-
-
         public static Employee ToEmployeeFromCreateDTO(this CreateEmployeeRequestDto employeeRequestDto)
         {
             return new Employee
@@ -66,8 +64,8 @@ namespace HRConnect.Api.Mappers
                 MonthlySalary = employeeRequestDto.MonthlySalary,
                 PositionId = employeeRequestDto.PositionId,
                 EmploymentStatus = employeeRequestDto.EmploymentStatus,
-                CareerManager = employeeRequestDto.CareerManager,
-                EmpPicture = employeeRequestDto.EmpPicture
+                CareerManagerID = employeeRequestDto.CareerManagerID,
+                ProfileImage = employeeRequestDto.ProfileImage
             };
         }
     }

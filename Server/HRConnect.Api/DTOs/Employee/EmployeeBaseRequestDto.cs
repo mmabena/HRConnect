@@ -1,7 +1,9 @@
 namespace HRConnect.Api.DTOs.Employee
 {
+    using System;
     using HRConnect.Api.Models;
-    public class EmployeeDto
+
+    public abstract class EmployeeBaseRequestDto
     {
         public string EmployeeId { get; set; } = string.Empty;
         public Title Title { get; set; }
@@ -22,11 +24,9 @@ namespace HRConnect.Api.DTOs.Employee
         public DateOnly StartDate { get; set; }
         public Branch Branch { get; set; }
         public decimal MonthlySalary { get; set; }
-        public int  PositionId { get; set; }
+        public int PositionId { get; set; }
         public EmploymentStatus EmploymentStatus { get; set; }
-        public string CareerManagerID { get; set; } = string.Empty;
+        public string? CareerManagerID { get; set; } = string.Empty;
         public string ProfileImage { get; set; } = string.Empty;
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     }
 }

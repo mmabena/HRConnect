@@ -1,16 +1,38 @@
 namespace HRConnect.Api.Models
 {
-    using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
-    using System.Linq;
-    using System.Threading.Tasks;
+    public enum Gender
+    {
+        Male,
+        Female
+    }
+    public enum Title
+    {
+        Mr,
+        Mrs,
+        Ms,
+        Dr,
+        Prof
+    }
+    public enum Branch
+    {
+        Johannesburg, 
+        CapeTown,
+        UK
+    }
+    public enum EmploymentStatus
+    {
+        Permanent,
+        FixedTerm,
+        Contract
+    }
     public class Employee
     {
         [Required]
         public string EmployeeId { get; set; } = string.Empty;
         [Required]
-        public string Title { get; set; } = string.Empty;
+        public Title Title { get; set; }
         [Required]
         public string Name { get; set; } = string.Empty;
         [Required]
@@ -19,7 +41,7 @@ namespace HRConnect.Api.Models
         public string IdNumber { get; set; } = string.Empty;
         public string PassportNumber { get; set; } = string.Empty;
         [Required]
-        public string Gender { get; set; } = string.Empty;
+        public Gender Gender { get; set; }
         [Required]
         [StringLength(10)]
         public string ContactNumber { get; set; } = string.Empty;
@@ -41,7 +63,7 @@ namespace HRConnect.Api.Models
         [Required]
         public DateOnly StartDate { get; set; }
         [Required]
-        public string Branch { get; set; } = string.Empty;
+        public Branch Branch { get; set; }
         [Required]
         [Column(TypeName = "decimal(18,2)")]
         public decimal MonthlySalary { get; set; }
@@ -49,16 +71,13 @@ namespace HRConnect.Api.Models
         public int  PositionId { get; set; }
         public Position? Position { get; set; }
         [Required]
-        public string EmploymentStatus { get; set; } = string.Empty;
+        public EmploymentStatus EmploymentStatus { get; set; }
+        public string? CareerManagerID { get; set; } = string.Empty;
+        public Employee? CareerManager { get; set; }
         [Required]
-        public string CareerManager { get; set; } = string.Empty;
-        [Required]
-        public string EmpPicture { get; set; } = string.Empty;
+        public string ProfileImage { get; set; } = string.Empty;
+        // ProfileImage
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-
-        
-
-
     }
 }

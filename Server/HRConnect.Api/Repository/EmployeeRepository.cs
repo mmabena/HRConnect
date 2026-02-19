@@ -7,9 +7,10 @@ namespace HRConnect.Api.Repository
     using HRConnect.Api.Data;
     using HRConnect.Api.DTOs.Employee;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Storage;
     /// <summary>
     /// Employee Repository file responsible for all Employee data access operations.
-    /// Acts as a bridge between the database context and the service layer. - O.Seilane
+    /// Acts as a bridge between the database context and the service layer.
     /// </summary>
     public class EmployeeRepository : IEmployeeRepository
     {
@@ -43,38 +44,11 @@ namespace HRConnect.Api.Repository
         /// <param name="EmployeeId">The employee Id </param>
         /// <param name="EmployeeDto">The updated employee data </param>
         /// <returns>The Updated employee as objects, or null if inputs are invalid or duplicated</returns>
-        public async Task<Employee?> UpdateEmployeeAsync(string EmployeeId, UpdateEmployeeRequestDto employeeDto)
+        public async Task<Employee?> UpdateEmployeeAsync(Employee employeeModel)
         {
-            var existingEmployee = await _context.Employees
-                .FirstOrDefaultAsync(e => e.EmployeeId == EmployeeId);
-            
-            if (existingEmployee == null)
-            {
-                return null;
-            }
-
-            existingEmployee.Title = employeeDto.Title;
-            existingEmployee.Name = employeeDto.Name;
-            existingEmployee.Surname = employeeDto.Surname;
-            existingEmployee.IdNumber = employeeDto.IdNumber;
-            existingEmployee.PassportNumber = employeeDto.PassportNumber;
-            existingEmployee.ContactNumber = employeeDto.ContactNumber;
-            existingEmployee.Email = employeeDto.Email;
-            existingEmployee.PhysicalAddress = employeeDto.PhysicalAddress;
-            existingEmployee.City = employeeDto.City;
-            existingEmployee.ZipCode = employeeDto.ZipCode;
-            existingEmployee.HasDisability = employeeDto.HasDisability;
-            existingEmployee.DisabilityDescription = employeeDto.DisabilityDescription;
-            existingEmployee.Branch = employeeDto.Branch;
-            existingEmployee.MonthlySalary = employeeDto.MonthlySalary;
-            existingEmployee.PositionId = employeeDto.PositionId;
-            existingEmployee.EmploymentStatus = employeeDto.EmploymentStatus;
-            existingEmployee.CareerManager = employeeDto.CareerManager;
-            existingEmployee.EmpPicture = employeeDto.EmpPicture;
-            existingEmployee.UpdatedAt = DateTime.UtcNow;
-
+            _context.Employees.Update(employeeModel);
             await _context.SaveChangesAsync();
-            return existingEmployee;
+            return employeeModel;
         }
         /// <summary>
         /// Retrieves a single employee by their Employee Id.
@@ -117,100 +91,121 @@ namespace HRConnect.Api.Repository
             return true;
         }
         /// <summary>
-        /// Checks if provided email already exist in the database
+        /// Begins a new database transaction.
         /// </summary>
-        /// <param name="Email">The employee email</param>
-        /// <returns>True; if email already exist, False; if it doesn't exist</returns>
-        public async Task<bool> EmailExistsAsync(string Email)
+        /// <returns>The database transaction object</returns>
+        public async Task<IDbContextTransaction> BeginTransactionAsync()
         {
-            return await _context.Employees
-                    .AnyAsync(e => e.Email == Email);
+            return await _context.Database.BeginTransactionAsync();
         }
         /// <summary>
-        /// Checks if provided email already exist for other employees in the database
+        /// Retrieves a single employee by their email.
         /// </summary>
-        /// <param name="EmployeeId">The employee identifier</param>
-        /// <param name="Email">The employee email</param>
-        /// <returns>True; If email already exists for another employee, False; if it doesn't exist or is the same employee</returns>
-        public async Task<bool> EmailExistsForOthersAsync(string Email, string EmployeeId)
+        /// <param name="email">The employee email</param>
+        /// <returns>The employee object if found, null otherwise</returns>
+        public async Task<Employee?> GetEmployeeByEmailAsync(string email)
         {
             return await _context.Employees
-                    .AnyAsync(e => e.Email == Email && e.EmployeeId != EmployeeId);
+                .FirstOrDefaultAsync(e => e.Email == email);
         }
         /// <summary>
-        /// Checks whether a tax number already exists.
+        /// Retrieves a single employee by their email excluding a specific EmployeeId.
+        /// Used for uniqueness checks during updates.
         /// </summary>
-        /// <param name="TaxNumber">The employee tax number</param>
-        /// <returns>True; if tax number already exists, False; if it doesn't exist</returns>
-        public async Task<bool> TaxNumberExistsAsync(string TaxNumber)
+        /// <param name="email">The employee email</param>
+        /// <param name="EmployeeId">The employee identifier to exclude</param>
+        /// <returns>The employee object if found, null otherwise</returns>
+        public async Task<Employee?> GetEmployeeByEmailAsync(string email, string EmployeeId)
         {
             return await _context.Employees
-                    .AnyAsync(e => e.TaxNumber == TaxNumber);
+                .FirstOrDefaultAsync(e => e.Email == email && e.EmployeeId != EmployeeId);
         }
         /// <summary>
-        /// Checks whether a Id number already exists.
+        /// Retrieves a single employee by their ID number.
         /// </summary>
-        /// <param name="IdNumber">The employee ID number</param>
-        /// <returns>True; if ID number already exists, False; if it doesn't exist</returns>
-        public async Task<bool> IdNumberExistsAsync(string IdNumber)
+        /// <param name="idNumber">The employee ID number</param>
+        /// <returns>The employee object if found, null otherwise</returns>
+        public async Task<Employee?> GetEmployeeByIdNumberAsync(string idNumber)
         {
             return await _context.Employees
-                    .AnyAsync(e => e.IdNumber == IdNumber);
+                .FirstOrDefaultAsync(e => e.IdNumber == idNumber);
         }
         /// <summary>
-        /// Checks whether an ID number already exists for another employee.
+        /// Retrieves a single employee by their ID number excluding a specific EmployeeId.
+        /// Used for uniqueness checks during updates.
         /// </summary>
-        /// <param name="IdNumber">The employee ID number</param>
-        /// <param name="EmployeeId">The employee identifier</param>
-        /// <returns>True; if ID number already exists for another employee, False; if it doesn't exist or is the same employee</returns>
-        public async Task<bool> IdNumberExistsForOthersAsync(string IdNumber, string EmployeeId)
+        /// <param name="idNumber">The employee ID number</param>
+        /// <param name="EmployeeId">The employee identifier to exclude</param>
+        public async Task<Employee?> GetEmployeeByIdNumberAsync(string idNumber, string EmployeeId)
         {
             return await _context.Employees
-                    .AnyAsync(e => e.IdNumber == IdNumber && e.EmployeeId != EmployeeId);
+                .FirstOrDefaultAsync(e => e.IdNumber == idNumber && e.EmployeeId != EmployeeId);
         }
         /// <summary>
-        /// Checks whether a passport number already exists.
+        /// Retrieves a single employee by their Tax Number.
         /// </summary>
-        /// <param name="PassportNumber">The employee passport number</param>
-        /// <returns>True; if passport number already exists, False; if it doesn't exist</returns>
-        public async Task<bool> PassportExistsAsync(string PassportNumber)
+        /// <param name="taxNumber">The employee tax number</param>
+        /// <returns>The employee object if found, null otherwise</returns>
+        public async Task<Employee?> GetEmployeeByTaxNumberAsync(string taxNumber)
         {
             return await _context.Employees
-                    .AnyAsync(e => e.PassportNumber == PassportNumber);
+                .FirstOrDefaultAsync(e => e.TaxNumber == taxNumber);
         }
         /// <summary>
-        /// Checks whether an Passport number already exists for another employee.
+        /// Retrieves a single employee by their Tax Number excluding a specific EmployeeId.
+        /// Used for uniqueness checks during updates.
         /// </summary>
-        /// <param name="EmployeeId">The employee identifier</param>
-        /// <param name="PassportNumber">The employee passport number</param>
-        /// <returns>True; if passport number already exists for another employee, False; if it doesn't exist or is the same employee</returns>
-        public async Task<bool> PassportExistsForOthersAsync(string PassportNumber, string EmployeeId)
+        /// <param name="taxNumber">The employee tax number</param>
+        /// <param name="EmployeeId">The employee identifier to exclude</param>
+        /// <returns>The employee object if found, null otherwise</returns>
+        public async Task<Employee?> GetEmployeeByTaxNumberAsync(string taxNumber, string EmployeeId)
         {
             return await _context.Employees
-                    .AnyAsync(e => e.PassportNumber == PassportNumber && e.EmployeeId != EmployeeId);
+                .FirstOrDefaultAsync(e => e.TaxNumber == taxNumber && e.EmployeeId != EmployeeId);
         }
         /// <summary>
-        /// Checks whether a contact number already exists.
+        /// Retrieves a single employee by their Passport Number.
         /// </summary>
-        /// <param name="ContactNumber">The employee contact number</param>
-        /// <returns>True; if contact number already exists, False; if it doesn't exist</returns>
-        public async Task<bool> ContactExistsAsync(string ContactNumber)
+        /// <param name="passportNumber">The employee passport number</param>
+        /// <returns>The employee object if found, null otherwise</returns>
+        public async Task<Employee?> GetEmployeeByPassportAsync(string passportNumber)
         {
             return await _context.Employees
-                    .AnyAsync(e => e.ContactNumber == ContactNumber);
+                .FirstOrDefaultAsync(e => e.PassportNumber == passportNumber);
         }
         /// <summary>
-        /// Checks whether an contact number already exists for another employee.
+        /// Retrieves a single employee by their Passport Number excluding a specific EmployeeId.
+        /// Used for uniqueness checks during updates.
         /// </summary>
-        /// <param name="ContactNumber">The employee contact number</param>
-        /// <param name="EmployeeId">The employee identifier</param>
-        /// <returns>True; if contact number already exists for another employee, False; if it doesn't exist or is the same employee</returns>
-        public async Task<bool> ContactExistsForOthersAsync(string ContactNumber, string EmployeeId)
+        /// <param name="passportNumber">The employee passport number</param>
+        /// <param name="EmployeeId">The employee identifier to exclude</param>
+        /// <returns>The employee object if found, null otherwise</returns>
+        public async Task<Employee?> GetEmployeeByPassportAsync(string passportNumber, string EmployeeId)
         {
             return await _context.Employees
-                    .AnyAsync(e => e.ContactNumber == ContactNumber && e.EmployeeId != EmployeeId);
+                .FirstOrDefaultAsync(e => e.PassportNumber == passportNumber && e.EmployeeId != EmployeeId);
         }
-        
-        
+        /// <summary>
+        /// Retrieves a single employee by their Contact Number.
+        /// </summary>
+        /// <param name="contactNumber">The employee contact number</param>
+        /// <returns>The employee object if found, null otherwise</returns>
+        public async Task<Employee?> GetEmployeeByContactNumberAsync(string contactNumber)
+        {
+            return await _context.Employees
+                .FirstOrDefaultAsync(e => e.ContactNumber == contactNumber);
+        }
+        /// <summary>
+        /// Retrieves a single employee by their Contact Number excluding a specific EmployeeId.
+        /// Used for uniqueness checks during updates.
+        /// </summary>
+        /// <param name="contactNumber">The employee contact number</param>
+        /// <param name="EmployeeId">The employee identifier to exclude</param>
+        /// <returns>The employee object if found, null otherwise</returns>
+        public async Task<Employee?> GetEmployeeByContactNumberAsync(string contactNumber, string EmployeeId)
+        {
+            return await _context.Employees
+                .FirstOrDefaultAsync(e => e.ContactNumber == contactNumber && e.EmployeeId != EmployeeId);
+        }
     }
 }

@@ -8,10 +8,10 @@ namespace HRConnect.Api.Interfaces
     using HRConnect.Api.DTOs.Employee;
     public interface IEmployeeService
     {
-        Task<List<Employee>> GetAllEmployeesAsync();
-        Task<Employee?> GetEmployeeByIdAsync(string EmployeeId);
-        Task<Employee> CreateEmployeeAsync(CreateEmployeeRequestDto employeeRequestDto);
-        Task<Employee?> UpdateEmployeeAsync(string EmployeeId, UpdateEmployeeRequestDto employeeDto);
+        Task<List<EmployeeDto>> GetAllEmployeesAsync();
+        Task<EmployeeDto?> GetEmployeeByIdAsync(string EmployeeId);
+        Task<EmployeeDto> CreateEmployeeAsync(CreateEmployeeRequestDto employeeRequestDto);
+        Task<EmployeeDto?> UpdateEmployeeAsync(string EmployeeId, UpdateEmployeeRequestDto employeeDto);
         Task<bool> DeleteEmployeeAsync(string EmployeeId);
 
     }

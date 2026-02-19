@@ -11,7 +11,7 @@ namespace HRConnect.Api.Utils
         /// <summary>
         /// Internal mapping of supported cities and their allowed zip codes.
         /// Case-insensitive to avoid user input issues. When a employee is created or updated, this validator is used to ensure that the provided city and zip code are valid and consistent with each other. 
-        /// This helps maintain data integrity and ensures that employee records contain accurate location information. - O.Seilane
+        /// This helps maintain data integrity and ensures that employee records contain accurate location information.
         /// </summary>
         private static readonly Dictionary<string, List<string>> CityZipMap =
             new(StringComparer.OrdinalIgnoreCase)

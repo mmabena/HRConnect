@@ -22,6 +22,25 @@ namespace HRConnect.Api.Data
         .HasForeignKey(e => e.PositionId);
 
 
+      // Convert enums to stirng in the database
+
+      modelBuilder.Entity<Employee>()
+        .Property(e => e.Title)
+        .HasConversion<string>();
+      
+      modelBuilder.Entity<Employee>()
+        .Property(e => e.Gender)
+        .HasConversion<string>();
+
+      modelBuilder.Entity<Employee>()
+        .Property(e => e.Branch)
+        .HasConversion<string>();
+
+      modelBuilder.Entity<Employee>()
+        .Property(e => e.EmploymentStatus)
+        .HasConversion<string>();
+
+
       modelBuilder.Entity<Position>().HasData(
         new Position { PositionId = 1, PositionTitle = "Chief Executive Officer"},
         new Position { PositionId = 2, PositionTitle = "Associate Software Engineer"},
@@ -29,9 +48,6 @@ namespace HRConnect.Api.Data
       );
 
     }
-
-    public DbSet<PasswordResetPin> PasswordResetPins { get; set; }
-    public DbSet<PasswordHistory> PasswordHistories { get; set; }
 
   }
 }

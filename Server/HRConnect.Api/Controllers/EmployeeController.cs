@@ -17,7 +17,6 @@ namespace HRConnect.Api.Controllers
         public EmployeeController(IEmployeeService employeeService)
         {
             _employeeService = employeeService;
-
         }
         /// <summary>
         /// Retrieves all Employees from the database.
@@ -27,7 +26,7 @@ namespace HRConnect.Api.Controllers
         public async Task<IActionResult> GetAllEmployees()
         {
             var employees = await _employeeService.GetAllEmployeesAsync();
-            return Ok(employees.Select(e => e.ToEmployeeDto()));
+            return Ok(employees);
         }
         /// <summary>
         /// Retrieves a single employee by their Employee Id.
@@ -42,7 +41,7 @@ namespace HRConnect.Api.Controllers
             {
                 return NotFound();
             }
-            return Ok(employee.ToEmployeeDto());
+            return Ok(employee);
         }
         /// <summary>
         /// Creates a new Employee in the database (SuperUsers only).
@@ -52,16 +51,8 @@ namespace HRConnect.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateEmployee([FromBody] CreateEmployeeRequestDto employeeDto)
         {
-            try
-            {
-                var created_emp = await _employeeService.CreateEmployeeAsync(employeeDto);
-                return CreatedAtAction(nameof(GetEmployeeById), new { EmployeeId = created_emp.EmployeeId }, created_emp.ToEmployeeDto());
-            }
-            catch (ArgumentNullException ex)
-            {
-                ModelState.AddModelError("Validation", ex.Message);
-                return ValidationProblem(ModelState);
-            }
+            var employee = await _employeeService.CreateEmployeeAsync(employeeDto);
+            return CreatedAtAction(nameof(GetEmployeeById), new { EmployeeId = employee.EmployeeId }, employee);
         }
         /// <summary>
         /// Updates an existing employee (SuperUser only).
@@ -72,19 +63,11 @@ namespace HRConnect.Api.Controllers
         [HttpPut("{EmployeeId}")]
         public async Task<IActionResult> UpdateEmployee(string EmployeeId, [FromBody] UpdateEmployeeRequestDto employeeDto)
         {
-            try
-            {
-                var updated_emp = await _employeeService.UpdateEmployeeAsync(EmployeeId, employeeDto);
-
-                if (updated_emp == null)
-                    return NotFound();
-                return Ok(updated_emp.ToEmployeeDto());
-            }
-            catch (ArgumentNullException ex)
-            {
-                ModelState.AddModelError("Validation", ex.Message);
-                return ValidationProblem(ModelState);
-            }
+            var updatedEmployee = await _employeeService.UpdateEmployeeAsync(EmployeeId, employeeDto);
+            if (updatedEmployee == null)
+                return NotFound();
+            
+            return Ok(updatedEmployee);
         }
         /// <summary>
         /// Deletes a employee from the database (SuperUser only).
@@ -94,20 +77,11 @@ namespace HRConnect.Api.Controllers
         [HttpDelete("{EmployeeId}")]
         public async Task<IActionResult> DeleteEmployee(string EmployeeId)
         {
-            try
-            {
-                var deletedEmployee = await _employeeService.DeleteEmployeeAsync(EmployeeId);
+            var deletedEmployee = await _employeeService.DeleteEmployeeAsync(EmployeeId);
+            if (!deletedEmployee)
+                return NotFound();
 
-                if (!deletedEmployee)
-                    return NotFound();
-
-                return Ok("Employee deleted successfully");
-            }
-            catch (ArgumentException ex)
-            {
-                ModelState.AddModelError("DeleteError", ex.Message);
-                return ValidationProblem(ModelState);
-            }
+            return Ok("Employee deleted successfully.");
         }
 
     }

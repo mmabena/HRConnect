@@ -3,11 +3,12 @@ namespace HRConnect.Api.Utils
     using System;
     using System.Globalization;
     using System.Linq;
+    using HRConnect.Api.Models;
     /// <summary>
     /// Utility class responsible for validating and extracting information
     /// from a South African ID Number. Responsible for ensuring the ID number is in the correct format, extracting the date of birth and gender information, and validating that the employee is an adult. 
     /// This class is used during employee creation to populate the DateOfBirth and Gender fields based on the provided ID number, 
-    /// and to ensure that the ID number is valid and that the employee meets the minimum age requirement. - O.Seilane
+    /// and to ensure that the ID number is valid and that the employee meets the minimum age requirement.
     /// </summary>
     public static class IdNumberValidator
     {   /// <summary>
@@ -32,12 +33,12 @@ namespace HRConnect.Api.Utils
             // Create DateOnly object for Date of Birth
             DateOnly dateOfBirth = new DateOnly
             (
-                fullYear, int.Parse(mm, CultureInfo.InvariantCulture), 
+                fullYear, int.Parse(mm, CultureInfo.InvariantCulture),
                 int.Parse(dd, CultureInfo.InvariantCulture)
             );
             // Extract gender code and determine gender
             int genderCode = int.Parse(IdNumber.AsSpan(6, 4), CultureInfo.InvariantCulture);
-            string gender = genderCode < 5000 ? "Female" : "Male";
+            Gender gender = genderCode < 5000 ? Gender.Female : Gender.Male;
 
             return new EmployeeInfo
             {
@@ -62,44 +63,28 @@ namespace HRConnect.Api.Utils
             if (!IdNumber.All(char.IsDigit))
                 throw new ArgumentException("ID number must contain only digits");
         }
+
+
+    }
+    /// <summary>
+    /// Contains helper methods related to age calculations and validation.
+    /// </summary>
+    public static class AgeCalculator
+    {
         /// <summary>
-        /// Contains helper methods related to age calculations and validation.
+        /// Calculates age based on Date of Birth.
         /// </summary>
-        public static class AgeValidator
+        /// <param name="dateOfBirth">The employee Date of Birth</param>
+        /// <returns>Age of the employee</returns>
+        public static int CalculateAge(DateOnly dateOfBirth)
         {
-            /// <summary>
-            /// Calculates age based on Date of Birth.
-            /// </summary>
-            /// <param name="dateOfBirth">The employee Date of Birth</param>
-            /// <returns>Age of the employee</returns>
-            public static int CalculateAge(DateOnly dateOfBirth)
-            {
-                var today = DateOnly.FromDateTime(DateTime.UtcNow);
-                int age = today.Year - dateOfBirth.Year;
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            int age = today.Year - dateOfBirth.Year;
 
-                if (dateOfBirth > today.AddYears(-age))
-                    age--;
+            if (dateOfBirth > today.AddYears(-age))
+                age--;
 
-                return age;
-            }
-            /// <summary>
-            /// Ensures the employee is at least 18 years old
-            /// and that the birth date is not in the future.
-            /// </summary>
-            /// <param name="dateOfBirth">The employee Date of Birth</param>
-            /// /// <returns>Error message if validation fails</returns>
-            public static void EnsureAdult(DateOnly dateOfBirth)
-            {
-                var today = DateOnly.FromDateTime(DateTime.UtcNow);
-
-                if (dateOfBirth > today)
-                    throw new ArgumentException("Date of birth cannot be in the future");
-
-                int age = CalculateAge(dateOfBirth);
-
-                if (age < 18)
-                    throw new ArgumentException("Employee must be 18 years or older");
-            }
+            return age;
         }
     }
     /// <summary>
@@ -107,7 +92,7 @@ namespace HRConnect.Api.Utils
     /// </summary>
     public class EmployeeInfo
     {
-        public string Gender { get; set; } = string.Empty;
+        public Gender Gender { get; set; }
         public DateOnly DateOfBirth { get; set; }
     }
 }
