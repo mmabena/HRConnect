@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from "react";
-import CompanyManagementHeader from "./CompanyManagement/companyManagementHeader";
-import CompanyManagementNavBar from "./CompanyManagement/companyManagementNavBar";
+import CompanyManagementHeader from "../../../Components/CompanyManagement/companyManagementHeader";
+import CompanyManagementNavBar from "../../../Components/CompanyManagement/companyManagementNavBar";
 import { useNavigate } from "react-router-dom";
-
-import "./MenuBar/MenuBar.css";
-
 
 const PositionManagement = () => {
   const [positions, setPositions] = useState([]);
@@ -15,7 +12,7 @@ const PositionManagement = () => {
   const [activeTab, setActiveTab] = useState("Position Management");
 
   const navigate = useNavigate();
-
+ 
   const pageOptions = [10, 15, 20, 25];
   const navTabs = [
     "Tax Table Management",
@@ -65,7 +62,7 @@ const PositionManagement = () => {
   };
 
   return (
-    <div className="edit-employee-background custom-scrollbar">
+    <div className="menu-background custom-scrollbar">
       <CompanyManagementHeader title={activeTab} />
 
   <div className="nav-bar-with-button">
@@ -84,7 +81,7 @@ const PositionManagement = () => {
 
   {activeTab === "Position Management" && (
     <button className="add-position-button" onClick={handleAddPositionClick}>
-      Add Position
+      Add New Position
     </button>
   )}
 </div>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import "../Navy.css";
+import "../../Navy.css";
 
 import {
   addEmployee,
@@ -15,7 +15,7 @@ import {
   showConfirmationToast,
   convertDDMMYYYYtoISO,
   GetEmployeeByEmployeeNumberAsync,
-} from "../Employee";
+} from "../../Employee";
 
 /// </summary>
 /// MOCK super user role

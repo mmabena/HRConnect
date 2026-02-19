@@ -937,7 +937,9 @@
   padding: 0 24px;
   margin-top: 20px;
 }
+ 
 .add-position-button {
+  margin-top: 80px;
   background-color: #9AAC60;
   color: white;
   padding: 10px 50px; /* thinner vertically, wider horizontally */
@@ -2285,7 +2287,7 @@
 }
 
 
-/* Custom Scrollbar for the overall container (e.g., .edit-employee-background) */
+/* Custom Scrollbar for the overall container (e.g., .menu-background) */
 .custom-scrollbar {
   overflow-y: auto; 
 }

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CompanyManagementHeader from './companyManagementHeader.jsx';
 import CompanyManagementNavBar from './companyManagementNavBar.jsx';
-import TaxTableUpload from '../TaxTableUpload.jsx';
+import TaxTableUpload from './TaxTableManagement/TaxTableUpload.jsx';
 
 
 import "../MenuBar/MenuBar.css";
@@ -78,7 +78,7 @@ function CompanyManagementUI({
   };
 
   return (
-  <div className="edit-employee-background custom-scrollbar">
+  <div className="menu-background custom-scrollbar">
     {/* Pass activeTab as title to the header */}
     <CompanyManagementHeader title={activeTab} />
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "./MenuBar/MenuBar.css";
+import "../../MenuBar/MenuBar.css";
 import { toast } from "react-toastify";
 import { confirmAlert } from "react-confirm-alert";
 import "react-confirm-alert/src/react-confirm-alert.css";

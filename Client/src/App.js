@@ -2,25 +2,26 @@ import React, { useState, useEffect } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import SignIn from "./Components/SignIn/SignIn";
 import ForgotPassword from "./Components/ForgotPassword/ForgotPassword";
-import AddEmployee from "./Components/AddEmployee";
-import EditEmployee from "./Components/EditEmployee";
+import AddEmployee from "./Components/EmployeeManagement/AddEmployee";
+import EditEmployee from "./Components/EmployeeManagement/EditEmployee";
 import AddCompany from "./addCompany";
 import EditCompany from "./Components/CompanyManagement/editCompany";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
-import EmployeeList from "./Components/EmployeeList";
 import UserManagement from "./Components/UserManagement";
-import PositionManagement from "./Components/PositionManagement";
 import ViewPositionManagement from "./Components/ViewPositionManagement";
-import TaxTableUpload from "./Components/TaxTableUpload";
-import EditPositionManagement from "./Components/EditPositionManagement";
-import AddPositionManagement from "./Components/AddPositionManagment";
+import TaxTableUpload from "./Components/CompanyManagement/TaxTableManagement/TaxTableUpload";
+import EditPositionManagement from "./Components/CompanyManagement/PositionManagement/EditPositionManagement";
+import AddPositionManagement from "./Components/CompanyManagement/PositionManagement/AddPositionManagment";
 import CompanyManagement from './companyManagement';
 import CompanyContribution from './Components/CompanyContribution/CompanyContribution'; 
 import Profile from './Components/MyProfile';
 import CompensationPlanning from './Components/CompensationPlanning';
 import MenuBar from "./Components/MenuBar/MenuBar";
+import EmployeeList from "./Pages/EmployeeManagement/EmployeeList";
+import PositionManagement from "./Pages/CompanyManagement/PositionManagement/PositionManagement";
+
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);

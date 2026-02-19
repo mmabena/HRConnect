@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { fetchAllEmployees } from "../Employee";
+import { fetchAllEmployees } from "../../Employee";
 import { Link,useLocation } from "react-router-dom";
 
 const EmployeeList = () => {
@@ -126,7 +126,7 @@ const location = useLocation();
   );
 
   return (
-    <div className="edit-employee-background">
+    <div className="menu-background">
       <div className="menu-bar"></div>
 
       <div className="wrapper-container">

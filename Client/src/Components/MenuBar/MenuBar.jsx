@@ -113,7 +113,7 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
                   src="/images/cases.png"
                   alt="Employee Management"
                   className="menu-icon"
-                />
+                                                 />
                 <span className="menu-heading">
                   Employee Management
                   <span className="menu-dropdown">{reportOpen ? "▲" : "▼"}</span>
@@ -124,9 +124,25 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
                   <li>
                     <span
                       className="menu-subitem"
+                      onClick={() => handleSubmenuClick("/employeeList")}
+                    >
+                      Employee List
+                    </span>
+                  </li>
+                  <li>
+                    <span
+                      className="menu-subitem"
                       onClick={() => handleSubmenuClick("/addEmployee")}
                     >
                       Add New Employee
+                    </span>
+                  </li>
+                   <li>
+                    <span
+                      className="menu-subitem"
+                      onClick={() => handleSubmenuClick("/editEmployee")}
+                    >
+                      Edit Employee
                     </span>
                   </li>
                   <li>

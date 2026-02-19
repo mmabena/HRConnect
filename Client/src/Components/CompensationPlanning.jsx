@@ -96,7 +96,7 @@ function CompensationPlanning({ currentUser }) {
   }
 
   return (
-    <div className="edit-employee-background custom-scrollbar">
+    <div className="menu-background custom-scrollbar">
       {/* The header is a direct duplicate, but the title is Compensation Planning */}
       <CompanyManagementHeader title="Compensation Planning" />
 
