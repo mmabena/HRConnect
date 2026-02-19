@@ -18,10 +18,10 @@ namespace HRConnect.Api.Controllers
     [HttpGet("{employeeId}")]
     public async Task<IActionResult> GetDeductionsByEmployeeId(string employeeId)
     {
-      PayrollDeduction? deduction = await _payrollDeductionService.GetDeductionsByEmployeeIdAsync(employeeId);
+      PayrollDeductionDto? deduction = await _payrollDeductionService.GetDeductionsByEmployeeIdAsync(employeeId);
       if (deduction == null) return NotFound();
 
-      return Ok(deduction.ToPayrollDeductionsDto());
+      return Ok(deduction);
     }
 
     [HttpGet]

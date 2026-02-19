@@ -5,9 +5,9 @@ namespace HRConnect.Api.Mappers
 
   public static class PayrollDeductionMapper
   {
-    public static PayrollDeductionsDto ToPayrollDeductionsDto(this PayrollDeduction payrollDeductionModel)
+    public static PayrollDeductionDto ToPayrollDeductionsDto(this PayrollDeduction payrollDeductionModel)
     {
-      return new PayrollDeductionsDto
+      return new PayrollDeductionDto
       {
         SdlAmount = payrollDeductionModel.SdlAmount,
         UifEmployeeAmount = payrollDeductionModel.UifEmployeeAmount,
@@ -18,7 +18,7 @@ namespace HRConnect.Api.Mappers
         MonthlySalary = payrollDeductionModel.MonthlySalary
       };
     }
-    public static PayrollDeduction ToPayrollDeductionsFromAddDeductionsDto(this PayrollDeductionsDto payrollDeductionsDto)
+    public static PayrollDeduction ToPayrollDeductionsFromDto(this PayrollDeductionDto payrollDeductionsDto)
     {
       return new PayrollDeduction
       {

@@ -12,10 +12,8 @@ using Microsoft.AspNetCore.Identity;
 using HRConnect.Api.Models;
 using HRConnect.Api.Utils;
 using Microsoft.Build.Framework;
-using HRConnect.Api.Services;
 using OfficeOpenXml;
 using Resend;
-using HRConnect.Api.Services;
 using HRConnect.Api.Interfaces.PensionProjection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -148,5 +146,4 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
-
 

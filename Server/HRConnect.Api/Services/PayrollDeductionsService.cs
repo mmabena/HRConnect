@@ -6,6 +6,7 @@ namespace HRConnect.Api.Services
   using HRConnect.Api.Utils;
   using HRConnect.Api.Mappers;
   using HRConnect.Api.DTOs.PayrollDeductions;
+
   public class PayrollDeductionsService : IPayrollDeductionsService
   {
     private readonly IEmployeeRepository _employeeRepo;
@@ -18,11 +19,14 @@ namespace HRConnect.Api.Services
       _deductionsCalculator = new PayrollDeductionsCalculator();
     }
 
-    public async Task<PayrollDeduction?> GetDeductionsByEmployeeIdAsync(string employeeId)
+    public async Task<PayrollDeductionDto?> GetDeductionsByEmployeeIdAsync(string employeeId)
     {
-      return await _payrollDeductionRepo.GetDeductionsByEmployeeIdAsync(employeeId);
+      var deduction = await _payrollDeductionRepo.GetDeductionsByEmployeeIdAsync(employeeId);
+      if (deduction == null)
+        return null;
+      return deduction.ToPayrollDeductionsDto();
     }
-    public async Task<List<PayrollDeductionsDto>> GetAllDeductionsAsync()
+    public async Task<IEnumerable<PayrollDeductionDto>> GetAllDeductionsAsync()
     {
       var deductions = await _payrollDeductionRepo.GetAllDeductionsAsync();
       return deductions.Select(d => d.ToPayrollDeductionsDto()).ToList();
@@ -46,10 +50,8 @@ namespace HRConnect.Api.Services
           UifEmployerAmount = employerAmount,
           SdlAmount = sdlDeduction
         };
-
-        employee.MonthlySalary -= employeeAmount;
-
-        _ = await _employeeRepo.UpdateEmployeeAsync(employeeId, employee);
+        // employee.MonthlySalary -= employeeAmount;
+        // await _employeeRepo.UpdateEmployeeAsync(employeeId, employee);
         return await _payrollDeductionRepo.AddDeductionsAsync(deductions);
       }
       catch (ArgumentException ex)
