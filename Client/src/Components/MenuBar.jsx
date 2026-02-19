@@ -197,7 +197,7 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
                   <li>
                     <span
                       className="menu-subitem"
-                      onClick={() => handleSubmenuClick("/taxTableUpload")}
+                      onClick={() => handleSubmenuClick("/taxtablemanagement")}
                     >
                       Tax Table Management
                     </span>

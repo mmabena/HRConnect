@@ -22,6 +22,7 @@ import CompanyManagement from './companyManagement';
 import CompanyContribution from './Components/CompanyContribution/CompanyContribution'; 
 import Profile from './Components/MyProfile';
 import CompensationPlanning from './Components/CompensationPlanning';
+import TaxTableManagement from './Components/TaxTableManagement';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -112,15 +113,17 @@ const handleLoginSuccess = (responseData) => {
  <Route path="/editEmployee/:employeeNumber" element={<EditEmployee />} />
  <Route path="/addCompany" element={<AddCompany />} />
  <Route path="/companyManagement" element={<CompanyManagement/>} />
-<Route path="/editCompany/:id" element={<EditCompany />} />
-<Route path="/employeeList" element={<EmployeeList />} />
+ <Route path="/editCompany/:id" element={<EditCompany />} />
+ <Route path="/employeeList" element={<EmployeeList />} />
  <Route path="/company-contribution" element={<CompanyContribution />} />
  <Route path="/userManagement" element={<UserManagement />} /> 
  <Route path="/taxTableUpload" element={<TaxTableUpload />} />
  <Route path="/positionManagement" element={<PositionManagement />} />
-<Route path="/addPositionManagement" element={<AddPositionManagement />} />
+ <Route path="/addPositionManagement" element={<AddPositionManagement />} />
  <Route path="/editPositionManagement/:id" element={<EditPositionManagement />} />
  <Route path="/viewPositionManagement/:id" element={<ViewPositionManagement />} />
+ <Route path="/taxtablemanagement" element={<TaxTableManagement />} />
+         
 <Route
   path="/profile"
   element={<Profile currentUser={currentUser} />}
