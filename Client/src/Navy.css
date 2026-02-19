@@ -104,7 +104,6 @@
   display: flex;
   flex-direction: column;
   position: relative;
-
   margin-top: -20px;
 }
 
@@ -629,6 +628,19 @@ body,
   left: 350px;
 }
 
+.forgot-password-heading{
+  text-align: center;
+  margin-top: -40px;
+  color: #002D40;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 40px;
+  line-height: 26px;
+  letter-spacing: 0;
+  position: relative;
+  right: -100px;
+  margin-bottom: 60px;
+}
 
 .welcome-text {
   text-align: right;
@@ -640,8 +652,20 @@ body,
   line-height: 26px;
   letter-spacing: 0;
   position: relative;
-  right: -20px;
+  right: -79px;
   margin-bottom: 60px;
+}
+
+.forgot-ins{
+  text-align: right;
+  margin-top: -30px;
+  font-family: 'Instrument Sans', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 21px;
+  letter-spacing: 0;
+  position: relative;
+  right: -40px;
 }
 
 .log-details {
@@ -650,6 +674,9 @@ body,
   width: 324px;
   gap: 17px;
   margin-top: 20px;
+  position: relative;
+  left: 50px;
+  
 }
 
 .input-group {
@@ -761,6 +788,30 @@ body,
   left: -50px;
 }
 
+.forgot-password-reset{
+  width: 324px;
+  height: 26px;
+  margin-top: 10px;
+  border: none;
+  background:none;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-family: 'Instrument Sans', sans-serif;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 0px;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 26px;
+  letter-spacing: 0.5px;
+  color: #002D40;
+  text-decoration: underline;
+  margin-top: 10px;
+  text-align: center;
+  position: relative;
+  left: 70px;
+}
+
 .footer-text {
   width: 304px;
   height: 52px;
@@ -788,7 +839,14 @@ body,
   position: relative;
   left: -605px;
   top: -188px;
+}
 
+.forgot-column-image{
+  position: relative;
+  left: -700px;
+  top: -150px;
+  height: 900px;
+  width: 900px;
 }
 
 .adjusted-content {
@@ -924,7 +982,7 @@ body,
   text-align: left;
   margin-top: 46px;
   position: relative;
-  left: 34px;
+  left: 44px;
 
 }
 
@@ -951,6 +1009,10 @@ body,
 .reset-instruction {
   position: relative;
   top: 20px;
+}
+
+.left-inner-column{
+  margin-left: 50px;
 }
 
 .input-group {

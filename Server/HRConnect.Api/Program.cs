@@ -5,13 +5,22 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using HRConnect.Api.Interfaces;
+using HRConnect.Api.Repositories;
+using HRConnect.Api.Services;
 using HRConnect.Api.Repository;
 using Microsoft.AspNetCore.Identity;
 using HRConnect.Api.Models;
 using HRConnect.Api.Utils;
+using Microsoft.Build.Framework;
+using HRConnect.Api.Services;
+using OfficeOpenXml;
 using Resend;
+using HRConnect.Api.Services;
+using HRConnect.Api.Interfaces.PensionProjection;
 
 var builder = WebApplication.CreateBuilder(args);
+
+ExcelPackage.License.SetNonCommercialPersonal("YourName");
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -96,11 +105,19 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IUserService, HRConnect.Api.Services.UserService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<ITaxTableUploadService, TaxTableUploadService>();
+builder.Services.AddScoped<ITaxTableUploadRepository, TaxTableUploadRepository>();
+builder.Services.AddScoped<ITaxDeductionService, TaxDeductionService>();
+builder.Services.AddScoped<ITaxDeductionRepository, TaxDeductionRepository>();
 builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.Services.AuthService>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IPayrollDeductionsRepository, PayrollDeductionsRepository>();
 builder.Services.AddScoped<IPayrollDeductionsService, PayrollDeductionsService>();
+<<<<<<< HEAD
+=======
+builder.Services.AddTransient<IPensionProjectionService, PensionProjectionService>();
+>>>>>>> 6f925a0edeaed929a59e86c64f891a0419502b7b
 builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowReact",
