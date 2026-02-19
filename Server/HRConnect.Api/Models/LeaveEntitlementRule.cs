@@ -18,9 +18,9 @@ namespace HRConnect.Api.Models
         public decimal MinYearsService { get; set; }
         public decimal? MaxYearsService { get; set; }
 
-        public int DaysAllocated { get; set; }
+        public decimal DaysAllocated { get; set; }
 
         public bool IsActive { get; set; }
-            
+
     }
 }

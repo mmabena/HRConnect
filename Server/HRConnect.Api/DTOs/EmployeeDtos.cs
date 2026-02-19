@@ -2,11 +2,6 @@ namespace HRConnect.Api.DTOs
 {
     using System;
     using System.Collections.Generic;
-
-    // ============================================================
-    // CREATE EMPLOYEE REQUEST
-    // Used by: POST /api/Employee
-    // ============================================================
     public class CreateEmployeeRequest
     {
         public int PositionId { get; set; }
@@ -16,23 +11,10 @@ namespace HRConnect.Api.DTOs
         public string Gender { get; set; } = null!;
         public DateOnly StartDate { get; set; }
     }
-
-    // ============================================================
-    // UPDATE POSITION REQUEST (Optional body version if needed later)
-    // Used by: PUT /api/Employee/{id}/position
-    // ============================================================
     public class UpdatePositionRequest
     {
         public int NewPositionId { get; set; }
     }
-
-    // ============================================================
-    // MAIN EMPLOYEE RESPONSE (Used everywhere)
-    // GET All
-    // GET By Id
-    // POST Response
-    // PUT Response
-    // ============================================================
     public class EmployeeResponse
     {
         public Guid Id { get; set; }
@@ -51,11 +33,6 @@ namespace HRConnect.Api.DTOs
         // Optional detailed balances (used in GET by ID)
         public List<LeaveBalanceSummary> LeaveBalances { get; set; } = new();
     }
-
-    // ============================================================
-    // LEAVE BALANCE SUMMARY
-    // Clean. No navigation properties.
-    // ============================================================
     public class LeaveBalanceSummary
     {
         public string LeaveType { get; set; } = null!;
@@ -63,4 +40,10 @@ namespace HRConnect.Api.DTOs
         public decimal UsedDays { get; set; }
         public decimal RemainingDays { get; set; }
     }
+    public class UpdateLeaveRuleRequest
+    {
+        public int RuleId { get; set; }
+        public decimal NewDaysAllocated { get; set; }
+    }
+
 }

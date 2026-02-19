@@ -362,6 +362,111 @@ namespace HRConnect.Api.Services
 
             await _context.SaveChangesAsync();
         }
+        public async Task UpdateLeaveEntitlementRuleAsync(UpdateLeaveRuleRequest request)
+        {
+            if (request.NewDaysAllocated < 0)
+                throw new InvalidOperationException("Days allocated cannot be negative.");
+
+            var rule = await _context.LeaveEntitlementRules
+                .Include(r => r.LeaveType)
+                .FirstOrDefaultAsync(r => r.Id == request.RuleId);
+
+            if (rule == null)
+                throw new InvalidOperationException("Rule not found.");
+
+            if (rule.MinYearsService < 0)
+                throw new InvalidOperationException("MinYearsService cannot be negative.");
+
+            if (rule.MaxYearsService.HasValue &&
+                rule.MaxYearsService < rule.MinYearsService)
+                throw new InvalidOperationException("MaxYearsService cannot be less than MinYearsService.");
+
+            // Get affected employees BEFORE updating rule
+            var employees = await _context.Employees
+                .Include(e => e.Position)
+                .Include(e => e.LeaveBalances)
+                .Where(e => e.Position.JobGradeId == rule.JobGradeId)
+                .ToListAsync();
+
+            foreach (var employee in employees)
+            {
+                var years = CalculateYearsOfService(employee.StartDate);
+
+                if (years < rule.MinYearsService)
+                    continue;
+
+                if (rule.MaxYearsService.HasValue &&
+                    years > rule.MaxYearsService.Value)
+                    continue;
+
+                var balance = employee.LeaveBalances
+                    .FirstOrDefault(lb => lb.LeaveTypeId == rule.LeaveTypeId);
+
+                if (balance == null)
+                    continue;
+
+                // PROTECTION: cannot reduce below used days
+                if (request.NewDaysAllocated < balance.UsedDays)
+                    throw new InvalidOperationException(
+                        $"Cannot reduce entitlement below used days for employee {employee.FirstName}.");
+            }
+
+            // Safe to update rule
+            rule.DaysAllocated = request.NewDaysAllocated;
+
+            await _context.SaveChangesAsync();
+
+            // Recalculate employees
+            await RecalculateEmployeesForRuleChangeAsync(rule);
+        }
+        public async Task RecalculateEmployeesForRuleChangeAsync(LeaveEntitlementRule rule)
+        {
+            var employees = await _context.Employees
+                .Include(e => e.Position)
+                .Include(e => e.LeaveBalances)
+                    .ThenInclude(lb => lb.LeaveType)
+                .Where(e => e.Position.JobGradeId == rule.JobGradeId)
+                .ToListAsync();
+
+            foreach (var employee in employees)
+            {
+                var years = CalculateYearsOfService(employee.StartDate);
+
+                if (years < rule.MinYearsService)
+                    continue;
+
+                if (rule.MaxYearsService.HasValue &&
+                    years > rule.MaxYearsService.Value)
+                    continue;
+
+                var balance = employee.LeaveBalances
+                    .FirstOrDefault(lb => lb.LeaveTypeId == rule.LeaveTypeId);
+
+                if (balance == null)
+                    continue;
+
+                balance.EntitledDays = rule.DaysAllocated;
+                balance.RemainingDays = rule.DaysAllocated - balance.UsedDays;
+
+                await _emailService.SendEmailAsync(
+                    employee.ReportingManagerId,
+                    "Leave Policy Updated",
+                    $"""
+            Dear {employee.FirstName},
+
+            The company has updated the leave policy.
+
+            Your new annual entitlement is {rule.DaysAllocated} days.
+            Your remaining balance is now {balance.RemainingDays} days.
+
+            Regards,
+            HRConnect
+            """);
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
         // ============================================================
         // MAPPING
         // ============================================================

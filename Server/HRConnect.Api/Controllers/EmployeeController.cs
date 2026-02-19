@@ -88,6 +88,12 @@ namespace HRConnect.Api.Controllers
             await _employeeService.ProcessAnnualResetAsync();
             return Ok("Annual reset processed.");
         }
+        [HttpPut("update-rule")]
+        public async Task<IActionResult> UpdateRule(UpdateLeaveRuleRequest request)
+        {
+            await _employeeService.UpdateLeaveEntitlementRuleAsync(request);
+            return Ok("Rule updated and employees recalculated.");
+        }
 
     }
 }

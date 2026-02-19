@@ -62,9 +62,9 @@ namespace HRConnect.Tests
 
             // Rules for all except maternity
             context.LeaveEntitlementRules.AddRange(
-                new LeaveEntitlementRule { Id = 1, LeaveTypeId = 1, JobGradeId = 1, MinYearsService = 0, MaxYearsService = null, DaysAllocated = 15, IsActive = true },
-                new LeaveEntitlementRule { Id = 2, LeaveTypeId = 2, JobGradeId = 1, MinYearsService = 0, MaxYearsService = null, DaysAllocated = 30, IsActive = true },
-                new LeaveEntitlementRule { Id = 3, LeaveTypeId = 4, JobGradeId = 1, MinYearsService = 0, MaxYearsService = null, DaysAllocated = 3, IsActive = true }
+                new LeaveEntitlementRule { Id = 1, LeaveTypeId = 1, JobGradeId = 1, MinYearsService = 0, MaxYearsService = null, DaysAllocated = 15m, IsActive = true },
+                new LeaveEntitlementRule { Id = 2, LeaveTypeId = 2, JobGradeId = 1, MinYearsService = 0, MaxYearsService = null, DaysAllocated = 30m, IsActive = true },
+                new LeaveEntitlementRule { Id = 3, LeaveTypeId = 4, JobGradeId = 1, MinYearsService = 0, MaxYearsService = null, DaysAllocated = 3m, IsActive = true }
             );
 
             await context.SaveChangesAsync();
@@ -117,10 +117,10 @@ namespace HRConnect.Tests
             );
 
             context.LeaveEntitlementRules.AddRange(
-                new LeaveEntitlementRule { Id = 1, LeaveTypeId = 1, JobGradeId = 1, MinYearsService = 0, MaxYearsService = null, DaysAllocated = 15, IsActive = true },
-                new LeaveEntitlementRule { Id = 2, LeaveTypeId = 2, JobGradeId = 1, MinYearsService = 0, MaxYearsService = null, DaysAllocated = 30, IsActive = true },
-                new LeaveEntitlementRule { Id = 3, LeaveTypeId = 3, JobGradeId = 1, MinYearsService = 0, MaxYearsService = null, DaysAllocated = 120, IsActive = true },
-                new LeaveEntitlementRule { Id = 4, LeaveTypeId = 4, JobGradeId = 1, MinYearsService = 0, MaxYearsService = null, DaysAllocated = 3, IsActive = true }
+                new LeaveEntitlementRule { Id = 1, LeaveTypeId = 1, JobGradeId = 1, MinYearsService = 0, MaxYearsService = null, DaysAllocated = 15m, IsActive = true },
+                new LeaveEntitlementRule { Id = 2, LeaveTypeId = 2, JobGradeId = 1, MinYearsService = 0, MaxYearsService = null, DaysAllocated = 30m, IsActive = true },
+                new LeaveEntitlementRule { Id = 3, LeaveTypeId = 3, JobGradeId = 1, MinYearsService = 0, MaxYearsService = null, DaysAllocated = 120m, IsActive = true },
+                new LeaveEntitlementRule { Id = 4, LeaveTypeId = 4, JobGradeId = 1, MinYearsService = 0, MaxYearsService = null, DaysAllocated = 3m, IsActive = true }
             );
 
             await context.SaveChangesAsync();
@@ -180,7 +180,7 @@ namespace HRConnect.Tests
                     JobGradeId = 1,
                     MinYearsService = 0,
                     MaxYearsService = null,
-                    DaysAllocated = 15,
+                    DaysAllocated = 15m,
                     IsActive = true
                 });
 
@@ -230,8 +230,8 @@ namespace HRConnect.Tests
                 new LeaveType { Id = 1, Name = "Annual", Code = "AL", Description = "Annual", IsActive = true });
 
             context.LeaveEntitlementRules.AddRange(
-                new LeaveEntitlementRule { Id = 1, LeaveTypeId = 1, JobGradeId = 1, MinYearsService = 0, DaysAllocated = 15, IsActive = true },
-                new LeaveEntitlementRule { Id = 2, LeaveTypeId = 1, JobGradeId = 2, MinYearsService = 0, DaysAllocated = 18, IsActive = true });
+                new LeaveEntitlementRule { Id = 1, LeaveTypeId = 1, JobGradeId = 1, MinYearsService = 0, DaysAllocated = 15m, IsActive = true },
+                new LeaveEntitlementRule { Id = 2, LeaveTypeId = 1, JobGradeId = 2, MinYearsService = 0, DaysAllocated = 18m, IsActive = true });
 
             await context.SaveChangesAsync();
 
@@ -282,8 +282,8 @@ namespace HRConnect.Tests
                 new LeaveType { Id = 1, Name = "Annual", Code = "AL", Description = "Annual", IsActive = true });
 
             context.LeaveEntitlementRules.AddRange(
-                new LeaveEntitlementRule { Id = 1, LeaveTypeId = 1, JobGradeId = 1, MinYearsService = 0, DaysAllocated = 15, IsActive = true },
-                new LeaveEntitlementRule { Id = 2, LeaveTypeId = 1, JobGradeId = 2, MinYearsService = 0, DaysAllocated = 18, IsActive = true });
+                new LeaveEntitlementRule { Id = 1, LeaveTypeId = 1, JobGradeId = 1, MinYearsService = 0, DaysAllocated = 15m, IsActive = true },
+                new LeaveEntitlementRule { Id = 2, LeaveTypeId = 1, JobGradeId = 2, MinYearsService = 0, DaysAllocated = 18m, IsActive = true });
 
             await context.SaveChangesAsync();
 
@@ -336,8 +336,8 @@ namespace HRConnect.Tests
                 new LeaveType { Id = 1, Name = "Annual", Code = "AL", Description = "Annual", IsActive = true });
 
             context.LeaveEntitlementRules.AddRange(
-                new LeaveEntitlementRule { Id = 1, LeaveTypeId = 1, JobGradeId = 1, MinYearsService = 0, DaysAllocated = 15, IsActive = true },
-                new LeaveEntitlementRule { Id = 2, LeaveTypeId = 1, JobGradeId = 2, MinYearsService = 0, DaysAllocated = 18, IsActive = true });
+                new LeaveEntitlementRule { Id = 1, LeaveTypeId = 1, JobGradeId = 1, MinYearsService = 0, DaysAllocated = 15m, IsActive = true },
+                new LeaveEntitlementRule { Id = 2, LeaveTypeId = 1, JobGradeId = 2, MinYearsService = 0, DaysAllocated = 18m, IsActive = true });
 
             await context.SaveChangesAsync();
 
@@ -464,7 +464,7 @@ namespace HRConnect.Tests
                     JobGradeId = 1,
                     MinYearsService = 0,
                     MaxYearsService = null,
-                    DaysAllocated = 30,
+                    DaysAllocated = 30m,
                     IsActive = true
                 });
 
@@ -521,7 +521,7 @@ namespace HRConnect.Tests
                     JobGradeId = 1,
                     MinYearsService = 0,
                     MaxYearsService = 3,
-                    DaysAllocated = 15,
+                    DaysAllocated = 15m,
                     IsActive = true
                 },
                 new LeaveEntitlementRule
@@ -531,7 +531,7 @@ namespace HRConnect.Tests
                     JobGradeId = 1,
                     MinYearsService = 3,
                     MaxYearsService = null,
-                    DaysAllocated = 18,
+                    DaysAllocated = 18m,
                     IsActive = true
                 });
 
@@ -587,8 +587,8 @@ namespace HRConnect.Tests
                 });
 
             context.LeaveEntitlementRules.AddRange(
-                new LeaveEntitlementRule { Id = 1, LeaveTypeId = 1, JobGradeId = 1, MinYearsService = 0, DaysAllocated = 15, IsActive = true },
-                new LeaveEntitlementRule { Id = 2, LeaveTypeId = 1, JobGradeId = 2, MinYearsService = 0, DaysAllocated = 20, IsActive = true });
+                new LeaveEntitlementRule { Id = 1, LeaveTypeId = 1, JobGradeId = 1, MinYearsService = 0, DaysAllocated = 15m, IsActive = true },
+                new LeaveEntitlementRule { Id = 2, LeaveTypeId = 1, JobGradeId = 2, MinYearsService = 0, DaysAllocated = 20m, IsActive = true });
 
             await context.SaveChangesAsync();
 
@@ -645,7 +645,7 @@ namespace HRConnect.Tests
                 LeaveTypeId = 1,
                 JobGradeId = 1,
                 MinYearsService = 0,
-                DaysAllocated = 15,
+                DaysAllocated = 15m,
                 IsActive = true
             });
 
@@ -705,7 +705,7 @@ namespace HRConnect.Tests
                 LeaveTypeId = 1,
                 JobGradeId = 1,
                 MinYearsService = 0,
-                DaysAllocated = 15,
+                DaysAllocated = 15m,
                 IsActive = true
             });
 
@@ -765,7 +765,7 @@ namespace HRConnect.Tests
                 LeaveTypeId = 1,
                 JobGradeId = 1,
                 MinYearsService = 0,
-                DaysAllocated = 15,
+                DaysAllocated = 15m,
                 IsActive = true
             });
 
@@ -839,7 +839,7 @@ namespace HRConnect.Tests
                     LeaveTypeId = 1,
                     JobGradeId = 1,
                     MinYearsService = 0,
-                    DaysAllocated = 15,
+                    DaysAllocated = 15m,
                     IsActive = true
                 },
                 new LeaveEntitlementRule
@@ -848,7 +848,7 @@ namespace HRConnect.Tests
                     LeaveTypeId = 2,
                     JobGradeId = 1,
                     MinYearsService = 0,
-                    DaysAllocated = 30,
+                    DaysAllocated = 30m,
                     IsActive = true
                 });
 
@@ -927,7 +927,7 @@ namespace HRConnect.Tests
                     LeaveTypeId = 1,
                     JobGradeId = 1,
                     MinYearsService = 0,
-                    DaysAllocated = 15,
+                    DaysAllocated = 15m,
                     IsActive = true
                 });
 
@@ -996,7 +996,7 @@ namespace HRConnect.Tests
                     LeaveTypeId = 1,
                     JobGradeId = 1,
                     MinYearsService = 0,
-                    DaysAllocated = 15,
+                    DaysAllocated = 15m,
                     IsActive = true
                 });
 
@@ -1035,7 +1035,7 @@ namespace HRConnect.Tests
                 ReportingManagerId = "test@email.com",
                 StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
                 IsActive = true
-            };
+            }; 
 
             context.Employees.Add(employee);
             await context.SaveChangesAsync();
@@ -1057,7 +1057,7 @@ namespace HRConnect.Tests
                     LeaveTypeId = 1,
                     JobGradeId = 1,
                     MinYearsService = 0,
-                    DaysAllocated = 15,
+                    DaysAllocated = 15m,
                     IsActive = true
                 });
 
