@@ -22,6 +22,115 @@ namespace HRConnect.Api.Migrations
 
       SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("HRConnect.Api.Models.Employee", b =>
+                {
+                    b.Property<string>("EmployeeId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Branch")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CareerManagerID")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ContactNumber")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateOnly>("DateOfBirth")
+                        .HasColumnType("date");
+
+                    b.Property<string>("DisabilityDescription")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EmploymentStatus")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Gender")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("HasDisability")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("IdNumber")
+                        .IsRequired()
+                        .HasMaxLength(13)
+                        .HasColumnType("nvarchar(13)");
+
+                    b.Property<decimal>("MonthlySalary")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PassportNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhysicalAddress")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PositionId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ProfileImage")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Surname")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TaxNumber")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ZipCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("EmployeeId");
+
+                    b.HasIndex("CareerManagerID");
+
+                    b.HasIndex("PositionId");
+
+                    b.ToTable("Employees");
+                });
+
+            modelBuilder.Entity("HRConnect.Api.Models.PasswordHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
       modelBuilder.Entity("HRConnect.Api.Models.AuditPayrollDeductions", b =>
           {
             b.Property<int>("AuditId")
@@ -86,6 +195,44 @@ namespace HRConnect.Api.Migrations
             b.Property<string>("Branch")
                             .IsRequired()
                             .HasColumnType("nvarchar(max)");
+
+            modelBuilder.Entity("HRConnect.Api.Models.Position", b =>
+                {
+                    b.Property<int>("PositionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PositionId"));
+
+                    b.Property<string>("PositionTitle")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("PositionId");
+
+                    b.ToTable("Positions");
+
+                    b.HasData(
+                        new
+                        {
+                            PositionId = 1,
+                            PositionTitle = "Chief Executive Officer"
+                        },
+                        new
+                        {
+                            PositionId = 2,
+                            PositionTitle = "Associate Software Engineer"
+                        },
+                        new
+                        {
+                            PositionId = 3,
+                            PositionTitle = "Trainee Software Developer"
+                        });
+            modelBuilder.Entity("HRConnect.Api.Models.TaxDeduction", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
             b.Property<string>("CareerManager")
                             .IsRequired()
@@ -166,7 +313,14 @@ namespace HRConnect.Api.Migrations
                       .ValueGeneratedOnAdd()
                       .HasColumnType("int");
 
+
+                    b.ToTable("TaxTableUpload", (string)null);
+
+
+                });
+
             SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
 
             b.Property<DateTime>("ChangedAt")
                       .HasColumnType("datetime2");
@@ -191,6 +345,36 @@ namespace HRConnect.Api.Migrations
 
             SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("HRConnect.Api.Models.Employee", b =>
+                {
+                    b.HasOne("HRConnect.Api.Models.Employee", "CareerManager")
+                        .WithMany("Subordinates")
+                        .HasForeignKey("CareerManagerID")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("HRConnect.Api.Models.Position", "Position")
+                        .WithMany("Employees")
+                        .HasForeignKey("PositionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CareerManager");
+
+                    b.Navigation("Position");
+                });
+
+            modelBuilder.Entity("HRConnect.Api.Models.Employee", b =>
+                {
+                    b.Navigation("Subordinates");
+                });
+
+            modelBuilder.Entity("HRConnect.Api.Models.Position", b =>
+                {
+                    b.Navigation("Employees");
+                });
             b.Property<DateTime>("CreatedAt")
                       .HasColumnType("datetime2");
 
