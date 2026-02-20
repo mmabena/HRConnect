@@ -22,12 +22,19 @@ namespace HRConnect.Api.Data
         .HasForeignKey(e => e.PositionId);
 
 
+      modelBuilder.Entity<Employee>()
+        .HasOne(e => e.CareerManager)
+        .WithMany(e => e.Subordinates)
+        .HasForeignKey(e => e.CareerManagerID)
+        .OnDelete(DeleteBehavior.Restrict);
+
+
       // Convert enums to stirng in the database
 
       modelBuilder.Entity<Employee>()
         .Property(e => e.Title)
         .HasConversion<string>();
-      
+
       modelBuilder.Entity<Employee>()
         .Property(e => e.Gender)
         .HasConversion<string>();
@@ -42,9 +49,9 @@ namespace HRConnect.Api.Data
 
 
       modelBuilder.Entity<Position>().HasData(
-        new Position { PositionId = 1, PositionTitle = "Chief Executive Officer"},
-        new Position { PositionId = 2, PositionTitle = "Associate Software Engineer"},
-        new Position { PositionId = 3, PositionTitle = "Trainee Software Developer"}
+        new Position { PositionId = 1, PositionTitle = "Chief Executive Officer" },
+        new Position { PositionId = 2, PositionTitle = "Associate Software Engineer" },
+        new Position { PositionId = 3, PositionTitle = "Trainee Software Developer" }
       );
 
     }

@@ -75,6 +75,8 @@ namespace HRConnect.Api.Services
             ValidateCreate(employeeRequestDto);
             // Ensure no duplicates exist
             await CheckDuplicates(employeeRequestDto);
+
+            await ValidateCareerManagerAsync(null, employeeRequestDto.CareerManagerID);
             // If ID number exists, auto-extract DOB and Gender
             ExtractIdInfo(employeeRequestDto);
             // Ensure Title and Gender combination is valid
@@ -116,6 +118,8 @@ namespace HRConnect.Api.Services
             ValidateUpdate(employeeDto);
             //Check for duplicate entries
             await CheckDuplicateOnUpdate(EmployeeId, employeeDto);
+
+            await ValidateCareerManagerAsync(EmployeeId, employeeDto.CareerManagerID);
 
             existingEmployee.Title = employeeDto.Title;
             existingEmployee.Name = employeeDto.Name;
@@ -217,6 +221,7 @@ namespace HRConnect.Api.Services
             var employeeInfo = IdNumberValidator.ParseIdNumber(employeeRequestDto.IdNumber);
 
             EnsureEmployeeMeetsAgePolicy(employeeInfo.DateOfBirth, employeeRequestDto.EmploymentStatus);
+
             employeeRequestDto.Gender = employeeInfo.Gender;
             employeeRequestDto.DateOfBirth = employeeInfo.DateOfBirth;
         }
@@ -275,9 +280,6 @@ namespace HRConnect.Api.Services
             if (!string.IsNullOrWhiteSpace(employeeRequestDto.IdNumber) && await _employeeRepo.GetEmployeeByIdNumberAsync(employeeRequestDto.IdNumber) != null)
                 throw new BusinessRuleException("An employee with the same ID number already exists");
 
-            if (!string.IsNullOrWhiteSpace(employeeRequestDto.PassportNumber) && await _employeeRepo.GetEmployeeByPassportAsync(employeeRequestDto.PassportNumber) != null)
-                throw new BusinessRuleException("An employee with the same passport number already exists");
-
             if (await _employeeRepo.GetEmployeeByContactNumberAsync(employeeRequestDto.ContactNumber) != null)
                 throw new BusinessRuleException("An employee with the same contact number already exists");
         }
@@ -289,16 +291,20 @@ namespace HRConnect.Api.Services
         /// <returns>Error message if duplicate record is found</returns>
         private async Task CheckDuplicateOnUpdate(string employeeId, UpdateEmployeeRequestDto employeeRequestDto)
         {
-            if (await _employeeRepo.GetEmployeeByEmailAsync(employeeRequestDto.Email, employeeId) != null)
+            if (!string.IsNullOrWhiteSpace(employeeRequestDto.Email) &&
+        await _employeeRepo.GetEmployeeByEmailAsync(employeeRequestDto.Email, employeeId) != null)
                 throw new BusinessRuleException("Another employee with the same email already exists");
 
-            if (await _employeeRepo.GetEmployeeByIdNumberAsync(employeeRequestDto.IdNumber, employeeId) != null)
+            if (!string.IsNullOrWhiteSpace(employeeRequestDto.IdNumber) &&
+                await _employeeRepo.GetEmployeeByIdNumberAsync(employeeRequestDto.IdNumber, employeeId) != null)
                 throw new BusinessRuleException("Another employee with the same Id Number already exists");
 
-            if (await _employeeRepo.GetEmployeeByPassportAsync(employeeRequestDto.PassportNumber, employeeId) != null)
+            if (!string.IsNullOrWhiteSpace(employeeRequestDto.PassportNumber) &&
+                await _employeeRepo.GetEmployeeByPassportAsync(employeeRequestDto.PassportNumber, employeeId) != null)
                 throw new BusinessRuleException("Another employee with the same passport number already exists");
 
-            if (await _employeeRepo.GetEmployeeByContactNumberAsync(employeeRequestDto.ContactNumber, employeeId) != null)
+            if (!string.IsNullOrWhiteSpace(employeeRequestDto.ContactNumber) &&
+                await _employeeRepo.GetEmployeeByContactNumberAsync(employeeRequestDto.ContactNumber, employeeId) != null)
                 throw new BusinessRuleException("Another employee with the same contact number already exists");
         }
         /// <summary>
@@ -345,7 +351,7 @@ namespace HRConnect.Api.Services
                 throw new ValidationException("Contact number must be 10 digits long");
 
             if (!Enum.IsDefined<Title>(employeeRequestDto.Title))
-                throw new ValidationException("Employee Title must be either 'Mr', 'Mrs', 'Ms', 'Dr', 'Prof' ");
+                throw new ValidationException("Employee Title is invalid");
 
             if (employeeRequestDto.ContactNumber.Length != 10)
                 throw new ValidationException("Contact number must be 10 digits long");
@@ -369,9 +375,6 @@ namespace HRConnect.Api.Services
 
             if (!Enum.IsDefined<EmploymentStatus>(employeeRequestDto.EmploymentStatus))
                 throw new ValidationException("Employment status must either be 'Permanent', 'Fixed-Term' or 'Contract'");
-
-            if (!Enum.IsDefined<Title>(employeeRequestDto.Title))
-                throw new ValidationException("Employee Title must be either 'Mr', 'Mrs', 'Ms', 'Dr', 'Prof' ");
 
             if (employeeRequestDto.MonthlySalary <= 0)
                 throw new ValidationException("Monthly salary must be greater than 0");
@@ -421,17 +424,18 @@ namespace HRConnect.Api.Services
                 if (age < 18)
                     throw new ValidationException("Employee must be at least 18 years old.");
 
-                if (!Enum.IsDefined<Gender>(employeeRequestDto.Gender))
+                if (!employeeRequestDto.Gender.HasValue)
+                    throw new ValidationException("Gender is required when using Passport");
+
+                if (!Enum.IsDefined(employeeRequestDto.Gender.Value))
                     throw new ValidationException("Gender must be either Male or Female");
 
-                if (employeeRequestDto.Gender == default(Gender))
-                    throw new ValidationException("Employee Gender is required");
-
             }
-            if (string.IsNullOrWhiteSpace(employeeRequestDto.TaxNumber) && employeeRequestDto.TaxNumber.Length != 10)
-                    throw new ValidationException("Tax Number must be 10 digits long");
-
-            ValidateTitleAndGender(employeeRequestDto);
+            if (!string.IsNullOrWhiteSpace(employeeRequestDto.TaxNumber) &&
+                employeeRequestDto.TaxNumber.Length != 10)
+            {
+                throw new ValidationException("Tax Number must be 10 digits long");
+            }
 
         }
         // <summary>
@@ -472,9 +476,22 @@ namespace HRConnect.Api.Services
 
             if (await _employeeRepo.GetEmployeeByContactNumberAsync(employeeRequestDto.ContactNumber, EmployeeId) != null)
                 throw new BusinessRuleException("Another employee with the same contact number already exists");
-
         }
-        
+        private async Task ValidateCareerManagerAsync(string EmployeeId, string? CareerMangerId)
+        {
+            if (string.IsNullOrWhiteSpace(CareerMangerId))
+                return;
+
+            if (CareerMangerId ==  EmployeeId)
+                throw new BusinessRuleException("Employee cannot be their own Career Manager");
+            
+            var manager = await _employeeRepo.GetEmployeeByIdAsync(CareerMangerId);
+
+            if (manager == null)
+                throw new BusinessRuleException("Career Manager must be an existing Employee");
+                
+        }
+
 
 
     }

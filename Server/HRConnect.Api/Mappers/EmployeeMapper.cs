@@ -49,7 +49,7 @@ namespace HRConnect.Api.Mappers
                 Surname = employeeRequestDto.Surname,
                 IdNumber = employeeRequestDto.IdNumber,
                 PassportNumber = employeeRequestDto.PassportNumber,
-                Gender = employeeRequestDto.Gender,
+                Gender = employeeRequestDto.Gender!.Value,
                 ContactNumber = employeeRequestDto.ContactNumber,
                 TaxNumber = employeeRequestDto.TaxNumber,
                 Email = employeeRequestDto.Email,

@@ -72,12 +72,15 @@ namespace HRConnect.Api.Models
         public Position? Position { get; set; }
         [Required]
         public EmploymentStatus EmploymentStatus { get; set; }
-        public string? CareerManagerID { get; set; } = string.Empty;
+        public string? CareerManagerID { get; set; }
+        [ForeignKey(nameof(CareerManagerID))]
         public Employee? CareerManager { get; set; }
         [Required]
         public string ProfileImage { get; set; } = string.Empty;
         // ProfileImage
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        // Allow reverse navigation
+        public ICollection<Employee>? Subordinates { get; set; }
     }
 }

@@ -9,7 +9,7 @@ namespace HRConnect.Api.DTOs.Employee
         public string Surname { get; set; } = string.Empty;
         public string IdNumber { get; set; } = string.Empty;
         public string PassportNumber { get; set; } = string.Empty;
-        public Gender Gender { get; set; }
+        public Gender? Gender { get; set; }
         public string ContactNumber { get; set; } = string.Empty;
         public string TaxNumber { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
