@@ -20,15 +20,15 @@ namespace HRConnect.Api.Repository
       return await _context.Employees.ToListAsync();
     }
 
-    public async Task<Employee?> GetEmployeeByIdAsync(string EmployeeId)
+    public async Task<Employee?> GetEmployeeByIdAsync(string employeeId)
     {
-      return await _context.Employees.FirstOrDefaultAsync(e => e.EmployeeId == EmployeeId);
+      return await _context.Employees.FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
     }
     public async Task<Employee?> UpdateEmployeeAsync(string employeeId, Employee employeeModel)
     {
       var existingEmployee = await _context.Employees.FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
 
-      if (existingEmployee == null) return null;
+      if (existingEmployee == null) throw new KeyNotFoundException($"Employee with ID {employeeId} not found.");
 
       _context.Entry(existingEmployee).CurrentValues.SetValues(employeeModel);
       await _context.SaveChangesAsync();
