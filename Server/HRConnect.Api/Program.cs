@@ -6,13 +6,27 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using Resend;
 using HRConnect.Api.Interfaces;
+using HRConnect.Api.Repositories;
+using HRConnect.Api.Services;
 using HRConnect.Api.Repository;
 using Microsoft.AspNetCore.Identity;
 using HRConnect.Api.Models;
 using HRConnect.Api.Services;
 using HRConnect.Api.Utils;
+<<<<<<< HEAD
 
 var builder = WebApplication.CreateBuilder(args);
+=======
+using OfficeOpenXml;
+using Resend;
+using HRConnect.Api.Services;
+using HRConnect.Api.Interfaces.PensionProjection;
+
+var builder = WebApplication.CreateBuilder(args);
+
+ExcelPackage.License.SetNonCommercialPersonal("YourName");
+
+>>>>>>> 7c8ffe2bcd74924498cf3623f957d75c2a53f812
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -91,14 +105,22 @@ builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IUserService, HRConnect.Api.Services.UserService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+<<<<<<< HEAD
 builder.Services.AddHttpClient<ResendClient>();
 builder.Services.Configure<ResendClientOptions>(options =>
 {
     options.ApiToken = builder.Configuration["Resend:ApiKey"]!;
 });
 
+=======
+builder.Services.AddScoped<ITaxTableUploadService, TaxTableUploadService>();
+builder.Services.AddScoped<ITaxTableUploadRepository, TaxTableUploadRepository>();
+builder.Services.AddScoped<ITaxDeductionService, TaxDeductionService>();
+builder.Services.AddScoped<ITaxDeductionRepository, TaxDeductionRepository>();
+>>>>>>> 7c8ffe2bcd74924498cf3623f957d75c2a53f812
 builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.Services.AuthService>();
+builder.Services.AddTransient<IPensionProjectionService, PensionProjectionService>();
 builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowReact",
