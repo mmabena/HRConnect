@@ -1,8 +1,7 @@
 namespace HRConnect.Api.Controllers
 {
   using HRConnect.Api.Interfaces;
-  using HRConnect.Api.Mappers;
-  using HRConnect.Api.Models;
+  using HRConnect.Api.DTOs.PayrollDeduction;
   using Microsoft.AspNetCore.Mvc;
 
   [Route("api/payrollDeduction")]
@@ -33,9 +32,17 @@ namespace HRConnect.Api.Controllers
     [HttpPost("{employeeId}")]
     public async Task<IActionResult> TakeDeductions(string employeeId)
     {
-      var added_deduction = await _payrollDeductionService.AddDeductionsAsync(employeeId);
-      return CreatedAtAction(nameof(GetDeductionsByEmployeeId),
-      new { employeeId = added_deduction!.EmployeeId }, added_deduction);
+      try
+      {
+        var added_deduction = await _payrollDeductionService.AddDeductionsAsync(employeeId);
+        //      if (added_deduction == null) return BadRequest();
+        return CreatedAtAction(nameof(GetDeductionsByEmployeeId),
+        new { employeeId = added_deduction!.EmployeeId }, added_deduction);
+      }
+      catch (Exception ex)
+      {
+        return BadRequest(ex.Message);
+      }
     }
   }
 }
