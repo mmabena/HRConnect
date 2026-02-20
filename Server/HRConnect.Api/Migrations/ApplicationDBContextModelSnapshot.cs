@@ -183,6 +183,7 @@ namespace HRConnect.Api.Migrations
                 });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
             modelBuilder.Entity("HRConnect.Api.Models.Position", b =>
                 {
                     b.Property<int>("PositionId")
@@ -216,6 +217,8 @@ namespace HRConnect.Api.Migrations
                             PositionTitle = "Trainee Software Developer"
                         });
 =======
+=======
+>>>>>>> cbb1802d126cf4a3215ff2a7757e5ba695d785da
             modelBuilder.Entity("HRConnect.Api.Models.TaxDeduction", b =>
                 {
                     b.Property<int>("Id")
@@ -289,7 +292,10 @@ namespace HRConnect.Api.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("TaxTableUpload", (string)null);
+<<<<<<< HEAD
 >>>>>>> 7c8ffe2bcd74924498cf3623f957d75c2a53f812
+=======
+>>>>>>> cbb1802d126cf4a3215ff2a7757e5ba695d785da
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.User", b =>
