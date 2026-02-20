@@ -11,14 +11,35 @@ using HRConnect.Api.Repository;
 using Microsoft.AspNetCore.Identity;
 using HRConnect.Api.Models;
 using HRConnect.Api.Utils;
-using Microsoft.Build.Framework;
 using OfficeOpenXml;
 using Resend;
-using HRConnect.Api.Services;
 using HRConnect.Api.Interfaces.PensionProjection;
+using Audit.Core;
 using Audit.EntityFramework;
 
 var builder = WebApplication.CreateBuilder(args);
+
+//Audit configuration for custom audit capturing
+Audit.Core.Configuration.Setup()
+  .UseEntityFramework(config => config
+      .AuditTypeExplicitMapper(map => map
+        .Map<PayrollDeduction, AuditPayrollDeductions>((entity, audit) =>
+          {
+            audit.EmployeeId = entity.EmployeeId;
+            audit.IdNumber = entity.IdNumber;
+            audit.PassportNumber = entity.PassportNumber;
+            audit.MonthlySalary = entity.MonthlySalary;
+            audit.ProjectedSalary = entity.MonthlySalary - entity.UifEmployeeAmount;
+            audit.UifEmployeeAmount = entity.UifEmployeeAmount;
+            audit.UifEmployerAmount = entity.UifEmployerAmount;
+            audit.EmployerSdlContribution = entity.EmployerSdlContribution;
+          })
+        .AuditEntityAction<AuditPayrollDeductions>((e, entry, audit) =>
+        {
+          audit.AuditedAt = DateTime.UtcNow;
+          audit.AuditAction = entry.Action;
+          audit.TabelName = entry.Name;
+        })));
 
 ExcelPackage.License.SetNonCommercialPersonal("YourName");
 
@@ -55,7 +76,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
     {
-      options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+      options.UseSqlServer(builder.Configuration.GetConnectionString("DBeaverConnection"));
       options.AddInterceptors(new AuditSaveChangesInterceptor());
     });
 
@@ -151,5 +172,3 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
-
-

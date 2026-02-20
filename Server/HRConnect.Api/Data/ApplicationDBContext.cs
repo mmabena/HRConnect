@@ -13,6 +13,8 @@ namespace HRConnect.Api.Data
     public DbSet<PayrollDeduction> PayrollDeductions { get; set; }
     public DbSet<TaxTableUpload> TaxTableUploads { get; set; }
     public DbSet<TaxDeduction> TaxDeductions { get; set; }
+    public DbSet<AuditPayrollDeductions> AuditPayrollDeductions { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
       base.OnModelCreating(modelBuilder);

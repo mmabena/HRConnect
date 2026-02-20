@@ -5,7 +5,7 @@ namespace HRConnect.Api.Models
 
   public static class DeductionConstants
   {
-    public const decimal UIFCap = 17712m;
+    public const decimal UIFCap = 354.24m;
     public const decimal UIFEmployeeAmount = 0.01m;
     public const decimal UIFEmployerAmount = 0.01m;
     public const decimal SDLAmount = 0.01m;
@@ -25,7 +25,7 @@ namespace HRConnect.Api.Models
     [Precision(7, 2)]
     public decimal UifEmployerAmount { get; set; }
     [Precision(18, 2)]
-    public decimal SdlAmount { get; set; }
+    public decimal EmployerSdlContribution { get; set; }
     public DateTime DeductedAt { get; set; } = DateTime.UtcNow;
   }
 }

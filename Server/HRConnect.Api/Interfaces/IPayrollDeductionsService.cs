@@ -1,8 +1,7 @@
-
 namespace HRConnect.Api.Interfaces
 {
   using HRConnect.Api.Models;
-  using HRConnect.Api.DTOs.PayrollDeductions;
+  using HRConnect.Api.DTOs.PayrollDeduction;
   public interface IPayrollDeductionsService
   {
     Task<IEnumerable<PayrollDeductionDto>> GetAllDeductionsAsync();
