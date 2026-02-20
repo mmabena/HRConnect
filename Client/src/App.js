@@ -22,7 +22,6 @@ import MenuBar from "./Components/MenuBar/MenuBar";
 import EmployeeList from "./Pages/EmployeeManagement/EmployeeList";
 import PositionManagement from "./Pages/CompanyManagement/PositionManagement/PositionManagement";
 
-
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
@@ -39,8 +38,6 @@ function App() {
     window.removeEventListener("beforeunload", handleBeforeUnload);
   };
 }, []);
-
-
 
   useEffect(() => {
     const storedUser = localStorage.getItem("currentUser");
@@ -101,9 +98,9 @@ const handleLoginSuccess = (responseData) => {
  console.log("App currentUser:", currentUser);
 
  return (
- <div className="App" style={{ display: "flex", minHeight: "100vh" }}>
+ <div className="App">
  <MenuBar currentUser={currentUser} />
- <div style={{ flex: 1, padding: "1rem" }}>
+ <div className="routes">
  <ToastContainer position="top-right" autoClose={3000} />
  <Routes>
  <Route path="/dashboard" element={<div>Welcome to Dashboard</div>} />

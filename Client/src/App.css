@@ -1,5 +1,12 @@
 .App {
   text-align: center;
+  display: flex;
+  min-height: 100vh;
+}
+
+.routes{
+  flex: 1;
+  padding: 1rem;
 }
 
 .App-logo {

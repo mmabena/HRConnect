@@ -7,7 +7,7 @@ import {
   toISOStringSafe,
   showConfirmationToast,
   GetEmployeeByEmployeeNumberAsync,
-} from "../../Employee";
+} from "../../api/Employee";
 
 import { toast } from "react-toastify";
 /// </summary>

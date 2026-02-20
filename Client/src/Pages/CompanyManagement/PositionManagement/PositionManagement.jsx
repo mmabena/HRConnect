@@ -86,9 +86,7 @@ const PositionManagement = () => {
   )}
 </div>
 
-
-
-         <div className="pm-table-wrapper">
+         <div className="content-container">
         <table className="position-table">
           <thead>
             <tr>

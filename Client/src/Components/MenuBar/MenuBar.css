@@ -1438,28 +1438,25 @@
   gap: 10px;
   box-sizing: border-box;
 
-
-
 }
 
-
-.table-grid {
+  .table-grid {
   display: grid;
-  grid-template-columns: 66px 40px 309px 207px 211px 275px 141px 192px;
-  grid-template-rows: 59px repeat(10, 1fr);
-  /*1 header + 10 rows */
-  width: 1441px;
-  height: 777px;
+  height: 608px;
   row-gap: 5px;
+  flex-shrink: 0;
+  align-self: stretch;
+  grid-template-rows: 59px 68px 68px 68px 68px 68px 68px 68px 64px 64px;
+  grid-template-columns: minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);
   border-radius: 10px 10px 5px 10px;
   box-sizing: border-box;
   overflow: hidden;
   background-color: #f5f5f5;
-}
+  }
 
 /* Header cell styling */
 .table-header {
-  background-color: #006088;
+  background-color: var(--primary-color);
   color: white;
   font-family: 'Anek Bangla', sans-serif;
   font-weight: 700;
@@ -1471,26 +1468,24 @@
   justify-content: flex-start;
   /* Left align text */
   height: 59px;
-  text-align: left;
+  width: auto;
+  text-align: left; 
   padding-left: 12px;
 }
 
 
 /* Regular cell styling */
-.table-cell {
-  background-color: white;
+ .table-cell {               
+  background-color: var(--primary-color);;
   display: flex;
   align-items: center;
   justify-content: flex-start;
   font-size: 14px;
   font-family: 'Anek Bangla', sans-serif;
-  color: #002D40;
   text-align: left;
   padding-left: 8px;
 
-
-
-}
+} 
 
 .name-surname-cell {
   font-family: 'Anek Bangla', sans-serif;
