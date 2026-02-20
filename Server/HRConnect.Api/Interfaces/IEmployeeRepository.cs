@@ -5,7 +5,7 @@ namespace HRConnect.Api.Interfaces
   using System.Collections.Generic;
   public interface IEmployeeRepository
   {
-    Task<Employee?> GetEmployeeByIdAsync(string EmployeeId);
+    Task<Employee?> GetEmployeeByIdAsync(string employeeId);
     Task<List<Employee>> GetAllEmployeesAsync();
     Task<Employee?> UpdateEmployeeAsync(string employeeId, Employee employeeModel);
   }
