@@ -4,6 +4,8 @@ namespace HRConnect.Api.Services
     using HRConnect.Api.Interfaces;
     using HRConnect.Api.Mappers;
     using HRConnect.Api.Models;
+    using HRConnect.Api.Utils;
+    using Microsoft.EntityFrameworkCore;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -68,29 +70,59 @@ namespace HRConnect.Api.Services
         return occupationalLevel.ToOccupationalLevelDto();
     }
 
-    public async Task<OccupationalLevelDto?> UpdateOccupationalLevelAsync(int id, UpdateOccupationalLevelDto updateOccupationalLevelDto)
-    {
-          ArgumentNullException.ThrowIfNull(updateOccupationalLevelDto);
+public async Task<OccupationalLevelDto?> UpdateOccupationalLevelAsync(
+    int id,
+    UpdateOccupationalLevelDto updateOccupationalLevelDto)
+{
+    ArgumentNullException.ThrowIfNull(updateOccupationalLevelDto);
 
-        var occupationalLevel = await _occupationalLevelRepo.GetOccupationalLevelByIdAsync(id); 
-          if (occupationalLevel == null) return null;
-      
+    var occupationalLevel = await _occupationalLevelRepo
+        .GetOccupationalLevelByIdAsync(id);
+
+    if (occupationalLevel == null)
+        return null;
+
+    // ✅ ADD THIS DUPLICATE CHECK
+    if (!string.IsNullOrWhiteSpace(updateOccupationalLevelDto.Description))
+    {
         var trimmedDescription = updateOccupationalLevelDto.Description.Trim();
 
-        // Prevent duplicate
-        if (!string.Equals(trimmedDescription, occupationalLevel.Description, StringComparison.OrdinalIgnoreCase))
-        {
-            var existing = await _occupationalLevelRepo.GetOccupationalLevelByDescriptionAsync(trimmedDescription);
-            if (existing != null && existing.OccupationalLevelId != id)
-                throw new InvalidOperationException("Another occupational level with this description already exists.");
-        }
-          //Update properties
-          occupationalLevel.Description = trimmedDescription;
-          occupationalLevel.UpdatedDate = DateTime.UtcNow;
+        var duplicate = await _occupationalLevelRepo
+            .GetOccupationalLevelByDescriptionAsync(trimmedDescription);
 
-          await _occupationalLevelRepo.UpdateOccupationalLevelAsync(occupationalLevel);
-          return occupationalLevel.ToOccupationalLevelDto();
+        if (duplicate != null && duplicate.OccupationalLevelId != id)
+        {
+            throw new DomainException(
+                "An occupational level with this description already exists.");
+        }
+
+        occupationalLevel.Description = trimmedDescription;
     }
+
+    if (updateOccupationalLevelDto.IsActive.HasValue)
+    {
+        occupationalLevel.IsActive =
+            updateOccupationalLevelDto.IsActive.Value;
+    }
+
+    occupationalLevel.UpdatedDate = DateTime.UtcNow;
+
+    try
+    {
+        await _occupationalLevelRepo
+            .UpdateOccupationalLevelAsync(occupationalLevel);
+
+        return occupationalLevel.ToOccupationalLevelDto();
+    }
+    catch (DbUpdateException ex)
+        when (DbExceptionHelper.IsUniqueConstraintViolation(ex))
+    {
+        throw new DomainException(
+            "An occupational level with this description already exists.");
+    }
+}
+
+
 
 }
 }

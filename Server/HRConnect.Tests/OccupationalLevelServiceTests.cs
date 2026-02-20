@@ -5,6 +5,8 @@ namespace HRConnect.Tests.Services
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
   using HRConnect.Api.DTOs.OccupationalLevel;
+  using HRConnect.Api.Utils;
+  using Microsoft.EntityFrameworkCore;
   public class OccupationalLevelServiceTests
   {
     private readonly Mock<IOccupationalLevelRepository> _occupationalLevelRepoMock;
@@ -106,5 +108,63 @@ public async Task UpdateOccupationalLevelAsyncUpdatesOccupationalLevel()
     Assert.Equal("Entry Level Updated", result.Description);
 }
 
-  }
+[Fact]
+public async Task AddOccupationalLevelAsyncThrowsOnDuplicateDescription()
+{
+    // Arrange
+    var existingOccupationalLevel = new OccupationalLevel { OccupationalLevelId = 1, Description = "Entry Level" };
+    _occupationalLevelRepoMock.Setup(r => r.GetOccupationalLevelByDescriptionAsync("Entry Level"))
+                             .ReturnsAsync(existingOccupationalLevel);
+
+    // Act & Assert
+    var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        _occupationalLevelService.AddOccupationalLevelAsync(createOccupationalLevelDto: new CreateOccupationalLevelDto { Description = "Entry Level" }));
+}       
+
+[Fact]
+public async Task UpdateOccupationalLevelAsyncThrowsOnDuplicateDescription()
+{
+    // Arrange
+
+    // Existing record being updated
+    var existingOccupationalLevel = new OccupationalLevel
+    {
+        OccupationalLevelId = 1,
+        Description = "Entry Level",
+        IsActive = true
+    };
+
+    // Another record that already has the new description
+    var duplicateOccupationalLevel = new OccupationalLevel
+    {
+        OccupationalLevelId = 2,
+        Description = "Mid Level",
+        IsActive = true
+    };
+
+    var updateDto = new UpdateOccupationalLevelDto
+    {
+        OccupationalLevelId = 1,
+        Description = "Mid Level", // duplicate description
+        IsActive = true
+    };
+
+    // Mock: fetch by Id returns the existing record
+    _occupationalLevelRepoMock
+        .Setup(r => r.GetOccupationalLevelByIdAsync(1))
+        .ReturnsAsync(existingOccupationalLevel);
+
+    // Mock: fetching by description returns another record (duplicate)
+    _occupationalLevelRepoMock
+        .Setup(r => r.GetOccupationalLevelByDescriptionAsync("Mid Level"))
+        .ReturnsAsync(duplicateOccupationalLevel);
+
+    // Act & Assert
+    var ex = await Assert.ThrowsAsync<DomainException>(() =>
+        _occupationalLevelService.UpdateOccupationalLevelAsync(1, updateDto));
+
+    Assert.Equal("An occupational level with this description already exists.", ex.Message);
+}
+
+}
 }

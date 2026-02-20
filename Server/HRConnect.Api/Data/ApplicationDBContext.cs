@@ -21,23 +21,27 @@ using System.Threading.Tasks;
 {
     base.OnModelCreating(modelBuilder);
 
-    // Position - JobGrade
-    modelBuilder.Entity<Position>()
-        .HasOne(p => p.JobGrade)
-        .WithMany(jg => jg.Positions)
-        .HasForeignKey(p => p.JobGradeId)
-        .OnDelete(DeleteBehavior.Restrict);  // <-- prevent cascade
+        // Position - JobGrade
+        modelBuilder.Entity<Position>()
+            .HasOne(p => p.JobGrade)
+            .WithMany(jg => jg.Positions)
+            .HasForeignKey(p => p.JobGradeId)
+            .OnDelete(DeleteBehavior.Restrict);  // <-- prevent cascade
 
-    // Position - OccupationalLevel
-    modelBuilder.Entity<Position>()
-        .HasOne(p => p.OccupationalLevels)
-        .WithMany(o => o.Positions)
-        .HasForeignKey(p => p.OccupationalLevelId)
-        .OnDelete(DeleteBehavior.Restrict);  // <-- prevent cascade
+        // Position - OccupationalLevel
+        modelBuilder.Entity<Position>()
+            .HasOne(p => p.OccupationalLevels)
+            .WithMany(o => o.Positions)
+            .HasForeignKey(p => p.OccupationalLevelId)
+            .OnDelete(DeleteBehavior.Restrict);  // <-- prevent cascade
 
-    // Unique index on Position.Title
-    modelBuilder.Entity<Position>()
-        .HasIndex(p => p.Title)
+        // Unique index on Position.Title
+        modelBuilder.Entity<Position>()
+            .HasIndex(p => p.Title)
+            .IsUnique();
+
+        modelBuilder.Entity<OccupationalLevel>()
+        .HasIndex(o => o.Description)
         .IsUnique();
 }
 

@@ -5,6 +5,10 @@ namespace HRConnect.Tests.Services
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
   using HRConnect.Api.DTOs.Position;
+  using HRConnect.Api.DTOs.JobGrade;
+  using HRConnect.Api.DTOs.OccupationalLevel;
+  using HRConnect.Api.Utils;
+  using Microsoft.EntityFrameworkCore;
   public class PositionServiceTests
   {
     private readonly Mock<IPositionRepository> _positionRepoMock;
@@ -71,6 +75,15 @@ namespace HRConnect.Tests.Services
     public async Task CreatePositionAsyncAddsPosition()
     {
       // Arrange
+
+      var createPositionDto = new CreatePositionDto
+       { 
+        Title = "Data Scientist",
+        JobGradeId = 1,
+        OccupationalLevelId = 1,
+        IsActive = true 
+        };
+        
       var newPosition = new Position { Title = "Data Scientist" };
       _positionRepoMock.Setup(r => r.AddPositionAsync(It.IsAny<Position>()))
                        .ReturnsAsync((Position pos) => 
@@ -123,5 +136,61 @@ namespace HRConnect.Tests.Services
       Assert.Equal(1, result.PositionId);
       Assert.Equal("Senior Software Engineer", result.Title);
 }
+
+ // ---------------------- NEW TESTS FOR DUPLICATE TITLE ----------------------
+       [Fact]
+public async Task AddPositionAsyncThrowsDomainExceptionOnDuplicateTitle()
+{
+    // Arrange
+    var createDto = new CreatePositionDto
+    {
+        Title = "Developer",
+        JobGradeId = 1,
+        OccupationalLevelId = 1,
+        IsActive = true
+    };
+
+    // Instead of throwing DbUpdateException, throw DomainException directly
+    _positionRepoMock
+        .Setup(r => r.AddPositionAsync(It.IsAny<Position>()))
+        .ThrowsAsync(new DomainException("A position with this title already exists."));
+
+    // Act & Assert
+    var ex = await Assert.ThrowsAsync<DomainException>(() =>
+        _positionService.AddPositionAsync(createDto));
+
+    Assert.Equal("A position with this title already exists.", ex.Message);
 }
+
+[Fact]
+public async Task UpdatePositionAsyncThrowsDomainExceptionOnDuplicateTitle()
+{
+    // Arrange
+    var existingPosition = new Position
+    {
+        PositionId = 1,
+        Title = "Developer"
+    };
+
+    var updateDto = new UpdatePositionDto
+    {
+        Title = "Developer", // duplicate title
+        IsActive = true
+    };
+
+    _positionRepoMock.Setup(r => r.GetPositionByIdAsync(1))
+                     .ReturnsAsync(existingPosition);
+
+    // Throw DomainException directly from the repo mock
+    _positionRepoMock
+        .Setup(r => r.UpdatePositionAsync(1, It.IsAny<Position>()))
+        .ThrowsAsync(new DomainException("A position with this title already exists."));
+
+    // Act & Assert
+    var ex = await Assert.ThrowsAsync<DomainException>(() =>
+        _positionService.UpdatePositionAsync(1, updateDto));
+
+    Assert.Equal("A position with this title already exists.", ex.Message);
+}
+  }
 }

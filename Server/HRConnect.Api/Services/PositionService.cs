@@ -6,6 +6,12 @@ namespace HRConnect.Api.Services
     using HRConnect.Api.Interfaces;
     using HRConnect.Api.Mappers;
     using HRConnect.Api.Models;
+    using HRConnect.Api.Utils;
+     using Microsoft.EntityFrameworkCore;
+     using System;
+     using System.Collections.Generic;
+     using System.Linq;
+     using System.Threading.Tasks;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -63,76 +69,86 @@ namespace HRConnect.Api.Services
         public async Task<PositionDto> AddPositionAsync(CreatePositionDto createPositionDto)
         {
             ValidateCreateDto(createPositionDto);
-            await EnsureUniqueTitle(createPositionDto.Title);
-            
-            //Prevents duplicate titles
-            var existing = await _positionRepo.GetPositionByTitleAsync(createPositionDto.Title);
-            if (existing != null)
-                throw new InvalidOperationException("A position with this name already exists.");
 
             var position = new Position
             {
-                Title = createPositionDto.Title,
+                Title = createPositionDto.Title.Trim(),
                 JobGradeId = createPositionDto.JobGradeId,
                 OccupationalLevelId = createPositionDto.OccupationalLevelId,
+                IsActive = createPositionDto.IsActive,
                 CreatedDate = DateTime.UtcNow,
-                UpdatedDate = DateTime.UtcNow,
-                IsActive = createPositionDto.IsActive
+                UpdatedDate = DateTime.UtcNow
             };
 
-            var created = await _positionRepo.AddPositionAsync(position);
-            return MapToPositionDto(created);
+            try
+            {
+                var created = await _positionRepo.AddPositionAsync(position);
+                return MapToPositionDto(created);
+            }
+            catch (DbUpdateException ex)
+                when (DbExceptionHelper.IsUniqueConstraintViolation(ex))
+            {
+                throw new DomainException("A position with this title already exists.");
+            }
         }
+
 
         // ----------------------
         // UPDATE
         // ----------------------
-        public async Task<PositionDto?> UpdatePositionAsync(int id, UpdatePositionDto updatePositionDto)
+     public async Task<PositionDto?> UpdatePositionAsync(int id, UpdatePositionDto updatePositionDto)
         {
+            
             var position = await _positionRepo.GetPositionByIdAsync(id);
             if (position == null)
                 throw new KeyNotFoundException($"Position with ID {id} not found.");
 
+        
             ValidateUpdateDto(updatePositionDto);
-            await EnsureUniqueTitle(updatePositionDto.Title, id);
 
-            if(updatePositionDto.JobGradeId > 0)
+            
+            if (updatePositionDto.JobGradeId > 0)
             {
+                var jobGrade = await _positionRepo.GetPositionByIdAsync(updatePositionDto.JobGradeId);
+                if (jobGrade == null)
+                    throw new KeyNotFoundException($"JobGrade with ID {updatePositionDto.JobGradeId} not found.");
 
-            var jobGrade = await _positionRepo.GetPositionByIdAsync(updatePositionDto.JobGradeId);
-            if (jobGrade == null)
-                throw new KeyNotFoundException($"JobGrade with ID {updatePositionDto.JobGradeId} not found.");
-
-            if(!jobGrade.IsActive)
-                throw new InvalidOperationException("Cannot assign a position to an inactive Job Grade.");
+                if (!jobGrade.IsActive)
+                    throw new InvalidOperationException("Cannot assign a position to an inactive Job Grade.");
 
                 position.JobGradeId = updatePositionDto.JobGradeId;
-
             }
-            if(updatePositionDto.OccupationalLevelId > 0)
+
+        
+            if (updatePositionDto.OccupationalLevelId > 0)
             {
-            
-            var occupationalLevel = await _positionRepo.GetPositionByIdAsync(updatePositionDto.OccupationalLevelId);
-            if (occupationalLevel == null)
-                throw new KeyNotFoundException($"OccupationalLevel with ID {updatePositionDto.OccupationalLevelId} not found.");
-            
-            if(!occupationalLevel.IsActive)
-                throw new InvalidOperationException("Occupational level does not exist.");
+                var occupationalLevel = await _positionRepo.GetPositionByIdAsync(updatePositionDto.OccupationalLevelId);
+                if (occupationalLevel == null)
+                    throw new KeyNotFoundException($"OccupationalLevel with ID {updatePositionDto.OccupationalLevelId} not found.");
+
+                if (!occupationalLevel.IsActive)
+                    throw new InvalidOperationException("Occupational level does not exist.");
 
                 position.OccupationalLevelId = updatePositionDto.OccupationalLevelId;
-
             }
 
-            // Update properties
             position.Title = updatePositionDto.Title;
-            position.JobGradeId = updatePositionDto.JobGradeId;
-            position.OccupationalLevelId = updatePositionDto.OccupationalLevelId;
             position.IsActive = updatePositionDto.IsActive;
             position.UpdatedDate = DateTime.UtcNow;
 
-            var updated = await _positionRepo.UpdatePositionAsync(id, position);
-            return updated == null ? null : MapToPositionDto(updated);
+            
+            try
+            {
+                var updated = await _positionRepo.UpdatePositionAsync(id, position);
+                return updated == null ? null : MapToPositionDto(updated);
+            }
+            catch (DbUpdateException ex)
+                when (DbExceptionHelper.IsUniqueConstraintViolation(ex))
+            {
+                throw new DomainException("A position with this title already exists.");
+            }
         }
+
 
         // ----------------------
         // PRIVATE HELPERS
