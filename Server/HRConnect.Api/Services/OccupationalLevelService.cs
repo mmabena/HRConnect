@@ -82,7 +82,7 @@ public async Task<OccupationalLevelDto?> UpdateOccupationalLevelAsync(
     if (occupationalLevel == null)
         return null;
 
-    // ✅ ADD THIS DUPLICATE CHECK
+    //ADD THIS DUPLICATE CHECK
     if (!string.IsNullOrWhiteSpace(updateOccupationalLevelDto.Description))
     {
         var trimmedDescription = updateOccupationalLevelDto.Description.Trim();
