@@ -35,7 +35,6 @@ namespace HRConnect.Api.Controllers
       try
       {
         var added_deduction = await _payrollDeductionService.AddDeductionsAsync(employeeId);
-        //      if (added_deduction == null) return BadRequest();
         return CreatedAtAction(nameof(GetDeductionsByEmployeeId),
         new { employeeId = added_deduction!.EmployeeId }, added_deduction);
       }
