@@ -3,6 +3,7 @@
   using System;
   using System.Collections.Generic;
   using System.Linq;
+  using System.Runtime.Serialization;
   using HRConnect.Api.DTOs.MedicalOption;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Mappers;
@@ -256,7 +257,9 @@
       //Define validations dictionary
       var validationDictionary =
         new Dictionary<string, (bool isValid, string? Message, Func<string, Exception> Throw)>();
-      int updateCounter = 0;
+      //indexers
+      int updateCounter = 0, dbCopyCount = 0, variantCount = 0, indexer = 0;
+      
       // Check if the update is done outside the update period (Nov - Dev) || Approach used is enum(Named Period) + Extension Method
       if (!(DateRangeUpdatePeriod.CategoryOptionsUpdatePeriod.Contains(DateTime.Now)))
       {
@@ -269,13 +272,16 @@
       
       // Validations (Strict)
       // Check if category is valid
-      if (await _medicalOptionRepository.MedicalOptionCategoryExistsAsync(categoryId) is false)
+      if (!(await _medicalOptionRepository.MedicalOptionCategoryExistsAsync(categoryId)))
         throw
           new ArgumentException("Bulk update operation cannot be executed on this category");
       
       //get db copy of the options under the category
       var dbData = await _medicalOptionRepository
         .GetAllOptionsUnderCategoryAsync(categoryId);
+      
+      //Get dBData Count and use as index
+      dbCopyCount = dbData.Count;
       
       // First check if the count of entity is the same as that in the db
       if (dbData.Count != bulkUpdateDto.Count)
@@ -305,10 +311,10 @@
         // Check via ID since we do not have names:
         var getOptionTable = await GetMedicalOptionCategoryByIdAsync(categoryId);
             
-        if ((bool)(getOptionTable.MedicalOptionCategory?.MedicalOptionCategoryName.Contains(
+        if ( ((bool)(getOptionTable.MedicalOptionCategory?.MedicalOptionCategoryName.Contains(
               "Double")) ||
             (bool)getOptionTable.MedicalOptionCategory?.MedicalOptionCategoryName.Contains(
-              "Alliance"))
+              "Alliance")) && (entity.SalaryBracketMin > 0 || entity.SalaryBracketMin is not null || entity.SalaryBracketMax > 0 || entity.SalaryBracketMax is not null))
         {
           throw new InvalidOperationException("Salary bracket cannot be updated for this category");
         }
@@ -318,19 +324,37 @@
           // Get variant info like Name in this case (Will be used in the Salary Validations)
           var (categoryName, variantName, filterName ) = MedicalOptionVariantFactory
             .GetVariantInfoSafe(getOptionTable);
+          
+          // Query Db for Variant collection -> to be used for indexing (Tracking)
+          var variantCollection =
+            await _medicalOptionRepository
+              .GetAllMedicalOptionsUnderCategoryVariantAsync(filterName);
+          
+          //get variant count
+          variantCount = variantCollection.Count;
+          
           // use the filterName as the tracking Name
           currentVariantName = filterName;
           
           //check if it is the first iteration or not 
-          if (previousVariantName != null)
+          if (previousVariantName == null)
           {
-           previousVariantName = currentVariantName; 
+           previousVariantName = currentVariantName;
+           // Increment Counter
+           updateCounter++;
+           indexer++;
           }
           else
           {
             //check if the current variant is the same as the same as the previous
             if (previousVariantName != currentVariantName)
             {
+              //check indexers
+              //Check if variant index == 0
+              if (variantCount == 0)
+              {
+                // get new variant name
+              }
               //update variant and reset counter
             }
           }
@@ -343,7 +367,111 @@
             entity.SalaryBracketMax);
         }
 
+        //logic for contrib validations will be added here (Might consider using a Factory to handle the different cases of variants and categories and their respective validation rules)
+        // Regardless whether it is a restricted group or not we need to validate the contributions and make sure that the data coming in is in perfect order 
+        
+        //calc to consider 
+        /*
+         * monthly risk (for some categories this is the total contribution)
+         * monthly msa (this is the medical saving )
+         * Monthly Total Contribution (this field is added for simplicity and clarity especially on plans with MSA and Risk on them)
+         *
+         * validation Approach :
+         * 1. Validate if option has Nulls on MSA
+         *      -=> If yes only look at validating if Risk == Total Contribution (reserving nulls on the way)
+         *
+         *            -=> If No:
+         *                Validate if MSA + Risk == Total
+         *
+         * NOTE : Som plans have principle, so it is best to not use this field as an index for validating
+         */
+        
+        // --- Risk Contributions ---
+        // All options have this , yet we will check for any nulls and these will be marked as errors
+        if ((entity.MonthlyMsaContributionAdult == null ||
+             entity.MonthlyMsaContributionAdult == 0) &&
+            (entity.MonthlyMsaContributionChild == null || entity.MonthlyMsaContributionChild == 0))
+        {
+          throw new InvalidDataContractException();
+        }
+        
+        // Check if principal has a value on the db copy and validating that against the payload
+        var calcPrincipals = dbData
+          .Where(o =>
+            o.MedicalOptionId == entity.MedicalOptionId &&
+            o.MonthlyRiskContributionPrincipal != 0 ||
+            o.MonthlyRiskContributionPrincipal != null)
+          .ToList().Count;
+        
+        // Check if MSA exists (with a value not null)
+        var calcMsa = dbData
+          .Where(o =>
+            o.MedicalOptionId == entity.MedicalOptionId &&
+            o.MonthlyMsaContributionAdult != 0 ||
+            o.MonthlyMsaContributionAdult != null)
+          .ToList().Count;
+        
+        decimal pRisk,aRisk,cRisk,c2Risk, pMsa,aMsa,cMsa, pTotalContrib,aTotalContrib,cTotalContrib;
+        
+        switch (calcPrincipals)
+        {
+          case > 0:
+            // Do calculations with principals involved
+            if (calcMsa > 0)
+            {
+              // Perform calcs with MSA contributions included
+              pMsa = (decimal)entity.MonthlyMsaContributionPrincipal;
+              aMsa = (decimal)entity.MonthlyMsaContributionAdult;
+              cMsa = (decimal)entity.MonthlyMsaContributionChild;
+              
+            }
+            else
+            {
+              // Perform Calcs without MSA included
+              pMsa = 0;
+              aMsa = 0;
+              cMsa = 0;
+              
+              // Risk
+              pRisk = (decimal)entity.MonthlyRiskContributionPrincipal;
+              aRisk = (decimal)entity.MonthlyRiskContributionAdult;
+              cRisk = (decimal)entity.MonthlyRiskContributionChild;
+              // Check if policy option is NetworkChoice Or has Child2 amount (dbData/Copy)
+              if (dbData.Any(o =>
+                    o.MonthlyRiskContributionChild2 != null ||
+                    o.MonthlyRiskContributionChild2 != 0))
+              {
+                
+                int child2Counter = dbData.Where(o =>
+                  o.MonthlyRiskContributionChild2 != null ||
+                  o.MonthlyRiskContributionChild2 != 0).ToList().Count;
+                
+                cRisk = entity.MonthlyRiskContributionChild2.HasValue && child2Counter > 0
+                  ? (decimal)entity.MonthlyRiskContributionChild2 : (decimal)entity.MonthlyRiskContributionChild2; 
+              }
+            }
+            break;
+          
+          case 0:
+            // Do calculations without principals involved
+            if (calcMsa > 0)
+            {
+              // Perform calcs with MSA contributions included
+            }
+            else
+            {
+              // Perform Calcs without MSA included
+              // msa = 0;
+            }
+
+        }
+
+        // --- MSA Contributions ---
+
+        // --- Total Contributions --- 
+
       }
+      
 
       return null;
     }
