@@ -491,8 +491,5 @@ namespace HRConnect.Api.Services
                 throw new BusinessRuleException("Career Manager must be an existing Employee");
                 
         }
-
-
-
     }
 }
