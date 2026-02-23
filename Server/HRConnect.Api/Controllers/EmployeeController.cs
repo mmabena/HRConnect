@@ -1,9 +1,10 @@
-using HRConnect.Api.DTOs;
-using HRConnect.Api.Interfaces;
-using Microsoft.AspNetCore.Mvc;
 
 namespace HRConnect.Api.Controllers
 {
+    using HRConnect.Api.DTOs;
+    using HRConnect.Api.Interfaces;
+    using Microsoft.AspNetCore.Mvc;
+
     [ApiController]
     [Route("api/[controller]")]
     public class EmployeeController : ControllerBase
@@ -65,16 +66,6 @@ namespace HRConnect.Api.Controllers
 
             return Ok(updated);
         }
-
-        // ============================
-        // DELETE
-        // ============================
-        [HttpDelete("{id:guid}")]
-        public async Task<IActionResult> Delete(Guid id)
-        {
-            await _employeeService.DeleteEmployeeAsync(id);
-            return NoContent();
-        }
         [HttpPost("process-carryover-notifications")]
         public async Task<IActionResult> TriggerCarryoverNotifications()
         {
@@ -94,6 +85,18 @@ namespace HRConnect.Api.Controllers
             await _employeeService.UpdateLeaveEntitlementRuleAsync(request);
             return Ok("Rule updated and employees recalculated.");
         }
-
+        [HttpPost("{id:guid}/recalculate-sick")]
+        public async Task<IActionResult> RecalculateSick(Guid id)
+        {
+            await _employeeService.RecalculateSickLeaveAsync(id);
+            return Ok("Sick leave recalculated.");
+        }
+        [HttpPut("update-used-days")]
+        public async Task<IActionResult> UpdateUsedDays(
+        [FromBody] UpdateUsedDaysRequest request)
+        {
+            await _employeeService.UpdateUsedDaysAsync(request);
+            return Ok("Used days updated successfully.");
+        }
     }
 }

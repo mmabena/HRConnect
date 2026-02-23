@@ -1,4 +1,3 @@
-
 namespace HRConnect.Api.Interfaces
 {
     using System;
@@ -7,16 +6,18 @@ namespace HRConnect.Api.Interfaces
     using HRConnect.Api.Models;
     using HRConnect.Api.DTOs;
 
-
     public interface IEmployeeEntitlementService
     {
         Task<EmployeeResponse> CreateEmployeeAsync(CreateEmployeeRequest request);
         Task<List<EmployeeResponse>> GetAllEmployeesAsync();
         Task<EmployeeResponse?> GetEmployeeByIdAsync(Guid id);
         Task<EmployeeResponse> UpdateEmployeePositionAsync(Guid employeeId, int newPositionId);
-        Task DeleteEmployeeAsync(Guid id);
         Task InitializeEmployeeLeaveBalancesAsync(Guid employeeId);
         Task RecalculateAnnualLeaveAsync(Guid employeeId);
+        Task RecalculateSickLeaveAsync(Guid employeeId);
+        Task RecalculateAllSickLeaveAsync();
+        Task UpdateUsedDaysAsync(UpdateUsedDaysRequest request);
+
         Task ProcessCarryOverNotificationAsync();
         Task ProcessAnnualResetAsync();
         Task UpdateLeaveEntitlementRuleAsync(UpdateLeaveRuleRequest request);

@@ -11,13 +11,23 @@ namespace HRConnect.Tests
     using HRConnect.Api.Services;
     using Microsoft.EntityFrameworkCore;
     using Xunit;
+    using HRConnect.Api.DTOs;
 
     public class EmployeeEntitlementServiceTests
     {
-        private sealed class FakeEmailService : HRConnect.Api.Utils.IEmailService
+        private sealed class FakeEmailService : IEmailService
         {
             public Task SendEmailAsync(string recipientEmail, string subject, string body)
                 => Task.CompletedTask;
+        }
+        private sealed class TrackingEmailService : IEmailService
+        {
+            public List<(string Recipient, string Subject, string Body)> SentEmails { get; } = new();
+            public Task SendEmailAsync(string recipientEmail, string subject, string body)
+            {
+                SentEmails.Add((recipientEmail, subject, body));
+                return Task.CompletedTask;
+            }
         }
         private static ApplicationDBContext GetInMemoryDb()
         {
@@ -1029,13 +1039,14 @@ namespace HRConnect.Tests
             {
                 EmployeeId = Guid.NewGuid(),
                 PositionId = 1,
+                Email = "test@email.com",
                 Gender = "Male",
                 FirstName = "Test",
                 LastName = "User",
-                ReportingManagerId = "test@email.com",
+                ReportingManagerId = "RM001",
                 StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
                 IsActive = true
-            }; 
+            };
 
             context.Employees.Add(employee);
             await context.SaveChangesAsync();
@@ -1076,6 +1087,286 @@ namespace HRConnect.Tests
             Assert.Equal(0, balance.CarryoverDays);
             Assert.Equal(0, balance.ForfeitedDays);
             Assert.Equal(15m, balance.EntitledDays);
+        }
+        [Fact]
+        public async Task PromotionShouldSendEmailNotification()
+        {
+            var context = GetInMemoryDb();
+            var emailService = new TrackingEmailService();
+
+            context.JobGrades.AddRange(
+                new JobGrade { Id = 1, Name = "Grade1" },
+                new JobGrade { Id = 2, Name = "Grade2" });
+
+            context.Positions.AddRange(
+                new Position { PositionId = 1, Title = "P1", JobGradeId = 1 },
+                new Position { PositionId = 2, Title = "P2", JobGradeId = 2 });
+
+            await context.SaveChangesAsync();
+
+            var employee = new Employee
+            {
+                EmployeeId = Guid.NewGuid(),
+                PositionId = 1,
+                Email = "test@email.com",
+                Gender = "Male",
+                FirstName = "Test",
+                LastName = "User",
+                ReportingManagerId = "RM001",
+                StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
+                IsActive = true
+            };
+
+            context.Employees.Add(employee);
+
+            context.LeaveTypes.Add(
+                new LeaveType { Id = 1, Name = "Annual", Code = "AL", Description = "Annual Leave", IsActive = true });
+
+            context.LeaveEntitlementRules.AddRange(
+                new LeaveEntitlementRule { Id = 1, LeaveTypeId = 1, JobGradeId = 1, MinYearsService = 0, DaysAllocated = 15, IsActive = true },
+                new LeaveEntitlementRule { Id = 2, LeaveTypeId = 1, JobGradeId = 2, MinYearsService = 0, DaysAllocated = 20, IsActive = true });
+
+            await context.SaveChangesAsync();
+
+            var service = new EmployeeEntitlementService(context, emailService);
+
+            await service.InitializeEmployeeLeaveBalancesAsync(employee.EmployeeId);
+
+            employee.PositionId = 2;
+            employee.UpdatedDate = new DateTime(DateTime.UtcNow.Year, 1, 1);
+            await context.SaveChangesAsync();
+
+            await service.RecalculateAnnualLeaveAsync(employee.EmployeeId);
+
+            Assert.Single(emailService.SentEmails);
+            Assert.Contains("Recalculated", emailService.SentEmails[0].Subject);
+            Assert.Contains("20", emailService.SentEmails[0].Body);
+        }
+        [Fact]
+        public async Task RecalculateShouldThrowIfEmployeeNotFound()
+        {
+            var context = GetInMemoryDb();
+            var service = new EmployeeEntitlementService(context, new TrackingEmailService());
+
+            await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                service.RecalculateAnnualLeaveAsync(Guid.NewGuid()));
+        }
+        [Fact]
+        public async Task RecalculateShouldThrowIfUpdatedDateMissing()
+        {
+            var context = GetInMemoryDb();
+
+            context.JobGrades.Add(new JobGrade { Id = 1, Name = "G1" });
+            context.Positions.Add(new Position { PositionId = 1, Title = "P1", JobGradeId = 1 });
+
+            var employee = new Employee
+            {
+                EmployeeId = Guid.NewGuid(),
+                PositionId = 1,
+                Email = "test@email.com",
+                Gender = "Male",
+                FirstName = "Test",
+                LastName = "User",
+                ReportingManagerId = "RM001",
+                StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
+                IsActive = true
+            };
+
+            context.Employees.Add(employee);
+            await context.SaveChangesAsync();
+
+            var service = new EmployeeEntitlementService(context, new TrackingEmailService());
+
+            await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                service.RecalculateAnnualLeaveAsync(employee.EmployeeId));
+        }
+        [Fact]
+        public async Task UpdateRuleShouldThrowIfReducingBelowUsedDays()
+        {
+            var context = GetInMemoryDb();
+
+            context.JobGrades.Add(new JobGrade { Id = 1, Name = "G1" });
+            context.Positions.Add(new Position { PositionId = 1, Title = "P1", JobGradeId = 1 });
+
+            var employee = new Employee
+            {
+                EmployeeId = Guid.NewGuid(),
+                PositionId = 1,
+                Email = "test@email.com",
+                Gender = "Male",
+                FirstName = "Test",
+                LastName = "User",
+                ReportingManagerId = "RM001",
+                StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
+                IsActive = true
+            };
+
+            context.Employees.Add(employee);
+
+            context.LeaveTypes.Add(new LeaveType { Id = 1, Name = "Annual", Code = "AL", Description = "Annual Leave", IsActive = true });
+
+            context.LeaveEntitlementRules.Add(new LeaveEntitlementRule
+            {
+                Id = 1,
+                LeaveTypeId = 1,
+                JobGradeId = 1,
+                MinYearsService = 0,
+                DaysAllocated = 15,
+                IsActive = true
+            });
+
+            await context.SaveChangesAsync();
+
+            var service = new EmployeeEntitlementService(context, new TrackingEmailService());
+
+            await service.InitializeEmployeeLeaveBalancesAsync(employee.EmployeeId);
+
+            var balance = context.EmployeeLeaveBalances.Single();
+            balance.UsedDays = 10;
+            await context.SaveChangesAsync();
+
+            await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                service.UpdateLeaveEntitlementRuleAsync(new UpdateLeaveRuleRequest
+                {
+                    RuleId = 1,
+                    NewDaysAllocated = 5
+                }));
+        }
+        [Fact]
+        public async Task InactiveRuleShouldNotApply()
+        {
+            var context = GetInMemoryDb();
+
+            context.JobGrades.Add(new JobGrade { Id = 1, Name = "G1" });
+            context.Positions.Add(new Position { PositionId = 1, Title = "P1", JobGradeId = 1 });
+
+            var employee = new Employee
+            {
+                EmployeeId = Guid.NewGuid(),
+                PositionId = 1,
+                Email = "test@email.com",
+                Gender = "Male",
+                FirstName = "Test",
+                LastName = "User",
+                ReportingManagerId = "RM001",
+                StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
+                IsActive = true
+            };
+
+            context.Employees.Add(employee);
+
+            context.LeaveTypes.Add(new LeaveType { Id = 1, Name = "Annual", Code = "AL", Description = "Annual Leave", IsActive = true });
+
+            context.LeaveEntitlementRules.Add(new LeaveEntitlementRule
+            {
+                Id = 1,
+                LeaveTypeId = 1,
+                JobGradeId = 1,
+                MinYearsService = 0,
+                DaysAllocated = 15,
+                IsActive = false
+            });
+
+            await context.SaveChangesAsync();
+
+            var service = new EmployeeEntitlementService(context, new TrackingEmailService());
+
+            await service.InitializeEmployeeLeaveBalancesAsync(employee.EmployeeId);
+
+            Assert.Empty(context.EmployeeLeaveBalances);
+        }
+        [Fact]
+        public async Task CarryoverNotificationShouldSendWhenAboveFive()
+        {
+            var context = GetInMemoryDb();
+            var emailService = new TrackingEmailService();
+
+            context.LeaveTypes.Add(new LeaveType { Id = 1, Name = "Annual", Code = "AL", Description = "Annual Leave", IsActive = true });
+
+            var employee = new Employee
+            {
+                EmployeeId = Guid.NewGuid(),
+                PositionId = 1,
+                Email = "test@email.com",
+                Gender = "Male",
+                FirstName = "Test",
+                LastName = "User",
+                ReportingManagerId = "RM001",
+                StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
+                IsActive = true
+            };
+
+            context.Employees.Add(employee);
+
+            context.EmployeeLeaveBalances.Add(new EmployeeLeaveBalance
+            {
+                EmployeeId = employee.EmployeeId,
+                LeaveTypeId = 1,
+                RemainingDays = 8
+            });
+
+            await context.SaveChangesAsync();
+
+            var service = new EmployeeEntitlementService(context, emailService);
+
+            await service.ProcessCarryOverNotificationAsync();
+
+            Assert.Single(emailService.SentEmails);
+            Assert.Contains("3", emailService.SentEmails[0].Body); // 8 - 5 forfeited
+        }
+        [Fact]
+        public async Task OldRuleSelectionShouldNotPickWrongGrade()
+        {
+            var context = GetInMemoryDb();
+
+            context.JobGrades.AddRange(
+                new JobGrade { Id = 1, Name = "G1" },
+                new JobGrade { Id = 2, Name = "G2" },
+                new JobGrade { Id = 3, Name = "G3" });
+
+            context.Positions.AddRange(
+                new Position { PositionId = 1, Title = "P1", JobGradeId = 1 },
+                new Position { PositionId = 2, Title = "P2", JobGradeId = 2 });
+
+            await context.SaveChangesAsync();
+
+            var employee = new Employee
+            {
+                EmployeeId = Guid.NewGuid(),
+                PositionId = 1,
+                Email = "test@email.com",
+                Gender = "Male",
+                FirstName = "Test",
+                LastName = "User",
+                ReportingManagerId = "RM001",
+                StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
+                IsActive = true
+            };
+            context.Employees.Add(employee);
+
+            context.LeaveTypes.Add(new LeaveType { Id = 1, Name = "Annual", Code = "AL", Description = "Annual Leave", IsActive = true });
+
+            context.LeaveEntitlementRules.AddRange(
+                new LeaveEntitlementRule { Id = 1, LeaveTypeId = 1, JobGradeId = 1, MinYearsService = 0, DaysAllocated = 15, IsActive = true },
+                new LeaveEntitlementRule { Id = 2, LeaveTypeId = 1, JobGradeId = 2, MinYearsService = 0, DaysAllocated = 18, IsActive = true },
+                new LeaveEntitlementRule { Id = 3, LeaveTypeId = 1, JobGradeId = 3, MinYearsService = 0, DaysAllocated = 25, IsActive = true }
+            );
+
+            await context.SaveChangesAsync();
+
+            var service = new EmployeeEntitlementService(context, new TrackingEmailService());
+
+            await service.InitializeEmployeeLeaveBalancesAsync(employee.EmployeeId);
+
+            employee.PositionId = 2;
+            employee.UpdatedDate = new DateTime(DateTime.UtcNow.Year, 7, 1);
+            await context.SaveChangesAsync();
+
+            await service.RecalculateAnnualLeaveAsync(employee.EmployeeId);
+
+            var balance = context.EmployeeLeaveBalances.Single();
+
+            Assert.NotEqual(25, balance.EntitledDays); // ensure wrong grade not picked
         }
     }
 }

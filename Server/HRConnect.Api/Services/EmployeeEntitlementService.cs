@@ -50,6 +50,8 @@ namespace HRConnect.Api.Services
         // ============================================================
         public async Task<List<EmployeeResponse>> GetAllEmployeesAsync()
         {
+            await RecalculateAllSickLeaveAsync();
+
             var employees = await _context.Employees
                 .Include(e => e.Position)
                     .ThenInclude(p => p.JobGrade)
@@ -59,12 +61,13 @@ namespace HRConnect.Api.Services
 
             return employees.Select(MapToResponse).ToList();
         }
-
         // ============================================================
         // GET BY ID
         // ============================================================
         public async Task<EmployeeResponse?> GetEmployeeByIdAsync(Guid id)
         {
+            await RecalculateAllSickLeaveAsync();
+
             var employee = await _context.Employees
                 .Include(e => e.Position)
                     .ThenInclude(p => p.JobGrade)
@@ -98,19 +101,33 @@ namespace HRConnect.Api.Services
             return await GetEmployeeByIdAsync(employeeId)
                    ?? throw new InvalidOperationException("Failed to load updated employee.");
         }
-
-        // ============================================================
-        // DELETE (Will be removed)
-        // ============================================================
-        public async Task DeleteEmployeeAsync(Guid id)
+        public async Task UpdateUsedDaysAsync(UpdateUsedDaysRequest request)
         {
-            var employee = await _context.Employees
-                .FirstOrDefaultAsync(e => e.EmployeeId == id);
+            if (request.UsedDays < 0)
+                throw new InvalidOperationException("Used days cannot be negative.");
 
-            if (employee == null)
-                throw new InvalidOperationException("Employee not found.");
+            var balance = await _context.EmployeeLeaveBalances
+                .Include(b => b.LeaveType)
+                .Include(b => b.Employee)
+                .FirstOrDefaultAsync(b =>
+                    b.EmployeeId == request.EmployeeId &&
+                    b.LeaveTypeId == request.LeaveTypeId);
 
-            _context.Employees.Remove(employee);
+            if (balance == null)
+                throw new InvalidOperationException("Leave balance not found.");
+
+            // Ensure sick leave is up to date before validation
+            if (balance.LeaveType.Code == "SL")
+                await RecalculateSickLeaveAsync(request.EmployeeId);
+
+            if (request.UsedDays > balance.EntitledDays)
+                throw new InvalidOperationException(
+                    "Used days cannot exceed entitled days.");
+
+            balance.UsedDays = request.UsedDays;
+            balance.RemainingDays =
+                balance.EntitledDays - balance.UsedDays;
+
             await _context.SaveChangesAsync();
         }
 
@@ -163,7 +180,29 @@ namespace HRConnect.Api.Services
                     int monthsRemaining = 12 - employee.StartDate.Month + 1;
                     entitledDays = Math.Round((rule.DaysAllocated / 12m) * monthsRemaining, 2);
                 }
+                // =============================
+                // SICK LEAVE — delegate to recalculation method
+                // =============================
+                if (leaveType.Code == "SL")
+                {
+                    // Create initial balance with rule default (30)
+                    var sickBalance = new EmployeeLeaveBalance
+                    {
+                        EmployeeId = employee.EmployeeId,
+                        LeaveTypeId = leaveType.Id,
+                        EntitledDays = rule.DaysAllocated, // temporary
+                        UsedDays = 0,
+                        AccruedDays = 0,
+                        RemainingDays = rule.DaysAllocated
+                    };
 
+                    await _context.EmployeeLeaveBalances.AddAsync(sickBalance);
+                    await _context.SaveChangesAsync();
+
+                    await RecalculateSickLeaveAsync(employee.EmployeeId);
+
+                    continue; // skip normal balance creation
+                }
                 var balance = new EmployeeLeaveBalance
                 {
                     EmployeeId = employee.EmployeeId,
@@ -187,7 +226,7 @@ namespace HRConnect.Api.Services
         {
             var employee = await _context.Employees
                 .Include(e => e.Position)
-                .ThenInclude(p => p.JobGrade)
+                    .ThenInclude(p => p.JobGrade)
                 .FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
 
             if (employee == null)
@@ -208,7 +247,7 @@ namespace HRConnect.Api.Services
 
             var yearsOfService = CalculateYearsOfService(employee.StartDate);
 
-            //NEW rule (after promotion/demotion)
+            // NEW rule (after promotion/demotion)
             var newRule = await _context.LeaveEntitlementRules
                 .FirstAsync(r =>
                     r.LeaveTypeId == annualLeave.Id &&
@@ -217,7 +256,7 @@ namespace HRConnect.Api.Services
                     (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
                     r.IsActive);
 
-            //OLD rule (before promotion/demotion)
+            // OLD rule (before promotion/demotion)
             var oldRule = await _context.LeaveEntitlementRules
                 .FirstAsync(r =>
                     r.LeaveTypeId == annualLeave.Id &&
@@ -238,6 +277,33 @@ namespace HRConnect.Api.Services
             balance.RemainingDays = total - balance.UsedDays;
 
             await _context.SaveChangesAsync();
+
+            // ===============================
+            // EMAIL NOTIFICATION SECTION
+            // ===============================
+
+            await _emailService.SendEmailAsync(
+                employee.Email, // Make sure Employee model has Email property
+                "Annual Leave Recalculated Due to Position Change",
+                $"""
+        Dear {employee.FirstName},
+
+        Your position has recently been updated to: {employee.Position.Title}.
+
+        As a result, your annual leave entitlement has been recalculated.
+
+        New Annual Entitlement: {balance.EntitledDays} days
+        Used Days: {balance.UsedDays} days
+        Remaining Days: {balance.RemainingDays} days
+
+        This adjustment was calculated proportionally based on the month of change.
+
+        If you have any questions, please contact HR.
+
+        Regards,
+        HRConnect
+        """
+            );
         }
 
 
@@ -267,7 +333,12 @@ namespace HRConnect.Api.Services
             var today = DateTime.UtcNow.Date;
 
             if (today.Month != 12 || today.Day != 1)
+            {
+#if !DEBUG
                 return;
+#endif
+            }
+
 
             var annualLeave = await _context.LeaveTypes
             .FirstOrDefaultAsync(l => l.Code == "AL" && l.IsActive);
@@ -299,7 +370,7 @@ namespace HRConnect.Api.Services
                 ";
 
                 await _emailService.SendEmailAsync(
-                    balance.Employee.ReportingManagerId, //Change this Later
+                    balance.Employee.Email, //Change this Later
                     subject,
                     body
                 );
@@ -391,14 +462,17 @@ namespace HRConnect.Api.Services
             foreach (var employee in employees)
             {
                 var years = CalculateYearsOfService(employee.StartDate);
-
+                // If the employee's years of service is LESS than the minimum
+                // required by this entitlement rule, skip this rule and move
                 if (years < rule.MinYearsService)
                     continue;
-
+                // If the rule has a maximum years-of-service limit defined
+                // AND the employee's years exceed that maximum, skip this employee
                 if (rule.MaxYearsService.HasValue &&
                     years > rule.MaxYearsService.Value)
                     continue;
-
+                // Retrieve the employee's leave balance record
+                // that matches the current rule's LeaveTypeId.
                 var balance = employee.LeaveBalances
                     .FirstOrDefault(lb => lb.LeaveTypeId == rule.LeaveTypeId);
 
@@ -449,7 +523,7 @@ namespace HRConnect.Api.Services
                 balance.RemainingDays = rule.DaysAllocated - balance.UsedDays;
 
                 await _emailService.SendEmailAsync(
-                    employee.ReportingManagerId,
+                    employee.Email,
                     "Leave Policy Updated",
                     $"""
             Dear {employee.FirstName},
@@ -492,6 +566,105 @@ namespace HRConnect.Api.Services
                     RemainingDays = lb.RemainingDays
                 }).ToList()
             };
+        }
+        public async Task RecalculateSickLeaveAsync(Guid employeeId)
+        {
+            var employee = await _context.Employees
+                .Include(e => e.LeaveBalances)
+                .FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
+
+            if (employee == null)
+                throw new InvalidOperationException("Employee not found.");
+
+            var sickLeave = await _context.LeaveTypes
+                .FirstOrDefaultAsync(l => l.Code == "SL" && l.IsActive);
+
+            if (sickLeave == null)
+                throw new InvalidOperationException("Sick Leave not configured.");
+
+            var balance = employee.LeaveBalances
+                .FirstOrDefault(b => b.LeaveTypeId == sickLeave.Id);
+
+            if (balance == null)
+                return;
+
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
+            var monthsWorked =
+                (today.Year - employee.StartDate.Year) * 12 +
+                (today.Month - employee.StartDate.Month);
+
+            if (monthsWorked < 0)
+                monthsWorked = 0;
+
+            decimal entitledDays;
+
+            // -------------------------
+            // PHASE 1 — First 6 Months
+            // -------------------------
+            if (monthsWorked < 6)
+            {
+                entitledDays = monthsWorked;
+            }
+            else
+            {
+                entitledDays = 30;
+            }
+
+            // -------------------------
+            // PHASE 3 — 36-Month Reset
+            // -------------------------
+            if (monthsWorked >= 36)
+            {
+                balance.UsedDays = 0;
+                entitledDays = 30;
+            }
+
+            balance.EntitledDays = entitledDays;
+            balance.RemainingDays = Math.Max(0, entitledDays - balance.UsedDays);
+
+            await _context.SaveChangesAsync();
+        }
+        public async Task RecalculateAllSickLeaveAsync()
+        {
+            var employees = await _context.Employees
+                .Include(e => e.LeaveBalances)
+                    .ThenInclude(lb => lb.LeaveType)
+                .ToListAsync();
+
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
+            foreach (var employee in employees)
+            {
+                var sickBalance = employee.LeaveBalances
+                    .FirstOrDefault(b => b.LeaveType.Code == "SL");
+
+                if (sickBalance == null)
+                    continue;
+
+                var monthsWorked =
+                    (today.Year - employee.StartDate.Year) * 12 +
+                    (today.Month - employee.StartDate.Month);
+
+                if (monthsWorked < 0)
+                    monthsWorked = 0;
+
+                decimal entitled =
+                    monthsWorked < 6 ? monthsWorked : 30;
+
+                // 36-month automatic reset
+                if (monthsWorked >= 36)
+                {
+                    sickBalance.UsedDays = 0;
+                    entitled = 30;
+                }
+
+                sickBalance.EntitledDays = entitled;
+                sickBalance.RemainingDays =
+                    Math.Max(0, entitled - sickBalance.UsedDays);
+            }
+
+            await _context.SaveChangesAsync();
         }
     }
 }

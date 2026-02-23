@@ -45,5 +45,11 @@ namespace HRConnect.Api.DTOs
         public int RuleId { get; set; }
         public decimal NewDaysAllocated { get; set; }
     }
+    public class UpdateUsedDaysRequest
+    {
+        public Guid EmployeeId { get; set; }
+        public int LeaveTypeId { get; set; }
+        public decimal UsedDays { get; set; }
+    }
 
 }
