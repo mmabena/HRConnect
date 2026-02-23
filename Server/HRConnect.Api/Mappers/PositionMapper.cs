@@ -12,7 +12,7 @@ namespace HRConnect.Api.Mappers
         {
             return new Position
             {
-                Title = createPositionDto.Title,
+                PositionTitle = createPositionDto.PositionTitle,
                 JobGradeId = createPositionDto.JobGradeId,
                 OccupationalLevelId = createPositionDto.OccupationalLevelId,
                 IsActive = createPositionDto.IsActive,
@@ -25,7 +25,7 @@ namespace HRConnect.Api.Mappers
            return new PositionDto
     {
         PositionId = position.PositionId,
-        Title = position.Title,
+        PositionTitle = position.PositionTitle,
         JobGradeId = position.JobGradeId,
         OccupationalLevelId = position.OccupationalLevelId,
         CreatedDate = position.CreatedDate,

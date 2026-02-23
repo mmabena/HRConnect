@@ -26,8 +26,8 @@ namespace HRConnect.Tests.Services
       // Arrange
       var positions = new List<Position>
       {
-        new Position { PositionId = 1, Title = "Software Engineer" },
-        new Position { PositionId = 2, Title = "Product Manager" }
+        new Position { PositionId = 1, PositionTitle = "Software Engineer" },
+        new Position { PositionId = 2, PositionTitle = "Product Manager" }
       };
       _positionRepoMock.Setup(r => r.GetAllPositionsAsync())
                        .ReturnsAsync(positions);
@@ -38,14 +38,14 @@ namespace HRConnect.Tests.Services
       // Assert
       Assert.NotNull(result);
       Assert.Equal(2, result.Count);
-      Assert.Equal("Software Engineer", list[0].Title);
+      Assert.Equal("Software Engineer", list[0].PositionTitle);
     }
 
     [Fact]
     public async Task GetPositionByIdAsyncReturnsPosition()
     {
       // Arrange
-      var position = new Position { PositionId = 1, Title = "Software Engineer" };
+      var position = new Position { PositionId = 1, PositionTitle = "Software Engineer" };
       _positionRepoMock.Setup(r => r.GetPositionByIdAsync(1))
                        .ReturnsAsync(position);
 
@@ -54,7 +54,7 @@ namespace HRConnect.Tests.Services
 
       // Assert
       Assert.NotNull(result);
-      Assert.Equal("Software Engineer", result.Title);
+      Assert.Equal("Software Engineer", result.PositionTitle);
     }
 
     [Fact]
@@ -78,13 +78,13 @@ namespace HRConnect.Tests.Services
 
       var createPositionDto = new CreatePositionDto
        { 
-        Title = "Data Scientist",
+        PositionTitle = "Data Scientist",
         JobGradeId = 1,
         OccupationalLevelId = 1,
         IsActive = true 
         };
         
-      var newPosition = new Position { Title = "Data Scientist" };
+      var newPosition = new Position { PositionTitle = "Data Scientist" };
       _positionRepoMock.Setup(r => r.AddPositionAsync(It.IsAny<Position>()))
                        .ReturnsAsync((Position pos) => 
                        {
@@ -93,12 +93,12 @@ namespace HRConnect.Tests.Services
                        });
 
       // Act
-      var result = await _positionService.AddPositionAsync(createPositionDto: new CreatePositionDto { Title = "Data Scientist", JobGradeId = 1 });
+      var result = await _positionService.AddPositionAsync(createPositionDto: new CreatePositionDto { PositionTitle = "Data Scientist", JobGradeId = 1 });
 
       // Assert
       Assert.NotNull(result);
       Assert.Equal(3, result.PositionId);
-      Assert.Equal("Data Scientist", result.Title);
+      Assert.Equal("Data Scientist", result.PositionTitle);
   }
 
     [Fact]
@@ -108,18 +108,18 @@ namespace HRConnect.Tests.Services
      var existingPosition = new Position 
     { 
         PositionId = 1, 
-        Title = "Software Engineer" 
+        PositionTitle = "Software Engineer" 
     };
 
     var updatedPositionDto = new UpdatePositionDto
     {
-        Title = "Senior Software Engineer"
+        PositionTitle = "Senior Software Engineer"
     };
 
     var updatedPosition = new Position
     {
         PositionId = 1,
-        Title = "Senior Software Engineer"
+        PositionTitle = "Senior Software Engineer"
     };
 
       _positionRepoMock.Setup(r => r.GetPositionByIdAsync(1))
@@ -134,7 +134,7 @@ namespace HRConnect.Tests.Services
       // Assert
       Assert.NotNull(result);
       Assert.Equal(1, result.PositionId);
-      Assert.Equal("Senior Software Engineer", result.Title);
+      Assert.Equal("Senior Software Engineer", result.PositionTitle);
 }
 
  // ---------------------- NEW TESTS FOR DUPLICATE TITLE ----------------------
@@ -144,7 +144,7 @@ public async Task AddPositionAsyncThrowsDomainExceptionOnDuplicateTitle()
     // Arrange
     var createDto = new CreatePositionDto
     {
-        Title = "Developer",
+        PositionTitle = "Developer",
         JobGradeId = 1,
         OccupationalLevelId = 1,
         IsActive = true
@@ -169,12 +169,12 @@ public async Task UpdatePositionAsyncThrowsDomainExceptionOnDuplicateTitle()
     var existingPosition = new Position
     {
         PositionId = 1,
-        Title = "Developer"
+        PositionTitle = "Developer"
     };
 
     var updateDto = new UpdatePositionDto
     {
-        Title = "Developer", // duplicate title
+        PositionTitle = "Developer", // duplicate title
         IsActive = true
     };
 

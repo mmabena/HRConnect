@@ -35,13 +35,13 @@ namespace HRConnect.Api.Repository
             return await _context.Positions
                 .Include(p => p.JobGrade)
                 .Include(p => p.OccupationalLevels)
-                .FirstOrDefaultAsync(p => p.Title == title);
+                .FirstOrDefaultAsync(p => p.PositionTitle == title);
         }
 
         public async Task<bool> TitleExistsAsync(string title, int excludeId = 0)
         {
             return await _context.Positions
-                .AnyAsync(p => p.Title == title && p.PositionId != excludeId);
+                .AnyAsync(p => p.PositionTitle == title && p.PositionId != excludeId);
         }
 
         public async Task<Position> AddPositionAsync(Position position)
@@ -59,7 +59,7 @@ namespace HRConnect.Api.Repository
             if (existingPosition == null)
                 return null;
 
-            existingPosition.Title = position.Title;
+            existingPosition.PositionTitle = position.PositionTitle;
             existingPosition.JobGradeId = position.JobGradeId;
             existingPosition.OccupationalLevelId = position.OccupationalLevelId;
             existingPosition.IsActive = position.IsActive;

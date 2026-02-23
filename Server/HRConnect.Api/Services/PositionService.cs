@@ -72,7 +72,7 @@ namespace HRConnect.Api.Services
 
             var position = new Position
             {
-                Title = createPositionDto.Title.Trim(),
+                PositionTitle = createPositionDto.PositionTitle.Trim(),
                 JobGradeId = createPositionDto.JobGradeId,
                 OccupationalLevelId = createPositionDto.OccupationalLevelId,
                 IsActive = createPositionDto.IsActive,
@@ -132,7 +132,7 @@ namespace HRConnect.Api.Services
                 position.OccupationalLevelId = updatePositionDto.OccupationalLevelId;
             }
 
-            position.Title = updatePositionDto.Title;
+            position.PositionTitle = updatePositionDto.PositionTitle;
             position.IsActive = updatePositionDto.IsActive;
             position.UpdatedDate = DateTime.UtcNow;
 
@@ -158,7 +158,7 @@ namespace HRConnect.Api.Services
             return new PositionDto
             {
                 PositionId = p.PositionId,
-                Title = p.Title,
+                PositionTitle = p.PositionTitle,
                 JobGradeId = p.JobGradeId,
                 OccupationalLevelId = p.OccupationalLevelId,
                 CreatedDate = p.CreatedDate,
@@ -178,13 +178,13 @@ namespace HRConnect.Api.Services
 
         private static void ValidateCreateDto(CreatePositionDto dto)
         {
-            if (string.IsNullOrWhiteSpace(dto.Title))
+            if (string.IsNullOrWhiteSpace(dto.PositionTitle))
                 throw new ArgumentException("Position title is required.");
         }
 
         private static void ValidateUpdateDto(UpdatePositionDto dto)
         {
-            if (string.IsNullOrWhiteSpace(dto.Title))
+            if (string.IsNullOrWhiteSpace(dto.PositionTitle))
                 throw new ArgumentException("Position title is required.");
         }
 

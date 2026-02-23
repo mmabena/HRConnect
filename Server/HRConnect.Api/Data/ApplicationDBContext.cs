@@ -35,11 +35,12 @@ using System.Threading.Tasks;
             .HasForeignKey(p => p.OccupationalLevelId)
             .OnDelete(DeleteBehavior.Restrict);  // <-- prevent cascade
 
-        // Unique index on Position.Title
+        // Unique index on Position.PositionTitle
         modelBuilder.Entity<Position>()
-            .HasIndex(p => p.Title)
+            .HasIndex(p => p.PositionTitle)
             .IsUnique();
 
+        // Unique index on OccupationalLevel.Description
         modelBuilder.Entity<OccupationalLevel>()
         .HasIndex(o => o.Description)
         .IsUnique();

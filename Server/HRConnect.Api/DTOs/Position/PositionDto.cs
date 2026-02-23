@@ -7,7 +7,7 @@ namespace HRConnect.Api.DTOs.Position
   public class PositionDto
   {
     public int PositionId  { get; set; }
-    public string Title { get; set; }
+    public string PositionTitle { get; set; }
     public int JobGradeId { get; set; }
     public int OccupationalLevelId { get; set; }
     public DateTime CreatedDate { get; set; }
