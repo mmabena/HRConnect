@@ -12,36 +12,6 @@ namespace HRConnect.Api.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Employees",
-                columns: table => new
-                {
-                    EmployeeId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Surname = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    IdNumber = table.Column<string>(type: "nvarchar(13)", maxLength: 13, nullable: false),
-                    PassportNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Gender = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ContactNumber = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PhysicalAddress = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    DateOfBirth = table.Column<DateOnly>(type: "date", nullable: false),
-                    StartDate = table.Column<DateOnly>(type: "date", nullable: false),
-                    Branch = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    MonthlySalary = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    PositionId = table.Column<int>(type: "int", nullable: false),
-                    EmploymentStatus = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CareerManager = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    EmpPicture = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Employees", x => x.EmployeeId);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "PayrollDeductions",
                 columns: table => new
                 {
@@ -65,9 +35,6 @@ namespace HRConnect.Api.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "Employees");
-
             migrationBuilder.DropTable(
                 name: "PayrollDeductions");
         }
