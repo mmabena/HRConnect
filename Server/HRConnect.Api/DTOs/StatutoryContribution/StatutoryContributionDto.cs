@@ -1,12 +1,12 @@
-namespace HRConnect.Api.DTOs.PayrollDeductions
+namespace HRConnect.Api.DTOs.StatutoryContribution
 {
-  public class CreatePayrollDeductionDto
+  public class StatutoryContributionDto
   {
-    public int EmployeeId { get; set; }
+    public string EmployeeId { get; set; } = string.Empty;
     public decimal MonthlySalary { get; set; }
     public string IdNumber { get; set; } = string.Empty;
     public string PassportNumber { get; set; } = string.Empty;
-    public decimal SdlAmount { get; set; }
+    public decimal EmployerSdlContribution { get; set; }
     public decimal UifEmployeeAmount { get; set; }
     public decimal UifEmployerAmount { get; set; }
   }

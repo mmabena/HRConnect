@@ -11,7 +11,7 @@ namespace HRConnect.Api.Models
     public const decimal SDLAmount = 0.01m;
   }
 
-  public class PayrollDeduction
+  public class StatutoryContribution
   {
     public int Id { get; set; }
     public string EmployeeId { get; set; } = string.Empty;

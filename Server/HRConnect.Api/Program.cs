@@ -25,7 +25,7 @@ var builder = WebApplication.CreateBuilder(args);
 Audit.Core.Configuration.Setup()
   .UseEntityFramework(config => config
       .AuditTypeExplicitMapper(map => map
-        .Map<PayrollDeduction, AuditPayrollDeductions>((entity, audit) =>
+        .Map<StatutoryContribution, AuditPayrollDeductions>((entity, audit) =>
           {
             audit.EmployeeId = entity.EmployeeId;
             audit.IdNumber = entity.IdNumber;
@@ -134,8 +134,8 @@ builder.Services.AddScoped<ITaxDeductionRepository, TaxDeductionRepository>();
 builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.Services.AuthService>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
-builder.Services.AddScoped<IPayrollDeductionsRepository, PayrollDeductionsRepository>();
-builder.Services.AddScoped<IPayrollDeductionsService, PayrollDeductionsService>();
+builder.Services.AddScoped<IStatutoryContributionRepository, StatutoryContributionsRepository>();
+builder.Services.AddScoped<IStatutoryContributionService, StatutoryContributionService>();
 builder.Services.AddTransient<IPensionProjectionService, PensionProjectionService>();
 builder.Services.AddCors(options =>
 {
