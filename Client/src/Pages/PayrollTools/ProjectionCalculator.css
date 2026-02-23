@@ -1,0 +1,144 @@
+:root {
+    --pension-percentage-slider-width: 700px;
+}
+
+.pension-projection-frame {
+    width: 71.8vw;
+    border-radius: 10px;
+    
+    
+    overflow: hidden;
+    z-index: 0;
+    display: grid;
+    grid-template-rows: 70px 140px 110px 150px 130px 80px;
+    gap: 10px;
+    
+    padding-left: 140px;
+    padding-right: 140px;
+    margin-top: 20px;
+}
+
+.pension-projection-header h2 {
+    float: left;
+}
+
+.pension-employee-details {
+    display: grid;
+    grid-template-columns: 100px auto;
+    grid-template-rows: 20px 48px;
+    gap: 2px
+}
+
+.pension-employee-detail-header {
+    text-align: left;
+}
+
+.pension-employee-detail {
+    text-align: left;
+    margin-top: 10px;
+}
+
+.pension-projection-voluntary-contribution {
+    display: grid;
+    grid-template-rows: 20px 88px;
+    gap: 20px;
+}
+
+.pension-projection-voluntary-contribution-header {
+
+}
+
+.voluntary-contribution {
+    display: grid;
+    grid-template-columns: 250px auto;
+}
+
+.contribution {
+    display: block;
+    text-align: left;
+}
+
+.contribution input {
+    margin-top: 8px;
+    border-radius: 15px;
+    text-align: center;
+    height: 60px;
+    width: 210px;
+    font-size: 28px;
+}
+
+.contribution-frequency {
+    display: block;
+    text-align: left;
+    padding-top: 6px;
+}
+
+.contribution-frequency-radio {
+    margin-top: 20px;
+}
+
+.contribution-frequency-radio label {
+    margin-left: 15px;
+}
+
+.pension-projection-slider {
+    margin: auto 4px;
+}
+
+.pension-projection-slider input {
+    width: var(--pension-percentage-slider-width);
+}
+
+.range-labels {
+    width: var(--pension-percentage-slider-width);
+    list-style: none;
+    text-align: right;
+    margin-left: 36px;
+
+    li {
+        display: inline-block;
+        text-align: center;
+        font-size: 14px;
+        margin-left: 66px;
+    }
+}
+
+.pension-projection-details {
+    display: grid;
+    grid-template-columns: 12.5vw 12.5vw 12.5vw 12.5vw;
+    gap: 10px;
+}
+
+.pension-projection-detail {
+    display: block;
+    border: 2px solid;
+    border-radius: 15px;
+    border-color: aqua;
+    gap: 20px;
+}
+
+.pension-projection-detail h4 {
+    margin-top: 5px;
+    margin-bottom: 50px;
+}
+
+.pension-projection-total {
+    width: 51.5vw;
+    text-align: center;
+    border: 2px solid;
+    border-radius: 15px;
+    border-color: aqua;
+    margin-top: 30px;
+}
+
+.pension-projection-total h4 {
+    margin-top: 5px;
+    margin-bottom: 25px;
+}
+
+.pension-projection-disclaimer {
+    text-align: left;
+}
+
+
+
