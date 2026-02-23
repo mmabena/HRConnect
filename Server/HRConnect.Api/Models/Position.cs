@@ -1,5 +1,6 @@
 namespace HRConnect.Api.Models
 {
+
   public class Position
   {
     public int PositionId { get; set; }
@@ -11,5 +12,6 @@ namespace HRConnect.Api.Models
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedDate { get; set; } = DateTime.UtcNow;
     public bool IsActive { get; set; }
+    public List<Employee> Employees { get; set; } = new();
   }
 }

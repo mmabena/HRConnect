@@ -4,6 +4,7 @@ using HRConnect.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRConnect.Api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260220060826_AuditPayrollDeductions")]
+    partial class AuditPayrollDeductions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -87,10 +90,7 @@ namespace HRConnect.Api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("CareerManagerID")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("City")
+                    b.Property<string>("CareerManager")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -105,10 +105,11 @@ namespace HRConnect.Api.Migrations
                     b.Property<DateOnly>("DateOfBirth")
                         .HasColumnType("date");
 
-                    b.Property<string>("DisabilityDescription")
+                    b.Property<string>("Email")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Email")
+                    b.Property<string>("EmpPicture")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -119,9 +120,6 @@ namespace HRConnect.Api.Migrations
                     b.Property<string>("Gender")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("HasDisability")
-                        .HasColumnType("bit");
 
                     b.Property<string>("IdNumber")
                         .IsRequired()
@@ -146,21 +144,12 @@ namespace HRConnect.Api.Migrations
                     b.Property<int>("PositionId")
                         .HasColumnType("int");
 
-                    b.Property<string>("ProfileImage")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateOnly>("StartDate")
                         .HasColumnType("date");
 
                     b.Property<string>("Surname")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TaxNumber")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -169,72 +158,9 @@ namespace HRConnect.Api.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("ZipCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("EmployeeId");
 
-                    b.HasIndex("CareerManagerID");
-
-                    b.HasIndex("PositionId");
-
                     b.ToTable("Employees");
-                });
-
-            modelBuilder.Entity("HRConnect.Api.Models.JobGrade", b =>
-                {
-                    b.Property<int>("JobGradeId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("JobGradeId"));
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("JobGradeId");
-
-                    b.ToTable("JobGrades");
-                });
-
-            modelBuilder.Entity("HRConnect.Api.Models.OccupationalLevel", b =>
-                {
-                    b.Property<int>("OccupationalLevelId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OccupationalLevelId"));
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("OccupationalLevelId");
-
-                    b.HasIndex("Description")
-                        .IsUnique();
-
-                    b.ToTable("OccupationalLevels");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.PasswordHistory", b =>
@@ -337,45 +263,6 @@ namespace HRConnect.Api.Migrations
                     b.ToTable("PayrollDeductions");
                 });
 
-            modelBuilder.Entity("HRConnect.Api.Models.Position", b =>
-                {
-                    b.Property<int>("PositionId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PositionId"));
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("JobGradeId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("OccupationalLevelId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("PositionTitle")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("PositionId");
-
-                    b.HasIndex("JobGradeId");
-
-                    b.HasIndex("OccupationalLevelId");
-
-                    b.HasIndex("PositionTitle")
-                        .IsUnique();
-
-                    b.ToTable("Positions");
-                });
-
             modelBuilder.Entity("HRConnect.Api.Models.TaxDeduction", b =>
                 {
                     b.Property<int>("Id")
@@ -476,63 +363,6 @@ namespace HRConnect.Api.Migrations
                     b.HasKey("UserId");
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("HRConnect.Api.Models.Employee", b =>
-                {
-                    b.HasOne("HRConnect.Api.Models.Employee", "CareerManager")
-                        .WithMany("Subordinates")
-                        .HasForeignKey("CareerManagerID")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("HRConnect.Api.Models.Position", "Position")
-                        .WithMany("Employees")
-                        .HasForeignKey("PositionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CareerManager");
-
-                    b.Navigation("Position");
-                });
-
-            modelBuilder.Entity("HRConnect.Api.Models.Position", b =>
-                {
-                    b.HasOne("HRConnect.Api.Models.JobGrade", "JobGrade")
-                        .WithMany("Positions")
-                        .HasForeignKey("JobGradeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("HRConnect.Api.Models.OccupationalLevel", "OccupationalLevels")
-                        .WithMany("Positions")
-                        .HasForeignKey("OccupationalLevelId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("JobGrade");
-
-                    b.Navigation("OccupationalLevels");
-                });
-
-            modelBuilder.Entity("HRConnect.Api.Models.Employee", b =>
-                {
-                    b.Navigation("Subordinates");
-                });
-
-            modelBuilder.Entity("HRConnect.Api.Models.JobGrade", b =>
-                {
-                    b.Navigation("Positions");
-                });
-
-            modelBuilder.Entity("HRConnect.Api.Models.OccupationalLevel", b =>
-                {
-                    b.Navigation("Positions");
-                });
-
-            modelBuilder.Entity("HRConnect.Api.Models.Position", b =>
-                {
-                    b.Navigation("Employees");
                 });
 #pragma warning restore 612, 618
         }
