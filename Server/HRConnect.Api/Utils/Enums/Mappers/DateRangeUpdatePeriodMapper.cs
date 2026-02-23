@@ -12,8 +12,8 @@
        return period switch
        {
          DateRangeUpdatePeriod.CategoryOptionsUpdatePeriod => (
-           new DateTime(y, 11, 1, 0, 0, 01), // Nov 01 00:00:01.001
-           new DateTime(y, 12, 31, 23, 59, 59) // Dec 31 23:59:59.999
+           new DateTime(y, 02, 1, 0, 0, 01), // Nov 01 00:00:01.001
+           new DateTime(y, 03, 31, 23, 59, 59) // Dec 31 23:59:59.999
          ),
          _ => throw new ArgumentOutOfRangeException(nameof(period),
            "Update operations are restricted outside of the Update Period")
