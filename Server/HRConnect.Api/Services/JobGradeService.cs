@@ -99,11 +99,11 @@ namespace HRConnect.Api.Services
             }
 
             // Update properties
-            jobGrade.Name = trimmedName;
+            jobGrade.Name = trimmedName; 
             jobGrade.IsActive = updateJobGradeDto.IsActive;
             jobGrade.UpdatedDate = DateTime.UtcNow;
 
-            await _jobGradeRepo.UpdateJobGradeAsync(id, jobGrade);
+            await _jobGradeRepo.UpdateJobGradeAsync(jobGrade);
 
             return jobGrade.ToJobGradeDto();
         }

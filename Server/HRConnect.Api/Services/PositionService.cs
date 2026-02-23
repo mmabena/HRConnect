@@ -7,11 +7,11 @@ namespace HRConnect.Api.Services
     using HRConnect.Api.Mappers;
     using HRConnect.Api.Models;
     using HRConnect.Api.Utils;
-     using Microsoft.EntityFrameworkCore;
-     using System;
-     using System.Collections.Generic;
-     using System.Linq;
-     using System.Threading.Tasks;
+    using Microsoft.EntityFrameworkCore;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -32,8 +32,8 @@ namespace HRConnect.Api.Services
         // ----------------------
         public async Task<List<PositionDto>> GetAllPositionsAsync()
         {
-          var positions = await _positionRepo.GetAllPositionsAsync();
-            return positions 
+            var positions = await _positionRepo.GetAllPositionsAsync();
+            return positions
                 .OrderBy(p => p.PositionId)
                 .Select(p => p.ToPositionDto())
                 .ToList();
@@ -96,17 +96,17 @@ namespace HRConnect.Api.Services
         // ----------------------
         // UPDATE
         // ----------------------
-     public async Task<PositionDto?> UpdatePositionAsync(int id, UpdatePositionDto updatePositionDto)
+        public async Task<PositionDto?> UpdatePositionAsync(int id, UpdatePositionDto updatePositionDto)
         {
-            
+
             var position = await _positionRepo.GetPositionByIdAsync(id);
             if (position == null)
                 throw new KeyNotFoundException($"Position with ID {id} not found.");
 
-        
+
             ValidateUpdateDto(updatePositionDto);
 
-            
+
             if (updatePositionDto.JobGradeId > 0)
             {
                 var jobGrade = await _positionRepo.GetPositionByIdAsync(updatePositionDto.JobGradeId);
@@ -119,7 +119,7 @@ namespace HRConnect.Api.Services
                 position.JobGradeId = updatePositionDto.JobGradeId;
             }
 
-        
+
             if (updatePositionDto.OccupationalLevelId > 0)
             {
                 var occupationalLevel = await _positionRepo.GetPositionByIdAsync(updatePositionDto.OccupationalLevelId);
@@ -133,10 +133,12 @@ namespace HRConnect.Api.Services
             }
 
             position.PositionTitle = updatePositionDto.PositionTitle;
+            position.JobGradeId = updatePositionDto.JobGradeId;
+            position.OccupationalLevelId = updatePositionDto.OccupationalLevelId;
             position.IsActive = updatePositionDto.IsActive;
             position.UpdatedDate = DateTime.UtcNow;
 
-            
+
             try
             {
                 var updated = await _positionRepo.UpdatePositionAsync(id, position);

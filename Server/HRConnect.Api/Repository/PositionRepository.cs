@@ -53,20 +53,9 @@ namespace HRConnect.Api.Repository
 
         public async Task<Position?> UpdatePositionAsync(int id, Position position)
         {
-            var existingPosition = await _context.Positions
-                .FirstOrDefaultAsync(p => p.PositionId == id);
-
-            if (existingPosition == null)
-                return null;
-
-            existingPosition.PositionTitle = position.PositionTitle;
-            existingPosition.JobGradeId = position.JobGradeId;
-            existingPosition.OccupationalLevelId = position.OccupationalLevelId;
-            existingPosition.IsActive = position.IsActive;
-            existingPosition.UpdatedDate = DateTime.UtcNow;
-
+           _context.Positions.Update(position);
             await _context.SaveChangesAsync();
-            return existingPosition;
+            return position;
         }
 
         

@@ -91,7 +91,7 @@ namespace HRConnect.Tests.Services
             .Setup(r => r.GetJobGradeByIdAsync(1))
             .ReturnsAsync(existingJobGrade);
 
-      _jobGradeRepoMock.Setup(r => r.UpdateJobGradeAsync(1, It.IsAny<JobGrade>()))
+      _jobGradeRepoMock.Setup(r => r.UpdateJobGradeAsync(It.IsAny<JobGrade>()))
                        .ReturnsAsync(existingJobGrade);
 
       // Act

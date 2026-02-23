@@ -29,7 +29,6 @@ namespace HRConnect.Api.Repository
         {
             var jobGrade = await _context.JobGrades
             .FirstOrDefaultAsync(j => j.Name == name);
-
             return jobGrade;
         }
 
@@ -41,18 +40,11 @@ namespace HRConnect.Api.Repository
             return jobGrade;
         }
 
-        public async Task<JobGrade?> UpdateJobGradeAsync(int id, JobGrade updatedJobGrade)
+        public async Task<JobGrade?> UpdateJobGradeAsync(JobGrade jobGrade)
         {
-            var existing = await _context.JobGrades.FindAsync(id);
-            if (existing == null)
-                return null;
-
-            existing.Name = updatedJobGrade.Name;
-            existing.IsActive = updatedJobGrade.IsActive;
-            existing.UpdatedDate = DateTime.UtcNow;
-
-            await _context.SaveChangesAsync();
-            return existing;
+          _context.JobGrades.Update(jobGrade);
+          await _context.SaveChangesAsync();
+          return jobGrade;
         }
 
         public async Task SaveChangesAsync()

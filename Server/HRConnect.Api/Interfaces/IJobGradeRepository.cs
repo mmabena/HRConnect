@@ -14,7 +14,7 @@ namespace HRConnect.Api.Interfaces
 
         Task<JobGrade> AddJobGradeAsync(JobGrade jobGrade);
 
-        Task<JobGrade?> UpdateJobGradeAsync(int id, JobGrade updatedJobGrade);
-        Task SaveChangesAsync();
+        Task<JobGrade?> UpdateJobGradeAsync(JobGrade jobGrade);
+       
     }
 }
