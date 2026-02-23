@@ -17,14 +17,6 @@ namespace HRConnect.Api.Migrations
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(450)");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Employees_Employees_CareerManagerID",
-                table: "Employees",
-                column: "CareerManagerID",
-                principalTable: "Employees",
-                principalColumn: "EmployeeId",
-                onDelete: ReferentialAction.Restrict);
         }
 
         /// <inheritdoc />
@@ -39,14 +31,6 @@ namespace HRConnect.Api.Migrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(450)",
                 oldNullable: true);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Employees_Employees_CareerManagerID",
-                table: "Employees",
-                column: "CareerManagerID",
-                principalTable: "Employees",
-                principalColumn: "EmployeeId",
-                onDelete: ReferentialAction.Cascade);
         }
     }
 }
