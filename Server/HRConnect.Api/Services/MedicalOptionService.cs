@@ -13,6 +13,7 @@
   using HRConnect.Api.Utils.Factories;
   using Models.MedicalOptions.Records;
   using Utils.Enums.Mappers;
+  using Utils.Enums.MedicalOptions;
 
 
   public class MedicalOptionService:IMedicalOptionService
@@ -251,7 +252,7 @@
       return await _medicalOptionRepository.MedicalOptionExistsWithinCategoryAsync(categoryId, optionId);
     }
 
-    public async Task<IReadOnlyList<MedicalOption?>> BulkUpdateByCategoryIdAsync(int categoryId,
+    public async Task<IReadOnlyList<MedicalOptionDto>> BulkUpdateMedicalOptionsByCategoryAsync(int categoryId,
       IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto)
     {
       //Define validations dictionary
@@ -260,47 +261,171 @@
       //indexers
       int updateCounter = 0, dbCopyCount = 0, variantCount = 0, indexer = 0;
       
+      //get db copy of the options under the category
+      var dbData = await _medicalOptionRepository
+        .GetAllOptionsUnderCategoryAsync(categoryId);
+      
+      // Use the comprehensive validator
+      var validationResult = await MedicalOptionValidator.ValidateBulkUpdateAsync(
+        categoryId, 
+        bulkUpdateDto, 
+        _medicalOptionRepository, 
+        dbData);
+  
+      if (!validationResult.IsValid)
+      {
+        throw new InvalidOperationException(validationResult.ErrorMessage);
+      }
+  
+      // All validations passed - proceed with the bulk update
+      return await _medicalOptionRepository.BulkUpdateByCategoryIdAsync(categoryId, bulkUpdateDto);
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
       // Check if the update is done outside the update period (Nov - Dev) || Approach used is enum(Named Period) + Extension Method
-      if (!(DateRangeUpdatePeriod.CategoryOptionsUpdatePeriod.Contains(DateTime.Now)))
+      /*if (!(DateRangeUpdatePeriod.CategoryOptionsUpdatePeriod.Contains(DateTime.Now)))
       {
         throw new InvalidOperationException(
           "Bulk update operation cannot be executed outside the update period");
-      }
+      }*/
 
 
       
       
       // Validations (Strict)
       // Check if category is valid
-      if (!(await _medicalOptionRepository.MedicalOptionCategoryExistsAsync(categoryId)))
+      /*if (!(await _medicalOptionRepository.MedicalOptionCategoryExistsAsync(categoryId)))
         throw
           new ArgumentException("Bulk update operation cannot be executed on this category");
-      
+      */
       //get db copy of the options under the category
-      var dbData = await _medicalOptionRepository
-        .GetAllOptionsUnderCategoryAsync(categoryId);
+      //var dbData = await _medicalOptionRepository
+      //  .GetAllOptionsUnderCategoryAsync(categoryId);
       
       //Get dBData Count and use as index
       dbCopyCount = dbData.Count;
       
       // First check if the count of entity is the same as that in the db
-      if (dbData.Count != bulkUpdateDto.Count)
+      /*if (dbData.Count != bulkUpdateDto.Count)
         throw new InvalidOperationException(
           "One or more medical options not found in the specified category");
-      
+      */
       // variables to store the Previous and Current Variant
       string previousVariantName = null;
       string currentVariantName = null;
       
       // Check if all id's within the payload are valid
-      foreach (var entity in bulkUpdateDto)
-      {
+     // foreach (var entity in bulkUpdateDto)
+     // {
         // Check the ID first 
-        if (await _medicalOptionRepository.MedicalOptionExistsAsync(entity.MedicalOptionId) is false)
-          throw new InvalidOperationException("One or more medical options are invalid");
+       /* if (await _medicalOptionRepository.MedicalOptionExistsAsync(entity.MedicalOptionId) is false)
+          throw new InvalidOperationException("One or more medical options are invalid");*/
         
         // Then validate if it belongs in the category
-        if (await _medicalOptionRepository.MedicalOptionExistsWithinCategoryAsync(categoryId, entity.MedicalOptionId) is false)
+     /*   if (await _medicalOptionRepository.MedicalOptionExistsWithinCategoryAsync(categoryId, entity.MedicalOptionId) is false)
           throw new InvalidOperationException("One or more medical options are invalid within the specified category");
         // TODO : Might consider adding the option to use as a way to confirm if what is updated really exists and that no one is trying to update a non existing option with a valid id
         // TODO: Add Dict as a storage for validations
@@ -388,7 +513,7 @@
         
         // --- Risk Contributions ---
         // All options have this , yet we will check for any nulls and these will be marked as errors
-        if ((entity.MonthlyMsaContributionAdult == null ||
+      /*  if ((entity.MonthlyMsaContributionAdult == null ||
              entity.MonthlyMsaContributionAdult == 0) &&
             (entity.MonthlyMsaContributionChild == null || entity.MonthlyMsaContributionChild == 0))
         {
@@ -412,7 +537,7 @@
           .ToList().Count;
         
         decimal pRisk,aRisk,cRisk,c2Risk, pMsa,aMsa,cMsa, pTotalContrib,aTotalContrib,cTotalContrib;
-        
+       
         switch (calcPrincipals)
         {
           case > 0:
@@ -474,6 +599,7 @@
       
 
       return null;
+      */
     }
   }  
 }

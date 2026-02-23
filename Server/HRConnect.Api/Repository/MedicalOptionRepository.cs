@@ -7,6 +7,10 @@
   using Microsoft.EntityFrameworkCore;
   using Microsoft.EntityFrameworkCore.Infrastructure;
   using HRConnect.Api.Utils;
+  using Mappers;
+  using Microsoft.Data.SqlClient;
+  using EFCore.BulkExtensions;
+
 
   public class MedicalOptionRepository: IMedicalOptionRepository
   {
@@ -155,9 +159,9 @@
     public async Task<bool> MedicalOptionExistsAsync(int optionId)
     {
       var optionExists = await _context.MedicalOptions
-        .AnyAsync(o => o.MedicalOptionCategoryId == optionId);
+        .AnyAsync(o => o.MedicalOptionId == optionId);
 
-      if (optionExists == null) return false;
+      if (optionExists == null || optionExists == false) return false;
 
       return true;
     }
@@ -186,13 +190,91 @@
       return true;
     }
 
-    public async Task<IReadOnlyList<MedicalOption>> BulkUpdateByCategoryIdAsync(int categoryId,
+    public async Task<IReadOnlyList<MedicalOptionDto>> BulkUpdateByCategoryIdAsync(int categoryId,
       IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto)
     {
-      return null;
-      /*return await _context.MedicalOptions
-        .Where(o => o.MedicalOptionCategoryId == categoryId)
-        .ToListAsync();*/
+      // get existin options in category that match with the Payload's Ids
+      var optionIdsToUpdate = bulkUpdateDto.Select(dto => dto.MedicalOptionId).ToList();
+
+      var existingOptions = await _context.MedicalOptions
+        .Where(o =>
+          o.MedicalOptionCategoryId == categoryId && optionIdsToUpdate.Contains(o.MedicalOptionId))
+        .ToListAsync();
+      
+      // check if we have data 
+      if (existingOptions.Count <= 0)
+      {
+        return null;
+      }
+      
+      //Create a dictionary for faster lookups
+      var updateDict = bulkUpdateDto.ToDictionary(dto => dto.MedicalOptionId, dto => dto);
+      
+      // Update entities using the dictionary for 0(1) lookups
+      foreach (var entity in existingOptions)
+      {
+        if (updateDict.TryGetValue(entity.MedicalOptionId, out var updateDto))
+        {
+          entity.SalaryBracketMin = updateDto.SalaryBracketMin;
+          entity.SalaryBracketMax = updateDto.SalaryBracketMax;
+          entity.MonthlyMsaContributionAdult = updateDto.MonthlyMsaContributionAdult;
+          entity.MonthlyMsaContributionChild = updateDto.MonthlyMsaContributionChild;
+          entity.MonthlyMsaContributionPrincipal = updateDto.MonthlyMsaContributionPrincipal;
+          entity.MonthlyRiskContributionAdult = updateDto.MonthlyRiskContributionAdult;
+          entity.MonthlyRiskContributionChild = updateDto.MonthlyRiskContributionChild;
+          entity.MonthlyRiskContributionChild2 = updateDto.MonthlyRiskContributionChild2;
+          entity.MonthlyRiskContributionPrincipal = updateDto.MonthlyRiskContributionPrincipal;
+          entity.TotalMonthlyContributionsAdult = updateDto.TotalMonthlyContributionsAdult;
+          entity.TotalMonthlyContributionsChild = updateDto.TotalMonthlyContributionsChild;
+          entity.TotalMonthlyContributionsChild2 = updateDto.TotalMonthlyContributionsChild2;
+          entity.TotalMonthlyContributionsPrincipal = updateDto.TotalMonthlyContributionsPrincipal;
+        }
+      }
+      
+      //perform bulk update using EFCore.BulkExtensions
+      await _context.BulkUpdateAsync(existingOptions, new BulkConfig()
+      {
+        BatchSize = 1000,
+        PropertiesToInclude = new List<string>
+        {
+          nameof(MedicalOption.SalaryBracketMin),
+          nameof(MedicalOption.SalaryBracketMax),
+          nameof(MedicalOption.MonthlyMsaContributionAdult),
+          nameof(MedicalOption.MonthlyMsaContributionChild),
+          nameof(MedicalOption.MonthlyMsaContributionPrincipal),
+          nameof(MedicalOption.MonthlyRiskContributionAdult),
+          nameof(MedicalOption.MonthlyRiskContributionChild),
+          nameof(MedicalOption.MonthlyRiskContributionChild2),
+          nameof(MedicalOption.MonthlyRiskContributionPrincipal),
+          nameof(MedicalOption.TotalMonthlyContributionsAdult),
+          nameof(MedicalOption.TotalMonthlyContributionsChild),
+          nameof(MedicalOption.TotalMonthlyContributionsChild2),
+          nameof(MedicalOption.TotalMonthlyContributionsPrincipal)
+        }
+      });
+
+      // Map to DTOs to avoid circular reference
+      var responseDtos = existingOptions.Select(option => new MedicalOptionDto
+      {
+        MedicalOptionId = option.MedicalOptionId,
+        MedicalOptionName = option.MedicalOptionName,
+        MedicalOptionCategoryId = option.MedicalOptionCategoryId,
+        SalaryBracketMin = option.SalaryBracketMin,
+        SalaryBracketMax = option.SalaryBracketMax,
+        MonthlyRiskContributionPrincipal = option.MonthlyRiskContributionPrincipal,
+        MonthlyRiskContributionAdult = option.MonthlyRiskContributionAdult,
+        MonthlyRiskContributionChild = option.MonthlyRiskContributionChild,
+        MonthlyRiskContributionChild2 = option.MonthlyRiskContributionChild2,
+        MonthlyMsaContributionPrincipal = option.MonthlyMsaContributionPrincipal,
+        MonthlyMsaContributionAdult = option.MonthlyMsaContributionAdult,
+        MonthlyMsaContributionChild = option.MonthlyMsaContributionChild,
+        TotalMonthlyContributionsPrincipal = option.TotalMonthlyContributionsPrincipal,
+        TotalMonthlyContributionsAdult = option.TotalMonthlyContributionsAdult,
+        TotalMonthlyContributionsChild = option.TotalMonthlyContributionsChild,
+        TotalMonthlyContributionsChild2 = option.TotalMonthlyContributionsChild2
+      }).ToList();
+      
+      return responseDtos.AsReadOnly();
     }
   }
 }

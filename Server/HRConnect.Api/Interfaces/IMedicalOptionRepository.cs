@@ -28,7 +28,7 @@
 
     Task<Boolean> MedicalOptionExistsWithinCategoryAsync(int categoryId, int optionId);
     
-    Task<IReadOnlyList<MedicalOption>> BulkUpdateByCategoryIdAsync(int categoryId,
+    Task<IReadOnlyList<MedicalOptionDto>> BulkUpdateByCategoryIdAsync(int categoryId,
       IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto);
     
     //Task<List<MedicalOption?>> GetMedicalOptionsByCategoryAsync(int categoryId);

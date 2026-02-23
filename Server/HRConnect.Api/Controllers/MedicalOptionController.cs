@@ -44,10 +44,11 @@
 
     [HttpPut("{optionId}/salary-bracket")]
     //[Authorize(Roles = "SuperUser")]
-    public async Task<IActionResult> UpdateMedicalOptionSalaryBracket([FromRoute] int optionId,
-      [FromBody] HRConnect.Api.DTOs.MedicalOption.UpdateMedicalOptionSalaryBracketRequestDto
-        requestDto)
+    public async Task<ActionResult<IReadOnlyList<MedicalOptionDto>>> BulkUpdateMedicalOptionsByCategory(
+      int optionId, 
+      [FromBody] IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto)
     {
+      /*
       try
       {
         var results = await _medicalOptionService.UpdateSalaryBracketAsync(optionId,
@@ -66,6 +67,33 @@
       {
         //ModelState.AddModelError("Unauthorized Operation", ex.Message);
         return NotFound($"Unauthorized operation: {ex.Message}");
+      }
+      */
+      
+      // --- New Implementation
+      try
+      {
+        var results = await _medicalOptionService.BulkUpdateMedicalOptionsByCategoryAsync(optionId, bulkUpdateDto);
+
+        if (results == null || !results.Any()) 
+          return NotFound();
+
+        return Ok(results);
+      }
+      catch (ArgumentException ex)
+      {
+        ModelState.AddModelError("Validation", ex.Message);
+        return ValidationProblem(ModelState);
+      }
+      catch (InvalidOperationException ex)
+      {
+        ModelState.AddModelError("Validation", ex.Message);
+        return BadRequest(ex.Message);
+      }
+      catch (Exception ex)
+      {
+        // Log the exception
+        return StatusCode(500, "An unexpected error occurred during bulk update");
       }
     }
   }
