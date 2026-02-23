@@ -4,21 +4,47 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using Resend;
 using HRConnect.Api.Interfaces;
 using HRConnect.Api.Repositories;
 using HRConnect.Api.Services;
 using HRConnect.Api.Repository;
 using Microsoft.AspNetCore.Identity;
 using HRConnect.Api.Models;
+using HRConnect.Api.Services;
 using HRConnect.Api.Utils;
 using OfficeOpenXml;
 using Resend;
-using HRConnect.Api.Services;
 using HRConnect.Api.Interfaces.PensionProjection;
+using Audit.Core;
+using Audit.EntityFramework;
 
 var builder = WebApplication.CreateBuilder(args);
 
+//Audit configuration for custom audit capturing
+Audit.Core.Configuration.Setup()
+  .UseEntityFramework(config => config
+      .AuditTypeExplicitMapper(map => map
+        .Map<PayrollDeduction, AuditPayrollDeductions>((entity, audit) =>
+          {
+            audit.EmployeeId = entity.EmployeeId;
+            audit.IdNumber = entity.IdNumber;
+            audit.PassportNumber = entity.PassportNumber;
+            audit.MonthlySalary = entity.MonthlySalary;
+            audit.ProjectedSalary = entity.MonthlySalary - entity.UifEmployeeAmount;
+            audit.UifEmployeeAmount = entity.UifEmployeeAmount;
+            audit.UifEmployerAmount = entity.UifEmployerAmount;
+            audit.EmployerSdlContribution = entity.EmployerSdlContribution;
+          })
+        .AuditEntityAction<AuditPayrollDeductions>((e, entry, audit) =>
+        {
+          audit.AuditedAt = DateTime.UtcNow;
+          audit.AuditAction = entry.Action;
+          audit.TabelName = entry.Name;
+        })));
+
 ExcelPackage.License.SetNonCommercialPersonal("YourName");
+
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -52,7 +78,10 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    {
+      options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+      options.AddInterceptors(new AuditSaveChangesInterceptor());
+    });
 
 builder.Services.AddAuthentication(options =>
 {
@@ -92,14 +121,9 @@ builder.Services.AddAuthorizationBuilder()
     .AddPolicy("SuperUserOnly", policy => policy.RequireRole("SuperUser"))
     .AddPolicy("NormalUserOnly", policy => policy.RequireRole("NormalUser"));
 
-// Register Resend
-builder.Services.AddOptions<ResendClientOptions>().Configure<IConfiguration>((o, c) =>
-{
-  o.ApiToken = c["Resend:ApiKey"] ?? throw new InvalidOperationException("Resend API key is not configured.");
-});
-builder.Services.AddHttpClient<ResendClient>();
-
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IUserService, HRConnect.Api.Services.UserService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
@@ -109,6 +133,9 @@ builder.Services.AddScoped<ITaxDeductionService, TaxDeductionService>();
 builder.Services.AddScoped<ITaxDeductionRepository, TaxDeductionRepository>();
 builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.Services.AuthService>();
+builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+builder.Services.AddScoped<IPayrollDeductionsRepository, PayrollDeductionsRepository>();
+builder.Services.AddScoped<IPayrollDeductionsService, PayrollDeductionsService>();
 builder.Services.AddTransient<IPensionProjectionService, PensionProjectionService>();
 builder.Services.AddCors(options =>
 {
@@ -122,12 +149,6 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
-{
-  var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-  dbContext.Database.Migrate();
-}
-
 if (app.Environment.IsDevelopment())
 {
   app.UseSwagger();
@@ -137,11 +158,9 @@ if (app.Environment.IsDevelopment())
   });
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 app.UseCors("AllowReact");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
-
-
