@@ -30,7 +30,7 @@ const PositionManagement = () => {
 
   useEffect(() => {
     setLoading(true);
-    fetch("http://localhost:5037/api/Positions")
+    fetch("http://localhost:5147/api/positions")
       .then((res) => res.json())
       .then((data) => {
         setPositions(data);
@@ -90,7 +90,8 @@ const PositionManagement = () => {
         <table className="position-table">
           <thead>
             <tr>
-              <th>Description</th>
+              <th>Position Title</th>
+               <th>Position Grade</th>
               <th>Effective Date</th>
               <th></th>
             </tr>

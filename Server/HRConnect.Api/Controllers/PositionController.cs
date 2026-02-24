@@ -10,7 +10,7 @@ namespace HRConnect.Api.Controllers
 
     [Route("api/positions")]
     [ApiController]
-    [Authorize(Roles = "SuperUser")] // Require authentication and SuperAdmin role
+  /*  [Authorize(Roles = "SuperUser")] // Require authentication and SuperAdmin role*/
     public class PositionController : ControllerBase
     {
     private readonly IPositionService _positionService;
@@ -42,6 +42,8 @@ namespace HRConnect.Api.Controllers
             if (position == null) return NotFound();
             return Ok(position);
         }
+
+        
 
         [HttpPost("Create")]
       

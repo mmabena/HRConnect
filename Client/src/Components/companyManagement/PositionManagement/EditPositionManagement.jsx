@@ -29,8 +29,8 @@ const EditPositionManagement = () => {
     const fetchDropdownsAndPosition = async () => {
       try {
         const [gradesRes, levelsRes] = await Promise.all([
-          fetch("http://localhost:5037/api/JobGrades"),
-          fetch("http://localhost:5037/api/OccupationalLevels"),
+          fetch("http://localhost:5147/api/jobgrades"),
+          fetch("http://localhost:5147/api/occupationallevels"),
         ]);
 
         const [gradesData, levelsData] = await Promise.all([
@@ -41,7 +41,7 @@ const EditPositionManagement = () => {
         setJobGrades(gradesData);
         setOccupationalLevels(levelsData);
 
-        const posRes = await fetch(`http://localhost:5037/api/Positions/${id}`);
+        const posRes = await fetch(`http://localhost:5147/api/positions/${id}`);
         if (!posRes.ok) throw new Error("Position not found");
 
         const posData = await posRes.json();

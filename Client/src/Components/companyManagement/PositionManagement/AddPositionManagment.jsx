@@ -15,14 +15,15 @@ const AddPositionManagement = () => {
   const [occupationalLevels, setOccupationalLevels] = useState([]);
   const [filteredLevels, setFilteredLevels] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("http://localhost:5037/api/JobGrades")
+    fetch("http://localhost:5147/api/jobgrades")
       .then((res) => res.json())
       .then((data) => setJobGrades(data))
       .catch((error) => console.error("Failed to fetch job grades:", error));
 
-    fetch("http://localhost:5037/api/OccupationalLevels")
+    fetch("http://localhost:5147/api/occupationallevels")
       .then((res) => res.json())
       .then((data) => setOccupationalLevels(data))
       .catch((error) => console.error("Failed to fetch occupational levels:", error));
@@ -74,7 +75,7 @@ const AddPositionManagement = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:5037/api/Positions", {
+      const response = await fetch("http://localhost:5147/api/positions/Create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -155,9 +156,9 @@ const AddPositionManagement = () => {
                 onChange={handleChange}
                 required
               >
-                <option value="">Grade</option>
+                <option value="">Position Grade</option>
                 {jobGrades.map((grade) => (
-                  <option key={grade.jobGradeId} value={grade.jobGradeId}>
+                  <option key={grade.jobGrade} value={grade.jobGradeId}>
                     {grade.jobGradeName}
                   </option>
                 ))}
