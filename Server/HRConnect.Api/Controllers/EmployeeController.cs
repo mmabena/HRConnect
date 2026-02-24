@@ -43,12 +43,18 @@ namespace HRConnect.Api.Controllers
             }
             return Ok(employee);
         }
-        /// <summary>
-        /// Creates a new Employee in the database (SuperUsers only).
-        /// </summary>
-        /// <param name="employeeDto">The employee data request to create</param>
-        /// <returns>The created employee as employeeDto or appropriate error response depending on e.g. missing fields or duplicate data</returns>
-        [HttpPost]
+    [HttpGet("email/{employeeEmail}")]
+    public async Task<IActionResult> GetEmployeeByEmail(string employeeEmail)
+    {
+      EmployeeDto? employee = await _employeeService.GetEmployeeByEmailAsync(employeeEmail);
+      return employee == null ? NotFound() : Ok(employee);
+    }
+    /// <summary>
+    /// Creates a new Employee in the database (SuperUsers only).
+    /// </summary>
+    /// <param name="employeeDto">The employee data request to create</param>
+    /// <returns>The created employee as employeeDto or appropriate error response depending on e.g. missing fields or duplicate data</returns>
+    [HttpPost]
         public async Task<IActionResult> CreateEmployee([FromBody] CreateEmployeeRequestDto employeeDto)
         {
             var employee = await _employeeService.CreateEmployeeAsync(employeeDto);

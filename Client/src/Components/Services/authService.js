@@ -7,6 +7,7 @@ export const authService = {
   login: async (email, password) => {
     try {
       const response = await api.post(`${AUTH_BASE}/login`, { email, password });
+      console.log(response);
       return response.data;
     } catch (error) {
       throw error.response?.data || { message: 'Login failed' };

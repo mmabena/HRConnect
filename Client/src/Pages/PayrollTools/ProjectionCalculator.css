@@ -10,7 +10,7 @@
     overflow: hidden;
     z-index: 0;
     display: grid;
-    grid-template-rows: 70px 140px 110px 150px 130px 80px;
+    grid-template-rows: 70px 160px 110px 150px 130px 80px;
     gap: 10px;
     
     padding-left: 140px;
@@ -58,13 +58,20 @@
     text-align: left;
 }
 
+
 .contribution input {
     margin-top: 8px;
     border-radius: 15px;
+    border-color: aqua;
     text-align: center;
     height: 60px;
     width: 210px;
     font-size: 28px;
+}
+
+.voluntary-contribution-error {
+    font-size: 11px;
+    color: red;
 }
 
 .contribution-frequency {

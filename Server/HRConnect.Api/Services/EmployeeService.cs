@@ -491,5 +491,11 @@ namespace HRConnect.Api.Services
                 throw new BusinessRuleException("Career Manager must be an existing Employee");
                 
         }
+
+    public async Task<EmployeeDto?> GetEmployeeByEmailAsync(string employeeEmail)
+    {
+      Employee? employee = await _employeeRepo.GetEmployeeByEmailAsync(employeeEmail);
+      return employee?.ToEmployeeDto();
     }
+  }
 }

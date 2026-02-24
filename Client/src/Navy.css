@@ -435,7 +435,7 @@
   background-color: #004d6b;
 }
 
-.edit-employee-background {
+.menu-background {
   position: fixed;
   top: 0;
   left: 375px;
@@ -1289,7 +1289,7 @@ UserManagement Styles */
   font-style: italic;
 }
 
-.edit-employee-background {
+.menu-background {
   background-color: #f5f5f5;
   min-height: 100vh;
   padding-bottom: 50px;
@@ -1754,7 +1754,7 @@ UserManagement Styles */
   }
 }
 
- .edit-employee-background {
+ .menu-background {
   background-color: #f9f9f9;
   min-height: 100vh;
   overflow-y: auto; 

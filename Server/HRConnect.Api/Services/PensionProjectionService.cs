@@ -3,12 +3,12 @@ namespace HRConnect.Api.Services
   using System.Globalization;
   using HRConnect.Api.DTOs.Employee.Pension;
   using HRConnect.Api.Interfaces.PensionProjection;
+  using HRConnect.Api.Models;
   using HRConnect.Api.Utils;
 
   public class PensionProjectionService : IPensionProjectionService
   {
     private readonly int PENSION_PROJECTION_AGE_LIMIT = 65;
-    private readonly string EMPLOYEE_EMPLOYEMENT_TYPE = "Permanent";
     private readonly decimal MAX_PENSIONCONTRIBUTION_PERCENTAGE = (decimal)27.5 / 100;
     private static readonly decimal MAX_MONTHLYCONTRIBUTION = 29166.66M;
     private readonly float SALARYINCREASE_PERCENTAGE = 0.05f;
@@ -90,7 +90,7 @@ namespace HRConnect.Api.Services
     ///<returns>
     ///Warning message to state if employee employment status is invalid
     ///</returns>
-    private string ValidEmployeeForPensionProjection(int currentAge, string EmploymentStatus)
+    private string ValidEmployeeForPensionProjection(int currentAge, EmploymentStatus EmploymentStatus)
     {
       string warningMessage = "";
 
@@ -98,7 +98,7 @@ namespace HRConnect.Api.Services
       {
         warningMessage += "You have reached retirement age — projections not available.";
       }
-      if (EmploymentStatus != EMPLOYEE_EMPLOYEMENT_TYPE)
+      if (EmploymentStatus != EmploymentStatus.Permanent)
       {
         warningMessage += "Pension projections not available for fixed-term employees.";
       }

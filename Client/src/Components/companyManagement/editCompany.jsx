@@ -337,7 +337,7 @@ function EditCompany() {
   const defaultTaxCalculationOptions = ['A - Average', 'B - Standard', 'C - Custom'];
 
   return (
-    <div className="edit-employee-background custom-scrollbar"> 
+    <div className="menu-background custom-scrollbar"> 
       <CompanyManagementHeader />
       <CompanyManagementNavBar
         tabs={navTabs}

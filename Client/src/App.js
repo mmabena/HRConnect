@@ -22,6 +22,7 @@ import CompanyManagement from './companyManagement';
 import CompanyContribution from './Components/CompanyContribution/CompanyContribution'; 
 import Profile from './Components/MyProfile';
 import CompensationPlanning from './Components/CompensationPlanning';
+import ProjectionCalculator from "./Pages/PayrollTools/ProjectionCalculator";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -80,7 +81,7 @@ const handleLoginSuccess = (responseData) => {
 
   setCurrentUser(user); // save in component state
   // Store both token and user data in localStorage with the key "currentUser"
-  localStorage.setItem("currentUser", JSON.stringify({ token, user })); // persist in localStorage
+  //localStorage.setItem("currentUser", JSON.stringify({ token, user })); // persist in localStorage
   setIsLoggedIn(true);
   navigate("/dashboard");
 };
@@ -128,6 +129,7 @@ const handleLoginSuccess = (responseData) => {
 
 <Route path="/company-contribution" element={<CompanyContribution />} />
 <Route path="/compensationPlanning" element={<CompensationPlanning  />} />
+<Route path="/projection-calculator" element={<ProjectionCalculator />} />
  </Routes>
 
 </div>
