@@ -2,7 +2,7 @@
 import React, { useState, useRef } from "react";
 import axios from "axios";
 
-import "../Navy.css";
+import "../../../Navy.css";
 //import "./TaxTableUpload.css";
 
 const financialYears = [

@@ -1,11 +1,11 @@
 // src/components/CompensationPlanning.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import CompanyManagementHeader from './companyManagement/companyManagementHeader.jsx';
-import CompanyManagementNavBar from './companyManagement/companyManagementNavBar.jsx';
+import CompanyManagementHeader from './CompanyManagement/companyManagementHeader.jsx';
+import CompanyManagementNavBar from './CompanyManagement/companyManagementNavBar.jsx';
 
 
-import '../MenuBar.css';
+import "./MenuBar/MenuBar.css";
 import '../Navy.css';
 
 
@@ -96,7 +96,7 @@ function CompensationPlanning({ currentUser }) {
   }
 
   return (
-    <div className="edit-employee-background custom-scrollbar">
+    <div className="menu-background custom-scrollbar">
       {/* The header is a direct duplicate, but the title is Compensation Planning */}
       <CompanyManagementHeader title="Compensation Planning" />
 

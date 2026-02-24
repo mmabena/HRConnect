@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { fetchAllEmployees } from "../Employee";
+import { fetchAllEmployees } from "../../api/Employee";
 import { Link,useLocation } from "react-router-dom";
 
 const EmployeeList = () => {
@@ -126,7 +126,7 @@ const location = useLocation();
   );
 
   return (
-    <div className="edit-employee-background">
+    <div className="menu-background">
       <div className="menu-bar"></div>
 
       <div className="wrapper-container">
@@ -198,16 +198,15 @@ const location = useLocation();
 
         <div className="content-container">
           <div className="table-grid">
-            <div className="table-header">ID</div>
-            <div className="table-cell" style={{ backgroundColor: "#006088" }}>
-              <img src="/images/Frame_287.png" alt="Block_logo" />
-            </div>
+             <div className="table-header">Employee ID</div>
             <div className="table-header">Name & Surname</div>
-            <div className="table-header">Career Title</div>
-            <div className="table-header">Phone Number</div>
+            <div className="table-header">Job Title</div>
+            <div className="table-header">Contact Number</div>
             <div className="table-header">Email</div>
-            <div className="table-header">Location</div>
-            <div className="table-header"></div>
+             <div className="table-header">Employement Status</div>
+            <div className="table-header">Branch</div>
+            <div className="table-header">Actions</div>
+            
 
             {loading && (
               <div

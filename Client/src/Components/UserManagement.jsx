@@ -161,7 +161,7 @@ const UserManagement = () => {
 
   if (isLoading)
     return (
-      <div className="edit-employee-background">
+      <div className="menu-background">
         {/* Removed MenuBar here */}
         <div className="loading-container">
           <div className="loading-spinner"></div>
@@ -171,7 +171,7 @@ const UserManagement = () => {
     );
 
   return (
-    <div className="edit-employee-background">
+    <div className="menu-background">
       {/* Removed MenuBar here */}
       <div className="top-bar">
         <FaUsers size={25} />

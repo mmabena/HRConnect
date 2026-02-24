@@ -1,6 +1,6 @@
 // companyManagementHeader.jsx
 import { useState, useEffect } from 'react';
-import '../../MenuBar.css';
+import "../MenuBar/MenuBar.css";
 
 function CompanyManagementHeader({ title }) {
   const [currentTime, setCurrentTime] = useState('');
