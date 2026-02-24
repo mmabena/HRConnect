@@ -30,6 +30,7 @@ namespace HRConnect.Api.Services
                 ReportingManagerId = request.ReportingManagerId,
                 FirstName = request.FirstName,
                 LastName = request.LastName,
+                Email = request.Email,
                 Gender = request.Gender,
                 StartDate = request.StartDate,
                 CreatedDate = DateTime.UtcNow,
@@ -51,7 +52,7 @@ namespace HRConnect.Api.Services
         public async Task<List<EmployeeResponse>> GetAllEmployeesAsync()
         {
             await RecalculateAllSickLeaveAsync();
-
+            await RecalculateAllFamilyResponsibilityLeaveAsync();
             var employees = await _context.Employees
                 .Include(e => e.Position)
                     .ThenInclude(p => p.JobGrade)
@@ -67,6 +68,7 @@ namespace HRConnect.Api.Services
         public async Task<EmployeeResponse?> GetEmployeeByIdAsync(Guid id)
         {
             await RecalculateAllSickLeaveAsync();
+            await RecalculateAllFamilyResponsibilityLeaveAsync();
 
             var employee = await _context.Employees
                 .Include(e => e.Position)
@@ -202,6 +204,26 @@ namespace HRConnect.Api.Services
                     await RecalculateSickLeaveAsync(employee.EmployeeId);
 
                     continue; // skip normal balance creation
+                }
+                if (leaveType.Code == "FRL")
+                {
+                    var frlBalance = new EmployeeLeaveBalance
+                    {
+                        EmployeeId = employee.EmployeeId,
+                        LeaveTypeId = leaveType.Id,
+                        EntitledDays = rule.DaysAllocated, // 3
+                        UsedDays = 0,
+                        AccruedDays = 0,
+                        RemainingDays = rule.DaysAllocated,
+                        LastResetYear = DateTime.UtcNow.Year // initialize cycle
+                    };
+
+                    await _context.EmployeeLeaveBalances.AddAsync(frlBalance);
+                    await _context.SaveChangesAsync();
+
+                    await RecalculateFamilyResponsibilityLeaveAsync(employee.EmployeeId);
+
+                    continue;
                 }
                 var balance = new EmployeeLeaveBalance
                 {
@@ -663,6 +685,88 @@ namespace HRConnect.Api.Services
                 sickBalance.RemainingDays =
                     Math.Max(0, entitled - sickBalance.UsedDays);
             }
+
+            await _context.SaveChangesAsync();
+        }
+        public async Task RecalculateFamilyResponsibilityLeaveAsync(Guid employeeId)
+        {
+            var employee = await _context.Employees
+                .Include(e => e.LeaveBalances)
+                .ThenInclude(lb => lb.LeaveType)
+                .FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
+
+            if (employee == null)
+                throw new InvalidOperationException("Employee not found.");
+
+            var frlBalance = employee.LeaveBalances
+                .FirstOrDefault(b => b.LeaveType.Code == "FRL");
+
+            if (frlBalance == null)
+                return;
+
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
+            // Determine this year's anniversary date
+            var anniversaryThisYear = new DateOnly(
+                today.Year,
+                employee.StartDate.Month,
+                employee.StartDate.Day
+            );
+
+            // If anniversary hasn’t happened yet this year,
+            // use last year as current cycle
+            if (today < anniversaryThisYear)
+                anniversaryThisYear = anniversaryThisYear.AddYears(-1);
+
+            var anniversaryYear = anniversaryThisYear.Year;
+
+            // Reset only if this cycle hasn't already been processed
+            if (frlBalance.LastResetYear == null ||
+                frlBalance.LastResetYear != anniversaryYear)
+            {
+                frlBalance.UsedDays = 0;
+                frlBalance.EntitledDays = 3;
+                frlBalance.RemainingDays = 3;
+                frlBalance.LastResetYear = anniversaryYear;
+
+                await _context.SaveChangesAsync();
+            }
+        }
+        //Batch Calculation
+        public async Task RecalculateAllFamilyResponsibilityLeaveAsync()
+        {
+            var employees = await _context.Employees
+                .Include(e => e.LeaveBalances)
+                    .ThenInclude(lb => lb.LeaveType)
+                .ToListAsync();
+
+            foreach (var employee in employees)
+            {
+                await RecalculateFamilyResponsibilityLeaveAsync(employee.EmployeeId);
+            }
+        }
+        public async Task ResetMaternityLeaveForNewPregnancy(Guid employeeId)
+        {
+            var employee = await _context.Employees
+                .Include(e => e.LeaveBalances)
+                    .ThenInclude(lb => lb.LeaveType)
+                .FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
+
+            if (employee == null)
+                throw new InvalidOperationException("Employee not found.");
+
+            if (employee.Gender != "Female")
+                throw new InvalidOperationException("Maternity leave applies to female employees only.");
+
+            var mlBalance = employee.LeaveBalances
+                .FirstOrDefault(b => b.LeaveType.Code == "ML");
+
+            if (mlBalance == null)
+                throw new InvalidOperationException("Maternity Leave not configured.");
+
+            mlBalance.UsedDays = 0;
+            mlBalance.EntitledDays = 120;
+            mlBalance.RemainingDays = 120;
 
             await _context.SaveChangesAsync();
         }

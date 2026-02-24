@@ -486,7 +486,14 @@ namespace HRConnect.Tests
 
             var balance = context.EmployeeLeaveBalances.Single();
 
-            Assert.Equal(30m, balance.EntitledDays);
+            var expectedMonths =
+                (DateTime.UtcNow.Year - hireDate.Year) * 12 +
+                (DateTime.UtcNow.Month - hireDate.Month);
+
+            if (expectedMonths < 0)
+                expectedMonths = 0;
+
+            Assert.Equal(expectedMonths, balance.EntitledDays);
         }
 
         [Fact]

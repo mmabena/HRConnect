@@ -98,5 +98,23 @@ namespace HRConnect.Api.Controllers
             await _employeeService.UpdateUsedDaysAsync(request);
             return Ok("Used days updated successfully.");
         }
+        [HttpPost("{id:guid}/new-pregnancy")]
+        public async Task<IActionResult> RegisterNewPregnancy(Guid id)
+        {
+            await _employeeService.ResetMaternityLeaveForNewPregnancy(id);
+            return Ok("Maternity leave reset for new pregnancy.");
+        }
+        [HttpPost("{id:guid}/recalculate-frl")]
+        public async Task<IActionResult> RecalculateFRL(Guid id)
+        {
+            await _employeeService.RecalculateFamilyResponsibilityLeaveAsync(id);
+            return Ok("Family Responsibility Leave recalculated.");
+        }
+        [HttpPost("recalculate-all-frl")]
+        public async Task<IActionResult> RecalculateAllFRL()
+        {
+            await _employeeService.RecalculateAllFamilyResponsibilityLeaveAsync();
+            return Ok("All FRL recalculated.");
+        }
     }
 }
