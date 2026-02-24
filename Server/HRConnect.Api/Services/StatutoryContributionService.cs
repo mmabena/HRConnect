@@ -61,7 +61,7 @@ namespace HRConnect.Api.Services
             UifEmployeeAmount = employeeAmount,
             UifEmployerAmount = employerAmount,
             EmployerSdlContribution = sdlDeduction,
-            Month = DateTime.UtcNow.AddMonths(1) //adds a month with automatic rollover
+            CurrentMonth = DateTime.UtcNow.AddMonths(1) //adds a month with automatic rollover
 
           };
 

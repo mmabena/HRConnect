@@ -14,8 +14,56 @@ namespace HRConnect.Api.Migrations
             migrationBuilder.DropTable(
                 name: "AuditPayrollDeductions");
 
+            migrationBuilder.AlterColumn<decimal>(
+                name: "UifEmployerAmount",
+                table: "PayrollDeductions",
+                type: "decimal(18,4)",
+                precision: 18,
+                scale: 4,
+                nullable: false,
+                oldClrType: typeof(decimal),
+                oldType: "decimal(7,2)",
+                oldPrecision: 7,
+                oldScale: 2);
+
+            migrationBuilder.AlterColumn<decimal>(
+                name: "UifEmployeeAmount",
+                table: "PayrollDeductions",
+                type: "decimal(18,4)",
+                precision: 18,
+                scale: 4,
+                nullable: false,
+                oldClrType: typeof(decimal),
+                oldType: "decimal(7,2)",
+                oldPrecision: 7,
+                oldScale: 2);
+
+            migrationBuilder.AlterColumn<decimal>(
+                name: "MonthlySalary",
+                table: "PayrollDeductions",
+                type: "decimal(18,4)",
+                precision: 18,
+                scale: 4,
+                nullable: false,
+                oldClrType: typeof(decimal),
+                oldType: "decimal(18,2)",
+                oldPrecision: 18,
+                oldScale: 2);
+
+            migrationBuilder.AlterColumn<decimal>(
+                name: "EmployerSdlContribution",
+                table: "PayrollDeductions",
+                type: "decimal(18,4)",
+                precision: 18,
+                scale: 4,
+                nullable: false,
+                oldClrType: typeof(decimal),
+                oldType: "decimal(18,2)",
+                oldPrecision: 18,
+                oldScale: 2);
+
             migrationBuilder.AddColumn<DateTime>(
-                name: "Month",
+                name: "CurrentMonth",
                 table: "PayrollDeductions",
                 type: "datetime2",
                 nullable: false,
@@ -52,8 +100,56 @@ namespace HRConnect.Api.Migrations
                 name: "AuditLogs");
 
             migrationBuilder.DropColumn(
-                name: "Month",
+                name: "CurrentMonth",
                 table: "PayrollDeductions");
+
+            migrationBuilder.AlterColumn<decimal>(
+                name: "UifEmployerAmount",
+                table: "PayrollDeductions",
+                type: "decimal(7,2)",
+                precision: 7,
+                scale: 2,
+                nullable: false,
+                oldClrType: typeof(decimal),
+                oldType: "decimal(18,4)",
+                oldPrecision: 18,
+                oldScale: 4);
+
+            migrationBuilder.AlterColumn<decimal>(
+                name: "UifEmployeeAmount",
+                table: "PayrollDeductions",
+                type: "decimal(7,2)",
+                precision: 7,
+                scale: 2,
+                nullable: false,
+                oldClrType: typeof(decimal),
+                oldType: "decimal(18,4)",
+                oldPrecision: 18,
+                oldScale: 4);
+
+            migrationBuilder.AlterColumn<decimal>(
+                name: "MonthlySalary",
+                table: "PayrollDeductions",
+                type: "decimal(18,2)",
+                precision: 18,
+                scale: 2,
+                nullable: false,
+                oldClrType: typeof(decimal),
+                oldType: "decimal(18,4)",
+                oldPrecision: 18,
+                oldScale: 4);
+
+            migrationBuilder.AlterColumn<decimal>(
+                name: "EmployerSdlContribution",
+                table: "PayrollDeductions",
+                type: "decimal(18,2)",
+                precision: 18,
+                scale: 2,
+                nullable: false,
+                oldClrType: typeof(decimal),
+                oldType: "decimal(18,4)",
+                oldPrecision: 18,
+                oldScale: 4);
 
             migrationBuilder.CreateTable(
                 name: "AuditPayrollDeductions",
