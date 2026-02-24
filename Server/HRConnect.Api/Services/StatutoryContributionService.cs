@@ -60,7 +60,9 @@ namespace HRConnect.Api.Services
             IdNumber = employee.IdNumber,
             UifEmployeeAmount = employeeAmount,
             UifEmployerAmount = employerAmount,
-            EmployerSdlContribution = sdlDeduction
+            EmployerSdlContribution = sdlDeduction,
+            Month = DateTime.UtcNow.AddMonths(1) //adds a month with automatic rollover
+
           };
 
           var newDeduction = await _statutoryContributionRepo.AddDeductionsAsync(deductions);

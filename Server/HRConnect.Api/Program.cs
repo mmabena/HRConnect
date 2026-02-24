@@ -13,7 +13,6 @@ using Microsoft.AspNetCore.Identity;
 using HRConnect.Api.Models;
 using HRConnect.Api.Utils;
 using OfficeOpenXml;
-using Resend;
 using HRConnect.Api.Interfaces.PensionProjection;
 using Audit.Core;
 using Audit.EntityFramework;
@@ -24,7 +23,7 @@ var builder = WebApplication.CreateBuilder(args);
 Audit.Core.Configuration.Setup()
   .UseEntityFramework(config => config
       .AuditTypeExplicitMapper(map => map
-        .Map<StatutoryContribution, AuditPayrollDeductions>((entity, audit) =>
+        .Map<StatutoryContribution, AuditLogs>((entity, audit) =>
           {
             audit.EmployeeId = entity.EmployeeId;
             audit.IdNumber = entity.IdNumber;
@@ -35,7 +34,7 @@ Audit.Core.Configuration.Setup()
             audit.UifEmployerAmount = entity.UifEmployerAmount;
             audit.EmployerSdlContribution = entity.EmployerSdlContribution;
           })
-        .AuditEntityAction<AuditPayrollDeductions>((e, entry, audit) =>
+        .AuditEntityAction<AuditLogs>((e, entry, audit) =>
         {
           audit.AuditedAt = DateTime.UtcNow;
           audit.AuditAction = entry.Action;

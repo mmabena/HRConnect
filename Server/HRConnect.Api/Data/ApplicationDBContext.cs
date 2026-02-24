@@ -15,7 +15,7 @@ namespace HRConnect.Api.Data
     public DbSet<TaxTableUpload> TaxTableUploads { get; set; }
     public DbSet<TaxDeduction> TaxDeductions { get; set; }
     public DbSet<StatutoryContribution> PayrollDeductions { get; set; }
-    public DbSet<AuditPayrollDeductions> AuditPayrollDeductions { get; set; }
+    public DbSet<AuditLogs> AuditLogs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
