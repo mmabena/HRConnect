@@ -26,6 +26,13 @@
       var variant = GetVariantByName(enumType.Name, categoryName);
       var variantName = variant?.ToString() ?? string.Empty;
       
+      string altFilterName = null;
+      if (categoryName.Contains("Choice"))
+      {
+        altFilterName = categoryName;
+        return (categoryName, variantName, altFilterName);
+      }
+      
       // Construct the filter name
       var filterName = option.MedicalOptionCategory?.MedicalOptionCategoryName + " " + variantName;
 
@@ -77,7 +84,12 @@
           altFilterName = categoryName;
           return (categoryName, variantName, altFilterName);
         }
-
+        
+        if (variantName == "" || variantName == null)
+        {
+          variantName = trimmedOptionName.Split(' ')[1];
+        }
+        
         var filterName = option.MedicalOptionCategory?.MedicalOptionCategoryName + " " + 
                          variantName;
         

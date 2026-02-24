@@ -47,7 +47,7 @@ builder.Services.AddOpenApi();
 // Office Use Only - using EF Core with MQSL
 
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("SecondaryConnection")));
 
 // Home Usage Only
 // Configure Entity Framework Core with MySQL
