@@ -15,19 +15,6 @@ namespace HRConnect.Api.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Positions",
-                columns: table => new
-                {
-                    PositionId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    PositionTitle = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Positions", x => x.PositionId);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Employees",
                 columns: table => new
                 {
@@ -63,15 +50,6 @@ namespace HRConnect.Api.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.InsertData(
-                table: "Positions",
-                columns: new[] { "PositionId", "PositionTitle" },
-                values: new object[,]
-                {
-                    { 1, "Chief Executive Officer" },
-                    { 2, "Associate Software Engineer" },
-                    { 3, "Trainee Software Developer" }
-                });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Employees_PositionId",
@@ -85,8 +63,6 @@ namespace HRConnect.Api.Migrations
             migrationBuilder.DropTable(
                 name: "Employees");
 
-            migrationBuilder.DropTable(
-                name: "Positions");
         }
     }
 }

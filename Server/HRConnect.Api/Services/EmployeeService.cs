@@ -107,9 +107,9 @@ namespace HRConnect.Api.Services
     /// <param name="EmployeeId">The employee identifier.</param>
     /// <param name="employeeDto">Updated employee data.</param>
     /// <returns>The updated employee or null if not found.</returns>
-    public async Task<EmployeeDto?> UpdateEmployeeAsync(string EmployeeId, UpdateEmployeeRequestDto employeeDto)
+    public async Task<EmployeeDto?> UpdateEmployeeAsync(string employeeId, UpdateEmployeeRequestDto employeeDto)
     {
-      var existingEmployee = await _employeeRepo.GetEmployeeByIdAsync(EmployeeId);
+      var existingEmployee = await _employeeRepo.GetEmployeeByIdAsync(employeeId);
       if (existingEmployee == null)
         throw new NotFoundException("Employee not found");
 
@@ -117,9 +117,9 @@ namespace HRConnect.Api.Services
       ValidateCommonFields(employeeDto);
       ValidateUpdate(employeeDto);
       //Check for duplicate entries
-      await CheckDuplicateOnUpdate(EmployeeId, employeeDto);
+      await CheckDuplicateOnUpdate(employeeId, employeeDto);
 
-      await ValidateCareerManagerAsync(EmployeeId, employeeDto.CareerManagerID);
+      await ValidateCareerManagerAsync(employeeId, employeeDto.CareerManagerID);
 
       existingEmployee.Title = employeeDto.Title;
       existingEmployee.Name = employeeDto.Name;
@@ -142,9 +142,9 @@ namespace HRConnect.Api.Services
     /// </summary>
     /// <param name="EmployeeId">The employee identifier.</param>
     /// <returns>True if deletion successful.</returns>
-    public async Task<bool> DeleteEmployeeAsync(string EmployeeId)
+    public async Task<bool> DeleteEmployeeAsync(string employeeId)
     {
-      var existingEmployee = await _employeeRepo.GetEmployeeByIdAsync(EmployeeId);
+      var existingEmployee = await _employeeRepo.GetEmployeeByIdAsync(employeeId);
 
       if (existingEmployee == null)
         throw new NotFoundException("Employee not found");
@@ -155,7 +155,7 @@ namespace HRConnect.Api.Services
       {
         throw new ArgumentException("Employee can only be deleted in the same month they started.");
       }
-      return await _employeeRepo.DeleteEmployeeAsync(EmployeeId);
+      return await _employeeRepo.DeleteEmployeeAsync(employeeId);
     }
     /// <summary>
     /// Generates a unique Employee ID based on surname prefix and existing IDs.
@@ -491,8 +491,5 @@ namespace HRConnect.Api.Services
         throw new BusinessRuleException("Career Manager must be an existing Employee");
 
     }
-
-
-
   }
 }
