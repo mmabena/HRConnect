@@ -131,6 +131,30 @@
         .FirstOrDefaultAsync(mo => mo.MedicalOptionCategoryId == id);
     }
 
+    /// <summary>
+    /// Retrieves a list of medical options by their IDs.
+    /// </summary>
+    /// <param name="ids">The list of medical option IDs to retrieve.</param>
+    /// <returns>A task that represents the asynchronous operation, containing the list of medical options.</returns>
+    public async Task<List<MedicalOption>> GetMedicalOptionsByIdsAsync(List<int> ids)
+    {
+      return await _context.MedicalOptions
+        .Where(mo => ids.Contains(mo.MedicalOptionId))
+        .Include(mo => mo.MedicalOptionCategory)
+        .ToListAsync();
+    }
+
+    /// <summary>
+    /// Retrieves a medical option category by its ID.
+    /// </summary>
+    /// <param name="id">The ID of the medical option category.</param>
+    /// <returns>A task that represents the asynchronous operation, containing the medical option category or null if not found.</returns>
+    public async Task<MedicalOptionCategory?> GetCategoryByIdAsync(int id)
+    {
+      return await _context.MedicalOptionCategories
+        .FirstOrDefaultAsync(c => c.MedicalOptionCategoryId == id);
+    }
+
     public async Task<List<MedicalOption?>> GetAllMedicalOptionsUnderCategoryVariantAsync( 
       string optionName)
     {

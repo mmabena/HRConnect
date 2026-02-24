@@ -7,7 +7,7 @@
   public interface IMedicalOptionRepository
   {
     //TODO: Document methods
-    //1. GetGroupedMedicalOptions
+    //1. GetGrouped MedicalOptions
     //2. GetMedicalOptionById
     //3. GetMedicalOptionByCategory
     //4. GetMedicalOptionBySalaryBracket
@@ -19,6 +19,8 @@
     Task<MedicalOption?> UpdateSalaryBracketAsync(int id, 
       UpdateMedicalOptionSalaryBracketRequestDto requestDto);
     Task<MedicalOption?> GetMedicalOptionCategoryByIdAsync(int id);
+    Task<List<MedicalOption>> GetMedicalOptionsByIdsAsync(List<int> ids);
+    Task<MedicalOptionCategory?> GetCategoryByIdAsync(int id);
     Task<List<MedicalOption?>> GetAllMedicalOptionsUnderCategoryVariantAsync(string optionName);
     //helper functions within Repository
     Task<Boolean> MedicalOptionCategoryExistsAsync(int categoryId);

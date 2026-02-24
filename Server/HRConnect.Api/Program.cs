@@ -1,14 +1,15 @@
+using System;
+using System.Text;
 using HRConnect.Api.Data;
-using Microsoft.EntityFrameworkCore;
+using HRConnect.Api.Interfaces;
+using HRConnect.Api.Models;
+using HRConnect.Api.Repository;
+using HRConnect.Api.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Text;
-using HRConnect.Api.Interfaces;
-using HRConnect.Api.Repository;
-using Microsoft.AspNetCore.Identity;
-using HRConnect.Api.Models;
-using HRConnect.Api.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,8 +44,27 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddOpenApi();
+// Office Use Only - using EF Core with MQSL
+
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("SecondaryConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Home Usage Only
+// Configure Entity Framework Core with MySQL
+/*
+builder.Services.AddDbContext<ApplicationDBContext>(options =>
+    options.UseMySql(
+        builder.Configuration.GetConnectionString("TertiaryConnection"),
+        ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("TertiaryConnection"))
+    )
+);
+*/
+// Configure Entity Framework Core with Postgres
+/*
+builder.Services.AddDbContext<ApplicationDBContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("Postgres")));
+           //.UseSnakeCaseNamingConvention()); // Optional: improves PostgreSQL compatibility
+*/
 
 builder.Services.AddAuthentication(options =>
 {

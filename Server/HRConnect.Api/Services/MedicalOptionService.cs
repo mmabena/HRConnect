@@ -13,7 +13,7 @@
   using HRConnect.Api.Utils.Factories;
   using Models.MedicalOptions.Records;
   using Utils.Enums.Mappers;
-  using Utils.Enums.MedicalOptions;
+  using Utils.MedicalOptions;
 
 
   public class MedicalOptionService:IMedicalOptionService
@@ -264,19 +264,33 @@
       //get db copy of the options under the category
       var dbData = await _medicalOptionRepository
         .GetAllOptionsUnderCategoryAsync(categoryId);
-      
-      // Use the comprehensive validator
-      var validationResult = await MedicalOptionValidator.ValidateBulkUpdateAsync(
-        categoryId, 
-        bulkUpdateDto, 
-        _medicalOptionRepository, 
-        dbData);
-  
+
+      if (dbData == null || dbData.Count == 0)
+      {
+        throw new InvalidOperationException($"No medical options found for category {categoryId}");
+      }
+
+      // Perform comprehensive validation
+      var validationResult = await MedicalOptionValidator.ValidateAllCategoryVariantsComprehensiveAsync(
+        categoryId, bulkUpdateDto, _medicalOptionRepository, dbData);
+
       if (!validationResult.IsValid)
       {
         throw new InvalidOperationException(validationResult.ErrorMessage);
       }
-  
+
+      // Use the comprehensive validator
+     /* var validationResult = await MedicalOptionValidator.ValidateBulkUpdateAsync(
+        categoryId, 
+        bulkUpdateDto, 
+        _medicalOptionRepository, 
+        dbData);
+
+      if (!validationResult.IsValid)
+      {
+        throw new InvalidOperationException(validationResult.ErrorMessage);
+      }
+  */
       // All validations passed - proceed with the bulk update
       return await _medicalOptionRepository.BulkUpdateByCategoryIdAsync(categoryId, bulkUpdateDto);
       

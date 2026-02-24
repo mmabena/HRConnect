@@ -1,12 +1,14 @@
-﻿namespace HRConnect.Api.Utils.Enums.MedicalOptions
+﻿namespace HRConnect.Api.Utils.MedicalOptions
 {
-  using DTOs.MedicalOption;
+  using HRConnect.Api.DTOs.MedicalOption;
+  using Enums;
+  using Enums.Mappers;
   using Factories;
   using Interfaces;
   using Mappers;
   using Models;
   using Models.MedicalOptions.Records;
-  using HRConnect.Api.Utils.Enums.MedicalOptions;
+  using HRConnect.Api.Utils.Enums.Mappers;
 
   public static class MedicalOptionValidator
   {
@@ -24,7 +26,9 @@
     //       (only on valid ID numbers) -- out of the scope of this file's operation
     //4. Do cross-checks on the contribution values if the payload's value balance out (per option in the variant)
     //   (will need to cater for nulls as not all options have RISK + MSA = Total Contrib)
-/*
+
+    //Helper methods
+
     #region Basic Validations
 
     /// <summary>
@@ -166,7 +170,7 @@
 
       return ValidateContributionValues(entity, hasMsa, hasPrincipal);
     }
-
+/*
     /// <summary>
     /// Core contribution validation logic
     /// </summary>
@@ -186,7 +190,58 @@
       // Validate Total contributions
       return ValidateTotalContributions(entity, hasMsa, hasPrincipal);
     }
+*/
 
+    /// <summary>
+    /// Validates salary bracket gaps and overlaps within a single variant
+    /// </summary>
+    private static BulkValidationResult ValidateSingleVariantSalaryBrackets(List<MedicalOption> variantOptions)
+    {
+      var result = new BulkValidationResult();
+
+      try
+      {
+        var salaryBracketRecords = new List<SalaryBracketValidatorRecord>();
+
+        foreach (var option in variantOptions)
+        {
+          if (option.SalaryBracketMin.HasValue || option.SalaryBracketMax.HasValue)
+          {
+            salaryBracketRecords.Add(new SalaryBracketValidatorRecord(
+              option.MedicalOptionId,
+              option.MedicalOptionName,
+              option.SalaryBracketMin,
+              option.SalaryBracketMax));
+          }
+        }
+
+        if (salaryBracketRecords.Count > 1)
+        {
+          if (!ValidateNoGapsInSalaryRanges(salaryBracketRecords))
+          {
+            result.IsValid = false;
+            result.ErrorMessage = "Gaps detected in salary ranges within variant";
+            return result;
+          }
+
+          if (!ValidateNoOverlappingBrackets(salaryBracketRecords))
+          {
+            result.IsValid = false;
+            result.ErrorMessage = "Overlapping salary brackets detected within variant";
+            return result;
+          }
+        }
+
+        result.IsValid = true;
+      }
+      catch (Exception ex)
+      {
+        result.IsValid = false;
+        result.ErrorMessage = $"Salary bracket validation error: {ex.Message}";
+      }
+
+      return result;
+    }
     private static bool ValidateRiskContributions(
       UpdateMedicalOptionVariantsDto entity,
       bool hasPrincipal)
@@ -414,7 +469,7 @@ public static async Task<BulkValidationResult> ValidateAllVariantsComprehensiveA
       return result;
     }
 
-    if (!dbData.Any())
+    if (dbData.Count == 0)
     {
       result.IsValid = false;
       result.ErrorMessage = $"No medical options found for category ID: {categoryId}";
@@ -782,7 +837,7 @@ private static BulkValidationResult ValidateCrossVariantBusinessRules(
       .ToList();
 
     // Add specific cross-variant rules here
-    if (networkVariants.Any() && plusVariants.Any())
+    if (networkVariants.Count != 0 && plusVariants.Count != 0)
     {
       // Example rule: Network variants should have lower contributions than Plus variants
       var avgNetworkContribution = networkVariants.Average(o => o.TotalMonthlyContributionsAdult);
@@ -806,7 +861,7 @@ private static BulkValidationResult ValidateCrossVariantBusinessRules(
 }
 
 #endregion
-*/
+
 
     #region Comprehensive Category Variant Validation
 
@@ -831,7 +886,7 @@ public static async Task<BulkValidationResult> ValidateAllCategoryVariantsCompre
       return result;
     }
 
-    if (!dbData.Any()) {
+    if (dbData.Count == 0) {
       result.IsValid = false;
       result.ErrorMessage = $"No medical options found for category ID: {categoryId}";
       return result;
@@ -850,7 +905,7 @@ public static async Task<BulkValidationResult> ValidateAllCategoryVariantsCompre
     // 3. GROUP BY VARIANT using existing factory
     var variantGroups = GroupOptionsByVariant(dbData);
     
-    if (!variantGroups.Any()) {
+    if (variantGroups.Count == 0) {
       result.IsValid = false;
       result.ErrorMessage = $"No valid variants found for category ID: {categoryId}";
       return result;
@@ -905,7 +960,7 @@ private static async Task<BulkValidationResult> ValidateCategoryBusinessRulesAsy
 
     // Use existing enum mapper to check restrictions
     var variantInfo = MedicalOptionEnumMapper.GetCategoryInfoFromVariant(categoryInfo.MedicalOptionCategoryName);
-    var isRestricted = Enum.IsDefined(typeof(NoUpdateOnMedicalOptionCategory), variantInfo.Variant);
+    var isRestricted = Enum.IsDefined(typeof(NoUpdateOnMedicalOptionCategory), categoryInfo.MedicalOptionCategoryName);
     
     if (isRestricted) {
       // Check for salary bracket updates in payload
@@ -913,7 +968,7 @@ private static async Task<BulkValidationResult> ValidateCategoryBusinessRulesAsy
         .Where(dto => dto.SalaryBracketMin.HasValue || dto.SalaryBracketMax.HasValue)
         .ToList();
 
-      if (salaryBracketUpdates.Any()) {
+      if (salaryBracketUpdates.Count != 0) {
         // Get option names for error message
         var optionIds = salaryBracketUpdates.Select(dto => dto.MedicalOptionId).ToList();
         var dbOptions = await repository.GetMedicalOptionsByIdsAsync(optionIds);
