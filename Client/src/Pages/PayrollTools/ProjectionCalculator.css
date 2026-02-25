@@ -1,5 +1,10 @@
 :root {
-    --pension-percentage-slider-width: 700px;
+    --pension-percentage-slider-width: 1190px;
+    
+}
+
+.payroll-page{
+  font-family: 'Anek Bangla';
 }
 
 .pension-projection-frame {
@@ -18,6 +23,7 @@
     margin-top: 20px;
 }
 
+
 .pension-projection-header h2 {
     float: left;
 }
@@ -31,7 +37,13 @@
 
 .pension-employee-detail-header {
     text-align: left;
+    color: #9A9A9A;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 26px;
 }
+
 
 .pension-employee-detail {
     text-align: left;
@@ -39,13 +51,13 @@
 }
 
 .pension-projection-voluntary-contribution {
+    color: var(--primary-color);
     display: grid;
     grid-template-rows: 20px 88px;
     gap: 20px;
 }
 
 .pension-projection-voluntary-contribution-header {
-
 }
 
 .voluntary-contribution {
@@ -58,11 +70,10 @@
     text-align: left;
 }
 
-
 .contribution input {
     margin-top: 8px;
     border-radius: 15px;
-    border-color: aqua;
+    border-color: var(--primary-color);
     text-align: center;
     height: 60px;
     width: 210px;
@@ -73,6 +84,25 @@
     font-size: 11px;
     color: red;
 }
+
+.pension-projection-disclaimer {
+    text-align: left;
+}
+
+
+.warning{
+    color: #EB1111;
+     font-size: 16px;
+}
+
+.message{
+font-size: 16px;
+font-style: normal;
+font-weight: 400;
+line-height: 20px; 
+letter-spacing: 0.32px;
+}
+
 
 .contribution-frequency {
     display: block;
@@ -93,49 +123,69 @@
 }
 
 .pension-projection-slider input {
+    height: 6px;;
     width: var(--pension-percentage-slider-width);
 }
 
 .range-labels {
     width: var(--pension-percentage-slider-width);
+    font-weight: 500;
     list-style: none;
     text-align: right;
-    margin-left: 36px;
+    
 
     li {
-        display: inline-block;
+        display: inline-flex;
         text-align: center;
         font-size: 14px;
-        margin-left: 66px;
+        margin-right: 170px;
     }
 }
 
 .pension-projection-details {
-    display: grid;
-    grid-template-columns: 12.5vw 12.5vw 12.5vw 12.5vw;
-    gap: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 35px;
+    font-size: 18px;
+    width: 1196px; 
 }
 
 .pension-projection-detail {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    width: 270px;
+    gap: 9px;
+    height: 140px;
+    align-self: stretch;
     border: 2px solid;
-    border-radius: 15px;
-    border-color: aqua;
-    gap: 20px;
+    font-weight: 700;
+    border-radius: 20px;
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    align-items: center;
 }
 
 .pension-projection-detail h4 {
-    margin-top: 5px;
-    margin-bottom: 50px;
+    text-align: center;
+    margin-top: 2px;
+    margin-bottom: 10px;
+    padding: 10px 42px;
 }
 
+
 .pension-projection-total {
-    width: 51.5vw;
-    text-align: center;
-    border: 2px solid;
-    border-radius: 15px;
-    border-color: aqua;
-    margin-top: 30px;
+    color: var(--primary-color);
+    font-size: 18px;
+    font-weight: 700;
+    display: flex;
+    width: 1196px;
+    padding: 21px 437px;
+    flex-direction: column;
+    align-items: center;
+    gap: 9px;
+    border-radius: 20px;
+    border: 2px solid var(--primary-color);
+    
 }
 
 .pension-projection-total h4 {
@@ -143,9 +193,7 @@
     margin-bottom: 25px;
 }
 
-.pension-projection-disclaimer {
-    text-align: left;
-}
+
 
 
 

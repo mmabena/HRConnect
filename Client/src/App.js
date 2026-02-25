@@ -6,7 +6,7 @@ import AddEmployee from "./Components/AddEmployee";
 import EditEmployee from "./Components/EditEmployee";
 import MenuBar from "./Components/MenuBar";
 import AddCompany from "./addCompany";
-import EditCompany from "./Components/companyManagement/editCompany";
+import EditCompany from "./Components/CompanyManagement/editCompany";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
@@ -81,7 +81,7 @@ const handleLoginSuccess = (responseData) => {
 
   setCurrentUser(user); // save in component state
   // Store both token and user data in localStorage with the key "currentUser"
-  //localStorage.setItem("currentUser", JSON.stringify({ token, user })); // persist in localStorage
+  localStorage.setItem("currentUser", JSON.stringify({ token, user })); // persist in localStorage
   setIsLoggedIn(true);
   navigate("/dashboard");
 };
