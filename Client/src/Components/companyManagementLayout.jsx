@@ -40,7 +40,7 @@ const CompanyManagementLayout = ({
   };
 
   return (
-    <div className="edit-employee-background">
+    <div className="menu-background">
       {/* Shared Header */}
       <CompanyManagementHeader title={getHeaderTitle()} />
 

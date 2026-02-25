@@ -10,5 +10,8 @@ namespace HRConnect.Api.Interfaces
     Task<User> CreateUserAsync(CreateUserRequestDto dto);
     Task<User?> UpdateUserAsync(int id, UpdateUserRequestDto dto);
     Task<bool> DeleteUserAsync(int id);
+
+    // Change password while logged in
+    Task<bool> ChangePasswordAsync(ChangePasswordRequestDto dto);
   }
 }

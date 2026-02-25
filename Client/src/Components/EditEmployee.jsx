@@ -372,7 +372,7 @@ useEffect(() => {
   };
 
   return (
-    <div className="edit-employee-background">
+    <div className="menu-background">
       
 
       <div className="edit-employee-heading-row">
