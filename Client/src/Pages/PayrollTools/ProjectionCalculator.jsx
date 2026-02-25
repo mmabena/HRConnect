@@ -7,6 +7,7 @@ import "./ProjectionCalculator.css";
 
 const ProjectionCalculator = () => {
     const [employeeDetails, setEmployeeDetails] = useState(null);
+    const [employeeAge, setEmployeeAge] = useState(null);
     const [selectedPensionPercentage, setSelectedPensionPercentage] = useState(1);
     const [projectedPensionDetails, setProjectedPensionDetails] = useState(null);
     const [selectedVoluntaryContributionFrequency, setSelectedVoluntaryContributionFrequency] = useState(1);
@@ -33,6 +34,7 @@ const ProjectionCalculator = () => {
                 if (response.status === 200) {
                     console.log("Get employee details:", response.data);
                     setEmployeeDetails(response.data);
+                    setEmployeeAge(calculateAge(response.data.dateOfBirth));
                 } else {
                     console.error("Unexpeted status:", response.status);
                 }
@@ -97,17 +99,23 @@ const ProjectionCalculator = () => {
 
     const handleVolutaryContributionInput = (event) => {
         const enteredVoluntaryContribution = event.target.value;
+        console.log("Voluntaru contribution amount:",enteredVoluntaryContribution);
         if (voluntaryContribution !== "" ) {
             if(employeeDetails) {
                 let voluntaryContributionPercentage = enteredVoluntaryContribution / employeeDetails.monthlySalary;
-                if (voluntaryContributionPercentage > MAX_PENSIONCONTRIBUTION_PERCENTAGE) {
+                let roundedVoluntaryContributionPercentage = Math.round(voluntaryContributionPercentage * 10000) / 10000
+                console.log(`Voluntary contribution percentage: ${roundedVoluntaryContributionPercentage}`)
+                console.log(`Total percentage: ${Math.round((roundedVoluntaryContributionPercentage + selectedPercentage()) * 10000) / 10000}`)
+                if (roundedVoluntaryContributionPercentage + selectedPercentage() > MAX_PENSIONCONTRIBUTION_PERCENTAGE) {
+                    console.log("Voluntary Contribution is Cappped");
                     voluntaryContributionIsCapped = true;
                     voluntaryContributionInputRef.current.style.borderColor = "red";
-                    const maxVoluntaryContribution = (employeeDetails.monthlySalary * MAX_PENSIONCONTRIBUTION_PERCENTAGE) - (employeeDetails.monthlySalary * selectedPercentage())
+                    const maxVoluntaryContribution = Math.round(((employeeDetails.monthlySalary * MAX_PENSIONCONTRIBUTION_PERCENTAGE) - (employeeDetails.monthlySalary * selectedPercentage())) * 10000) / 10000;
                     setVoluntaryContributionError({
                         Error: `Voluntary Contribution + Monthly Salary Contribution cannot exceed 27.5% of salary. Maximum contribution: R ${maxVoluntaryContribution}`
                     })
                 } else {
+                    console.log("Voluntary Contribution isn't Cappped");
                     voluntaryContributionIsCapped = false;
                     voluntaryContributionInputRef.current.style.borderColor = "aqua";
                     setVoluntaryContributionError({
@@ -145,6 +153,20 @@ const ProjectionCalculator = () => {
         return percentage;
     }
 
+    const calculateAge = (dateOfBirth) => {
+        let today = new Date();
+        let birthDate = new Date(dateOfBirth);
+        let age = today.getFullYear() - birthDate.getFullYear();
+        
+        if (today.getMonth() < birthDate.getMonth()) {
+            age--;
+        } else if ((today.getMonth() === birthDate.getMonth()) && (today.getDay() < birthDate.getDay())){
+            age--;
+        }
+
+        return age;
+    }
+
     return (
         <div className="menu-background custom-scrollbar">
             <CompanyManagementHeader title="Projection Calculator" />
@@ -161,7 +183,7 @@ const ProjectionCalculator = () => {
                         {employeeDetails && employeeDetails.surname}
                     </div>
                     <div className="pension-employee-detail">
-                        30
+                        {employeeAge && employeeAge}
                     </div>
                 </div>
                 <div className="pension-projection-voluntary-contribution">

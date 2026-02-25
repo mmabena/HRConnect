@@ -118,7 +118,7 @@ namespace HRConnect.Api.Services
     private string ValidVoluntaryContribution(decimal voluntaryContribution, float selectedPensionPercentage, decimal salary)
     {
       string warningMessage = "";
-      float voluntaryContributionPercentage = (float)(voluntaryContribution / salary);
+      float voluntaryContributionPercentage = (float)Math.Round(voluntaryContribution / salary, 2);
 
       if ((voluntaryContributionPercentage + selectedPensionPercentage) > (float)MAX_PENSIONCONTRIBUTION_PERCENTAGE)
       {
