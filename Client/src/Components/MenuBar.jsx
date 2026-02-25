@@ -20,6 +20,7 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
   const isAdminOrSuperUser = role === "admin" || role === "superuser";
 
   const isEmployeeManagementPage =
+   location.pathname.startsWith("/employeeList") ||
     location.pathname.startsWith("/addEmployee") ||
     location.pathname.startsWith("/employeeList") ||
     location.pathname.startsWith("/editEmployee");
@@ -127,6 +128,14 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
                       onClick={() => handleSubmenuClick("/addEmployee")}
                     >
                       Add New Employee
+                    </span>
+                  </li>
+                  <li>
+                    <span
+                      className="menu-subitem"
+                      onClick={() => handleSubmenuClick("/employeeList")}
+                    >
+                      Employee List
                     </span>
                   </li>
                   <li>
