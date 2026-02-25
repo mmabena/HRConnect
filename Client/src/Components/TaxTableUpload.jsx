@@ -1,7 +1,7 @@
 import React, { useState, useRef, useMemo } from "react";
 import api from "../api";
 import { toast } from "react-toastify";
-import "../Components/TaxTableUpload.css";
+import "./TaxTableUpload.css";
 
 /* ---------- YEAR GENERATOR ---------- */
 const generateFinancialYears = (existingYears = []) => {
@@ -105,9 +105,8 @@ function TaxTableUpload({ onClose, onUploadSuccess, existingYears = [] }) {
         <div className="tax-table-content-centered">
 
           <button
-            className="close-btn"
+            className="x-btn "
             onClick={onClose}
-            style={{ float: "right", cursor: "pointer" }}
           >
             ✕
           </button>

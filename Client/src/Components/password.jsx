@@ -246,7 +246,6 @@ const handleRequestResetLink = async () => {
           <div
             className="back-to-login"
             onClick={onBackToLogin}
-            style={{ cursor: 'pointer' }}
           >
             Back to log in
           </div>

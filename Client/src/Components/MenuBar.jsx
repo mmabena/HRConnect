@@ -14,7 +14,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   const [manualReportToggle, setManualReportToggle] = useState(false);
   const [manualAdminToggle, setManualAdminToggle] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-
+  
   //displaying user initials
   const displayName =
   currentUser?.username ||

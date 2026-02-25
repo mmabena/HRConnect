@@ -146,7 +146,6 @@ function TaxTableManagement() {
       {/* UPLOAD POPUP */}
       {showUploadPopup && (
         <div className="modal-overlay">
-          <div className="modal-content">
             <TaxTableUpload
               existingYears={[
                 ...(activeTable ? [activeTable.taxYear] : []),
@@ -159,7 +158,6 @@ function TaxTableManagement() {
               }}
             />
           </div>
-        </div>
       )}
     </div>
   );
