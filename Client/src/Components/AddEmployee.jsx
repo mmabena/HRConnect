@@ -341,12 +341,6 @@ const AddEmployee = () => {
 
   return (
     <div className="menu-background custom-scrollbar">
-      {/* Background shapes and layout */}
-      <div className="shape-1"></div>
-      <div className="shape-2"></div>
-      <div className="shape-3"></div>
-      <div className="shape-4"></div>
-      <div className="shape-5"></div>
 
       <div className="center-frame">
         <div className="left-frame">

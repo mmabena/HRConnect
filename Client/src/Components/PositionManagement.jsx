@@ -63,7 +63,7 @@ const PositionManagement = () => {
   };
 
   return (
-    <div className="edit-employee-background custom-scrollbar">
+    <div className="menu-background custom-scrollbar">
       <CompanyManagementHeader title={activeTab} />
 
   <div className="nav-bar-with-button">

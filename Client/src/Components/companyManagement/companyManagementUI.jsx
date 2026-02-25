@@ -78,7 +78,7 @@ function CompanyManagementUI({
   };
 
   return (
-  <div className="edit-employee-background custom-scrollbar">
+  <div className="menu-background custom-scrollbar">
     {/* Pass activeTab as title to the header */}
     <CompanyManagementHeader title={activeTab} />
 

@@ -2,7 +2,7 @@ import "../MenuBar.css";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
-const MenuBar = ({ currentUser, onAccessDenied }) => {
+const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   const [reportOpen, setReportOpen] = useState(false);
   const [companyOpen, setCompanyOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
@@ -13,14 +13,31 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
   const [payinfoOpen, setPayInfoOpen] = useState(false);
   const [manualReportToggle, setManualReportToggle] = useState(false);
   const [manualAdminToggle, setManualAdminToggle] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
 
+  //displaying user initials
+  const displayName =
+  currentUser?.username ||
+  currentUser?.email ||
+  "User";
+
+  const initials = displayName
+    .split(" ")
+    .map(name => name.charAt(0))
+    .join("")
+    .substring(0, 2)
+    .toUpperCase();
+  
   const navigate = useNavigate();
   const location = useLocation();
 
   // FIX: Access the role directly from the currentUser object
-  const role = currentUser?.role?.toLowerCase() || "";
-  console.log("Role", role);
-  const isAdminOrSuperUser = role === "admin" || role === "superuser";
+  const role = currentUser?.role?.toLowerCase();
+
+  const permissions = {
+    isAdmin: ["admin", "superuser"].includes(role),
+    isNormalUser: role === "normaluser"
+  };
 
   const isEmployeeManagementPage =
     location.pathname.startsWith("/addEmployee") ||
@@ -55,6 +72,24 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
     isEmployeeManagementPage,
     isUserManagementPage,
   ]);
+
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setShowMenu(false);
+    };
+
+    if (showMenu) {
+      document.removeEventListener("click", handleClickOutside);
+    }
+     
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, [showMenu]);
+
+  const toggleMenu = () => {
+    setShowMenu(prev => !prev);
+  };
 
   const toggleReport = () => {
     setManualReportToggle(true);
@@ -125,7 +160,7 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
           </li>
 
           {/* Employee Management */}
-          {isAdminOrSuperUser && (
+          {permissions.isAdmin && (
             <li>
               <div className="menu-item-wrapper" onClick={toggleReport}>
                 <img
@@ -140,6 +175,14 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
               </div>
               {reportOpen && (
                 <ul className="submenu show">
+                   <li>
+                    <span
+                      className="menu-subitem"
+                      onClick={() => handleSubmenuClick("/employeeList")}
+                    >
+                      Employee List
+                    </span>
+                  </li>
                   <li>
                     <span
                       className="menu-subitem"
@@ -176,10 +219,9 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
               )}
             </li>
           )}
-          
 
           {/* ✅ Company Management */}
-          {/* {isAdminOrSuperUser && ( */}
+          {permissions.isAdmin && (
             <li>
               <div className="menu-item-wrapper" onClick={toggleCompany}>
                 <img
@@ -238,10 +280,10 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
                 </ul>
               )}
             </li>
-          {/* )} */}
+          )}
 
           {/* Payroll Management */}
-          {isAdminOrSuperUser && (
+          {permissions.isAdmin && (
             <li>
               <div
                 className="menu-item-wrapper"
@@ -339,7 +381,7 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
           )}
           
           {/* Document Management */}
-          {isAdminOrSuperUser && (
+          {permissions.isAdmin && (
             <li>
               <div className="menu-item-wrapper">
                 <img
@@ -353,7 +395,7 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
           )}
 
           {/* Admin tools (SuperUser only) */}
-          {isAdminOrSuperUser && (
+          {permissions.isAdmin && (
             <li>
               <div className="menu-item-wrapper" onClick={toggleAdmin}>
                 <img
@@ -382,7 +424,7 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
           )}
 
           {/* NormalUser tools (NormalUser only) */}
-          
+          {permissions.isNormalUser && (
             <li>
               <div className="menu-item-wrapper" onClick={togglePayrollInfo}>
                 <img
@@ -404,12 +446,14 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
                     >
                       Payslips
                     </span>
-                </li>
-              </ul>       
+                  </li>
+                </ul>
               )}
             </li>
+          )}
 
-            {/* NormalUser tools (NormalUser only) */}
+          {/* NormalUser tools (NormalUser only) */}
+          {permissions.isNormalUser && (
             <li>
               <div className="menu-item-wrapper" onClick={toggleLeave}>
                 <img
@@ -431,16 +475,16 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
                     >
                       Leave Application
                     </span>
-                </li>
-                 <li>
+                  </li>
+                  <li>
                     <span
                       className="menu-subitem"
                       onClick={() => handleSubmenuClick("/leave-balance")}
                     >
                       Leave Balance
                     </span>
-                </li>
-                 <li>
+                  </li>
+                  <li>
                     <span
                       className="menu-subitem"
                       onClick={() => handleSubmenuClick("/history")}
@@ -448,11 +492,13 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
                       History
                     </span>
                   </li>
-              </ul>       
+                </ul>
               )}
             </li>
+          )}
 
-           {/* NormalUser tools (NormalUser only) */}
+          {/* NormalUser tools (NormalUser only) */}
+          {permissions.isNormalUser && (
             <li>
               <div className="menu-item-wrapper" onClick={togglePayroll}>
                 <img
@@ -477,7 +523,8 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
                   </li>
                 </ul>
               )}
-          </li> 
+            </li> 
+          )}
         </ul>
                  
       </div>
@@ -490,19 +537,41 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
         />
         {/* Container for user details */}
         <div className="user-details-container">
-          {/* Initials Circle */}
-          <div className="menu-initials-circle">
-            {(
-              (currentUser?.firstName || "").charAt(0) +
-              (currentUser?.lastName || "").charAt(0)
-            ).toUpperCase()}
+          <div className="menu-initials-circle" onClick={(e) => {
+            e.stopPropagation();
+            toggleMenu();
+          }}>
+            
+            {initials}
+            {showMenu && (
+                <div className="user-dropdown">
+                  <button
+                    className="dropdown-item"
+                    onClick={() => {
+                      setShowMenu(false);
+                      navigate("/changePassword");
+                    }}
+                  >
+                    Change Password
+                  </button>
+
+                  <button
+                    className="dropdown-item logout"
+                    onClick={() => {
+                      setShowMenu(false);
+                      onLogout();
+                    }}
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
           </div>
           <div className="user-text-details">
             <div className="user-full-name">
-              {currentUser?.firstName} {currentUser?.lastName}
+              {displayName}
             </div>
             <div className="user-job-title">
-              {/* FIX: Access the jobTitle directly from the currentUser object */}
               {currentUser?.jobTitle}
             </div>
           </div>
