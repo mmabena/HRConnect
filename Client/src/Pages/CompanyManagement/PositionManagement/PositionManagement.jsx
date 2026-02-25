@@ -5,14 +5,17 @@ import { useNavigate } from "react-router-dom";
 
 const PositionManagement = () => {
   const [positions, setPositions] = useState([]);
+  const [jobGrades, setJobGrades] = useState([]);
+  const [occupationalLevels, setOccupationalLevels] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [showPageOptions, setShowPageOptions] = useState(false);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("Position Management");
+  const [showModal, setShowModal] = useState(false);
 
   const navigate = useNavigate();
- 
+
   const pageOptions = [10, 15, 20, 25];
   const navTabs = [
     "Tax Table Management",
@@ -23,8 +26,6 @@ const PositionManagement = () => {
     "Manage Companies",
     "Salary Budgets",
   ];
-
-
 
   const tabWidths = [168, 133, 122, 134, 154, 125, 120];
 
@@ -40,6 +41,24 @@ const PositionManagement = () => {
         console.error("Error fetching positions:", error);
         setLoading(false);
       });
+  }, []);
+
+  useEffect(() => {
+    fetch("http://localhost:5147/api/jobgrades")
+      .then((res) => res.json())
+      .then((data) => setJobGrades(data))
+      .catch((error) => console.error("Error fetching job grades:", error));
+    setLoading(false);
+  }, []);
+
+  // Fetch occupational levels
+  useEffect(() => {
+    fetch("http://localhost:5147/api/occupationallevels")
+      .then((res) => res.json())
+      .then((data) => setOccupationalLevels(data))
+      .catch((error) =>
+        console.error("Error fetching occupational levels:", error),
+      );
   }, []);
 
   const totalPages = Math.ceil(positions.length / itemsPerPage);
@@ -60,68 +79,94 @@ const PositionManagement = () => {
   const handlePageClick = (pageNum) => {
     setCurrentPage(pageNum);
   };
+  const jobGradeMap = Object.fromEntries(
+    jobGrades.map((grade) => [grade.JobGradeId, grade.Name]),
+  );
+
+  const occupationalLevelMap = Object.fromEntries(
+    occupationalLevels.map((level) => [
+      level.OccupationalLevelId,
+      level.Description,
+    ]),
+  );
 
   return (
     <div className="menu-background custom-scrollbar">
       <CompanyManagementHeader title={activeTab} />
 
-  <div className="nav-bar-with-button">
-  <CompanyManagementNavBar
-    tabs={navTabs}
-    activeTab={activeTab}
-    onTabChange={(tab) => {
-      if (tab !== "Position Management") {
-        navigate("/companyManagement");
-      } else {
-        setActiveTab(tab);
-      }
-    }}
-    tabWidths={tabWidths}
-  />
+      <div className="nav-bar-with-button">
+        <CompanyManagementNavBar
+          tabs={navTabs}
+          activeTab={activeTab}
+          onTabChange={(tab) => {
+            if (tab !== "Position Management") {
+              navigate("/companyManagement");
+            } else {
+              setActiveTab(tab);
+            }
+          }}
+          tabWidths={tabWidths}
+        />
 
-  {activeTab === "Position Management" && (
-    <button className="add-position-button" onClick={handleAddPositionClick}>
-      Add New Position
-    </button>
-  )}
-</div>
+        {activeTab === "Position Management" && (
+          <button
+            className="add-position-button"
+            onClick={handleAddPositionClick}
+          >
+            Add New Position
+          </button>
+        )}
+      </div>
 
-         <div className="content-container">
+      <div className="content-container">
         <table className="position-table">
           <thead>
             <tr>
               <th>Position Title</th>
-               <th>Position Grade</th>
+              <th>Position Grade</th>
+              <th>Occupational Description</th>
               <th>Effective Date</th>
+              <th>Actions</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan="3" style={{ textAlign: "center" }}>Loading...</td>
+                <td colSpan="3" style={{ textAlign: "center" }}>
+                  Loading...
+                </td>
               </tr>
             ) : currentPositions.length === 0 ? (
               <tr>
-                <td colSpan="3" style={{ textAlign: "center" }}>No positions found.</td>
+                <td colSpan="3" style={{ textAlign: "center" }}>
+                  No positions found.
+                </td>
               </tr>
             ) : (
               currentPositions.map((position) => (
                 <tr key={position.positionId}>
                   <td>{position.positionTitle}</td>
+                  <td>{position.jobGrade?.name || "N/A"}</td>
+                  <td>{position.occupationalLevel?.description || "N/A"}</td>
                   <td>
-                    {new Date(position.createdDate).toLocaleDateString("en-GB", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}
+                    {new Date(position.createdDate).toLocaleDateString(
+                      "en-GB",
+                      {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      },
+                    )}
                   </td>
                   <td>
                     <div className="view-edit-button-group">
                       <button
                         className="text-button"
                         onClick={() =>
-                          navigate(`/viewPositionManagement/${position.positionId}`)
+                          navigate(
+                            `/viewPositionManagement/${position.positionId}`,
+                          )
                         }
                       >
                         View
@@ -130,7 +175,9 @@ const PositionManagement = () => {
                       <button
                         className="text-button"
                         onClick={() =>
-                          navigate(`/editPositionManagement/${position.positionId}`)
+                          navigate(
+                            `/editPositionManagement/${position.positionId}`,
+                          )
                         }
                       >
                         Edit
@@ -186,50 +233,51 @@ const PositionManagement = () => {
           <span className="per-page-label">Per page</span>
         </div>
 
-<div className="pagination-right">
-  {/* Prev Arrow */}
-  <img
-    src="/images/arrow_drop_down_circle.png"
-    alt="Previous"
-    className="pagination-arrow prev"
-    onClick={handlePrev}
-    style={{
-      transform: "rotate(90deg)",
-      cursor: currentPage > 1 ? "pointer" : "not-allowed",
-      opacity: currentPage > 1 ? 1 : 0.4,
-    }}
-  />
+        <div className="pagination-right">
+          {/* Prev Arrow */}
+          <img
+            src="/images/arrow_drop_down_circle.png"
+            alt="Previous"
+            className="pagination-arrow prev"
+            onClick={handlePrev}
+            style={{
+              transform: "rotate(90deg)",
+              cursor: currentPage > 1 ? "pointer" : "not-allowed",
+              opacity: currentPage > 1 ? 1 : 0.4,
+            }}
+          />
 
-  {/* Page Numbers */}
-  <div className="page-numbers">
-    {Array.from({ length: totalPages }, (_, i) => (
-      <button
-        key={i + 1}
-        className={`page-number ${currentPage === i + 1 ? "active-page" : ""}`}
-        onClick={() => handlePageClick(i + 1)}
-        aria-label={`Go to page ${i + 1}`}
-      >
-        {i + 1}
-      </button>
-    ))}
-  </div>
+          {/* Page Numbers */}
+          <div className="page-numbers">
+            {Array.from({ length: totalPages }, (_, i) => (
+              <button
+                key={i + 1}
+                className={`page-number ${currentPage === i + 1 ? "active-page" : ""}`}
+                onClick={() => handlePageClick(i + 1)}
+                aria-label={`Go to page ${i + 1}`}
+              >
+                {i + 1}
+              </button>
+            ))}
+          </div>
 
-  {/* Next Arrow */}
-  <img
-    src="/images/arrow_drop_down_circle.png"
-    alt="Next"
-    className="pagination-arrow next"
-    onClick={handleNext}
-    style={{
-      transform: "rotate(-90deg)",
-      cursor: currentPage < totalPages ? "pointer" : "not-allowed",
-      opacity: currentPage < totalPages ? 1 : 0.4,
-    }}
-  />
+          {/* Next Arrow */}
+          <img
+            src="/images/arrow_drop_down_circle.png"
+            alt="Next"
+            className="pagination-arrow next"
+            onClick={handleNext}
+            style={{
+              transform: "rotate(-90deg)",
+              cursor: currentPage < totalPages ? "pointer" : "not-allowed",
+              opacity: currentPage < totalPages ? 1 : 0.4,
+            }}
+          />
 
-  <div className="pagination-info">{positions.length} Positions @ Singular</div>
-</div>
-
+          <div className="pagination-info">
+            {positions.length} Positions @ Singular
+          </div>
+        </div>
       </div>
     </div>
   );

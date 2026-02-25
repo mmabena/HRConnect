@@ -8,14 +8,19 @@ const AddPositionManagement = () => {
     effectiveDate: "",
     jobGradeId: "",
     occupationalLevelId: "",
-    occupationalLevel: ""
+    occupationalLevel: "",
   });
 
+  const [errors, setErrors] = useState({
+    positionTitle: "",
+    jobGradeId: "",
+    occupationalLevelId: "",
+  });
+  const [positionTitle, setPositionTitle] = useState("");
   const [jobGrades, setJobGrades] = useState([]);
   const [occupationalLevels, setOccupationalLevels] = useState([]);
   const [filteredLevels, setFilteredLevels] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [error, setError] = useState("");
 
   useEffect(() => {
     fetch("http://localhost:5147/api/jobgrades")
@@ -26,24 +31,30 @@ const AddPositionManagement = () => {
     fetch("http://localhost:5147/api/occupationallevels")
       .then((res) => res.json())
       .then((data) => setOccupationalLevels(data))
-      .catch((error) => console.error("Failed to fetch occupational levels:", error));
+      .catch((error) =>
+        console.error("Failed to fetch occupational levels:", error),
+      );
   }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
 
+    // Clear inline error when user edits field
+    setErrors((prev) => ({ ...prev, [name]: "" }));
+
     if (name === "occupationalLevel") {
       const matches = occupationalLevels.filter((level) =>
-        level.occupationalLevelName.toLowerCase().includes(value.toLowerCase())
+        level.description.toLowerCase().includes(value.toLowerCase()),
       );
+
       const selected = occupationalLevels.find(
-        (level) => level.occupationalLevelName.toLowerCase() === value.toLowerCase()
+        (level) => level.description.toLowerCase() === value.toLowerCase(),
       );
 
       setFormData((prev) => ({
         ...prev,
         occupationalLevel: value,
-        occupationalLevelId: selected ? selected.occupationalLevelId : ""
+        occupationalLevelId: selected ? selected.occupationalLevelId : "",
       }));
 
       setFilteredLevels(matches);
@@ -55,181 +66,193 @@ const AddPositionManagement = () => {
 
   const handleSuggestionClick = (selectedValue) => {
     const selected = occupationalLevels.find(
-      (level) => level.occupationalLevelName === selectedValue
+      (level) => level.description === selectedValue,
     );
     setFormData((prev) => ({
       ...prev,
       occupationalLevel: selectedValue,
-      occupationalLevelId: selected?.occupationalLevelId || ""
+      occupationalLevelId: selected?.occupationalLevelId || "",
     }));
     setShowSuggestions(false);
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const { positionTitle, effectiveDate, occupationalLevelId, jobGradeId } = formData;
-    if (!positionTitle || !effectiveDate || !occupationalLevelId || !jobGradeId) {
-      alert("All fields are required");
-      return;
-    }
+  const { positionTitle, effectiveDate, occupationalLevelId, jobGradeId } = formData;
 
-    try {
-      const response = await fetch("http://localhost:5147/api/positions/Create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          positionTitle,
-          jobGradeId: parseInt(jobGradeId),
-          occupationalLevelId: parseInt(occupationalLevelId),
-          createdDate: new Date().toISOString(),
-        }),
+  // Basic frontend validation
+  if (!positionTitle || !effectiveDate || !occupationalLevelId || !jobGradeId) {
+    setErrors((prev) => ({
+      ...prev,
+      positionTitle: !positionTitle ? "Position title is required" : "",
+      jobGradeId: !jobGradeId ? "Job grade is required" : "",
+      occupationalLevelId: !occupationalLevelId ? "Occupational level is required" : "",
+    }));
+    return;
+  }
+
+  try {
+    const response = await fetch("http://localhost:5147/api/positions/Create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        positionTitle,
+        jobGradeId: parseInt(jobGradeId),
+        occupationalLevelId: parseInt(occupationalLevelId),
+        createdDate: new Date().toISOString(),
+      }),
+    });
+
+    // Read response as text because backend throws plain exceptions
+    const text = await response.text();
+
+    if (!response.ok) {
+      // Map backend error text to inline errors
+      setErrors({
+        positionTitle: text.toLowerCase().includes("title") || text.toLowerCase().includes("duplicate")
+          ? "This position title already exists"
+          : "",
+        jobGradeId: text.toLowerCase().includes("jobgrade")
+          ? "Invalid JobGradeId or inactive"
+          : "",
+        occupationalLevelId: text.toLowerCase().includes("occupationallevel")
+          ? "Invalid OccupationalLevelId or inactive"
+          : "",
       });
-
-      if (!response.ok) throw new Error("Failed to create position");
-
-      const data = await response.json();
-      console.log("Position saved:", data);
-      toast.success("Position created successfully!");
-    } catch (error) {
-      console.error("Error saving position:", error);
-      toast.error("Something went wrong. Please try again.");
+      return; // stop submission
     }
-  };
+
+    // Success
+    toast.success("Position created successfully!");
+    setFormData({
+      positionTitle: "",
+      effectiveDate: "",
+      jobGradeId: "",
+      occupationalLevelId: "",
+      occupationalLevel: "",
+    });
+    setErrors({ positionTitle: "", jobGradeId: "", occupationalLevelId: "" });
+    
+
+  } catch (err) {
+    console.error("Error saving position:", err);
+    toast.error("Something went wrong. Please try again.");
+  }
+};
 
   return (
     <div className="full-screen-bg">
-      {/* Background shapes */}
-      <div className="shape-1"></div>
-      <div className="shape-2"></div>
-      <div className="shape-3"></div>
-      <div className="shape-4"></div>
-      <div className="shape-5"></div>
-
       <div className="center-frame">
         <div className="left-frame">
           <div className="left-frame-centered">
             <div className="headings-container">
-     <div className="apm-logo">
-              <span className="apm-logo-bold">singular</span>
-              <span className="apm-logo-light">express</span>
-            </div>
-            <h2 className="apm-title">Position Details</h2>
-            <p className="apm-subtitle">
-              Please complete the form below to add a
-              <br />
-              <span className="apm-highlight">new Position</span>
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="apm-form">
-            <div className="apm-input-group">
-              <input
-                type="text"
-                name="positionTitle"
-                placeholder="Position title"
-                className="apm-input"
-                value={formData.positionTitle}
-                onChange={handleChange}
-                required
-              />
-            </div>
-<div className="apm-input-group">
-  <input
-    type="date"
-    name="effectiveDate"
-    className="apm-input"
-    value={formData.effectiveDate}
-    onChange={handleChange}
-    required
-  />
-</div>
-
-
-            <div className="apm-input-group apm-dropdown-wrapper">
-              <select
-                name="jobGradeId"
-                className="apm-input select-dropdown"
-                value={formData.jobGradeId}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Position Grade</option>
-                {jobGrades.map((grade) => (
-                  <option key={grade.jobGrade} value={grade.jobGradeId}>
-                    {grade.jobGradeName}
-                  </option>
-                ))}
-              </select>
-              <img
-                src="/images/arrow_drop_down_circle.png"
-                alt="Dropdown Icon"
-                className="apm-dropdown-icon"
-              />
+              <div className="apm-logo">
+                <span className="apm-logo-bold">singular</span>
+                <span className="apm-logo-light">express</span>
+              </div>
+              <h2 className="apm-title">Position Details</h2>
             </div>
 
-            {/* Custom Occupational Level Input */}
-            <div className="apm-input-group">
-  <div className="apm-dropdown-wrapper custom-autocomplete">
-    <input
-      type="text"
-      name="occupationalLevel"
-      placeholder="Occupational Level"
-      className="apm-input"
-      value={formData.occupationalLevel}
-      onChange={handleChange}
-      onFocus={() => {
-        if (formData.occupationalLevel) {
-          setShowSuggestions(true);
-        }
-      }}
-      onBlur={() => setTimeout(() => setShowSuggestions(false), 100)}
-      autoComplete="off"
-      required
-    />
+            <form onSubmit={handleSubmit} className="apm-form">
+              {/* Position Title */}
+              <div className="apm-input-group">
+                <input
+                  type="text"
+                  name="positionTitle"
+                  placeholder="Position title"
+                  className={`apm-input ${errors.positionTitle ? "error" : ""}`}
+                  value={formData.positionTitle}
+                  onChange={handleChange}
+                  required
+                />
+                {errors.positionTitle && (
+                  <span className="apm-error">{errors.positionTitle}</span>
+                )}
+              </div>
 
-    {showSuggestions && filteredLevels.length > 0 && (
-      <ul className="autocomplete-list">
-        {filteredLevels.map((level, index) => (
-          <li
-            key={index}
-            className="autocomplete-item"
-            onClick={() => handleSuggestionClick(level.occupationalLevelName)}
-          >
-            {level.occupationalLevelName}
-          </li>
-        ))}
-      </ul>
-    )}
-  </div>
-</div>
+              {/* Job Grade */}
+              <div className="apm-input-group apm-dropdown-wrapper">
+                <select
+                  name="jobGradeId"
+                  className={`apm-input select-dropdown ${errors.jobGradeId ? "error" : ""}`}
+                  value={formData.jobGradeId}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Position Grade</option>
+                  {jobGrades
+                    .filter((grade) => grade.isActive)
+                    .map((grade) => (
+                      <option key={grade.jobGradeId} value={grade.jobGradeId}>
+                        {grade.name}
+                      </option>
+                    ))}
+                </select>
+                <img
+                  src="/images/arrow_drop_down_circle.png"
+                  alt="Dropdown Icon"
+                  className="apm-dropdown-icon"
+                />
+                {errors.jobGradeId && (
+                  <span className="apm-error">{errors.jobGradeId}</span>
+                )}
+              </div>
 
+              {/* Occupational Level */}
+              <div className="apm-input-group apm-dropdown-wrapper">
+                <select
+                  name="occupationalLevelId"
+                  className={`apm-input select-dropdown ${errors.jobGradeId ? "error" : ""}`}
+                  value={formData.occupationalLevelId}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Occupational Description</option>
+                  {occupationalLevels
+                    .filter((level) => level.isActive)
+                    .map((level) => (
+                      <option
+                        key={level.occupationalLevelId}
+                        value={level.occupationalLevelId}
+                      >
+                        {level.description}
+                      </option>
+                    ))}
+                </select>
+                <img
+                  src="/images/arrow_drop_down_circle.png"
+                  alt="Dropdown Icon"
+                  className="apm-dropdown-icon"
+                />
+                {errors.occupationalLevelId && (
+                  <span className="apm-error">
+                    {errors.occupationalLevelId}
+                  </span>
+                )}
+              </div>
 
-            <button type="submit" className="apm-save-button">
-              Save
-            </button>
+              {/* Effective Date */}
+              <div className="apm-input-group">
+                <input
+                  type="date"
+                  name="effectiveDate"
+                  className="apm-input"
+                  value={formData.effectiveDate}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
 
+              <button type="submit" className="apm-save-button">
+                Save
+              </button>
 
-             <div className="apm-footer">
-              <p>Privacy Policy &nbsp; | &nbsp; Terms & Conditions</p>
-              <p>Copyright © 2025 Singular Systems. All rights reserved.</p>
-            </div>
-          </form>
-        </div>
-        </div>
-
-        <div className="right-frame">
-  <div className="apm-ellipse-wrapper">        
-       <div className="apm-ellipse-background"></div>
-          </div>
-          <div className="image-wrapper">
-            <img
-              src="/images/standing_man.svg"
-              alt="Standing Man"
-              className="center-image"
-            />
+              <div className="apm-footer">
+                <p>Privacy Policy &nbsp; | &nbsp; Terms & Conditions</p>
+                <p>Copyright © 2025 Singular Systems. All rights reserved.</p>
+              </div>
+            </form>
           </div>
         </div>
       </div>

@@ -29,6 +29,7 @@ const EditPositionManagement = () => {
     const fetchDropdownsAndPosition = async () => {
       try {
         const [gradesRes, levelsRes] = await Promise.all([
+
           fetch("http://localhost:5147/api/jobgrades"),
           fetch("http://localhost:5147/api/occupationallevels"),
         ]);
@@ -68,8 +69,8 @@ const EditPositionManagement = () => {
   }, [id]);
 
   const filteredLevels = occupationalLevels.filter((level) =>
-    level.occupationalLevelName
-      .toLowerCase()
+    level.description
+      ?.toLowerCase()
       .includes(formData.occupationalLevel.toLowerCase())
   );
 
@@ -128,7 +129,7 @@ const EditPositionManagement = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:5037/api/Positions/UpdatePosition/${id}`, {
+      const response = await fetch(`http://localhost:5147/api/positions/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -199,7 +200,7 @@ const EditPositionManagement = () => {
                 />
               </div>
 
-              <div className="apm-input-group apm-dropdown-wrapper">
+      <div className="apm-input-group apm-dropdown-wrapper">
                 <select
                   name="jobGradeId"
                   className="apm-input select-dropdown"
@@ -207,10 +208,10 @@ const EditPositionManagement = () => {
                   onChange={handleChange}
                   required
                 >
-                  <option value="">Grade</option>
+                  <option value="">Position Grade</option>
                   {jobGrades.map((grade) => (
                     <option key={grade.jobGradeId} value={grade.jobGradeId}>
-                      {grade.jobGradeName}
+                      {grade.name}
                     </option>
                   ))}
                 </select>
@@ -222,38 +223,26 @@ const EditPositionManagement = () => {
               </div>
 
               {/* Occupational Level Input with autocomplete */}
-              <div className="apm-input-group">
-                <div className="apm-dropdown-wrapper custom-autocomplete">
-                  <input
-                    type="text"
-                    name="occupationalLevel"
-                    placeholder="Occupational Level"
-                    className="apm-input"
-                    value={formData.occupationalLevel}
-                    onChange={handleChange}
-                    onFocus={() => {
-                      if (formData.occupationalLevel) {
-                        setShowSuggestions(true);
-                      }
-                    }}
-                    onBlur={() => setTimeout(() => setShowSuggestions(false), 100)}
-                    autoComplete="off"
-                    required
-                  />
-                  {showSuggestions && filteredLevels.length > 0 && (
-                    <ul className="autocomplete-list">
-                      {filteredLevels.map((level, index) => (
-                        <li
-                          key={index}
-                          className="autocomplete-item"
-                          onMouseDown={() => handleSuggestionClick(level.occupationalLevelName)}
-                        >
-                          {level.occupationalLevelName}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
+                <div className="apm-input-group apm-dropdown-wrapper">
+                  <select
+                  name="occupationalLevelId"
+                  className="apm-input select-dropdown"
+                  value={formData.occupationalLevelId}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Occupational Level</option>
+                  {occupationalLevels.map((level) => (
+                    <option key={level.occupationalLevelId} value={level.occupationalLevelId}>
+                      {level.description}
+                    </option>
+                  ))}
+                </select>
+                <img
+                  src="/images/arrow_drop_down_circle.png"
+                  alt="Dropdown Icon"
+                  className="apm-dropdown-icon"
+                />
               </div>
 
               <button type="submit" className="apm-save-button">

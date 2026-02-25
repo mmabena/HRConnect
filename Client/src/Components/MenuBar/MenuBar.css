@@ -541,7 +541,7 @@
 /* Column 1: Description (~63%) */
 .position-table th:nth-child(1),
 .position-table td:nth-child(1) {
-  width: 63%;
+  width: 20%;
   text-align: left;
 }
 
@@ -553,7 +553,7 @@
   text-align: left;
   border-left: 1px solid #d4d4d4;
   padding-left: 12px;
-  padding-right: 12px; /* ✅ Reduce from 110px to avoid squashing */
+  padding-right: 12px; /*Reduce from 110px to avoid squashing */
 }
 
 /* Column 4: Action (~9%) */
@@ -922,6 +922,17 @@
   outline: none;
   box-sizing: border-box;
   background-color: transparent;
+}
+
+.apm-input.error {
+  border: 1px solid red;
+}
+
+.apm-error {
+  color: red;
+  font-size: 0.85rem;
+  margin-top: 2px;
+  display: block;
 }
 
 .apm-input::placeholder {
@@ -1432,7 +1443,7 @@
 .content-container {
   display: flex;
   flex-direction: column;
-  width: 1461px;
+  width: 1400px;
   height: 615px;
   padding: 10px;
   gap: 10px;
