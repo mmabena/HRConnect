@@ -24,8 +24,20 @@
       { "Plus Vital", Vital.Plus },
       { "Network Vital", Vital.Network }
     };
+    private static readonly Dictionary<string, Alliance> AllianceMappings = new()
+    {
+      { "Alliance Plus", Alliance.Plus },
+      { "Alliance Network", Alliance.Network }
+    };
+
+    private static readonly Dictionary<string, @Double> DoubleMappings = new()
+    {
+      { "Double Plus", @Double.Plus },
+      { "Double Network", @Double.Network }
+    };
+    
     // Reverse Mapping varient ->  category
-    private static readonly Dictionary<Choice, string> ChoicereverseMappings = new()
+    private static readonly Dictionary<Choice, string> ChoiceReverseMappings = new()
     {
       { Choice.Network, "Network Choice" },
       { Choice.First, "First Choice" }
@@ -42,7 +54,18 @@
       { Vital.Network, "Network Vital" },
       { Vital.Plus, "Plus Vital" },
     };
-    
+    private static readonly Dictionary<string, Alliance> AllianceReverseMappings = new()
+    {
+      { "Alliance Plus", Alliance.Plus },
+      { "Alliance Network", Alliance.Network }
+    };
+
+    private static readonly Dictionary<string, @Double> DoubleReverseMappings = new()
+    {
+      { "Double Plus", @Double.Plus },
+      { "Double Network", @Double.Network }
+    };
+
     // Category Patterns Dictionary
     private static readonly Dictionary<string, (string Category, Type EnumType)> CategoryPatterns =
       new()
@@ -52,7 +75,13 @@
         { @"Essential.*Plus", ("Essential", typeof(Essential)) },
         { @"Essential.*Network", ("Essential", typeof(Essential)) },
         { @"Vital.*Plus", ("Vital", typeof(Vital)) },
-        { @"Vital.*Network", ("Vital", typeof(Vital)) }
+        { @"Vital.*Network", ("Vital", typeof(Vital)) },
+        { @"^Alliance$", ("Alliance", typeof(Alliance)) },
+        { @"Alliance.*Plus", ("Alliance", typeof(Alliance))},
+        { @"Alliance.*Network", ("Alliance", typeof(Alliance))},
+        { @"^Double$", ("Double", typeof(Double)) },
+        { @"Double.*Plus", ("Double", typeof(Double))},
+        { @"Double.*Network", ("Double", typeof(Double))}
       };
     
     // Obtains the category name and enum type from a variant name.
@@ -87,6 +116,8 @@
             null,
         var t when t == typeof(Vital) => 
           VitalMappings.TryGetValue(categoryName, out var vital) ? (T?)(object)vital : null,
+        var t when t == typeof(Double) => DoubleMappings.TryGetValue(categoryName, out var @double) ? (T)(object)@double : null,
+        var t when t == typeof(Alliance) => AllianceMappings.TryGetValue(categoryName, out var alliance) ? (T)(object)alliance : null
       };
     }
 

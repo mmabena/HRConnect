@@ -27,6 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Middleware\" />
     <Folder Include="Models\MedicalOptions\Records\" />
     <Folder Include="Utils\MedicalOption\" />
   </ItemGroup>

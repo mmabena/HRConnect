@@ -49,12 +49,19 @@
     /// <returns>The enum variant value or null if not found</returns>
     public static object? GetVariantByName(string enumTypeName, string categoryName)
     {
-      return enumTypeName switch
+      // If enumTypeName is actually the enum value, get its type name
+      var actualTypeName = enumTypeName.StartsWith("HRConnect", StringComparison.Ordinal) 
+        ? enumTypeName.Split('.').Last() 
+        : enumTypeName;
+    
+      return actualTypeName switch
       {
         "Choice" => MedicalOptionEnumMapper.GetEnumVariant<Choice>(categoryName),
         "Essential" => MedicalOptionEnumMapper.GetEnumVariant<Essential>(categoryName),
         "Vital" => MedicalOptionEnumMapper.GetEnumVariant<Vital>(categoryName),
-        _ => throw new ArgumentException($"Unknown enum type: {enumTypeName}")
+        "Alliance" => MedicalOptionEnumMapper.GetEnumVariant<Alliance>(categoryName),
+        "Double" => MedicalOptionEnumMapper.GetEnumVariant<Double>(categoryName),
+        _ => throw new ArgumentException($"Unknown enum type: {actualTypeName}")
       };
     }
     

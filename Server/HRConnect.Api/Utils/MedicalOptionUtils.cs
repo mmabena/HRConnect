@@ -1,16 +1,21 @@
 ﻿namespace HRConnect.Api.Utils
 {
+  using System.Text.RegularExpressions;
   using DTOs.MedicalOption;
   using HRConnect.Api.Utils.Enums;
   using HRConnect.Api.Models;
   using HRConnect.Api.Interfaces;
   using Microsoft.Identity.Client;
 
-  public static class MedicalOptionUtils
+  public static partial class MedicalOptionUtils
   {
+    [GeneratedRegex(@"\d$")]
+    private static partial Regex TrailingDigitRegex();
     public static string OptionNameFormatter(string optionName)
     {
-      return optionName.Replace(optionName.Last().ToString(), "").TrimEnd();
+      //return optionName[..^1].TrimEnd();// Remove last character (digit)
+      //or use regex
+      return TrailingDigitRegex().Replace(optionName, ""); // Remove trailing digit only
     }
 
     // Fetching the filtered option variant
