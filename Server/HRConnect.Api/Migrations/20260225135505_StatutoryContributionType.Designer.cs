@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRConnect.Api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20260224135544_PayrollDeductionsRename")]
-    partial class PayrollDeductionsRename
+    [Migration("20260225135505_StatutoryContributionType")]
+    partial class StatutoryContributionType
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -343,8 +343,11 @@ namespace HRConnect.Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CurrentMonth")
-                        .HasColumnType("datetime2");
+                    b.Property<Guid?>("ContributionTypeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("CurrentMonth")
+                        .HasColumnType("date");
 
                     b.Property<DateTime>("DeductedAt")
                         .HasColumnType("datetime2");
@@ -379,7 +382,53 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("PayrollDeductions");
+                    b.HasIndex("ContributionTypeId");
+
+                    b.ToTable("StatutoryContributions");
+                });
+
+            modelBuilder.Entity("HRConnect.Api.Models.StatutoryContributionType", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("CapAmount")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("EffectiveFrom")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("EffectiveTo")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("EmployeeRate")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)")
+                        .HasDefaultValue(0.01m);
+
+                    b.Property<decimal>("EmployerRate")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)")
+                        .HasDefaultValue(0.01m);
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("StatutoryContributionTypes");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.TaxDeduction", b =>
@@ -519,6 +568,15 @@ namespace HRConnect.Api.Migrations
                     b.Navigation("JobGrade");
 
                     b.Navigation("OccupationalLevels");
+                });
+
+            modelBuilder.Entity("HRConnect.Api.Models.StatutoryContribution", b =>
+                {
+                    b.HasOne("HRConnect.Api.Models.StatutoryContributionType", "ContributionType")
+                        .WithMany()
+                        .HasForeignKey("ContributionTypeId");
+
+                    b.Navigation("ContributionType");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.Employee", b =>

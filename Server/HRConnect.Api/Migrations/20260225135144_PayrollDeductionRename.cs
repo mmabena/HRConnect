@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace HRConnect.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class PayrollDeductionsRename : Migration
+    public partial class PayrollDeductionRename : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -14,60 +14,8 @@ namespace HRConnect.Api.Migrations
             migrationBuilder.DropTable(
                 name: "AuditPayrollDeductions");
 
-            migrationBuilder.AlterColumn<decimal>(
-                name: "UifEmployerAmount",
-                table: "PayrollDeductions",
-                type: "decimal(18,4)",
-                precision: 18,
-                scale: 4,
-                nullable: false,
-                oldClrType: typeof(decimal),
-                oldType: "decimal(7,2)",
-                oldPrecision: 7,
-                oldScale: 2);
-
-            migrationBuilder.AlterColumn<decimal>(
-                name: "UifEmployeeAmount",
-                table: "PayrollDeductions",
-                type: "decimal(18,4)",
-                precision: 18,
-                scale: 4,
-                nullable: false,
-                oldClrType: typeof(decimal),
-                oldType: "decimal(7,2)",
-                oldPrecision: 7,
-                oldScale: 2);
-
-            migrationBuilder.AlterColumn<decimal>(
-                name: "MonthlySalary",
-                table: "PayrollDeductions",
-                type: "decimal(18,4)",
-                precision: 18,
-                scale: 4,
-                nullable: false,
-                oldClrType: typeof(decimal),
-                oldType: "decimal(18,2)",
-                oldPrecision: 18,
-                oldScale: 2);
-
-            migrationBuilder.AlterColumn<decimal>(
-                name: "EmployerSdlContribution",
-                table: "PayrollDeductions",
-                type: "decimal(18,4)",
-                precision: 18,
-                scale: 4,
-                nullable: false,
-                oldClrType: typeof(decimal),
-                oldType: "decimal(18,2)",
-                oldPrecision: 18,
-                oldScale: 2);
-
-            migrationBuilder.AddColumn<DateTime>(
-                name: "CurrentMonth",
-                table: "PayrollDeductions",
-                type: "datetime2",
-                nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+            migrationBuilder.DropTable(
+                name: "PayrollDeductions");
 
             migrationBuilder.CreateTable(
                 name: "AuditLogs",
@@ -91,6 +39,27 @@ namespace HRConnect.Api.Migrations
                 {
                     table.PrimaryKey("PK_AuditLogs", x => x.AuditId);
                 });
+
+            migrationBuilder.CreateTable(
+                name: "StatutoryContributions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    EmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IdNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PassportNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MonthlySalary = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: false),
+                    UifEmployeeAmount = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: false),
+                    UifEmployerAmount = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: false),
+                    EmployerSdlContribution = table.Column<decimal>(type: "decimal(18,4)", precision: 18, scale: 4, nullable: false),
+                    DeductedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CurrentMonth = table.Column<DateOnly>(type: "date", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StatutoryContributions", x => x.Id);
+                });
         }
 
         /// <inheritdoc />
@@ -99,57 +68,8 @@ namespace HRConnect.Api.Migrations
             migrationBuilder.DropTable(
                 name: "AuditLogs");
 
-            migrationBuilder.DropColumn(
-                name: "CurrentMonth",
-                table: "PayrollDeductions");
-
-            migrationBuilder.AlterColumn<decimal>(
-                name: "UifEmployerAmount",
-                table: "PayrollDeductions",
-                type: "decimal(7,2)",
-                precision: 7,
-                scale: 2,
-                nullable: false,
-                oldClrType: typeof(decimal),
-                oldType: "decimal(18,4)",
-                oldPrecision: 18,
-                oldScale: 4);
-
-            migrationBuilder.AlterColumn<decimal>(
-                name: "UifEmployeeAmount",
-                table: "PayrollDeductions",
-                type: "decimal(7,2)",
-                precision: 7,
-                scale: 2,
-                nullable: false,
-                oldClrType: typeof(decimal),
-                oldType: "decimal(18,4)",
-                oldPrecision: 18,
-                oldScale: 4);
-
-            migrationBuilder.AlterColumn<decimal>(
-                name: "MonthlySalary",
-                table: "PayrollDeductions",
-                type: "decimal(18,2)",
-                precision: 18,
-                scale: 2,
-                nullable: false,
-                oldClrType: typeof(decimal),
-                oldType: "decimal(18,4)",
-                oldPrecision: 18,
-                oldScale: 4);
-
-            migrationBuilder.AlterColumn<decimal>(
-                name: "EmployerSdlContribution",
-                table: "PayrollDeductions",
-                type: "decimal(18,2)",
-                precision: 18,
-                scale: 2,
-                nullable: false,
-                oldClrType: typeof(decimal),
-                oldType: "decimal(18,4)",
-                oldPrecision: 18,
-                oldScale: 4);
+            migrationBuilder.DropTable(
+                name: "StatutoryContributions");
 
             migrationBuilder.CreateTable(
                 name: "AuditPayrollDeductions",
@@ -172,6 +92,26 @@ namespace HRConnect.Api.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AuditPayrollDeductions", x => x.AuditId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PayrollDeductions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    DeductedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    EmployerSdlContribution = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    IdNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MonthlySalary = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    PassportNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UifEmployeeAmount = table.Column<decimal>(type: "decimal(7,2)", precision: 7, scale: 2, nullable: false),
+                    UifEmployerAmount = table.Column<decimal>(type: "decimal(7,2)", precision: 7, scale: 2, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PayrollDeductions", x => x.Id);
                 });
         }
     }

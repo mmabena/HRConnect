@@ -1,6 +1,6 @@
 namespace HRConnect.Tests
 {
-  public static class PayrollDeductionsTestData
+  public static class StatutoryContributionTestData
   {
     public static TheoryData<decimal, decimal> SdlAmountTestData =>
        new TheoryData<decimal, decimal>
@@ -18,12 +18,12 @@ namespace HRConnect.Tests
         new TheoryData<decimal, decimal, decimal>
     {
      {5000m,50m,50m},
-     {1771200m,8856m,8856m},
-     {20000m,200m,200m}
+     {1771200m,177.12m,177.12m},
+     {17712m,177.12m,177.12m}
     };
     public static TheoryData<decimal, decimal, decimal> UifAboveCapTestData => new TheoryData<decimal, decimal, decimal>
     {
-      {2000000m,8856m,8856m}
+      {2000000m,177.12m,177.12m}
     };
   }
 }

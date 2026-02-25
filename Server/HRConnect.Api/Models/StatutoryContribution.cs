@@ -2,6 +2,7 @@ namespace HRConnect.Api.Models
 {
   using System.ComponentModel.DataAnnotations;
   using Microsoft.EntityFrameworkCore;
+  using HRConnect.Api.Utils;
   public class StatutoryContribution
   {
     public int Id { get; set; }
@@ -18,10 +19,8 @@ namespace HRConnect.Api.Models
     [Precision(18, 4)]
     public decimal EmployerSdlContribution { get; set; }
     public DateTime DeductedAt { get; set; } = DateTime.UtcNow;
-    public DateTime CurrentMonth { get; set; }
-    //Navigation Props
-    // public StatutoryContributionType ContributionType { get; set; }
-    // public EmployeePayroll EmployeePayroll { get; set; }
-
+    public DateOnly CurrentMonth { get; set; }
+    //Navigation property
+    public StatutoryContributionType? ContributionType { get; set; }
   }
 }

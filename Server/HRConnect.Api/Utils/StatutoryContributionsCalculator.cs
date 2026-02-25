@@ -1,6 +1,5 @@
 namespace HRConnect.Api.Utils
 {
-  using HRConnect.Api.Models;
 
   public class StatutoryContributionsCalculator
   {
@@ -22,7 +21,7 @@ namespace HRConnect.Api.Utils
 
       decimal employeeContribution = monthlySalary * StatutoryContributionConstants.UIFEmployeeAmount;
 
-      if (employeeContribution >= StatutoryContributionConstants.UIFCap)
+      if (employeeContribution > StatutoryContributionConstants.UIFCap)
       {
         employeeContribution = StatutoryContributionConstants.UIFCap;
       }
@@ -46,7 +45,7 @@ namespace HRConnect.Api.Utils
 
       decimal employerContribution = monthlySalary * StatutoryContributionConstants.UIFEmployeeAmount;
 
-      if (employerContribution >= StatutoryContributionConstants.UIFCap)
+      if (employerContribution > StatutoryContributionConstants.UIFCap)
       {
         employerContribution = StatutoryContributionConstants.UIFCap;
       }
@@ -61,7 +60,7 @@ namespace HRConnect.Api.Utils
     {
       decimal employee = CalculateUifEmployee(monthlySalary);
       decimal employer = CalculateUifEmployer(monthlySalary);
-      if ((employee + employer) >= StatutoryContributionConstants.UIFCap)
+      if ((employee + employer) > StatutoryContributionConstants.UIFCap)
       {
         employee /= 2;
         employer /= 2;

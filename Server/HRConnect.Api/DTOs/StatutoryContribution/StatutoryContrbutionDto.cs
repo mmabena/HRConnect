@@ -10,6 +10,6 @@ namespace HRConnect.Api.DTOs.StatutoryContribution
     public decimal EmployerSdlContribution { get; set; }
     public decimal UifEmployeeAmount { get; set; }
     public decimal UifEmployerAmount { get; set; }
-    public DateTime CurrentMonth { get; set; }
+    public DateOnly CurrentMonth { get; set; }
   }
 }

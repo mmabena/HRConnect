@@ -1,6 +1,5 @@
 namespace HRConnect.Api.Data
 {
-  using System.Reflection.Metadata;
   using HRConnect.Api.Models;
   using Microsoft.EntityFrameworkCore;
   public class ApplicationDBContext(DbContextOptions dbContextOptions) : DbContext(dbContextOptions)
@@ -14,8 +13,9 @@ namespace HRConnect.Api.Data
     public DbSet<PasswordHistory> PasswordHistories { get; set; }
     public DbSet<TaxTableUpload> TaxTableUploads { get; set; }
     public DbSet<TaxDeduction> TaxDeductions { get; set; }
-    public DbSet<StatutoryContribution> PayrollDeductions { get; set; }
+    public DbSet<StatutoryContribution> StatutoryContributions { get; set; }
     public DbSet<AuditLogs> AuditLogs { get; set; }
+    public DbSet<StatutoryContributionType> StatutoryContributionTypes { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -83,6 +83,14 @@ namespace HRConnect.Api.Data
         entity.Property(e => e.EffectiveFrom).IsRequired();
         entity.Property(e => e.EffectiveTo);
       });
+
+      // StatutoryContributionType with default contribution percentages mandated by law
+      modelBuilder.Entity<StatutoryContributionType>().Property(e => e.EmployeeRate)
+        .HasColumnType("decimal(18,4)")
+        .HasDefaultValue(0.01m);
+      modelBuilder.Entity<StatutoryContributionType>().Property(e => e.EmployerRate)
+        .HasColumnType("decimal(18,4)")
+        .HasDefaultValue(0.01m);
     }
   }
 }

@@ -4,33 +4,33 @@ namespace HRConnect.Tests
   using FluentAssertions;
   using HRConnect.Api.Utils;
 
-  public class PayrollDeductionsCalculatorTests
+  public class StatutoryContributionCalculatorTests
   {
-    private readonly PayrollDeductionsCalculator _payrollDeductionsCalculator;
-    public PayrollDeductionsCalculatorTests()
+    private readonly StatutoryContributionsCalculator _statutoryContributionsCalculator;
+    public StatutoryContributionCalculatorTests()
     {
-      _payrollDeductionsCalculator = new PayrollDeductionsCalculator();
+      _statutoryContributionsCalculator = new StatutoryContributionsCalculator();
     }
 
     [Theory]
-    [MemberData(nameof(PayrollDeductionsTestData.UifForSalaryBelowCap),
-    MemberType = typeof(PayrollDeductionsTestData))]
+    [MemberData(nameof(StatutoryContributionTestData.UifForSalaryBelowCap),
+    MemberType = typeof(StatutoryContributionTestData))]
     public void CalculateDeductionsShouldReturnCorrectAmountsForSalaryBelowCap(decimal monthlySalary, decimal expectedAmount)
     {
       //Act and Arrange 
-      var result = _payrollDeductionsCalculator.CalculateUif(monthlySalary);
+      var result = _statutoryContributionsCalculator.CalculateUif(monthlySalary);
 
       //Assert
       Assert.Equal(expectedAmount, result.employeeAmount);
     }
 
     [Theory]
-    [MemberData(nameof(PayrollDeductionsTestData.UifAboveCapTestData),
-    MemberType = typeof(PayrollDeductionsTestData))]
-    public void CalculateDeductionsShouldReturnCorrectAmountsForSalaryAboveUifCap(decimal monthlySalary, decimal expectedEmployeeAmount = 8856, decimal expectedEmployerAmount = 8856)
+    [MemberData(nameof(StatutoryContributionTestData.UifAboveCapTestData),
+    MemberType = typeof(StatutoryContributionTestData))]
+    public void CalculateDeductionsShouldReturnCorrectAmountsForSalaryAboveUifCap(decimal monthlySalary, decimal expectedEmployeeAmount = 177.12m, decimal expectedEmployerAmount = 177.12m)
     {
       //Arrange and assert
-      var result = _payrollDeductionsCalculator.CalculateUif(monthlySalary);
+      var result = _statutoryContributionsCalculator.CalculateUif(monthlySalary);
 
       //Assert 
       Assert.Equal(expectedEmployeeAmount, result.employeeAmount);
@@ -42,7 +42,7 @@ namespace HRConnect.Tests
     public void CalculateDeductionsShouldReturnZeroForZeroSalary(decimal monthlySalary, decimal expectedAmount = 0)
     {
       // Arrange and Act
-      var result = _payrollDeductionsCalculator.CalculateUif(monthlySalary);
+      var result = _statutoryContributionsCalculator.CalculateUif(monthlySalary);
 
       // Assert
       Assert.Equal(expectedAmount, result.employeeAmount);
@@ -50,26 +50,26 @@ namespace HRConnect.Tests
     }
 
     [Theory]
-    [MemberData(nameof(PayrollDeductionsTestData.SdlAmountTestData),
-    MemberType = typeof(PayrollDeductionsTestData))]
+    [MemberData(nameof(StatutoryContributionTestData.SdlAmountTestData),
+    MemberType = typeof(StatutoryContributionTestData))]
     public void CalculateDeductionsShouldCalculateSdlCorrectly(decimal monthlySalary, decimal expectedSdlAmount)
     {
       //Arrange
       decimal result;
 
       //Act
-      result = _payrollDeductionsCalculator.CalculateSdlAmount(monthlySalary);
+      result = _statutoryContributionsCalculator.CalculateSdlAmount(monthlySalary);
 
       Assert.Equal(expectedSdlAmount, result);
     }
 
     [Theory]
-    [MemberData(nameof(PayrollDeductionsTestData.UifEmployeeAndEmployerTestData),
-    MemberType = typeof(PayrollDeductionsTestData))]
+    [MemberData(nameof(StatutoryContributionTestData.UifEmployeeAndEmployerTestData),
+    MemberType = typeof(StatutoryContributionTestData))]
     public void CalculateDeductionsShouldCalculateUifEmployeeAndEmployerCorrectly(decimal monthlySalary, decimal expectedEmployeeAmount, decimal expectedEmployerAmount)
     {
       //Arrange and Act
-      var result = _payrollDeductionsCalculator.CalculateUif(monthlySalary);
+      var result = _statutoryContributionsCalculator.CalculateUif(monthlySalary);
 
       //Assert
       Assert.Equal(expectedEmployeeAmount, result.employeeAmount);
@@ -81,7 +81,7 @@ namespace HRConnect.Tests
     public void CalculateDeductionsShouldThrowExceptionOnNegativeSalary()
     {
       //Arrange 
-      var payrollCalculator = new PayrollDeductionsCalculator();
+      var payrollCalculator = new StatutoryContributionsCalculator();
 
       Action result = () => payrollCalculator.CalculateUifEmployee(-1m);
 
