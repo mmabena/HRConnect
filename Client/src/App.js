@@ -18,121 +18,115 @@ import ViewPositionManagement from "./Components/ViewPositionManagement";
 import TaxTableUpload from "./Components/TaxTableUpload";
 import EditPositionManagement from "./Components/EditPositionManagement";
 import AddPositionManagement from "./Components/AddPositionManagment";
-import CompanyManagement from './companyManagement';
-import CompanyContribution from './Components/CompanyContribution/CompanyContribution'; 
-import Profile from './Components/MyProfile';
-import CompensationPlanning from './Components/CompensationPlanning';
+import CompanyManagement from "./companyManagement";
+import CompanyContribution from "./Components/CompanyContribution/CompanyContribution";
+import Profile from "./Components/MyProfile";
+import CompensationPlanning from "./Components/CompensationPlanning";
+import TaxTableManagement from "./Components/TaxTableManagement";
+import ChangePassword from "./Components/ChangePassword";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const handleBeforeUnload = () => {
-      localStorage.removeItem("currentUser");
-    };
-
-  window.addEventListener("beforeunload", handleBeforeUnload);
-
-  return () => {
-    window.removeEventListener("beforeunload", handleBeforeUnload);
-  };
-}, []);
-
-
-
+  // ✅ Load user from localStorage on refresh
   useEffect(() => {
     const storedUser = localStorage.getItem("currentUser");
 
-    if (storedUser && storedUser !== "undefined") {
+    if (storedUser) {
       try {
-        const userData = JSON.parse(storedUser);
-
-        // Extract user object if nested
-        if (userData.user) {
-          setCurrentUser(userData.user);
-        } else {
-          setCurrentUser(userData);
-        }
+        const parsedUser = JSON.parse(storedUser);
+        setCurrentUser(parsedUser);
         setIsLoggedIn(true);
-      } catch (e) {
-        console.error("Failed to parse user data from localStorage", e);
+      } catch {
         localStorage.removeItem("currentUser");
+      }
     }
-  }
-}, []);
+  }, []);
 
+  const handleForgotPasswordClick = () => {
+    navigate("/forgot-password");
+  };
 
-const handleForgotPasswordClick = () => {
-  navigate("/forgot-password");
-};
+  const handleBackToLogin = () => {
+    navigate("/");
+  };
 
-const handleBackToLogin = () => {
-  navigate("/");
-};
+  const handleLogout = () => {
+    localStorage.removeItem("currentUser");
+    setCurrentUser(null);
+    setIsLoggedIn(false);
+    navigate("/");
+  };
 
-const handleLoginSuccess = (responseData) => {
-  console.log("User data received on login:", responseData);
-
-  const user = responseData.user;  // extract nested user
-  const token = responseData.token; // extract token
-
-  setCurrentUser(user); // save in component state
-  // Store both token and user data in localStorage with the key "currentUser"
-  localStorage.setItem("currentUser", JSON.stringify({ token, user })); // persist in localStorage
+  // FIXED: Use backend user object directly
+ const handleLoginSuccess = (userWithToken) => {
+  setCurrentUser(userWithToken);
+   localStorage.setItem("currentUser", JSON.stringify(userWithToken));
+   console.log("App currentUser:", userWithToken);
   setIsLoggedIn(true);
   navigate("/dashboard");
 };
-
 
   if (!isLoggedIn) {
     return (
       <div className="App">
         <Routes>
-          <Route path="/" element={<SignIn onForgotPasswordClick={handleForgotPasswordClick} onLoginSuccess={handleLoginSuccess} />} />
-          <Route path="/forgot-password" element={<ForgotPassword onBackToLogin={handleBackToLogin} />} />
+          <Route
+            path="/"
+            element={
+              <SignIn
+                onForgotPasswordClick={handleForgotPasswordClick}
+                onLoginSuccess={handleLoginSuccess}
+              />
+            }
+          />
+          <Route
+            path="/forgot-password"
+            element={<ForgotPassword onBackToLogin={handleBackToLogin} />}
+          />
         </Routes>
       </div>
     );
   }
 
+  return (
+    <div className="App">
+      <MenuBar currentUser={currentUser} onLogout={handleLogout} />
 
- console.log("App currentUser:", currentUser);
+      <div>
+        <ToastContainer position="top-right" autoClose={3000} />
 
- return (
- <div className="App" style={{ display: "flex", minHeight: "100vh" }}>
- <MenuBar currentUser={currentUser} />
- <div style={{ flex: 1, padding: "1rem" }}>
- <ToastContainer position="top-right" autoClose={3000} />
- <Routes>
- <Route path="/dashboard" element={<div>Welcome to Dashboard</div>} />
- <Route path="/addEmployee" element={<AddEmployee />} />
- <Route path="/editEmployee" element={<EditEmployee />} />
- <Route path="/editEmployee/:employeeNumber" element={<EditEmployee />} />
- <Route path="/addCompany" element={<AddCompany />} />
- <Route path="/companyManagement" element={<CompanyManagement/>} />
-<Route path="/editCompany/:id" element={<EditCompany />} />
-<Route path="/employeeList" element={<EmployeeList />} />
- <Route path="/company-contribution" element={<CompanyContribution />} />
- <Route path="/userManagement" element={<UserManagement />} /> 
- <Route path="/taxTableUpload" element={<TaxTableUpload />} />
- <Route path="/positionManagement" element={<PositionManagement />} />
-<Route path="/addPositionManagement" element={<AddPositionManagement />} />
- <Route path="/editPositionManagement/:id" element={<EditPositionManagement />} />
- <Route path="/viewPositionManagement/:id" element={<ViewPositionManagement />} />
-<Route
-  path="/profile"
-  element={<Profile currentUser={currentUser} />}
-/>
+        <Routes>
+          <Route path="/dashboard" element={<div>Welcome to Dashboard</div>} />
 
-<Route path="/company-contribution" element={<CompanyContribution />} />
-<Route path="/compensationPlanning" element={<CompensationPlanning  />} />
- </Routes>
+          <Route path="/addEmployee" element={<AddEmployee />} />
+          <Route path="/editEmployee" element={<EditEmployee />} />
+          <Route path="/editEmployee/:employeeNumber" element={<EditEmployee />} />
 
-</div>
- </div>
-);
+          <Route path="/addCompany" element={<AddCompany />} />
+          <Route path="/companyManagement" element={<CompanyManagement />} />
+          <Route path="/editCompany/:id" element={<EditCompany />} />
+
+          <Route path="/employeeList" element={<EmployeeList />} />
+          <Route path="/company-contribution" element={<CompanyContribution />} />
+          <Route path="/userManagement" element={<UserManagement />}/>
+
+          <Route path="/taxTableUpload" element={<TaxTableUpload />} />
+          <Route path="/positionManagement" element={<PositionManagement />} />
+          <Route path="/addPositionManagement" element={<AddPositionManagement />} />
+          <Route path="/editPositionManagement/:id" element={<EditPositionManagement />} />
+          <Route path="/viewPositionManagement/:id" element={<ViewPositionManagement />} />
+          <Route path="/taxtablemanagement" element={<TaxTableManagement />} />
+          <Route path="/profile" element={<Profile currentUser={currentUser} />} />
+          <Route path="/compensationPlanning" element={<CompensationPlanning />} />
+          <Route path="/changePassword" element={<ChangePassword currentUser={currentUser} />} />
+        
+        </Routes>
+      </div>
+    </div>
+  );
 }
 
 export default App;
