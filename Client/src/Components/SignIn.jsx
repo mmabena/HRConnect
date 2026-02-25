@@ -5,6 +5,7 @@ import "../../Navy.css";
 // import VisibilityOffIcon from '../assets/icons/visibility_off.svg';
 // import ImageGenForWeb from '../images/iMAGE gEN FOR WEB.svg';
 import { useNavigate } from 'react-router-dom';
+import { authService } from "../../services/authService";
 
 const SignIn = ({ onForgotPasswordClick, onLoginSuccess }) => {
   const [email, setEmail] = useState(''); 
@@ -20,76 +21,39 @@ const SignIn = ({ onForgotPasswordClick, onLoginSuccess }) => {
     setShowPassword(!showPassword); 
   };
 
-    const handleLogin = async () => {
-      setError(''); 
+  const handleLogin = async () => {
+  setError('');
 
-      // Validation
-      if (!email.trim()) {
-        setError('Email is required.');
-        return;
+  // Validation
+  if (!email.trim()) {
+    setError('Email is required.');
+    return;
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    setError('Please enter a valid email address.');
+    return;
+  }
+
+  if (!password) {
+    setError('Password is required.');
+    return;
+  }
+
+    try {
+      const data = await authService.login(email, password);
+
+      if (typeof onLoginSuccess === "function") {
+        onLoginSuccess(data);
       }
-
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        setError('Please enter a valid email address.');
-        return;
-      }
-
-      if (!password) {
-        setError('Password is required.');
-        return;
-      }
-
-      try {
-        console.log('Attempting login with email:', email);
-        
-        const response = await fetch('http://localhost:5147/api/auth/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ email, password }),
-        });
-
-        console.log('Response status:', response.status);
-        
-        const responseText = await response.text(); 
-        console.log('Response text:', responseText);
-
-        if (response.ok) {
-          console.log('Login successful');
-          setError('');
-          setAttemptCount(0);
-
-          // Parse the responseText to get the actual user data (usually in JSON format)
-          const responseData = JSON.parse(responseText);
-          console.log('Parsed response data:', responseData);
-
-          // Pass the user data to onLoginSuccess
-          if (typeof onLoginSuccess === 'function') {
-            onLoginSuccess(responseData);  // Pass the whole response data (user, token, etc.)
-          }
-        } else {
-          // Try to parse error response
-          try {
-            const errorData = JSON.parse(responseText);
-            const errorMessage = errorData.errors?.[0] || responseText || 'Login failed';
-            console.error('Login error response:', errorData);
-            setError(errorMessage);
-          } catch {
-            console.error('Error parsing response:', responseText);
-            setError(responseText || 'Login failed. Please try again.');
-          }
-          
-          if (response.status === 401) {
-            setAttemptCount(prev => prev + 1);
-          }
-        }
-      } catch (err) {
-        console.error('Login network error:', err);
-        setError('Network error. Please check your connection and ensure the server is running.');
-      }
-    };
+    } catch (err) {
+      setError(err?.message || "Login failed. Please try again.");
+      setAttemptCount(prev => prev + 1);
+    } 
+  };
+  
+  //forgot password
       const handleForgotPassword = () => {
     navigate('/reset-password'); 
   };

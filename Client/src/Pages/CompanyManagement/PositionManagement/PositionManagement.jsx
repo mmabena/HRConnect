@@ -19,7 +19,6 @@ const PositionManagement = () => {
   const pageOptions = [10, 15, 20, 25];
   const navTabs = [
     "Tax Table Management",
-    "Upload TAX Tables",
     "Company Details",
     "Leave Management",
     "Position Management",

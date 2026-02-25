@@ -10,33 +10,22 @@ const api = axios.create({
 // Add JWT token to all requests
 api.interceptors.request.use(
   (config) => {
-    const currentUser = localStorage.getItem('currentUser');
-    if (currentUser) {
-      try {
-        const { token } = JSON.parse(currentUser);
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-      } catch (error) {
-        console.error('Failed to parse stored user:', error);
-      }
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
+
     return config;
   },
   (error) => Promise.reject(error)
 );
 
 api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    // Handle 401 Unauthorized (expired token, etc.)
-    if (error.response?.status === 401) {
-      localStorage.removeItem('currentUser');
-      window.location.href = '/';
-    }
-    console.error('API Error:', error.response?.data || error.message);
+  response => response,
+  error => {
+    console.log("Interceptor caught error:", error.response?.status);
     return Promise.reject(error);
   }
 );
-
 export default api;
