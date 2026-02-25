@@ -83,6 +83,13 @@ namespace HRConnect.Api.Data
         entity.Property(e => e.EffectiveFrom).IsRequired();
         entity.Property(e => e.EffectiveTo);
       });
+      // StatutoryContributionType with default contribution percentages mandated by law
+      modelBuilder.Entity<StatutoryContributionType>().Property(e => e.EmployeeRate)
+        .HasColumnType("decimal(18,4)")
+        .HasDefaultValue(0.01m);
+      modelBuilder.Entity<StatutoryContributionType>().Property(e => e.EmployerRate)
+        .HasColumnType("decimal(18,4)")
+        .HasDefaultValue(0.01m);
     }
   }
 }

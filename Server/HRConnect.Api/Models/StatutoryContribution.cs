@@ -20,7 +20,7 @@ namespace HRConnect.Api.Models
     public DateTime DeductedAt { get; set; } = DateTime.UtcNow;
     public DateTime CurrentMonth { get; set; }
     //Navigation Props
-    // public StatutoryContributionType ContributionType { get; set; }
+    public StatutoryContributionType? ContributionType { get; set; }
     // public EmployeePayroll EmployeePayroll { get; set; }
 
   }
