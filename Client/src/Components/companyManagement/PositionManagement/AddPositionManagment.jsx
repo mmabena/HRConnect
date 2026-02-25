@@ -16,7 +16,7 @@ const AddPositionManagement = () => {
     jobGradeId: "",
     occupationalLevelId: "",
   });
-  const [positionTitle, setPositionTitle] = useState("");
+
   const [jobGrades, setJobGrades] = useState([]);
   const [occupationalLevels, setOccupationalLevels] = useState([]);
   const [filteredLevels, setFilteredLevels] = useState([]);
@@ -77,69 +77,73 @@ const AddPositionManagement = () => {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const { positionTitle, effectiveDate, occupationalLevelId, jobGradeId } = formData;
+    const { positionTitle, effectiveDate, occupationalLevelId, jobGradeId } =
+      formData;
 
-  // Basic frontend validation
-  if (!positionTitle || !effectiveDate || !occupationalLevelId || !jobGradeId) {
-    setErrors((prev) => ({
-      ...prev,
-      positionTitle: !positionTitle ? "Position title is required" : "",
-      jobGradeId: !jobGradeId ? "Job grade is required" : "",
-      occupationalLevelId: !occupationalLevelId ? "Occupational level is required" : "",
-    }));
-    return;
-  }
-
-  try {
-    const response = await fetch("http://localhost:5147/api/positions/Create", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        positionTitle,
-        jobGradeId: parseInt(jobGradeId),
-        occupationalLevelId: parseInt(occupationalLevelId),
-        createdDate: new Date().toISOString(),
-      }),
-    });
-
-    // Read response as text because backend throws plain exceptions
-    const text = await response.text();
-
-    if (!response.ok) {
-      // Map backend error text to inline errors
-      setErrors({
-        positionTitle: text.toLowerCase().includes("title") || text.toLowerCase().includes("duplicate")
-          ? "This position title already exists"
-          : "",
-        jobGradeId: text.toLowerCase().includes("jobgrade")
-          ? "Invalid JobGradeId or inactive"
-          : "",
-        occupationalLevelId: text.toLowerCase().includes("occupationallevel")
-          ? "Invalid OccupationalLevelId or inactive"
-          : "",
-      });
-      return; // stop submission
+    // Basic required fields validation
+    if (!positionTitle || !effectiveDate || !occupationalLevelId || !jobGradeId) {
+      toast.error("All fields are required");
+      return;
     }
 
-    // Success
-    toast.success("Position created successfully!");
-    setFormData({
-      positionTitle: "",
-      effectiveDate: "",
-      jobGradeId: "",
-      occupationalLevelId: "",
-      occupationalLevel: "",
-    });
-    setErrors({ positionTitle: "", jobGradeId: "", occupationalLevelId: "" });
-    
+    try {
+      const response = await fetch(
+        "http://localhost:5147/api/positions/Create",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            positionTitle,
+            jobGradeId: parseInt(jobGradeId),
+            occupationalLevelId: parseInt(occupationalLevelId),
+            createdDate: new Date().toISOString(),
+          }),
+        }
+      );
 
-  } catch (err) {
-    console.error("Error saving position:", err);
-    toast.error("Something went wrong. Please try again.");
-  }
-};
+      let data;
+try {
+  data = await response.json(); // try JSON first
+} catch {
+  data = { message: await response.text() }; // fallback to plain text
+}
+
+      if (!response.ok) {
+        // Map backend validation errors to inline fields
+        const msg = data?.message || data?.error || "";
+
+        setErrors({
+          positionTitle: msg.toLowerCase().includes("duplicate")
+            ? "This position title already exists"
+            : "",
+          jobGradeId: msg.toLowerCase().includes("jobgrade")
+            ? "Invalid JobGradeId or inactive"
+            : "",
+          occupationalLevelId: msg.toLowerCase().includes("occupationallevel")
+            ? "Invalid OccupationalLevelId or inactive"
+            : "",
+        });
+
+        return; // stop submission
+      }
+
+      // Success
+      toast.success("Position created successfully!");
+      setFormData({
+        positionTitle: "",
+        effectiveDate: "",
+        jobGradeId: "",
+        occupationalLevelId: "",
+        occupationalLevel: "",
+      });
+      setErrors({ positionTitle: "", jobGradeId: "", occupationalLevelId: "" });
+    } catch (err) {
+      console.error("Error saving position:", err);
+      toast.error("Something went wrong. Please try again.");
+    }
+  };
 
   return (
     <div className="full-screen-bg">
@@ -161,7 +165,7 @@ const AddPositionManagement = () => {
                   type="text"
                   name="positionTitle"
                   placeholder="Position title"
-                  className={`apm-input ${errors.positionTitle ? "error" : ""}`}
+                 className={`apm-input ${errors.positionTitle ? "error" : ""}`}
                   value={formData.positionTitle}
                   onChange={handleChange}
                   required
@@ -175,7 +179,7 @@ const AddPositionManagement = () => {
               <div className="apm-input-group apm-dropdown-wrapper">
                 <select
                   name="jobGradeId"
-                  className={`apm-input select-dropdown ${errors.jobGradeId ? "error" : ""}`}
+                   className={`apm-input select-dropdown ${errors.jobGradeId ? "error" : ""}`}
                   value={formData.jobGradeId}
                   onChange={handleChange}
                   required
@@ -203,7 +207,7 @@ const AddPositionManagement = () => {
               <div className="apm-input-group apm-dropdown-wrapper">
                 <select
                   name="occupationalLevelId"
-                  className={`apm-input select-dropdown ${errors.jobGradeId ? "error" : ""}`}
+                   className={`apm-input select-dropdown ${errors.jobGradeId ? "error" : ""}`}
                   value={formData.occupationalLevelId}
                   onChange={handleChange}
                   required
@@ -226,9 +230,7 @@ const AddPositionManagement = () => {
                   className="apm-dropdown-icon"
                 />
                 {errors.occupationalLevelId && (
-                  <span className="apm-error">
-                    {errors.occupationalLevelId}
-                  </span>
+                  <span className="apm-error">{errors.occupationalLevelId}</span>
                 )}
               </div>
 

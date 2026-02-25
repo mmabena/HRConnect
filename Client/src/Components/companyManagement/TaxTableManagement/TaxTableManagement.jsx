@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import api from "../api.js";
-import "../styles/global.css";
+import api from "../../../api/api";
+import "../../../styles/global.css";
 import TaxTableUpload from "./TaxTableUpload";
 
 function TaxTableManagement() {

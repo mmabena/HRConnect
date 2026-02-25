@@ -10,6 +10,7 @@ namespace HRConnect.Api.Controllers
     using Microsoft.AspNetCore.Authorization;
     [Route("api/employee")]
     [ApiController]
+    
   
     public class EmployeeController : ControllerBase
     {

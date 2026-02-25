@@ -1,7 +1,6 @@
 import React, { useState, useRef, useMemo } from "react";
-import api from "../api";
+import api from "../../../api/api.js";
 import { toast } from "react-toastify";
-import "../Components/TaxTableUpload.css";
 
 /* ---------- YEAR GENERATOR ---------- */
 const generateFinancialYears = (existingYears = []) => {

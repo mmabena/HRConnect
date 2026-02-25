@@ -10,7 +10,7 @@ namespace HRConnect.Api.Controllers
 
   [ApiController]
   [Route("api/occupationallevels")]
-  /*[Authorize(Roles = "SuperUser")] // Require authentication and SuperAdmin */
+  [Authorize(Roles = "SuperUser")] // Require authentication and SuperAdmin */
  
   public class OccupationalLevelController : ControllerBase
   {

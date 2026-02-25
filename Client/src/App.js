@@ -11,15 +11,18 @@ import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 import UserManagement from "./Components/UserManagement";
 import ViewPositionManagement from "./Components/ViewPositionManagement";
-import TaxTableUpload from "./Components/TaxTableUpload";
-import EditPositionManagement from "./Components/EditPositionManagement";
-import AddPositionManagement from "./Components/AddPositionManagment";
+import EditPositionManagement from "./Components/CompanyManagement/PositionManagement/EditPositionManagement";
+import AddPositionManagement from "./Components/CompanyManagement/PositionManagement/AddPositionManagment";
+import PositionManagement from "./Pages/CompanyManagement/PositionManagement/PositionManagement";
 import CompanyManagement from "./companyManagement";
 import CompanyContribution from "./Components/CompanyContribution/CompanyContribution";
 import Profile from "./Components/MyProfile";
 import CompensationPlanning from "./Components/CompensationPlanning";
-import TaxTableManagement from "./Components/TaxTableManagement";
+import TaxTableManagement from "./Components/CompanyManagement/TaxTableManagement/TaxTableManagement";
 import ChangePassword from "./Components/ChangePassword";
+import TaxTableUpload from "./Components/CompanyManagement/TaxTableManagement/TaxTableUpload";
+import EmployeeList from "./Pages/EmployeeManagement/EmployeeList";
+import MenuBar from "./Components/MenuBar/MenuBar";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -109,7 +112,6 @@ function App() {
           <Route path="/company-contribution" element={<CompanyContribution />} />
           <Route path="/userManagement" element={<UserManagement />}/>
 
-          <Route path="/taxTableUpload" element={<TaxTableUpload />} />
           <Route path="/positionManagement" element={<PositionManagement />} />
           <Route path="/addPositionManagement" element={<AddPositionManagement />} />
           <Route path="/editPositionManagement/:id" element={<EditPositionManagement />} />
@@ -118,7 +120,7 @@ function App() {
           <Route path="/profile" element={<Profile currentUser={currentUser} />} />
           <Route path="/compensationPlanning" element={<CompensationPlanning />} />
           <Route path="/changePassword" element={<ChangePassword currentUser={currentUser} />} />
-        
+          <Route path="/taxTableUpload" element={<TaxTableUpload />} />
         </Routes>
       </div>
     </div>

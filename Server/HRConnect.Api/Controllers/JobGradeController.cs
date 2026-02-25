@@ -7,7 +7,7 @@ namespace HRConnect.Api.Controllers
 
     [ApiController]
     [Route("api/jobgrades")]
-   // Require authentication and SuperAdmin role
+    [Authorize(Roles = "SuperUser")] // Require authentication and SuperAdmin role
 
     public class JobGradeController : ControllerBase
     {
