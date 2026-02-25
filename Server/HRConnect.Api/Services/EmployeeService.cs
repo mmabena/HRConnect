@@ -323,8 +323,14 @@ namespace HRConnect.Api.Services
             if (isIdNumberProvided && isPassportProvided)
                 throw new ValidationException("You cannot enter both ID Number and Passport Number");
 
-            if (!string.IsNullOrWhiteSpace(employeeRequestDto.IdNumber) && employeeRequestDto.IdNumber.Length != 13)
-                throw new ValidationException("ID Number must be 13 digits long");
+            if (!string.IsNullOrWhiteSpace(employeeRequestDto.IdNumber))
+            {
+                if (employeeRequestDto.IdNumber.Length != 13)
+                    throw new ValidationException("ID Number must be 13 digits long and must contain digits only");
+
+                if (!employeeRequestDto.IdNumber.All(char.IsDigit))
+                    throw new ValidationException("ID Number must contain digits only");
+            }
 
             if (string.IsNullOrWhiteSpace(employeeRequestDto.Name))
                 throw new ValidationException("Employee name is required");
@@ -346,9 +352,6 @@ namespace HRConnect.Api.Services
 
             if (string.IsNullOrWhiteSpace(employeeRequestDto.ContactNumber))
                 throw new ValidationException("Employee contact number is required");
-
-            if (employeeRequestDto.ContactNumber.Length != 10)
-                throw new ValidationException("Contact number must be 10 digits long");
 
             if (!Enum.IsDefined<Title>(employeeRequestDto.Title))
                 throw new ValidationException("Employee Title is invalid");
@@ -431,10 +434,14 @@ namespace HRConnect.Api.Services
                     throw new ValidationException("Gender must be either Male or Female");
 
             }
-            if (!string.IsNullOrWhiteSpace(employeeRequestDto.TaxNumber) &&
-                employeeRequestDto.TaxNumber.Length != 10)
+
+            if (!string.IsNullOrWhiteSpace(employeeRequestDto.TaxNumber))
             {
-                throw new ValidationException("Tax Number must be 10 digits long");
+                if (employeeRequestDto.TaxNumber.Length != 10)
+                    throw new ValidationException("Tax Number must be 10 digits long and must contain digits only");
+
+                if (!employeeRequestDto.TaxNumber.All(char.IsDigit))
+                    throw new ValidationException("Tax Number must contain digits only");
             }
 
         }
@@ -451,7 +458,6 @@ namespace HRConnect.Api.Services
             if (employeeRequestDto.MonthlySalary >= 100000)
                 throw new ValidationException("Monthly salary must not exceed 100 000");
         }
-
         /// <summary>
         /// Checks for duplicate records when updating an employee.
         /// </summary>
@@ -482,14 +488,13 @@ namespace HRConnect.Api.Services
             if (string.IsNullOrWhiteSpace(CareerMangerId))
                 return;
 
-            if (CareerMangerId ==  EmployeeId)
+            if (CareerMangerId == EmployeeId)
                 throw new BusinessRuleException("Employee cannot be their own Career Manager");
-            
+
             var manager = await _employeeRepo.GetEmployeeByIdAsync(CareerMangerId);
 
             if (manager == null)
                 throw new BusinessRuleException("Career Manager must be an existing Employee");
-                
         }
     }
 }
