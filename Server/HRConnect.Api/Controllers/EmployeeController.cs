@@ -10,7 +10,7 @@ namespace HRConnect.Api.Controllers
     using Microsoft.AspNetCore.Authorization;
     [Route("api/employee")]
     [ApiController]
-    [Authorize(Roles = "SuperUser")]
+    [Authorize(Policy = "SuperUserOnly")]
     public class EmployeeController : ControllerBase
     {
         private readonly IEmployeeService _employeeService;
@@ -43,6 +43,12 @@ namespace HRConnect.Api.Controllers
             }
             return Ok(employee);
         }
+    /// <summary>
+    /// Retrieves a single employee by their Employee email.
+    /// </summary>
+    /// <param name="employeeEmail">The employee email</param>
+    /// <returns>The employee with the same Employee email provided as EmployeeDTODto object or NotFound if the Employee Id does not exist</returns>
+    [Authorize(Policy = "NormalUserOnly")]
     [HttpGet("email/{employeeEmail}")]
     public async Task<IActionResult> GetEmployeeByEmail(string employeeEmail)
     {
