@@ -1,7 +1,7 @@
 import { useEffect, useState,useRef } from "react";
 import axios from "axios";
 
-import CompanyManagementHeader from "../../Components/companyManagement/companyManagementHeader";
+import CompanyManagementHeader from "../../Components/CompanyManagement/companyManagementHeader";
 
 import "./ProjectionCalculator.css";
 

@@ -59,6 +59,9 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
   ]);
 
   useEffect(() => {
+    if(currentUser) {
+
+    }
     const token = JSON.parse(localStorage.getItem('currentUser')).token;
     const email = JSON.parse(localStorage.getItem('currentUser')).user.email;
     try {

@@ -119,7 +119,8 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorizationBuilder()
     .AddPolicy("SuperUserOnly", policy => policy.RequireRole("SuperUser"))
-    .AddPolicy("NormalUserOnly", policy => policy.RequireRole("NormalUser"));
+    .AddPolicy("NormalUserOnly", policy => policy.RequireRole("NormalUser"))
+    .AddPolicy("SuperOrNormalUser", policy => policy.RequireRole("SuperUser", "NormalUser"));
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();

@@ -6,7 +6,7 @@ import AddEmployee from "./Components/AddEmployee";
 import EditEmployee from "./Components/EditEmployee";
 import MenuBar from "./Components/MenuBar";
 import AddCompany from "./addCompany";
-import EditCompany from "./Components/companyManagement/editCompany";
+import EditCompany from "./Components/CompanyManagement/editCompany";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
