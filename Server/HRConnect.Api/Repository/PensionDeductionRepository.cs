@@ -10,9 +10,7 @@ namespace HRConnect.Api.Repository
   using Microsoft.EntityFrameworkCore;
   public class PensionDeductionRepository(ApplicationDBContext context) : IPensionDeductionRepository
   {
-    // ============================
     // Pension Funds (for deduction)
-    // ============================
 
     public async Task<List<PensionFund>> GetAllPensionFundsWithOptionsAsync()
     {
