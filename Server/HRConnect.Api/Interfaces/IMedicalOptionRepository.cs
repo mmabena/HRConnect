@@ -16,8 +16,6 @@
     
     Task<List<IGrouping<int, MedicalOption>>> GetGroupedMedicalOptionsAsync();
     Task<MedicalOption?> GetMedicalOptionByIdAsync(int id);
-    Task<MedicalOption?> UpdateSalaryBracketAsync(int id, 
-      UpdateMedicalOptionSalaryBracketRequestDto requestDto);
     Task<MedicalOption?> GetMedicalOptionCategoryByIdAsync(int id);
     Task<List<MedicalOption>> GetMedicalOptionsByIdsAsync(List<int> ids);
     Task<MedicalOptionCategory?> GetCategoryByIdAsync(int id);

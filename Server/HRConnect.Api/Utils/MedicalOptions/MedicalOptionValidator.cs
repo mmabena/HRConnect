@@ -183,11 +183,11 @@
     {
       // Determine if option has MSA and Principal based on database
       var hasMsa = dbOption.MonthlyMsaContributionAdult.HasValue &&
-                   dbOption.MonthlyMsaContributionAdult > 0;
+                   dbOption.MonthlyMsaContributionAdult >= 0;
       var hasPrincipal = dbOption.MonthlyRiskContributionPrincipal.HasValue &&
-                         dbOption.MonthlyRiskContributionPrincipal > 0;
+                         (dbOption.MonthlyRiskContributionPrincipal >= 0 && dbOption.MonthlyRiskContributionPrincipal is not null);
 
-      return ValidateContributionValues(entity, hasMsa, hasPrincipal);
+      return ValidateContributionValues(entity, hasMsa, hasPrincipal).IsValid;
     }
     
     /// <summary>
@@ -244,15 +244,15 @@
       UpdateMedicalOptionVariantsDto entity,
       bool hasPrincipal)
     {
-      // Adult and Child risk contributions must be > 0
-      if (entity.MonthlyRiskContributionAdult <= 0 ||
-          entity.MonthlyRiskContributionChild <= 0)
+      // Adult and Child risk contributions must be >= 0
+      if (entity.MonthlyRiskContributionAdult < 0 ||
+          entity.MonthlyRiskContributionChild < 0)
         return false;
 
       // Principal validation (if applicable)
       if (hasPrincipal &&
           (!entity.MonthlyRiskContributionPrincipal.HasValue ||
-           entity.MonthlyRiskContributionPrincipal <= 0))
+           entity.MonthlyRiskContributionPrincipal < 0 || entity.MonthlyRiskContributionPrincipal is null))
         return false;
 
       return true;
@@ -662,101 +662,110 @@ private static BulkValidationResult ValidateContributionStructureWithinVariant(
   return result;
 }
 
-/// <summary>
-/// Validates variant-specific rules
-/// </summary>
-private static BulkValidationResult ValidateVariantSpecificRules(
-  string variantName,
-  List<MedicalOption> variantOptions)
-{
-  var result = new BulkValidationResult();
-
-  try
-  {
-    if (variantName.Contains("Network"))
-    {
-      var networkValidation = ValidateNetworkVariantRules(variantOptions);
-      if (!networkValidation.IsValid)
-      {
-        result.IsValid = false;
-        result.ErrorMessage = networkValidation.ErrorMessage;
-        return result;
-      }
-    }
-
-    if (variantName.Contains("Plus"))
-    {
-      var plusValidation = ValidatePlusVariantRules(variantOptions);
-      if (!plusValidation.IsValid)
-      {
-        result.IsValid = false;
-        result.ErrorMessage = plusValidation.ErrorMessage;
-        return result;
-      }
-    }
-  }
-  catch (Exception ex)
-  {
-    result.IsValid = false;
-    result.ErrorMessage = $"Variant-specific rules validation error: {ex.Message}";
-  }
-
-  return result;
-}
-
-/// <summary>
-/// Placeholder for network variant validation
-/// </summary>
-private static BulkValidationResult ValidateNetworkVariantRules(List<MedicalOption> variantOptions)
-{
-  var result = new BulkValidationResult { IsValid = true };
-  
-  // Add network-specific validation logic here
-  
-  return result;
-}
-
-/// <summary>
-/// Placeholder for plus variant validation
-/// </summary>
-private static BulkValidationResult ValidatePlusVariantRules(List<MedicalOption> variantOptions)
-{
-  var result = new BulkValidationResult { IsValid = true };
-  
-  // Add plus-specific validation logic here
-  
-  return result;
-}
-
 #endregion
-/*
-##region Cross-Variant Validation
-    private static BulkValidationResult ValidateCrossVariantConsistency(
-  Dictionary<string, List<MedicalOption>> variantGroups)
+
+
+#region Cross-Variant Validation
+private static BulkValidationResult ValidateCrossVariantConsistency(
+    Dictionary<string, List<UpdateMedicalOptionVariantsDto>> variantGroups)
 {
-  var result = new BulkValidationResult { IsValid = true };
-  var variants = variantGroups.ToList();
-  
-  foreach (var currentVariant in variants) {
-    foreach (var otherVariant in variants) {
-      // Skip self-comparison
-      if (currentVariant.Key == otherVariant.Key) continue;
-      
-      // Check if contribution amounts are identical across all business rules
-      if ( AreContributionAmountsIdentical(currentVariant.Value, otherVariant.Value) ) {
-        result.IsValid = false;
-        result.ErrorMessage = 
-          $"Variant '{currentVariant.Key}' has identical contribution amounts as variant '{otherVariant.Key}' - variants must have distinct contribution structures";
-        return result;
-      }
+    var result = new BulkValidationResult { IsValid = true };
+    var variants = variantGroups.ToList();
+    
+    // If there is only one variant, skip cross-variant checks but still validate within variant
+    if (variantGroups.Count < 2)
+    {
+        // Still validate consistency within the single variant
+        foreach (var variant in variants)
+        {
+            var withinVariantResult = ValidateWithinVariantConsistency(variant.Value, variant.Key);
+            if (!withinVariantResult.IsValid)
+            {
+                return withinVariantResult;
+            }
+        }
+        return result; // Valid - no other variants to compare against
     }
-  }
-  
-  return result;
+
+    // Step 1: Validate consistency within each variant first
+    foreach (var variant in variants)
+    {
+        var withinVariantResult = ValidateWithinVariantConsistency(variant.Value, variant.Key);
+        if (!withinVariantResult.IsValid)
+        {
+            return withinVariantResult;
+        }
+    }
+
+    // Step 2: Cross-variant validation - compare different variants
+    foreach (var currentVariant in variants) {
+        foreach (var otherVariant in variants) {
+            // Skip self-comparison
+            if (currentVariant.Key == otherVariant.Key) continue;
+            
+            // Check if contribution amounts are identical across all business rules
+            if (AreContributionAmountsIdentical(currentVariant.Value, otherVariant.Value)) {
+                result.IsValid = false;
+                result.ErrorMessage = 
+                    $"Variant '{currentVariant.Key}' has identical contribution amounts as variant '{otherVariant.Key}' - variants must have distinct contribution structures";
+                return result;
+            }
+        }
+    }
+    
+    return result;
 }
 
+// New method to validate consistency within a single variant
+private static BulkValidationResult ValidateWithinVariantConsistency(
+    List<UpdateMedicalOptionVariantsDto> variantOptions, string variantName)
+{
+    var result = new BulkValidationResult { IsValid = true };
+    
+    if (variantOptions.Count < 2)
+    {
+        return result; // Single option is always consistent
+    }
+
+    // Sort options by MedicalOptionId for consistent comparison
+    var sortedOptions = variantOptions.OrderBy(o => o.MedicalOptionId).ToList();
+    
+    // Check for consistent contribution structure within the variant
+    var firstOption = sortedOptions.First();
+    
+    for (int i = 1; i < sortedOptions.Count; i++)
+    {
+        var currentOption = sortedOptions[i];
+        
+        // Validate that the contribution structure is consistent
+        // if first option has MSA, all options should have MSA
+        var firstHasMsa = firstOption.MonthlyMsaContributionAdult.HasValue;
+        var currentHasMsa = currentOption.MonthlyMsaContributionAdult.HasValue;
+        
+        if (firstHasMsa != currentHasMsa)
+        {
+            result.IsValid = false;
+            result.ErrorMessage = 
+                $"Inconsistent MSA structure in variant '{variantName}': Option {firstOption.MedicalOptionId} has MSA, but Option {currentOption.MedicalOptionId} does not";
+            return result;
+        }
+        
+        var firstHasPrincipal = firstOption.MonthlyRiskContributionPrincipal.HasValue;
+        var currentHasPrincipal = currentOption.MonthlyRiskContributionPrincipal.HasValue;
+        
+        if (firstHasPrincipal != currentHasPrincipal)
+        {
+            result.IsValid = false;
+            result.ErrorMessage = 
+                $"Inconsistent Principal structure in variant '{variantName}': Option {firstOption.MedicalOptionId} has Principal, but Option {currentOption.MedicalOptionId} does not";
+            return result;
+        }
+    }
+    
+    return result;
+}
 private static bool AreContributionAmountsIdentical(
-  List<MedicalOption> variant1, List<MedicalOption> variant2)
+  List<UpdateMedicalOptionVariantsDto> variant1, List<UpdateMedicalOptionVariantsDto> variant2)
 {
   // Sort options by MedicalOptionId to ensure proper comparison
   var sortedVariant1 = variant1.OrderBy(o => o.MedicalOptionId).ToList();
@@ -785,7 +794,7 @@ private static bool AreContributionAmountsIdentical(
   return true; // All amounts are identical
 }
 
-private static bool CompareRiskContributions(MedicalOption opt1, MedicalOption opt2)
+private static bool CompareRiskContributions(UpdateMedicalOptionVariantsDto opt1, UpdateMedicalOptionVariantsDto opt2)
 {
   // Principal Risk
   if (opt1.MonthlyRiskContributionPrincipal != opt2.MonthlyRiskContributionPrincipal)
@@ -806,7 +815,7 @@ private static bool CompareRiskContributions(MedicalOption opt1, MedicalOption o
   return true;
 }
 
-private static bool CompareMsaContributions(MedicalOption opt1, MedicalOption opt2)
+private static bool CompareMsaContributions(UpdateMedicalOptionVariantsDto opt1, UpdateMedicalOptionVariantsDto opt2)
 {
   // Principal MSA
   if (opt1.MonthlyMsaContributionPrincipal != opt2.MonthlyMsaContributionPrincipal)
@@ -823,29 +832,29 @@ private static bool CompareMsaContributions(MedicalOption opt1, MedicalOption op
   return true;
 }
 
-private static bool CompareTotalContributions(MedicalOption opt1, MedicalOption opt2)
+private static bool CompareTotalContributions(UpdateMedicalOptionVariantsDto opt1, UpdateMedicalOptionVariantsDto opt2)
 {
   // Principal Total
-  if (opt1.TotalMonthlyContributionPrincipal != opt2.TotalMonthlyContributionPrincipal)
+  if ((decimal)opt1.TotalMonthlyContributionsPrincipal != opt2.TotalMonthlyContributionsPrincipal)
     return false;
     
   // Adult Total  
-  if (opt1.TotalMonthlyContributionAdult != opt2.TotalMonthlyContributionAdult)
+  if (opt1.TotalMonthlyContributionsAdult != opt2.TotalMonthlyContributionsAdult)
     return false;
     
   // Child Total
-  if (opt1.TotalMonthlyContributionChild != opt2.TotalMonthlyContributionChild)
+  if (opt1.TotalMonthlyContributionsChild != opt2.TotalMonthlyContributionsChild)
     return false;
     
   // Child2 Total (if exists)
-  if (opt1.TotalMonthlyContributionChild2 != opt2.TotalMonthlyContributionChild2)
+  if (opt1.TotalMonthlyContributionsChild2 != opt2.TotalMonthlyContributionsChild2)
     return false;
     
   return true;
 }
 
 #endregion
-*/
+
 
 #region Comprehensive Category Variant Validation
 
@@ -908,7 +917,7 @@ public static async Task<BulkValidationResult> ValidateAllCategoryVariantsCompre
         bulkUpdateDto, 
         repository,
         categoryId, dbData);
-
+      
       if (!variantValidation.IsValid) {
         result.IsValid = false;
         result.ErrorMessage = $"Variant '{variantGroup.Key}' validation failed: {variantValidation.ErrorMessage}";
@@ -916,7 +925,13 @@ public static async Task<BulkValidationResult> ValidateAllCategoryVariantsCompre
       }
     }
 
-    // 5. SUCCESS
+    // 5. Validate for Cross-variant Consistency (Looking for duplication of contributions within category across variants)
+    if (!ValidateCrossVariantConsistency(variantGroups).IsValid)
+    {
+      return result;
+    }
+    
+    // 6. SUCCESS
     result.IsValid = true;
   }
   catch (Exception ex) {
@@ -1049,6 +1064,15 @@ private static async Task<BulkValidationResult> ValidateSingleVariantWithExistin
     foreach (var dto in variantUpdateDtos) {
       var dbOption = dbData.FirstOrDefault(o => o.MedicalOptionId == dto.MedicalOptionId);
       if (dbOption != null && ((dto.SalaryBracketMin.HasValue || dto.SalaryBracketMin >= 0) || (dto.SalaryBracketMax.HasValue || dto.SalaryBracketMax > 0) )) {
+        //if first option min must be 0
+        if ((dto == variantUpdateDtos.First() ) && dto.SalaryBracketMin != 0)
+        {
+          result.IsValid = false;
+          result.ErrorMessage =
+            $"First option's Salary Bracket Min cannot be greater than 0 for '{variantName}'";
+          return result;
+        }
+        //else continue
         salaryBracketRecords.Add(new SalaryBracketValidatorRecord(
           dto.MedicalOptionId, dbOption.MedicalOptionName, dto.SalaryBracketMin, dto.SalaryBracketMax));
       }
@@ -1247,11 +1271,13 @@ private static BulkValidationResult ValidateVariantSpecificBusinessRules(
 /// CORE CONTRIBUTION VALIDATION LOGIC
 /// Updated for correct Network Choice handling (Risk + Principal, NO MSA)
 /// </summary>
-public static bool ValidateContributionValues(
+public static BulkValidationResult ValidateContributionValues(
   UpdateMedicalOptionVariantsDto entity,
   bool hasMsa,
   bool hasPrincipal)
 {
+  var result = new BulkValidationResult() { IsValid = true };
+  
   // Determine variant type based on contribution structure
   var isRiskOnlyVariant = !hasMsa && !hasPrincipal;           // First Choice, Vital
   var isRiskPlusPrincipalVariant = !hasMsa && hasPrincipal;     // Network Choice
@@ -1259,153 +1285,188 @@ public static bool ValidateContributionValues(
   var isMsaWithPrincipalVariant = hasMsa && hasPrincipal;      // Essential
 
   // Validate Risk contributions (all options must have these)
-  if (!ValidateRiskContributions(entity, hasPrincipal))
-    return false;
+  if (!ValidateRiskContributions(entity, hasPrincipal)) {
+    result.IsValid = false;
+    result.ErrorMessage = "Risk contributions validation failed";
+    return result;
+  }
 
   // Apply validation logic based on variant type
   if (isRiskOnlyVariant) {
     // Risk-only variants: Risk should equal Total
-    return ValidateRiskOnlyTotalContributions(entity);
+    if (!ValidateRiskOnlyTotalContributions(entity).IsValid) {
+      result.IsValid = false;
+      result.ErrorMessage = "Risk-only variant: Risk contribution must equal Total contribution";
+    }
   } else if (isRiskPlusPrincipalVariant) {
     // Risk + Principal variants: Risk should equal Total
-    return ValidateRiskPlusPrincipalTotalContributions(entity);
+    if (!ValidateRiskPlusPrincipalTotalContributions(entity).IsValid) {
+      result.IsValid = false;
+      result.ErrorMessage = "Risk + Principal variant: Risk contribution must equal Total contribution";
+    }
   } else if (isMsaOnlyVariant) {
     // MSA-only variants: Risk + MSA should equal Total
-    return ValidateMsaOnlyTotalContributions(entity);
+    if (!ValidateMsaOnlyTotalContributions(entity).IsValid) {
+      result.IsValid = false;
+      result.ErrorMessage = "MSA-only variant: Risk + MSA contributions must equal Total contribution";
+    }
   } else if (isMsaWithPrincipalVariant) {
     // MSA + Principal variants: Risk + MSA should equal Total
-    return ValidateMsaWithPrincipalTotalContributions(entity);
+    if (!ValidateMsaWithPrincipalTotalContributions(entity).IsValid) {
+      result.IsValid = false;
+      result.ErrorMessage = "MSA + Principal variant: Risk + MSA contributions must equal Total contribution";
+    }
+  } else {
+    result.IsValid = false;
+    result.ErrorMessage = "Unknown variant type - unable to determine contribution validation rules";
   }
 
-  return false; // Unknown variant type
+  return result;
 }
 
 /// <summary>
 /// VALIDATION FOR RISK + PRINCIPAL VARIANTS (Network Choice)
 /// Risk should equal Total (NO MSA validation)
 /// </summary>
-private static bool ValidateRiskPlusPrincipalTotalContributions(UpdateMedicalOptionVariantsDto entity)
+private static BulkValidationResult ValidateRiskPlusPrincipalTotalContributions(UpdateMedicalOptionVariantsDto entity)
 {
+  var result = new BulkValidationResult { IsValid = true };
   const decimal tolerance = 0.01m;
 
   // Adult: Risk should equal Total
-  if (Math.Abs((decimal)(entity.MonthlyRiskContributionAdult - entity.TotalMonthlyContributionsAdult)) > tolerance)
-    return false;
+  if (Math.Abs((decimal)(entity.MonthlyRiskContributionAdult - entity.TotalMonthlyContributionsAdult)) > tolerance) {
+    result.IsValid = false;
+    result.ErrorMessage = "Adult: Risk contribution must equal Total contribution for Network Choice variant";
+    return result;
+  }
 
   // Child: Risk should equal Total
-  if (Math.Abs((decimal)(entity.MonthlyRiskContributionChild - entity.TotalMonthlyContributionsChild)) > tolerance)
-    return false;
+  if (Math.Abs((decimal)(entity.MonthlyRiskContributionChild - entity.TotalMonthlyContributionsChild)) > tolerance) {
+    result.IsValid = false;
+    result.ErrorMessage = "Child: Risk contribution must equal Total contribution for Network Choice variant";
+    return result;
+  }
 
   // Principal: Risk should equal Total (must be present)
   if (!entity.MonthlyRiskContributionPrincipal.HasValue || !entity.TotalMonthlyContributionsPrincipal.HasValue) {
-    return false; // Principal contributions required for Network Choice
+    result.IsValid = false;
+    result.ErrorMessage = "Principal contributions are required for Network Choice variant";
+    return result;
   }
 
-  if (Math.Abs(entity.MonthlyRiskContributionPrincipal.Value - entity.TotalMonthlyContributionsPrincipal.Value) > tolerance)
-    return false;
-
-  // Child2: Risk should equal Total (if present)
-  /*if (entity.MonthlyRiskContributionChild2.HasValue && entity.TotalMonthlyContributionsChild2.HasValue) {
-    if (Math.Abs(entity.MonthlyRiskContributionChild2.Value - entity.TotalMonthlyContributionsChild2.Value) > tolerance)
-      return false;
+  if (Math.Abs(entity.MonthlyRiskContributionPrincipal.Value - entity.TotalMonthlyContributionsPrincipal.Value) > tolerance) {
+    result.IsValid = false;
+    result.ErrorMessage = "Principal: Risk contribution must equal Total contribution for Network Choice variant";
+    return result;
   }
-*/
-  return true;
+
+  return result;
 }
 
 /// <summary>
 /// VALIDATION FOR RISK-ONLY VARIANTS (First Choice, Vital)
 /// Risk = Total for Adult, Child, and Child2 (if present)
 /// </summary>
-private static bool ValidateRiskOnlyTotalContributions(UpdateMedicalOptionVariantsDto entity)
+private static BulkValidationResult ValidateRiskOnlyTotalContributions(UpdateMedicalOptionVariantsDto entity)
 {
+  var result = new BulkValidationResult { IsValid = true };
   const decimal tolerance = 0.01m;
 
   // Adult: Risk should equal Total
-  if (Math.Abs((decimal)(entity.MonthlyRiskContributionAdult - entity.TotalMonthlyContributionsAdult)) > tolerance)
-    return false;
-
-  // Child: Risk should equal Total
-  if (Math.Abs((decimal)(entity.MonthlyRiskContributionChild - entity.TotalMonthlyContributionsChild)) > tolerance)
-    return false;
-
-  // Child2: Risk should equal Total (if present)
-  if ((entity.MonthlyRiskContributionChild2.HasValue && entity.MonthlyRiskContributionChild2 > 0) && (entity.TotalMonthlyContributionsChild2.HasValue && entity.TotalMonthlyContributionsChild2 > 0)) {
-    if (Math.Abs(entity.MonthlyRiskContributionChild2.Value - entity.TotalMonthlyContributionsChild2.Value) > tolerance)
-      return false;
+  if (Math.Abs((decimal)(entity.MonthlyRiskContributionAdult - entity.TotalMonthlyContributionsAdult)) > tolerance) {
+    result.IsValid = false;
+    result.ErrorMessage = "Adult: Risk contribution must equal Total contribution for Risk-only variant";
+    return result;
   }
 
-  return true;
+  // Child: Risk should equal Total
+  if (Math.Abs((decimal)(entity.MonthlyRiskContributionChild - entity.TotalMonthlyContributionsChild)) > tolerance) {
+    result.IsValid = false;
+    result.ErrorMessage = "Child: Risk contribution must equal Total contribution for Risk-only variant";
+    return result;
+  }
+
+  // Child2: Risk should equal Total (if present)
+  if ((entity.MonthlyRiskContributionChild2.HasValue && entity.MonthlyRiskContributionChild2 > 0 && entity.MonthlyRiskContributionChild2 is not null) && 
+      (entity.TotalMonthlyContributionsChild2.HasValue && entity.TotalMonthlyContributionsChild2 > 0 && entity.TotalMonthlyContributionsChild2 is not null)) {
+    if (Math.Abs(entity.MonthlyRiskContributionChild2.Value - entity.TotalMonthlyContributionsChild2.Value) > tolerance) {
+      result.IsValid = false;
+      result.ErrorMessage = "Child2: Risk contribution must equal Total contribution for Risk-only variant";
+      return result;
+    }
+  }
+
+  return result;
 }
 
 /// <summary>
 /// VALIDATION FOR MSA-ONLY VARIANTS (Alliance, Double)
 /// Risk + MSA should equal Total (no Principal validation)
 /// </summary>
-private static bool ValidateMsaOnlyTotalContributions(UpdateMedicalOptionVariantsDto entity)
+private static BulkValidationResult ValidateMsaOnlyTotalContributions(UpdateMedicalOptionVariantsDto entity)
 {
+  var result = new BulkValidationResult { IsValid = true };
   const decimal tolerance = 0.01m;
 
   // Adult: Risk + MSA should equal Total
   var adultTotal = entity.MonthlyRiskContributionAdult + entity.MonthlyMsaContributionAdult.Value;
-  if (Math.Abs((decimal)(adultTotal - entity.TotalMonthlyContributionsAdult)) > tolerance)
-    return false;
+  if (Math.Abs((decimal)(adultTotal - entity.TotalMonthlyContributionsAdult)) > tolerance) {
+    result.IsValid = false;
+    result.ErrorMessage = "Adult: Risk + MSA contributions must equal Total contribution for MSA-only variant";
+    return result;
+  }
 
   // Child: Risk + MSA should equal Total
   var childTotal = entity.MonthlyRiskContributionChild + entity.MonthlyMsaContributionChild.Value;
-  if (Math.Abs((decimal)(childTotal - entity.TotalMonthlyContributionsChild)) > tolerance)
-    return false;
-
-  // Child2: Risk + MSA should equal Total (if present)
-  /*if (entity.MonthlyRiskContributionChild2.HasValue && entity.MonthlyMsaContributionChild2.HasValue) {
-    var child2Total = entity.MonthlyRiskContributionChild2.Value + entity.MonthlyMsaContributionChild2.Value;
-    if (entity.TotalMonthlyContributionsChild2.HasValue) {
-      if (Math.Abs(child2Total - entity.TotalMonthlyContributionsChild2.Value) > tolerance)
-        return false;
-    }
+  if (Math.Abs((decimal)(childTotal - entity.TotalMonthlyContributionsChild)) > tolerance) {
+    result.IsValid = false;
+    result.ErrorMessage = "Child: Risk + MSA contributions must equal Total contribution for MSA-only variant";
+    return result;
   }
-  */
 
-  return true;
+  return result;
 }
 
 /// <summary>
 /// VALIDATION FOR MSA + PRINCIPAL VARIANTS (Essential)
 /// Risk + MSA should equal Total (including Principal validation)
 /// </summary>
-private static bool ValidateMsaWithPrincipalTotalContributions(UpdateMedicalOptionVariantsDto entity)
+private static BulkValidationResult ValidateMsaWithPrincipalTotalContributions(UpdateMedicalOptionVariantsDto entity)
 {
+  var result = new BulkValidationResult { IsValid = true };
   const decimal tolerance = 0.01m;
 
   // Adult: Risk + MSA should equal Total
   var adultTotal = entity.MonthlyRiskContributionAdult + entity.MonthlyMsaContributionAdult.Value;
-  if (Math.Abs((decimal)(adultTotal - entity.TotalMonthlyContributionsAdult)) > tolerance)
-    return false;
+  if (Math.Abs((decimal)(adultTotal - entity.TotalMonthlyContributionsAdult)) > tolerance) {
+    result.IsValid = false;
+    result.ErrorMessage = "Adult: Risk + MSA contributions must equal Total contribution for MSA + Principal variant";
+    return result;
+  }
 
   // Child: Risk + MSA should equal Total
   var childTotal = entity.MonthlyRiskContributionChild + entity.MonthlyMsaContributionChild.Value;
-  if (Math.Abs((decimal)(childTotal - entity.TotalMonthlyContributionsChild)) > tolerance)
-    return false;
+  if (Math.Abs((decimal)(childTotal - entity.TotalMonthlyContributionsChild)) > tolerance) {
+    result.IsValid = false;
+    result.ErrorMessage = "Child: Risk + MSA contributions must equal Total contribution for MSA + Principal variant";
+    return result;
+  }
 
   // Principal: Risk + MSA should equal Total (must be present)
   if (!entity.MonthlyRiskContributionPrincipal.HasValue || !entity.MonthlyMsaContributionPrincipal.HasValue || !entity.TotalMonthlyContributionsPrincipal.HasValue) {
-    return false; // Principal contributions required for Essential
+    result.IsValid = false;
+    result.ErrorMessage = "Principal contributions (Risk, MSA, and Total) are required for Essential variant";
+    return result;
   }
 
   var principalTotal = entity.MonthlyRiskContributionPrincipal.Value + entity.MonthlyMsaContributionPrincipal.Value;
-  if (Math.Abs(principalTotal - entity.TotalMonthlyContributionsPrincipal.Value) > tolerance)
-    return false;
-
-  // Child2: Risk + MSA should equal Total (if present)
- /* if (entity.MonthlyRiskContributionChild2.HasValue && entity.MonthlyMsaContributionChild2.HasValue) {
-    var child2Total = entity.MonthlyRiskContributionChild2.Value + entity.MonthlyMsaContributionChild2.Value;
-    if (entity.TotalMonthlyContributionsChild2.HasValue) {
-      if (Math.Abs(child2Total - entity.TotalMonthlyContributionsChild2.Value) > tolerance)
-        return false; 
-    }
+  if (Math.Abs(principalTotal - entity.TotalMonthlyContributionsPrincipal.Value) > tolerance) {
+    result.IsValid = false;
+    result.ErrorMessage = "Principal: Risk + MSA contributions must equal Total contribution for MSA + Principal variant";
+    return result;
   }
-*/
-  return true;
+
+  return result;
 }
 
 /// <summary>

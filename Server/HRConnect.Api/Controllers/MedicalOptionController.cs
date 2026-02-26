@@ -23,23 +23,18 @@
     //[Authorize(Roles = "SuperUser")]
     public async Task<IActionResult> GetGroupedMedicalOptions()
     {
-      //TODO: Wrap in a try catch block for error handling
-      try
+      //with middleware global exception handling, we can remove the try catch block and just have the execution logic here.
+      //The middleware will catch any unhandled exceptions and return a standardized error response.
+
+      var groupedOptions = await _medicalOptionService
+        .GetGroupedMedicalOptionsAsync();
+
+      if (groupedOptions == null)
       {
-        var groupedOptions = await _medicalOptionService
-          .GetGroupedMedicalOptionsAsync();
-        
-        if(groupedOptions == null)
-        {
-          return NotFound();
-        }
-        
-        return Ok(groupedOptions);
+        return NotFound();
       }
-      catch(Exception ex)
-      {
-        return StatusCode(503, ex.Message); 
-      }
+
+      return Ok(groupedOptions);
     }
 
     [HttpPut("{optionId}/salary-bracket")]
@@ -48,53 +43,13 @@
       int optionId, 
       [FromBody] IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto)
     {
-      /*
-      try
-      {
-        var results = await _medicalOptionService.UpdateSalaryBracketAsync(optionId,
-          requestDto);
+      var result =
+        await _medicalOptionService.BulkUpdateMedicalOptionsByCategoryAsync(optionId,
+          bulkUpdateDto);
 
-        if (results == null) return NotFound();
+      if (result == null || !result.Any()) return NotFound();
 
-        return Created();
-      } // TODO : Cater for other Exception Types that are thrown in the service layer
-      catch (ArgumentException ex)
-      {
-        ModelState.AddModelError("Validation", ex.Message);
-        return ValidationProblem(ModelState);
-      }
-      catch (InvalidOperationException ex)
-      {
-        //ModelState.AddModelError("Unauthorized Operation", ex.Message);
-        return NotFound($"Unauthorized operation: {ex.Message}");
-      }
-      */
-      
-      // --- New Implementation
-      try
-      {
-        var results = await _medicalOptionService.BulkUpdateMedicalOptionsByCategoryAsync(optionId, bulkUpdateDto);
-
-        if (results == null || !results.Any()) 
-          return NotFound();
-
-        return Ok(results);
-      }
-      catch (ArgumentException ex)
-      {
-        ModelState.AddModelError("Validation", ex.Message);
-        return ValidationProblem(ModelState);
-      }
-      catch (InvalidOperationException ex)
-      {
-        ModelState.AddModelError("Validation", ex.Message);
-        return BadRequest(ex.Message);
-      }
-      catch (Exception ex)
-      {
-        // Log the exception
-        return StatusCode(500, "An unexpected error occurred during bulk update");
-      }
+      return NoContent();
     }
   }
 }

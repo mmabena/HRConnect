@@ -11,6 +11,7 @@
   using HRConnect.Api.Utils;
   using HRConnect.Api.Utils.Enums;
   using HRConnect.Api.Utils.Factories;
+  using Middleware;
   using Models.MedicalOptions.Records;
   using Utils.Enums.Mappers;
   using Utils.MedicalOptions;
@@ -54,9 +55,10 @@
     
     public MedicalOptionService(IMedicalOptionRepository medicalOptionRepository)
     {
-      _medicalOptionRepository = medicalOptionRepository;
+      _medicalOptionRepository = medicalOptionRepository ??
+                                 throw new ArgumentNullException(nameof(medicalOptionRepository));
     }
-    
+
     /// <summary>
     /// Retrieves medical options grouped by their categories in a client-friendly DTO format.
     /// This method uses the repository to get grouped medical options and transforms them
@@ -164,123 +166,127 @@
     /// </exception>
     public async Task<List<MedicalOptionCategoryDto>> GetGroupedMedicalOptionsAsync()
     {
-      var groupedOptions = await _medicalOptionRepository
-        .GetGroupedMedicalOptionsAsync();
-      return groupedOptions.Select(group => group
-        .ToMedicalOptionCategoryDto()).ToList();
+      var groupedOptions = await _medicalOptionRepository.GetGroupedMedicalOptionsAsync();
+
+      return groupedOptions.Select(group => group.ToMedicalOptionCategoryDto()).ToList();
     }
 
-    public async Task<MedicalOption?> UpdateSalaryBracketAsync(
-      int id, UpdateMedicalOptionSalaryBracketRequestDto requestDto)
-    {
-      //string filterName = null, selectedVariant = null;
-      //Task<List<MedicalOption?>> medicalOptionsVariants;
-      var existingOption = await _medicalOptionRepository.GetMedicalOptionByIdAsync(id);
-      if (existingOption == null) return null;
-      
-      //TODO : Now I need to validate the Min and Max amount if they are valid
-      
-      // Checking Category Name
-      if (_restrictedPolicyCategoryUpdates
-          .Contains(existingOption.MedicalOptionCategory?.MedicalOptionCategoryName)) 
-        throw new InvalidOperationException("Salary bracket cannot be updated for this category");
-
-      //Checking Min and Max from request
-      if (requestDto.SalaryBracketMin < 0 ) throw 
-        new ArgumentException("Minimum salary must be greater than 0.");
-      
-      if (requestDto.SalaryBracketMax < requestDto.SalaryBracketMin) throw 
-        new ArgumentException("Maximum salary must be greater than minimum salary.");
-      
-      if (requestDto.SalaryBracketMin > requestDto.SalaryBracketMax) throw 
-        new ArgumentException("Minimum salary cannot be greater than or equal to Maximum salary.");
-      
-      //refactored Version - Single factory handles all cases
-      var (categoryName, variantName, filterName) = MedicalOptionVariantFactory
-        .GetVariantInfoSafe(existingOption);
-          
-      // Get trimmed down filtered options variants
-      var filteredTrimmedDownVariants = await MedicalOptionUtils
-        .GetFilteredOptionVariant(filterName, categoryName, _medicalOptionRepository, 
-          existingOption);
-
-      if (filteredTrimmedDownVariants == null)
-      {
-        throw new InvalidOperationException("No variants found for the given category and " +
-                                            "variant.");
-      }
-      
-      var isUpdatePayloadValid = MedicalOptionUtils.ValidateSalaryBracketUpdateRequest(
-        filteredTrimmedDownVariants, id, requestDto, existingOption);
-      
-      if (!isUpdatePayloadValid)
-      {
-        throw new InvalidOperationException("Salary bracket update is not valid.");
-      }
-      
-      return await _medicalOptionRepository.UpdateSalaryBracketAsync(id, requestDto);
-    }
-    
+    /// <summary>
+    /// Retrieves a specific medical option by its ID.
+    /// </summary>
+    /// <param name="id">The medical option ID to retrieve.</param>
+    /// <returns>The Medical option if found; otherwise, null.</returns>
+    /// <exception cref="ArgumentException">Thrown when the ID is invalid.</exception>
     public async Task<MedicalOption?> GetMedicalOptionByIdAsync(int id)
     {
       return await _medicalOptionRepository.GetMedicalOptionByIdAsync(id);
     }
 
+    /// <summary>
+    /// Retrieves a specific medical option category by its ID.
+    /// </summary>
+    /// <param name="categoryId">The category ID</param>
+    /// <returns>List of medical options</returns>
+    /// <exception cref="ArgumentException">Thrown when category ID is invalid</exception>
     public async Task<MedicalOption?> GetMedicalOptionCategoryByIdAsync(int categoryId)
     {
-      return await _medicalOptionRepository.GetMedicalOptionCategoryByIdAsync(categoryId);
+      var options = await _medicalOptionRepository.GetAllOptionsUnderCategoryAsync(categoryId);
+
+      return options.FirstOrDefault() ?? throw new KeyNotFoundException($"no medical option found for category {categoryId}");
     }
 
+    /// <summary>
+    /// Checks if a medical option category exists.
+    /// </summary>
+    /// <param name="categoryId">The category ID</param>
+    /// <returns>True if category exists</returns>
+    /// <exception cref="ArgumentException">Thrown when category ID is invalid</exception>
     public async Task<bool> MedicalOptionCategoryExistsAsync(int categoryId)
     {
       return await _medicalOptionRepository.MedicalOptionCategoryExistsAsync(categoryId);
     }
 
+    /// <summary>
+    /// Checks if a medical option exists.
+    /// </summary>
+    /// <param name="optionId">The option ID</param>
+    /// <returns>True if option exists</returns>
+    /// <exception cref="ArgumentException">Thrown when option ID is invalid</exception>
     public async Task<bool> MedicalOptionExistsAsync(int optionId)
     {
       return await _medicalOptionRepository.MedicalOptionExistsAsync(optionId);
     }
 
+    /// <summary>
+    /// Gets all options under a specific category.
+    /// </summary>
+    /// <param name="categoryId">The category ID</param>
+    /// <returns>List of medical options</returns>
+    /// <exception cref="ArgumentException">Thrown when category ID is invalid</exception>
     public async Task<List<MedicalOption>> GetAllOptionsUnderCategoryAsync(int categoryId)
     {
       return await _medicalOptionRepository.GetAllOptionsUnderCategoryAsync(categoryId);
     }
 
+    /// <summary>
+    /// Checks if a medical option exists within a specific category.
+    /// </summary>
+    /// <param name="categoryId">The category ID</param>
+    /// <param name="optionId">The option ID</param>
+    /// <returns>True if option exists in category</returns>
+    /// <exception cref="ArgumentException">Thrown when IDs are invalid</exception>
     public async Task<bool> MedicalOptionExistsWithinCategoryAsync(int categoryId, int optionId)
     {
-      // This method assume the category ID and option ID is valid
       return await _medicalOptionRepository.MedicalOptionExistsWithinCategoryAsync(categoryId, optionId);
     }
 
     /// <summary>
-    /// Bulk update medical options by category with comprehensive validation
+    /// Bulk update medical options by category with comprehensive validation.
     /// </summary>
+    /// <param name="categoryId">The category ID</param>
+    /// <param name="bulkUpdateDto">The bulk update data</param>
+    /// <returns>List of updated medical options</returns>
+    /// <exception cref="ValidationException">Thrown when validation fails</exception>
+    /// <exception cref="InvalidOperationException">Thrown when business rules are violated</exception>
     public async Task<IReadOnlyList<MedicalOptionDto>> BulkUpdateMedicalOptionsByCategoryAsync(
       int categoryId,
       IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto)
     {
-      try
+      // Validate input parameters
+      if (categoryId <= 0)
       {
-        // Get existing data for validation
-        var dbData = await _medicalOptionRepository.GetAllOptionsUnderCategoryAsync(categoryId);
-    
-        // Perform comprehensive validation using the new validator
-        var validationResult = await MedicalOptionValidator.ValidateAllCategoryVariantsComprehensiveAsync(
-          categoryId, bulkUpdateDto, _medicalOptionRepository, dbData);
+        throw new ArgumentException("Category ID must be greater than 0", nameof(categoryId));
+      }
 
-        if (!validationResult.IsValid)
+      if (bulkUpdateDto == null || bulkUpdateDto.Count == 0)
+      {
+        throw new ArgumentException("Bulk update data cannot be null or empty", nameof(bulkUpdateDto));
+      }
+
+      // Get existing data for validation
+      var dbData = await _medicalOptionRepository.GetAllOptionsUnderCategoryAsync(categoryId);
+
+      // Perform comprehensive validation using the existing validator
+      var validationResult = await MedicalOptionValidator.ValidateAllCategoryVariantsComprehensiveAsync(
+        categoryId, bulkUpdateDto, _medicalOptionRepository, dbData);
+
+      if (!validationResult.IsValid)
+      {
+        // Create validation errors dictionary with the error message
+        var validationErrors = new Dictionary<string, string[]>();
+
+        if (!string.IsNullOrWhiteSpace(validationResult.ErrorMessage))
         {
-          throw new InvalidOperationException(validationResult.ErrorMessage ?? "Validation failed");
+          validationErrors["Validation"] = new[] { validationResult.ErrorMessage };
         }
 
-        // If validation passes, proceed with bulk update
-        return await _medicalOptionRepository.BulkUpdateByCategoryIdAsync(categoryId, bulkUpdateDto);
+        throw new ValidationException(
+          validationResult.ErrorMessage ?? "Validation failed",
+          validationErrors);
       }
-      catch (Exception ex)
-      {
-        //_logger.LogError(ex, "Error bulk updating medical options for category {CategoryId}", categoryId);
-        throw;
-      }
+
+      // If validation passes, proceed with bulk update
+      return await _medicalOptionRepository.BulkUpdateByCategoryIdAsync(categoryId, bulkUpdateDto);
     }
-  }  
+  }
 }

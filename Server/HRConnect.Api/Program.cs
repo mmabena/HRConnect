@@ -2,6 +2,7 @@ using System;
 using System.Text;
 using HRConnect.Api.Data;
 using HRConnect.Api.Interfaces;
+using HRConnect.Api.Middleware;
 using HRConnect.Api.Models;
 using HRConnect.Api.Repository;
 using HRConnect.Api.Utils;
@@ -136,6 +137,8 @@ if (app.Environment.IsDevelopment())
 
 // app.UseHttpsRedirection();
 app.UseCors("AllowReact");
+// Adding Global Exception Handler
+app.UseGlobalExceptionHandler();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
