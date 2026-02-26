@@ -6,13 +6,13 @@ namespace HRConnect.Api.Services
   using System;
   using System.Threading.Tasks;
 
-  // Service that calculates and updates pension deductions (ContributionAmount) for employees.
+  // calculates and updates pension deductions (ContributionAmount) for employees.
 
   public class PensionFundDeductionService(IPensionDeductionRepository repository) : IPensionFundDeductionService
   {
     private readonly IPensionDeductionRepository _repository = repository;
 
-    // Processes all pension deductions for employees.
+    
     // Only runs on the 26th of each month. 
     public async Task ProcessMonthlyPensionDeductionsAsync()
     {
@@ -41,11 +41,11 @@ namespace HRConnect.Api.Services
             fund.PensionOptions.ContributionPercentage
         );
 
-        // Store the calculated amount in the PensionFund table
+        
         fund.ContributionAmount = contributionAmount;
       }
 
-      // Save all updates
+      
       await _repository.SaveChangesAsync();
     }
 
