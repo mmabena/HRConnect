@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRConnect.Api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20260225135505_StatutoryContributionType")]
+    [Migration("20260226084759_StatutoryContributionType")]
     partial class StatutoryContributionType
     {
         /// <inheritdoc />
@@ -343,9 +343,6 @@ namespace HRConnect.Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<Guid?>("ContributionTypeId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateOnly>("CurrentMonth")
                         .HasColumnType("date");
 
@@ -357,32 +354,30 @@ namespace HRConnect.Api.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("EmployerSdlContribution")
-                        .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("IdNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("MonthlySalary")
-                        .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("PassportNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("UifEmployeeAmount")
-                        .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("UifEmployerAmount")
-                        .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ContributionTypeId");
 
                     b.ToTable("StatutoryContributions");
                 });
@@ -568,15 +563,6 @@ namespace HRConnect.Api.Migrations
                     b.Navigation("JobGrade");
 
                     b.Navigation("OccupationalLevels");
-                });
-
-            modelBuilder.Entity("HRConnect.Api.Models.StatutoryContribution", b =>
-                {
-                    b.HasOne("HRConnect.Api.Models.StatutoryContributionType", "ContributionType")
-                        .WithMany()
-                        .HasForeignKey("ContributionTypeId");
-
-                    b.Navigation("ContributionType");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.Employee", b =>
