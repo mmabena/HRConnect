@@ -10,12 +10,13 @@
 /* ==================== GLOBAL VARIABLES & RESETS ==================== */
 
 :root {
-  --primary-color: #002D40;
+  --primary-color: #355867;
   --primary-dark: #001a25;
   --primary-light: #004d6b;
   --accent-blue: #006088;
   --accent-blue-dark: #004d6b;
   --success-color: #AFBF74;
+  --add-buttton: #638549;
   --background-light: #EEEEF1;
   --background-light-alt: #EFF1F3;
   --background-light-alt-2: #E7EAEB;
@@ -51,6 +52,36 @@ body {
   font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
 }
 
+.button-wrapper
+{
+  display: flex;
+  width: 1451px;
+  height: 74px;
+  padding: 15px 0;
+  justify-content: flex-end;
+  align-items: flex-end;
+  gap: 45px;
+
+}
+
+.add-button {
+  background-color: var(--add-buttton);
+  color: white;
+  border: none;
+  padding: 10px 50px;
+  border-radius: 10px;
+  text-align: center;
+  font-family: "Anek Bangla";
+  font-size: 16px;
+  font-weight: 500;
+  line-height: normal;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  white-space: nowrap; /* Prevent text wrapping */
+}
+
+
 /* ==================== BUTTONS ==================== */
 
 /* Primary Button - Standard action button */
@@ -59,7 +90,7 @@ body {
   font-family: 'Instrument Sans', sans-serif;
   width: 360px;
   height: 37px;
-  background-color: var(--accent-blue);
+  background-color: var(--primary-color);
   border: none;
   border-radius: var(--border-radius-medium);
   padding: 0 39px;
@@ -700,7 +731,7 @@ body {
   z-index: 1;
 }
 
-/* Edit Employee Background */
+/* Menu Background */
 .menu-background {
   position: fixed;
   top: 0;

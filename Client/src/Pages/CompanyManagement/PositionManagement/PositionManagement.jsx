@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
-import CompanyManagementHeader from "./companyManagement/companyManagementHeader";
-import CompanyManagementNavBar from "./companyManagement/companyManagementNavBar";
+import CompanyManagementHeader from "../../../Components/CompanyManagement/companyManagementHeader";
+import CompanyManagementNavBar from "../../../Components/CompanyManagement/companyManagementNavBar";
 import { useNavigate } from "react-router-dom";
-
-import "../MenuBar.css";
 
 const PositionManagement = () => {
   const [positions, setPositions] = useState([]);
@@ -14,7 +12,7 @@ const PositionManagement = () => {
   const [activeTab, setActiveTab] = useState("Position Management");
 
   const navigate = useNavigate();
-
+ 
   const pageOptions = [10, 15, 20, 25];
   const navTabs = [
     "Tax Table Management",
@@ -31,7 +29,7 @@ const PositionManagement = () => {
 
   useEffect(() => {
     setLoading(true);
-    fetch("http://localhost:5037/api/Positions")
+    fetch("http://localhost:5147/api/positions")
       .then((res) => res.json())
       .then((data) => {
         setPositions(data);
@@ -82,14 +80,12 @@ const PositionManagement = () => {
 
   {activeTab === "Position Management" && (
     <button className="add-position-button" onClick={handleAddPositionClick}>
-      Add Position
+      Add New Position
     </button>
   )}
 </div>
 
-
-
-         <div className="pm-table-wrapper">
+         <div className="content-container">
         <table className="position-table">
           <thead>
             <tr>
@@ -238,3 +234,5 @@ const PositionManagement = () => {
 };
 
 export default PositionManagement;
+
+

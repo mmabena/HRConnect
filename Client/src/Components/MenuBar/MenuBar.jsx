@@ -1,4 +1,4 @@
-import "../MenuBar.css";
+import "./MenuBar.css";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -167,7 +167,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                   src="/images/cases.png"
                   alt="Employee Management"
                   className="menu-icon"
-                />
+                                                 />
                 <span className="menu-heading">
                   Employee Management
                   <span className="menu-dropdown">{reportOpen ? "▲" : "▼"}</span>
@@ -186,9 +186,25 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                   <li>
                     <span
                       className="menu-subitem"
+                      onClick={() => handleSubmenuClick("/employeeList")}
+                    >
+                      Employee List
+                    </span>
+                  </li>
+                  <li>
+                    <span
+                      className="menu-subitem"
                       onClick={() => handleSubmenuClick("/addEmployee")}
                     >
                       Add New Employee
+                    </span>
+                  </li>
+                   <li>
+                    <span
+                      className="menu-subitem"
+                      onClick={() => handleSubmenuClick("/editEmployee")}
+                    >
+                      Edit Employee
                     </span>
                   </li>
                   <li>

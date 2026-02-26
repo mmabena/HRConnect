@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useParams } from "react-router-dom";
-import "../Navy.css";
+import "../../Navy.css";
 import {
   editEmployee,
   formatDateForDisplay,
   toISOStringSafe,
   showConfirmationToast,
   GetEmployeeByEmployeeNumberAsync,
-} from "../Employee";
+} from "../../api/Employee";
 
 import { toast } from "react-toastify";
 /// </summary>

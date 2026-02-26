@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "../MenuBar.css";
+import "../../MenuBar/MenuBar.css";
 import { toast } from "react-toastify";
 
 const AddPositionManagement = () => {

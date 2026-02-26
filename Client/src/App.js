@@ -2,35 +2,47 @@ import React, { useState, useEffect } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import SignIn from "./Components/SignIn/SignIn";
 import ForgotPassword from "./Components/ForgotPassword/ForgotPassword";
-import AddEmployee from "./Components/AddEmployee";
-import EditEmployee from "./Components/EditEmployee";
-import MenuBar from "./Components/MenuBar";
+import AddEmployee from "./Components/EmployeeManagement/AddEmployee";
+import EditEmployee from "./Components/EmployeeManagement/EditEmployee";
 import AddCompany from "./addCompany";
-import EditCompany from "./Components/companyManagement/editCompany";
+import EditCompany from "./Components/CompanyManagement/editCompany";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
-import "./MenuBar.css";
-import EmployeeList from "./Components/EmployeeList";
 import UserManagement from "./Components/UserManagement";
-import PositionManagement from "./Components/PositionManagement";
 import ViewPositionManagement from "./Components/ViewPositionManagement";
-import TaxTableUpload from "./Components/TaxTableUpload";
-import EditPositionManagement from "./Components/EditPositionManagement";
-import AddPositionManagement from "./Components/AddPositionManagment";
+import TaxTableUpload from "./Components/CompanyManagement/TaxTableManagement/TaxTableUpload";
+import EditPositionManagement from "./Components/CompanyManagement/PositionManagement/EditPositionManagement";
+import AddPositionManagement from "./Components/CompanyManagement/PositionManagement/AddPositionManagment";
 import CompanyManagement from "./companyManagement";
 import CompanyContribution from "./Components/CompanyContribution/CompanyContribution";
 import Profile from "./Components/MyProfile";
 import CompensationPlanning from "./Components/CompensationPlanning";
 import TaxTableManagement from "./Components/TaxTableManagement";
 import ChangePassword from "./Components/ChangePassword";
+import MenuBar from "./Components/MenuBar/MenuBar";
+import EmployeeList from "./Pages/EmployeeManagement/EmployeeList";
+import PositionManagement from "./Pages/CompanyManagement/PositionManagement/PositionManagement";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const navigate = useNavigate();
 
-  // ✅ Load user from localStorage on refresh
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      localStorage.removeItem("currentUser");
+    };
+
+  window.addEventListener("beforeunload", handleBeforeUnload);
+
+  return () => {
+    window.removeEventListener("beforeunload", handleBeforeUnload);
+  };
+}, []);
+
+
+
   useEffect(() => {
     const storedUser = localStorage.getItem("currentUser");
 
@@ -91,42 +103,42 @@ function App() {
     );
   }
 
-  return (
-    <div className="App">
-      <MenuBar currentUser={currentUser} onLogout={handleLogout} />
 
-      <div>
-        <ToastContainer position="top-right" autoClose={3000} />
+ console.log("App currentUser:", currentUser);
 
-        <Routes>
-          <Route path="/dashboard" element={<div>Welcome to Dashboard</div>} />
+ return (
+ <div className="App" style={{ display: "flex", minHeight: "100vh" }}>
+ <MenuBar currentUser={currentUser} />
+ <div style={{ flex: 1, padding: "1rem" }}>
+ <ToastContainer position="top-right" autoClose={3000} />
+ <Routes>
+ <Route path="/dashboard" element={<div>Welcome to Dashboard</div>} />
+ <Route path="/addEmployee" element={<AddEmployee />} />
+ <Route path="/editEmployee" element={<EditEmployee />} />
+ <Route path="/editEmployee/:employeeNumber" element={<EditEmployee />} />
+ <Route path="/addCompany" element={<AddCompany />} />
+ <Route path="/companyManagement" element={<CompanyManagement/>} />
+<Route path="/editCompany/:id" element={<EditCompany />} />
+<Route path="/employeeList" element={<EmployeeList />} />
+ <Route path="/company-contribution" element={<CompanyContribution />} />
+ <Route path="/userManagement" element={<UserManagement />} /> 
+ <Route path="/taxTableUpload" element={<TaxTableUpload />} />
+ <Route path="/positionManagement" element={<PositionManagement />} />
+<Route path="/addPositionManagement" element={<AddPositionManagement />} />
+ <Route path="/editPositionManagement/:id" element={<EditPositionManagement />} />
+ <Route path="/viewPositionManagement/:id" element={<ViewPositionManagement />} />
+<Route
+  path="/profile"
+  element={<Profile currentUser={currentUser} />}
+/>
 
-          <Route path="/addEmployee" element={<AddEmployee />} />
-          <Route path="/editEmployee" element={<EditEmployee />} />
-          <Route path="/editEmployee/:employeeNumber" element={<EditEmployee />} />
+<Route path="/company-contribution" element={<CompanyContribution />} />
+<Route path="/compensationPlanning" element={<CompensationPlanning  />} />
+ </Routes>
 
-          <Route path="/addCompany" element={<AddCompany />} />
-          <Route path="/companyManagement" element={<CompanyManagement />} />
-          <Route path="/editCompany/:id" element={<EditCompany />} />
-
-          <Route path="/employeeList" element={<EmployeeList />} />
-          <Route path="/company-contribution" element={<CompanyContribution />} />
-          <Route path="/userManagement" element={<UserManagement />}/>
-
-          <Route path="/taxTableUpload" element={<TaxTableUpload />} />
-          <Route path="/positionManagement" element={<PositionManagement />} />
-          <Route path="/addPositionManagement" element={<AddPositionManagement />} />
-          <Route path="/editPositionManagement/:id" element={<EditPositionManagement />} />
-          <Route path="/viewPositionManagement/:id" element={<ViewPositionManagement />} />
-          <Route path="/taxtablemanagement" element={<TaxTableManagement />} />
-          <Route path="/profile" element={<Profile currentUser={currentUser} />} />
-          <Route path="/compensationPlanning" element={<CompensationPlanning />} />
-          <Route path="/changePassword" element={<ChangePassword currentUser={currentUser} />} />
-        
-        </Routes>
-      </div>
-    </div>
-  );
+</div>
+ </div>
+);
 }
 
 export default App;

@@ -534,8 +534,11 @@
 
 body,
 .App {
-  background-color: #002D40;
-  min-height: 1080px;
+  background-color: var(--primary-color);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   margin: 0;
   padding: 0;
   position: relative;
@@ -861,16 +864,6 @@ body {
   height: 100%;
   margin: 0;
 }
-
-body,
-.App {
-  background-color: #002D40;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
 
 .signin-container {
   width: 1187px;
@@ -2262,21 +2255,15 @@ text-align: left;
 .nav-tabs-wrapper {
   margin-bottom: 24px;
 }
+
 .pm-table-wrapper {
-  margin-left:-50px!important;
-  margin-right: 50px;  
-  max-width: 1550px;
-  width: calc(100% - 100px); 
-  padding: 0;
   background-color: #ffffff;
   border-radius: 0px;
   margin-top: 20px;
   overflow-x: auto;
   box-sizing: border-box;
-   margin-left: -50px;
-
-
 }
+
 .position-table {
   width: 100%;
   border-collapse: collapse;

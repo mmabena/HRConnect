@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import "../Navy.css";
+import "../../Navy.css";
 // import MailIcon from '../images/mail2.svg';
 // import KeyIcon from '../images/key2.svg';
 // import VisibilityOffIcon from '../assets/icons/visibility_off.svg';
