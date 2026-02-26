@@ -2,27 +2,25 @@ import React, { useState, useEffect } from "react";
 import CompanyManagementHeader from "../../../Components/CompanyManagement/companyManagementHeader";
 import CompanyManagementNavBar from "../../../Components/CompanyManagement/companyManagementNavBar";
 import { useNavigate } from "react-router-dom";
-import api from "../../../api/api"; // use axios instance
+import api from "../../../api/api";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
-import AddPositionManagement from "../../../Components/CompanyManagement/PositionManagement/AddPositionManagment";
 
-const PositionManagement = () => {
+const ManageUserPositions = () => {
+  const [employees, setEmployees] = useState([]);
   const [positions, setPositions] = useState([]);
-  const [jobGrades, setJobGrades] = useState([]);
-  const [occupationalLevels, setOccupationalLevels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [hasAccess, setHasAccess] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [showPageOptions, setShowPageOptions] = useState(false);
-  const [showAddModal, setShowAddModal] = useState(false);
 
   const [activeTab, setActiveTab] = useState("Position Management");
 
   const navigate = useNavigate();
   const pageOptions = [10, 15, 20, 25];
+
   const navTabs = [
     "Tax Table Management",
     "Company Details",
@@ -31,11 +29,12 @@ const PositionManagement = () => {
     "Manage Companies",
     "Salary Budgets",
   ];
-  const tabWidths = [168, 133, 122, 134, 154, 125, 120];
 
-  // --------------------------
+  const tabWidths = [168, 133, 122, 134, 154, 125];
+
+  // ==============================
   // INITIALIZATION + AUTH
-  // --------------------------
+  // ==============================
   useEffect(() => {
     const initialize = async () => {
       setLoading(true);
@@ -64,19 +63,17 @@ const PositionManagement = () => {
 
         setHasAccess(true);
 
-        // Fetch positions, job grades, and occupational levels
-        const [positionsRes, gradesRes, levelsRes] = await Promise.all([
+        // Fetch employees + positions
+        const [employeesRes, positionsRes] = await Promise.all([
+          api.get("/employee"),
           api.get("/positions"),
-          api.get("/jobgrades"),
-          api.get("/occupationallevels"),
         ]);
 
+        setEmployees(employeesRes.data);
         setPositions(positionsRes.data);
-        setJobGrades(gradesRes.data);
-        setOccupationalLevels(levelsRes.data);
       } catch (error) {
         console.error("Initialization error:", error);
-        toast.error("Failed to load data. Unauthorized.");
+        toast.error("Failed to load data.");
       } finally {
         setLoading(false);
       }
@@ -85,34 +82,35 @@ const PositionManagement = () => {
     initialize();
   }, []);
 
-  // --------------------------
-  // PAGINATION LOGIC
-  // --------------------------
-  const totalPages = Math.ceil(positions.length / itemsPerPage);
+  // ==============================
+  // POSITION LOOKUP MAP
+  // ==============================
+  const positionMap = Object.fromEntries(
+    positions.map((pos) => [pos.positionId, pos.positionTitle])
+  );
+
+  // ==============================
+  // PAGINATION
+  // ==============================
+  const totalPages = Math.ceil(employees.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentPositions = positions.slice(indexOfFirstItem, indexOfLastItem);
+  const currentEmployees = employees.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
 
   const handlePrev = () =>
     currentPage > 1 && setCurrentPage((prev) => prev - 1);
+
   const handleNext = () =>
     currentPage < totalPages && setCurrentPage((prev) => prev + 1);
+
   const handlePageClick = (num) => setCurrentPage(num);
-  const handleAddPositionClick = () => setShowAddModal(true);
 
-  const jobGradeMap = Object.fromEntries(
-    jobGrades.map((grade) => [grade.jobGradeId, grade.name]),
-  );
-  const occupationalLevelMap = Object.fromEntries(
-    occupationalLevels.map((level) => [
-      level.occupationalLevelId,
-      level.description,
-    ]),
-  );
-
-  // --------------------------
+  // ==============================
   // RENDER
-  // --------------------------
+  // ==============================
   if (loading) return <h3>Loading...</h3>;
   if (!hasAccess) return <h2>Access Denied. SuperUser only.</h2>;
 
@@ -133,64 +131,38 @@ const PositionManagement = () => {
           }}
           tabWidths={tabWidths}
         />
-
-        {activeTab === "Position Management" && (
-          <button
-            className="add-position-button"
-            onClick={handleAddPositionClick}
-          >
-            Add New Position
-          </button>
-        )}
       </div>
 
       <div className="content-container">
         <table className="position-table">
           <thead>
             <tr>
+              <th>Name</th>
+              <th>Branch</th>
+              <th>Current Position</th>
               <th>Position Title</th>
-              <th>Position Grade</th>
-              <th>Occupational Description</th>
-              <th>Effective Date</th>
-              <th>Actions</th>
             </tr>
           </thead>
+
           <tbody>
-            {currentPositions.length === 0 ? (
+            {currentEmployees.length === 0 ? (
               <tr>
-                <td colSpan="5" style={{ textAlign: "center" }}>
-                  No positions found.
+                <td colSpan="4" style={{ textAlign: "center" }}>
+                  No users found.
                 </td>
               </tr>
             ) : (
-              currentPositions.map((position) => (
-                <tr key={position.positionId}>
-                  <td>{position.positionTitle}</td>
-                  <td>{position.jobGrade?.name || "N/A"}</td>
-                  <td>{position.occupationalLevel?.description || "N/A"}</td>
+              currentEmployees.map((employee) => (
+                <tr key={employee.employeeId}>
                   <td>
-                    {new Date(position.createdDate).toLocaleDateString(
-                      "en-GB",
-                      {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                      },
-                    )}
+                    {employee.firstName} {employee.lastName}
+                  </td>
+                  <td>{employee.branch || "N/A"}</td>
+                  <td>
+                    {positionMap[employee.positionId] || "N/A"}
                   </td>
                   <td>
-                    <div className="edit-button-group">
-                      <button
-                        className="text-button"
-                        onClick={() =>
-                          navigate(
-                            `/editPositionManagement/${position.positionId}`,
-                          )
-                        }
-                      >
-                        Edit
-                      </button>
-                    </div>
+                    {positionMap[employee.positionId] || "N/A"}
                   </td>
                 </tr>
               ))
@@ -199,15 +171,17 @@ const PositionManagement = () => {
         </table>
       </div>
 
-      {/* PAGINATION */}
+      {/* ==============================
+           PAGINATION
+         ============================== */}
       <div className="pagination-wrapper">
         <div className="pagination-left">
           <span className="pagination-range">
             <strong className="pagination-bold">
-              {positions.length === 0 ? 0 : indexOfFirstItem + 1} -{" "}
-              {Math.min(indexOfLastItem, positions.length)}
+              {employees.length === 0 ? 0 : indexOfFirstItem + 1} -{" "}
+              {Math.min(indexOfLastItem, employees.length)}
             </strong>{" "}
-            of {positions.length}
+            of {employees.length}
           </span>
 
           <div
@@ -254,18 +228,21 @@ const PositionManagement = () => {
               opacity: currentPage > 1 ? 1 : 0.4,
             }}
           />
+
           <div className="page-numbers">
             {Array.from({ length: totalPages }, (_, i) => (
               <button
                 key={i + 1}
-                className={`page-number ${currentPage === i + 1 ? "active-page" : ""}`}
+                className={`page-number ${
+                  currentPage === i + 1 ? "active-page" : ""
+                }`}
                 onClick={() => handlePageClick(i + 1)}
-                aria-label={`Go to page ${i + 1}`}
               >
                 {i + 1}
               </button>
             ))}
           </div>
+
           <img
             src="/images/arrow_drop_down_circle.png"
             alt="Next"
@@ -277,19 +254,14 @@ const PositionManagement = () => {
               opacity: currentPage < totalPages ? 1 : 0.4,
             }}
           />
+
           <div className="pagination-info">
-            {positions.length} Positions @ Singular
+            {employees.length} Users @ Singular
           </div>
-          {showAddModal && (
-            <AddPositionManagement
-              isOpen={showAddModal}
-              onClose={() => setShowAddModal(false)}
-            />
-          )}
         </div>
       </div>
     </div>
   );
 };
 
-export default PositionManagement;
+export default ManageUserPositions;

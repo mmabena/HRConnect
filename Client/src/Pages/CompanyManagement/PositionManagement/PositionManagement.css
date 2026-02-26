@@ -1,0 +1,19 @@
+/* Error messages below inputs */
+.error-texts {
+  color: red;
+  font-size: 0.9em;
+  margin-top: 4px;
+  display: block;
+}
+
+
+/* Dropdown icon styling */
+.apm-dropdown-icon {
+  position: absolute;
+  top:10px;
+  right: 10px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  width: 20px;
+  height: 20px;
+}

@@ -4,6 +4,8 @@ import { toast } from "react-toastify";
 import { confirmAlert } from "react-confirm-alert";
 import "react-confirm-alert/src/react-confirm-alert.css";
 import "react-toastify/dist/ReactToastify.css";
+import api from "../../../api/api";
+import { jwtDecode } from "jwt-decode";
 import { useParams, useNavigate } from "react-router-dom";
 
 const EditPositionManagement = () => {
@@ -16,77 +18,71 @@ const EditPositionManagement = () => {
     effectiveDate: "",
     jobGradeId: "",
     occupationalLevelId: "",
-    occupationalLevel: "",
   });
 
   const [jobGrades, setJobGrades] = useState([]);
   const [occupationalLevels, setOccupationalLevels] = useState([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [hasAccess, setHasAccess] = useState(false);
 
   useEffect(() => {
-    if (!id) return console.error("ID is undefined.");
+    const initialize = async () => {
+      const token = localStorage.getItem("token");
 
-    const fetchDropdownsAndPosition = async () => {
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
       try {
-        const [gradesRes, levelsRes] = await Promise.all([
+        const decoded = jwtDecode(token);
 
-          fetch("http://localhost:5147/api/jobgrades"),
-          fetch("http://localhost:5147/api/occupationallevels"),
+        const role =
+          decoded?.role ||
+          decoded?.[
+            "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+          ];
+
+        if (role !== "SuperUser") {
+          setLoading(false);
+          return;
+        }
+
+        setHasAccess(true);
+
+        // Fetch dropdowns + position data
+        const [gradesRes, levelsRes, positionRes] = await Promise.all([
+          api.get("/jobgrades"),
+          api.get("/occupationallevels"),
+          api.get(`/positions/${id}`),
         ]);
 
-        const [gradesData, levelsData] = await Promise.all([
-          gradesRes.json(),
-          levelsRes.json(),
-        ]);
+        setJobGrades(gradesRes.data);
+        setOccupationalLevels(levelsRes.data);
 
-        setJobGrades(gradesData);
-        setOccupationalLevels(levelsData);
-
-        const posRes = await fetch(`http://localhost:5147/api/positions/${id}`);
-        if (!posRes.ok) throw new Error("Position not found");
-
-        const posData = await posRes.json();
-        const matchedLevel = levelsData.find(
-          (level) => level.occupationalLevelId === posData.occupationalLevelId
-        );
+        const posData = positionRes.data;
 
         setFormData({
           positionId: posData.positionId,
           positionTitle: posData.positionTitle || "",
           effectiveDate: posData.createdDate
-            ? new Date(posData.createdDate).toISOString().slice(0, 10) // date in yyyy-mm-dd format for input[type=date]
+            ? new Date(posData.createdDate).toISOString().slice(0, 10)
             : "",
           jobGradeId: posData.jobGradeId?.toString() || "",
           occupationalLevelId: posData.occupationalLevelId?.toString() || "",
-          occupationalLevel: matchedLevel?.occupationalLevelName || "",
         });
-      } catch (err) {
-        console.error("Failed to load data:", err);
+      } catch (error) {
+        console.error("Initialization error:", error);
+        toast.error("Failed to load position data.");
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchDropdownsAndPosition();
+    initialize();
   }, [id]);
 
-  const filteredLevels = occupationalLevels.filter((level) =>
-    level.description
-      ?.toLowerCase()
-      .includes(formData.occupationalLevel.toLowerCase())
-  );
-
-  const handleSuggestionClick = (name) => {
-    const selected = occupationalLevels.find(
-      (level) =>
-        level.occupationalLevelName.toLowerCase() === name.toLowerCase()
-    );
-    setFormData((prev) => ({
-      ...prev,
-      occupationalLevel: name,
-      occupationalLevelId: selected?.occupationalLevelId?.toString() || "",
-    }));
-    setShowSuggestions(false);
-  };
-
+  // Handle input change
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -102,64 +98,79 @@ const EditPositionManagement = () => {
               toast.info("Job Grade changed.");
             },
           },
-          { label: "No", onClick: () => {} },
+          { label: "No" },
         ],
       });
       return;
     }
 
-    if (name === "occupationalLevel") {
-      setFormData((prev) => ({
-        ...prev,
-        occupationalLevel: value,
-      }));
-      setShowSuggestions(true);
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const { positionTitle, effectiveDate, jobGradeId, occupationalLevelId } = formData;
+  // Submit using axios instance (JWT auto-attached)
+  // Submit using axios instance (JWT auto-attached)
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (!positionTitle || !effectiveDate || !jobGradeId || !occupationalLevelId) {
-      alert("All fields are required");
-      return;
-    }
+  const { positionTitle, jobGradeId, occupationalLevelId } = formData;
 
-    try {
-      const response = await fetch(`http://localhost:5147/api/positions/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          positionId: parseInt(id),
-          positionTitle,
-          jobGradeId: parseInt(jobGradeId),
-          occupationalLevelId: parseInt(occupationalLevelId),
-          updatedDate: new Date().toISOString(),
-        }),
+  // Basic validation
+  if (!positionTitle || !jobGradeId || !occupationalLevelId) {
+    toast.error("All fields are required");
+    return;
+  }
+
+  try {
+    // 1️⃣ Fetch all employees linked to this position
+    const employeesRes = await api.get("/employee");
+    const linkedEmployees = employeesRes.data.filter(
+      (emp) => emp.positionId === parseInt(id)
+    );
+
+    // 2️⃣ Fetch all positions to check for duplicate titles
+    const positionsRes = await api.get("/positions");
+    const duplicateTitle = positionsRes.data.find(
+      (pos) =>
+        pos.positionTitle.toLowerCase() === positionTitle.toLowerCase() &&
+        pos.positionId !== parseInt(id)
+    );
+
+    //If there are linked employees or duplicate title, go to ChangePositionManagement
+    if (linkedEmployees.length > 0 || duplicateTitle) {
+      navigate("/changePositionManagement", {
+        state: {
+          currentPosition: formData.positionTitle,
+          linkedEmployeesCount: linkedEmployees.length,
+          attemptedTitle: positionTitle,
+        },
       });
-
-      if (!response.ok) throw new Error("Failed to update position");
-
-      toast.success("Position updated successfully.");
-      navigate("/positionManagement");
-    } catch (error) {
-      console.error("Error updating position:", error);
-      toast.error("Something went wrong. Please try again.");
+      return; // Stop normal save
     }
-  };
+
+    // No conflicts → proceed with normal save
+    await api.put(`/positions/${id}`, {
+      positionTitle,
+      jobGradeId: parseInt(jobGradeId),
+      occupationalLevelId: parseInt(occupationalLevelId),
+      isActive: true,
+    });
+
+    toast.success("Position updated successfully.");
+    navigate("/positionManagement");
+  } catch (error) {
+    console.error("Error updating position:", error.response?.data || error.message);
+    toast.error(
+      error.response?.data?.message || "Something went wrong. Please try again."
+    );
+  }
+};
+
+  // Render control AFTER hooks
+  if (loading) return <h3>Loading...</h3>;
+  if (!hasAccess) return <h2>Access Denied. SuperUser only.</h2>;
 
   return (
     <div className="full-screen-bg">
-      {/* Background shapes */}
-      <div className="shape-1"></div>
-      <div className="shape-2"></div>
-      <div className="shape-3"></div>
-      <div className="shape-4"></div>
-      <div className="shape-5"></div>
-
       <div className="center-frame">
         <div className="left-frame">
           <div className="left-frame-centered">
@@ -168,12 +179,8 @@ const EditPositionManagement = () => {
                 <span className="apm-logo-bold">singular</span>
                 <span className="apm-logo-light">express</span>
               </div>
-              <h2 className="apm-title">Position Details</h2>
-              <p className="apm-subtitle">
-                Please see the form below to edit or view the position
-                <br />
-                <span className="apm-highlight">Position Record.</span>
-              </p>
+              <h2 className="apm-title">Edit Position</h2>
+              
             </div>
 
             <form onSubmit={handleSubmit} className="apm-form">
@@ -200,7 +207,7 @@ const EditPositionManagement = () => {
                 />
               </div>
 
-      <div className="apm-input-group apm-dropdown-wrapper">
+              <div className="apm-input-group apm-dropdown-wrapper">
                 <select
                   name="jobGradeId"
                   className="apm-input select-dropdown"
@@ -222,9 +229,8 @@ const EditPositionManagement = () => {
                 />
               </div>
 
-              {/* Occupational Level Input with autocomplete */}
-                <div className="apm-input-group apm-dropdown-wrapper">
-                  <select
+              <div className="apm-input-group apm-dropdown-wrapper">
+                <select
                   name="occupationalLevelId"
                   className="apm-input select-dropdown"
                   value={formData.occupationalLevelId}
@@ -233,7 +239,10 @@ const EditPositionManagement = () => {
                 >
                   <option value="">Occupational Level</option>
                   {occupationalLevels.map((level) => (
-                    <option key={level.occupationalLevelId} value={level.occupationalLevelId}>
+                    <option
+                      key={level.occupationalLevelId}
+                      value={level.occupationalLevelId}
+                    >
                       {level.description}
                     </option>
                   ))}
@@ -250,7 +259,7 @@ const EditPositionManagement = () => {
               </button>
 
               <div className="apm-footer">
-                <p>Privacy Policy &nbsp; | &nbsp; Terms & Conditions</p>
+                <p>Privacy Policy | Terms & Conditions</p>
                 <p>Copyright © 2025 Singular Systems. All rights reserved.</p>
               </div>
             </form>

@@ -14,6 +14,7 @@ import ViewPositionManagement from "./Components/ViewPositionManagement";
 import EditPositionManagement from "./Components/CompanyManagement/PositionManagement/EditPositionManagement";
 import AddPositionManagement from "./Components/CompanyManagement/PositionManagement/AddPositionManagment";
 import PositionManagement from "./Pages/CompanyManagement/PositionManagement/PositionManagement";
+import ChangePositionManagement from "./Components/CompanyManagement/PositionManagement/ChangePositionManagement";
 import CompanyManagement from "./companyManagement";
 import CompanyContribution from "./Components/CompanyContribution/CompanyContribution";
 import Profile from "./Components/MyProfile";
@@ -116,6 +117,7 @@ function App() {
           <Route path="/addPositionManagement" element={<AddPositionManagement />} />
           <Route path="/editPositionManagement/:id" element={<EditPositionManagement />} />
           <Route path="/viewPositionManagement/:id" element={<ViewPositionManagement />} />
+          <Route path="/changePositionManagement" element={<ChangePositionManagement />} />
           <Route path="/taxtablemanagement" element={<TaxTableManagement />} />
           <Route path="/profile" element={<Profile currentUser={currentUser} />} />
           <Route path="/compensationPlanning" element={<CompensationPlanning />} />

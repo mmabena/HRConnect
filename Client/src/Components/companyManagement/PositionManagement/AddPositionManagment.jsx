@@ -1,262 +1,207 @@
 import React, { useState, useEffect } from "react";
 import "../../MenuBar/MenuBar.css";
+import api from "../../../api/api";
+import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
+import "../../../Pages/CompanyManagement/PositionManagement/PositionManagement.css";
 
-const AddPositionManagement = () => {
+const AddPositionManagement = ({ isOpen, onClose }) => {
+  // Hooks always first
   const [formData, setFormData] = useState({
     positionTitle: "",
     effectiveDate: "",
     jobGradeId: "",
     occupationalLevelId: "",
-    occupationalLevel: "",
   });
-
-  const [errors, setErrors] = useState({
-    positionTitle: "",
-    jobGradeId: "",
-    occupationalLevelId: "",
-  });
-
+  const [errors, setErrors] = useState({});
   const [jobGrades, setJobGrades] = useState([]);
   const [occupationalLevels, setOccupationalLevels] = useState([]);
-  const [filteredLevels, setFilteredLevels] = useState([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [hasAccess, setHasAccess] = useState(false);
 
+  // Initialize dropdowns + access
   useEffect(() => {
-    fetch("http://localhost:5147/api/jobgrades")
-      .then((res) => res.json())
-      .then((data) => setJobGrades(data))
-      .catch((error) => console.error("Failed to fetch job grades:", error));
+    const initialize = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setLoading(false);
+        return;
+      }
 
-    fetch("http://localhost:5147/api/occupationallevels")
-      .then((res) => res.json())
-      .then((data) => setOccupationalLevels(data))
-      .catch((error) =>
-        console.error("Failed to fetch occupational levels:", error),
-      );
+      try {
+        const decoded = jwtDecode(token);
+        const role =
+          decoded?.role ||
+          decoded?.[
+            "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+          ];
+
+        if (role !== "SuperUser") {
+          setLoading(false);
+          return;
+        }
+
+        setHasAccess(true);
+
+        const [gradesRes, levelsRes] = await Promise.all([
+          api.get("/jobgrades"),
+          api.get("/occupationallevels"),
+        ]);
+
+        setJobGrades(gradesRes.data);
+        setOccupationalLevels(levelsRes.data);
+      } catch (error) {
+        console.error("Initialization error:", error);
+        toast.error("Access error");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initialize();
   }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
-    // Clear inline error when user edits field
+    setFormData((prev) => ({ ...prev, [name]: value }));
     setErrors((prev) => ({ ...prev, [name]: "" }));
-
-    if (name === "occupationalLevel") {
-      const matches = occupationalLevels.filter((level) =>
-        level.description.toLowerCase().includes(value.toLowerCase()),
-      );
-
-      const selected = occupationalLevels.find(
-        (level) => level.description.toLowerCase() === value.toLowerCase(),
-      );
-
-      setFormData((prev) => ({
-        ...prev,
-        occupationalLevel: value,
-        occupationalLevelId: selected ? selected.occupationalLevelId : "",
-      }));
-
-      setFilteredLevels(matches);
-      setShowSuggestions(true);
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
   };
 
-  const handleSuggestionClick = (selectedValue) => {
-    const selected = occupationalLevels.find(
-      (level) => level.description === selectedValue,
-    );
-    setFormData((prev) => ({
-      ...prev,
-      occupationalLevel: selectedValue,
-      occupationalLevelId: selected?.occupationalLevelId || "",
-    }));
-    setShowSuggestions(false);
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.positionTitle.trim())
+      newErrors.positionTitle = "Position title is required";
+    if (!formData.effectiveDate)
+      newErrors.effectiveDate = "Effective date is required";
+    if (!formData.jobGradeId)
+      newErrors.jobGradeId = "Position grade is required";
+    if (!formData.occupationalLevelId)
+      newErrors.occupationalLevelId = "Occupational level is required";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const { positionTitle, effectiveDate, occupationalLevelId, jobGradeId } =
-      formData;
-
-    // Basic required fields validation
-    if (!positionTitle || !effectiveDate || !occupationalLevelId || !jobGradeId) {
-      toast.error("All fields are required");
-      return;
-    }
+    if (!validateForm()) return;
 
     try {
-      const response = await fetch(
-        "http://localhost:5147/api/positions/Create",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            positionTitle,
-            jobGradeId: parseInt(jobGradeId),
-            occupationalLevelId: parseInt(occupationalLevelId),
-            createdDate: new Date().toISOString(),
-          }),
-        }
-      );
+      const response = await fetch("http://localhost:5147/api/positions/Create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          positionTitle: formData.positionTitle,
+          jobGradeId: parseInt(formData.jobGradeId),
+          occupationalLevelId: parseInt(formData.occupationalLevelId),
+          createdDate: new Date().toISOString(),
+        }),
+      });
 
-      let data;
-try {
-  data = await response.json(); // try JSON first
-} catch {
-  data = { message: await response.text() }; // fallback to plain text
-}
-
-      if (!response.ok) {
-        // Map backend validation errors to inline fields
-        const msg = data?.message || data?.error || "";
-
-        setErrors({
-          positionTitle: msg.toLowerCase().includes("duplicate")
-            ? "This position title already exists"
-            : "",
-          jobGradeId: msg.toLowerCase().includes("jobgrade")
-            ? "Invalid JobGradeId or inactive"
-            : "",
-          occupationalLevelId: msg.toLowerCase().includes("occupationallevel")
-            ? "Invalid OccupationalLevelId or inactive"
-            : "",
-        });
-
-        return; // stop submission
-      }
-
-      // Success
+      if (!response.ok) throw new Error("Failed to create position");
+      await response.json();
       toast.success("Position created successfully!");
+
+      // Reset form and close modal
       setFormData({
         positionTitle: "",
         effectiveDate: "",
         jobGradeId: "",
         occupationalLevelId: "",
-        occupationalLevel: "",
       });
-      setErrors({ positionTitle: "", jobGradeId: "", occupationalLevelId: "" });
-    } catch (err) {
-      console.error("Error saving position:", err);
-      toast.error("Something went wrong. Please try again.");
+      setErrors({});
+      onClose();
+    } catch (error) {
+      console.error("Error saving position:", error);
+      toast.error("This position already exists or there was an error.");
     }
   };
 
+  if (!isOpen) return null; // only render when open
+
   return (
-    <div className="full-screen-bg">
-      <div className="center-frame">
-        <div className="left-frame">
-          <div className="left-frame-centered">
-            <div className="headings-container">
-              <div className="apm-logo">
-                <span className="apm-logo-bold">singular</span>
-                <span className="apm-logo-light">express</span>
-              </div>
-              <h2 className="apm-title">Position Details</h2>
-            </div>
+    <div className="modal-overlay">
+      <div className="modal-content">
+        <button className="modal-close-btn" onClick={onClose}>✕</button>
 
-            <form onSubmit={handleSubmit} className="apm-form">
-              {/* Position Title */}
-              <div className="apm-input-group">
-                <input
-                  type="text"
-                  name="positionTitle"
-                  placeholder="Position title"
-                 className={`apm-input ${errors.positionTitle ? "error" : ""}`}
-                  value={formData.positionTitle}
-                  onChange={handleChange}
-                  required
-                />
-                {errors.positionTitle && (
-                  <span className="apm-error">{errors.positionTitle}</span>
-                )}
-              </div>
-
-              {/* Job Grade */}
-              <div className="apm-input-group apm-dropdown-wrapper">
-                <select
-                  name="jobGradeId"
-                   className={`apm-input select-dropdown ${errors.jobGradeId ? "error" : ""}`}
-                  value={formData.jobGradeId}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Position Grade</option>
-                  {jobGrades
-                    .filter((grade) => grade.isActive)
-                    .map((grade) => (
-                      <option key={grade.jobGradeId} value={grade.jobGradeId}>
-                        {grade.name}
-                      </option>
-                    ))}
-                </select>
-                <img
-                  src="/images/arrow_drop_down_circle.png"
-                  alt="Dropdown Icon"
-                  className="apm-dropdown-icon"
-                />
-                {errors.jobGradeId && (
-                  <span className="apm-error">{errors.jobGradeId}</span>
-                )}
-              </div>
-
-              {/* Occupational Level */}
-              <div className="apm-input-group apm-dropdown-wrapper">
-                <select
-                  name="occupationalLevelId"
-                   className={`apm-input select-dropdown ${errors.jobGradeId ? "error" : ""}`}
-                  value={formData.occupationalLevelId}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Occupational Description</option>
-                  {occupationalLevels
-                    .filter((level) => level.isActive)
-                    .map((level) => (
-                      <option
-                        key={level.occupationalLevelId}
-                        value={level.occupationalLevelId}
-                      >
-                        {level.description}
-                      </option>
-                    ))}
-                </select>
-                <img
-                  src="/images/arrow_drop_down_circle.png"
-                  alt="Dropdown Icon"
-                  className="apm-dropdown-icon"
-                />
-                {errors.occupationalLevelId && (
-                  <span className="apm-error">{errors.occupationalLevelId}</span>
-                )}
-              </div>
-
-              {/* Effective Date */}
-              <div className="apm-input-group">
-                <input
-                  type="date"
-                  name="effectiveDate"
-                  className="apm-input"
-                  value={formData.effectiveDate}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-
-              <button type="submit" className="apm-save-button">
-                Save
-              </button>
-
-              <div className="apm-footer">
-                <p>Privacy Policy &nbsp; | &nbsp; Terms & Conditions</p>
-                <p>Copyright © 2025 Singular Systems. All rights reserved.</p>
-              </div>
-            </form>
+        <div className="headings-container">
+          <div className="apm-logo">
+            <span className="apm-logo-bold">singular</span>
+            <span className="apm-logo-light">express</span>
           </div>
+          <h2 className="apm-title">Position Details</h2>
         </div>
+
+        <form onSubmit={handleSubmit} className="apm-form">
+          <div className="apm-input-group">
+            <input
+              type="text"
+              name="positionTitle"
+              placeholder="Position title"
+              value={formData.positionTitle}
+              onChange={handleChange}
+              className={`apm-input ${errors.positionTitle ? "inputs-error" : ""}`}
+            />
+            {errors.positionTitle && <span className="error-texts">{errors.positionTitle}</span>}
+          </div>
+
+          <div className="apm-input-group apm-dropdown-wrapper">
+            <select
+              name="jobGradeId"
+              value={formData.jobGradeId}
+              onChange={handleChange}
+              className={`apm-input select-dropdown ${errors.jobGradeId ? "inputs-error" : ""}`}
+            >
+              <option value="">Position Grade</option>
+              {jobGrades.filter(g => g.isActive).map((grade) => (
+                <option key={grade.jobGradeId} value={grade.jobGradeId}>{grade.name}</option>
+              ))}
+            </select>
+            {errors.jobGradeId && <span className="error-texts">{errors.jobGradeId}</span>}
+ <img
+                src="/images/arrow_drop_down_circle.png"
+                alt="Dropdown Icon"
+                className="apm-dropdown-icon"
+              />
+          </div>
+
+          <div className="apm-input-group apm-dropdown-wrapper">
+            <select
+              name="occupationalLevelId"
+              value={formData.occupationalLevelId}
+              onChange={handleChange}
+              className={`apm-input select-dropdown ${errors.occupationalLevelId ? "inputs-error" : ""}`}
+            >
+              <option value="">Occupational Description</option>
+              {occupationalLevels.filter(l => l.isActive).map((level) => (
+                <option key={level.occupationalLevelId} value={level.occupationalLevelId}>{level.description}</option>
+              ))}
+            </select>
+            {errors.occupationalLevelId && <span className="error-texts">{errors.occupationalLevelId}</span>}
+ <img
+                src="/images/arrow_drop_down_circle.png"
+                alt="Dropdown Icon"
+                className="apm-dropdown-icon"
+              />
+          </div>
+
+          <div className="apm-input-group">
+            <input
+              type="date"
+              name="effectiveDate"
+              value={formData.effectiveDate}
+              onChange={handleChange}
+              className={`apm-input ${errors.effectiveDate ? "inputs-error" : ""}`}
+            />
+            {errors.effectiveDate && <span className="error-texts">{errors.effectiveDate}</span>}
+          </div>
+
+          <button type="submit" className="apm-save-button">Save</button>
+  <div className="apm-footer">
+              <p>Privacy Policy &nbsp; | &nbsp; Terms & Conditions</p>
+              <p>Copyright © 2025 Singular Systems. All rights reserved.</p>
+            </div>
+        </form>
       </div>
     </div>
   );

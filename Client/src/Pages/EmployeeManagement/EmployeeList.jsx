@@ -89,7 +89,7 @@ const location = useLocation();
   /// </summary>
   const filteredEmployees = employees.filter((emp) => {
     if (selectedTab !== "All staff") {
-      const empDepartment = (emp.department || "")
+      const empDepartment = (emp.branch || "")
         .toLowerCase()
         .replace(/\s+/g, "");
       const selected = selectedTab.toLowerCase().replace(/\s+/g, "");
@@ -101,10 +101,10 @@ const location = useLocation();
     const search = searchQuery.toLowerCase();
     if (!search) return true;
 
-    const fullName = `${emp.firstName} ${emp.lastName}`.toLowerCase();
-    const jobTitle = emp.jobTitle?.toLowerCase() || "";
+    const fullName = `${emp.name} ${emp.surname}`.toLowerCase();
+    const jobTitle = emp.positionId?.toLowerCase() || "";
     const email = emp.email?.toLowerCase() || "";
-    const id = emp.employeeNumber?.toString() || "";
+    const id = emp.employeeId?.toString() || "";
 
     return (
       fullName.includes(search) ||
@@ -198,15 +198,14 @@ const location = useLocation();
 
         <div className="content-container">
           <div className="table-grid">
-             <div className="table-header">Employee ID</div>
+            <div className="table-header">Employee ID</div>
             <div className="table-header">Name & Surname</div>
             <div className="table-header">Job Title</div>
-            <div className="table-header">Contact Number</div>
+            <div className="table-header">Phone Number</div>
             <div className="table-header">Email</div>
-             <div className="table-header">Employement Status</div>
+            <div className="table-header">Employment Status</div>
             <div className="table-header">Branch</div>
-            <div className="table-header">Actions</div>
-            
+            <div className="table-header">Action</div>
 
             {loading && (
               <div
@@ -242,12 +241,10 @@ const location = useLocation();
             {!loading &&
               !error &&
               currentEmployees.map((emp, index) => (
-                <React.Fragment key={emp.employeeNumber}>
-                  <div className="table-cell">{emp.employeeNumber}</div>
+                <React.Fragment key={emp.employeeId}>
+                  <div className="table-cell">{emp.employeeId}</div>
 
-                  <div className="table-cell">
-                    <img src="/images/Frame_287.png" alt="Block_logo" />
-                  </div>
+                 
 
                   <div className="table-cell name-surname-cell">
                     <div
@@ -256,29 +253,23 @@ const location = useLocation();
                     >
                       {(
                         emp.initials ||
-                        `${(emp.firstName || "").charAt(0)}${(
-                          emp.lastName || ""
+                        `${(emp.name || "").charAt(0)}${(
+                          emp.surname || ""
                         ).charAt(0)}`
                       ).toUpperCase()}
                     </div>
 
-                    <span className="name-text">{`${emp.firstName} ${emp.lastName}`}</span>
+                    <span className="name-text">{`${emp.name} ${emp.surname}`}</span>
                   </div>
 
-                  <div className="table-cell">{emp.jobTitle}</div>
+                  <div className="table-cell">{emp.positionId}</div>
                   <div className="table-cell">{emp.contactNumber}</div>
                   <div className="table-cell">{emp.email}</div>
-                  <div className="table-cell">{emp.department || emp.city}</div>
+                  <div className="table-cell">{emp.employmentStatus}</div>
+                  <div className="table-cell">{emp.branch}</div>
                   <div className="table-cell view-edit-cell">
                     <Link
-                      to={`/editEmployee/${emp.employeeNumber}`}
-                      state={{ ...emp, readOnly: true }}
-                      className="view-btn"
-                    >
-                      View
-                    </Link>
-                    <Link
-                      to={`/editEmployee/${emp.employeeNumber}`}
+                      to={`/editEmployee/${emp.employeeId}`}
                       state={emp}
                       className="edit-btn"
                     >
