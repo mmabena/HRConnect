@@ -138,7 +138,7 @@ builder.Services.AddScoped<IOccupationalLevelRepository, OccupationalLevelReposi
 builder.Services.AddScoped<IOccupationalLevelService, OccupationalLevelService>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.Services.AuthService>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
-builder.Services.AddScoped<IStatutoryContributionRepository, PayrollDeductionsRepository>();
+builder.Services.AddScoped<IStatutoryContributionRepository, StatutoryContributionRepository>();
 builder.Services.AddScoped<IStatutoryContributionService, StatutoryContributionService>();
 builder.Services.AddTransient<IPensionProjectionService, PensionProjectionService>();
 builder.Services.AddCors(options =>
