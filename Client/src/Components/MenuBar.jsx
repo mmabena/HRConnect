@@ -1,15 +1,21 @@
 import "../MenuBar.css";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
+import e from "cors";
 
 const MenuBar = ({ currentUser, onAccessDenied }) => {
   const [reportOpen, setReportOpen] = useState(false);
   const [companyOpen, setCompanyOpen] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
   const [deductionsOpen, setDeductionsOpen] = useState(false);
+  const [payrollOpen, setPayrollOpen] = useState(false);
+  const [leaveOpen, setLeaveOpen] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
+  const [payinfoOpen, setPayInfoOpen] = useState(false);
   const [manualReportToggle, setManualReportToggle] = useState(false);
   const [manualAdminToggle, setManualAdminToggle] = useState(false);
+  const [canProjectPension, setCanProjectPension] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -53,6 +59,53 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
     isUserManagementPage,
   ]);
 
+  useEffect(() => {
+    if(localStorage.getItem('currentUser') !== null && localStorage.getItem('currentUser') !== undefined) {
+      const token = JSON.parse(localStorage.getItem('currentUser')).token;
+      const email = JSON.parse(localStorage.getItem('currentUser')).user.email;
+      try {
+          axios.get("http://localhost:5147/api/employee/email/" + email, {
+              headers: {
+                  "Authorization": `Bearer ${token}`
+              }
+          })
+          .then(response => {
+              if (response.status === 200) {
+                  console.log("Employee status for menu bar:",response.data);
+                  const employementStatus = response.data.employmentStatus;
+                  const employeeAge = response.data.dateOfBirth;
+                  if (employementStatus === 0 && (calculateAge(employeeAge) < 65)) {
+                    setCanProjectPension(true);
+                  }
+              } else {
+                  console.error("Unexpeted status:", response.status);
+              }
+          })
+          .catch(error => {
+              console.error("Error:", error);
+          });
+      }
+
+      catch (error) {
+          console.error("Failed to fetch your employee details:", error)
+      }
+    }
+  })
+
+  const calculateAge = (dateOfBirth) => {
+        let today = new Date();
+        let birthDate = new Date(dateOfBirth);
+        let age = today.getFullYear() - birthDate.getFullYear();
+        
+        if (today.getMonth() < birthDate.getMonth()) {
+            age--;
+        } else if ((today.getMonth() === birthDate.getMonth()) && (today.getDay() < birthDate.getDay())){
+            age--;
+        }
+
+        return age;
+    }
+
   const toggleReport = () => {
     setManualReportToggle(true);
     setReportOpen((prev) => !prev);
@@ -71,7 +124,7 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
   };
 
   const toggleDeductions = (e) => {
-    e.stopPropagation(); // prevents parent click
+    e.stopPropagation(); 
     setDeductionsOpen((prev) => !prev);
   };
 
@@ -79,6 +132,21 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
     setPayOpen((prev) => !prev);
     onAccessDenied && onAccessDenied("");
   };
+
+  const togglePayroll = () => {
+    setPayrollOpen((prev) => !prev);
+    onAccessDenied && onAccessDenied("");
+  }
+
+  const toggleLeave = () => {
+    setLeaveOpen((prev) => !prev);
+    onAccessDenied && onAccessDenied("");
+  }
+
+  const togglePayrollInfo = () => {
+    setPayInfoOpen((prev) => !prev);
+    onAccessDenied && onAccessDenied("");
+  }
 
   const handleSubmenuClick = (path) => {
     navigate(path);
@@ -98,7 +166,7 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
           <li>
             <div className="menu-item-wrapper">
               <img
-                src="/images/contacts_product.png"
+                src="/images/user.png"
                 alt="Personal icon"
                 className="menu-icon"
               />
@@ -107,6 +175,7 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
           </li>
 
           {/* Employee Management */}
+          {isAdminOrSuperUser && (
             <li>
               <div className="menu-item-wrapper" onClick={toggleReport}>
                 <img
@@ -156,9 +225,11 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
                 </ul>
               )}
             </li>
+          )}
           
 
           {/* ✅ Company Management */}
+          {/* {isAdminOrSuperUser && ( */}
             <li>
               <div className="menu-item-wrapper" onClick={toggleCompany}>
                 <img
@@ -217,23 +288,25 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
                 </ul>
               )}
             </li>
+          {/* )} */}
 
           {/* Payroll Management */}
-             <li>
-            <div 
-              className="menu-item-wrapper"
-              onClick={togglePay} // <-- Add this onClick handler
-            >
-              <img
-                src="/images/hand-coins.png"
-                alt="Payroll icon"
-                className="menu-icon"
-              />
-              <span className="menu-heading">Payroll Management
-                <span className="menu-dropdown">{payOpen ? "▲" : "▼"}</span>
-               </span>
+          {isAdminOrSuperUser && (
+            <li>
+              <div
+                className="menu-item-wrapper"
+                onClick={togglePay} // <-- Add this onClick handler
+              >
+                <img
+                  src="/images/hand-coins.png"
+                  alt="Payroll icon"
+                  className="menu-icon"
+                />
+                <span className="menu-heading">Payroll Management
+                  <span className="menu-dropdown">{payOpen ? "▲" : "▼"}</span>
+                </span>
               </div>
-                 {payOpen && (
+              {payOpen && (
                 <ul className="submenu show">
                   <li>
                     <span
@@ -245,75 +318,76 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
                   </li>
               
                   <li>
-                  <div className="menu-item-wrapper"  onClick={toggleDeductions}>
-                    <span>Deductions</span>
-                    <span className="menu-dropdown">{deductionsOpen ? "▲" : "▼"}</span>
-                  </div>
-                  {deductionsOpen && (
-                    <ul className="submenu show">
-                      <li>
-                        <span className="menu-subitem" onClick={() => handleSubmenuClick("/pension-funds")}>
-                          Pension Funds
-                         </span>
-                          </li>
-                          <li>
-                            <span
-                              className="menu-subitem"
-                              onClick={() => handleSubmenuClick("/assign-pension")}
-                            >
-                              Assign Pension
-                            </span>
-                      </li>
-                      <li>
-                            <span
-                              className="menu-subitem"
-                              onClick={() => handleSubmenuClick("/medical-aid")}
-                            >
-                              Medical Aid
-                            </span>
-                          </li>
-                        </ul>
-                      )}
-                    </li>
+                    <div className="menu-item-wrapper" onClick={toggleDeductions}>
+                      <span>Deductions</span>
+                      <span className="menu-dropdown">{deductionsOpen ? "▲" : "▼"}</span>
+                    </div>
+                    {deductionsOpen && (
+                      <ul className="submenu show">
+                        <li>
+                          <span className="menu-subitem" onClick={() => handleSubmenuClick("/pension-funds")}>
+                            Pension Funds
+                          </span>
+                        </li>
+                        <li>
+                          <span
+                            className="menu-subitem"
+                            onClick={() => handleSubmenuClick("/assign-pension")}
+                          >
+                            Assign Pension
+                          </span>
+                        </li>
+                        <li>
+                          <span
+                            className="menu-subitem"
+                            onClick={() => handleSubmenuClick("/medical-aid")}
+                          >
+                            Medical Aid
+                          </span>
+                        </li>
+                      </ul>
+                    )}
+                  </li>
                                     
-                 <li>
+                  <li>
                     <span
                       className="menu-subitem"
                       onClick={() => handleSubmenuClick("/company-contributions")}
                     >
-                    Company Contributions
+                      Company Contributions
                     
                     </span>
-                </li>
-                 <li>
+                  </li>
+                  <li>
                     <span
                       className="menu-subitem"
                       onClick={() => handleSubmenuClick("/bcea")}
                     >
-                    BCEA
+                      BCEA
                     </span>
-                </li>
-                 <li>
+                  </li>
+                  <li>
                     <span
                       className="menu-subitem"
                       onClick={() => handleSubmenuClick("/oid")}
                     >
-                    OID
+                      OID
                     </span>
-                </li>
-                 <li>
+                  </li>
+                  <li>
                     <span
                       className="menu-subitem"
                       onClick={() => handleSubmenuClick("/stock")}
                     >
-                    Stock
+                      Stock
                     </span>
                   
-                </li>  
+                  </li>
                 </ul>
               )}
             </li>
-                
+          )}
+          
           {/* Document Management */}
           {isAdminOrSuperUser && (
             <li>
@@ -329,6 +403,7 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
           )}
 
           {/* Admin tools (SuperUser only) */}
+          {isAdminOrSuperUser && (
             <li>
               <div className="menu-item-wrapper" onClick={toggleAdmin}>
                 <img
@@ -354,10 +429,109 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
                 </ul>
               )}
             </li>
-        </ul>
-            
-      </div>
+          )}
 
+          {/* NormalUser tools (NormalUser only) */}
+          
+            <li>
+              <div className="menu-item-wrapper" onClick={togglePayrollInfo}>
+                <img
+                  src="/images/hand-coins.png"
+                  alt="Leave"
+                  className="menu-icon"
+                />
+                <span className="menu-heading">
+                  Payroll Information
+                  <span className="menu-dropdown">{payinfoOpen ? "▲" : "▼"}</span>
+                </span>
+              </div>
+              {payinfoOpen && (
+                <ul className="submenu show">
+                  <li>
+                    <span
+                      className="menu-subitem"
+                      onClick={() => handleSubmenuClick("/payslips")}
+                    >
+                      Payslips
+                    </span>
+                </li>
+              </ul>       
+              )}
+            </li>
+
+            {/* NormalUser tools (NormalUser only) */}
+            <li>
+              <div className="menu-item-wrapper" onClick={toggleLeave}>
+                <img
+                  src="/images/file-user.png"
+                  alt="Leave"
+                  className="menu-icon"
+                />
+                <span className="menu-heading">
+                  Leave
+                  <span className="menu-dropdown">{leaveOpen ? "▲" : "▼"}</span>
+                </span>
+              </div>
+              {leaveOpen && (
+                <ul className="submenu show">
+                  <li>
+                    <span
+                      className="menu-subitem"
+                      onClick={() => handleSubmenuClick("/leave-application")}
+                    >
+                      Leave Application
+                    </span>
+                </li>
+                 <li>
+                    <span
+                      className="menu-subitem"
+                      onClick={() => handleSubmenuClick("/leave-balance")}
+                    >
+                      Leave Balance
+                    </span>
+                </li>
+                 <li>
+                    <span
+                      className="menu-subitem"
+                      onClick={() => handleSubmenuClick("/history")}
+                    >
+                      History
+                    </span>
+                  </li>
+              </ul>       
+              )}
+            </li>
+
+           {/* NormalUser tools (NormalUser only) */}
+            <li>
+              <div className="menu-item-wrapper" onClick={togglePayroll}>
+                <img
+                  src="/images/calculator.png"
+                  alt="Payroll Tools"
+                  className="menu-icon"
+                />
+                <span className="menu-heading">
+                  Payroll Tools
+                  <span className="menu-dropdown">{payrollOpen ? "▲" : "▼"}</span>
+                </span>
+              </div>
+              {canProjectPension && payrollOpen && (
+                <ul className="submenu show">
+                  <li>
+                    <span
+                      className="menu-subitem"
+                      onClick={() => handleSubmenuClick("/projection-calculator")}
+                    >
+                      Projection Calculator
+                    </span>
+                  </li>
+                </ul>
+              )}
+          </li> 
+        </ul>
+                 
+      </div>
+      
       <div className="menu-footer">
         <img
           src="/images/setitngs_icon.png"

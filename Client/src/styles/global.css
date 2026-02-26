@@ -9,8 +9,9 @@
 
 /* ==================== GLOBAL VARIABLES & RESETS ==================== */
 
+
 :root {
-  --primary-color: #002D40;
+  --primary-color: #355867;
   --primary-dark: #001a25;
   --primary-light: #004d6b;
   --accent-blue: #006088;
@@ -701,7 +702,7 @@ body {
 }
 
 /* Edit Employee Background */
-.edit-employee-background {
+.menu-background {
   position: fixed;
   top: 0;
   left: 375px;

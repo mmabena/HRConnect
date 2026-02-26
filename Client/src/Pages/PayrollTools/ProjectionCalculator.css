@@ -1,0 +1,199 @@
+:root {
+    --pension-percentage-slider-width: 1190px;
+    
+}
+
+.payroll-page{
+  font-family: 'Anek Bangla';
+}
+
+.pension-projection-frame {
+    width: 71.8vw;
+    border-radius: 10px;
+    
+    
+    overflow: hidden;
+    z-index: 0;
+    display: grid;
+    grid-template-rows: 70px 160px 110px 150px 130px 80px;
+    gap: 10px;
+    
+    padding-left: 140px;
+    padding-right: 140px;
+    margin-top: 20px;
+}
+
+
+.pension-projection-header h2 {
+    float: left;
+}
+
+.pension-employee-details {
+    display: grid;
+    grid-template-columns: 100px auto;
+    grid-template-rows: 20px 48px;
+    gap: 2px
+}
+
+.pension-employee-detail-header {
+    text-align: left;
+    color: #9A9A9A;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 26px;
+}
+
+
+.pension-employee-detail {
+    text-align: left;
+    margin-top: 10px;
+}
+
+.pension-projection-voluntary-contribution {
+    color: var(--primary-color);
+    display: grid;
+    grid-template-rows: 20px 88px;
+    gap: 20px;
+}
+
+.pension-projection-voluntary-contribution-header {
+}
+
+.voluntary-contribution {
+    display: grid;
+    grid-template-columns: 250px auto;
+}
+
+.contribution {
+    display: block;
+    text-align: left;
+}
+
+.contribution input {
+    margin-top: 8px;
+    border-radius: 15px;
+    border-color: var(--primary-color);
+    text-align: center;
+    height: 60px;
+    width: 210px;
+    font-size: 28px;
+}
+
+.voluntary-contribution-error {
+    font-size: 11px;
+    color: red;
+}
+
+.pension-projection-disclaimer {
+    text-align: left;
+}
+
+
+.warning{
+    color: #EB1111;
+     font-size: 16px;
+}
+
+.message{
+font-size: 16px;
+font-style: normal;
+font-weight: 400;
+line-height: 20px; 
+letter-spacing: 0.32px;
+}
+
+
+.contribution-frequency {
+    display: block;
+    text-align: left;
+    padding-top: 6px;
+}
+
+.contribution-frequency-radio {
+    margin-top: 20px;
+}
+
+.contribution-frequency-radio label {
+    margin-left: 15px;
+}
+
+.pension-projection-slider {
+    margin: auto 4px;
+}
+
+.pension-projection-slider input {
+    height: 6px;;
+    width: var(--pension-percentage-slider-width);
+}
+
+.range-labels {
+    width: var(--pension-percentage-slider-width);
+    font-weight: 500;
+    list-style: none;
+    text-align: right;
+    
+
+    li {
+        display: inline-flex;
+        text-align: center;
+        font-size: 14px;
+        margin-right: 170px;
+    }
+}
+
+.pension-projection-details {
+    display: inline-flex;
+    align-items: center;
+    gap: 35px;
+    font-size: 18px;
+    width: 1196px; 
+}
+
+.pension-projection-detail {
+    display: flex;
+    flex-direction: column;
+    width: 270px;
+    gap: 9px;
+    height: 140px;
+    align-self: stretch;
+    border: 2px solid;
+    font-weight: 700;
+    border-radius: 20px;
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    align-items: center;
+}
+
+.pension-projection-detail h4 {
+    text-align: center;
+    margin-top: 2px;
+    margin-bottom: 10px;
+    padding: 10px 42px;
+}
+
+
+.pension-projection-total {
+    color: var(--primary-color);
+    font-size: 18px;
+    font-weight: 700;
+    display: flex;
+    width: 1196px;
+    padding: 21px 437px;
+    flex-direction: column;
+    align-items: center;
+    gap: 9px;
+    border-radius: 20px;
+    border: 2px solid var(--primary-color);
+    
+}
+
+.pension-projection-total h4 {
+    margin-top: 5px;
+    margin-bottom: 25px;
+}
+
+
+
+
+

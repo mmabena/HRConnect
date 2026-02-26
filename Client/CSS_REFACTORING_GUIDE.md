@@ -110,7 +110,7 @@ Components import their specific CSS:
 ### Backgrounds
 - `.full-screen-bg` - Full viewport background
 - `.signin-container` - Sign-in page container
-- `.edit-employee-background` - Edit form background
+- `.menu-background` - Edit form background
 
 ## CSS Variables (Custom Properties)
 

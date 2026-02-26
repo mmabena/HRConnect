@@ -2285,7 +2285,7 @@
 }
 
 
-/* Custom Scrollbar for the overall container (e.g., .edit-employee-background) */
+/* Custom Scrollbar for the overall container (e.g., .menu-background) */
 .custom-scrollbar {
   overflow-y: auto; 
 }

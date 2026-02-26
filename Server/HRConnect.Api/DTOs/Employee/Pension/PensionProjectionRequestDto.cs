@@ -1,5 +1,7 @@
 namespace HRConnect.Api.DTOs.Employee.Pension
 {
+  using HRConnect.Api.Models;
+
   public enum ContributionFrequency
   {
     NotSet = 0,
@@ -10,7 +12,7 @@ namespace HRConnect.Api.DTOs.Employee.Pension
   {
     public int SelectedPensionPercentage { get; set; }
     public DateTime DOB { get; set; }
-    public required string EmploymentStatus { get; set; }
+    public required EmploymentStatus EmploymentStatus { get; set; }
     public decimal Salary { get; set; }
     public decimal VoluntaryContribution { get; set; }
     public ContributionFrequency VoluntaryContributionFrequency { get; set; }

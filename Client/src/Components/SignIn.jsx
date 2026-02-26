@@ -50,7 +50,7 @@ const SignIn = ({ onForgotPasswordClick, onLoginSuccess }) => {
           },
           body: JSON.stringify({ email, password }),
         });
-
+        
         console.log('Response status:', response.status);
         
         const responseText = await response.text(); 
@@ -67,7 +67,7 @@ const SignIn = ({ onForgotPasswordClick, onLoginSuccess }) => {
 
           // Pass the user data to onLoginSuccess
           if (typeof onLoginSuccess === 'function') {
-            onLoginSuccess(responseData);  // Pass the whole response data (user, token, etc.)
+            onLoginSuccess(response);  // Pass the whole response data (user, token, etc.)
           }
         } else {
           // Try to parse error response
