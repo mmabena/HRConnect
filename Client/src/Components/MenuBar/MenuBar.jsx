@@ -175,14 +175,6 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
               </div>
               {reportOpen && (
                 <ul className="submenu show">
-                   <li>
-                    <span
-                      className="menu-subitem"
-                      onClick={() => handleSubmenuClick("/employeeList")}
-                    >
-                      Employee List
-                    </span>
-                  </li>
                   <li>
                     <span
                       className="menu-subitem"

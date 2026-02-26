@@ -10,7 +10,7 @@ namespace HRConnect.Api.Controllers
     using Microsoft.AspNetCore.Authorization;
     [Route("api/employee")]
     [ApiController]
-    [Authorize(Roles = "SuperUser")]
+    // [Authorize(Roles = "SuperUser")]
     public class EmployeeController : ControllerBase
     {
         private readonly IEmployeeService _employeeService;

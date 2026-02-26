@@ -107,8 +107,8 @@ function App() {
  console.log("App currentUser:", currentUser);
 
  return (
- <div className="App" style={{ display: "flex", minHeight: "100vh" }}>
- <MenuBar currentUser={currentUser} />
+ <div className="App">
+ <MenuBar currentUser={currentUser} onLogout={handleLogout} />
  <div style={{ flex: 1, padding: "1rem" }}>
  <ToastContainer position="top-right" autoClose={3000} />
  <Routes>
@@ -121,7 +121,8 @@ function App() {
 <Route path="/editCompany/:id" element={<EditCompany />} />
 <Route path="/employeeList" element={<EmployeeList />} />
  <Route path="/company-contribution" element={<CompanyContribution />} />
- <Route path="/userManagement" element={<UserManagement />} /> 
+ <Route path="/userManagement" element={<UserManagement />} />
+ <Route path ="/taxtablemanagement" element={<TaxTableManagement/>}/>
  <Route path="/taxTableUpload" element={<TaxTableUpload />} />
  <Route path="/positionManagement" element={<PositionManagement />} />
 <Route path="/addPositionManagement" element={<AddPositionManagement />} />
