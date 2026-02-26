@@ -58,7 +58,7 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
     isUserManagementPage,
   ]);
 
-  useEffect(() => {
+  /*useEffect(() => {
     const token = JSON.parse(localStorage.getItem('currentUser')).token;
     const email = JSON.parse(localStorage.getItem('currentUser')).user.email;
     try {
@@ -86,7 +86,7 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
     catch (error) {
         console.error("Failed to fetch your employee details:", error)
     }
-  })
+  })*/
 
   const toggleReport = () => {
     setManualReportToggle(true);
@@ -497,7 +497,7 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
                   <span className="menu-dropdown">{payrollOpen ? "▲" : "▼"}</span>
                 </span>
               </div>
-              {canProjectPension && payrollOpen && (
+              { payrollOpen && (
                 <ul className="submenu show">
                   <li>
                     <span

@@ -1,8 +1,7 @@
 import { useEffect, useState,useRef } from "react";
 import axios from "axios";
 
-import CompanyManagementHeader from "../../Components/companyManagement/companyManagementHeader";
-
+import CompanyManagementHeader from "../../Components/CompanyManagement/companyManagementHeader";
 import "./ProjectionCalculator.css";
 
 const ProjectionCalculator = () => {
@@ -22,9 +21,9 @@ const ProjectionCalculator = () => {
 
     useEffect(() => {
         const token = JSON.parse(localStorage.getItem('currentUser')).token;
-        const email = JSON.parse(localStorage.getItem('currentUser')).user.email;
+        //const email = JSON.parse(localStorage.getItem('currentUser')).user.email;
         try {
-            axios.get("http://localhost:5147/api/employee/email/" + email, {
+            axios.get("http://localhost:5147/api/employee/email/Lebo@singular.co.za", {
                 headers: {
                     "Authorization": `Bearer ${token}`
                 }
@@ -168,7 +167,7 @@ const ProjectionCalculator = () => {
     }
 
     return (
-        <div className="menu-background custom-scrollbar">
+        <div className="menu-background custom-scrollbar payroll-page">
             <CompanyManagementHeader title="Projection Calculator" />
             <div className="pension-projection-frame">
                 <div className="pension-employee-details">
@@ -236,8 +235,8 @@ const ProjectionCalculator = () => {
                     <label>R {projectedPensionDetails && projectedPensionDetails.totalProjectedSavings}</label>
                 </div>
                 <div className="pension-projection-disclaimer">
-                    <h5>Disclaimer</h5>
-                    <p>
+                    <h5 className="warning">Disclaimer</h5>
+                    <p className="message">
                         The results shown are estimates are intended for guidance only. Calculations assume a 5% annual salary increase and a 6% annual pension growth rate.
                         Actual outcomes may differ from these projections. Monthly contributions are capped at R29166,66 per month.
                     </p>
