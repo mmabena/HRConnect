@@ -73,7 +73,8 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
               if (response.status === 200) {
                   console.log("Employee status for menu bar:",response.data);
                   const employementStatus = response.data.employmentStatus;
-                  if (employementStatus === 0) {
+                  const employeeAge = response.data.dateOfBirth;
+                  if (employementStatus === 0 && (calculateAge(employeeAge) < 65)) {
                     setCanProjectPension(true);
                   }
               } else {
@@ -90,6 +91,20 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
       }
     }
   })
+
+  const calculateAge = (dateOfBirth) => {
+        let today = new Date();
+        let birthDate = new Date(dateOfBirth);
+        let age = today.getFullYear() - birthDate.getFullYear();
+        
+        if (today.getMonth() < birthDate.getMonth()) {
+            age--;
+        } else if ((today.getMonth() === birthDate.getMonth()) && (today.getDay() < birthDate.getDay())){
+            age--;
+        }
+
+        return age;
+    }
 
   const toggleReport = () => {
     setManualReportToggle(true);
@@ -500,7 +515,7 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
                   <span className="menu-dropdown">{payrollOpen ? "▲" : "▼"}</span>
                 </span>
               </div>
-              { payrollOpen && (
+              {canProjectPension && payrollOpen && (
                 <ul className="submenu show">
                   <li>
                     <span

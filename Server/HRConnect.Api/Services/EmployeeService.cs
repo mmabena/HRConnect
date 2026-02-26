@@ -89,7 +89,7 @@ namespace HRConnect.Api.Services
             {
                 var createdEmployee = await _employeeRepo.CreateEmployeeAsync(new_employee);
                 // Send welcome email notification
-                //await SendWelcomeEmail(createdEmployee);
+                await SendWelcomeEmail(createdEmployee);
                 await transaction.CommitAsync();
                 return createdEmployee.ToEmployeeDto();
             }
