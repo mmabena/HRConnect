@@ -16,9 +16,7 @@
       IPensionFundDeductionService pensionFundDeductionService
   ) : ControllerBase
   {
-    // ===============================
-    // GET - All Pension Options
-    // ===============================
+  
     [HttpGet("options")]
     public async Task<ActionResult<IEnumerable<PensionOption>>> GetPensionOptions()
     {
@@ -28,9 +26,7 @@
       return Ok(options);
     }
 
-    // ===============================
-    // GET - Single Pension Option
-    // ===============================
+
     [HttpGet("options/{id}")]
     public async Task<ActionResult<PensionOption>> GetPensionOption(int id)
     {
@@ -40,9 +36,6 @@
       return option != null ? Ok(option) : NotFound("Pension option not found.");
     }
 
-    // ===============================
-    // POST - Add Pension Option
-    // ===============================
     [Authorize(Roles = "SuperUser")]
     [HttpPost("options")]
     public async Task<IActionResult> AddPensionOption([FromBody] PensionOptionDto dto)
@@ -57,9 +50,6 @@
       return result.IsSuccess ? Ok(result.Message) : BadRequest(result.Message);
     }
 
-    // ===============================
-    // PUT - Update Pension Option
-    // ===============================
     [HttpPut("options")]
     public async Task<IActionResult> UpdatePensionOption([FromBody] PensionOptionDto dto)
     {
@@ -75,9 +65,7 @@
       return result.IsSuccess ? Ok(result.Message) : BadRequest(result.Message);
     }
 
-    // ===============================
-    // POST - Process Monthly Deductions
-    // ===============================
+
     [Authorize(Roles = "SuperUser")]
     [HttpPost("process-deductions")]
     public async Task<IActionResult> ProcessMonthlyDeductions()
