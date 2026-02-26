@@ -21,9 +21,9 @@ const ProjectionCalculator = () => {
 
     useEffect(() => {
         const token = JSON.parse(localStorage.getItem('currentUser')).token;
-        //const email = JSON.parse(localStorage.getItem('currentUser')).user.email;
+        const email = JSON.parse(localStorage.getItem('currentUser')).user.email;
         try {
-            axios.get("http://localhost:5147/api/employee/email/Lebo@singular.co.za", {
+            axios.get("http://localhost:5147/api/employee/email/" + email, {
                 headers: {
                     "Authorization": `Bearer ${token}`
                 }
@@ -226,7 +226,8 @@ const ProjectionCalculator = () => {
                         <label>R {projectedPensionDetails && projectedPensionDetails.lumpSum}</label>
                    </div>
                    <div className="pension-projection-detail">
-                        <h4>Monthly Income:<br/>65-75 yrs</h4>
+                        <h4>Monthly Income
+                            65-75 years:</h4>
                         <label>R {projectedPensionDetails && projectedPensionDetails.monthlyIncomeAfterRetirement}</label>
                    </div>
                 </div>

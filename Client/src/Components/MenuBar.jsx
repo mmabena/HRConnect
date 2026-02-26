@@ -2,6 +2,7 @@ import "../MenuBar.css";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
+import e from "cors";
 
 const MenuBar = ({ currentUser, onAccessDenied }) => {
   const [reportOpen, setReportOpen] = useState(false);
@@ -59,37 +60,36 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
   ]);
 
   useEffect(() => {
-    if(currentUser) {
+    if(localStorage.getItem('currentUser') !== null && localStorage.getItem('currentUser') !== undefined) {
+      const token = JSON.parse(localStorage.getItem('currentUser')).token;
+      const email = JSON.parse(localStorage.getItem('currentUser')).user.email;
+      try {
+          axios.get("http://localhost:5147/api/employee/email/" + email, {
+              headers: {
+                  "Authorization": `Bearer ${token}`
+              }
+          })
+          .then(response => {
+              if (response.status === 200) {
+                  console.log("Employee status for menu bar:",response.data);
+                  const employementStatus = response.data.employmentStatus;
+                  if (employementStatus === 0) {
+                    setCanProjectPension(true);
+                  }
+              } else {
+                  console.error("Unexpeted status:", response.status);
+              }
+          })
+          .catch(error => {
+              console.error("Error:", error);
+          });
+      }
 
+      catch (error) {
+          console.error("Failed to fetch your employee details:", error)
+      }
     }
-    const token = JSON.parse(localStorage.getItem('currentUser')).token;
-    const email = JSON.parse(localStorage.getItem('currentUser')).user.email;
-    try {
-        axios.get("http://localhost:5147/api/employee/email/" + email, {
-            headers: {
-                "Authorization": `Bearer ${token}`
-            }
-        })
-        .then(response => {
-            if (response.status === 200) {
-                console.log("Employee status for menu bar:",response.data);
-                const employementStatus = response.data.employmentStatus;
-                if (employementStatus === 0) {
-                  setCanProjectPension(true);
-                }
-            } else {
-                console.error("Unexpeted status:", response.status);
-            }
-        })
-        .catch(error => {
-            console.error("Error:", error);
-        });
-    }
-
-    catch (error) {
-        console.error("Failed to fetch your employee details:", error)
-    }
-  })*/
+  })
 
   const toggleReport = () => {
     setManualReportToggle(true);

@@ -81,7 +81,7 @@ const handleLoginSuccess = (responseData) => {
 
   setCurrentUser(user); // save in component state
   // Store both token and user data in localStorage with the key "currentUser"
-  localStorage.setItem("currentUser", JSON.stringify({ token, user })); // persist in localStorage
+  //localStorage.setItem("currentUser", JSON.stringify({ token, user })); // persist in localStorage
   setIsLoggedIn(true);
   navigate("/dashboard");
 };
