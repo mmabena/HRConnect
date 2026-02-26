@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import CompanyManagementHeader from './CompanyManagement/companyManagementHeader.jsx';
 import CompanyManagementNavBar from './CompanyManagement/companyManagementNavBar.jsx';
 
-
 import '../MenuBar.css';
 import '../Navy.css';
 
