@@ -1,14 +1,15 @@
+using System.Text;
 using HRConnect.Api.Data;
-using Microsoft.EntityFrameworkCore;
+using HRConnect.Api.Interfaces;
+using HRConnect.Api.Models;
+using HRConnect.Api.Repository;
+using HRConnect.Api.Services;
+using HRConnect.Api.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Text;
-using HRConnect.Api.Interfaces;
-using HRConnect.Api.Repository;
-using Microsoft.AspNetCore.Identity;
-using HRConnect.Api.Models;
-using HRConnect.Api.Utils;
 using Resend;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -92,6 +93,8 @@ builder.Services.AddOptions<ResendClientOptions>().Configure<IConfiguration>((o,
 });
 builder.Services.AddHttpClient<ResendClient>();
 
+builder.Services.AddScoped<IPensionRepository, PensionFundRepository>();
+builder.Services.AddScoped<IPensionFundService, PensionFundService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IUserService, HRConnect.Api.Services.UserService>();
@@ -113,6 +116,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
   var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
+  
   dbContext.Database.Migrate();
 }
 
