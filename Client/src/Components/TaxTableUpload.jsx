@@ -59,10 +59,17 @@ function TaxTableUpload({ onClose, onUploadSuccess, existingYears = [] }) {
     }
 
     if (!year) {
-      toast.warning("Please select a financial year before uploading.");
-      fileInputRef.current.value = "";
-      return;
-    }
+  toast.warning("Please select a financial year before uploading.");
+  fileInputRef.current.value = "";
+  return;
+}
+
+// 🚨 Prevent duplicate year upload
+  if (existingYears.includes(year)) {
+    toast.error(`A tax table for ${year} already exists.`);
+    fileInputRef.current.value = "";
+    return;
+  }
 
     setFile(selected);
 
@@ -74,7 +81,7 @@ function TaxTableUpload({ onClose, onUploadSuccess, existingYears = [] }) {
       formData.append("file", selected);
 
       const response = await api.post(
-        "/tax-tables/upload",
+        "/taxtableupload/upload",
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
