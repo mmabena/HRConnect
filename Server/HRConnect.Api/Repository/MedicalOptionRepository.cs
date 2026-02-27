@@ -392,7 +392,7 @@
           .Where(mo => mo.MedicalOptionName.Contains(optionName))
           .ToListAsync();
 
-      if (medicalOptions.Count == 0)
+      if (medicalOptions.Count == 0) // move to service layer where used
       {
         throw new KeyNotFoundException($"No medical options found containing " +
                                        $"'{optionName}'");
@@ -779,6 +779,60 @@
         .Select(option => option.ToMedicalOptionDto()).ToList();
 
       return responseDtos.AsReadOnly();
+    }
+
+    public async Task<IReadOnlyCollection<MedicalOptionDto>> GetAllOptionsWithinEmployeeSalary(decimal salaryAmount)
+    {
+      var response = await _context.MedicalOptions
+        .Include(o => o.MedicalOptionCategory)
+        .Where(s => s.SalaryBracketMin.Value != null || s.SalaryBracketMax.Value != null)
+        .GroupBy(o=> o.MedicalOptionCategory.MedicalOptionCategoryId)
+        .FirstOrDefaultAsync(s => s.SalaryBracketMin < salaryAmount && salaryAmount < s.SalaryBracketMax)
+        .ToListAsync();
+        // Fix Linq Query
+      return response.AsReadOnly();
+    }
+
+    public async Task<IReadOnlyCollection<MedicalOptionDto>> GetEmployeeEligibleOptions(string employeeId)
+    {
+      // Depends on above
+      throw new NotImplementedException();
+    }
+
+    public async Task<IReadOnlyList<MedicalOptionDto>> GetAllCategoryOptionsById(int id)
+    {
+      throw new NotImplementedException();
+    }
+
+    public async Task<List<IGrouping<int, MedicalOptionCategory>>> GetAllMedicalOptionCategories()
+    {
+      return await _context.MedicalOptionCategories
+        .Where(c => c.MedicalOptionCategoryId != null)
+        .GroupBy(c => c.MedicalOptionCategoryId)
+        .ToListAsync();
+    }
+
+    public async Task<MedicalOptionCategoryDto> GetCategoryById(int id)
+    {
+      return await _context.MedicalOptionCategories
+        .Where(c => c.MedicalOptionCategoryId == id)
+        .ToListAsync();
+    }
+
+    public async Task<MedicalOptionCategoryDto> CreateMedicalOptionCategory(CreateMedicalOptionCategoryDto createCategoryPayload)
+    {
+      throw new NotImplementedException();
+    }
+
+    public Task<List<CreateMedicalOptionVariantsDto>> CreateBulkOptionsByExistingCategoryId(int id,
+      CreateMedicalOptionVariantsDto createOptionsPayload)
+    {
+      throw new NotImplementedException();
+    }
+
+    public Task<MedicalOptionCategoryDto> UpdateExistingCategoryById(int id, UpdateMedicalOptionCategoryDto updateCategoryPayload)
+    {
+      throw new NotImplementedException();
     }
   }
 }
