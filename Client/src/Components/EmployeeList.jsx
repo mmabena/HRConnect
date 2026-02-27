@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { fetchAllEmployees } from "../Employee";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import AddEmployee from "./AddEmployee";
+import AddEmployeeModal from "./AddEmployeeModal";
 import "../MenuBar.css";
 
 const EmployeeList = () => {
@@ -389,9 +389,12 @@ const EmployeeList = () => {
         </div>
       </div>
       {showAddModal && (
-        <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <AddEmployee closeModal={() => setShowAddModal(false)} />
+        <div
+          className="add-employee-overlay"
+          onClick={() => setShowAddModal(false)}
+        >
+          <div onClick={(e) => e.stopPropagation()}>
+            <AddEmployeeModal closeModal={() => setShowAddModal(false)} />
           </div>
         </div>
       )}

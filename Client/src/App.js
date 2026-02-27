@@ -12,6 +12,7 @@ import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 import "./MenuBar.css";
 import EmployeeList from "./Components/EmployeeList";
+import AddEmployeeModal from "./Components/AddEmployeeModal";
 import UserManagement from "./Components/UserManagement";
 import PositionManagement from "./Components/PositionManagement";
 import ViewPositionManagement from "./Components/ViewPositionManagement";
@@ -102,6 +103,7 @@ function App() {
           <Route path="/dashboard" element={<div>Welcome to Dashboard</div>} />
 
           <Route path="/addEmployee" element={<AddEmployee />} />
+          <Route path="/addEmployeeModal" element={<AddEmployeeModal />} />
           <Route path="/editEmployee" element={<EditEmployee />} />
           <Route path="/editEmployee/:employeeNumber" element={<EditEmployee />} />
 
