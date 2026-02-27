@@ -15,6 +15,7 @@ const ManageUserPositions = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [showPageOptions, setShowPageOptions] = useState(false);
+  const [changes, setChanges] = useState({});
 
   const [activeTab, setActiveTab] = useState("Position Management");
 
@@ -107,6 +108,29 @@ const ManageUserPositions = () => {
     currentPage < totalPages && setCurrentPage((prev) => prev + 1);
 
   const handlePageClick = (num) => setCurrentPage(num);
+  // ==============================
+  // SAVE CHANGES
+  // ==============================
+  const handleSave = async () => {
+    const updates = Object.entries(changes).map(([employeeId, positionId]) => ({
+      employeeId,
+      positionId,
+    }));
+
+    if (updates.length === 0) {
+      toast.info("No changes to save.");
+      return;
+    }
+
+    try {
+      await api.put("/employee/updatePositions", { updates });
+      toast.success("Positions updated successfully.");
+      setChanges({});
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to save changes.");
+    }
+  };
 
   // ==============================
   // RENDER
@@ -118,7 +142,7 @@ const ManageUserPositions = () => {
     <div className="menu-background custom-scrollbar">
       <CompanyManagementHeader title={activeTab} />
 
-      <div className="nav-bar-with-button">
+      <div className="nav-bar-with-buttons">
         <CompanyManagementNavBar
           tabs={navTabs}
           activeTab={activeTab}
@@ -132,6 +156,15 @@ const ManageUserPositions = () => {
           tabWidths={tabWidths}
         />
       </div>
+
+      <div >
+          <button className="add-position-button" onClick={handleSave}>
+            Save 
+          </button>
+        </div>
+      
+
+      
 
       <div className="content-container">
         <table className="position-table">
@@ -155,7 +188,7 @@ const ManageUserPositions = () => {
               currentEmployees.map((employee) => (
                 <tr key={employee.employeeId}>
                   <td>
-                    {employee.firstName} {employee.lastName}
+                    {employee.name} {employee.surname}
                   </td>
                   <td>{employee.branch || "N/A"}</td>
                   <td>

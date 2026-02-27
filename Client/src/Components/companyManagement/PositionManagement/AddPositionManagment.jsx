@@ -122,7 +122,6 @@ const AddPositionManagement = ({ isOpen, onClose }) => {
   return (
     <div className="modal-overlay">
       <div className="modal-content">
-        <button className="modal-close-btn" onClick={onClose}>✕</button>
 
         <div className="headings-container">
           <div className="apm-logo">

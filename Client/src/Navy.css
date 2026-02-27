@@ -2481,9 +2481,8 @@ text-align: left;
   border-collapse: collapse;
   table-layout: fixed;
   font-family: 'Anek Bangla', sans-serif; 
-  font-size: 16px;                        
+  font-size: 18px;                        
 }
-.position-table th,
 
 .position-table td {
   padding: 12px 20px;

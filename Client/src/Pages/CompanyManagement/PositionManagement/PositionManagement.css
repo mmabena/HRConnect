@@ -17,3 +17,156 @@
   width: 20px;
   height: 20px;
 }
+
+
+.save-position-button {
+  position: fixed;
+  right: 40px;     /* distance from right */
+  background-color: #668c4d;
+  color: white;
+  padding: 10px 50px; 
+  border: none;
+  border-radius: 8px;
+  font-size: 19px;
+  font-weight: 700;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  white-space: nowrap;
+  z-index: 1000; /* ensures it sits above other elements */
+}
+
+/*Company Management Section*/
+
+/* Header styles */
+
+.cmn-header-main-frame {
+  width: 100%;
+  min-height: 75px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  align-items: center;       /* vertically center items */
+  justify-content: space-between; /* push left and right sections to edges */
+  padding: 10px 20px;
+  gap: 33px;
+}
+
+
+/* Left Section (Logo/Text) */
+.cmn-header-left-section {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  box-sizing: border-box;
+  height: auto;
+  flex-shrink: 0;
+}
+
+/* Company Logo Text */
+.cmn-logo-text {
+  font-family: 'Anek Bangla', sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 40px;
+  line-height: 100%;
+  letter-spacing: 0.02em;
+  color: #006088;
+  margin: 0;
+  white-space: nowrap;
+}
+
+
+/* Right Section (Icons & Date/Time) */
+.cmn-header-right-section {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 15px;
+  height: auto;
+  box-sizing: border-box;
+  margin-left: auto;
+}
+.cm-navbar-tab-button--active {
+  color: #668c4d;
+  padding-bottom: 5px;
+  }
+
+.nav-bar-with-buttons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  margin-top: 20px;
+}
+
+
+/* Date/Time Container */
+.cmn-datetime-wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  height: 34px;
+  box-sizing: border-box;
+}
+
+/* Date & Time Grouping */
+.cmn-datetime-date-container,
+.cmn-datetime-time-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  box-sizing: border-box;
+  gap: 10px;
+}
+
+/* Shared Box Style */
+.cmn-datetime-month,
+.cmn-datetime-year,
+.cmn-datetime-time {
+  background-color: #9C9C9C29;
+  border-radius: 6px;
+  height: 34px;
+  padding: 6px 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'League Spartan', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 22px;
+  letter-spacing: -0.43px;
+  color: var(--primary-color);
+  margin: 0;
+  white-space: nowrap;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
