@@ -1,0 +1,54 @@
+.neo-nav {
+  width: 100%;
+  padding: 14px 0;
+  position: sticky;
+  top: 4px;
+  z-index: 999;
+}
+
+/* INNER CONTAINER */
+.nav-shell {
+  width: 90%;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* DESKTOP LINKS - Centered */
+.nav-links {
+  display: flex;
+  align-items: center;
+  justify-content:flex-start; /* Center horizontally */
+  gap: 50px; /* Slightly bigger gap for bigger font */
+  flex: 1; /* Take available space to help centering */
+}
+
+.nav-item {
+  text-decoration: none;
+  color: #050505;
+  font-size: 18px; 
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  font-family: 'Anek Bangla', sans-serif;
+  transition: 0.25s ease;
+  position: relative;
+}
+
+
+
+.nav-item:hover::after {
+  width: 100%;
+}
+
+.nav-item:hover {
+  color: #638549;
+}
+
+
+/* MOBILE MENU */
+@media (max-width: 850px) {
+  .nav-links {
+    display: none;
+  }
+}

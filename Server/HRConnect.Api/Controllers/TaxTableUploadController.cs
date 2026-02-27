@@ -17,7 +17,7 @@ namespace HRConnect.Api.Controllers
   /// and retrieve tax deduction data for a specific tax year
   /// </summary>
   [ApiController]
-  [Route("api/[controller]")]
+  [Route("api/taxtableupload")]
   [Authorize(Roles = "SuperUser")]
   public class TaxTableUploadController : ControllerBase
   {
@@ -37,14 +37,13 @@ namespace HRConnect.Api.Controllers
     /// <summary>
     /// Retrieves all tax table uploads.
     /// </summary>
-    /// <param name="taxYear">
     /// The tax year for which tax deductions should be retrieved.
     /// </param>
     /// <returns>
     /// A list of tax table upload records.
     /// </returns>
     [HttpGet]
-    public async Task<IActionResult> GetAll(int taxYear)
+    public async Task<IActionResult> GetAll()
     {
       var allDeductions = await _taxTableUploadService.GetAllUploadsAsync();
       return Ok(allDeductions);

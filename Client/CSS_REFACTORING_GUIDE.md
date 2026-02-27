@@ -1,56 +1,65 @@
 # CSS Refactoring Summary - HRConnect Client
 
 ## Overview
+
 Consolidated all shared and standardized CSS styles into a single global stylesheet to improve maintainability, consistency, and reduce code duplication.
 
 ## Changes Made
 
 ### 1. **Created `styles/global.css`** (875 lines)
-   - **CSS Custom Properties** - Brand colors, spacing, borders, and transitions
-   - **Buttons** - 7 standardized button types with hover/active states
-   - **Forms & Inputs** - Complete input styling with error states
-   - **Grids & Layouts** - Responsive grid systems and layouts
-   - **Tables** - Professional table styling with headers and hover effects
-   - **Modals** - Modal dialog patterns and overlays
-   - **Typography** - Text, heading, and feedback message styles
-   - **Backgrounds & Containers** - Full-page and component backgrounds
-   - **Responsive Design** - Mobile-first breakpoints (768px, 480px)
+
+- **CSS Custom Properties** - Brand colors, spacing, borders, and transitions
+- **Buttons** - 7 standardized button types with hover/active states
+- **Forms & Inputs** - Complete input styling with error states
+- **Grids & Layouts** - Responsive grid systems and layouts
+- **Tables** - Professional table styling with headers and hover effects
+- **Modals** - Modal dialog patterns and overlays
+- **Typography** - Text, heading, and feedback message styles
+- **Backgrounds & Containers** - Full-page and component backgrounds
+- **Responsive Design** - Mobile-first breakpoints (768px, 480px)
 
 ### 2. **Updated `index.js`**
-   - Added import: `import './styles/global.css';`
-   - Global CSS loads before component-specific CSS
-   - Ensures consistent baseline styling across all pages
+
+- Added import: `import './styles/global.css';`
+- Global CSS loads before component-specific CSS
+- Ensures consistent baseline styling across all pages
 
 ### 3. **Cleaned Component CSS Files**
-   
-   #### MenuBar.css
-   - ✅ Removed font imports (now in global.css)
-   - ✅ Removed duplicate `.grid-item` style
-   - ✅ Removed duplicate `.heading-item` style
-   - ✅ Removed duplicate `.em-edit-button` style
-   - ✅ Added dependency comment referencing global.css
-   - ✅ Kept menu-specific navigation styles
 
-   #### Navy.css
-   - ✅ Removed font imports (now in global.css)
-   - ✅ Removed duplicate `.full-screen-bg` style
-   - ✅ Added comprehensive dependency header
-   - ✅ Kept page-specific layouts and custom variations
-   - ✅ Kept decorative shapes and form customizations
+#### MenuBar.css
 
-   #### TaxTableUpload.css
-   - ✅ Removed font imports (now in global.css)
-   - ✅ Removed duplicate `.full-screen-bg` style
-   - ✅ Added dependency comment
-   - ✅ Kept component-specific styles
+- ✅ Removed font imports (now in global.css)
+- ✅ Removed duplicate `.grid-item` style
+- ✅ Removed duplicate `.heading-item` style
+- ✅ Removed duplicate `.em-edit-button` style
+- ✅ Added dependency comment referencing global.css
+- ✅ Kept menu-specific navigation styles
 
-   #### App.css
-   - No changes - contains only app-specific styles
+#### Navy.css
 
-   #### index.css
-   - No changes - mostly commented out
+- ✅ Removed font imports (now in global.css)
+- ✅ Removed duplicate `.full-screen-bg` style
+- ✅ Added comprehensive dependency header
+- ✅ Kept page-specific layouts and custom variations
+- ✅ Kept decorative shapes and form customizations
+
+#### TaxTableUpload.css
+
+- ✅ Removed font imports (now in global.css)
+- ✅ Removed duplicate `.full-screen-bg` style
+- ✅ Added dependency comment
+- ✅ Kept component-specific styles
+
+#### App.css
+
+- No changes - contains only app-specific styles
+
+#### index.css
+
+- No changes - mostly commented out
 
 ### 4. **Import Chain (Load Order)**
+
 ```
 index.js
 ├── styles/global.css (shared standardized styles)
@@ -58,7 +67,7 @@ index.js
 └── App.js
     ├── App.css (app-specific)
     └── MenuBar.css (menu component - component-specific overrides)
-    
+
 Components import their specific CSS:
 ├── Navy.css (auth, forms, tables)
 ├── TaxTableUpload.css (tax upload)
@@ -68,6 +77,7 @@ Components import their specific CSS:
 ## Standardized Global Classes
 
 ### Buttons
+
 - `.btn`, `.btn-primary` - Primary action buttons
 - `.btn-secondary` - Alternative actions
 - `.btn-success`, `.save-button` - Save/submit actions
@@ -76,6 +86,7 @@ Components import their specific CSS:
 - `.sign-in-button` - Authentication actions
 
 ### Form Inputs
+
 - `.input-field` - Standard text/email inputs
 - `.input-group` - Container for input with icon
 - `.input-label`, `.form-label` - Input labels
@@ -84,17 +95,20 @@ Components import their specific CSS:
 - `.input-error` - Error state styling
 
 ### Grids & Layouts
+
 - `.grid-item` - Grid cell containers
 - `.actions-grid` - Responsive action grid
 - `.center-frame` - Two-column layout
 - `.column`, `.left-column`, `.right-column` - Column layouts
 
 ### Tables
+
 - `.styled-table` - Professional table styling
 - `.empty-table-message` - Empty state message
 - `.action-buttons` - Row action buttons
 
 ### Modals
+
 - `.actions-modal` - Modal container
 - `.actions-modal-overlay` - Overlay backdrop
 - `.actions-modal-header` - Modal header section
@@ -102,15 +116,17 @@ Components import their specific CSS:
 - `.toast-confirm-buttons` - Action buttons in modals
 
 ### Typography
+
 - `.page-title` - Page headings
 - `.instruction-text` - Helper/instruction text
 - `.error-message`, `.success-message` - Feedback messages
 - `.footer-text` - Footer copyright/info text
 
 ### Backgrounds
+
 - `.full-screen-bg` - Full viewport background
 - `.signin-container` - Sign-in page container
-- `.edit-employee-background` - Edit form background
+- `.menu-background` - Edit form background
 
 ## CSS Variables (Custom Properties)
 
@@ -118,9 +134,9 @@ All colors and values are defined as CSS variables in `:root`:
 
 ```css
 :root {
-  --primary-color: #002D40;
+  --primary-color: #002d40;
   --accent-blue: #006088;
-  --success-color: #AFBF74;
+  --success-color: #afbf74;
   --error-color: #d32f2f;
   --border-radius-small: 5px;
   --border-radius-medium: 10px;
@@ -130,6 +146,7 @@ All colors and values are defined as CSS variables in `:root`:
 ```
 
 ### Benefits:
+
 - Easy color scheme updates (change one variable, update everywhere)
 - Consistent spacing and sizing
 - Standardized animations and transitions
@@ -144,7 +161,9 @@ All colors and values are defined as CSS variables in `:root`:
 ## Migration Guide for Developers
 
 ### Using Standardized Styles
+
 Instead of creating custom button CSS:
+
 ```css
 /* ❌ Old Way - Custom CSS in each file */
 .my-button {
@@ -157,6 +176,7 @@ Instead of creating custom button CSS:
 ```
 
 Use global classes:
+
 ```html
 <!-- ✅ New Way - Use global classes -->
 <button className="btn">My Button</button>
@@ -164,7 +184,9 @@ Use global classes:
 ```
 
 ### Component-Specific Overrides
+
 If you need component-specific variations, extend the global classes in your component CSS:
+
 ```css
 /* In component CSS */
 .my-custom-button {
@@ -201,6 +223,7 @@ If you need component-specific variations, extend the global classes in your com
 ## Questions or Issues?
 
 If you find any styling inconsistencies:
+
 1. Check if the style should be in global.css (shared) or component CSS (specific)
 2. Use CSS variables for colors/spacing
 3. Keep component CSS minimal - use global classes as base

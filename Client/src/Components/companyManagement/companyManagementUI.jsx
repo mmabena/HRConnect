@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CompanyManagementHeader from './companyManagementHeader.jsx';
 import CompanyManagementNavBar from './companyManagementNavBar.jsx';
-import TaxTableUpload from '../TaxTableUpload';
+import TaxTableUpload from './TaxTableManagement/TaxTableUpload.jsx';
 
 
-import '../../MenuBar.css';
+import "../MenuBar/MenuBar.css";
 import '../../Navy.css';
 
 const CmInputField = ({ id, value, onChange, placeholder, isTextArea = false, inputClassName = '', readOnly = false }) => {
@@ -78,7 +78,7 @@ function CompanyManagementUI({
   };
 
   return (
-  <div className="edit-employee-background custom-scrollbar">
+  <div className="menu-background custom-scrollbar">
     {/* Pass activeTab as title to the header */}
     <CompanyManagementHeader title={activeTab} />
 

@@ -1,4 +1,4 @@
-import '../../MenuBar.css'; 
+import "../MenuBar/MenuBar.css";
 
 const CompanyManagementNavBar = ({
   tabs,

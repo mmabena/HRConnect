@@ -86,5 +86,23 @@ namespace HRConnect.Api.Services
     {
       return _userRepo.DeleteUserAsync(id);
     }
-  }
+    public async Task<bool> ChangePasswordAsync(ChangePasswordRequestDto dto)
+    {
+      var user = await _userRepo.GetUserByEmailAsync(dto.Email);
+      if (user == null)
+        throw new ArgumentException("User not found.");
+
+      // Verify current password
+      var verificationResult = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, dto.CurrentPassword);
+      if (verificationResult == Microsoft.AspNetCore.Identity.PasswordVerificationResult.Failed)
+        throw new ArgumentException("Current password is incorrect.");
+
+      if (!PasswordValidator.IsValidPassword(dto.NewPassword))
+        throw new ArgumentException("New password does not meet complexity requirements. Minimum 8 chars, include uppercase, lowercase, digit and special character.");
+
+      user.PasswordHash = _passwordHasher.HashPassword(user, dto.NewPassword);
+      await _userRepo.UpdateUserAsync(user.UserId, user);
+      return true;
+    }
+    }
 }

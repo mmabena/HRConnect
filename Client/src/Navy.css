@@ -435,7 +435,7 @@
   background-color: #004d6b;
 }
 
-.edit-employee-background {
+.menu-background {
   position: fixed;
   top: 0;
   left: 375px;
@@ -534,8 +534,11 @@
 
 body,
 .App {
-  background-color: #002D40;
-  min-height: 1080px;
+  background-color: var(--primary-color);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   margin: 0;
   padding: 0;
   position: relative;
@@ -862,16 +865,6 @@ body {
   margin: 0;
 }
 
-body,
-.App {
-  background-color: #002D40;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-
 .signin-container {
   width: 1187px;
   min-height: 828px;
@@ -947,6 +940,30 @@ body,
   align-items: center;
 }
 
+ .img-left-column{
+  flex: 1;
+  position: relative;
+  justify-content: center;
+  align-items: center;
+  right: 95px;
+ }
+.modal-overlay1 {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5); /* semi-transparent */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
 .right-column {
   flex: 1;
   display: flex;
@@ -1289,7 +1306,7 @@ UserManagement Styles */
   font-style: italic;
 }
 
-.edit-employee-background {
+.menu-background {
   background-color: #f5f5f5;
   min-height: 100vh;
   padding-bottom: 50px;
@@ -1754,7 +1771,7 @@ UserManagement Styles */
   }
 }
 
- .edit-employee-background {
+ .menu-background {
   background-color: #f9f9f9;
   min-height: 100vh;
   overflow-y: auto; 
@@ -2169,242 +2186,6 @@ text-align: left;
 }
 
 
-
-/* Tax Table Upload css----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
-.tax-table-frame {
-  width: 61.8vw;
-  height: 86.7vh;
-  border-radius: 10px;
-  background: linear-gradient(
-    135deg,
-    #EEEEF1,
-    #EFF1F3,
-    #E7EAEB,
-    #D6D6D9,
-    #C4C4C5
-  );
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  z-index: 1;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-}
-
-.tax-table-content-centered {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  padding: 20px;
-}
-
-.tax-table-headings-container {
-  width: 360px;
-  margin: 20px auto 0;
-  text-align: center;
-}
-
-/* Logo */
-.tax-table-logo {
-  width: 279.32px;
-  height: 35.14px;
-  margin: 0 auto 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.tax-table-logo-text-bold,
-.tax-table-logo-text-light {
-  font-family: 'Anek Bangla', serif;
-  font-size: 40px;
-  line-height: 100%;
-  letter-spacing: 0.02em;
-  user-select: none;
-}
-
-.tax-table-logo-text-bold {
-  font-weight: 700;
-  color: #002D40;
-}
-
-.tax-table-logo-text-light {
-  font-weight: 300;
-  color: #006088;
-}
-
-
-.upload-title {
-  width: 360px;
-  font-family: 'Inter', sans-serif;
-  font-weight: 700;
-  font-size: 30px;
-  line-height: 36px;
-  letter-spacing: 0;
-  color: #002D40;
-  text-align: center;
-  margin: 0 auto 20px;
-}
-
-.file-type-text {
-  width: 360px;
-  font-family: 'Instrument Sans', sans-serif;
-  font-weight: 400;
-  font-size: 12px;
-  line-height: 18px;
-  letter-spacing: 0;
-  color: #002D40;
-  text-align: center;
-  margin: 0 auto 20px;
-}
-
-
-
-/* ----------------------- Messages ----------------------- */
-.error-message,
-.success-message {
-  font-family: 'Instrument Sans', sans-serif;
-  font-size: 12px;
-  margin: 10px auto 0;
-  text-align: center;
-  width: 360px;
-}
-.error-message {
-  color: #ff0000;
-}
-.success-message {
-  color: #006088;
-}
-
-/* --------------------- Upload section --------------------- */
-.upload-section {
-  position: absolute;
-  top: 60%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 905px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.dashed-box {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 10px;
-  gap: 30px;
-  width: 885px;
-  height: 409px;
-  background: linear-gradient(180deg, #EEEEF1 0%, #EFF1F3 16.19%, #E7EAEB 50.25%, #D6D6D9 79.77%, #C4C4C5 100%);
-  border: 5px solid transparent;
-  border-image: repeating-linear-gradient(to right, #000 0, #000 34px, transparent 34px, transparent 68px) 5 round;
-  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
-}
-
-/* ----------------- Dropdown and upload elements ----------------- */
-.tax-name-input {
-  width: 100%;
-  height: 33px;
-  padding-right: 35px; /* space for arrow */
-  padding-left: 5px;
-  padding-bottom: 5px;
-  border: none;
-  border-bottom: 1.5px solid #006088;
-  border-radius: 0;
-  font-size: 14px;
-  outline: none;
-  box-sizing: border-box;
-  background-color: transparent;
-  font-family: sans-serif;
-  
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-}
-.dropdown-arrow {
-  position: absolute;
-  right: 5px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 20px;
-  height: 20px;
-  pointer-events: none;
-}
-
-
-.drop-files-text {
-  max-width: 885px;
-  width: 100%;
-  font-family: 'Inter', sans-serif;
-  font-weight: 700;
-  font-size: 36px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: #002D40;
-  margin: 0;
-}
-
-.or-text {
-  width: 885px;
-  font-family: 'Instrument Sans', sans-serif;
-  font-weight: 400;
-  font-size: 14px;
-  text-align: center;
-  color: #002D40;
-  margin: 0;
-}
-
-.upload-button-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 11px;
-  gap: 5px;
-  width: 100px;
-  height: 20px;
-  background: #002D40;
-  border-radius: 11px;
-}
-
-.upload-file-button {
-  font-family: 'Inter', sans-serif;
-  font-weight: 500;
-  font-size: 18px;
-  color: #fff;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  height: 15px;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.upload-hidden-input {
-  opacity: 0;
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  left: 0;
-  top: 0;
-  cursor: pointer;
-}
-
-.selected-file-display {
-  color: #002D40;
-  font-family: 'Instrument Sans', sans-serif;
-  font-size: 13px;
-  margin-top: 8px;
-  text-align: center;
-}
-
-
 /*START OF CSS COMPANY CONTRIBUTION PAGE --------------------------------------------------------------------------------------------------------------------------------------*/
 
 .management-container {
@@ -2474,21 +2255,15 @@ text-align: left;
 .nav-tabs-wrapper {
   margin-bottom: 24px;
 }
+
 .pm-table-wrapper {
-  margin-left:-50px!important;
-  margin-right: 50px;  
-  max-width: 1550px;
-  width: calc(100% - 100px); 
-  padding: 0;
   background-color: #ffffff;
   border-radius: 0px;
   margin-top: 20px;
   overflow-x: auto;
   box-sizing: border-box;
-   margin-left: -50px;
-
-
 }
+
 .position-table {
   width: 100%;
   border-collapse: collapse;
@@ -2873,4 +2648,8 @@ td .edit-button:hover {
 .download-button:hover {
   background-color: #9AAC60;
 }/*END OF CSS COMPANY CONTRIBUTION PAGE --------------------------------------------------------------------------------------------------------------------------------------*/
+
+
+
+
 
