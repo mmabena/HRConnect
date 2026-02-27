@@ -1,8 +1,7 @@
 namespace HRConnect.Api.Utils
 {
-  using HRConnect.Api.Models;
 
-  public class PayrollDeductionsCalculator
+  public class StatutoryContributionsCalculator
   {
     /// <summary>
     /// Calculate employee UIF Contribution from employee's monthly salary with validation that the employee portion. This is calculate as 1% of employee's monthly solution 
@@ -20,11 +19,11 @@ namespace HRConnect.Api.Utils
       }
       else if (monthlySalary == 0) return 0;
 
-      decimal employeeContribution = monthlySalary * DeductionConstants.UIFEmployeeAmount;
+      decimal employeeContribution = monthlySalary * StatutoryContributionConstants.UIFEmployeeAmount;
 
-      if (employeeContribution >= DeductionConstants.UIFCap)
+      if (employeeContribution > StatutoryContributionConstants.UIFCap)
       {
-        employeeContribution = DeductionConstants.UIFCap;
+        employeeContribution = StatutoryContributionConstants.UIFCap;
       }
       return employeeContribution;
     }
@@ -44,11 +43,11 @@ namespace HRConnect.Api.Utils
       }
       else if (monthlySalary == 0) return 0;
 
-      decimal employerContribution = monthlySalary * DeductionConstants.UIFEmployeeAmount;
+      decimal employerContribution = monthlySalary * StatutoryContributionConstants.UIFEmployeeAmount;
 
-      if (employerContribution >= DeductionConstants.UIFCap)
+      if (employerContribution > StatutoryContributionConstants.UIFCap)
       {
-        employerContribution = DeductionConstants.UIFCap;
+        employerContribution = StatutoryContributionConstants.UIFCap;
       }
       return employerContribution;
     }
@@ -61,7 +60,7 @@ namespace HRConnect.Api.Utils
     {
       decimal employee = CalculateUifEmployee(monthlySalary);
       decimal employer = CalculateUifEmployer(monthlySalary);
-      if ((employee + employer) >= DeductionConstants.UIFCap)
+      if ((employee + employer) > StatutoryContributionConstants.UIFCap)
       {
         employee /= 2;
         employer /= 2;
@@ -83,7 +82,7 @@ namespace HRConnect.Api.Utils
       }
       else if (monthlySalary == 0) return 0;
 
-      return monthlySalary * DeductionConstants.SDLAmount;
+      return monthlySalary * StatutoryContributionConstants.SDLAmount;
     }
   }
 }

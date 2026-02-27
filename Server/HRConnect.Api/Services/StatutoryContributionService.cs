@@ -5,31 +5,31 @@ namespace HRConnect.Api.Services
   using HRConnect.Api.Models;
   using HRConnect.Api.Utils;
   using HRConnect.Api.Mappers;
-  using HRConnect.Api.DTOs.PayrollDeduction;
+  using HRConnect.Api.DTOs.StatutoryContribution;
   using Audit.Core;
 
-  public class PayrollDeductionsService : IPayrollDeductionsService
+  public class StatutoryContributionService : IStatutoryContributionService
   {
     private readonly IEmployeeRepository _employeeRepo;
-    private readonly PayrollDeductionsCalculator _deductionsCalculator;
-    private readonly IPayrollDeductionsRepository _payrollDeductionRepo;
-    public PayrollDeductionsService(IEmployeeRepository employeeRepo, IPayrollDeductionsRepository payrollContributionsRepo)
+    private readonly StatutoryContributionsCalculator _deductionsCalculator;
+    private readonly IStatutoryContributionRepository _statutoryContributionRepo;
+    public StatutoryContributionService(IEmployeeRepository employeeRepo, IStatutoryContributionRepository payrollContributionsRepo)
     {
       _employeeRepo = employeeRepo;
-      _payrollDeductionRepo = payrollContributionsRepo;
-      _deductionsCalculator = new PayrollDeductionsCalculator();
+      _statutoryContributionRepo = payrollContributionsRepo;
+      _deductionsCalculator = new StatutoryContributionsCalculator();
     }
 
-    public async Task<PayrollDeductionDto?> GetDeductionsByEmployeeIdAsync(string employeeId)
+    public async Task<StatutoryContributionDto?> GetDeductionsByEmployeeIdAsync(string employeeId)
     {
-      var deduction = await _payrollDeductionRepo.GetDeductionsByEmployeeIdAsync(employeeId);
+      var deduction = await _statutoryContributionRepo.GetDeductionsByEmployeeIdAsync(employeeId);
       if (deduction == null)
         return null;
       return deduction.ToPayrollDeductionDto();
     }
-    public async Task<IEnumerable<PayrollDeductionDto>> GetAllDeductionsAsync()
+    public async Task<IEnumerable<StatutoryContributionDto>> GetAllDeductionsAsync()
     {
-      var deductions = await _payrollDeductionRepo.GetAllDeductionsAsync();
+      var deductions = await _statutoryContributionRepo.GetAllDeductionsAsync();
       return deductions.Select(d => d.ToPayrollDeductionDto()).ToList();
     }
     /// <summary>
@@ -39,10 +39,10 @@ namespace HRConnect.Api.Services
     /// <returns>Newly added deductions</returns>
     /// <exception cref="KeyNotFoundException">Thrown when employeeId does not return an existing employee</exception>
     /// <exception cref="ArgumentException">Generic exception should this method fail with an existing employee</exception>
-    public async Task<PayrollDeduction?> AddDeductionsAsync(string employeeId)
+    public async Task<StatutoryContribution?> AddDeductionsAsync(string employeeId)
     {
 
-      using (var scope = AuditScope.Create("PayrollDeduction:Insert",
+      using (var scope = AuditScope.Create("StatutoryContribution:Insert",
             () => new { employeeId }, EventCreationPolicy.InsertOnEnd))
       {
         try
@@ -52,7 +52,7 @@ namespace HRConnect.Api.Services
 
           var (employeeAmount, employerAmount) = _deductionsCalculator.CalculateUif(employee.MonthlySalary);
           var sdlDeduction = _deductionsCalculator.CalculateSdlAmount(employee.MonthlySalary);
-          var deductions = new PayrollDeduction
+          var deductions = new StatutoryContribution
           {
             EmployeeId = employee.EmployeeId,
             MonthlySalary = employee.MonthlySalary,
@@ -60,10 +60,12 @@ namespace HRConnect.Api.Services
             IdNumber = employee.IdNumber,
             UifEmployeeAmount = employeeAmount,
             UifEmployerAmount = employerAmount,
-            EmployerSdlContribution = sdlDeduction
+            EmployerSdlContribution = sdlDeduction,
+            CurrentMonth = new DateOnly(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day)
+
           };
 
-          var newDeduction = await _payrollDeductionRepo.AddDeductionsAsync(deductions);
+          var newDeduction = await _statutoryContributionRepo.AddDeductionsAsync(deductions);
           decimal projectedSalary = newDeduction.MonthlySalary - newDeduction.UifEmployeeAmount;
 
           scope.Event.Environment = null;

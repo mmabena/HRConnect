@@ -11,10 +11,8 @@ using HRConnect.Api.Services;
 using HRConnect.Api.Repository;
 using Microsoft.AspNetCore.Identity;
 using HRConnect.Api.Models;
-using HRConnect.Api.Services;
 using HRConnect.Api.Utils;
 using OfficeOpenXml;
-using Resend;
 using HRConnect.Api.Interfaces.PensionProjection;
 using Audit.Core;
 using Audit.EntityFramework;
@@ -25,7 +23,7 @@ var builder = WebApplication.CreateBuilder(args);
 Audit.Core.Configuration.Setup()
   .UseEntityFramework(config => config
       .AuditTypeExplicitMapper(map => map
-        .Map<PayrollDeduction, AuditPayrollDeductions>((entity, audit) =>
+        .Map<StatutoryContribution, AuditLogs>((entity, audit) =>
           {
             audit.EmployeeId = entity.EmployeeId;
             audit.IdNumber = entity.IdNumber;
@@ -36,7 +34,7 @@ Audit.Core.Configuration.Setup()
             audit.UifEmployerAmount = entity.UifEmployerAmount;
             audit.EmployerSdlContribution = entity.EmployerSdlContribution;
           })
-        .AuditEntityAction<AuditPayrollDeductions>((e, entry, audit) =>
+        .AuditEntityAction<AuditLogs>((e, entry, audit) =>
         {
           audit.AuditedAt = DateTime.UtcNow;
           audit.AuditAction = entry.Action;
@@ -133,15 +131,15 @@ builder.Services.AddScoped<ITaxDeductionService, TaxDeductionService>();
 builder.Services.AddScoped<ITaxDeductionRepository, TaxDeductionRepository>();
 builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
 builder.Services.AddScoped<IPositionRepository, PositionRepository>();
-builder.Services.AddScoped<IPositionService,PositionService>();
+builder.Services.AddScoped<IPositionService, PositionService>();
 builder.Services.AddScoped<IJobGradeRepository, JobGradeRepository>();
-builder.Services.AddScoped<IJobGradeService,JobGradeService>();
+builder.Services.AddScoped<IJobGradeService, JobGradeService>();
 builder.Services.AddScoped<IOccupationalLevelRepository, OccupationalLevelRepository>();
-builder.Services.AddScoped<IOccupationalLevelService,OccupationalLevelService>();
+builder.Services.AddScoped<IOccupationalLevelService, OccupationalLevelService>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.Services.AuthService>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
-builder.Services.AddScoped<IPayrollDeductionsRepository, PayrollDeductionsRepository>();
-builder.Services.AddScoped<IPayrollDeductionsService, PayrollDeductionsService>();
+builder.Services.AddScoped<IStatutoryContributionRepository, StatutoryContributionRepository>();
+builder.Services.AddScoped<IStatutoryContributionService, StatutoryContributionService>();
 builder.Services.AddTransient<IPensionProjectionService, PensionProjectionService>();
 builder.Services.AddCors(options =>
 {
