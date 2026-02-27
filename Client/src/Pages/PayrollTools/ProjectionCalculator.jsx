@@ -1,251 +1,247 @@
-import { useEffect, useState,useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 
 import CompanyManagementHeader from "../../Components/CompanyManagement/companyManagementHeader";
 import "./ProjectionCalculator.css";
+import Box from "@mui/material/Box";
+import Slider from "@mui/material/Slider";
 
 const ProjectionCalculator = () => {
     const [employeeDetails, setEmployeeDetails] = useState(null);
     const [employeeAge, setEmployeeAge] = useState(null);
-    const [selectedPensionPercentage, setSelectedPensionPercentage] = useState(1);
+
+    const [selectedPensionPercentage, setSelectedPensionPercentage] = useState(0); // 👈 default 0
     const [projectedPensionDetails, setProjectedPensionDetails] = useState(null);
     const [selectedVoluntaryContributionFrequency, setSelectedVoluntaryContributionFrequency] = useState(1);
     const [voluntaryContribution, setVoluntaryContribution] = useState("");
     const voluntaryContributionInputRef = useRef(null);
-    var MAX_PENSIONCONTRIBUTION_PERCENTAGE = 0.275;
-    var voluntaryContributionIsCapped = false;
-    const [voluntaryContributionError, setVoluntaryContributionError] = useState({
-        Error: ""
-    })
 
+    const MAX_PENSIONCONTRIBUTION_PERCENTAGE = 0.275;
+    const [voluntaryContributionIsCapped, setVoluntaryContributionIsCapped] = useState(false);
+    const [voluntaryContributionError, setVoluntaryContributionError] = useState({ Error: "" });
 
     useEffect(() => {
         const token = JSON.parse(localStorage.getItem('currentUser')).token;
         const email = JSON.parse(localStorage.getItem('currentUser')).user.email;
-        try {
-            axios.get("http://localhost:5147/api/employee/email/" + email, {
-                headers: {
-                    "Authorization": `Bearer ${token}`
-                }
-            })
-            .then(response => {
-                
-                if (response.status === 200) {
-                    console.log("Get employee details:", response.data);
-                    setEmployeeDetails(response.data);
-                    setEmployeeAge(calculateAge(response.data.dateOfBirth));
-                } else {
-                    console.error("Unexpeted status:", response.status);
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-            });
-        }
 
-        catch (error) {
-            console.error("Failed to fetch your employee details:", error)
-        }
-    }, [])
+        axios.get(`http://localhost:5147/api/employee/email/${email}`, {
+            headers: { "Authorization": `Bearer ${token}` }
+        })
+        .then(response => {
+            if (response.status === 200) {
+                setEmployeeDetails(response.data);
+                setEmployeeAge(calculateAge(response.data.dateOfBirth));
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    }, []);
 
     useEffect(() => {
-        if (employeeDetails == null) {
+        if (!employeeDetails) return;
+
+       // if slider = 0, reset results
+        if (selectedPensionPercentage === 0) {
+            setProjectedPensionDetails({
+                lumpSum: 0,
+                monthlyIncomeAfterRetirement: 0,
+                totalProjectedSavings: 0
+            });
             return;
         }
-        try {
-            if (!voluntaryContributionIsCapped) {
-                const pensionProjectionRequestDTO = {
-                    "SelectedPensionPercentage": selectedPensionPercentage,
-                    "DOB": employeeDetails.dateOfBirth,
-                    "EmploymentStatus": employeeDetails.employmentStatus,
-                    "Salary": employeeDetails.monthlySalary,
-                    "VoluntaryContribution": (voluntaryContribution === "") ? 0 : voluntaryContribution,
-                    "VoluntaryContributionFrequency": selectedVoluntaryContributionFrequency
-                };
 
-                axios.post(
-                    "http://localhost:5147/api/pension/projection",
-                    pensionProjectionRequestDTO,
-                    {
-                        "Content-type": "application/json; charset=UTF-8"
-                    }
-                )
-                .then(response => {
-                    if (response.status === 200) {
-                        setProjectedPensionDetails(response.data);
-                        console.log(projectedPensionDetails);
-                    } else {
-                        console.error("Unexpeted status:", response.status);
-                    }
-                })
-                .catch(error => {
-                    console.error("Error:", error);
-                });
-            }
-        } catch (error) {
-            console.error("Pension Projection failed:", error)
+        if (!voluntaryContributionIsCapped) {
+            const pensionProjectionRequestDTO = {
+                SelectedPensionPercentage: selectedPensionPercentage,
+                DOB: employeeDetails.dateOfBirth,
+                EmploymentStatus: employeeDetails.employmentStatus,
+                Salary: employeeDetails.monthlySalary,
+                VoluntaryContribution: voluntaryContribution === "" ? 0 : voluntaryContribution,
+                VoluntaryContributionFrequency: selectedVoluntaryContributionFrequency
+            };
+
+            axios.post("http://localhost:5147/api/pension/projection", pensionProjectionRequestDTO, {
+                headers: { "Content-Type": "application/json" }
+            })
+            .then(response => {
+                if (response.status === 200) {
+                    setProjectedPensionDetails(response.data);
+                }
+            })
+            .catch(error => console.error("Error:", error));
         }
-        
-    }, [employeeDetails, voluntaryContribution,selectedPensionPercentage, selectedVoluntaryContributionFrequency])
+    }, [employeeDetails, voluntaryContribution, selectedPensionPercentage, selectedVoluntaryContributionFrequency, voluntaryContributionIsCapped]);
 
-    const handleSelectedUserPercentageInput = (event) => {
-        setSelectedPensionPercentage(event.target.value);
-    }
+
+    const percentageMap = { 0: 0, 1: 2.5, 2: 5, 3: 7.5, 4: 10, 5: 12.5, 6: 15 };
+    const reverseMap = { 0: 0, 2.5: 1, 5: 2, 7.5: 3, 10: 4, 12.5: 5, 15: 6 };
+
+    const handleSelectedUserPercentageInput = (event, newValue) => {
+        setSelectedPensionPercentage(reverseMap[newValue]);
+    };
 
     const handleVolutaryContributionFrequency = (event) => {
         setSelectedVoluntaryContributionFrequency(Number(event.target.value));
-    }
+    };
 
     const handleVolutaryContributionInput = (event) => {
         const enteredVoluntaryContribution = event.target.value;
-        console.log("Voluntaru contribution amount:",enteredVoluntaryContribution);
-        if (voluntaryContribution !== "" ) {
-            if(employeeDetails) {
-                let voluntaryContributionPercentage = enteredVoluntaryContribution / employeeDetails.monthlySalary;
-                let roundedVoluntaryContributionPercentage = Math.round(voluntaryContributionPercentage * 10000) / 10000
-                console.log(`Voluntary contribution percentage: ${roundedVoluntaryContributionPercentage}`)
-                console.log(`Total percentage: ${Math.round((roundedVoluntaryContributionPercentage + selectedPercentage()) * 10000) / 10000}`)
-                if (roundedVoluntaryContributionPercentage + selectedPercentage() > MAX_PENSIONCONTRIBUTION_PERCENTAGE) {
-                    console.log("Voluntary Contribution is Cappped");
-                    voluntaryContributionIsCapped = true;
-                    voluntaryContributionInputRef.current.style.borderColor = "red";
-                    const maxVoluntaryContribution = Math.round(((employeeDetails.monthlySalary * MAX_PENSIONCONTRIBUTION_PERCENTAGE) - (employeeDetails.monthlySalary * selectedPercentage())) * 10000) / 10000;
-                    setVoluntaryContributionError({
-                        Error: `Voluntary Contribution + Monthly Salary Contribution cannot exceed 27.5% of salary. Maximum contribution: R ${maxVoluntaryContribution}`
-                    })
-                } else {
-                    console.log("Voluntary Contribution isn't Cappped");
-                    voluntaryContributionIsCapped = false;
-                    voluntaryContributionInputRef.current.style.borderColor = "aqua";
-                    setVoluntaryContributionError({
-                        Error: ""
-                    })
-                }
+
+        if (employeeDetails) {
+            let voluntaryContributionPercentage = enteredVoluntaryContribution / employeeDetails.monthlySalary;
+            let roundedPercentage = Math.round(voluntaryContributionPercentage * 10000) / 10000;
+
+            if (roundedPercentage + selectedPercentage() > MAX_PENSIONCONTRIBUTION_PERCENTAGE) {
+                setVoluntaryContributionIsCapped(true);
+                voluntaryContributionInputRef.current.style.borderColor = "red";
+
+                const maxVoluntaryContribution =
+                    ((employeeDetails.monthlySalary * MAX_PENSIONCONTRIBUTION_PERCENTAGE) -
+                    (employeeDetails.monthlySalary * selectedPercentage())).toFixed(2);
+
+                setVoluntaryContributionError({Error: `Voluntary Contribution + Monthly Salary Contribution cannot exceed 27.5% of salary. Maximum contribution: R ${maxVoluntaryContribution}` });
+
+            } else {
+                setVoluntaryContributionIsCapped(false);
+                voluntaryContributionInputRef.current.style.borderColor = "#355867";
+                setVoluntaryContributionError({ Error: "" });
             }
-            
         }
-        setVoluntaryContribution(enteredVoluntaryContribution)
-        
-    }
+
+        setVoluntaryContribution(enteredVoluntaryContribution);
+    };
 
     const selectedPercentage = () => {
-        let percentage = 0.00;
-        if (selectedPensionPercentage == 1) {
-            percentage = 0.025;
+        switch (selectedPensionPercentage) {
+            case 0: return 0;
+            case 1: return 0.025;
+            case 2: return 0.05;
+            case 3: return 0.075;
+            case 4: return 0.1;
+            case 5: return 0.125;
+            case 6: return 0.15;
+            default: return 0;
         }
-        else if (selectedPensionPercentage == 2) {
-            percentage = 0.05;
-        }
-        else if (selectedPensionPercentage == 3) {
-            percentage = 0.075;
-        }
-        else if (selectedPensionPercentage == 4) {
-            percentage = 0.1;
-        }
-        else if (selectedPensionPercentage == 5) {
-            percentage = 0.125;
-        }
-        else if (selectedPensionPercentage == 6) {
-            percentage = 0.15;
-        }
+    };
 
-        return percentage;
-    }
+    const marks = [
+        // { value:  0, label:'' },
+        { value: 2.5, label: '2.5%' },
+        { value: 5, label: '5%' },
+        { value: 7.5, label: '7.5%' },
+        { value: 10, label: '10%' },
+        { value: 12.5, label: '12.5%' },
+        { value: 15, label: '15%' },
+    ];
 
-    const calculateAge = (dateOfBirth) => {
-        let today = new Date();
-        let birthDate = new Date(dateOfBirth);
+    const calculateAge = (dob) => {
+        const today = new Date();
+        const birthDate = new Date(dob);
         let age = today.getFullYear() - birthDate.getFullYear();
-        
-        if (today.getMonth() < birthDate.getMonth()) {
-            age--;
-        } else if ((today.getMonth() === birthDate.getMonth()) && (today.getDay() < birthDate.getDay())){
-            age--;
-        }
-
+        if (today.getMonth() < birthDate.getMonth()) age--;
         return age;
-    }
+    };
 
     return (
         <div className="menu-background custom-scrollbar payroll-page">
             <CompanyManagementHeader title="Projection Calculator" />
-            <div className="pension-projection-frame">
-                <div className="pension-employee-details">
-                    <div className="pension-employee-detail-header">
-                        Name
-                    </div>
-                    <div className="pension-employee-detail-header">
-                        Age
-                    </div>
 
-                    <div className="pension-employee-detail">
-                        {employeeDetails && employeeDetails.surname}
-                    </div>
-                    <div className="pension-employee-detail">
-                        {employeeAge && employeeAge}
-                    </div>
+            <div className="pension-projection-frame">
+
+                <div className="pension-employee-details">
+                    <div className="pension-employee-detail-header">Name</div>
+                    <div className="pension-employee-detail-header">Age</div>
+                    <div className="pension-employee-detail">{employeeDetails?.surname}</div>
+                    <div className="pension-employee-detail">{employeeAge}</div>
                 </div>
+
                 <div className="pension-projection-voluntary-contribution">
-                    <div className="pension-projection-voluntary-contribution-header">
-                        <h3>Adjust Your Contribution Percentage:</h3>
-                    </div>
+                    <h3>Adjust Your Contribution Percentage:</h3>
+
                     <div className="voluntary-contribution">
+
                         <div className="contribution">
                             Voluntary Contribution
-                            <input placeholder="0" type="number" value={voluntaryContribution} onChange={handleVolutaryContributionInput} ref={voluntaryContributionInputRef}></input>
-                            {voluntaryContributionError.Error && <div className="voluntary-contribution-error">{voluntaryContributionError.Error}</div>}
+                            <input
+                                type="number"
+                                placeholder="0"
+                                value={voluntaryContribution}
+                                onChange={handleVolutaryContributionInput}
+                                ref={voluntaryContributionInputRef}
+                            />
+                            {voluntaryContributionError.Error &&
+                                <div className="voluntary-contribution-error">{voluntaryContributionError.Error}</div>
+                            }
                         </div>
+
                         <div className="contribution-frequency">
-                            <div className="contribution-frequency-radio"><input type="radio" name="voluntaryContributionFrequency" value={1} checked={selectedVoluntaryContributionFrequency === 1} onChange={handleVolutaryContributionFrequency}></input><label>Once-Off</label></div>
-                            <div className="contribution-frequency-radio"><input type="radio" name="voluntaryContributionFrequency" value={2} checked={selectedVoluntaryContributionFrequency === 2} onChange={handleVolutaryContributionFrequency}></input><label>Permanent</label></div>
+                            <div>
+                                <input className="radio" type="radio" value={1} checked={selectedVoluntaryContributionFrequency === 1} onChange={handleVolutaryContributionFrequency} />
+                                <label> Once-Off</label>
+                            </div>
+                            <div>
+                                <input className="radio" type="radio" value={2} checked={selectedVoluntaryContributionFrequency === 2} onChange={handleVolutaryContributionFrequency} />
+                                <label> Permanent</label>
+                            </div>
                         </div>
+
                     </div>
                 </div>
+
                 <div className="pension-projection-slider">
-                    <input type="range" min="1" max="6" step="1" value={selectedPensionPercentage} onChange={handleSelectedUserPercentageInput}></input>
-                    <ul class="range-labels">
-                        <li>2.5%</li>
-                        <li>5%</li>
-                        <li>7.5%</li>
-                        <li>10%</li>
-                        <li>12.5%</li>
-                        <li>15%</li>
-                    </ul>
+                    <Box className="pension-projection">
+                        <Slider
+                            className="my-custom-slider"
+                            value={percentageMap[selectedPensionPercentage]}
+                            onChange={handleSelectedUserPercentageInput}
+                            marks={marks}
+                            step={null}
+                            min={0}
+                            max={15}
+                            valueLabelDisplay="auto"
+                        />
+                    </Box>
                 </div>
-                <div className="pension-projection-details"> 
-                   <div className="pension-projection-detail">
-                        <h4>Monthly Salary:<br/></h4>
-                        <label>R {employeeDetails && employeeDetails.monthlySalary}</label>
-                   </div>
-                   <div className="pension-projection-detail">
-                        <h4>Monthly Contribution:<br/></h4>
-                        <label>R {employeeDetails && employeeDetails.monthlySalary * selectedPercentage()}</label>
-                   </div>
-                   <div className="pension-projection-detail">
-                        <h4>Lump Sum in 35 years:<br/></h4>
-                        <label>R {projectedPensionDetails && projectedPensionDetails.lumpSum}</label>
-                   </div>
-                   <div className="pension-projection-detail">
-                        <h4>Monthly Income
-                            65-75 years:</h4>
-                        <label>R {projectedPensionDetails && projectedPensionDetails.monthlyIncomeAfterRetirement}</label>
-                   </div>
+
+                <div className="pension-projection-details">
+
+                    <div className="pension-projection-detail">
+                        <h4>Monthly Salary:</h4>
+                        <label>R {employeeDetails?.monthlySalary}</label>
+                    </div>
+
+                    <div className="pension-projection-detail">
+                        <h4>Monthly Contribution:</h4>
+                        <label>R {(employeeDetails?.monthlySalary * selectedPercentage()).toFixed(2)}</label>
+                    </div>
+
+                    <div className="pension-projection-detail">
+                        <h4>Lump Sum in 35 years:</h4>
+                        <label>R {projectedPensionDetails?.lumpSum}</label>
+                    </div>
+
+                    <div className="pension-projection-detail">
+                        <h4>Monthly Income 65-75:</h4>
+                        <label>R {projectedPensionDetails?.monthlyIncomeAfterRetirement}</label>
+                    </div>
+
                 </div>
+
                 <div className="pension-projection-total">
                     <h4>Estimated Total in 35 Years:</h4>
-                    <label>R {projectedPensionDetails && projectedPensionDetails.totalProjectedSavings}</label>
+                    <label>R {projectedPensionDetails?.totalProjectedSavings}</label>
                 </div>
+
                 <div className="pension-projection-disclaimer">
                     <h5 className="warning">Disclaimer</h5>
                     <p className="message">
-                        The results shown are estimates are intended for guidance only. Calculations assume a 5% annual salary increase and a 6% annual pension growth rate.
+                         The results shown are estimates are intended for guidance only. Calculations assume a 5% annual salary increase and a 6% annual pension growth rate.
                         Actual outcomes may differ from these projections. Monthly contributions are capped at R29166,66 per month.
                     </p>
                 </div>
+
             </div>
         </div>
-        
-    )
-}
+    );
+};
 
 export default ProjectionCalculator;
