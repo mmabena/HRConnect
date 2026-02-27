@@ -147,9 +147,9 @@ const ManageUserPositions = () => {
           <tbody>
             {currentEmployees.length === 0 ? (
               <tr>
-                <td colSpan="4" style={{ textAlign: "center" }}>
+        
                   No users found.
-                </td>
+            
               </tr>
             ) : (
               currentEmployees.map((employee) => (

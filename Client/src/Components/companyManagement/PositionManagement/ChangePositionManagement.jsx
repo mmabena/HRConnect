@@ -87,7 +87,9 @@ return (
                 <span
                   className="apm-link"
                   onClick={() =>
-                    navigate(`/positions/${currentPosition}/users`)
+                    navigate(`/manageUserPosition`, {
+                      state: { positionId: currentPosition },
+                    })
                   }
                 >
                   View Users List &gt;

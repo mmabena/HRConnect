@@ -98,7 +98,7 @@ const PositionManagement = () => {
   const handleNext = () =>
     currentPage < totalPages && setCurrentPage((prev) => prev + 1);
   const handlePageClick = (num) => setCurrentPage(num);
-  const handleAddPositionClick = () => setShowAddModal(true);
+  const handleAddPositionClick = () => setShowAddModal;
 
   const jobGradeMap = Object.fromEntries(
     jobGrades.map((grade) => [grade.jobGradeId, grade.name]),

@@ -15,6 +15,7 @@ import EditPositionManagement from "./Components/CompanyManagement/PositionManag
 import AddPositionManagement from "./Components/CompanyManagement/PositionManagement/AddPositionManagment";
 import PositionManagement from "./Pages/CompanyManagement/PositionManagement/PositionManagement";
 import ChangePositionManagement from "./Components/CompanyManagement/PositionManagement/ChangePositionManagement";
+import ManageUserPosition from "./Pages/CompanyManagement/PositionManagement/ManageUserPosition";
 import CompanyManagement from "./companyManagement";
 import CompanyContribution from "./Components/CompanyContribution/CompanyContribution";
 import Profile from "./Components/MyProfile";
@@ -30,7 +31,7 @@ function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const navigate = useNavigate();
 
-  // ✅ Load user from localStorage on refresh
+  //Load user from localStorage on refresh
   useEffect(() => {
     const storedUser = localStorage.getItem("currentUser");
 
@@ -118,6 +119,7 @@ function App() {
           <Route path="/editPositionManagement/:id" element={<EditPositionManagement />} />
           <Route path="/viewPositionManagement/:id" element={<ViewPositionManagement />} />
           <Route path="/changePositionManagement" element={<ChangePositionManagement />} />
+          <Route path="/manageUserPosition" element={<ManageUserPosition />} />
           <Route path="/taxtablemanagement" element={<TaxTableManagement />} />
           <Route path="/profile" element={<Profile currentUser={currentUser} />} />
           <Route path="/compensationPlanning" element={<CompensationPlanning />} />
