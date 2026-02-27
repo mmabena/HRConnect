@@ -22,7 +22,7 @@ import Profile from "./Components/MyProfile";
 import CompensationPlanning from "./Components/CompensationPlanning";
 import TaxTableManagement from "./Components/CompanyManagement/TaxTableManagement/TaxTableManagement";
 import ChangePassword from "./Components/ChangePassword";
-import TaxTableUpload from "./Components/CompanyManagement/TaxTableManagement/TaxTableUpload";
+import TaxTableUpload from "./Components/CompanyManagement/TaxTableManagement/TaxTableUpload.jsx";
 import EmployeeList from "./Pages/EmployeeManagement/EmployeeList";
 import MenuBar from "./Components/MenuBar/MenuBar";
 

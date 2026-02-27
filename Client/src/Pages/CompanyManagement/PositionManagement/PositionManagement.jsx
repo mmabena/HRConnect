@@ -162,7 +162,7 @@ const PositionManagement = ({ title }) => {
       </div>
       
 
-      <div className="nav-bar-with-button">
+      <div className="nav-bar-with-buttons">
         <CompanyManagementNavBar
           tabs={navTabs}
           activeTab={activeTab}

@@ -6,11 +6,13 @@ import api from "../../../api/api";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
 
-const ManageUserPositions = () => {
+const ManageUserPositions = ({ title }) => {
   const [employees, setEmployees] = useState([]);
   const [positions, setPositions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [hasAccess, setHasAccess] = useState(false);
+  const [currentTime, setCurrentTime] = useState('');
+    const [currentDate, setCurrentDate] = useState('');
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -32,6 +34,28 @@ const ManageUserPositions = () => {
   ];
 
   const tabWidths = [168, 133, 122, 134, 154, 125];
+  useEffect(() => {
+    const updateDateTime = () => {
+      const now = new Date();
+
+      const month = now.toLocaleDateString('en-ZA', { month: 'short' });
+      const day = now.toLocaleDateString('en-ZA', { day: '2-digit' });
+      const year = now.toLocaleDateString('en-ZA', { year: 'numeric' });
+
+      const time = now.toLocaleTimeString('en-ZA', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      });
+
+      setCurrentDate(`${month}. ${day}, ${year}`);
+      setCurrentTime(time);
+    };
+
+    updateDateTime();
+    const intervalId = setInterval(updateDateTime, 60000);
+    return () => clearInterval(intervalId);
+  }, []);
 
   // ==============================
   // INITIALIZATION + AUTH
@@ -139,8 +163,24 @@ const ManageUserPositions = () => {
   if (!hasAccess) return <h2>Access Denied. SuperUser only.</h2>;
 
   return (
+    <header className="cmn-header-main-frame">
     <div className="menu-background custom-scrollbar">
-      <CompanyManagementHeader title={activeTab} />
+      {/* <CompanyManagementHeader title={activeTab} /> */}
+       <div className="cmn-header-left-section">
+        <h1 className="cmn-logo-text">{title || 'Company Management'}</h1>
+      </div>
+      <div className="cmn-header-right-section">
+   
+    
+        <div className="cmn-datetime-wrapper">
+          <div className="cmn-datetime-date-container">
+            <span className="cmn-datetime-month">{currentDate}</span>
+          </div>
+          <div className="cmn-datetime-time-container">
+            <span className="cmn-datetime-time">{currentTime}</span>
+          </div>
+        </div>
+      </div>
 
       <div className="nav-bar-with-buttons">
         <CompanyManagementNavBar
@@ -294,6 +334,7 @@ const ManageUserPositions = () => {
         </div>
       </div>
     </div>
+    </header>
   );
 };
 
