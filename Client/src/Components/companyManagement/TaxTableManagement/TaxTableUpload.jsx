@@ -1,6 +1,7 @@
 import React, { useState, useRef, useMemo } from "react";
-import api from "../api";
+import api from "../../../api/api.js";
 import { toast } from "react-toastify";
+import "../../../styles/global.css";
 import "./TaxTableUpload.css";
 
 /* ---------- YEAR GENERATOR ---------- */
@@ -14,19 +15,14 @@ const generateFinancialYears = (existingYears = []) => {
     currentMonth >= 2 ? currentYear : currentYear - 1;
 
   const years = [];
-
-  // Start from 2022 (adjust if needed)
-  for (let start = 2024; start <= currentFinancialStartYear; start++) {
+  for (let start = 2024; start <= currentFinancialStartYear + 1; start++) {
     const end = start + 1;
     const value = `${start}-${end}`;
-
-    // Exclude years already used
-    if (!existingYears.includes(value)) {
-      years.push({
-        value,
-        label: `March ${start} - April ${end}`,
-      });
-    }
+    years.push({
+      value,
+      label: `March ${start} - April ${end}`,
+      disabled: existingYears.includes(start) || start > currentFinancialStartYear + 1
+    });
   }
 
   return years;
@@ -38,38 +34,41 @@ function TaxTableUpload({ onClose, onUploadSuccess, existingYears = [] }) {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
 
-  /* ✅ Generate dropdown YEARS inside component */
   const financialYears = useMemo(() => {
     return generateFinancialYears(existingYears);
   }, [existingYears]);
 
   const handleAutoUpload = async (e) => {
     const selected = e.target.files[0];
-    if (!selected) {
-      setFile(null);
-      return;
-    }
+    if (!selected) return;
 
     const ext = selected.name.split(".").pop().toLowerCase();
     if (!["xls", "xlsx"].includes(ext)) {
       toast.error("Only Excel files (.xls, .xlsx) are allowed.");
-      setFile(null);
       fileInputRef.current.value = "";
       return;
     }
 
     if (!year) {
-  toast.warning("Please select a financial year before uploading.");
-  fileInputRef.current.value = "";
-  return;
-}
+      toast.warning("Please select a financial year before uploading.");
+      fileInputRef.current.value = "";
+      return;
+    }
 
-// 🚨 Prevent duplicate year upload
-  if (existingYears.includes(year)) {
-    toast.error(`A tax table for ${year} already exists.`);
-    fileInputRef.current.value = "";
-    return;
-  }
+    const startYear = parseInt(year.split("-")[0], 10);
+
+    if (existingYears.includes(startYear)) {
+      toast.error("A tax table for this year already exists.");
+      fileInputRef.current.value = "";
+      return;
+    }
+
+    const currentYear = new Date().getFullYear();
+    if (startYear > currentYear + 1) {
+      toast.error("Cannot upload a tax table beyond next year.");
+      fileInputRef.current.value = "";
+      return;
+    }
 
     setFile(selected);
 
@@ -77,30 +76,24 @@ function TaxTableUpload({ onClose, onUploadSuccess, existingYears = [] }) {
       setIsUploading(true);
 
       const formData = new FormData();
-      formData.append("year", year);
+      formData.append("taxYear", startYear);
       formData.append("file", selected);
 
       const response = await api.post(
         "/taxtableupload/upload",
         formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
+        { headers: { "Content-Type": "multipart/form-data" } }
       );
 
       toast.success(response.data.message || "Upload successful.");
-
       setYear("");
       setFile(null);
       fileInputRef.current.value = "";
 
-      if (onUploadSuccess) {
-        onUploadSuccess();
-      }
-
+      onUploadSuccess?.();
     } catch (err) {
       console.error("Upload failed:", err);
-      toast.error(err.response?.data?.message || "Upload failed.");
+      toast.error(err.response?.data || err.message || "Upload failed.");
     } finally {
       setIsUploading(false);
     }
@@ -111,12 +104,7 @@ function TaxTableUpload({ onClose, onUploadSuccess, existingYears = [] }) {
       <div className="tax-table-frame">
         <div className="tax-table-content-centered">
 
-          <button
-            className="x-btn "
-            onClick={onClose}
-          >
-            ✕
-          </button>
+          <button className="x-btn" onClick={onClose}>✕</button>
 
           <div className="tax-table-headings-container">
             <div className="tax-table-logo">
@@ -125,23 +113,18 @@ function TaxTableUpload({ onClose, onUploadSuccess, existingYears = [] }) {
             </div>
 
             <h1 className="upload-title">Upload Tax Table</h1>
-            <p className="file-type-text">
-              Only Excel files (.xls, .xlsx) are supported
-            </p>
+            <p className="file-type-text">Only Excel files (.xls, .xlsx) are supported</p>
 
-            <div className="gender-select-wrapper">
+            <div className="gender-select-wrapper"> 
               <select
                 className="tax-name-input"
                 value={year}
                 onChange={(e) => setYear(e.target.value)}
               >
-                <option value="" disabled>
-                  Please select the year
-                </option>
-
+                <option value="" disabled>Please select the year</option>
                 {financialYears.map((yr) => (
-                  <option key={yr.value} value={yr.value}>
-                    {yr.label}
+                  <option key={yr.value} value={yr.value} disabled={yr.disabled}>
+                    {yr.label} {yr.disabled ? "(Unavailable)" : ""}
                   </option>
                 ))}
               </select>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import CompanyManagementHeader from "../../../Components/CompanyManagement/companyManagementHeader";
-import CompanyManagementNavBar from "../../../Components/CompanyManagement/companyManagementNavBar";
+import CompanyManagementHeader from "../../../Components/companyManagement/companyManagementHeader";
+import CompanyManagementNavBar from "../../../Components/companyManagement/companyManagementNavBar";
 import { useNavigate } from "react-router-dom";
 
 const PositionManagement = () => {

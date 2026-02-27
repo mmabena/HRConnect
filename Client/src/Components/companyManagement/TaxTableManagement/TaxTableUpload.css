@@ -332,3 +332,196 @@
   transform: scale(1.2);
   color: #006088;
 }
+
+.company-heading-container{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 1441px;
+  min-height: 75px;
+  padding: 10px;
+  gap: 33px;
+  box-sizing: border-box;
+  font-family: 'Anek Bangla', sans-serif;
+  font-weight: 700;
+  font-size: 30px;
+  line-height: 100%;
+  letter-spacing: 2%;
+  color: #006088;
+}
+
+.icon{
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  width: 320px;
+  height: 34px;
+  align-items: center;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  align-self: flex-start;
+  margin-left: auto;
+  margin-top: 6px;
+  margin-right: -245px;
+}
+
+.util-box {
+  background-color: #9C9C9C29;
+  border-radius: 6px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 22px;
+  letter-spacing: -0.43px;
+  color: #02070c8f;
+  white-space: nowrap;
+  position: relative;
+  top: -5px;
+  right: 0px;
+}
+
+.m-box{
+    box-sizing: border-box;
+    width: 109px;
+    padding: 6px 11px;
+}
+
+.s-box{
+  width: 76px;
+  padding: 6px 11px;
+  margin-right: 2px;
+}
+
+/* ----------------------- Active tax table section ----------------------- */
+.card-container {
+  background: #ffffff;
+  padding: 0;
+  margin-bottom: 40px;
+  border-radius: 12px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+/* Header */
+.card-header {
+  background-color: #C7D9E5;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  font-family: 'Anek Bangla', sans-serif;
+  font-size: 22px;
+  font-weight: 500;
+  color: #002D40;
+}
+
+.card-header h3 {
+  margin: 0;
+}
+
+/* Upload Button */
+.upload-btn {
+  background: #739e5c;
+  color: white;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.upload-btn:hover {
+  background: #5f864c;
+}
+
+/* Status Row */
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.status-left,
+.status-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.label {
+  font-weight: 600;
+  color: #002D40;
+}
+
+/* Status Badge */
+.status-badge.active {
+  background: #d4e4d0;
+  color: #3d6b2f;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Date Text */
+.date-value {
+  color: #5b6b75;
+  font-weight: 500;
+}
+
+/* Table */
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.custom-table thead {
+  background: #3f5f6b;
+}
+
+.custom-table th {
+  color: white;
+  text-align: left;
+  padding: 15px 20px;
+  font-weight: 500;
+}
+
+.custom-table td {
+  padding: 15px 20px;
+  border-bottom: 1px solid #eee;
+  color: #002D40;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.custom-table tbody tr:hover {
+  background-color: #f7fafc;
+}
+
+/* View Link */
+.view-link {
+  color: #002D40;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.view-link:hover {
+  text-decoration: underline;
+}
+
+.status-badge.uploaded {
+  background: #e6f0fa;
+  color: #1f5f8b;
+}
+
+.status-badge.previous {
+  background: #f1f1f1;
+  color: #6c6c6c;
+}
