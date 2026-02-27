@@ -15,5 +15,5 @@ namespace HRConnect.Api.Interfaces
         Task<EmployeeDto?> UpdateEmployeeAsync(string EmployeeId, UpdateEmployeeRequestDto employeeDto);
         Task<bool> DeleteEmployeeAsync(string EmployeeId);
 
-    }
+  }
 }
