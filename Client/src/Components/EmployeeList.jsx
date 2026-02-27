@@ -1,18 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { fetchAllEmployees } from "../Employee";
-import { Link,useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import AddEmployee from "./AddEmployee";
+import "../MenuBar.css";
 
 const EmployeeList = () => {
   const tabs = ["All staff", "Johannesburg", "Cape Town", "UK(London)"];
   const [selectedTab, setSelectedTab] = useState("All staff");
-
+  const [showAddModal, setShowAddModal] = useState(false);
   const [currentTime, setCurrentTime] = useState("");
   const [currentDate, setCurrentDate] = useState("");
   const [employees, setEmployees] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-const location = useLocation();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   /// </summary>
   /// Pagination states
@@ -62,34 +65,33 @@ const location = useLocation();
   ///loading employees on page load
   /// </summary>
   useEffect(() => {
-  const loadEmployees = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await fetchAllEmployees();
-      setEmployees(data);
-      console.log("Employee fetched:",data);
-    } catch (err) {
-      setError("Failed to load employees.");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const loadEmployees = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await fetchAllEmployees();
+        setEmployees(data);
+        console.log("Employee fetched:", data);
+      } catch (err) {
+        setError("Failed to load employees.");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  loadEmployees();
-   /// </summary>
-  /// Re-run every time the route changes
-  /// </summary>
-}, [location.key]);
-
+    loadEmployees();
+    /// </summary>
+    /// Re-run every time the route changes
+    /// </summary>
+  }, [location.key]);
 
   /// </summary>
   /// Filter by selected tab (location) and search query
   /// </summary>
   const filteredEmployees = employees.filter((emp) => {
     if (selectedTab !== "All staff") {
-      const empDepartment = (emp.department || "")
+      const empDepartment = (emp.branch || "")
         .toLowerCase()
         .replace(/\s+/g, "");
       const selected = selectedTab.toLowerCase().replace(/\s+/g, "");
@@ -101,10 +103,10 @@ const location = useLocation();
     const search = searchQuery.toLowerCase();
     if (!search) return true;
 
-    const fullName = `${emp.firstName} ${emp.lastName}`.toLowerCase();
-    const jobTitle = emp.jobTitle?.toLowerCase() || "";
+    const fullName = `${emp.name} ${emp.surname}`.toLowerCase();
+    const jobTitle = emp.positionTitle?.toLowerCase() || "";
     const email = emp.email?.toLowerCase() || "";
-    const id = emp.employeeNumber?.toString() || "";
+    const id = emp.employeeId?.toString() || "";
 
     return (
       fullName.includes(search) ||
@@ -122,8 +124,9 @@ const location = useLocation();
   const indexOfLastItem = indexOfFirstItem + itemsPerPage;
   const currentEmployees = filteredEmployees.slice(
     indexOfFirstItem,
-    indexOfLastItem
+    indexOfLastItem,
   );
+  const handleAddEmployeeClick = () => setShowAddModal(true);
 
   return (
     <div className="menu-background">
@@ -164,50 +167,55 @@ const location = useLocation();
               {tab}
             </div>
           ))}
-
-          <div className="heading-item filter-search-wrapper">
-            <span className="filter-label">Filter</span>
-            <div className="search-bar-container">
-              {/* <img
+          <div className="right-controls">
+            <div className="heading-item filter-search-wrapper">
+              <span className="filter-label">Filter</span>
+              <div className="search-bar-container">
+                {/* <img
                 src="/images/Leading-icon.png"
                 alt="Left Icon"
                 className="search-icon"
               /> */}
-              <div className="input-wrapper">
-                <input
-                  type="text"
-                  className="search-input"
-                  placeholder="Search text"
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    /// </summary>
-                    setActivePage(1); /// reset page on search
-                    /// </summary>
-                  }}
+                <div className="input-wrapper">
+                  <input
+                    type="text"
+                    className="search-input"
+                    placeholder="Search text"
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      /// </summary>
+                      setActivePage(1); /// reset page on search
+                      /// </summary>
+                    }}
+                  />
+                </div>
+                <img
+                  src="/images/Trailing-Elements.png"
+                  alt="Right Icon"
+                  className="search-icon"
                 />
               </div>
-              <img
-                src="/images/Trailing-Elements.png"
-                alt="Right Icon"
-                className="search-icon"
-              />
             </div>
+            <button
+              className="add-employee-button"
+              onClick={handleAddEmployeeClick}
+            >
+              Add Employee
+            </button>
           </div>
         </div>
 
         <div className="content-container">
           <div className="table-grid">
-            <div className="table-header">ID</div>
-            <div className="table-cell" style={{ backgroundColor: "#006088" }}>
-              <img src="/images/Frame_287.png" alt="Block_logo" />
-            </div>
+            <div className="table-header">Employee ID</div>
             <div className="table-header">Name & Surname</div>
-            <div className="table-header">Career Title</div>
-            <div className="table-header">Phone Number</div>
+            <div className="table-header">Job Title</div>
+            <div className="table-header">Contact Number</div>
             <div className="table-header">Email</div>
-            <div className="table-header">Location</div>
-            <div className="table-header"></div>
+            <div className="table-header">Employment Status</div>
+            <div className="table-header">Branch</div>
+            <div className="table-header">Action</div>
 
             {loading && (
               <div
@@ -243,12 +251,8 @@ const location = useLocation();
             {!loading &&
               !error &&
               currentEmployees.map((emp, index) => (
-                <React.Fragment key={emp.employeeNumber}>
-                  <div className="table-cell">{emp.employeeNumber}</div>
-
-                  <div className="table-cell">
-                    <img src="/images/Frame_287.png" alt="Block_logo" />
-                  </div>
+                <React.Fragment key={emp.employeeId}>
+                  <div className="table-cell">{emp.employeeId}</div>
 
                   <div className="table-cell name-surname-cell">
                     <div
@@ -257,29 +261,23 @@ const location = useLocation();
                     >
                       {(
                         emp.initials ||
-                        `${(emp.firstName || "").charAt(0)}${(
-                          emp.lastName || ""
+                        `${(emp.name || "").charAt(0)}${(
+                          emp.surname || ""
                         ).charAt(0)}`
                       ).toUpperCase()}
                     </div>
 
-                    <span className="name-text">{`${emp.firstName} ${emp.lastName}`}</span>
+                    <span className="name-text">{`${emp.name} ${emp.surname}`}</span>
                   </div>
 
-                  <div className="table-cell">{emp.jobTitle}</div>
+                  <div className="table-cell">{emp.positionTitle}</div>
                   <div className="table-cell">{emp.contactNumber}</div>
                   <div className="table-cell">{emp.email}</div>
-                  <div className="table-cell">{emp.department || emp.city}</div>
+                  <div className="table-cell">{emp.employmentStatus}</div>
+                  <div className="table-cell">{emp.branch}</div>
                   <div className="table-cell view-edit-cell">
                     <Link
-                      to={`/editEmployee/${emp.employeeNumber}`}
-                      state={{ ...emp, readOnly: true }}
-                      className="view-btn"
-                    >
-                      View
-                    </Link>
-                    <Link
-                      to={`/editEmployee/${emp.employeeNumber}`}
+                      to={`/editEmployee/${emp.employeeId}`}
                       state={emp}
                       className="edit-btn"
                     >
@@ -329,65 +327,74 @@ const location = useLocation();
 
         <div className="pagination-right-section">
           <div className="pagination-controls">
-           {/* Go to First Page */}
-<img
-  src="/images/arrow_drop_down_circle.png"
-  alt="First"
-  className={`pagination-arrow ${activePage === 1 ? "disabled" : ""}`}
-  onClick={() => activePage > 1 && setActivePage(1)}
-/>
+            {/* Go to First Page */}
+            <img
+              src="/images/arrow_drop_down_circle.png"
+              alt="First"
+              className={`pagination-arrow ${activePage === 1 ? "disabled" : ""}`}
+              onClick={() => activePage > 1 && setActivePage(1)}
+            />
 
-{/* Go to Previous Page */}
-<img
-  src="/images/arrow_drop_down_circle.png"
-  alt="Previous"
-  className={`pagination-arrow ${activePage === 1 ? "disabled" : ""}`}
-  onClick={() => activePage > 1 && setActivePage(activePage - 1)}
-/>
+            {/* Go to Previous Page */}
+            <img
+              src="/images/arrow_drop_down_circle.png"
+              alt="Previous"
+              className={`pagination-arrow ${activePage === 1 ? "disabled" : ""}`}
+              onClick={() => activePage > 1 && setActivePage(activePage - 1)}
+            />
 
-{/* Page numbers remain the same */}
-<div className="page-count">
-  {Array.from({ length: totalPages || 1 }, (_, i) => {
-    const pageNum = i + 1;
-    return (
-      <button
-        key={pageNum}
-        onClick={() => setActivePage(pageNum)}
-        className={`page-number ${activePage === pageNum ? "active" : ""}`}
-      >
-        {pageNum}
-      </button>
-    );
-  })}
-</div>
+            {/* Page numbers remain the same */}
+            <div className="page-count">
+              {Array.from({ length: totalPages || 1 }, (_, i) => {
+                const pageNum = i + 1;
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => setActivePage(pageNum)}
+                    className={`page-number ${activePage === pageNum ? "active" : ""}`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+            </div>
 
-{/* Go to Next Page */}
-<img
-  src="/images/arrow_drop_down_circle.png"
-  alt="Next"
-  className={`pagination-arrow next ${
-    activePage === totalPages ? "disabled" : ""
-  }`}
-  onClick={() => activePage < totalPages && setActivePage(activePage + 1)}
-/>
+            {/* Go to Next Page */}
+            <img
+              src="/images/arrow_drop_down_circle.png"
+              alt="Next"
+              className={`pagination-arrow next ${
+                activePage === totalPages ? "disabled" : ""
+              }`}
+              onClick={() =>
+                activePage < totalPages && setActivePage(activePage + 1)
+              }
+            />
 
-{/* Go to Last Page */}
-<img
-  src="/images/arrow_drop_down_circle.png"
-  alt="Last"
-  className={`pagination-arrow next ${
-    activePage === totalPages ? "disabled" : ""
-  }`}
-  onClick={() => activePage < totalPages && setActivePage(totalPages)}
-/>
-
+            {/* Go to Last Page */}
+            <img
+              src="/images/arrow_drop_down_circle.png"
+              alt="Last"
+              className={`pagination-arrow next ${
+                activePage === totalPages ? "disabled" : ""
+              }`}
+              onClick={() =>
+                activePage < totalPages && setActivePage(totalPages)
+              }
+            />
           </div>
-
           <div className="employee-count">
             {`${filteredEmployees.length} Employees @ Singular`}
           </div>
         </div>
       </div>
+      {showAddModal && (
+        <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <AddEmployee closeModal={() => setShowAddModal(false)} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

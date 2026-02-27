@@ -16,6 +16,7 @@ namespace HRConnect.Api.Interfaces
     Task<List<string>> GetAllEmployeeIdsWithPrefix(string prefix);
     Task<bool> DeleteEmployeeAsync(string employeeId);
     Task<IDbContextTransaction> BeginTransactionAsync();
+    
     Task<Employee?> GetEmployeeByEmailAsync(string email);
     Task<Employee?> GetEmployeeByEmailAsync(string email, string employeeId);
     Task<Employee?> GetEmployeeByIdNumberAsync(string idNumber);

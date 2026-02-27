@@ -36,11 +36,13 @@ namespace HRConnect.Api.Services
     public class EmployeeService : IEmployeeService
     {
         private readonly IEmployeeRepository _employeeRepo;
+        private readonly IPositionRepository _positionRepo;
         private readonly IEmailService _emailService;
-        public EmployeeService(IEmployeeRepository employeeRepo, IEmailService emailService)
+        public EmployeeService(IEmployeeRepository employeeRepo, IEmailService emailService, IPositionRepository positionRepo)
         {
             _employeeRepo = employeeRepo;
             _emailService = emailService;
+            _positionRepo = positionRepo;
         }
         /// <summary>
         /// Retrieves all employees from the repository.
@@ -82,7 +84,15 @@ namespace HRConnect.Api.Services
             // Ensure Title and Gender combination is valid
             ValidateTitleAndGender(employeeRequestDto);
             employeeRequestDto.EmployeeId = await GenerateUniqueEmpId(employeeRequestDto.Surname);
+
+            var position = await _positionRepo.GetPositionByIdAsync(employeeRequestDto.PositionId);
+            if (position == null)
+                throw new ValidationException($"Position with ID {employeeRequestDto.PositionId} does not exist.");
+
             var new_employee = employeeRequestDto.ToEmployeeFromCreateDTO();
+
+            new_employee.PositionId = position.PositionId;
+            new_employee.Position = position;
 
             using var transaction = await _employeeRepo.BeginTransactionAsync();
             try
@@ -118,6 +128,13 @@ namespace HRConnect.Api.Services
             ValidateUpdate(employeeDto);
             //Check for duplicate entries
             await CheckDuplicateOnUpdate(employeeId, employeeDto);
+
+            var position = await _positionRepo.GetPositionByIdAsync(employeeDto.PositionId);
+            if (position == null)
+                throw new ValidationException($"Position with ID {employeeDto.PositionId} does not exist.");
+
+            existingEmployee.PositionId = position.PositionId;
+            existingEmployee.Position = position;
 
             await ValidateCareerManagerAsync(employeeId, employeeDto.CareerManagerID);
 
@@ -224,6 +241,11 @@ namespace HRConnect.Api.Services
 
             employeeRequestDto.Gender = employeeInfo.Gender;
             employeeRequestDto.DateOfBirth = employeeInfo.DateOfBirth;
+
+            if (employeeInfo.IsSouthAfricanCitizen)
+            {
+                employeeRequestDto.Nationality = "South African";
+            }
         }
         /// <summary>
         /// Ensures the employee meets the minimum age requirement based on employment status.
@@ -244,6 +266,13 @@ namespace HRConnect.Api.Services
 
             if (age < minimumAge)
                 throw new ValidationException($"Employee must be at least {minimumAge} years old.");
+
+            if (age > 65 &&
+            employmentStatus != EmploymentStatus.Contract)
+            {
+                throw new ValidationException(
+                    "Employees older than 65 may only be employed on a Contract basis.");
+            }
         }
         /// <summary>
         /// Validates that the employee title matches the provided gender.
@@ -317,6 +346,38 @@ namespace HRConnect.Api.Services
             var allowedExtensions = new[] { ".png", ".jpg", ".jpeg" };
             bool isIdNumberProvided = !string.IsNullOrWhiteSpace(employeeRequestDto.IdNumber);
             bool isPassportProvided = !string.IsNullOrWhiteSpace(employeeRequestDto.PassportNumber);
+
+            if (isIdNumberProvided)
+            {
+                var info = IdNumberValidator.ParseIdNumber(employeeRequestDto.IdNumber);
+
+                if (info.IsSouthAfricanCitizen)
+                {
+                    if (!string.IsNullOrWhiteSpace(employeeRequestDto.Nationality) &&
+                        employeeRequestDto.Nationality != "South African")
+                    {
+                        throw new ValidationException(
+                            "South African citizens cannot override nationality.");
+                    }
+                }
+                else
+                {
+                    if (string.IsNullOrWhiteSpace(employeeRequestDto.Nationality))
+                    {
+                        throw new ValidationException(
+                            "Permanent residents must manually enter their nationality.");
+                    }
+                }
+            }
+
+            if (isPassportProvided)
+            {
+                if (string.IsNullOrWhiteSpace(employeeRequestDto.Nationality))
+                {
+                    throw new ValidationException(
+                        "Nationality is required when using a Passport.");
+                }
+            }
             if (!isIdNumberProvided && !isPassportProvided)
                 throw new ValidationException("Either National ID or Passport is required");
 
@@ -423,18 +484,16 @@ namespace HRConnect.Api.Services
                 if (employeeRequestDto.DateOfBirth == default)
                     throw new ValidationException("Date of Birth is required if ID Number is not provided");
 
-                int age = AgeCalculator.CalculateAge(employeeRequestDto.DateOfBirth);
-                if (age < 18)
-                    throw new ValidationException("Employee must be at least 18 years old.");
+                EnsureEmployeeMeetsAgePolicy(
+                    employeeRequestDto.DateOfBirth,
+                    employeeRequestDto.EmploymentStatus);
 
                 if (!employeeRequestDto.Gender.HasValue)
                     throw new ValidationException("Gender is required when using Passport");
 
                 if (!Enum.IsDefined(employeeRequestDto.Gender.Value))
                     throw new ValidationException("Gender must be either Male or Female");
-
             }
-
             if (!string.IsNullOrWhiteSpace(employeeRequestDto.TaxNumber))
             {
                 if (employeeRequestDto.TaxNumber.Length != 10)
@@ -443,7 +502,6 @@ namespace HRConnect.Api.Services
                 if (!employeeRequestDto.TaxNumber.All(char.IsDigit))
                     throw new ValidationException("Tax Number must contain digits only");
             }
-
         }
         // <summary>
         /// Performs additional validation rules specific to employee updates.

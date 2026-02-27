@@ -9,6 +9,7 @@ namespace HRConnect.Api.DTOs.Employee
         public string Surname { get; set; } = string.Empty;
         public string IdNumber { get; set; } = string.Empty;
         public string PassportNumber { get; set; } = string.Empty;
+        public string Nationality { get; set; } = string.Empty;
         public Gender? Gender { get; set; }
         public string ContactNumber { get; set; } = string.Empty;
         public string TaxNumber { get; set; } = string.Empty;
@@ -23,6 +24,7 @@ namespace HRConnect.Api.DTOs.Employee
         public Branch Branch { get; set; }
         public decimal MonthlySalary { get; set; }
         public int  PositionId { get; set; }
+        public string? PositionTitle { get; set; }
         public EmploymentStatus EmploymentStatus { get; set; }
         public string CareerManagerID { get; set; } = string.Empty;
         public string ProfileImage { get; set; } = string.Empty;

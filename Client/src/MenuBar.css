@@ -952,6 +952,8 @@
 }
 
 
+
+
 .apm-save-button {
   width: 100%; /* Match .apm-input */
   height: 37px;
@@ -1238,9 +1240,7 @@
   display: flex;
   flex-direction: column;
   gap: 5px;
-
   width: 1441px;
-
   box-sizing: border-box;
   padding-left: 20px;
   overflow: visible;
@@ -1335,6 +1335,20 @@
   padding: 6px 11px;
 }
 
+.add-employee-button {
+  background-color: #9AAC60;
+  color: white;
+  width: 200px;
+  padding: 10px 50px; /* thinner vertically, wider horizontally */
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  white-space: nowrap; /* Prevent text wrapping */
+}
+
 .heading-icon {
   width: 31px;
   height: 31px;
@@ -1343,16 +1357,20 @@
 
 .employee-list-heading-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 45px;
-  padding: 5px 145px 5px 0;
-  height: 66px;
+  padding: 5px 0;
+  min-height: 58px;
   box-sizing: border-box;
   width: 1441px;
 }
 
-
-
+.right-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-left: auto;
+}
 
 .heading-item {
   padding: 0.5rem 1rem;
@@ -1367,7 +1385,6 @@
   align-items: center;
   gap: 10px;
   height: 56px;
-  margin-left: auto;
 
 }
 
@@ -1444,7 +1461,7 @@
 
 .table-grid {
   display: grid;
-  grid-template-columns: 66px 40px 309px 207px 211px 275px 141px 192px;
+  grid-template-columns: 100px 280px 185px 211px 275px 141px 162px 89px;
   grid-template-rows: 59px repeat(10, 1fr);
   /*1 header + 10 rows */
   width: 1441px;

@@ -40,6 +40,7 @@ namespace HRConnect.Api.Models
         [StringLength(13)]
         public string IdNumber { get; set; } = string.Empty;
         public string PassportNumber { get; set; } = string.Empty;
+        public string Nationality { get; set; } = string.Empty;
         [Required]
         public Gender Gender { get; set; }
         [Required]
