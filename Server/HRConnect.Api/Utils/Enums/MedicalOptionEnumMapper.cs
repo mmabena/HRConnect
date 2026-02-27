@@ -1,8 +1,7 @@
-﻿namespace HRConnect.Api.Utils
+﻿namespace HRConnect.Api.Utils.Enums
 {
   using System.Text.RegularExpressions;
-  using HRConnect.Api.Utils.Enums;
-  
+
   public static class MedicalOptionEnumMapper
   {
     // Forward Mapping : Category -> Variant
@@ -72,8 +71,10 @@
       {
         { @"Network.*Choice", ("Network Choice", typeof(Choice)) },
         { @"First.*Choice", ("First Choice", typeof(Choice)) },
+        { @"^Essential$", ("Essential", typeof(Essential)) },
         { @"Essential.*Plus", ("Essential", typeof(Essential)) },
         { @"Essential.*Network", ("Essential", typeof(Essential)) },
+        { @"^Vital$", ("Vital", typeof(Vital)) },
         { @"Vital.*Plus", ("Vital", typeof(Vital)) },
         { @"Vital.*Network", ("Vital", typeof(Vital)) },
         { @"^Alliance$", ("Alliance", typeof(Alliance)) },
@@ -116,8 +117,10 @@
             null,
         var t when t == typeof(Vital) => 
           VitalMappings.TryGetValue(categoryName, out var vital) ? (T?)(object)vital : null,
-        var t when t == typeof(Double) => DoubleMappings.TryGetValue(categoryName, out var @double) ? (T)(object)@double : null,
-        var t when t == typeof(Alliance) => AllianceMappings.TryGetValue(categoryName, out var alliance) ? (T)(object)alliance : null
+        var t when t == typeof(Double) => 
+          DoubleMappings.TryGetValue(categoryName, out var @double) ? (T)(object)@double : null,
+        var t when t == typeof(Alliance) => 
+          AllianceMappings.TryGetValue(categoryName, out var alliance) ? (T)(object)alliance : null
       };
     }
 

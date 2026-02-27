@@ -1,32 +1,15 @@
-﻿namespace HRConnect.Api.Utils.MedicalOptions
+﻿namespace HRConnect.Api.Utils.MedicalOption
 {
-  using HRConnect.Api.DTOs.MedicalOption;
+  using DTOs.MedicalOption;
   using Enums;
   using Enums.Mappers;
   using Factories;
   using Interfaces;
-  using Mappers;
   using Models;
-  using Models.MedicalOptions.Records;
-  using HRConnect.Api.Utils.Enums.Mappers;
+  using Records;
 
   public static class MedicalOptionValidator
   {
-    //TODO:
-    //1. Validate Entity Count against bulkPayload Count
-    //2. Validate if each ID is valid from the bulk payload
-    //3. Validate Salary Bracket for the following:
-    //   -=> Alliance and Double must not have a salary bracket cap
-    //   -=> Updates can only be done between November and December (31st 59:59:59)
-    //   -=> There should be no gaps in between the salary ranges (they should be apart by half a
-    //       cent/ or a rand)
-    //   -=> There should be no overlapping salary bracket caps within the same category
-    //       (where one option overlaps 1+ other options in the same category)
-    //   -=> Only perform an update if all the entities within the payload exist in the database
-    //       (only on valid ID numbers) -- out of the scope of this file's operation
-    //4. Do cross-checks on the contribution values if the payload's value balance out (per option in the variant)
-    //   (will need to cater for nulls as not all options have RISK + MSA = Total Contrib)
-
     // Global Variables
     private static string _globalCategoryName = string.Empty;
     private static string _globalVariantName = string.Empty;
@@ -62,7 +45,8 @@
       var existingIds = dbData.Select(o => o.MedicalOptionId).ToHashSet();
   
       foreach (var entity in bulkUpdateDto) {
-        if (!existingIds.Contains(entity.MedicalOptionId)) // In-memory check!
+        if (!existingIds.Contains(entity.MedicalOptionId)) 
+          // In-memory check
           return false;
       }
 
@@ -77,10 +61,12 @@
       int categoryId,
       IMedicalOptionRepository repository, List<MedicalOption> dbData)
     {
-      var categoryOptions = dbData.Where(o => o.MedicalOptionCategoryId == categoryId).ToHashSet();
+      var categoryOptions = dbData
+        .Where(o => o.MedicalOptionCategoryId == categoryId).ToHashSet();
   
       foreach (var entity in bulkUpdateDto) {
-        if (!categoryOptions.Any(o => o.MedicalOptionId == entity.MedicalOptionId)) // In-memory check!
+        if (!categoryOptions.Any(o => o.MedicalOptionId == entity.MedicalOptionId)) 
+          // In-memory check
           return false;
       }
 
@@ -115,7 +101,8 @@
       List<SalaryBracketValidatorRecord> records)
     {
       var sortedRecords = records
-        .Where(r => r.salaryBracketMin.HasValue && (r.salaryBracketMax.HasValue || r.salaryBracketMax is null))
+        .Where(r => r.salaryBracketMin.HasValue && 
+                    (r.salaryBracketMax.HasValue || r.salaryBracketMax is null))
         .OrderBy(r => r.salaryBracketMin)
         .ToList();
 
@@ -149,7 +136,8 @@
       List<SalaryBracketValidatorRecord> records)
     {
       var sortedRecords = records
-        .Where(r => (r.salaryBracketMin.HasValue || r.salaryBracketMin >= 0 ) && (r.salaryBracketMax.HasValue || r.salaryBracketMax is null))
+        .Where(r => (r.salaryBracketMin.HasValue || r.salaryBracketMin >= 0 ) 
+                    && (r.salaryBracketMax.HasValue || r.salaryBracketMax is null))
         .OrderBy(r => r.salaryBracketMin)
         .ToList();
 
@@ -159,12 +147,14 @@
         var next = sortedRecords[i + 1];
 
         // Check for overlap (next.min should be > current.max)
-        if (current.salaryBracketMax.HasValue && next.salaryBracketMin.HasValue || !(next is null)) {
+        if (current.salaryBracketMax.HasValue && next.salaryBracketMin.HasValue || 
+            !(next is null)) {
           if (next.salaryBracketMin <= current.salaryBracketMax.Value)
             return false;
         }
         
-        // When current.max is null (uncapped), it can't overlap with anything - what if there is a next value that has a less value ?
+        // When current.max is null (uncapped), it can't overlap with anything -
+        // what if there is a next value that has a less value ? [Resolved]
       }
 
       return true;
@@ -185,7 +175,8 @@
       var hasMsa = dbOption.MonthlyMsaContributionAdult.HasValue &&
                    dbOption.MonthlyMsaContributionAdult >= 0;
       var hasPrincipal = dbOption.MonthlyRiskContributionPrincipal.HasValue &&
-                         (dbOption.MonthlyRiskContributionPrincipal >= 0 && dbOption.MonthlyRiskContributionPrincipal is not null);
+                         (dbOption.MonthlyRiskContributionPrincipal >= 0 && 
+                          dbOption.MonthlyRiskContributionPrincipal is not null);
 
       return ValidateContributionValues(entity, hasMsa, hasPrincipal).IsValid;
     }
@@ -193,7 +184,8 @@
     /// <summary>
     /// Validates salary bracket gaps and overlaps within a single variant
     /// </summary>
-    private static BulkValidationResult ValidateSingleVariantSalaryBrackets(List<MedicalOption> variantOptions)
+    private static BulkValidationResult ValidateSingleVariantSalaryBrackets(
+      List<MedicalOption> variantOptions)
     {
       var result = new BulkValidationResult() { IsValid = true}; 
 
@@ -252,7 +244,8 @@
       // Principal validation (if applicable)
       if (hasPrincipal &&
           (!entity.MonthlyRiskContributionPrincipal.HasValue ||
-           entity.MonthlyRiskContributionPrincipal < 0 || entity.MonthlyRiskContributionPrincipal is null))
+           entity.MonthlyRiskContributionPrincipal < 0 || 
+           entity.MonthlyRiskContributionPrincipal is null))
         return false;
 
       return true;
@@ -293,10 +286,12 @@
         var childTotal = entity.MonthlyRiskContributionChild +
                          entity.MonthlyMsaContributionChild.Value;
 
-        if (Math.Abs((decimal)(adultTotal - entity.TotalMonthlyContributionsAdult)) > tolerance)
+        if (Math.Abs((decimal)(adultTotal
+                               - entity.TotalMonthlyContributionsAdult)) > tolerance)
           return false;
 
-        if (Math.Abs((decimal)(childTotal - entity.TotalMonthlyContributionsChild)) > tolerance)
+        if (Math.Abs((decimal)(childTotal
+                               - entity.TotalMonthlyContributionsChild)) > tolerance)
           return false;
 
         if (hasPrincipal)
@@ -311,11 +306,13 @@
       else
       {
         // Risk should equal Total when no MSA
-        if (Math.Abs((decimal)(entity.MonthlyRiskContributionAdult - entity.TotalMonthlyContributionsAdult)) >
+        if (Math.Abs((decimal)(entity.MonthlyRiskContributionAdult
+                               - entity.TotalMonthlyContributionsAdult)) >
             tolerance)
           return false;
 
-        if (Math.Abs((decimal)(entity.MonthlyRiskContributionChild - entity.TotalMonthlyContributionsChild)) >
+        if (Math.Abs((decimal)(entity.MonthlyRiskContributionChild
+                               - entity.TotalMonthlyContributionsChild)) >
             tolerance)
           return false;
 
@@ -349,7 +346,8 @@
         if (!ValidateUpdatePeriod())
         {
           result.IsValid = false;
-          result.ErrorMessage = "Bulk update operation cannot be executed outside the update period";
+          result.ErrorMessage = "Bulk update operation cannot be executed outside " +
+                                "the update period";
           return result;
         }
 
@@ -357,7 +355,8 @@
         if (!ValidateEntityCount(dbData.Count, bulkUpdateDto.Count))
         {
           result.IsValid = false;
-          result.ErrorMessage = "One or more medical options not found in the specified category";
+          result.ErrorMessage = "One or more medical options not found in the " +
+                                "specified category";
           return result;
         }
 
@@ -372,22 +371,28 @@
         if (!await ValidateAllIdsInCategoryAsync(bulkUpdateDto, categoryId, repository, dbData))
         {
           result.IsValid = false;
-          result.ErrorMessage = "One or more medical options are invalid within the specified category";
+          result.ErrorMessage = "One or more medical options are invalid within the " +
+                                "specified category";
           return result;
         }
 
         // 4. Individual Entity Validations
         foreach (var entity in bulkUpdateDto)
         {
-          var dbOption = dbData.First(o => o.MedicalOptionId == entity.MedicalOptionId);
-          var categoryName = dbOption.MedicalOptionCategory?.MedicalOptionCategoryName ?? string.Empty;
+          var dbOption = dbData
+            .First(o => o.MedicalOptionId == entity.MedicalOptionId);
+          var categoryName = 
+            dbOption.MedicalOptionCategory?.MedicalOptionCategoryName ?? string.Empty;
 
           // Salary bracket restriction validation
-          var restricted = ValidateSalaryBracketRestriction(categoryName, entity.SalaryBracketMin, entity.SalaryBracketMax);
+          var restricted = ValidateSalaryBracketRestriction(categoryName, 
+            entity.SalaryBracketMin, entity.SalaryBracketMax);
+          
           if (!restricted)
           {
             result.IsValid = false;
-            result.ErrorMessage = $"Salary bracket cannot be updated for category '{categoryName}'";
+            result.ErrorMessage = $"Salary bracket cannot be updated for category" +
+                                  $" '{categoryName}'";
             return result;
           }
 
@@ -395,7 +400,8 @@
           if (!ValidateContributionValuesWithContext(entity, dbOption))
           {
             result.IsValid = false;
-            result.ErrorMessage = $"Invalid contribution values for medical option {entity.MedicalOptionId}";
+            result.ErrorMessage = $"Invalid contribution values for medical option" +
+                                  $" {entity.MedicalOptionId}";
             return result;
           }
 
@@ -445,227 +451,236 @@
     // Variant based implementation
     #region Variant Comprehensive Validation
 
-/// <summary>
-/// Comprehensive validation that processes each variant individually with full validation,
-/// then performs cross-variant validation
-/// </summary>
-public static async Task<BulkValidationResult> ValidateAllVariantsComprehensiveAsync(
-  int categoryId,
-  IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto,
-  IMedicalOptionRepository repository,
-  List<MedicalOption> dbData)
-{
-  var result = new BulkValidationResult();
-
-  try
-  {
-    // Basic period validation (global)
-    if (!ValidateUpdatePeriod())
+    /// <summary>
+    /// Comprehensive validation that processes each variant individually with full validation,
+    /// then performs cross-variant validation
+    /// </summary>
+    public static async Task<BulkValidationResult> ValidateAllVariantsComprehensiveAsync(
+      int categoryId,
+      IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto,
+      IMedicalOptionRepository repository,
+      List<MedicalOption> dbData)
     {
-      result.IsValid = false;
-      result.ErrorMessage = "Updates can only be performed between November and December";
+      var result = new BulkValidationResult();
+
+      try
+      {
+        // Basic period validation (global)
+        if (!ValidateUpdatePeriod())
+        {
+          result.IsValid = false;
+          result.ErrorMessage = "Updates can only be performed between November and December";
+          return result;
+        }
+
+        if (dbData.Count == 0)
+        {
+          result.IsValid = false;
+          result.ErrorMessage = $"No medical options found for category ID: {categoryId}";
+          return result;
+        }
+
+        // Group by variant using your existing factory
+        var variantGroups = GroupOptionsByVariant(bulkUpdateDto, dbData);
+        
+        // Validate each variant individually with ALL validations
+        foreach (var variantGroup in variantGroups)
+        {
+          var variantValidation = await ValidateSingleVariantWithAllRulesAsync(
+            variantGroup.Key, 
+            variantGroup.Value, 
+            bulkUpdateDto, 
+            repository,
+            categoryId, dbData);
+
+          if (!variantValidation.IsValid)
+          {
+            result.IsValid = false;
+            result.ErrorMessage = $"Variant '{variantGroup.Key}' validation failed: " +
+                                  $"{variantValidation.ErrorMessage}";
+            return result;
+          }
+        }
+      }
+      catch (Exception ex)
+      {
+        result.IsValid = false;
+        result.ErrorMessage = $"Comprehensive validation error: {ex.Message}";
+      }
+
       return result;
     }
 
-    if (dbData.Count == 0)
+    #endregion
+
+    #region Single Variant Validation
+
+    /// <summary>
+    /// Validates a single variant with ALL validation rules applied
+    /// </summary>
+    private static async Task<BulkValidationResult> ValidateSingleVariantWithAllRulesAsync(
+      string variantName,
+      List<UpdateMedicalOptionVariantsDto> variantOptions,
+      IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto,
+      IMedicalOptionRepository repository,
+      int categoryId, List<MedicalOption> dbData)
     {
-      result.IsValid = false;
-      result.ErrorMessage = $"No medical options found for category ID: {categoryId}";
+      var result = new BulkValidationResult();
+
+      try
+      {
+        // 1. Entity count validation for this variant
+        var variantUpdateDtos = bulkUpdateDto
+          .Where(dto => variantOptions
+            .Any(opt => opt.MedicalOptionId == dto.MedicalOptionId))
+          .ToList();
+
+        if (!ValidateEntityCount(variantOptions.Count, variantUpdateDtos.Count))
+        {
+          result.IsValid = false;
+          result.ErrorMessage = $"Entity count mismatch for variant '{variantName}'. " +
+                                $"Expected: {variantOptions.Count}, Provided: " +
+                                $"{variantUpdateDtos.Count}";
+          return result;
+        }
+
+        // 2. ID existence validation for this variant
+        foreach (var dto in variantUpdateDtos)
+        {
+          if (!await repository.MedicalOptionExistsAsync(dto.MedicalOptionId))
+          {
+            result.IsValid = false;
+            result.ErrorMessage = $"Medical option ID {dto.MedicalOptionId} does not exist in " +
+                                  $"variant '{variantName}'";
+            return result;
+          }
+        }
+
+        // 3. Category membership validation for this variant
+        foreach (var dto in variantUpdateDtos)
+        {
+          if (!await repository.MedicalOptionExistsWithinCategoryAsync(categoryId,
+                dto.MedicalOptionId))
+          {
+            result.IsValid = false;
+            result.ErrorMessage = $"Medical option ID {dto.MedicalOptionId} does not belong to " +
+                                  $"category {categoryId} in variant '{variantName}'";
+            return result;
+          }
+        }
+
+        // 4. Individual contribution validation for this variant
+        foreach (var dto in variantUpdateDtos)
+        {
+          var dbOption = dbData.FirstOrDefault(
+            o => o.MedicalOptionId == dto.MedicalOptionId);
+          if (dbOption != null && !ValidateContributionValuesWithContext(dto, dbOption))
+          {
+            result.IsValid = false;
+            result.ErrorMessage = $"Invalid contribution values for option {dto.MedicalOptionId} " +
+                                  $"({dbOption.MedicalOptionName}) in variant '{variantName}'";
+            return result;
+          }
+        }
+
+        // 5. Salary bracket gap/overlap validation for this variant
+        // Get the database options for this variant
+        var dbVariantOptions = dbData
+          .Where(o => variantOptions.Any(dto => dto.MedicalOptionId == o.MedicalOptionId))
+          .ToList();
+
+        var salaryValidation = ValidateSingleVariantSalaryBrackets(dbVariantOptions);
+        if (!salaryValidation.IsValid)
+        {
+          result.IsValid = false;
+          result.ErrorMessage = $"Salary bracket validation failed for variant '{variantName}': " +
+                                $"{salaryValidation.ErrorMessage}";
+          return result;
+        }
+
+        // 6. Contribution structure consistency within this variant
+        var contributionStructureValidation = ValidateContributionStructureWithinVariant(
+          variantOptions);
+        if (!contributionStructureValidation.IsValid)
+        {
+          result.IsValid = false;
+          result.ErrorMessage = $"Contribution structure inconsistency in variant '{variantName}': " +
+                                $"{contributionStructureValidation.ErrorMessage}";
+          return result;
+        }
+
+        // 7. Variant-specific rules
+        var variantRulesValidation = ValidateVariantSpecificBusinessRules(variantName, variantOptions, 
+          dbData);
+        if (!variantRulesValidation.IsValid)
+        {
+          result.IsValid = false;
+          result.ErrorMessage = $"Variant-specific rules failed for '{variantName}': " +
+                                $"{variantRulesValidation.ErrorMessage}";
+          return result;
+        }
+      }
+      catch (Exception ex)
+      {
+        result.IsValid = false;
+        result.ErrorMessage = $"Single variant validation error for '{variantName}': {ex.Message}";
+      }
+
       return result;
     }
 
-    // Group by variant using your existing factory
-    var variantGroups = GroupOptionsByVariant(bulkUpdateDto, dbData);
+    /// <summary>
+    /// Validates contribution structure consistency within a single variant
+    /// </summary>
+    private static BulkValidationResult ValidateContributionStructureWithinVariant(
+      List<UpdateMedicalOptionVariantsDto> variantOptions)
+    {
+      var result = new BulkValidationResult(){IsValid = true};
+
+      try {
+        if (variantOptions.Count < 2) return result; // Not applicable for single option
+
+        // Get first option for expected structure
+        var firstOption = variantOptions.First();
+        var expectedHasMsa = firstOption.MonthlyMsaContributionAdult.HasValue &&
+                             firstOption.MonthlyMsaContributionAdult > 0;
+        var expectedHasPrincipal = firstOption.MonthlyRiskContributionPrincipal.HasValue &&
+                                   firstOption.MonthlyRiskContributionPrincipal > 0;
+
+        foreach (var option in variantOptions.Skip(1)) {
+          var actualHasMsa = option.MonthlyMsaContributionAdult.HasValue &&
+                             option.MonthlyMsaContributionAdult > 0;
+          var actualHasPrincipal = option.MonthlyRiskContributionPrincipal.HasValue &&
+                                   option.MonthlyRiskContributionPrincipal > 0;
+
+          if (expectedHasMsa != actualHasMsa) {
+            result.IsValid = false;
+            result.ErrorMessage = $"Inconsistent MSA structure within variant: Option " +
+                                  $"{firstOption.MedicalOptionId} has MSA, but Option " +
+                                  $"{option.MedicalOptionId} does not";
+            return result;
+          }
+
+          if (expectedHasPrincipal != actualHasPrincipal) {
+            result.IsValid = false;
+            result.ErrorMessage = $"Inconsistent Principal structure within variant: Option " +
+                                  $"{firstOption.MedicalOptionId} has Principal, but Option " +
+                                  $"{option.MedicalOptionId} does not";
+            return result;
+          }
+        }
+      }
+      catch (Exception ex) {
+        result.IsValid = false;
+        result.ErrorMessage = $"Contribution structure validation error: {ex.Message}";
+      }
+
+      return result;
+    }
+
+    #endregion
     
-    // Validate each variant individually with ALL validations
-    foreach (var variantGroup in variantGroups)
-    {
-      var variantValidation = await ValidateSingleVariantWithAllRulesAsync(
-        variantGroup.Key, 
-        variantGroup.Value, 
-        bulkUpdateDto, 
-        repository,
-        categoryId, dbData);
-
-      if (!variantValidation.IsValid)
-      {
-        result.IsValid = false;
-        result.ErrorMessage = $"Variant '{variantGroup.Key}' validation failed: {variantValidation.ErrorMessage}";
-        return result;
-      }
-    }
-  }
-  catch (Exception ex)
-  {
-    result.IsValid = false;
-    result.ErrorMessage = $"Comprehensive validation error: {ex.Message}";
-  }
-
-  return result;
-}
-
-#endregion
-
-#region Single Variant Validation
-
-/// <summary>
-/// Validates a single variant with ALL validation rules applied
-/// </summary>
-private static async Task<BulkValidationResult> ValidateSingleVariantWithAllRulesAsync(
-  string variantName,
-  List<UpdateMedicalOptionVariantsDto> variantOptions,
-  IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto,
-  IMedicalOptionRepository repository,
-  int categoryId, List<MedicalOption> dbData)
-{
-  var result = new BulkValidationResult();
-
-  try
-  {
-    // 1. Entity count validation for this variant
-    var variantUpdateDtos = bulkUpdateDto
-      .Where(dto => variantOptions.Any(opt => opt.MedicalOptionId == dto.MedicalOptionId))
-      .ToList();
-
-    if (!ValidateEntityCount(variantOptions.Count, variantUpdateDtos.Count))
-    {
-      result.IsValid = false;
-      result.ErrorMessage = $"Entity count mismatch for variant '{variantName}'. Expected: {variantOptions.Count}, Provided: {variantUpdateDtos.Count}";
-      return result;
-    }
-
-    // 2. ID existence validation for this variant
-    foreach (var dto in variantUpdateDtos)
-    {
-      if (!await repository.MedicalOptionExistsAsync(dto.MedicalOptionId))
-      {
-        result.IsValid = false;
-        result.ErrorMessage = $"Medical option ID {dto.MedicalOptionId} does not exist in variant '{variantName}'";
-        return result;
-      }
-    }
-
-    // 3. Category membership validation for this variant
-    foreach (var dto in variantUpdateDtos)
-    {
-      if (!await repository.MedicalOptionExistsWithinCategoryAsync(categoryId, dto.MedicalOptionId))
-      {
-        result.IsValid = false;
-        result.ErrorMessage = $"Medical option ID {dto.MedicalOptionId} does not belong to category {categoryId} in variant '{variantName}'";
-        return result;
-      }
-    }
-
-    // 4. Individual contribution validation for this variant
-    foreach (var dto in variantUpdateDtos)
-    {
-      var dbOption = dbData.FirstOrDefault(o => o.MedicalOptionId == dto.MedicalOptionId);
-      if (dbOption != null && !ValidateContributionValuesWithContext(dto, dbOption))
-      {
-        result.IsValid = false;
-        result.ErrorMessage = $"Invalid contribution values for option {dto.MedicalOptionId} ({dbOption.MedicalOptionName}) in variant '{variantName}'";
-        return result;
-      }
-    }
-
-    // 5. Salary bracket gap/overlap validation for this variant
-    // Get the database options for this variant
-    var dbVariantOptions = dbData
-      .Where(o => variantOptions.Any(dto => dto.MedicalOptionId == o.MedicalOptionId))
-      .ToList();
-
-    var salaryValidation = ValidateSingleVariantSalaryBrackets(dbVariantOptions);
-    if (!salaryValidation.IsValid)
-    {
-      result.IsValid = false;
-      result.ErrorMessage = $"Salary bracket validation failed for variant '{variantName}': {salaryValidation.ErrorMessage}";
-      return result;
-    }
-
-    // 6. Contribution structure consistency within this variant
-    var contributionStructureValidation = ValidateContributionStructureWithinVariant(variantOptions);
-    if (!contributionStructureValidation.IsValid)
-    {
-      result.IsValid = false;
-      result.ErrorMessage = $"Contribution structure inconsistency in variant '{variantName}': {contributionStructureValidation.ErrorMessage}";
-      return result;
-    }
-
-    // 7. Variant-specific rules
-    var variantRulesValidation = ValidateVariantSpecificBusinessRules(variantName, variantOptions, dbData);
-    if (!variantRulesValidation.IsValid)
-    {
-      result.IsValid = false;
-      result.ErrorMessage = $"Variant-specific rules failed for '{variantName}': {variantRulesValidation.ErrorMessage}";
-      return result;
-    }
-    /* -- Old --
-     var variantRulesValidation = ValidateVariantSpecificRules(variantName, variantOptions);
-    if (!variantRulesValidation.IsValid)
-    {
-      result.IsValid = false;
-      result.ErrorMessage = $"Variant-specific rules failed for '{variantName}': {variantRulesValidation.ErrorMessage}";
-      return result;
-    }*/
-  }
-  catch (Exception ex)
-  {
-    result.IsValid = false;
-    result.ErrorMessage = $"Single variant validation error for '{variantName}': {ex.Message}";
-  }
-
-  return result;
-}
-
-/// <summary>
-/// Validates contribution structure consistency within a single variant
-/// </summary>
-private static BulkValidationResult ValidateContributionStructureWithinVariant(
-  List<UpdateMedicalOptionVariantsDto> variantOptions)
-{
-  var result = new BulkValidationResult(){IsValid = true};
-
-  try {
-    if (variantOptions.Count < 2) return result; // Not applicable for single option
-
-    // Get first option for expected structure
-    var firstOption = variantOptions.First();
-    var expectedHasMsa = firstOption.MonthlyMsaContributionAdult.HasValue &&
-                         firstOption.MonthlyMsaContributionAdult > 0;
-    var expectedHasPrincipal = firstOption.MonthlyRiskContributionPrincipal.HasValue &&
-                               firstOption.MonthlyRiskContributionPrincipal > 0;
-
-    foreach (var option in variantOptions.Skip(1)) {
-      var actualHasMsa = option.MonthlyMsaContributionAdult.HasValue &&
-                         option.MonthlyMsaContributionAdult > 0;
-      var actualHasPrincipal = option.MonthlyRiskContributionPrincipal.HasValue &&
-                               option.MonthlyRiskContributionPrincipal > 0;
-
-      if (expectedHasMsa != actualHasMsa) {
-        result.IsValid = false;
-        result.ErrorMessage = $"Inconsistent MSA structure within variant: Option {firstOption.MedicalOptionId} has MSA, but Option {option.MedicalOptionId} does not";
-        return result;
-      }
-
-      if (expectedHasPrincipal != actualHasPrincipal) {
-        result.IsValid = false;
-        result.ErrorMessage = $"Inconsistent Principal structure within variant: Option {firstOption.MedicalOptionId} has Principal, but Option {option.MedicalOptionId} does not";
-        return result;
-      }
-    }
-  }
-  catch (Exception ex) {
-    result.IsValid = false;
-    result.ErrorMessage = $"Contribution structure validation error: {ex.Message}";
-  }
-
-  return result;
-}
-
-#endregion
-
-
-#region Cross-Variant Validation
+    #region Cross-Variant Validation
 private static BulkValidationResult ValidateCrossVariantConsistency(
     Dictionary<string, List<UpdateMedicalOptionVariantsDto>> variantGroups)
 {
@@ -707,7 +722,8 @@ private static BulkValidationResult ValidateCrossVariantConsistency(
             if (AreContributionAmountsIdentical(currentVariant.Value, otherVariant.Value)) {
                 result.IsValid = false;
                 result.ErrorMessage = 
-                    $"Variant '{currentVariant.Key}' has identical contribution amounts as variant '{otherVariant.Key}' - variants must have distinct contribution structures";
+                    $"Variant '{currentVariant.Key}' has identical contribution amounts as variant" +
+                    $" '{otherVariant.Key}' - variants must have distinct contribution structures";
                 return result;
             }
         }
@@ -728,7 +744,8 @@ private static BulkValidationResult ValidateWithinVariantConsistency(
     }
 
     // Sort options by MedicalOptionId for consistent comparison
-    var sortedOptions = variantOptions.OrderBy(o => o.MedicalOptionId).ToList();
+    var sortedOptions = variantOptions
+      .OrderBy(o => o.MedicalOptionId).ToList();
     
     // Check for consistent contribution structure within the variant
     var firstOption = sortedOptions.First();
@@ -746,7 +763,9 @@ private static BulkValidationResult ValidateWithinVariantConsistency(
         {
             result.IsValid = false;
             result.ErrorMessage = 
-                $"Inconsistent MSA structure in variant '{variantName}': Option {firstOption.MedicalOptionId} has MSA, but Option {currentOption.MedicalOptionId} does not";
+                $"Inconsistent MSA structure in variant '{variantName}': Option " +
+                $"{firstOption.MedicalOptionId} has MSA, but Option " +
+                $"{currentOption.MedicalOptionId} does not";
             return result;
         }
         
@@ -757,7 +776,9 @@ private static BulkValidationResult ValidateWithinVariantConsistency(
         {
             result.IsValid = false;
             result.ErrorMessage = 
-                $"Inconsistent Principal structure in variant '{variantName}': Option {firstOption.MedicalOptionId} has Principal, but Option {currentOption.MedicalOptionId} does not";
+                $"Inconsistent Principal structure in variant '{variantName}': Option " +
+                $"{firstOption.MedicalOptionId} has Principal, but Option " +
+                $"{currentOption.MedicalOptionId} does not";
             return result;
         }
     }
@@ -768,8 +789,10 @@ private static bool AreContributionAmountsIdentical(
   List<UpdateMedicalOptionVariantsDto> variant1, List<UpdateMedicalOptionVariantsDto> variant2)
 {
   // Sort options by MedicalOptionId to ensure proper comparison
-  var sortedVariant1 = variant1.OrderBy(o => o.MedicalOptionId).ToList();
-  var sortedVariant2 = variant2.OrderBy(o => o.MedicalOptionId).ToList();
+  var sortedVariant1 = variant1
+    .OrderBy(o => o.MedicalOptionId).ToList();
+  var sortedVariant2 = variant2
+    .OrderBy(o => o.MedicalOptionId).ToList();
   
   // Check if same number of options
   if (sortedVariant1.Count != sortedVariant2.Count) return false;
@@ -794,7 +817,8 @@ private static bool AreContributionAmountsIdentical(
   return true; // All amounts are identical
 }
 
-private static bool CompareRiskContributions(UpdateMedicalOptionVariantsDto opt1, UpdateMedicalOptionVariantsDto opt2)
+private static bool CompareRiskContributions(UpdateMedicalOptionVariantsDto opt1, 
+  UpdateMedicalOptionVariantsDto opt2)
 {
   // Principal Risk
   if (opt1.MonthlyRiskContributionPrincipal != opt2.MonthlyRiskContributionPrincipal)
@@ -815,7 +839,8 @@ private static bool CompareRiskContributions(UpdateMedicalOptionVariantsDto opt1
   return true;
 }
 
-private static bool CompareMsaContributions(UpdateMedicalOptionVariantsDto opt1, UpdateMedicalOptionVariantsDto opt2)
+private static bool CompareMsaContributions(UpdateMedicalOptionVariantsDto opt1, 
+  UpdateMedicalOptionVariantsDto opt2)
 {
   // Principal MSA
   if (opt1.MonthlyMsaContributionPrincipal != opt2.MonthlyMsaContributionPrincipal)
@@ -832,7 +857,8 @@ private static bool CompareMsaContributions(UpdateMedicalOptionVariantsDto opt1,
   return true;
 }
 
-private static bool CompareTotalContributions(UpdateMedicalOptionVariantsDto opt1, UpdateMedicalOptionVariantsDto opt2)
+private static bool CompareTotalContributions(UpdateMedicalOptionVariantsDto opt1, 
+  UpdateMedicalOptionVariantsDto opt2)
 {
   // Principal Total
   if ((decimal)opt1.TotalMonthlyContributionsPrincipal != opt2.TotalMonthlyContributionsPrincipal)
@@ -855,12 +881,12 @@ private static bool CompareTotalContributions(UpdateMedicalOptionVariantsDto opt
 
 #endregion
 
-
-#region Comprehensive Category Variant Validation
+    #region Comprehensive Category Variant Validation
 
 /// <summary>
 /// MAIN VALIDATION ENTRY POINT
-/// Comprehensive validation for all variants within a category using existing validation logic as core
+/// Comprehensive validation for all variants within a category using existing validation logic as
+/// core
 /// Addresses TODO items from lines 14-26 with enhanced error handling
 /// </summary>
 public static async Task<BulkValidationResult> ValidateAllCategoryVariantsComprehensiveAsync(
@@ -920,16 +946,19 @@ public static async Task<BulkValidationResult> ValidateAllCategoryVariantsCompre
       
       if (!variantValidation.IsValid) {
         result.IsValid = false;
-        result.ErrorMessage = $"Variant '{variantGroup.Key}' validation failed: {variantValidation.ErrorMessage}";
+        result.ErrorMessage = $"Variant '{variantGroup.Key}' validation failed: " +
+                              $"{variantValidation.ErrorMessage}";
         return result;
       }
     }
-
-    // 5. Validate for Cross-variant Consistency (Looking for duplication of contributions within category across variants)
-    if (!ValidateCrossVariantConsistency(variantGroups).IsValid)
-    {
-      return result;
-    }
+    // 4.5. Validate if all variant group combined == dbData.Count
+    
+    // 5. Validate for Cross-variant Consistency (Looking for duplication of
+    // contributions within category across variants)
+    // if (!ValidateCrossVariantConsistency(variantGroups).IsValid)
+    // {
+    //   return result;
+    // }
     
     // 6. SUCCESS
     result.IsValid = true;
@@ -941,9 +970,6 @@ public static async Task<BulkValidationResult> ValidateAllCategoryVariantsCompre
 
   return result;
 }
-
-
-
 /// <summary>
 /// CATEGORY BUSINESS RULES VALIDATION (FIRST CHECK)
 /// Uses existing enum system for restricted category validation
@@ -965,15 +991,18 @@ private static async Task<BulkValidationResult> ValidateCategoryBusinessRulesAsy
     }
 
     // Use existing enum mapper to check restrictions
-    var variantInfo = MedicalOptionEnumMapper.GetCategoryInfoFromVariant(categoryInfo.MedicalOptionCategoryName);
+    var variantInfo = MedicalOptionEnumMapper
+      .GetCategoryInfoFromVariant(categoryInfo.MedicalOptionCategoryName);
 
-    var isRestricted = Enum.IsDefined(typeof(NoUpdateOnMedicalOptionCategory), categoryInfo.MedicalOptionCategoryName);
+    var isRestricted = Enum.IsDefined(typeof(NoUpdateOnMedicalOptionCategory), 
+      categoryInfo.MedicalOptionCategoryName);
     // Store Category Name
     _globalCategoryName = variantInfo.CategoryName;
     if (isRestricted) {
       // Check for salary bracket updates in payload
       var salaryBracketUpdates = bulkUpdateDto
-        .Where(dto => (dto.SalaryBracketMin.HasValue && dto.SalaryBracketMin > 0) || (dto.SalaryBracketMax.HasValue || dto.SalaryBracketMax is not null))
+        .Where(dto => (dto.SalaryBracketMin.HasValue && dto.SalaryBracketMin > 0) || 
+                      (dto.SalaryBracketMax.HasValue || dto.SalaryBracketMax is not null))
         .ToList();
 
       if (salaryBracketUpdates.Count != 0) {
@@ -983,17 +1012,25 @@ private static async Task<BulkValidationResult> ValidateCategoryBusinessRulesAsy
         var optionNames = dbOptions.Select(o => o.MedicalOptionName).ToList();
 
         result.IsValid = false;
-        result.ErrorMessage = $"Salary bracket updates are not allowed for {categoryInfo.MedicalOptionCategoryName} category. Options with attempted salary updates: [{string.Join(", ", optionNames)}]. {categoryInfo.MedicalOptionCategoryName} categories should only have minimum salary of 0 and unlimited maximum.";
+        result.ErrorMessage = $"Salary bracket updates are not allowed for " +
+                              $"{categoryInfo.MedicalOptionCategoryName} category. Options with " +
+                              $"attempted salary updates: [{string.Join(", ", optionNames)}]. " +
+                              $"{categoryInfo.MedicalOptionCategoryName} categories should only " +
+                              $"have minimum salary of 0 and unlimited maximum.";
         return result;
       }
 
       // Use existing validation method for each DTO
       foreach (var dto in bulkUpdateDto) {
-        var dbOption = dbData.FirstOrDefault(o => o.MedicalOptionId == dto.MedicalOptionId);
+        var dbOption = dbData.FirstOrDefault(
+          o => o.MedicalOptionId == dto.MedicalOptionId);
         if (dbOption != null) {
-          if (!ValidateSalaryBracketRestriction(categoryInfo.MedicalOptionCategoryName, dto.SalaryBracketMin, dto.SalaryBracketMax)) {
+          if (!ValidateSalaryBracketRestriction(categoryInfo.MedicalOptionCategoryName, 
+                dto.SalaryBracketMin, dto.SalaryBracketMax)) {
             result.IsValid = false;
-            result.ErrorMessage = $"Salary bracket updates not allowed for {categoryInfo.MedicalOptionCategoryName} category: {dbOption.MedicalOptionName}";
+            result.ErrorMessage = $"Salary bracket updates not allowed for " +
+                                  $"{categoryInfo.MedicalOptionCategoryName} category: " +
+                                  $"{dbOption.MedicalOptionName}";
             return result;
           }
         }
@@ -1138,7 +1175,26 @@ private static async Task<BulkValidationResult> ValidateSingleVariantWithExistin
   return result;
 }
 
-/// <summary>
+// Validate count on variant groups
+    private static async Task<BulkValidationResult> ValidateVarientGroupCountAgainstDbCount(
+      List<UpdateMedicalOptionVariantsDto> variantGroups, List<MedicalOption> dbData)
+    {
+      var result = new BulkValidationResult(){IsValid = true};
+      
+      var variants = variantGroups.ToList();
+
+      if (variants.Count != dbData.Count)
+      {
+        result.IsValid = false;
+        result.ErrorMessage =
+          $"Total option count across the category : '{_globalCategoryName}' does not match with the existing data";
+        return result;
+      }
+      //if true 
+      return result;
+    }
+
+    /// <summary>
 /// VARIANT-SPECIFIC BUSINESS RULES
 /// Corrected for Network Choice (Risk + Principal, NO MSA)
 /// </summary>
@@ -1646,7 +1702,6 @@ private static Dictionary<string, List<UpdateMedicalOptionVariantsDto>> GroupOpt
 }
 
 #endregion
-  
   }
     
   /// <summary>

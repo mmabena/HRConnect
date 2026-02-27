@@ -106,11 +106,12 @@
       return groupedMedicalOptions;
     }
 
-        public async Task<MedicalOption> GetMedicalOptionByIdAsync(int id)
+        public async Task<MedicalOptionDto?> GetMedicalOptionByIdAsync(int id)
         {
             if (id <= 0)
             {
-                throw new ArgumentException("Medical option ID must be greater than 0", nameof(id));
+                throw new ArgumentException("Medical option ID must be greater than 0", 
+                  nameof(id));
             }
 
             var medicalOption = await _context.MedicalOptions
@@ -122,10 +123,10 @@
                 throw new KeyNotFoundException($"MedicalOption with ID {id} was not found");
             }
 
-            return medicalOption;
+            return medicalOption?.ToMedicalOptionDto();
         }
         
-        public async Task<MedicalOption?> GetMedicalOptionCategoryByIdAsync(int id)
+        public async Task<MedicalOptionDto?> GetMedicalOptionCategoryByIdAsync(int id)
         {
           if (id <= 0)
           {
@@ -141,26 +142,24 @@
             throw new KeyNotFoundException($"No medical options found for category ID {id}");
           }
 
-          return medicalOptions;
+          return medicalOptions?.ToMedicalOptionDto();
         }
 
         /// <summary>
         /// Retrieves medical options by category ID.
         /// </summary>
+        /// <param name="ids">List of medical option IDs</param>
         /// <param name="id">The category ID</param>
         /// <returns>List of medical options in the category</returns>
         /// <exception cref="KeyNotFoundException">Thrown when category is not found</exception>
         /// <exception cref="ArgumentException">Thrown when ID is invalid</exception>
-
-
         /// <summary>
         /// Retrieves medical options by their IDs.
         /// </summary>
-        /// <param name="ids">List of medical option IDs</param>
         /// <returns>List of medical options</returns>
         /// <exception cref="ArgumentException">Thrown when IDs list is null or empty</exception>
         /// <exception cref="KeyNotFoundException">Thrown when no options are found</exception>
-        public async Task<List<MedicalOption>> GetMedicalOptionsByIdsAsync(List<int> ids)
+        public async Task<List<MedicalOptionDto>> GetMedicalOptionsByIdsAsync(List<int> ids)
         {
             if (ids == null || ids.Count == 0)
             {
@@ -177,7 +176,7 @@
                 throw new KeyNotFoundException("No medical options found for the provided IDs");
             }
 
-            return medicalOptions;
+            return medicalOptions.Select(mo => mo.ToMedicalOptionDto()).ToList();
         }
 
         /// <summary>
@@ -199,7 +198,8 @@
 
             if (category == null)
             {
-                throw new KeyNotFoundException($"MedicalOptionCategory with ID {id} was not found");
+                throw new KeyNotFoundException($"MedicalOptionCategory with ID " +
+                                               $"{id} was not found");
             }
 
             return category;
@@ -212,11 +212,13 @@
         /// <returns>List of medical options</returns>
         /// <exception cref="ArgumentException">Thrown when option name is null or empty</exception>
         /// <exception cref="KeyNotFoundException">Thrown when no options are found</exception>
-        public async Task<List<MedicalOption>> GetAllMedicalOptionsUnderCategoryVariantAsync(string optionName)
+        public async Task<List<MedicalOptionDto?>> GetAllMedicalOptionsUnderCategoryVariantAsync(
+          string optionName)
         {
             if (string.IsNullOrWhiteSpace(optionName))
             {
-                throw new ArgumentException("Option name cannot be null or empty", nameof(optionName));
+                throw new ArgumentException("Option name cannot be null or empty", 
+                  nameof(optionName));
             }
 
             var medicalOptions = await _context.MedicalOptions
@@ -226,10 +228,11 @@
 
             if (medicalOptions.Count == 0)
             {
-                throw new KeyNotFoundException($"No medical options found containing '{optionName}'");
+                throw new KeyNotFoundException($"No medical options found containing " +
+                                               $"'{optionName}'");
             }
 
-            return medicalOptions;
+            return medicalOptions?.Select(mo => mo.ToMedicalOptionDto()).ToList();
         }
 
         /// <summary>
@@ -242,7 +245,8 @@
         {
             if (categoryId <= 0)
             {
-                throw new ArgumentException("Category ID must be greater than 0", nameof(categoryId));
+                throw new ArgumentException("Category ID must be greater than 0", 
+                  nameof(categoryId));
             }
 
             return await _context.MedicalOptionCategories
@@ -273,23 +277,25 @@
         /// <returns>List of medical options</returns>
         /// <exception cref="KeyNotFoundException">Thrown when category doesn't exist</exception>
         /// <exception cref="ArgumentException">Thrown when category ID is invalid</exception>
-        public async Task<List<MedicalOption>> GetAllOptionsUnderCategoryAsync(int categoryId)
+        public async Task<List<MedicalOptionDto>> GetAllOptionsUnderCategoryAsync(int categoryId)
         {
             if (categoryId <= 0)
             {
-                throw new ArgumentException("Category ID must be greater than 0", nameof(categoryId));
+                throw new ArgumentException("Category ID must be greater than 0", 
+                  nameof(categoryId));
             }
 
             if (!await MedicalOptionCategoryExistsAsync(categoryId))
             {
-                throw new KeyNotFoundException($"MedicalOptionCategory with ID {categoryId} was not found");
+                throw new KeyNotFoundException($"MedicalOptionCategory with ID " +
+                                               $"{categoryId} was not found");
             }
 
             var allOptions = await _context.MedicalOptions
                 .Where(co => co.MedicalOptionCategoryId == categoryId)
                 .ToListAsync();
 
-            return allOptions;
+            return allOptions.Select(mo => mo.ToMedicalOptionDto()).ToList();
         }
 
         /// <summary>
@@ -299,11 +305,13 @@
         /// <param name="optionId">The option ID</param>
         /// <returns>True if option exists in category</returns>
         /// <exception cref="ArgumentException">Thrown when IDs are invalid</exception>
-        public async Task<bool> MedicalOptionExistsWithinCategoryAsync(int categoryId, int optionId)
+        public async Task<bool> MedicalOptionExistsWithinCategoryAsync(
+          int categoryId, int optionId)
         {
             if (categoryId <= 0)
             {
-                throw new ArgumentException("Category ID must be greater than 0", nameof(categoryId));
+                throw new ArgumentException("Category ID must be greater than 0",
+                  nameof(categoryId));
             }
 
             if (optionId <= 0)
@@ -312,7 +320,8 @@
             }
 
             return await _context.MedicalOptions
-                .AnyAsync(o => o.MedicalOptionCategoryId == categoryId && o.MedicalOptionId == optionId);
+                .AnyAsync(o => o.MedicalOptionCategoryId == categoryId && 
+                               o.MedicalOptionId == optionId);
         }
 
         /// <summary>
@@ -323,33 +332,39 @@
         /// <returns>List of updated medical options</returns>
         /// <exception cref="ArgumentException">Thrown when parameters are invalid</exception>
         /// <exception cref="KeyNotFoundException">Thrown when no matching options are found</exception>
-        public async Task<IReadOnlyList<MedicalOptionDto>> BulkUpdateByCategoryIdAsync(int categoryId,
-            IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto)
+        public async Task<IReadOnlyList<MedicalOptionDto>> BulkUpdateByCategoryIdAsync(
+          int categoryId, IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto)
         {
             if (categoryId <= 0)
             {
-                throw new ArgumentException("Category ID must be greater than 0", nameof(categoryId));
+                throw new ArgumentException("Category ID must be greater than 0", 
+                  nameof(categoryId));
             }
 
             if (bulkUpdateDto == null || bulkUpdateDto.Count == 0)
             {
-                throw new ArgumentException("Bulk update DTO cannot be null or empty", nameof(bulkUpdateDto));
+                throw new ArgumentException("Bulk update DTO cannot be null or empty", 
+                  nameof(bulkUpdateDto));
             }
 
             // Get existing options in category that match with the Payload's IDs
-            var optionIdsToUpdate = bulkUpdateDto.Select(dto => dto.MedicalOptionId).ToList();
+            var optionIdsToUpdate = bulkUpdateDto.Select(dto => dto.MedicalOptionId)
+              .ToList();
 
             var existingOptions = await _context.MedicalOptions
-                .Where(o => o.MedicalOptionCategoryId == categoryId && optionIdsToUpdate.Contains(o.MedicalOptionId))
+                .Where(o => o.MedicalOptionCategoryId == categoryId && 
+                            optionIdsToUpdate.Contains(o.MedicalOptionId))
                 .ToListAsync();
 
             if (existingOptions.Count == 0)
             {
-                throw new KeyNotFoundException($"No medical options found for category ID {categoryId} with the provided option IDs");
+                throw new KeyNotFoundException($"No medical options found for category ID " +
+                                               $"{categoryId} with the provided option IDs");
             }
 
             // Create a dictionary for faster lookups
-            var updateDict = bulkUpdateDto.ToDictionary(dto => dto.MedicalOptionId, dto => dto);
+            var updateDict = bulkUpdateDto.ToDictionary(
+              dto => dto.MedicalOptionId, dto => dto);
 
             // Update entities using the dictionary for O(1) lookups
             foreach (var entity in existingOptions)
@@ -363,20 +378,7 @@
                             $"Invalid salary bracket range for option ID {entity.MedicalOptionId}: " +
                             "Minimum must be less than maximum");
                     }
-
-                    entity.SalaryBracketMin = updateDto.SalaryBracketMin;
-                    entity.SalaryBracketMax = updateDto.SalaryBracketMax;
-                    entity.MonthlyMsaContributionAdult = updateDto.MonthlyMsaContributionAdult;
-                    entity.MonthlyMsaContributionChild = updateDto.MonthlyMsaContributionChild;
-                    entity.MonthlyMsaContributionPrincipal = updateDto.MonthlyMsaContributionPrincipal;
-                    entity.MonthlyRiskContributionAdult = updateDto.MonthlyRiskContributionAdult;
-                    entity.MonthlyRiskContributionChild = updateDto.MonthlyRiskContributionChild;
-                    entity.MonthlyRiskContributionChild2 = updateDto.MonthlyRiskContributionChild2;
-                    entity.MonthlyRiskContributionPrincipal = updateDto.MonthlyRiskContributionPrincipal;
-                    entity.TotalMonthlyContributionsAdult = updateDto.TotalMonthlyContributionsAdult;
-                    entity.TotalMonthlyContributionsChild = updateDto.TotalMonthlyContributionsChild;
-                    entity.TotalMonthlyContributionsChild2 = updateDto.TotalMonthlyContributionsChild2;
-                    entity.TotalMonthlyContributionsPrincipal = updateDto.TotalMonthlyContributionsPrincipal;
+                    entity.UpdateFromDto(updateDto);
                 }
             }
 
@@ -403,25 +405,8 @@
             });
 
             // Map to DTOs to avoid circular reference
-            var responseDtos = existingOptions.Select(option => new MedicalOptionDto
-            {
-                MedicalOptionId = option.MedicalOptionId,
-                MedicalOptionName = option.MedicalOptionName,
-                MedicalOptionCategoryId = option.MedicalOptionCategoryId,
-                SalaryBracketMin = option.SalaryBracketMin,
-                SalaryBracketMax = option.SalaryBracketMax,
-                MonthlyRiskContributionPrincipal = option.MonthlyRiskContributionPrincipal,
-                MonthlyRiskContributionAdult = option.MonthlyRiskContributionAdult,
-                MonthlyRiskContributionChild = option.MonthlyRiskContributionChild,
-                MonthlyRiskContributionChild2 = option.MonthlyRiskContributionChild2,
-                MonthlyMsaContributionPrincipal = option.MonthlyMsaContributionPrincipal,
-                MonthlyMsaContributionAdult = option.MonthlyMsaContributionAdult,
-                MonthlyMsaContributionChild = option.MonthlyMsaContributionChild,
-                TotalMonthlyContributionsPrincipal = option.TotalMonthlyContributionsPrincipal,
-                TotalMonthlyContributionsAdult = option.TotalMonthlyContributionsAdult,
-                TotalMonthlyContributionsChild = option.TotalMonthlyContributionsChild,
-                TotalMonthlyContributionsChild2 = option.TotalMonthlyContributionsChild2
-            }).ToList();
+            var responseDtos = existingOptions
+              .Select(option => option.ToMedicalOptionDto()).ToList();
 
             return responseDtos.AsReadOnly();
         }

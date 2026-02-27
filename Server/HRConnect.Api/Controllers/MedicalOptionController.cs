@@ -2,11 +2,8 @@
 {
 
   using System.Linq;
-  using HRConnect.Api.Mappers;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.DTOs.MedicalOption;
-  using Microsoft.AspNetCore.Authorization;
-  using Microsoft.AspNetCore.Http.HttpResults;
   using Microsoft.AspNetCore.Mvc;
   
   [Route("api/medical-options")]
@@ -23,7 +20,8 @@
     //[Authorize(Roles = "SuperUser")]
     public async Task<IActionResult> GetGroupedMedicalOptions()
     {
-      //with middleware global exception handling, we can remove the try catch block and just have the execution logic here.
+      //With middleware global exception handling, we can remove the try catch block and
+      //just have the execution logic here.
       //The middleware will catch any unhandled exceptions and return a standardized error response.
 
       var groupedOptions = await _medicalOptionService

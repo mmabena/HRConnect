@@ -6,38 +6,6 @@
 
   public static class MedicalOptionVariantFactory
   {
-    /// <summary>
-    /// Factory method that extracts variant information from a medical option
-    /// </summary>
-    /// <param name="option">The medical option to analyze</param>
-    /// <returns>Tuple containing (CategoryName, VariantName, FilterName)</returns>
-    public static (string CategoryName, string VariantName, string FilterName) 
-      GetVariantInfo(MedicalOption option)
-    {
-      var (categoryName, enumType) = MedicalOptionEnumMapper
-        .GetCategoryInfoFromVariant(option.MedicalOptionName);
-
-      if (categoryName == null || enumType == null)
-      {
-        return (string.Empty, string.Empty, string.Empty);
-      }
-      
-      // Get the enum variant using the factory method
-      var variant = GetVariantByName(enumType.Name, categoryName);
-      var variantName = variant?.ToString() ?? string.Empty;
-      
-      string altFilterName = null;
-      if (categoryName.Contains("Choice"))
-      {
-        altFilterName = categoryName;
-        return (categoryName, variantName, altFilterName);
-      }
-      
-      // Construct the filter name
-      var filterName = option.MedicalOptionCategory?.MedicalOptionCategoryName + " " + variantName;
-
-      return (categoryName, variantName, filterName);
-    }
     // TODO : Detailed Documentation
     /// <summary>
     /// Factory method to get enum variant by type name
@@ -76,7 +44,8 @@
       try
       {
         var trimmedOptionName = MedicalOptionUtils.OptionNameFormatter(option.MedicalOptionName);
-        var (categoryName, enumType) = MedicalOptionEnumMapper.GetCategoryInfoFromVariant(trimmedOptionName);
+        var (categoryName, enumType) = MedicalOptionEnumMapper
+          .GetCategoryInfoFromVariant(trimmedOptionName);
 
         if (categoryName == null || enumType == null)
         {
@@ -94,7 +63,7 @@
         
         if (variantName == "" || variantName == null)
         {
-          variantName = trimmedOptionName.Split(' ')[1];
+          variantName = trimmedOptionName.Split(' ')[1].TrimEnd();
         }
         
         var filterName = option.MedicalOptionCategory?.MedicalOptionCategoryName + " " + 

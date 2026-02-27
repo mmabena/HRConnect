@@ -1,4 +1,4 @@
-﻿namespace HRConnect.Api.Models.MedicalOptions.Records
+﻿namespace HRConnect.Api.Utils.MedicalOption.Records
 {
   public record SalaryBracketValidatorRecord(
     int optionId,

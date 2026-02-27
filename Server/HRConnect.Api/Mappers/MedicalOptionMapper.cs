@@ -136,5 +136,27 @@
         TotalMonthlyContributionsChild2 = bulkUpdate.TotalMonthlyContributionsChild2
       };
     }
+    
+    /// <summary>
+    /// Maps UpdateMedicalOptionVariantsDto to MedicalOption entity.
+    /// Updates only the properties that can be modified.
+    /// Note :  refactored the entity update logic into a mapper method
+    /// </summary>
+    public static void UpdateFromDto(this MedicalOption entity, UpdateMedicalOptionVariantsDto dto)
+    {
+      entity.SalaryBracketMin = dto.SalaryBracketMin;
+      entity.SalaryBracketMax = dto.SalaryBracketMax;
+      entity.MonthlyMsaContributionAdult = dto.MonthlyMsaContributionAdult;
+      entity.MonthlyMsaContributionChild = dto.MonthlyMsaContributionChild;
+      entity.MonthlyMsaContributionPrincipal = dto.MonthlyMsaContributionPrincipal;
+      entity.MonthlyRiskContributionAdult = dto.MonthlyRiskContributionAdult;
+      entity.MonthlyRiskContributionChild = dto.MonthlyRiskContributionChild;
+      entity.MonthlyRiskContributionChild2 = dto.MonthlyRiskContributionChild2;
+      entity.MonthlyRiskContributionPrincipal = dto.MonthlyRiskContributionPrincipal;
+      entity.TotalMonthlyContributionsAdult = dto.TotalMonthlyContributionsAdult;
+      entity.TotalMonthlyContributionsChild = dto.TotalMonthlyContributionsChild;
+      entity.TotalMonthlyContributionsChild2 = dto.TotalMonthlyContributionsChild2;
+      entity.TotalMonthlyContributionsPrincipal = dto.TotalMonthlyContributionsPrincipal;
+    }
   }
 }

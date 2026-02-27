@@ -13,7 +13,8 @@ namespace HRConnect.Api.Middleware
         private readonly ILogger<GlobalExceptionHandler> _logger;
         private readonly IHostEnvironment _env;
 
-        // Cache both development and production JsonSerializerOptions
+        // Cache both development and production JsonSerializerOptions - creating a new one on each
+        // call is not performance efficient
         private static readonly JsonSerializerOptions _productionJsonOptions = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -39,8 +40,8 @@ namespace HRConnect.Api.Middleware
             LoggerMessage.Define<string>(LogLevel.Warning, new EventId(3, "ArgumentError"),
                 "Argument error occurred. Correlation ID: {CorrelationId}");
 
-        private static readonly Action<ILogger, string, Exception?> _invalidOperationWarningLogger =
-            LoggerMessage.Define<string>(LogLevel.Warning, new EventId(4, "InvalidOperation"),
+        private static readonly Action<ILogger, string, Exception?> _invalidOperationWarningLogger 
+          = LoggerMessage.Define<string>(LogLevel.Warning, new EventId(4, "InvalidOperation"),
                 "Invalid operation attempted. Correlation ID: {CorrelationId}");
 
         private static readonly Action<ILogger, string, Exception?> _unauthorizedWarningLogger =
@@ -218,7 +219,8 @@ namespace HRConnect.Api.Middleware
     // Extension method for easy registration
     public static class GlobalExceptionHandlerExtensions
     {
-        public static IApplicationBuilder UseGlobalExceptionHandler(this IApplicationBuilder builder)
+        public static IApplicationBuilder UseGlobalExceptionHandler(
+          this IApplicationBuilder builder)
         {
             return builder.UseMiddleware<GlobalExceptionHandler>();
         }
@@ -229,7 +231,8 @@ namespace HRConnect.Api.Middleware
     {
         public Dictionary<string, string[]> ValidationErrors { get; }
 
-        public ValidationException(string message, Dictionary<string, string[]>? validationErrors = null)
+        public ValidationException(string message, 
+          Dictionary<string, string[]>? validationErrors = null)
             : base(message)
         {
             ValidationErrors = validationErrors ?? new Dictionary<string, string[]>();

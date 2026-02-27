@@ -26,9 +26,4 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Models\MedicalOptions\Records\" />
-    <Folder Include="Utils\MedicalOption\" />
-  </ItemGroup>
-
 </Project>

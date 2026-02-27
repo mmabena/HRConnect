@@ -1,4 +1,3 @@
-using System;
 using System.Text;
 using HRConnect.Api.Data;
 using HRConnect.Api.Interfaces;
@@ -49,23 +48,6 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("SecondaryConnection")));
-
-// Home Usage Only
-// Configure Entity Framework Core with MySQL
-/*
-builder.Services.AddDbContext<ApplicationDBContext>(options =>
-    options.UseMySql(
-        builder.Configuration.GetConnectionString("TertiaryConnection"),
-        ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("TertiaryConnection"))
-    )
-);
-*/
-// Configure Entity Framework Core with Postgres
-/*
-builder.Services.AddDbContext<ApplicationDBContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("Postgres")));
-           //.UseSnakeCaseNamingConvention()); // Optional: improves PostgreSQL compatibility
-*/
 
 builder.Services.AddAuthentication(options =>
 {
@@ -143,5 +125,3 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
-
-

@@ -3,24 +3,17 @@
   using System;
   using System.Collections.Generic;
   using System.Linq;
-  using System.Runtime.Serialization;
   using HRConnect.Api.DTOs.MedicalOption;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Mappers;
   using HRConnect.Api.Models;
   using HRConnect.Api.Utils;
   using HRConnect.Api.Utils.Enums;
-  using HRConnect.Api.Utils.Factories;
   using Middleware;
-  using Models.MedicalOptions.Records;
-  using Utils.Enums.Mappers;
-  using Utils.MedicalOptions;
-
-
+  using Utils.MedicalOption;
+  
   public class MedicalOptionService:IMedicalOptionService
   {
-    // TODO: Implement methods
-    // TODO: Document methods
     private readonly IMedicalOptionRepository _medicalOptionRepository;
     /// <summary>
     /// Cached HashSet containing the string names of all medical option categories that are
@@ -166,9 +159,11 @@
     /// </exception>
     public async Task<List<MedicalOptionCategoryDto>> GetGroupedMedicalOptionsAsync()
     {
-      var groupedOptions = await _medicalOptionRepository.GetGroupedMedicalOptionsAsync();
+      var groupedOptions = await _medicalOptionRepository
+        .GetGroupedMedicalOptionsAsync();
 
-      return groupedOptions.Select(group => group.ToMedicalOptionCategoryDto()).ToList();
+      return groupedOptions
+        .Select(group => group.ToMedicalOptionCategoryDto()).ToList();
     }
 
     /// <summary>
@@ -177,7 +172,7 @@
     /// <param name="id">The medical option ID to retrieve.</param>
     /// <returns>The Medical option if found; otherwise, null.</returns>
     /// <exception cref="ArgumentException">Thrown when the ID is invalid.</exception>
-    public async Task<MedicalOption?> GetMedicalOptionByIdAsync(int id)
+    public async Task<MedicalOptionDto?> GetMedicalOptionByIdAsync(int id)
     {
       return await _medicalOptionRepository.GetMedicalOptionByIdAsync(id);
     }
@@ -188,11 +183,13 @@
     /// <param name="categoryId">The category ID</param>
     /// <returns>List of medical options</returns>
     /// <exception cref="ArgumentException">Thrown when category ID is invalid</exception>
-    public async Task<MedicalOption?> GetMedicalOptionCategoryByIdAsync(int categoryId)
+    public async Task<MedicalOptionDto?> GetMedicalOptionCategoryByIdAsync(int categoryId)
     {
-      var options = await _medicalOptionRepository.GetAllOptionsUnderCategoryAsync(categoryId);
+      var options = await _medicalOptionRepository
+        .GetAllOptionsUnderCategoryAsync(categoryId);
 
-      return options.FirstOrDefault() ?? throw new KeyNotFoundException($"no medical option found for category {categoryId}");
+      return options.FirstOrDefault() ?? throw 
+        new KeyNotFoundException($"no medical option found for category {categoryId}");
     }
 
     /// <summary>
@@ -223,7 +220,7 @@
     /// <param name="categoryId">The category ID</param>
     /// <returns>List of medical options</returns>
     /// <exception cref="ArgumentException">Thrown when category ID is invalid</exception>
-    public async Task<List<MedicalOption>> GetAllOptionsUnderCategoryAsync(int categoryId)
+    public async Task<List<MedicalOptionDto?>> GetAllOptionsUnderCategoryAsync(int categoryId)
     {
       return await _medicalOptionRepository.GetAllOptionsUnderCategoryAsync(categoryId);
     }
@@ -237,7 +234,8 @@
     /// <exception cref="ArgumentException">Thrown when IDs are invalid</exception>
     public async Task<bool> MedicalOptionExistsWithinCategoryAsync(int categoryId, int optionId)
     {
-      return await _medicalOptionRepository.MedicalOptionExistsWithinCategoryAsync(categoryId, optionId);
+      return await _medicalOptionRepository
+        .MedicalOptionExistsWithinCategoryAsync(categoryId, optionId);
     }
 
     /// <summary>
@@ -247,7 +245,8 @@
     /// <param name="bulkUpdateDto">The bulk update data</param>
     /// <returns>List of updated medical options</returns>
     /// <exception cref="ValidationException">Thrown when validation fails</exception>
-    /// <exception cref="InvalidOperationException">Thrown when business rules are violated</exception>
+    /// <exception cref="InvalidOperationException">Thrown when business rules are violated
+    /// </exception>
     public async Task<IReadOnlyList<MedicalOptionDto>> BulkUpdateMedicalOptionsByCategoryAsync(
       int categoryId,
       IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto)
@@ -260,15 +259,37 @@
 
       if (bulkUpdateDto == null || bulkUpdateDto.Count == 0)
       {
-        throw new ArgumentException("Bulk update data cannot be null or empty", nameof(bulkUpdateDto));
+        throw new ArgumentException("Bulk update data cannot be null or empty", 
+          nameof(bulkUpdateDto));
       }
 
       // Get existing data for validation
-      var dbData = await _medicalOptionRepository.GetAllOptionsUnderCategoryAsync(categoryId);
+      var dbData = await _medicalOptionRepository
+        .GetAllOptionsUnderCategoryAsync(categoryId);
 
       // Perform comprehensive validation using the existing validator
-      var validationResult = await MedicalOptionValidator.ValidateAllCategoryVariantsComprehensiveAsync(
-        categoryId, bulkUpdateDto, _medicalOptionRepository, dbData);
+      var validationResult = await MedicalOptionValidator
+        .ValidateAllCategoryVariantsComprehensiveAsync(
+        categoryId, bulkUpdateDto, _medicalOptionRepository, dbData.Select(dto => new MedicalOption 
+        {
+          // Map DTO back to entity for validation
+          MedicalOptionId = dto.MedicalOptionId,
+          MedicalOptionName = dto.MedicalOptionName,
+          MedicalOptionCategoryId = dto.MedicalOptionCategoryId,
+          SalaryBracketMin = dto.SalaryBracketMin,
+          SalaryBracketMax = dto.SalaryBracketMax,
+          MonthlyRiskContributionPrincipal = dto.MonthlyRiskContributionPrincipal,
+          MonthlyRiskContributionAdult = dto.MonthlyRiskContributionAdult,
+          MonthlyRiskContributionChild = dto.MonthlyRiskContributionChild,
+          MonthlyRiskContributionChild2 = dto.MonthlyRiskContributionChild2,
+          MonthlyMsaContributionPrincipal = dto.MonthlyMsaContributionPrincipal,
+          MonthlyMsaContributionAdult = dto.MonthlyMsaContributionAdult,
+          MonthlyMsaContributionChild = dto.MonthlyMsaContributionChild,
+          TotalMonthlyContributionsPrincipal = dto.TotalMonthlyContributionsPrincipal,
+          TotalMonthlyContributionsAdult = dto.TotalMonthlyContributionsAdult,
+          TotalMonthlyContributionsChild = dto.TotalMonthlyContributionsChild,
+          TotalMonthlyContributionsChild2 = dto.TotalMonthlyContributionsChild2
+        }).ToList());
 
       if (!validationResult.IsValid)
       {

@@ -2,7 +2,8 @@
 {
   
   using DTOs.MedicalOption;
-  using Models.MedicalOptions.Records;
+  using MedicalOption.Records;
+
 
   public static class SalaryBracketValidatorRecordMapper
   {
