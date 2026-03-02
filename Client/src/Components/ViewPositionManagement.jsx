@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import "../MenuBar.css";
+import "./MenuBar/MenuBar.css";
 
 const ViewPositionManagement = () => {
   const { id } = useParams();

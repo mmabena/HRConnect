@@ -22,7 +22,7 @@ namespace HRConnect.Api.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("HRConnect.Api.Models.AuditPayrollDeductions", b =>
+            modelBuilder.Entity("HRConnect.Api.Models.AuditLogs", b =>
                 {
                     b.Property<int>("AuditId")
                         .ValueGeneratedOnAdd()
@@ -75,7 +75,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("AuditId");
 
-                    b.ToTable("AuditPayrollDeductions");
+                    b.ToTable("AuditLogs");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.Employee", b =>
@@ -293,50 +293,6 @@ namespace HRConnect.Api.Migrations
                     b.ToTable("PasswordResetPins");
                 });
 
-            modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("DeductedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("EmployeeId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("EmployerSdlContribution")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("IdNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("MonthlySalary")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("PassportNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("UifEmployeeAmount")
-                        .HasPrecision(7, 2)
-                        .HasColumnType("decimal(7,2)");
-
-                    b.Property<decimal>("UifEmployerAmount")
-                        .HasPrecision(7, 2)
-                        .HasColumnType("decimal(7,2)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("PayrollDeductions");
-                });
-
             modelBuilder.Entity("HRConnect.Api.Models.Position", b =>
                 {
                     b.Property<int>("PositionId")
@@ -374,6 +330,97 @@ namespace HRConnect.Api.Migrations
                         .IsUnique();
 
                     b.ToTable("Positions");
+                });
+
+            modelBuilder.Entity("HRConnect.Api.Models.StatutoryContribution", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateOnly>("CurrentMonth")
+                        .HasColumnType("date");
+
+                    b.Property<DateTime>("DeductedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("EmployeeId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("EmployerSdlContribution")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("IdNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("MonthlySalary")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("PassportNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("UifEmployeeAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("UifEmployerAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("StatutoryContributions");
+                });
+
+            modelBuilder.Entity("HRConnect.Api.Models.StatutoryContributionType", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("CapAmount")
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("EffectiveFrom")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("EffectiveTo")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("EmployeeRate")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)")
+                        .HasDefaultValue(0.01m);
+
+                    b.Property<decimal>("EmployerRate")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)")
+                        .HasDefaultValue(0.01m);
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("StatutoryContributionTypes");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.TaxDeduction", b =>

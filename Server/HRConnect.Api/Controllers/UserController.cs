@@ -1,8 +1,9 @@
+using HRConnect.Api.DTOs.User;
+using HRConnect.Api.Mappers;
+using Microsoft.AspNetCore.Mvc;
+
 namespace HRConnect.Api.Controllers
 {
-  using HRConnect.Api.DTOs.User;
-  using HRConnect.Api.Mappers;
-  using Microsoft.AspNetCore.Mvc;
   [Route("api/user")]
   [ApiController]
   public class UserController : ControllerBase
@@ -12,6 +13,22 @@ namespace HRConnect.Api.Controllers
     public UserController(HRConnect.Api.Interfaces.IUserService userService)
     {
       _userService = userService;
+    }
+
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDto dto)
+    {
+      try
+      {
+        var result = await _userService.ChangePasswordAsync(dto);
+        if (result)
+          return Ok("Password changed successfully.");
+        return BadRequest("Password change failed.");
+      }
+      catch (ArgumentException ex)
+      {
+        return BadRequest(ex.Message);
+      }
     }
 
     [HttpGet]
