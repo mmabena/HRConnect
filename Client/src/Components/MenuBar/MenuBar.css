@@ -971,7 +971,7 @@
 .apm-save-button {
   width: 100%; /* Match .apm-input */
   height: 37px;
-  background-color: #006088;
+  background-color: var(--primary-color);
   border: none;
   border-radius: 10px;
   color: white;

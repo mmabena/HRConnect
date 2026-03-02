@@ -169,118 +169,102 @@ const EditPositionManagement = () => {
   if (loading) return <h3>Loading...</h3>;
   if (!hasAccess) return <h2>Access Denied. SuperUser only.</h2>;
 
-  return (
-    <div className="full-screen-bg">
-      <div className="center-frame">
-        <div className="left-frame">
-          <div className="left-frame-centered">
-            <div className="headings-container">
-              <div className="apm-logo">
-                <span className="apm-logo-bold">singular</span>
-                <span className="apm-logo-light">express</span>
-              </div>
-              <h2 className="apm-title">Edit Position</h2>
-              
-            </div>
+return (
+  <div className="modal-overlay">
+    <div className="modal-content">
 
-            <form onSubmit={handleSubmit} className="apm-form">
-              <div className="apm-input-group">
-                <input
-                  type="text"
-                  name="positionTitle"
-                  placeholder="Position title"
-                  className="apm-input"
-                  value={formData.positionTitle}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-
-              <div className="apm-input-group">
-                <input
-                  type="date"
-                  name="effectiveDate"
-                  className="apm-input"
-                  value={formData.effectiveDate}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-
-              <div className="apm-input-group apm-dropdown-wrapper">
-                <select
-                  name="jobGradeId"
-                  className="apm-input select-dropdown"
-                  value={formData.jobGradeId}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Position Grade</option>
-                  {jobGrades.map((grade) => (
-                    <option key={grade.jobGradeId} value={grade.jobGradeId}>
-                      {grade.name}
-                    </option>
-                  ))}
-                </select>
-                <img
-                  src="/images/arrow_drop_down_circle.png"
-                  alt="Dropdown Icon"
-                  className="apm-dropdown-icon"
-                />
-              </div>
-
-              <div className="apm-input-group apm-dropdown-wrapper">
-                <select
-                  name="occupationalLevelId"
-                  className="apm-input select-dropdown"
-                  value={formData.occupationalLevelId}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Occupational Level</option>
-                  {occupationalLevels.map((level) => (
-                    <option
-                      key={level.occupationalLevelId}
-                      value={level.occupationalLevelId}
-                    >
-                      {level.description}
-                    </option>
-                  ))}
-                </select>
-                <img
-                  src="/images/arrow_drop_down_circle.png"
-                  alt="Dropdown Icon"
-                  className="apm-dropdown-icon"
-                />
-              </div>
-
-              <button type="submit" className="apm-save-button">
-                Save
-              </button>
-
-              <div className="apm-footer">
-                <p>Privacy Policy | Terms & Conditions</p>
-                <p>Copyright © 2025 Singular Systems. All rights reserved.</p>
-              </div>
-            </form>
-          </div>
+      <div className="headings-container">
+        <div className="apm-logo">
+          <span className="apm-logo-bold">singular</span>
+          <span className="apm-logo-light">express</span>
         </div>
-
-        <div className="right-frame">
-          <div className="apm-ellipse-wrapper">
-            <div className="apm-ellipse-background"></div>
-          </div>
-          <div className="image-wrapper">
-            <img
-              src="/images/standing_man.svg"
-              alt="Standing Man"
-              className="center-image"
-            />
-          </div>
-        </div>
+        <h2 className="apm-title">Edit Position</h2>
       </div>
+
+      <form onSubmit={handleSubmit} className="apm-form">
+        <div className="apm-input-group">
+          <input
+            type="text"
+            name="positionTitle"
+            placeholder="Position title"
+            className="apm-input"
+            value={formData.positionTitle}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className="apm-input-group">
+          <input
+            type="date"
+            name="effectiveDate"
+            className="apm-input"
+            value={formData.effectiveDate}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className="apm-input-group apm-dropdown-wrapper">
+          <select
+            name="jobGradeId"
+            className="apm-input select-dropdown"
+            value={formData.jobGradeId}
+            onChange={handleChange}
+            required
+          >
+            <option value="">Position Grade</option>
+            {jobGrades.map((grade) => (
+              <option key={grade.jobGradeId} value={grade.jobGradeId}>
+                {grade.name}
+              </option>
+            ))}
+          </select>
+          <img
+            src="/images/arrow_drop_down_circle.png"
+            alt="Dropdown Icon"
+            className="apm-dropdown-icon"
+          />
+        </div>
+
+        <div className="apm-input-group apm-dropdown-wrapper">
+          <select
+            name="occupationalLevelId"
+            className="apm-input select-dropdown"
+            value={formData.occupationalLevelId}
+            onChange={handleChange}
+            required
+          >
+            <option value="">Occupational Level</option>
+            {occupationalLevels.map((level) => (
+              <option
+                key={level.occupationalLevelId}
+                value={level.occupationalLevelId}
+              >
+                {level.description}
+              </option>
+            ))}
+          </select>
+          <img
+            src="/images/arrow_drop_down_circle.png"
+            alt="Dropdown Icon"
+            className="apm-dropdown-icon"
+          />
+        </div>
+
+        <button type="submit" className="apm-save-button">
+          Save
+        </button>
+
+        <div className="apm-footer">
+          <p>Privacy Policy | Terms & Conditions</p>
+          <p>Copyright © 2025 Singular Systems. All rights reserved.</p>
+        </div>
+      </form>
+
     </div>
-  );
+  </div>
+);
 };
 
 export default EditPositionManagement;

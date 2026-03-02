@@ -2698,7 +2698,6 @@ td .edit-button:hover {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 45, 64, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
