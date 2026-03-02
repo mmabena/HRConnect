@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 
-import CompanyManagementHeader from "../../Components/CompanyManagement/companyManagementHeader";
+import CompanyManagementHeader from "../../Components/companyManagement/companyManagementHeader";
 import "./ProjectionCalculator.css";
 import Box from "@mui/material/Box";
 import Slider from "@mui/material/Slider";
@@ -30,8 +30,8 @@ const ProjectionCalculator = () => {
     ];
 
     useEffect(() => {
-        const token = JSON.parse(localStorage.getItem('currentUser')).token;
-        const email = JSON.parse(localStorage.getItem('currentUser')).user.email;
+        const token = localStorage.getItem('token');
+        const email = JSON.parse(localStorage.getItem('currentUser')).email;
 
         axios.get(`http://localhost:5147/api/employee/email/${email}`, {
             headers: { "Authorization": `Bearer ${token}` }
@@ -90,6 +90,7 @@ const ProjectionCalculator = () => {
                     })
                 } else {
                     setVoluntaryContributionIsCapped(false);
+                    voluntaryContributionInputRef.current.style.borderColor = "#355867";
                     setVoluntaryContributionError({
                         Error: ""
                     })

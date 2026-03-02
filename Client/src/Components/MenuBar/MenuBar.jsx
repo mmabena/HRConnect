@@ -78,8 +78,9 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
 
   useEffect(() => {
     if(localStorage.getItem('currentUser') !== null && localStorage.getItem('currentUser') !== undefined) {
-      const token = JSON.parse(localStorage.getItem('currentUser')).token;
-      const email = JSON.parse(localStorage.getItem('currentUser')).user.email;
+      const token = localStorage.getItem('token');
+      const email = JSON.parse(localStorage.getItem('currentUser')).email;
+      console.log("Current user", email);
       try {
           axios.get("http://localhost:5147/api/employee/email/" + email, {
               headers: {
@@ -93,6 +94,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                   const employeeAge = response.data.dateOfBirth;
                   if (employementStatus === 0 && (calculateAge(employeeAge) < 65)) {
                     setCanProjectPension(true);
+                    console.log("Employee can project pension:",canProjectPension)
                   }
               } else {
                   console.error("Unexpeted status:", response.status);

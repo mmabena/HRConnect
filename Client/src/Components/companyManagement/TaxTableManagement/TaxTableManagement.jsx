@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import api from "../../../api/api.js";
 import "../../../styles/global.css";
-import TaxTableUpload from "./TaxTableUpload";
+import TaxTableUpload from "./TaxTableUpload.jsx";
 import NavBar from "../../NavBar.jsx";
 
 function TaxTableManagement() {
