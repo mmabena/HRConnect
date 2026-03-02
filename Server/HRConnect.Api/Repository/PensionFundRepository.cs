@@ -9,9 +9,6 @@
 
   public class PensionFundRepository(ApplicationDBContext context) : IPensionRepository
   {
-    // ============================
-    // Pension Funds
-    // ============================
 
     public async Task<IEnumerable<PensionFund>> GetPensionFundsAsync()
     {
@@ -36,6 +33,7 @@
       _ = await context.SaveChangesAsync();
     }
 
+<<<<<<< HEAD
     // Add or update PensionFund for an employee
     public async Task AddOrUpdatePensionFundAsync(PensionFund fund)
     {
@@ -63,6 +61,8 @@
     // Pension Options
     // ============================
 
+=======
+>>>>>>> 82a5d8a54eb2645c4a2a43003643340a03574021
     public async Task<IEnumerable<PensionOption>> GetPensionOptionsAsync()
     {
       return await context.PensionOptions.ToListAsync();
