@@ -22,9 +22,12 @@
     /// <summary>
     /// Validates if the update operation is within the allowed period (November-December)
     /// </summary>
-    public static bool ValidateUpdatePeriod()
+    /// <param name="date"></param>
+    public static bool ValidateUpdatePeriod(DateTime date)
     {
-      return DateRangeUpdatePeriod.CategoryOptionsUpdatePeriod.Contains(DateTime.Now);
+      date = DateTime.Now;
+      
+      return DateRangeUpdatePeriod.CategoryOptionsUpdatePeriod.Contains(date);
     }
 
     /// <summary>
@@ -343,7 +346,7 @@
       try
       {
         // 1. Update Period Validation
-        if (!ValidateUpdatePeriod())
+        if (!ValidateUpdatePeriod(DateTime.Now))
         {
           result.IsValid = false;
           result.ErrorMessage = "Bulk update operation cannot be executed outside " +
@@ -466,7 +469,7 @@
       try
       {
         // Basic period validation (global)
-        if (!ValidateUpdatePeriod())
+        if (!ValidateUpdatePeriod(DateTime.Now))
         {
           result.IsValid = false;
           result.ErrorMessage = "Updates can only be performed between November and December";
@@ -899,7 +902,7 @@ public static async Task<BulkValidationResult> ValidateAllCategoryVariantsCompre
 
   try {
     // 1. PERIOD VALIDATION (Global requirement)
-    if (!ValidateUpdatePeriod()) {
+    if (!ValidateUpdatePeriod(DateTime.Now)) {
       result.IsValid = false;
       result.ErrorMessage = "Updates can only be performed between November and December";
       return result;
@@ -1198,7 +1201,7 @@ private static async Task<BulkValidationResult> ValidateSingleVariantWithExistin
 /// VARIANT-SPECIFIC BUSINESS RULES
 /// Corrected for Network Choice (Risk + Principal, NO MSA)
 /// </summary>
-private static BulkValidationResult ValidateVariantSpecificBusinessRules(
+public static BulkValidationResult ValidateVariantSpecificBusinessRules(
   string variantName, 
   List<UpdateMedicalOptionVariantsDto> variantOptions, List<MedicalOption> dbData)
 {
@@ -1676,7 +1679,7 @@ private static BulkValidationResult ValidateVariantContributionStructure(
 /// <summary>
 /// Groups payload DTOs by variant using existing data for context
 /// </summary>
-private static Dictionary<string, List<UpdateMedicalOptionVariantsDto>> GroupOptionsByVariant(
+public static Dictionary<string, List<UpdateMedicalOptionVariantsDto>> GroupOptionsByVariant(
   IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto,
   List<MedicalOption> dbData)
 {

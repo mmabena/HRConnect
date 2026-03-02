@@ -6,11 +6,12 @@
   using System.Collections.Generic;
   using System.Threading.Tasks;
   using Api.Mappers;
-  using HRConnect.Api.Utils.MedicalOptions;
+  using Api.Utils.MedicalOption;
+  using HRConnect.Api.Utils.MedicalOption;
   using HRConnect.Api.DTOs.MedicalOption;
   using HRConnect.Api.Models;
   using HRConnect.Api.Interfaces;
-  using HRConnect.Api.Models.MedicalOptions.Records;
+  using HRConnect.Api.Utils.MedicalOption.Records;
    public class MedicalOptionValidatorTests
    {
      private readonly Mock<IMedicalOptionRepository> _mockRepository;
@@ -28,7 +29,7 @@
          var testDate = new DateTime(2024, 11, 15); // November
          
          // Act
-         var result = MedicalOptionValidator.ValidateUpdatePeriod();
+         var result = MedicalOptionValidator.ValidateUpdatePeriod(testDate);
          
          // Assert
          Assert.True(result);
@@ -41,7 +42,7 @@
          var testDate = new DateTime(2024, 10, 15); // October
          
          // Act
-         var result = MedicalOptionValidator.ValidateUpdatePeriod();
+         var result = MedicalOptionValidator.ValidateUpdatePeriod(testDate);
          
          // Assert
          Assert.False(result);
