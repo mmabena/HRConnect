@@ -4,6 +4,7 @@
   using System.Linq;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.DTOs.MedicalOption;
+  using Microsoft.AspNetCore.Authorization;
   using Microsoft.AspNetCore.Mvc;
   
   [Route("api/medical-options")]
@@ -17,7 +18,7 @@
     }
     
     [HttpGet("categories")]
-    //[Authorize(Roles = "SuperUser")]
+    [Authorize(Roles = "SuperUser")]
     public async Task<IActionResult> GetGroupedMedicalOptions()
     {
       //With middleware global exception handling, we can remove the try catch block and
@@ -36,7 +37,7 @@
     }
 
     [HttpPut("{optionId}/salary-bracket")]
-    //[Authorize(Roles = "SuperUser")]
+    [Authorize(Roles = "SuperUser")]
     public async Task<ActionResult<IReadOnlyList<MedicalOptionDto>>> BulkUpdateMedicalOptionsByCategory(
       int optionId, 
       [FromBody] IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto)
