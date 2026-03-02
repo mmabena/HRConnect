@@ -27,7 +27,7 @@ axios.interceptors.response.use(
 
 export const addEmployee = async (employee) => {
   try {
-    const response = await axios.post(`${API_BASE}/add`, employee, {
+    const response = await axios.post(`${API_BASE}`, employee, {
       headers: { "Content-Type": "application/json" },
     });
 

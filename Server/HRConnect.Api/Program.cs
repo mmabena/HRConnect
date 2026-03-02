@@ -46,7 +46,13 @@ Audit.Core.Configuration.Setup()
 ExcelPackage.License.SetNonCommercialPersonal("YourName");
 
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+      options.JsonSerializerOptions.Converters.Add(
+          new System.Text.Json.Serialization.JsonStringEnumConverter()
+      );
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -133,11 +139,11 @@ builder.Services.AddScoped<ITaxDeductionService, TaxDeductionService>();
 builder.Services.AddScoped<ITaxDeductionRepository, TaxDeductionRepository>();
 builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
 builder.Services.AddScoped<IPositionRepository, PositionRepository>();
-builder.Services.AddScoped<IPositionService,PositionService>();
+builder.Services.AddScoped<IPositionService, PositionService>();
 builder.Services.AddScoped<IJobGradeRepository, JobGradeRepository>();
-builder.Services.AddScoped<IJobGradeService,JobGradeService>();
+builder.Services.AddScoped<IJobGradeService, JobGradeService>();
 builder.Services.AddScoped<IOccupationalLevelRepository, OccupationalLevelRepository>();
-builder.Services.AddScoped<IOccupationalLevelService,OccupationalLevelService>();
+builder.Services.AddScoped<IOccupationalLevelService, OccupationalLevelService>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.Services.AuthService>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IPayrollDeductionsRepository, PayrollDeductionsRepository>();

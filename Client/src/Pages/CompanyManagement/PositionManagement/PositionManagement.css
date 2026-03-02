@@ -17,25 +17,115 @@
   width: 20px;
   height: 20px;
 }
+.move-users-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 20px; /* space between dropdown row and button */
+  margin-top: 40px;
+  padding-left: 35px;
+  margin-bottom:30px;
+}
 
+.move-users-row {
+  display: flex;
+  align-items: center;
+  color: var(--primary-color);
+  gap: 70px;
+  flex-wrap: nowrap; 
+}
+
+.move-users-label {
+  margin: 0;
+  font-weight: 600;
+  font-size: 18px;
+  white-space: nowrap; /* prevents label from wrapping */
+}
+
+.apm-dropdown-wrapper {
+  max-width: 250px;
+  flex-shrink: 0; /* prevents dropdown from shrinking too much */
+}
+.positionId-dropdown .apm-input select-dropdown{
+  color: var(--primary-color);
+}
 
 .save-position-button {
-  position: fixed;
-  right: 40px;     /* distance from right */
   background-color: #668c4d;
   color: white;
-  padding: 10px 50px; 
+  padding: 10px 65px;
   border: none;
   border-radius: 8px;
-  font-size: 19px;
+  font-size: 18px;
   font-weight: 700;
+  margin-left:700px;
+  cursor: pointer;
   transition: background-color 0.3s ease;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  white-space: nowrap;
-  z-index: 1000; /* ensures it sits above other elements */
+  white-space: nowrap; /* prevent button text from wrapping */
+}
+
+.save-position-button:hover {
+  background-color: #5a7b3e;
+}
+.save-button-wrapper {
+  flex-shrink: 0; /* prevents the button from shrinking */
 }
 
 /*Company Management Section*/
+/* Wrapper for table to apply rounded borders */
+.content-container-table {
+  display: flex;
+  flex-direction: column;
+  width: 95%;
+  max-width: 1400px;
+  padding: 10px;
+  gap: 10px;
+  box-sizing: border-box;
+  border-radius: 15px;      /* rounded corners for the container */
+  overflow: hidden;          /* ensures corners clip content */
+  margin-left: 30px;
+  background-color: #fff;    /* optional, for contrast */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* Table without outer borders, only border-bottom */
+.position-table-manage-User {
+  width: 95%;
+  border-collapse: separate;  /* allows rounded corners on wrapper */
+  border-spacing: 0;          /* no spacing between cells */
+  table-layout: fixed;
+  font-family: 'Anek Bangla', sans-serif; 
+  font-size: 14px;   
+  margin:30px;
+
+}
+
+.position-table-manage-User tr{
+  padding:10px;
+}
+
+/* Table headers and cells */
+.position-table-manage-User th,
+.position-table-manage-User td {
+  padding: 20px 10px;
+  background-color: #f1f1f1;
+  border: none;               /* remove all borders */
+  border-bottom: 2px solid rgb(211, 210, 210); /* only bottom border */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #002D40;
+  font-size: 16px;
+  gap:10px;
+  text-align:left;
+}
+
+/* Table header style */
+.position-table-manage-User th {
+  background-color: var(--primary-color);
+  color: #ffffff;
+  font-weight: bold;
+
+}
 
 /* Header styles */
 
@@ -143,7 +233,6 @@
   margin: 0;
   white-space: nowrap;
 }
-
 
 
 

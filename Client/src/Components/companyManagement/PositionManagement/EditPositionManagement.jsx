@@ -121,13 +121,13 @@ const EditPositionManagement = () => {
   }
 
   try {
-    // 1️⃣ Fetch all employees linked to this position
+    //Fetch all employees linked to this position
     const employeesRes = await api.get("/employee");
     const linkedEmployees = employeesRes.data.filter(
       (emp) => emp.positionId === parseInt(id)
     );
 
-    // 2️⃣ Fetch all positions to check for duplicate titles
+    // Fetch all positions to check for duplicate titles
     const positionsRes = await api.get("/positions");
     const duplicateTitle = positionsRes.data.find(
       (pos) =>

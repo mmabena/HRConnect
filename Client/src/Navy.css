@@ -550,8 +550,6 @@ body,
   display: flex;
   flex-direction: row;
   width: 100%;
-
-
 }
 
 
@@ -771,6 +769,8 @@ body,
   left: 0px;
   margin-left: 34px;
 }
+
+
 
 .forgot-password {
   width: 324px;

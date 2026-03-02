@@ -25,7 +25,9 @@ namespace HRConnect.Api.Repository
     /// <returns> A List of all Employees</returns>
     public async Task<List<Employee>> GetAllEmployeesAsync()
     {
-      return await _context.Employees.ToListAsync();
+      return await _context.Employees
+            .Include(e => e.Position)
+            .ToListAsync();
     }
     /// <summary>
     /// Creates a new Employee in the database.
@@ -58,6 +60,7 @@ namespace HRConnect.Api.Repository
     public async Task<Employee?> GetEmployeeByIdAsync(string employeeId)
     {
       return await _context.Employees
+              .Include(e => e.Position)
               .FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
     }
     /// <summary>

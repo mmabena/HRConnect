@@ -87,7 +87,7 @@ return (
               className="apm-link"
               onClick={() =>
                 navigate(`/manageUserPosition`, {
-                  state: { positionId: currentPosition },
+                  state: { positionTitle: currentPosition },
                 })
               }
             >
