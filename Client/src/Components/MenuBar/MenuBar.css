@@ -1827,7 +1827,7 @@
   font-size: 17px;
   line-height: 22px;
   letter-spacing: -0.43px;
-  color: #007AFF;
+  color: var(--primary-color);
   margin: 0;
   white-space: nowrap;
 }

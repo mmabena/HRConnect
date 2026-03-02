@@ -1,10 +1,10 @@
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 
-import CompanyManagementHeader from "../../Components/companyManagement/companyManagementHeader";
 import "./ProjectionCalculator.css";
 import Box from "@mui/material/Box";
 import Slider from "@mui/material/Slider";
+import ProjectionCalculatorHeader from "../../Components/PayrollTools/projectionCalculatorHeader";
 
 const ProjectionCalculator = () => {
     const [employeeDetails, setEmployeeDetails] = useState(null);
@@ -148,7 +148,7 @@ const ProjectionCalculator = () => {
 
     return (
         <div className="menu-background custom-scrollbar payroll-page">
-            <CompanyManagementHeader title="Projection Calculator" />
+            <ProjectionCalculatorHeader title="Projection Calculator" />
 
             <div className="pension-projection-frame">
 

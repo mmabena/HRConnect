@@ -2,6 +2,17 @@
     --pension-percentage-slider-width: 100%;
 }
 
+.cm-header-left-section {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  box-sizing: border-box;
+  height: auto;
+  flex-shrink: 0;
+  margin-left: 144px;
+}
+
 
 .my-custom-slider {
   width: 100%;
@@ -304,3 +315,4 @@ input{
         font-size: 14px;
     }
 }
+
