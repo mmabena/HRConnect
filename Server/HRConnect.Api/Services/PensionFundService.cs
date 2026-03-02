@@ -5,12 +5,10 @@
   using System.Collections.Generic;
   using System.Threading.Tasks;
 
-  // Primary constructor style
+
   public class PensionFundService(IPensionRepository repo) : IPensionFundService
   {
-    // ============================
     // Pension Funds
-    // ============================
 
     public async Task<IEnumerable<PensionFund>> GetPensionFundsAsync()
     {
@@ -34,9 +32,7 @@
       return ServiceResult.Success("Fund updated successfully.");
     }
 
-    // ============================
     // Pension Options
-    // ============================
 
     public async Task<IEnumerable<PensionOption>> GetPensionOptionsAsync()
     {
@@ -80,18 +76,14 @@
       return ServiceResult.Success("Option updated successfully.");
     }
 
-    // ============================
     // Pension Deduction
-    // ============================
 
     public decimal CalculatePensionDeduction(decimal monthlySalary, PensionOption pensionoption)
     {
       return monthlySalary * (pensionoption.ContributionPercentage / 100);
     }
 
-    // ============================
-    // Record Pension Option Selection
-    // ============================
+    // Record Pension Option Selection   
 
     public async Task<ServiceResult> RecordEmployeePensionSelectionAsync(string employeeId, int pensionOptionId)
     {
