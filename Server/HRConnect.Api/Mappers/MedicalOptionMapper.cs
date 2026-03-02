@@ -3,42 +3,50 @@
   using HRConnect.Api.DTOs.MedicalOption;
   using HRConnect.Api.Models;
 
-
+  /// <summary>
+  /// Provides extension methods for mapping between MedicalOption domain entities 
+  /// and MedicalOption data transfer objects (DTOs).
+  /// This mapper class facilitates the transformation of data layers while maintaining
+  /// separation of concerns between domain models and API contracts.
+  /// </summary>
+  /// <remarks>
+  /// All mapping methods are designed to be null-safe and handle edge cases gracefully.
+  /// The mapper supports both single entity mapping and collection-based operations.
+  /// Decimal precision and nullability are preserved throughout all transformations.
+  /// </remarks>
   public static class MedicalOptionMapper
   {
     //TODO: Implement Mapper Methods:
     // 1. A Mapper that will handle grouping options into their releavant categories
 
     /// <summary>
-    /// Maps a grouping of Medical entities to a MedicalCategoryDto.
+    /// Maps a grouping of MedicalOption entities to a MedicalOptionCategoryDto.
     /// This extension method transforms the IGrouping results from the repository
     /// into a client-friendly DTO structure that contains the category information
     /// and all associated medical options.
     /// </summary>
     /// <param name="group">
-    /// The IGrouping result from the repository containing the MedicalOptions entities
-    /// grouped by MedicalOptionCategoryId, Then the collection contains all MedicalOptions
+    /// The IGrouping result from the repository containing the MedicalOption entities
+    /// grouped by MedicalOptionCategoryId. The collection contains all MedicalOption
     /// entities belonging to that category.
     /// </param>
     /// <returns>
     /// A MedicalOptionCategoryDto populated with:
-    /// - MedicalOptioncategoryId: The MedicalOptionCategoryId from the repository
-    /// - MedicalOptionCategoryName: The MedicalOptionCategoryName from the repository
-    ///   (from the first option's navigational property)
-    /// - MedicalOptions: A list of MedicalOptionDto objects representing all options in
-    ///   this category
+    /// - MedicalOptionCategoryId: The category ID from the group key
+    /// - MedicalOptionCategoryName: The category name from the first option's navigation property
+    /// - MedicalOptions: A list of MedicalOptionDto objects representing all options in this category
     /// </returns>
     /// <remarks>
     /// This method assumes that the MedicalOption entities have their MedicalOptionCategory
-    /// navigation property loaded (typically vai .Include() in the repository query).
-    /// If the category is not loaded, the MedicalCategoryName will default to an empty string.
+    /// navigation property loaded (typically via .Include() in the repository query).
+    /// If the category is not loaded, the MedicalOptionCategoryName will default to "Uncategorized".
+    /// Empty groups return a DTO with "Uncategorized" as the category name.
     /// </remarks>
     /// <example>
-    /// Usage in service:
+    /// Usage in service layer:
     /// <code>
     /// var groupedOptions = await _medicalOptionRepository.GetGroupedMedicalOptionsAsync();
-    /// var categoryDtos = groupedOptions.Select(group => group.
-    ///       ToMedicalOptionCategoryDto()).ToList();
+    /// var categoryDtos = groupedOptions.Select(group => group.ToMedicalOptionCategoryDto()).ToList();
     /// </code>
     /// </example>
     public static MedicalOptionCategoryDto ToMedicalOptionCategoryDto(
@@ -78,18 +86,19 @@
     /// A MedicalOptionDto populated with all relevant medical option details:
     /// - Identifying properties (ID, Name, MedicalOptionCategoryId)
     /// - Salary bracket information (Min/Max)
-    /// - Monthly contribution amounts (Risk and MSA contributions (if applicable))
-    /// - Total monthly contributions for different member types (Principal, Adult, Child)
+    /// - Monthly contribution amounts (Risk and MSA contributions)
+    /// - Total monthly contributions for different member types (Principal, Adult, Child, Child2)
     /// </returns>
     /// <remarks>
-    /// This method performs a direct propert mapping with no transforming logic.
-    /// All decimals properties maintain their original precision and nullability.
+    /// This method performs a direct property mapping with no transformation logic.
+    /// All decimal properties maintain their original precision and nullability.
     /// String properties are mapped directly with default empty string handling.
+    /// Navigation properties are not included in the DTO to maintain a clean API contract.
     /// </remarks>
     /// <example>
     /// Usage within ToMedicalOptionCategoryDto:
     /// <code>
-    /// Medicaloption = group.Select(option => option.ToMedicalOptionDto()).ToList();
+    /// MedicalOptions = group.Select(option => option.ToMedicalOptionDto()).ToList();
     /// </code>
     /// </example>
     public static MedicalOptionDto ToMedicalOptionDto(this MedicalOption option)
@@ -115,6 +124,31 @@
       };
     }
 
+    /// <summary>
+    /// Maps a MedicalOption entity to an UpdateMedicalOptionVariantsDto.
+    /// This transformation is used when preparing data for bulk update operations,
+    /// converting the current entity state into a DTO that can be modified and sent back.
+    /// </summary>
+    /// <param name="bulkUpdate">
+    /// The MedicalOption entity to be converted to update DTO format.
+    /// Should contain the current state of all updatable properties.
+    /// </param>
+    /// <returns>
+    /// An UpdateMedicalOptionVariantsDto populated with the current values of all
+    /// modifiable properties from the source entity, ready for client-side modifications.
+    /// </returns>
+    /// <remarks>
+    /// This method includes all properties that can be modified via the bulk update endpoint.
+    /// The MedicalOptionId is preserved to ensure the correct entity is targeted during updates.
+    /// Null values in the source entity are preserved as null in the DTO.
+    /// </remarks>
+    /// <example>
+    /// Usage when preparing bulk update data:
+    /// <code>
+    /// var existingOptions = await repository.GetOptionsByCategoryAsync(categoryId);
+    /// var updateDtos = existingOptions.Select(option => option.ToUpdateMedicalOptionVariantDto()).ToList();
+    /// </code>
+    /// </example>
     public static UpdateMedicalOptionVariantsDto ToUpdateMedicalOptionVariantDto(
       this MedicalOption bulkUpdate)
     {
@@ -138,10 +172,31 @@
     }
     
     /// <summary>
-    /// Maps UpdateMedicalOptionVariantsDto to MedicalOption entity.
-    /// Updates only the properties that can be modified.
-    /// Note :  refactored the entity update logic into a mapper method
+    /// Updates a MedicalOption entity with values from an UpdateMedicalOptionVariantsDto.
+    /// This method applies changes from the DTO to the existing entity, updating only
+    /// the properties that are allowed to be modified.
     /// </summary>
+    /// <param name="entity">The MedicalOption entity to be updated.</param>
+    /// <param name="dto">The DTO containing the new values to apply.</param>
+    /// <exception cref="ArgumentNullException">Thrown when entity or dto is null.</exception>
+    /// <remarks>
+    /// This method performs a direct property assignment for all updatable fields.
+    /// Null values in the DTO will overwrite existing values in the entity with null.
+    /// The method does not update the MedicalOptionId or MedicalOptionCategoryId as these
+    /// are considered immutable identifiers.
+    /// This approach centralizes the update logic and ensures consistency across the application.
+    /// </remarks>
+    /// <example>
+    /// Usage in repository or service during bulk updates:
+    /// <code>
+    /// foreach (var updateDto in bulkUpdateDtos)
+    /// {
+    ///     var entity = await context.MedicalOptions.FindAsync(updateDto.MedicalOptionId);
+    ///     entity.UpdateFromDto(updateDto);
+    /// }
+    /// await context.SaveChangesAsync();
+    /// </code>
+    /// </example>
     public static void UpdateFromDto(this MedicalOption entity, UpdateMedicalOptionVariantsDto dto)
     {
       entity.SalaryBracketMin = dto.SalaryBracketMin;
