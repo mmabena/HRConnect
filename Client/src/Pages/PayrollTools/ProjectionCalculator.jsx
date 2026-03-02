@@ -9,16 +9,25 @@ import Slider from "@mui/material/Slider";
 const ProjectionCalculator = () => {
     const [employeeDetails, setEmployeeDetails] = useState(null);
     const [employeeAge, setEmployeeAge] = useState(null);
-
-    const [selectedPensionPercentage, setSelectedPensionPercentage] = useState(0); // 👈 default 0
+    // 👈 default 0
     const [projectedPensionDetails, setProjectedPensionDetails] = useState(null);
     const [selectedVoluntaryContributionFrequency, setSelectedVoluntaryContributionFrequency] = useState(1);
     const [voluntaryContribution, setVoluntaryContribution] = useState("");
     const voluntaryContributionInputRef = useRef(null);
-
     const MAX_PENSIONCONTRIBUTION_PERCENTAGE = 0.275;
     const [voluntaryContributionIsCapped, setVoluntaryContributionIsCapped] = useState(false);
     const [voluntaryContributionError, setVoluntaryContributionError] = useState({ Error: "" });
+    const percentageMap = { 0: 0, 1: 2.5, 2: 5, 3: 7.5, 4: 10, 5: 12.5, 6: 15 };
+    const reverseMap = { 0: 0, 2.5: 1, 5: 2, 7.5: 3, 10: 4, 12.5: 5, 15: 6 };
+    const [selectedPensionPercentage, setSelectedPensionPercentage] = useState(reverseMap[2.5]); 
+    const marks = [
+        { value: 2.5, label: '2.5%' },
+        { value: 5, label: '5%' },
+        { value: 7.5, label: '7.5%' },
+        { value: 10, label: '10%' },
+        { value: 12.5, label: '12.5%' },
+        { value: 15, label: '15%' },
+    ];
 
     useEffect(() => {
         const token = JSON.parse(localStorage.getItem('currentUser')).token;
@@ -38,17 +47,6 @@ const ProjectionCalculator = () => {
 
     useEffect(() => {
         if (!employeeDetails) return;
-
-       // if slider = 0, reset results
-        if (selectedPensionPercentage === 0) {
-            setProjectedPensionDetails({
-                lumpSum: 0,
-                monthlyIncomeAfterRetirement: 0,
-                totalProjectedSavings: 0
-            });
-            return;
-        }
-
         if (!voluntaryContributionIsCapped) {
             const pensionProjectionRequestDTO = {
                 SelectedPensionPercentage: selectedPensionPercentage,
@@ -68,14 +66,37 @@ const ProjectionCalculator = () => {
                 }
             })
             .catch(error => console.error("Error:", error));
+        } else {
+            setProjectedPensionDetails({
+                lumpSum: 0,
+                monthlyIncomeAfterRetirement: 0,
+                totalProjectedSavings: 0
+            })
         }
     }, [employeeDetails, voluntaryContribution, selectedPensionPercentage, selectedVoluntaryContributionFrequency, voluntaryContributionIsCapped]);
 
-
-    const percentageMap = { 0: 0, 1: 2.5, 2: 5, 3: 7.5, 4: 10, 5: 12.5, 6: 15 };
-    const reverseMap = { 0: 0, 2.5: 1, 5: 2, 7.5: 3, 10: 4, 12.5: 5, 15: 6 };
-
     const handleSelectedUserPercentageInput = (event, newValue) => {
+        const percentageFromParameter = newValue / 100;
+        if (voluntaryContribution !== "") {
+            if (employeeDetails) {
+                let voluntaryContributionPercentage = voluntaryContribution / employeeDetails.monthlySalary;
+                let roudedVoluntaryContributionPercentage = Math.round(voluntaryContributionPercentage * 10000) / 10000;
+                if ((roudedVoluntaryContributionPercentage + percentageFromParameter) > MAX_PENSIONCONTRIBUTION_PERCENTAGE) {
+                    setVoluntaryContributionIsCapped(true);
+                    voluntaryContributionInputRef.current.style.borderColor = "red";
+                    const maxVoluntaryContribution = Math.round(((employeeDetails.monthlySalary * MAX_PENSIONCONTRIBUTION_PERCENTAGE) - (employeeDetails.monthlySalary * percentageFromParameter)) * 10000) / 10000;
+                    setVoluntaryContributionError({
+                        Error: `Voluntary Contribution + Monthly Salary Contribution cannot exceed 27.5% of salary. Maximum contribution: R ${maxVoluntaryContribution}`
+                    })
+                } else {
+                    setVoluntaryContributionIsCapped(false);
+                    setVoluntaryContributionError({
+                        Error: ""
+                    })
+
+                }
+            }
+        }
         setSelectedPensionPercentage(reverseMap[newValue]);
     };
 
@@ -85,19 +106,13 @@ const ProjectionCalculator = () => {
 
     const handleVolutaryContributionInput = (event) => {
         const enteredVoluntaryContribution = event.target.value;
-
         if (employeeDetails) {
             let voluntaryContributionPercentage = enteredVoluntaryContribution / employeeDetails.monthlySalary;
             let roundedPercentage = Math.round(voluntaryContributionPercentage * 10000) / 10000;
-
             if (roundedPercentage + selectedPercentage() > MAX_PENSIONCONTRIBUTION_PERCENTAGE) {
                 setVoluntaryContributionIsCapped(true);
                 voluntaryContributionInputRef.current.style.borderColor = "red";
-
-                const maxVoluntaryContribution =
-                    ((employeeDetails.monthlySalary * MAX_PENSIONCONTRIBUTION_PERCENTAGE) -
-                    (employeeDetails.monthlySalary * selectedPercentage())).toFixed(2);
-
+                const maxVoluntaryContribution =((employeeDetails.monthlySalary * MAX_PENSIONCONTRIBUTION_PERCENTAGE) - (employeeDetails.monthlySalary * selectedPercentage())).toFixed(2);
                 setVoluntaryContributionError({Error: `Voluntary Contribution + Monthly Salary Contribution cannot exceed 27.5% of salary. Maximum contribution: R ${maxVoluntaryContribution}` });
 
             } else {
@@ -112,7 +127,6 @@ const ProjectionCalculator = () => {
 
     const selectedPercentage = () => {
         switch (selectedPensionPercentage) {
-            case 0: return 0;
             case 1: return 0.025;
             case 2: return 0.05;
             case 3: return 0.075;
@@ -122,16 +136,6 @@ const ProjectionCalculator = () => {
             default: return 0;
         }
     };
-
-    const marks = [
-        // { value:  0, label:'' },
-        { value: 2.5, label: '2.5%' },
-        { value: 5, label: '5%' },
-        { value: 7.5, label: '7.5%' },
-        { value: 10, label: '10%' },
-        { value: 12.5, label: '12.5%' },
-        { value: 15, label: '15%' },
-    ];
 
     const calculateAge = (dob) => {
         const today = new Date();
@@ -216,19 +220,19 @@ const ProjectionCalculator = () => {
 
                     <div className="pension-projection-detail">
                         <h4>Lump Sum in 35 years:</h4>
-                        <label>R {projectedPensionDetails?.lumpSum}</label>
+                        <label>R {projectedPensionDetails && projectedPensionDetails.lumpSum}</label>
                     </div>
 
                     <div className="pension-projection-detail">
                         <h4>Monthly Income 65-75:</h4>
-                        <label>R {projectedPensionDetails?.monthlyIncomeAfterRetirement}</label>
+                        <label>R {projectedPensionDetails && projectedPensionDetails.monthlyIncomeAfterRetirement}</label>
                     </div>
 
                 </div>
 
                 <div className="pension-projection-total">
                     <h4>Estimated Total in 35 Years:</h4>
-                    <label>R {projectedPensionDetails?.totalProjectedSavings}</label>
+                    <label>R {projectedPensionDetails && projectedPensionDetails.totalProjectedSavings}</label>
                 </div>
 
                 <div className="pension-projection-disclaimer">
