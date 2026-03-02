@@ -40,6 +40,7 @@ namespace HRConnect.Api.Services
             _context.Employees.Add(employee);
             await _context.SaveChangesAsync();
 
+            // initialization now takes responsibility for creating the first accrual segment
             await InitializeEmployeeLeaveBalancesAsync(employee.EmployeeId);
 
             return await GetEmployeeByIdAsync(employee.EmployeeId)
@@ -51,8 +52,20 @@ namespace HRConnect.Api.Services
         // ============================================================
         public async Task<List<EmployeeResponse>> GetAllEmployeesAsync()
         {
+            // Recalculate Annual for ALL employees first
+            var employeeIds = await _context.Employees
+                .Select(e => e.EmployeeId)
+                .ToListAsync();
+
+            foreach (var id in employeeIds)
+            {
+                await RecalculateAnnualLeaveAsync(id);
+            }
+
+            // Existing recalculations remain untouched
             await RecalculateAllSickLeaveAsync();
             await RecalculateAllFamilyResponsibilityLeaveAsync();
+
             var employees = await _context.Employees
                 .Include(e => e.Position)
                     .ThenInclude(p => p.JobGrade)
@@ -67,6 +80,7 @@ namespace HRConnect.Api.Services
         // ============================================================
         public async Task<EmployeeResponse?> GetEmployeeByIdAsync(Guid id)
         {
+            await RecalculateAnnualLeaveAsync(id);
             await RecalculateAllSickLeaveAsync();
             await RecalculateAllFamilyResponsibilityLeaveAsync();
 
@@ -82,22 +96,85 @@ namespace HRConnect.Api.Services
 
             return MapToResponse(employee);
         }
-
         // ============================================================
         // UPDATE POSITION (Promotion/Demotion)
         // ============================================================
         public async Task<EmployeeResponse> UpdateEmployeePositionAsync(Guid employeeId, int newPositionId)
         {
             var employee = await _context.Employees
+                .Include(e => e.Position)
+                    .ThenInclude(p => p.JobGrade)
                 .FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
 
             if (employee == null)
                 throw new InvalidOperationException("Employee not found.");
 
+            // If position not actually changing → do nothing
+            if (employee.PositionId == newPositionId)
+                return await GetEmployeeByIdAsync(employeeId)
+                       ?? throw new InvalidOperationException("Failed to load employee.");
+
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
+            // ============================================================
+            // 1️⃣ Close current active accrual segment SAFELY
+            // ============================================================
+
+            var currentSegment = await _context.EmployeeAccrualRateHistories
+                .Where(x => x.EmployeeId == employeeId && x.EffectiveTo == null)
+                .FirstOrDefaultAsync();
+
+            if (currentSegment != null)
+            {
+                // Close segment TODAY (never subtract a day)
+                currentSegment.EffectiveTo = today;
+            }
+
+            // ============================================================
+            // 2️⃣ Update employee position
+            // ============================================================
+
             employee.PositionId = newPositionId;
             employee.UpdatedDate = DateTime.UtcNow;
 
+            // ============================================================
+            // 3️⃣ Determine new entitlement rule
+            // ============================================================
+
+            var annualLeave = await _context.LeaveTypes
+                .FirstAsync(l => l.Code == "AL" && l.IsActive);
+
+            var yearsOfService = CalculateYearsOfService(employee.StartDate);
+
+            var newRule = await _context.LeaveEntitlementRules
+                .FirstAsync(r =>
+                    r.LeaveTypeId == annualLeave.Id &&
+                    r.JobGradeId == employee.Position.JobGradeId &&
+                    r.MinYearsService <= yearsOfService &&
+                    (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
+                    r.IsActive);
+
+            // ============================================================
+            // 4️⃣ Create new accrual segment STARTING TOMORROW
+            // ============================================================
+
+            await _context.EmployeeAccrualRateHistories.AddAsync(
+                new EmployeeAccrualRateHistory
+                {
+                    EmployeeId = employeeId,
+                    AnnualEntitlement = newRule.DaysAllocated,
+                    DailyRate = newRule.DaysAllocated / 260m,
+                    EffectiveFrom = today,   // 🔥 starts next day
+                    EffectiveTo = null,
+                    CreatedDate = DateTime.UtcNow
+                });
+
             await _context.SaveChangesAsync();
+
+            // ============================================================
+            // 5️⃣ Recalculate using history model
+            // ============================================================
+
             await RecalculateAnnualLeaveAsync(employeeId);
 
             return await GetEmployeeByIdAsync(employeeId)
@@ -148,11 +225,10 @@ namespace HRConnect.Api.Services
                 throw new InvalidOperationException("Employee not found.");
 
             var yearsOfService = CalculateYearsOfService(employee.StartDate);
+
             var leaveTypes = await _context.LeaveTypes
                 .Where(l => l.IsActive)
                 .ToListAsync();
-
-            var currentYear = DateTime.UtcNow.Year;
 
             foreach (var leaveType in leaveTypes)
             {
@@ -173,26 +249,52 @@ namespace HRConnect.Api.Services
                 if (rule == null)
                     continue;
 
-                decimal entitledDays = rule.DaysAllocated;
-
-                // Mid-year prorating (Annual only)
-                if (leaveType.Code == "AL" &&
-                    employee.StartDate.Year == currentYear)
-                {
-                    int monthsRemaining = 12 - employee.StartDate.Month + 1;
-                    entitledDays = Math.Round((rule.DaysAllocated / 12m) * monthsRemaining, 2);
-                }
                 // =============================
-                // SICK LEAVE — delegate to recalculation method
+                // ANNUAL LEAVE — Dynamic Accrual
+                // =============================
+                if (leaveType.Code == "AL")
+                {
+                    var annualBalance = new EmployeeLeaveBalance
+                    {
+                        EmployeeId = employee.EmployeeId,
+                        LeaveTypeId = leaveType.Id,
+                        EntitledDays = 0,
+                        UsedDays = 0,
+                        AccruedDays = 0,
+                        RemainingDays = 0,
+                        CarryoverDays = 0,
+                        ForfeitedDays = 0,
+                        LastResetYear = DateTime.UtcNow.Year
+                    };
+
+                    await _context.EmployeeLeaveBalances.AddAsync(annualBalance);
+                    await _context.SaveChangesAsync();
+                    await BackfillHistoricalAnnualAccrualAsync(employee);
+
+                    // make sure there's an accrual rate segment - if one already exists
+                    // (e.g. when the employee record was just created) this call is
+                    // a no-op because CreateInitialAccrualSegmentAsync checks the
+                    // context before adding.
+                    var hasSegment = await _context.EmployeeAccrualRateHistories
+                        .AnyAsync(s => s.EmployeeId == employee.EmployeeId);
+                    if (!hasSegment)
+                    {
+                        await CreateInitialAccrualSegmentAsync(employee);
+                    }
+
+                    continue;
+                }
+
+                // =============================
+                // SICK LEAVE
                 // =============================
                 if (leaveType.Code == "SL")
                 {
-                    // Create initial balance with rule default (30)
                     var sickBalance = new EmployeeLeaveBalance
                     {
                         EmployeeId = employee.EmployeeId,
                         LeaveTypeId = leaveType.Id,
-                        EntitledDays = rule.DaysAllocated, // temporary
+                        EntitledDays = rule.DaysAllocated,
                         UsedDays = 0,
                         AccruedDays = 0,
                         RemainingDays = rule.DaysAllocated
@@ -202,37 +304,43 @@ namespace HRConnect.Api.Services
                     await _context.SaveChangesAsync();
 
                     await RecalculateSickLeaveAsync(employee.EmployeeId);
-
-                    continue; // skip normal balance creation
+                    continue;
                 }
+
+                // =============================
+                // FAMILY RESPONSIBILITY LEAVE
+                // =============================
                 if (leaveType.Code == "FRL")
                 {
                     var frlBalance = new EmployeeLeaveBalance
                     {
                         EmployeeId = employee.EmployeeId,
                         LeaveTypeId = leaveType.Id,
-                        EntitledDays = rule.DaysAllocated, // 3
+                        EntitledDays = rule.DaysAllocated,
                         UsedDays = 0,
                         AccruedDays = 0,
                         RemainingDays = rule.DaysAllocated,
-                        LastResetYear = DateTime.UtcNow.Year // initialize cycle
+                        LastResetYear = DateTime.UtcNow.Year
                     };
 
                     await _context.EmployeeLeaveBalances.AddAsync(frlBalance);
                     await _context.SaveChangesAsync();
 
                     await RecalculateFamilyResponsibilityLeaveAsync(employee.EmployeeId);
-
                     continue;
                 }
+
+                // =============================
+                // OTHER LEAVE TYPES
+                // =============================
                 var balance = new EmployeeLeaveBalance
                 {
                     EmployeeId = employee.EmployeeId,
                     LeaveTypeId = leaveType.Id,
-                    EntitledDays = entitledDays,
+                    EntitledDays = rule.DaysAllocated,
                     UsedDays = 0,
                     AccruedDays = 0,
-                    RemainingDays = entitledDays
+                    RemainingDays = rule.DaysAllocated
                 };
 
                 await _context.EmployeeLeaveBalances.AddAsync(balance);
@@ -240,13 +348,13 @@ namespace HRConnect.Api.Services
 
             await _context.SaveChangesAsync();
         }
-
         // ============================================================
         // ANNUAL RECALCULATION
         // ============================================================
         public async Task RecalculateAnnualLeaveAsync(Guid employeeId)
         {
             var employee = await _context.Employees
+                .Include(e => e.LeaveBalances)
                 .Include(e => e.Position)
                     .ThenInclude(p => p.JobGrade)
                 .FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
@@ -254,49 +362,56 @@ namespace HRConnect.Api.Services
             if (employee == null)
                 throw new InvalidOperationException("Employee not found.");
 
-            if (!employee.UpdatedDate.HasValue)
-                throw new InvalidOperationException("UpdatedDate not set.");
-
-            var changeDate = DateOnly.FromDateTime(employee.UpdatedDate.Value);
-
             var annualLeave = await _context.LeaveTypes
                 .FirstAsync(l => l.Code == "AL" && l.IsActive);
 
-            var balance = await _context.EmployeeLeaveBalances
-                .FirstAsync(b =>
-                    b.EmployeeId == employeeId &&
-                    b.LeaveTypeId == annualLeave.Id);
+            var balance = employee.LeaveBalances
+                .First(b => b.LeaveTypeId == annualLeave.Id);
 
-            var yearsOfService = CalculateYearsOfService(employee.StartDate);
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
-            // NEW rule (after promotion/demotion)
-            var newRule = await _context.LeaveEntitlementRules
-                .FirstAsync(r =>
-                    r.LeaveTypeId == annualLeave.Id &&
-                    r.JobGradeId == employee.Position.JobGradeId &&
-                    r.MinYearsService <= yearsOfService &&
-                    (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
-                    r.IsActive);
+            // Determine cycle start (1 Jan or employee start if hired this year)
+            var cycleStart = employee.StartDate.Year == today.Year
+                ? employee.StartDate
+                : new DateOnly(today.Year, 1, 1);
 
-            // OLD rule (before promotion/demotion)
-            var oldRule = await _context.LeaveEntitlementRules
-                .FirstAsync(r =>
-                    r.LeaveTypeId == annualLeave.Id &&
-                    r.JobGradeId != employee.Position.JobGradeId &&
-                    r.MinYearsService <= yearsOfService &&
-                    (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
-                    r.IsActive);
+            // 🔥 IMPORTANT: Use ALL segments, not just active one
+            var segments = await _context.EmployeeAccrualRateHistories
+                .Where(x => x.EmployeeId == employeeId)
+                .OrderBy(x => x.EffectiveFrom)
+                .ToListAsync();
 
-            int monthsBefore = changeDate.Month - 1;
-            int monthsAfter = 12 - monthsBefore;
+            if (segments.Count == 0)
+                return;
 
-            decimal before = (oldRule.DaysAllocated / 12m) * monthsBefore;
-            decimal after = (newRule.DaysAllocated / 12m) * monthsAfter;
+            decimal totalAccrued = 0m;
 
-            var total = Math.Round(before + after, 2);
+            foreach (var segment in segments)
+            {
+                // Determine effective window inside current cycle
+                var segmentStart = segment.EffectiveFrom > cycleStart
+                    ? segment.EffectiveFrom
+                    : cycleStart;
 
-            balance.EntitledDays = total;
-            balance.RemainingDays = total - balance.UsedDays;
+                var segmentEnd = segment.EffectiveTo.HasValue && segment.EffectiveTo.Value < today
+                    ? segment.EffectiveTo.Value
+                    : today;
+
+                if (segmentEnd < segmentStart)
+                    continue;
+
+                int workingDays = WorkingDayCalculator.CountWorkingDays(
+                    segmentStart,
+                    segmentEnd);
+
+                totalAccrued += workingDays * segment.DailyRate;
+            }
+
+            totalAccrued = Math.Round(totalAccrued, 2);
+
+            balance.EntitledDays = totalAccrued;
+            balance.RemainingDays = totalAccrued - balance.UsedDays;
+            balance.LastCalculatedDate = today;
 
             await _context.SaveChangesAsync();
 
@@ -305,30 +420,28 @@ namespace HRConnect.Api.Services
             // ===============================
 
             await _emailService.SendEmailAsync(
-                employee.Email, // Make sure Employee model has Email property
+                employee.Email,
                 "Annual Leave Recalculated Due to Position Change",
                 $"""
-        Dear {employee.FirstName},
+Dear {employee.FirstName},
 
-        Your position has recently been updated to: {employee.Position.Title}.
+Your position has recently been updated to: {employee.Position.Title}.
 
-        As a result, your annual leave entitlement has been recalculated.
+As a result, your annual leave entitlement has been recalculated.
 
-        New Annual Entitlement: {balance.EntitledDays} days
-        Used Days: {balance.UsedDays} days
-        Remaining Days: {balance.RemainingDays} days
+New Annual Entitlement: {balance.EntitledDays} days
+Used Days: {balance.UsedDays} days
+Remaining Days: {balance.RemainingDays} days
 
-        This adjustment was calculated proportionally based on the month of change.
+This adjustment was calculated proportionally based on the promotion date.
 
-        If you have any questions, please contact HR.
+If you have any questions, please contact HR.
 
-        Regards,
-        HRConnect
-        """
+Regards,
+HRConnect
+"""
             );
         }
-
-
         // ============================================================
         // YEARS CALCULATION
         // ============================================================
@@ -398,10 +511,13 @@ namespace HRConnect.Api.Services
                 );
             }
         }
-        public async Task ProcessAnnualResetAsync()
+        public async Task ProcessAnnualResetAsync(int? overrideYear = null)
         {
             var today = DateTime.UtcNow.Date;
-            var currentYear = today.Year;
+
+            // If overrideYear provided → use it
+            // Otherwise use real current year
+            var currentYear = overrideYear ?? today.Year;
 
             var annualLeave = await _context.LeaveTypes
                 .FirstOrDefaultAsync(l => l.Code == "AL" && l.IsActive);
@@ -423,15 +539,6 @@ namespace HRConnect.Api.Services
                     continue;
 
                 var employee = balance.Employee;
-                var years = CalculateYearsOfService(employee.StartDate);
-
-                var rule = await _context.LeaveEntitlementRules
-                    .FirstAsync(r =>
-                        r.LeaveTypeId == annualLeave.Id &&
-                        r.JobGradeId == employee.Position.JobGradeId &&
-                        r.MinYearsService <= years &&
-                        (r.MaxYearsService == null || r.MaxYearsService >= years) &&
-                        r.IsActive);
 
                 var remainingBeforeReset = balance.RemainingDays;
 
@@ -440,15 +547,12 @@ namespace HRConnect.Api.Services
                     ? remainingBeforeReset - 5
                     : 0;
 
-                var newEntitlement = rule.DaysAllocated + carryover;
-
-                // STORE AUDIT VALUES
                 balance.CarryoverDays = carryover;
                 balance.ForfeitedDays = forfeited;
 
-                balance.EntitledDays = newEntitlement;
+                balance.EntitledDays = carryover;
                 balance.UsedDays = 0;
-                balance.RemainingDays = newEntitlement;
+                balance.RemainingDays = carryover;
 
                 balance.LastResetYear = currentYear;
             }
@@ -767,6 +871,171 @@ namespace HRConnect.Api.Services
             mlBalance.UsedDays = 0;
             mlBalance.EntitledDays = 120;
             mlBalance.RemainingDays = 120;
+
+            await _context.SaveChangesAsync();
+        }
+        public async Task<LeaveProjectionResponse> ProjectAnnualLeaveAsync(
+     Guid employeeId,
+     DateOnly projectionDate)
+        {
+            var employee = await _context.Employees
+                .Include(e => e.LeaveBalances)
+                .FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
+
+            if (employee == null)
+                throw new InvalidOperationException("Employee not found.");
+
+            var annualLeave = await _context.LeaveTypes
+                .FirstAsync(l => l.Code == "AL" && l.IsActive);
+
+            var balance = employee.LeaveBalances
+                .First(b => b.LeaveTypeId == annualLeave.Id);
+
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
+            // If projecting backwards or today → just return current
+            if (projectionDate <= today)
+            {
+                return new LeaveProjectionResponse
+                {
+                    EmployeeName = $"{employee.FirstName} {employee.LastName}",
+                    ProjectionDate = projectionDate,
+                    ProjectedEntitledDays = balance.EntitledDays,
+                    UsedDays = balance.UsedDays,
+                    ProjectedRemainingDays = balance.RemainingDays
+                };
+            }
+
+            decimal projectedTotal = balance.EntitledDays;
+
+            // We only project from the day after today.
+            var projectionStart = today.AddDays(1);
+
+            var segments = await _context.EmployeeAccrualRateHistories
+                .Where(x => x.EmployeeId == employeeId)
+                .OrderBy(x => x.EffectiveFrom)
+                .ToListAsync();
+
+            foreach (var segment in segments)
+            {
+                // completely ignore any history that finishes before our projection window
+                if (segment.EffectiveTo.HasValue && segment.EffectiveTo.Value < projectionStart)
+                    continue;
+
+                // windowStart should be the later of the segment's start date and
+                // the first day we are projecting (tomorrow).
+                var windowStart = segment.EffectiveFrom > projectionStart
+                    ? segment.EffectiveFrom
+                    : projectionStart;
+
+                // windowEnd is either the end of the segment or the requested
+                // projection date, whichever comes first.  If the segment is open
+                // ended, we use the projection date directly.
+                var windowEnd = segment.EffectiveTo.HasValue
+                    ? (segment.EffectiveTo.Value < projectionDate
+                        ? segment.EffectiveTo.Value
+                        : projectionDate)
+                    : projectionDate;
+
+                if (windowEnd < windowStart)
+                    continue;
+
+                int workingDays = WorkingDayCalculator.CountWorkingDays(
+                    windowStart,
+                    windowEnd);
+
+                projectedTotal += workingDays * segment.DailyRate;
+            }
+
+            projectedTotal = Math.Round(projectedTotal, 2);
+
+            return new LeaveProjectionResponse
+            {
+                EmployeeName = $"{employee.FirstName} {employee.LastName}",
+                ProjectionDate = projectionDate,
+                ProjectedEntitledDays = projectedTotal,
+                UsedDays = balance.UsedDays,
+                ProjectedRemainingDays = projectedTotal - balance.UsedDays
+            };
+        }
+        private async Task BackfillHistoricalAnnualAccrualAsync(Employee employee)
+        {
+            var today = DateTime.UtcNow.Date;
+            var currentYear = today.Year;
+
+            // If hired this year → nothing to backfill
+            if (employee.StartDate.Year >= currentYear)
+                return;
+
+            var annualLeave = await _context.LeaveTypes
+                .FirstAsync(l => l.Code == "AL" && l.IsActive);
+
+            var balance = await _context.EmployeeLeaveBalances
+                .FirstAsync(b =>
+                    b.EmployeeId == employee.EmployeeId &&
+                    b.LeaveTypeId == annualLeave.Id);
+
+            var rule = await _context.LeaveEntitlementRules
+                .FirstAsync(r =>
+                    r.LeaveTypeId == annualLeave.Id &&
+                    r.JobGradeId == employee.Position.JobGradeId &&
+                    r.IsActive);
+
+            decimal dailyRate = rule.DaysAllocated / 260m;
+
+            // Calculate accrual up to 31 Dec of previous year
+            var endOfPreviousYear = new DateOnly(currentYear - 1, 12, 31);
+
+            int workingDays = WorkingDayCalculator.CountWorkingDays(
+                employee.StartDate,
+                endOfPreviousYear);
+
+            decimal accrued = Math.Round(workingDays * dailyRate, 2);
+
+            // Apply carryover cap
+            var carryover = accrued <= 5 ? accrued : 5;
+            var forfeited = accrued > 5 ? accrued - 5 : 0;
+
+            balance.CarryoverDays = carryover;
+            balance.ForfeitedDays = forfeited;
+
+            balance.EntitledDays = carryover;
+            balance.RemainingDays = carryover;
+            balance.UsedDays = 0;
+
+            balance.LastResetYear = currentYear;
+        }
+        private async Task CreateInitialAccrualSegmentAsync(Employee employee)
+        {
+            // idempotency: don't create a second segment if one already exists
+            bool exists = await _context.EmployeeAccrualRateHistories
+                .AnyAsync(s => s.EmployeeId == employee.EmployeeId);
+            if (exists)
+                return;
+
+            var annualLeave = await _context.LeaveTypes
+                .FirstAsync(l => l.Code == "AL" && l.IsActive);
+
+            var yearsOfService = CalculateYearsOfService(employee.StartDate);
+
+            var rule = await _context.LeaveEntitlementRules
+                .FirstAsync(r =>
+                    r.LeaveTypeId == annualLeave.Id &&
+                    r.JobGradeId == employee.Position.JobGradeId &&
+                    r.MinYearsService <= yearsOfService &&
+                    (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
+                    r.IsActive);
+
+            await _context.EmployeeAccrualRateHistories.AddAsync(
+                new EmployeeAccrualRateHistory
+                {
+                    EmployeeId = employee.EmployeeId,
+                    AnnualEntitlement = rule.DaysAllocated,
+                    DailyRate = rule.DaysAllocated / 260m,
+                    EffectiveFrom = employee.StartDate,
+                    EffectiveTo = null,
+                    CreatedDate = DateTime.UtcNow
+                });
 
             await _context.SaveChangesAsync();
         }

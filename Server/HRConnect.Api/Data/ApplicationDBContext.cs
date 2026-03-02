@@ -20,6 +20,7 @@ namespace HRConnect.Api.Data
         public DbSet<LeaveEntitlementRule> LeaveEntitlementRules => Set<LeaveEntitlementRule>();
         public DbSet<EmployeeLeaveBalance> EmployeeLeaveBalances => Set<EmployeeLeaveBalance>();
         public DbSet<LeaveApplication> LeaveApplications => Set<LeaveApplication>();
+        public DbSet<EmployeeAccrualRateHistory> EmployeeAccrualRateHistories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -32,12 +33,19 @@ namespace HRConnect.Api.Data
             ConfigureLeaveEntitlementRule(modelBuilder);
             ConfigureEmployeeLeaveBalance(modelBuilder);
             ConfigureLeaveApplication(modelBuilder);
+            ConfigureEmployeeAccrualRateHistory(modelBuilder);
 
             SeedData(modelBuilder);
         }
 
         // ================= CONFIGURATION =================
-
+        private static void ConfigureEmployeeAccrualRateHistory(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<EmployeeAccrualRateHistory>()
+                .HasOne(x => x.Employee)
+                .WithMany(e => e.AccrualRateHistory)
+                .HasForeignKey(x => x.EmployeeId);
+        }
         private static void ConfigureJobGrade(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<JobGrade>()

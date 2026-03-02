@@ -52,5 +52,18 @@ namespace HRConnect.Api.DTOs
         public int LeaveTypeId { get; set; }
         public decimal UsedDays { get; set; }
     }
+    public class LeaveProjectionRequest
+    {
+        public Guid EmployeeId { get; set; }
+        public DateOnly ProjectionDate { get; set; }
+    }
+    public class LeaveProjectionResponse
+    {
+        public string EmployeeName { get; set; } = string.Empty;
+        public DateOnly ProjectionDate { get; set; }
+        public decimal ProjectedEntitledDays { get; set; }
+        public decimal UsedDays { get; set; }
+        public decimal ProjectedRemainingDays { get; set; }
+    }
 
 }

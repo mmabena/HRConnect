@@ -19,10 +19,12 @@ namespace HRConnect.Api.Interfaces
         Task UpdateUsedDaysAsync(UpdateUsedDaysRequest request);
         Task ResetMaternityLeaveForNewPregnancy(Guid employeeId);
         Task ProcessCarryOverNotificationAsync();
-        Task ProcessAnnualResetAsync();
+        //Task ProcessAnnualResetAsync();
         Task UpdateLeaveEntitlementRuleAsync(UpdateLeaveRuleRequest request);
         Task RecalculateEmployeesForRuleChangeAsync(LeaveEntitlementRule rule);
         Task RecalculateAllFamilyResponsibilityLeaveAsync();
         Task RecalculateFamilyResponsibilityLeaveAsync(Guid employeeId);
+        Task<LeaveProjectionResponse> ProjectAnnualLeaveAsync(Guid employeeId, DateOnly projectionDate);
+        Task ProcessAnnualResetAsync(int? overrideYear = null);
     }
 }
