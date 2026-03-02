@@ -36,6 +36,29 @@
       _ = await context.SaveChangesAsync();
     }
 
+    // Add or update PensionFund for an employee
+    public async Task AddOrUpdatePensionFundAsync(PensionFund fund)
+    {
+      PensionFund? existingFund = await context.PensionFunds.
+        FirstOrDefaultAsync(f => f.EmployeeId == fund.EmployeeId);
+
+      if (existingFund == null)
+      {
+        _ = await context.PensionFunds.AddAsync(fund);
+      }
+      else
+      {
+        existingFund.PensionOptionId = fund.PensionOptionId;
+        existingFund.ContributionAmount = fund.ContributionAmount;
+        _ = context.PensionFunds.Update(existingFund);
+      }
+    }
+
+    public async Task SaveChangesAsync()
+    {
+      _ = await context.SaveChangesAsync();
+    }
+
     // ============================
     // Pension Options
     // ============================
@@ -63,5 +86,16 @@
       _ = await context.SaveChangesAsync();
     }
 
+    // ============================
+    // Employees
+    // ============================
+
+    // FIX: EmployeeId is a string, not int
+    public async Task<Employee?> GetEmployeeByIdAsync(string id)
+    {
+      return await context.Employees
+                          .FirstOrDefaultAsync(e => e.EmployeeId == id);
+    }
   }
 }
+

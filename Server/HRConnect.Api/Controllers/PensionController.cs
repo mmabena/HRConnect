@@ -11,20 +11,17 @@
 
   [ApiController]
   [Route("api/[controller]")]
-  public class PensionController(
-      IPensionFundService pensionFundService,
-      IPensionFundDeductionService pensionFundDeductionService
-  ) : ControllerBase
+  public class PensionController(IPensionFundService pensionFundService) : ControllerBase
   {
+    private readonly IPensionFundService pensionFundService = pensionFundService;
+
     // ===============================
     // GET - All Pension Options
     // ===============================
     [HttpGet("options")]
     public async Task<ActionResult<IEnumerable<PensionOption>>> GetPensionOptions()
     {
-      IEnumerable<PensionOption> options =
-          await pensionFundService.GetPensionOptionsAsync();
-
+      IEnumerable<PensionOption> options = await pensionFundService.GetPensionOptionsAsync();
       return Ok(options);
     }
 
@@ -34,9 +31,7 @@
     [HttpGet("options/{id}")]
     public async Task<ActionResult<PensionOption>> GetPensionOption(int id)
     {
-      PensionOption? option =
-          await pensionFundService.GetPensionOptionByIdAsync(id);
-
+      PensionOption? option = await pensionFundService.GetPensionOptionByIdAsync(id);
       return option != null ? Ok(option) : NotFound("Pension option not found.");
     }
 
@@ -53,7 +48,6 @@
       };
 
       ServiceResult result = await pensionFundService.AddPensionOptionAsync(pensionOption);
-
       return result.IsSuccess ? Ok(result.Message) : BadRequest(result.Message);
     }
 
@@ -69,22 +63,20 @@
         ContributionPercentage = dto.ContributionPercentage
       };
 
-      ServiceResult result =
-          await pensionFundService.UpdatePensionOptionAsync(pensionOption);
-
+      ServiceResult result = await pensionFundService.UpdatePensionOptionAsync(pensionOption);
       return result.IsSuccess ? Ok(result.Message) : BadRequest(result.Message);
     }
 
     // ===============================
-    // POST - Process Monthly Deductions
+    // POST - Employee Selects Pension Option
     // ===============================
-    [Authorize(Roles = "SuperUser")]
-    [HttpPost("process-deductions")]
-    public async Task<IActionResult> ProcessMonthlyDeductions()
+    [HttpPost("select-option")]
+    public async Task<IActionResult> SelectPensionOption([FromBody] SelectPensionOptionDto dto)
     {
-      await pensionFundDeductionService.ProcessMonthlyPensionDeductionsAsync();
-      return Ok("Monthly pension deductions processed successfully.");
+      ServiceResult result = await pensionFundService.RecordEmployeePensionSelectionAsync(dto.EmployeeId, dto.PensionOptionId);
+      return result.IsSuccess ? Ok(result.Message) : BadRequest(result.Message);
     }
   }
+
 }
 

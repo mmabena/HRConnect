@@ -5,6 +5,7 @@
   using System.Collections.Generic;
   using System.Threading.Tasks;
 
+  // Primary constructor style
   public class PensionFundService(IPensionRepository repo) : IPensionFundService
   {
     // ============================
@@ -54,8 +55,7 @@
         return ServiceResult.Failure("Percentage must be between 0 and 15.");
       }
 
-      IEnumerable<PensionOption> existingOptions =
-          await repo.GetPensionOptionsAsync();
+      IEnumerable<PensionOption> existingOptions = await repo.GetPensionOptionsAsync();
 
       foreach (PensionOption option in existingOptions)
       {
@@ -88,5 +88,48 @@
     {
       return monthlySalary * (pensionoption.ContributionPercentage / 100);
     }
+
+    // ============================
+    // Record Pension Option Selection
+    // ============================
+
+    public async Task<ServiceResult> RecordEmployeePensionSelectionAsync(string employeeId, int pensionOptionId)
+    {
+      Employee? employee = await repo.GetEmployeeByIdAsync(employeeId);
+      PensionOption? option = await repo.GetPensionOptionByIdAsync(pensionOptionId);
+
+      if (employee == null || option == null)
+      {
+        return ServiceResult.Failure("Employee or Pension Option not found.");
+      }
+
+      if (employee.EmploymentStatus != EmploymentStatus.Permanent)
+      {
+        return ServiceResult.Failure("Only permanent employees may select a pension option.");
+      }
+
+      decimal salary = employee.MonthlySalary ?? 0m;
+      decimal contributionAmount = salary * (option.ContributionPercentage / 100);
+
+
+      PensionFund fund = new()
+      {
+        EmployeeId = employee.EmployeeId,
+        EmployeeName = employee.Name,
+        PensionOptionId = option.PensionOptionId,
+        MonthlySalary = employee.MonthlySalary ?? 0m,          // snapshot salary
+        ContributionPercentage = option.ContributionPercentage, // snapshot percentage
+        ContributionAmount = contributionAmount,
+        TaxCode = 4001 // default tax code
+      };
+
+      await repo.AddOrUpdatePensionFundAsync(fund);
+      await repo.SaveChangesAsync();
+
+      return ServiceResult.Success("Pension option recorded and contribution calculated.");
+    }
+
+
   }
 }
+
