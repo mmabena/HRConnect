@@ -13,6 +13,16 @@
   margin-left: 144px;
 }
 
+.cm-datetime-wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  height: 34px;
+  box-sizing: border-box;
+  margin-right: 135px;
+}
+
 
 .my-custom-slider {
   width: 100%;
