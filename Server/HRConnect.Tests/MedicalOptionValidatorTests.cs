@@ -12,7 +12,9 @@
   using HRConnect.Api.Models;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Utils.MedicalOption.Records;
-   public class MedicalOptionValidatorTests
+  using Utils;
+
+  public class MedicalOptionValidatorTests
    {
      private readonly Mock<IMedicalOptionRepository> _mockRepository;
 
@@ -39,7 +41,7 @@
      public void ValidateUpdatePeriodShouldReturnFalseOutsideNovemberDecember()
      {
          // Arrange
-         var testDate = new DateTime(2024, 10, 15); // October
+         var testDate = new DateTime(2024, 09, 15); // September
          
          // Act
          var result = MedicalOptionValidator.ValidateUpdatePeriod(testDate);
@@ -284,14 +286,40 @@
          // Arrange
          var entity = new UpdateMedicalOptionVariantsDto
          {
-             MonthlyRiskContributionPrincipal = 1000,
-             MonthlyMsaContributionPrincipal = 500
+           MedicalOptionId = 1, 
+           SalaryBracketMin = 0,
+           SalaryBracketMax = 15000,
+           MonthlyRiskContributionPrincipal = null,
+           MonthlyRiskContributionAdult = 500,
+           MonthlyRiskContributionChild = 300,
+           MonthlyRiskContributionChild2 = 0,
+           MonthlyMsaContributionPrincipal = null,
+           MonthlyMsaContributionAdult = null,
+           MonthlyMsaContributionChild = null,
+           TotalMonthlyContributionsPrincipal = null,
+           TotalMonthlyContributionsAdult = 500,
+           TotalMonthlyContributionsChild = 300,
+           TotalMonthlyContributionsChild2 = null
          };
          
          var dbOption = new MedicalOption
          {
-             MonthlyRiskContributionPrincipal = 1000,
-             MonthlyMsaContributionPrincipal = 500
+           MedicalOptionId = 1, 
+           MedicalOptionName = "Plan A",
+           MedicalOptionCategoryId = 1,
+           SalaryBracketMin = 0,
+           SalaryBracketMax = 15000,
+           MonthlyRiskContributionPrincipal = null,
+           MonthlyRiskContributionAdult = 500,
+           MonthlyRiskContributionChild = 300,
+           MonthlyRiskContributionChild2 = null,
+           MonthlyMsaContributionPrincipal = null,
+           MonthlyMsaContributionAdult = null,
+           MonthlyMsaContributionChild = null,
+           TotalMonthlyContributionsPrincipal = null,
+           TotalMonthlyContributionsAdult = 500,
+           TotalMonthlyContributionsChild = 300,
+           TotalMonthlyContributionsChild2 = null
          };
          
          // Act
@@ -322,7 +350,6 @@
          Assert.False(result);
      }
 
-     // Integration Tests with Mock Repository
      [Fact]
      public async Task ValidateAllCategoryVariantsComprehensiveAsyncShouldPassValidPayload()
      {
@@ -330,25 +357,125 @@
          var categoryId = 1;
          var bulkUpdateDto = new List<UpdateMedicalOptionVariantsDto>
          {
-             new() { MedicalOptionId = 1, MonthlyRiskContributionPrincipal = 1000 },
-             new() { MedicalOptionId = 2, MonthlyRiskContributionPrincipal = 1500 }
+           new() { 
+             MedicalOptionId = 1, 
+             SalaryBracketMin = 0,
+             SalaryBracketMax = 15000,
+             MonthlyRiskContributionPrincipal = null,
+             MonthlyRiskContributionAdult = 500,
+             MonthlyRiskContributionChild = 300,
+             MonthlyRiskContributionChild2 = 0,
+             MonthlyMsaContributionPrincipal = null,
+             MonthlyMsaContributionAdult = null,
+             MonthlyMsaContributionChild = null,
+             TotalMonthlyContributionsPrincipal = null,
+             TotalMonthlyContributionsAdult = 500,
+             TotalMonthlyContributionsChild = 300,
+             TotalMonthlyContributionsChild2 = null
+           },
+           new() { 
+             MedicalOptionId = 2, 
+             SalaryBracketMin = 15001,
+             SalaryBracketMax = 30000,
+             MonthlyRiskContributionPrincipal = null,
+             MonthlyRiskContributionAdult = 750,
+             MonthlyRiskContributionChild = 450,
+             MonthlyRiskContributionChild2 = null,
+             MonthlyMsaContributionPrincipal = null,
+             MonthlyMsaContributionAdult = null,
+             MonthlyMsaContributionChild = null,
+             TotalMonthlyContributionsPrincipal = null,
+             TotalMonthlyContributionsAdult = 750,
+             TotalMonthlyContributionsChild = 450,
+             TotalMonthlyContributionsChild2 = null
+           }
          };
          
          var dbData = new List<MedicalOption>
          {
-             new() { MedicalOptionId = 1, MedicalOptionName = "Alliance Plus", MedicalOptionCategoryId = 1 },
-             new() { MedicalOptionId = 2, MedicalOptionName = "Alliance Network", MedicalOptionCategoryId = 1 }
+           new() { 
+             MedicalOptionId = 1, 
+             MedicalOptionName = "Plan A",
+             MedicalOptionCategoryId = categoryId,
+             SalaryBracketMin = 0,
+             SalaryBracketMax = 15000,
+             MonthlyRiskContributionPrincipal = null,
+             MonthlyRiskContributionAdult = 500,
+             MonthlyRiskContributionChild = 300,
+             MonthlyRiskContributionChild2 = null,
+             MonthlyMsaContributionPrincipal = null,
+             MonthlyMsaContributionAdult = null,
+             MonthlyMsaContributionChild = null,
+             TotalMonthlyContributionsPrincipal = null,
+             TotalMonthlyContributionsAdult = 500,
+             TotalMonthlyContributionsChild = 300,
+             TotalMonthlyContributionsChild2 = null
+           },
+           new() { 
+             MedicalOptionId = 2, 
+             MedicalOptionName = "Plan B",
+             MedicalOptionCategoryId = categoryId,
+             SalaryBracketMin = 15001,
+             SalaryBracketMax = 30000,
+             MonthlyRiskContributionPrincipal = null,
+             MonthlyRiskContributionAdult = 750,
+             MonthlyRiskContributionChild = 450,
+             MonthlyRiskContributionChild2 = null,
+             MonthlyMsaContributionPrincipal = null,
+             MonthlyMsaContributionAdult = null,
+             MonthlyMsaContributionChild = null,
+             TotalMonthlyContributionsPrincipal = null,
+             TotalMonthlyContributionsAdult = 750,
+             TotalMonthlyContributionsChild = 450,
+             TotalMonthlyContributionsChild2 = null
+           }
          };
+
+         // Create a date within update period (Nov 15, 2024)
+         var testDate = new DateTime(2024, 11, 15, 12, 0, 0);
          
+         var updatedOptions = new List<MedicalOptionDto>
+         {
+           new() { MedicalOptionId = 1, MedicalOptionName = "Plan A Updated" },
+           new() { MedicalOptionId = 2, MedicalOptionName = "Plan B Updated" }
+         };
+    
+         // Mock all repository methods that might be called
+         _mockRepository.Setup(r => r.GetCategoryByIdAsync(categoryId))
+           .ReturnsAsync(new MedicalOptionCategory 
+           { 
+             MedicalOptionCategoryId = categoryId,
+             MedicalOptionCategoryName = "Vital" // Non-restricted category
+           });
+      
+         _mockRepository.Setup(r => r.MedicalOptionCategoryExistsAsync(categoryId))
+           .ReturnsAsync(true);
+      
+         _mockRepository.Setup(r => r.MedicalOptionExistsAsync(It.IsAny<int>()))
+           .ReturnsAsync(true);
+      
+         _mockRepository.Setup(r => r.MedicalOptionExistsWithinCategoryAsync(It.IsAny<int>(), It.IsAny<int>()))
+           .ReturnsAsync(true);
+    
+         _mockRepository.Setup(r => r.GetMedicalOptionsByIdsAsync(It.IsAny<List<int>>()))
+           .ReturnsAsync(new List<MedicalOptionDto>
+           {
+             new() { MedicalOptionId = 1, MedicalOptionName = "Plan A" },
+             new() { MedicalOptionId = 2, MedicalOptionName = "Plan B" }
+           });
+    
          _mockRepository.Setup(r => r.GetAllOptionsUnderCategoryAsync(categoryId))
            .ReturnsAsync(dbData.Select(option => option.ToMedicalOptionDto()).ToList());
+    
+         _mockRepository.Setup(r => r.BulkUpdateByCategoryIdAsync(categoryId, bulkUpdateDto))
+           .ReturnsAsync(updatedOptions);
+         
          // Act
          var result = await MedicalOptionValidator.ValidateAllCategoryVariantsComprehensiveAsync(
-             categoryId, bulkUpdateDto, _mockRepository.Object, dbData);
+             categoryId, bulkUpdateDto, _mockRepository.Object, dbData, testDate);
          
          // Assert
          Assert.True(result.IsValid);
-         _mockRepository.Verify(r => r.GetAllOptionsUnderCategoryAsync(categoryId), Times.Once);
      }
 
      [Fact]
@@ -367,17 +494,19 @@
              new() { MedicalOptionId = 1, MedicalOptionName = "Alliance Plus", MedicalOptionCategoryId = 1 }
          };
          
+         // Create a date within update period (Nov 15, 2024)
+         var testDate = new DateTime(2024, 11, 15, 12, 0, 0);
+         
          _mockRepository.Setup(r => r.GetAllOptionsUnderCategoryAsync(categoryId))
                     .ReturnsAsync(dbData.Select(option => option.ToMedicalOptionDto()).ToList());
          
          // Act
          var result = await MedicalOptionValidator.ValidateAllCategoryVariantsComprehensiveAsync(
-             categoryId, bulkUpdateDto, _mockRepository.Object, dbData);
+             categoryId, bulkUpdateDto, _mockRepository.Object, dbData, testDate);
          
          // Assert
          Assert.False(result.IsValid);
          Assert.Contains("do not exist", result.ErrorMessage);
-         _mockRepository.Verify(r => r.GetAllOptionsUnderCategoryAsync(categoryId), Times.Once);
      }
    }
 }

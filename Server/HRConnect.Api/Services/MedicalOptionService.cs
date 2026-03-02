@@ -7,14 +7,51 @@
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Mappers;
   using HRConnect.Api.Models;
-  using HRConnect.Api.Utils;
   using HRConnect.Api.Utils.Enums;
   using Middleware;
   using Utils.MedicalOption;
-  
+
+  /// <summary>
+  /// Service layer implementation for managing medical options and their categories in the HR Connect system.
+  /// Provides business logic orchestration, validation, and data transformation between the repository layer
+  /// and API controllers, ensuring proper separation of concerns and comprehensive validation.
+  /// </summary>
+  /// <remarks>
+  /// This service acts as the business logic layer between the API controllers and the data repository.
+  /// It orchestrates complex operations, applies business rules, performs comprehensive validation,
+  /// and transforms data between different layers of the application.
+  /// 
+  /// Key responsibilities:
+  /// - Business rule enforcement and validation orchestration
+  /// - Data transformation between DTOs and entities
+  /// - Comprehensive bulk update validation using MedicalOptionValidator
+  /// - Category-specific restriction enforcement (salary bracket updates)
+  /// - Error handling and exception propagation
+  /// - Integration with validation utilities and business logic components
+  /// 
+  /// Architecture patterns:
+  /// - Implements the Service layer pattern for business logic separation
+  /// - Uses dependency injection for repository abstraction
+  /// - Leverages extension methods for data mapping (MedicalOptionMapper)
+  /// - Integrates with comprehensive validation framework
+  /// - Applies the Strategy pattern for category-specific restrictions
+  /// 
+  /// Performance considerations:
+  /// - Uses cached HashSet for O(1) category restriction lookups
+  /// - Leverages repository bulk operations for efficient data access
+  /// - Implements comprehensive validation before database operations
+  /// - Uses async/await pattern for non-blocking operations
+  /// 
+  /// Business rules enforced:
+  /// - Salary bracket restrictions for specific categories (Alliance, Double)
+  /// - Comprehensive validation of contribution amounts and salary brackets
+  /// - Category-option relationship validation
+  /// - Temporal validation support for testing scenarios
+  /// </remarks>
   public class MedicalOptionService:IMedicalOptionService
   {
     private readonly IMedicalOptionRepository _medicalOptionRepository;
+
     /// <summary>
     /// Cached HashSet containing the string names of all medical option categories that are
     /// restricted from salary bracket updates. This provides O(1) lookup performance for
@@ -45,7 +82,17 @@
       .GetValues<NoUpdateOnMedicalOptionCategory>()
       .Select(e => e.ToString())
       .ToHashSet();
-    
+
+    /// <summary>
+    /// Initializes a new instance of the MedicalOptionService class.
+    /// </summary>
+    /// <param name="medicalOptionRepository">The repository instance for data access operations.</param>
+    /// <exception cref="ArgumentNullException">Thrown when medicalOptionRepository is null.</exception>
+    /// <remarks>
+    /// The service requires a valid IMedicalOptionRepository instance for all data operations.
+    /// Dependency injection is used to provide the repository implementation, ensuring
+    /// loose coupling and testability.
+    /// </remarks>
     public MedicalOptionService(IMedicalOptionRepository medicalOptionRepository)
     {
       _medicalOptionRepository = medicalOptionRepository ??
@@ -55,7 +102,7 @@
     /// <summary>
     /// Retrieves medical options grouped by their categories in a client-friendly DTO format.
     /// This method uses the repository to get grouped medical options and transforms them
-    /// using the MedicalOptionMapper extension methods for clean seperation of concerns.
+    /// using the MedicalOptionMapper extension methods for clean separation of concerns.
     /// </summary>
     /// <returns>
     /// A list of MedicalOptionCategoryDto objects, each containing:
@@ -145,8 +192,7 @@
     ///     
     ///     foreach (var option in category.MedicalOptions)
     ///     {
-    ///         Console.WriteLine($"  -
-    ///           {option.MedicalOptionName}: R{option.TotalMonthlyContributionsAdult}/month");
+    ///         Console.WriteLine($"  - {option.MedicalOptionName}: R{option.TotalMonthlyContributionsAdult}/month");
     ///     }
     /// }
     /// </code>
@@ -167,22 +213,71 @@
     }
 
     /// <summary>
-    /// Retrieves a specific medical option by its ID.
+    /// Retrieves a specific medical option by its unique identifier.
     /// </summary>
-    /// <param name="id">The medical option ID to retrieve.</param>
-    /// <returns>The Medical option if found; otherwise, null.</returns>
-    /// <exception cref="ArgumentException">Thrown when the ID is invalid.</exception>
+    /// <param name="id">The unique identifier of the medical option to retrieve.</param>
+    /// <returns>The MedicalOptionDto if found; otherwise, null.</returns>
+    /// <exception cref="ArgumentException">Thrown when the provided id is invalid.</exception>
+    /// <exception cref="KeyNotFoundException">Thrown when no medical option with the specified ID is found.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when the database context is disposed.</exception>
+    /// <exception cref="SqlException">Thrown when there's a database connectivity or query execution error.</exception>
+    /// <remarks>
+    /// This method delegates directly to the repository layer, maintaining a clean separation
+    /// of concerns. The repository handles all database operations and entity-to-DTO mapping.
+    /// 
+    /// The service layer could add additional business logic in the future, such as
+    /// caching, logging, or permission checks, without modifying the repository.
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// var service = new MedicalOptionService(repository);
+    /// var medicalOption = await service.GetMedicalOptionByIdAsync(123);
+    /// 
+    /// if (medicalOption != null)
+    /// {
+    ///     Console.WriteLine($"Option: {medicalOption.MedicalOptionName}");
+    ///     Console.WriteLine($"Category ID: {medicalOption.MedicalOptionCategoryId}");
+    /// }
+    /// </code>
+    /// </example>
     public async Task<MedicalOptionDto?> GetMedicalOptionByIdAsync(int id)
     {
       return await _medicalOptionRepository.GetMedicalOptionByIdAsync(id);
     }
 
     /// <summary>
-    /// Retrieves a specific medical option category by its ID.
+    /// Retrieves the first medical option found within a specific category.
     /// </summary>
-    /// <param name="categoryId">The category ID</param>
-    /// <returns>List of medical options</returns>
-    /// <exception cref="ArgumentException">Thrown when category ID is invalid</exception>
+    /// <param name="categoryId">The unique identifier of the medical option category.</param>
+    /// <returns>The first MedicalOptionDto found in the category; otherwise, throws KeyNotFoundException.</returns>
+    /// <exception cref="ArgumentException">Thrown when the provided category ID is invalid.</exception>
+    /// <exception cref="KeyNotFoundException">Thrown when no medical options are found for the specified category.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when the database context is disposed.</exception>
+    /// <exception cref="SqlException">Thrown when there's a database connectivity or query execution error.</exception>
+    /// <remarks>
+    /// This method retrieves all options within a category and returns the first one found.
+    /// It throws a KeyNotFoundException if no options exist in the category, ensuring
+    /// that callers are aware when a category is empty.
+    /// 
+    /// This approach is useful when you need to validate that a category has at least
+    /// one option, or when you need a representative option from a category for display
+    /// or validation purposes.
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// var service = new MedicalOptionService(repository);
+    /// 
+    /// try
+    /// {
+    ///     var firstOption = await service.GetMedicalOptionCategoryByIdAsync(5);
+    ///     Console.WriteLine($"First option in category 5: {firstOption.MedicalOptionName}");
+    /// }
+    /// catch (KeyNotFoundException)
+    /// {
+    ///     Console.WriteLine("Category 5 has no medical options");
+    /// }
+    /// </code>
+    /// </example>
     public async Task<MedicalOptionDto?> GetMedicalOptionCategoryByIdAsync(int categoryId)
     {
       var options = await _medicalOptionRepository
@@ -193,45 +288,147 @@
     }
 
     /// <summary>
-    /// Checks if a medical option category exists.
+    /// Checks if a medical option category exists in the system.
     /// </summary>
-    /// <param name="categoryId">The category ID</param>
-    /// <returns>True if category exists</returns>
-    /// <exception cref="ArgumentException">Thrown when category ID is invalid</exception>
+    /// <param name="categoryId">The unique identifier of the medical option category to validate.</param>
+    /// <returns>True if the category exists; otherwise, false.</returns>
+    /// <exception cref="ArgumentException">Thrown when the provided category ID is invalid.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when the database context is disposed.</exception>
+    /// <exception cref="SqlException">Thrown when there's a database connectivity or query execution error.</exception>
+    /// <remarks>
+    /// This method delegates directly to the repository layer for efficient existence checking.
+    /// The repository uses Entity Framework's AnyAsync() method for optimal performance,
+    /// generating a SQL query that stops as soon as a matching record is found.
+    /// 
+    /// This is useful for pre-validation before performing operations that depend on
+    /// the existence of a specific category.
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// var service = new MedicalOptionService(repository);
+    /// 
+    /// if (await service.MedicalOptionCategoryExistsAsync(5))
+    /// {
+    ///     Console.WriteLine("Category 5 exists, proceeding with operations...");
+    /// }
+    /// else
+    /// {
+    ///     Console.WriteLine("Category 5 does not exist");
+    /// }
+    /// </code>
+    /// </example>
     public async Task<bool> MedicalOptionCategoryExistsAsync(int categoryId)
     {
       return await _medicalOptionRepository.MedicalOptionCategoryExistsAsync(categoryId);
     }
 
     /// <summary>
-    /// Checks if a medical option exists.
+    /// Checks if a specific medical option exists in the system.
     /// </summary>
-    /// <param name="optionId">The option ID</param>
-    /// <returns>True if option exists</returns>
-    /// <exception cref="ArgumentException">Thrown when option ID is invalid</exception>
+    /// <param name="optionId">The unique identifier of the medical option to validate.</param>
+    /// <returns>True if the medical option exists; otherwise, false.</returns>
+    /// <exception cref="ArgumentException">Thrown when the provided option ID is invalid.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when the database context is disposed.</exception>
+    /// <exception cref="SqlException">Thrown when there's a database connectivity or query execution error.</exception>
+    /// <remarks>
+    /// This method delegates directly to the repository layer for efficient existence checking.
+    /// The repository uses Entity Framework's AnyAsync() method for optimal performance,
+    /// generating a SQL query that stops as soon as a matching record is found.
+    /// 
+    /// This is useful for pre-validation before performing operations that depend on
+    /// the existence of a specific medical option.
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// var service = new MedicalOptionService(repository);
+    /// 
+    /// if (await service.MedicalOptionExistsAsync(123))
+    /// {
+    ///     Console.WriteLine("Medical option 123 exists, proceeding with operations...");
+    /// }
+    /// else
+    /// {
+    ///     Console.WriteLine("Medical option 123 does not exist");
+    /// }
+    /// </code>
+    /// </example>
     public async Task<bool> MedicalOptionExistsAsync(int optionId)
     {
       return await _medicalOptionRepository.MedicalOptionExistsAsync(optionId);
     }
 
     /// <summary>
-    /// Gets all options under a specific category.
+    /// Retrieves all medical options belonging to a specific category.
     /// </summary>
-    /// <param name="categoryId">The category ID</param>
-    /// <returns>List of medical options</returns>
-    /// <exception cref="ArgumentException">Thrown when category ID is invalid</exception>
+    /// <param name="categoryId">The unique identifier of the medical option category.</param>
+    /// <returns>List of MedicalOptionDto objects belonging to the specified category.</returns>
+    /// <exception cref="ArgumentException">Thrown when the provided category ID is invalid.</exception>
+    /// <exception cref="KeyNotFoundException">Thrown when the specified category does not exist.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when the database context is disposed.</exception>
+    /// <exception cref="SqlException">Thrown when there's a database connectivity or query execution error.</exception>
+    /// <remarks>
+    /// This method delegates directly to the repository layer, which handles all database
+    /// operations and entity-to-DTO mapping. The repository validates category existence
+    /// before retrieving the options to ensure data integrity.
+    /// 
+    /// The method returns an empty list if the category exists but contains no medical options.
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// var service = new MedicalOptionService(repository);
+    /// 
+    /// try
+    /// {
+    ///     var categoryOptions = await service.GetAllOptionsUnderCategoryAsync(5);
+    ///     Console.WriteLine($"Found {categoryOptions.Count} options in category 5:");
+    ///     
+    ///     foreach (var option in categoryOptions)
+    ///     {
+    ///         Console.WriteLine($"- {option.MedicalOptionName}");
+    ///     }
+    /// }
+    /// catch (KeyNotFoundException ex)
+    /// {
+    ///     Console.WriteLine($"Error: {ex.Message}");
+    /// }
+    /// </code>
+    /// </example>
     public async Task<List<MedicalOptionDto?>> GetAllOptionsUnderCategoryAsync(int categoryId)
     {
       return await _medicalOptionRepository.GetAllOptionsUnderCategoryAsync(categoryId);
     }
 
     /// <summary>
-    /// Checks if a medical option exists within a specific category.
+    /// Validates that a specific medical option exists within a particular category.
     /// </summary>
-    /// <param name="categoryId">The category ID</param>
-    /// <param name="optionId">The option ID</param>
-    /// <returns>True if option exists in category</returns>
-    /// <exception cref="ArgumentException">Thrown when IDs are invalid</exception>
+    /// <param name="categoryId">The unique identifier of the medical option category.</param>
+    /// <param name="optionId">The unique identifier of the medical option.</param>
+    /// <returns>True if the medical option exists within the specified category; otherwise, false.</returns>
+    /// <exception cref="ArgumentException">Thrown when either categoryId or optionId is invalid.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when the database context is disposed.</exception>
+    /// <exception cref="SqlException">Thrown when there's a database connectivity or query execution error.</exception>
+    /// <remarks>
+    /// This method delegates directly to the repository layer, which uses Entity Framework's
+    /// AnyAsync() method with a compound condition to check both the category membership
+    /// and option existence in a single database query.
+    /// 
+    /// This is useful for preventing invalid associations in business logic and ensuring
+    /// that operations are performed on valid category-option relationships.
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// var service = new MedicalOptionService(repository);
+    /// 
+    /// if (await service.MedicalOptionExistsWithinCategoryAsync(5, 123))
+    /// {
+    ///     Console.WriteLine("Option 123 belongs to category 5");
+    /// }
+    /// else
+    /// {
+    ///     Console.WriteLine("Option 123 does not belong to category 5");
+    /// }
+    /// </code>
+    /// </example>
     public async Task<bool> MedicalOptionExistsWithinCategoryAsync(int categoryId, int optionId)
     {
       return await _medicalOptionRepository
@@ -239,17 +436,133 @@
     }
 
     /// <summary>
-    /// Bulk update medical options by category with comprehensive validation.
+    /// Performs bulk updates of medical options within a specific category with comprehensive validation.
+    /// This method orchestrates complex business logic, validation, and database operations to ensure
+    /// data integrity and compliance with business rules before applying updates.
     /// </summary>
-    /// <param name="categoryId">The category ID</param>
-    /// <param name="bulkUpdateDto">The bulk update data</param>
-    /// <returns>List of updated medical options</returns>
-    /// <exception cref="ValidationException">Thrown when validation fails</exception>
-    /// <exception cref="InvalidOperationException">Thrown when business rules are violated
-    /// </exception>
+    /// <param name="categoryId">The unique identifier of the medical option category containing options to update.</param>
+    /// <param name="bulkUpdateDto">Collection of UpdateMedicalOptionVariantsDto objects containing the new values for updates.</param>
+    /// <param name="testDate">Optional date parameter for testing integration scenarios; if null, current date is used.</param>
+    /// <returns>Read-only list of updated MedicalOptionDto objects representing the successfully modified medical options.</returns>
+    /// <exception cref="ArgumentException">Thrown when categoryId is invalid (less than or equal to 0) or bulkUpdateDto is null or empty.</exception>
+    /// <exception cref="ValidationException">Thrown when comprehensive validation fails, containing detailed error information.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when business rules are violated or category restrictions apply.</exception>
+    /// <exception cref="KeyNotFoundException">Thrown when no medical options are found for the specified category with the provided option IDs.</exception>
+    /// <exception cref="SqlException">Thrown when there's a database connectivity or bulk operation error.</exception>
+    /// <remarks>
+    /// <para>
+    /// This method implements a comprehensive validation and update strategy:
+    /// </para>
+    /// <list type="number">
+    /// <item><description>Input parameter validation for categoryId and bulkUpdateDto</description></item>
+    /// <item><description>Retrieval of existing category data for validation context</description></item>
+    /// <item><description>Comprehensive validation using MedicalOptionValidator with multiple validation layers</description></item>
+    /// <item><description>Category-specific restriction enforcement (salary bracket updates blocked for Alliance, Double categories)</description></item>
+    /// <item><description>Temporal validation support using testDate parameter for testing scenarios</description></item>
+    /// <item><description>Database update execution only after all validations pass</description></item>
+    /// </list>
+    /// 
+    /// <para>
+    /// Validation layers applied:
+    /// </para>
+    /// <list type="bullet">
+    /// <item><description>Basic parameter validation (IDs, null checks)</description></item>
+    /// <item><description>Category existence and membership validation</description></item>
+    /// <item><description>Salary bracket range validation (min &lt; max)</description></item>
+    /// <item><description>Contribution amount validation and consistency checks</description></item>
+    /// <item><description>Category-specific business rule enforcement</description></item>
+    /// <item><description>Temporal validation for test scenarios</description></item>
+    /// </list>
+    /// 
+    /// <para>
+    /// Business rules enforced:
+    /// </para>
+    /// <list type="bullet">
+    /// <item><description>Salary bracket updates are blocked for Alliance and Double categories</description></item>
+    /// <item><description>All contribution amounts must be positive and consistent</description></item>
+    /// <item><description>Salary bracket ranges must not overlap within categories</description></item>
+    /// <item><description>Category-option relationships must be maintained</description></item>
+    /// </list>
+    /// 
+    /// <para>
+    /// Performance considerations:
+    /// </para>
+    /// <list type="bullet">
+    /// <item><description>Uses cached HashSet for O(1) category restriction lookups</description></item>
+    /// <item><description>Performs comprehensive validation before database operations</description></item>
+    /// <item><description>Leverages repository bulk operations for efficient updates</description></item>
+    /// <item><description>Maps DTOs to entities only for validation, minimizing memory usage</description></item>
+    /// </list>
+    /// 
+    /// <para>
+    /// The operation is atomic - either all updates succeed after validation or none are applied.
+    /// Validation failures result in detailed ValidationException with specific error messages.
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// var service = new MedicalOptionService(repository);
+    /// 
+    /// // Prepare bulk update data
+    /// var updates = new List&lt;UpdateMedicalOptionVariantsDto&gt;
+    /// {
+    ///     new UpdateMedicalOptionVariantsDto
+    ///     {
+    ///         MedicalOptionId = 123,
+    ///         SalaryBracketMin = 5000,
+    ///         SalaryBracketMax = 10000,
+    ///         MonthlyRiskContributionPrincipal = 150.50m,
+    ///         TotalMonthlyContributionsAdult = 200.00m
+    ///     },
+    ///     new UpdateMedicalOptionVariantsDto
+    ///     {
+    ///         MedicalOptionId = 124,
+    ///         SalaryBracketMin = 10001,
+    ///         SalaryBracketMax = 20000,
+    ///         MonthlyRiskContributionPrincipal = 250.75m,
+    ///         TotalMonthlyContributionsAdult = 300.00m
+    ///     }
+    /// };
+    /// 
+    /// try
+    /// {
+    ///     var updatedOptions = await service.BulkUpdateMedicalOptionsByCategoryAsync(
+    ///         categoryId: 5, 
+    ///         bulkUpdateDto: updates, 
+    ///         testDate: DateTime.Now);
+    ///         
+    ///     Console.WriteLine($"Successfully updated {updatedOptions.Count} medical options");
+    ///     
+    ///     foreach (var option in updatedOptions)
+    ///     {
+    ///         Console.WriteLine($"Updated: {option.MedicalOptionName}");
+    ///         Console.WriteLine($"New Adult Contribution: {option.TotalMonthlyContributionsAdult:C}");
+    ///     }
+    /// }
+    /// catch (ValidationException ex)
+    /// {
+    ///     Console.WriteLine($"Validation failed: {ex.Message}");
+    ///     if (ex.Errors != null)
+    ///     {
+    ///         foreach (var error in ex.Errors)
+    ///         {
+    ///             Console.WriteLine($"Error: {string.Join(", ", error.Value)}");
+    ///         }
+    ///     }
+    /// }
+    /// catch (InvalidOperationException ex)
+    /// {
+    ///     Console.WriteLine($"Business rule violation: {ex.Message}");
+    /// }
+    /// catch (KeyNotFoundException ex)
+    /// {
+    ///     Console.WriteLine($"Data not found: {ex.Message}");
+    /// }
+    /// </code>
+    /// </example>
     public async Task<IReadOnlyList<MedicalOptionDto>> BulkUpdateMedicalOptionsByCategoryAsync(
       int categoryId,
-      IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto)
+      IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto, DateTime? testDate = null)
     {
       // Validate input parameters
       if (categoryId <= 0)
@@ -289,7 +602,7 @@
           TotalMonthlyContributionsAdult = dto.TotalMonthlyContributionsAdult,
           TotalMonthlyContributionsChild = dto.TotalMonthlyContributionsChild,
           TotalMonthlyContributionsChild2 = dto.TotalMonthlyContributionsChild2
-        }).ToList());
+        }).ToList(), testDate ?? DateTime.Now);
 
       if (!validationResult.IsValid)
       {

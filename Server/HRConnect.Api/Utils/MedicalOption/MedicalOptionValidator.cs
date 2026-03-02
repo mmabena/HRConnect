@@ -8,48 +8,252 @@
   using Models;
   using Records;
 
+    /// <summary>
+  /// Comprehensive static validator for medical option operations, providing extensive validation
+  /// logic for bulk updates, salary brackets, contribution structures, and business rule enforcement.
+  /// This class serves as the central validation hub for all medical option modifications,
+  /// ensuring data integrity, compliance with business rules, and regulatory requirements.
+  /// </summary>
+  /// <remarks>
+  /// <para>
+  /// <strong>Architecture Overview:</strong>
+  /// This static utility class implements a multi-layered validation strategy with specialized
+  /// validation methods for different aspects of medical option management. It follows the
+  /// Single Responsibility Principle by organizing validation logic into distinct regions
+  /// based on validation type and complexity.
+  /// </para>
+  /// 
+  /// <para>
+  /// <strong>Key Validation Areas:</strong>
+  /// - Basic validations (period, entity counts, ID existence)
+  /// - Salary bracket validations (ranges, overlaps, gaps, restrictions)
+  /// - Contribution validations (risk, MSA, total contributions)
+  /// - Variant-specific business rules (Network Choice, First Choice, Essential, Double, Alliance)
+  /// - Comprehensive category validations with cross-variant consistency checks
+  /// </para>
+  /// 
+  /// <para>
+  /// <strong>Business Context:</strong>
+  /// Medical option validation is critical for ensuring:
+  /// - Compliance with regulatory requirements and actuarial standards
+  /// - Consistent pricing structures across benefit categories
+  /// - Proper salary bracket definitions for income-based pricing
+  /// - Adherence to update period restrictions (November-December)
+  /// - Variant-specific contribution structure requirements
+  /// </para>
+  /// 
+  /// <para>
+  /// <strong>Validation Strategy:</strong>
+  /// The validator employs a fail-fast approach, stopping at the first validation failure
+  /// to provide immediate feedback. Each validation method returns a BulkValidationResult
+  /// containing success status and detailed error messages for debugging and user feedback.
+  /// </para>
+  /// 
+  /// <para>
+  /// <strong>Performance Considerations:</strong>
+  /// - In-memory operations for optimal performance during bulk validations
+  /// - Efficient data structures (HashSet, Dictionary) for lookups and grouping
+  /// - Minimal database calls through repository pattern usage
+  /// - Optimized for concurrent validation scenarios
+  /// </para>
+  /// 
+  /// <para>
+  /// <strong>Error Handling:</strong>
+  /// Comprehensive exception handling with detailed error reporting. All validation methods
+  /// wrap operations in try-catch blocks to ensure graceful error handling and meaningful
+  /// error messages for debugging and user feedback.
+  /// </para>
+  /// 
+  /// <para>
+  /// <strong>Testing Support:</strong>
+  /// Many methods support optional testDate parameters for unit testing scenarios,
+  /// enabling deterministic validation behavior regardless of current system time.
+  /// </para>
+  /// </remarks>
+  
   public static class MedicalOptionValidator
   {
-    // Global Variables
+    /// <summary>
+    /// Global variable storing the current category name during validation operations.
+    /// This variable provides context for error messages and debugging across validation methods.
+    /// </summary>
+    /// <remarks>
+    /// Used to maintain validation context across multiple method calls within the same
+    /// validation workflow, enabling consistent error reporting and audit trail generation.
+    /// </remarks>
     private static string _globalCategoryName = string.Empty;
-    private static string _globalVariantName = string.Empty;
-    private static string _globalFilterName = string.Empty;
     
     //Helper methods
 
     #region Basic Validations
 
     /// <summary>
-    /// Validates if the update operation is within the allowed period (November-December)
+    /// Validates if the update operation is within the allowed period (November-December).
+    /// This method enforces business rules that restrict medical option updates to specific
+    /// time windows, ensuring compliance with annual enrollment and policy update cycles.
     /// </summary>
-    /// <param name="date"></param>
+    /// <param name="date">The date to validate against the allowed update period.</param>
+    /// <returns>True if the date falls within the allowed update period; otherwise, false.</returns>
+    /// <remarks>
+    /// <para>
+    /// <strong>Business Rule:</strong>
+    /// Medical option updates are only permitted between November 1st and December 31st
+    /// to align with annual benefits enrollment periods and ensure stable pricing throughout the year.
+    /// </para>
+    /// 
+    /// <para>
+    /// <strong>Usage Context:</strong>
+    /// This validation is typically the first check performed in any bulk update operation
+    /// to ensure that updates are only performed during authorized business periods.
+    /// </para>
+    /// 
+    /// <para>
+    /// <strong>Time Zone Considerations:</strong>
+    /// The validation uses the local time zone of the executing environment. For production
+    /// deployments, consider using UTC to ensure consistency across different server locations.
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// // Check if current date allows updates
+    /// var canUpdate = MedicalOptionValidator.ValidateUpdatePeriod(DateTime.Now);
+    /// if (canUpdate)
+    /// {
+    ///     Console.WriteLine("Updates are currently allowed");
+    ///     // Proceed with update operations
+    /// }
+    /// else
+    /// {
+    ///     Console.WriteLine("Updates are not allowed at this time");
+    ///     // Block update operations or show appropriate message
+    /// }
+    /// 
+    /// // Test specific dates
+    /// var novemberDate = new DateTime(2024, 11, 15);
+    /// var marchDate = new DateTime(2024, 3, 15);
+    /// 
+    /// Console.WriteLine($"November 15: {MedicalOptionValidator.ValidateUpdatePeriod(novemberDate)}"); // True
+    /// Console.WriteLine($"March 15: {MedicalOptionValidator.ValidateUpdatePeriod(marchDate)}"); // False
+    /// </code>
+    /// </example>
     public static bool ValidateUpdatePeriod(DateTime date)
     {
-      date = DateTime.Now;
-      
       return DateRangeUpdatePeriod.CategoryOptionsUpdatePeriod.Contains(date);
     }
 
     /// <summary>
-    /// Validates entity count matches between database and payload
+    /// Validates that the entity count matches between database records and payload data.
+    /// This method ensures data consistency by verifying that the number of medical options
+    /// being updated matches the expected count from the database.
     /// </summary>
+    /// <param name="dbEntityCount">The number of entities retrieved from the database.</param>
+    /// <param name="bulkPayloadCount">The number of entities in the update payload.</param>
+    /// <returns>True if the counts match; otherwise, false.</returns>
+    /// <remarks>
+    /// <para>
+    /// <strong>Purpose:</strong>
+    /// This validation prevents data integrity issues by ensuring that bulk update operations
+    /// include all expected entities and that no entities are missing or duplicated.
+    /// </para>
+    /// 
+    /// <para>
+    /// <strong>Usage Context:</strong>
+    /// Typically used as an early validation step in bulk update operations to verify
+    /// that the payload data aligns with the current database state.
+    /// </para>
+    /// 
+    /// <para>
+    /// <strong>Error Scenarios:</strong>
+    /// - Mismatch indicates potential data synchronization issues
+    /// - May occur if entities were added/removed between payload creation and update
+    /// - Could indicate incomplete payload data or database inconsistencies
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// // After retrieving database data and receiving payload
+    /// var dbCount = databaseOptions.Count;
+    /// var payloadCount = updatePayload.Count;
+    /// 
+    /// if (MedicalOptionValidator.ValidateEntityCount(dbCount, payloadCount))
+    /// {
+    ///     Console.WriteLine("Entity counts match, proceeding with validation");
+    /// }
+    /// else
+    /// {
+    ///     Console.WriteLine($"Entity count mismatch: DB={dbCount}, Payload={payloadCount}");
+    ///     throw new ValidationException("Entity count mismatch detected");
+    /// }
+    /// </code>
+    /// </example>
     public static bool ValidateEntityCount(int dbEntityCount, int bulkPayloadCount)
     {
       return dbEntityCount == bulkPayloadCount;
     }
 
     /// <summary>
-    /// Validates if all medical option IDs in the payload exist in the database
+    /// Validates that all medical option IDs in the payload exist in the database.
+    /// This method ensures data integrity by verifying that every option being updated
+    /// has a corresponding record in the database.
     /// </summary>
+    /// <param name="bulkUpdateDto">Collection of update DTOs containing medical option IDs to validate.</param>
+    /// <param name="repository">Repository for data access operations (used for additional validation if needed).</param>
+    /// <param name="dbData">List of existing medical options from the database for in-memory validation.</param>
+    /// <returns>True if all IDs exist in the database; otherwise, false.</returns>
+    /// <remarks>
+    /// <para>
+    /// <strong>Performance Optimization:</strong>
+    /// This method uses in-memory validation with HashSet for O(1) lookup performance,
+    /// avoiding additional database calls during bulk operations.
+    /// </para>
+    /// 
+    /// <para>
+    /// <strong>Validation Strategy:</strong>
+    /// - Creates a HashSet of existing IDs from database data
+    /// - Iterates through payload IDs checking existence in the HashSet
+    /// - Returns false immediately upon finding any missing ID (fail-fast approach)
+    /// </para>
+    /// 
+    /// <para>
+    /// <strong>Error Prevention:</strong>
+    /// Prevents attempts to update non-existent entities, which would result
+    /// in database errors and data inconsistency.
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// // Validate all IDs in payload exist in database
+    /// var payload = new List&​lt;UpdateMedicalOptionVariantsDto&​gt;
+    /// {
+    ///     new() { MedicalOptionId = 1, /* other properties */ },
+    ///     new() { MedicalOptionId = 2, /* other properties */ },
+    ///     new() { MedicalOptionId = 3, /* other properties */ }
+    /// };
+    /// 
+    /// var dbOptions = await repository.GetAllOptionsUnderCategoryAsync(5);
+    /// 
+    /// var allIdsExist = await MedicalOptionValidator.ValidateAllIdsExistAsync(
+    ///     payload, repository, dbOptions);
+    ///     
+    /// if (allIdsExist)
+    /// {
+    ///     Console.WriteLine("All payload IDs exist in database");
+    /// }
+    /// else
+    /// {
+    ///     Console.WriteLine("Some payload IDs do not exist in database");
+    ///     throw new ValidationException("Invalid medical option IDs detected");
+    /// }
+    /// </code>
+    /// </example>
     public static async Task<bool> ValidateAllIdsExistAsync(
       IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto,
-      IMedicalOptionRepository repository,List<MedicalOption> dbData)
+      IMedicalOptionRepository repository, List<MedicalOption> dbData)
     {
       var existingIds = dbData.Select(o => o.MedicalOptionId).ToHashSet();
   
       foreach (var entity in bulkUpdateDto) {
         if (!existingIds.Contains(entity.MedicalOptionId)) 
-          // In-memory check
           return false;
       }
 
@@ -57,8 +261,60 @@
     }
 
     /// <summary>
-    /// Validates if all entities belong to the specified category
+    /// Validates that all entities in the payload belong to the specified category.
+    /// This method ensures data integrity by verifying that medical options being updated
+    /// are correctly categorized and belong to the expected category.
     /// </summary>
+    /// <param name="bulkUpdateDto">Collection of update DTOs to validate.</param>
+    /// <param name="categoryId">The category ID that all entities should belong to.</param>
+    /// <param name="repository">Repository for data access operations.</param>
+    /// <param name="dbData">List of existing medical options from the database.</param>
+    /// <returns>True if all entities belong to the specified category; otherwise, false.</returns>
+    /// <remarks>
+    /// <para>
+    /// <strong>Business Rule Enforcement:</strong>
+    /// Ensures that bulk update operations only affect entities within the intended
+    /// category, preventing cross-category data contamination.
+    /// </para>
+    /// 
+    /// <para>
+    /// <strong>Security Consideration:</strong>
+    /// This validation prevents unauthorized category modifications by ensuring
+    /// that update operations are scoped to the correct category boundary.
+    /// </para>
+    /// 
+    /// <para>
+    /// <strong>Data Integrity:</strong>
+    /// Maintains categorical data integrity by preventing operations that could
+    /// misclassify or misplace medical options across different benefit categories.
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// // Validate all payload entities belong to category 5
+    /// var categoryId = 5;
+    /// var payload = new List&​lt;UpdateMedicalOptionVariantsDto&​gt;
+    /// {
+    ///     new() { MedicalOptionId = 1, /* other properties */ },
+    ///     new() { MedicalOptionId = 2, /* other properties */ }
+    /// };
+    /// 
+    /// var dbOptions = await repository.GetAllOptionsUnderCategoryAsync(categoryId);
+    /// 
+    /// var allInCategory = await MedicalOptionValidator.ValidateAllIdsInCategoryAsync(
+    ///     payload, categoryId, repository, dbOptions);
+    ///     
+    /// if (allInCategory)
+    /// {
+    ///     Console.WriteLine($"All entities belong to category {categoryId}");
+    /// }
+    /// else
+    /// {
+    ///     Console.WriteLine("Some entities do not belong to the specified category");
+    ///     throw new ValidationException($"Invalid category membership detected");
+    /// }
+    /// </code>
+    /// </example>
     public static async Task<bool> ValidateAllIdsInCategoryAsync(
       IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto,
       int categoryId,
@@ -69,7 +325,6 @@
   
       foreach (var entity in bulkUpdateDto) {
         if (!categoryOptions.Any(o => o.MedicalOptionId == entity.MedicalOptionId)) 
-          // In-memory check
           return false;
       }
 
@@ -81,8 +336,53 @@
     #region Salary Bracket Validations
 
     /// <summary>
-    /// Validates salary bracket restrictions for Alliance and Double categories
+    /// Validates salary bracket restrictions for Alliance and Double categories.
+    /// This method enforces business rules that prevent salary bracket updates for
+    /// specific categories that have fixed pricing structures.
     /// </summary>
+    /// <param name="categoryName">The name of the medical option category.</param>
+    /// <param name="salaryMin">The minimum salary bracket value being updated.</param>
+    /// <param name="salaryMax">The maximum salary bracket value being updated.</param>
+    /// <returns>True if the update complies with restrictions; otherwise, false.</returns>
+    /// <remarks>
+    /// <para>
+    /// <strong>Business Rule:</strong>
+    /// Alliance and Double categories have special business rules that prevent
+    /// salary bracket modifications because these categories typically have
+    /// fixed pricing structures that don't vary based on income levels.
+    /// </para>
+    /// 
+    /// <para>
+    /// <strong>Restricted Categories:</strong>
+    /// - Alliance: Entry-level category with no salary bracket pricing
+    /// - Double: Specialized category with fixed pricing structure
+    /// </para>
+    /// 
+    /// <para>
+    /// <strong>Validation Logic:</strong>
+    /// - Checks if category is in restricted list
+    /// - Validates that no salary bracket updates are being attempted
+    /// - Returns false if restricted category has salary updates
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// // Test restricted category with salary updates
+    /// var isAllowed = MedicalOptionValidator.ValidateSalaryBracketRestriction(
+    ///     "Alliance", 5000, 15000);
+    /// Console.WriteLine($"Alliance with salary updates allowed: {isAllowed}"); // False
+    /// 
+    /// // Test restricted category without salary updates
+    /// var isAllowed2 = MedicalOptionValidator.ValidateSalaryBracketRestriction(
+    ///     "Alliance", null, null);
+    /// Console.WriteLine($"Alliance without salary updates allowed: {isAllowed2}"); // True
+    /// 
+    /// // Test unrestricted category
+    /// var isAllowed3 = MedicalOptionValidator.ValidateSalaryBracketRestriction(
+    ///     "Choice", 5000, 15000);
+    /// Console.WriteLine($"Choice with salary updates allowed: {isAllowed3}"); // True
+    /// </code>
+    /// </example>
     public static bool ValidateSalaryBracketRestriction(
       string categoryName,
       decimal? salaryMin,
@@ -98,8 +398,56 @@
     }
 
     /// <summary>
-    /// Validates there are no gaps between salary ranges
+    /// Validates that there are no gaps between consecutive salary ranges.
+    /// This method ensures continuous coverage across salary brackets without
+    /// uncovered income ranges that would leave employees without eligible options.
     /// </summary>
+    /// <param name="records">List of salary bracket records to validate for gaps.</param>
+    /// <returns>True if there are no gaps between salary ranges; otherwise, false.</returns>
+    /// <remarks>
+    /// <para>
+    /// <strong>Business Requirement:</strong>
+    /// Continuous salary bracket coverage ensures that all employees, regardless
+    /// of income level, have access to appropriate medical benefit options.
+    /// </para>
+    /// 
+    /// <para>
+    /// <strong>Gap Tolerance:</strong>
+    /// Allows for small gaps (up to 1.00) between ranges to account for
+    /// rounding and practical implementation considerations.
+    /// </para>
+    /// 
+    /// <para>
+    /// <strong>Validation Logic:</strong>
+    /// - Sorts records by minimum salary
+    /// - Checks that next minimum is within acceptable range of current maximum
+    /// - Allows 0.01 + 0.99 tolerance for practical implementation
+    /// - Handles uncapped brackets (null maximum) appropriately
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// var records = new List&​lt;SalaryBracketValidatorRecord&​gt;
+    /// {
+    ///     new(1, "Plan A", 0, 10000),
+    ///     new(2, "Plan B", 10001, 20000),
+    ///     new(3, "Plan C", 20001, null) // Uncapped
+    /// };
+    /// 
+    /// var hasNoGaps = MedicalOptionValidator.ValidateNoGapsInSalaryRanges(records);
+    /// Console.WriteLine($"No gaps in salary ranges: {hasNoGaps}"); // True
+    /// 
+    /// // Example with gap
+    /// var recordsWithGap = new List&​lt;SalaryBracketValidatorRecord&​gt;
+    /// {
+    ///     new(1, "Plan A", 0, 10000),
+    ///     new(2, "Plan B", 10500, 20000) // Gap of 500
+    /// };
+    /// 
+    /// var hasNoGaps2 = MedicalOptionValidator.ValidateNoGapsInSalaryRanges(recordsWithGap);
+    /// Console.WriteLine($"No gaps with gap example: {hasNoGaps2}"); // False
+    /// </code>
+    /// </example>
     public static bool ValidateNoGapsInSalaryRanges(
       List<SalaryBracketValidatorRecord> records)
     {
@@ -114,27 +462,73 @@
         var current = sortedRecords[i];
         var next = sortedRecords[i + 1];
 
-        // Allow for 0.01 or 1.00 difference between ranges
         if (current.salaryBracketMax != null)
         {
           var expectedNextMin = current.salaryBracketMax.Value + 0.01m;
-          if (next.salaryBracketMin > expectedNextMin + 0.99m) // Allow up to 1.00 gap
+          if (next.salaryBracketMin > expectedNextMin + 0.99m)
             return false;  
         }
         else
         {
-          return true; // when current Max is == null (uncapped)
+          return true; // when current Max is null (uncapped)
         }
-
-
       }
 
       return true;
     }
 
     /// <summary>
-    /// Validates there are no overlapping salary brackets within the same category
+    /// Validates that there are no overlapping salary brackets within the same category.
+    /// This method ensures that salary ranges are mutually exclusive, preventing
+    /// eligibility ambiguity and ensuring clear income-based option assignment.
     /// </summary>
+    /// <param name="records">List of salary bracket records to validate for overlaps.</param>
+    /// <returns>True if there are no overlapping brackets; otherwise, false.</returns>
+    /// <remarks>
+    /// <para>
+    /// <strong>Business Requirement:</strong>
+    /// Non-overlapping salary brackets ensure that each employee falls into
+    /// exactly one income tier, preventing eligibility ambiguity and ensuring
+    /// consistent pricing structures.
+    /// </para>
+    /// 
+    /// <para>
+    /// <strong>Overlap Definition:</strong>
+    /// Overlap occurs when the minimum of one bracket is less than or equal
+    /// to the maximum of the preceding bracket.
+    /// </para>
+    /// 
+    /// <para>
+    /// <strong>Edge Cases:</strong>
+    /// - Handles null minimum (starts from 0) and null maximum (uncapped)
+    /// - Properly sorts records for sequential validation
+    /// - Considers boundary conditions for precise validation
+    /// </para>
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// // Valid non-overlapping ranges
+    /// var validRecords = new List&​lt;SalaryBracketValidatorRecord&​gt;
+    /// {
+    ///     new(1, "Plan A", 0, 10000),
+    ///     new(2, "Plan B", 10001, 20000),
+    ///     new(3, "Plan C", 20001, 30000)
+    /// };
+    /// 
+    /// var noOverlap = MedicalOptionValidator.ValidateNoOverlappingBrackets(validRecords);
+    /// Console.WriteLine($"No overlap: {noOverlap}"); // True
+    /// 
+    /// // Overlapping ranges
+    /// var overlappingRecords = new List&​lt;SalaryBracketValidatorRecord&​gt;
+    /// {
+    ///     new(1, "Plan A", 0, 10000),
+    ///     new(2, "Plan B", 9500, 20000) // Overlaps with Plan A
+    /// };
+    /// 
+    /// var noOverlap2 = MedicalOptionValidator.ValidateNoOverlappingBrackets(overlappingRecords);
+    /// Console.WriteLine($"No overlap with overlapping example: {noOverlap2}"); // False
+    /// </code>
+    /// </example>
     public static bool ValidateNoOverlappingBrackets(
       List<SalaryBracketValidatorRecord> records)
     {
@@ -149,15 +543,11 @@
         var current = sortedRecords[i];
         var next = sortedRecords[i + 1];
 
-        // Check for overlap (next.min should be > current.max)
         if (current.salaryBracketMax.HasValue && next.salaryBracketMin.HasValue || 
             !(next is null)) {
           if (next.salaryBracketMin <= current.salaryBracketMax.Value)
             return false;
         }
-        
-        // When current.max is null (uncapped), it can't overlap with anything -
-        // what if there is a next value that has a less value ? [Resolved]
       }
 
       return true;
@@ -886,23 +1276,39 @@ private static bool CompareTotalContributions(UpdateMedicalOptionVariantsDto opt
 
     #region Comprehensive Category Variant Validation
 
-/// <summary>
-/// MAIN VALIDATION ENTRY POINT
-/// Comprehensive validation for all variants within a category using existing validation logic as
-/// core
-/// Addresses TODO items from lines 14-26 with enhanced error handling
-/// </summary>
+    /// <summary>
+    /// Comprehensive validation for all category variants including update period, ID existence, and business rules
+    /// </summary>
+    /// <param name="categoryId">The category ID to validate against</param>
+    /// <param name="bulkUpdateDto">Collection of update DTOs to validate</param>
+    /// <param name="repository">Repository for data access operations</param>
+    /// <param name="dbData">Existing database data for validation context</param>
+    /// <param name="testDate">Optional test date for unit testing (defaults to current UTC time)</param>
+    /// <returns>BulkValidationResult indicating success or failure with detailed error message</returns>
+    /// <remarks>
+    /// This method performs comprehensive validation including:
+    /// - Update period restrictions (November-December)
+    /// - ID existence validation
+    /// - Business rule validation
+    /// - Contribution structure validation
+    /// 
+    /// The optional testDate parameter allows for deterministic testing by overriding DateTime.UtcNow
+    /// </remarks>
 public static async Task<BulkValidationResult> ValidateAllCategoryVariantsComprehensiveAsync(
   int categoryId,
   IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto,
   IMedicalOptionRepository repository,
-  List<MedicalOption> dbData)
+  List<MedicalOption> dbData,
+  DateTime? testDate = null) // Add optional test date parameter
 {
   var result = new BulkValidationResult(){IsValid = true};
 
   try {
     // 1. PERIOD VALIDATION (Global requirement)
-    if (!ValidateUpdatePeriod(DateTime.Now)) {
+    var dateToValidate = testDate ?? DateTime.UtcNow;
+    
+    // Use dateToValidate instead of DateTime.UtcNow in update period validation
+    if (!ValidateUpdatePeriod(dateToValidate)) {
       result.IsValid = false;
       result.ErrorMessage = "Updates can only be performed between November and December";
       return result;
@@ -1706,15 +2112,51 @@ public static Dictionary<string, List<UpdateMedicalOptionVariantsDto>> GroupOpti
 
 #endregion
   }
-    
+
   /// <summary>
-  /// Result object for bulk validation operations
+  /// Result object for bulk validation operations containing validation status and error information.
+  /// This class provides a standardized result format for all validation operations,
+  /// enabling consistent error handling and reporting across the validation framework.
   /// </summary>
+  /// <remarks>
+  /// <para>
+  /// <strong>Usage Pattern:</strong>
+  /// All validation methods return instances of this class to provide
+  /// standardized success/failure reporting with detailed error context.
+  /// </para>
+  /// 
+  /// <para>
+  /// <strong>Error Handling:</strong>
+  /// The ErrorMessage property provides detailed error information
+  /// for debugging, user feedback, and audit trail purposes.
+  /// </para>
+  /// 
+  /// <para>
+  /// <strong>Extended Information:</strong>
+  /// The SalaryBracketRecords property can be used to provide
+  /// additional context for salary bracket-specific validation failures.
+  /// </para>
+  /// </remarks>
   public class BulkValidationResult
   {
+    /// <summary>
+    /// Gets or sets a value indicating whether the validation operation was successful.
+    /// True indicates all validations passed; false indicates at least one validation failure.
+    /// </summary>
     public bool IsValid { get; set; }
+
+    /// <summary>
+    /// Gets or sets the detailed error message when validation fails.
+    /// This property provides specific information about what validation rule failed
+    /// and why, enabling debugging and user feedback.
+    /// </summary>
     public string? ErrorMessage { get; set; }
+
+    /// <summary>
+    /// Gets or sets the collection of salary bracket records involved in validation.
+    /// This property provides context for salary bracket-specific validation failures
+    /// and can be used for detailed error reporting and debugging.
+    /// </summary>
     public List<SalaryBracketValidatorRecord> SalaryBracketRecords { get; set; } = new();
-  
   }
 }

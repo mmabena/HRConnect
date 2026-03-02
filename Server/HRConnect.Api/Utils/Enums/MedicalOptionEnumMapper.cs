@@ -386,7 +386,7 @@
         /// </remarks>
         /// <example>
         /// <code>
-        /// var isValid1 = ContainsCategory&​lt;Choice&​gt;("Network Choice");
+        /// var isValid1 = ContainsCategory&lt;Choice&gt;("Network Choice");
         /// // Returns: true
         /// 
         /// var isValid2 = ContainsCategory&lt;Choice&gt;("Unknown Choice");
