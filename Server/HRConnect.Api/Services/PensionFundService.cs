@@ -114,6 +114,7 @@
 
       PensionFund fund = new()
       {
+        PensionFundId = 1,
         EmployeeId = employee.EmployeeId,
         EmployeeName = employee.Name,
         PensionOptionId = option.PensionOptionId,

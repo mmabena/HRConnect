@@ -9,7 +9,6 @@
 
   public class PensionFundRepository(ApplicationDBContext context) : IPensionRepository
   {
-
     public async Task<IEnumerable<PensionFund>> GetPensionFundsAsync()
     {
       return await context.PensionFunds.ToListAsync();
@@ -33,12 +32,11 @@
       _ = await context.SaveChangesAsync();
     }
 
-<<<<<<< HEAD
     // Add or update PensionFund for an employee
     public async Task AddOrUpdatePensionFundAsync(PensionFund fund)
     {
-      PensionFund? existingFund = await context.PensionFunds.
-        FirstOrDefaultAsync(f => f.EmployeeId == fund.EmployeeId);
+      PensionFund? existingFund = await context.PensionFunds
+          .FirstOrDefaultAsync(f => f.EmployeeId == fund.EmployeeId);
 
       if (existingFund == null)
       {
@@ -48,6 +46,10 @@
       {
         existingFund.PensionOptionId = fund.PensionOptionId;
         existingFund.ContributionAmount = fund.ContributionAmount;
+        existingFund.MonthlySalary = fund.MonthlySalary;
+        existingFund.ContributionPercentage = fund.ContributionPercentage;
+        existingFund.TaxCode = fund.TaxCode;
+
         _ = context.PensionFunds.Update(existingFund);
       }
     }
@@ -57,12 +59,8 @@
       _ = await context.SaveChangesAsync();
     }
 
-    // ============================
     // Pension Options
-    // ============================
 
-=======
->>>>>>> 82a5d8a54eb2645c4a2a43003643340a03574021
     public async Task<IEnumerable<PensionOption>> GetPensionOptionsAsync()
     {
       return await context.PensionOptions.ToListAsync();
@@ -86,10 +84,6 @@
       _ = await context.SaveChangesAsync();
     }
 
-    // ============================
-    // Employees
-    // ============================
-
     // FIX: EmployeeId is a string, not int
     public async Task<Employee?> GetEmployeeByIdAsync(string id)
     {
@@ -98,4 +92,3 @@
     }
   }
 }
-
