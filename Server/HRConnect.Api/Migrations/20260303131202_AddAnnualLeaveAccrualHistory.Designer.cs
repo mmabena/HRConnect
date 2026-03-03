@@ -4,6 +4,7 @@ using HRConnect.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRConnect.Api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260303131202_AddAnnualLeaveAccrualHistory")]
+    partial class AddAnnualLeaveAccrualHistory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -153,9 +156,6 @@ namespace HRConnect.Api.Migrations
                     b.Property<decimal>("AccruedDays")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("AvailableDays")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<decimal>("CarryoverDays")
                         .HasColumnType("decimal(18,2)");
 
@@ -179,6 +179,9 @@ namespace HRConnect.Api.Migrations
 
                     b.Property<int>("LeaveTypeId")
                         .HasColumnType("int");
+
+                    b.Property<decimal>("RemainingDays")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("UsedDays")
                         .HasColumnType("decimal(18,2)");

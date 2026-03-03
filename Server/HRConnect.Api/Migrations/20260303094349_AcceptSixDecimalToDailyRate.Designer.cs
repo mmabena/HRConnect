@@ -4,6 +4,7 @@ using HRConnect.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRConnect.Api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260303094349_AcceptSixDecimalToDailyRate")]
+    partial class AcceptSixDecimalToDailyRate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,45 +24,6 @@ namespace HRConnect.Api.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("HRConnect.Api.Models.AnnualLeaveAccrualHistory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("Accrued")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("ClosingBalance")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("EmployeeId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("Forfeited")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("OpeningBalance")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("Used")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("Year")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EmployeeId");
-
-                    b.ToTable("AnnualLeaveAccrualHistories");
-                });
 
             modelBuilder.Entity("HRConnect.Api.Models.Employee", b =>
                 {
@@ -153,9 +117,6 @@ namespace HRConnect.Api.Migrations
                     b.Property<decimal>("AccruedDays")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("AvailableDays")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<decimal>("CarryoverDays")
                         .HasColumnType("decimal(18,2)");
 
@@ -179,6 +140,9 @@ namespace HRConnect.Api.Migrations
 
                     b.Property<int>("LeaveTypeId")
                         .HasColumnType("int");
+
+                    b.Property<decimal>("RemainingDays")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("UsedDays")
                         .HasColumnType("decimal(18,2)");
@@ -725,17 +689,6 @@ namespace HRConnect.Api.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("HRConnect.Api.Models.AnnualLeaveAccrualHistory", b =>
-                {
-                    b.HasOne("HRConnect.Api.Models.Employee", "Employee")
-                        .WithMany("AnnualLeaveAccrualHistories")
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Employee");
-                });
-
             modelBuilder.Entity("HRConnect.Api.Models.Employee", b =>
                 {
                     b.HasOne("HRConnect.Api.Models.Position", "Position")
@@ -833,8 +786,6 @@ namespace HRConnect.Api.Migrations
             modelBuilder.Entity("HRConnect.Api.Models.Employee", b =>
                 {
                     b.Navigation("AccrualRateHistory");
-
-                    b.Navigation("AnnualLeaveAccrualHistories");
 
                     b.Navigation("LeaveApplications");
 

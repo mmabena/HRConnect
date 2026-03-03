@@ -21,6 +21,7 @@ namespace HRConnect.Api.Data
         public DbSet<EmployeeLeaveBalance> EmployeeLeaveBalances => Set<EmployeeLeaveBalance>();
         public DbSet<LeaveApplication> LeaveApplications => Set<LeaveApplication>();
         public DbSet<EmployeeAccrualRateHistory> EmployeeAccrualRateHistories { get; set; }
+        public DbSet<AnnualLeaveAccrualHistory> AnnualLeaveAccrualHistories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

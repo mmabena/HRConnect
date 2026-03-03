@@ -39,7 +39,7 @@ namespace HRConnect.Api.DTOs
         public string LeaveType { get; set; } = null!;
         public decimal EntitledDays { get; set; }
         public decimal UsedDays { get; set; }
-        public decimal RemainingDays { get; set; }
+        public decimal AvailableDays { get; set; }
     }
     public class UpdateLeaveRuleRequest
     {
@@ -63,7 +63,8 @@ namespace HRConnect.Api.DTOs
         public DateOnly ProjectionDate { get; set; }
         public decimal ProjectedEntitledDays { get; set; }
         public decimal UsedDays { get; set; }
-        public decimal ProjectedRemainingDays { get; set; }
+        public decimal ProjectedAvailableDays { get; set; }
+        public int DaysWorked { get; set; }
     }
 
 }

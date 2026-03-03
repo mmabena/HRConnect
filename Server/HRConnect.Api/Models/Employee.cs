@@ -33,5 +33,6 @@ namespace HRConnect.Api.Models
         public ICollection<LeaveApplication> LeaveApplications { get; set; }
             = new List<LeaveApplication>();
         public ICollection<EmployeeAccrualRateHistory> AccrualRateHistory { get; set; } = new List<EmployeeAccrualRateHistory>();
+        public ICollection<AnnualLeaveAccrualHistory> AnnualLeaveAccrualHistories  { get; set; } = new List<AnnualLeaveAccrualHistory>();
     }
 }
