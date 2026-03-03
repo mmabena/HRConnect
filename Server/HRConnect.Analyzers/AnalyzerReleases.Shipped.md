@@ -1,3 +1,7 @@
+
+### 1.0.0
+
+
 # Analyzer release history
 
 ### 1.0.0

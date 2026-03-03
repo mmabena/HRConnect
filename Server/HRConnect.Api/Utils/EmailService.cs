@@ -3,6 +3,7 @@ namespace HRConnect.Api.Utils
   using SendGrid;
   using SendGrid.Helpers.Mail;
 
+
   public interface IEmailService
   {
     Task SendEmailAsync(string recipientEmail, string subject, string body);
@@ -10,37 +11,34 @@ namespace HRConnect.Api.Utils
 
   public class EmailService : IEmailService
   {
-    private readonly SendGridClient _sendGridClient;
+    private readonly SendGridClient _client;
     private readonly string _fromEmail;
     private readonly string _fromName;
 
     public EmailService(IConfiguration configuration)
     {
-      string? sendGridApiKey = configuration["SendGrid:ApiKey"];
-      _fromEmail = configuration["SendGrid:FromEmail"] ?? "noreply@hrconnect.com";
+      string apiKey = configuration["SendGrid:ApiKey"];
+      _client = new SendGridClient(apiKey);
+      _fromEmail = configuration["SendGrid:FromEmail"] ?? "rebaoneseilane@gmail.com";
       _fromName = configuration["SendGrid:FromName"] ?? "HRConnect";
-
-      if (string.IsNullOrWhiteSpace(sendGridApiKey))
-      {
-        throw new InvalidOperationException("SendGrid API key is not configured.");
-      }
-
-      _sendGridClient = new SendGridClient(sendGridApiKey);
     }
 
     public async Task SendEmailAsync(string recipientEmail, string subject, string body)
     {
-      var from = new EmailAddress(_fromEmail, _fromName);
-      var toEmail = new EmailAddress(recipientEmail);
-      var msg = MailHelper.CreateSingleEmail(from, toEmail, subject, body, body);
+        var msg = new SendGridMessage()
+        {
+            From = new EmailAddress(_fromEmail, _fromName),
+            Subject = subject,
+            HtmlContent = body
+        };
+        msg.AddTo(new EmailAddress(recipientEmail));
 
-      var response = await _sendGridClient.SendEmailAsync(msg);
+        var response = await _client.SendEmailAsync(msg);
 
-      if (!response.IsSuccessStatusCode)
-      {
-        throw new InvalidOperationException(
-          $"Failed to send email to {recipientEmail}. StatusCode: {response.StatusCode}");
-      }
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new InvalidOperationException($"Failed to send email to {recipientEmail}. StatusCode: {response.StatusCode}");
+        }
     }
   }
 }

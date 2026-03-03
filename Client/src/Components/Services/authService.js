@@ -1,39 +1,46 @@
-import api from '../../api.js';
+import api from '../../api/api.js';
 
-const AUTH_BASE = '/auth';
+const AUTH_BASE = "/auth";
 
 export const authService = {
-  // Step 1: Login
-  login: async (email, password) => {
-    try {
-      const response = await api.post(`${AUTH_BASE}/login`, { email, password });
-      return response.data;
-    } catch (error) {
-      throw error.response?.data || { message: 'Login failed' };
-    }
-  },
 
-  // Step 2: Request password reset (sends PIN to email)
+  // ✅ Login
+  login: async (email, password) => {
+      const response = await api.post(`${AUTH_BASE}/login`, { email, password });
+
+      const { token, user } = response.data;
+
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+
+      if (!token || !user) {
+        throw new Error("Invalid login response from server");
+      }
+      console.log("Backend login response:", response.data);
+      return { token, user };
+    },
+
+  // ✅ Forgot Password
   forgotPassword: async (email) => {
     try {
       const response = await api.post(`${AUTH_BASE}/forgot-password`, { email });
       return response.data;
     } catch (error) {
-      throw error.response?.data || { message: 'Failed to send PIN' };
+      throw error.response?.data || { message: "Failed to send PIN" };
     }
   },
 
-  // Step 3: Verify the PIN
+  // ✅ Verify PIN
   verifyPin: async (email, pin) => {
     try {
       const response = await api.post(`${AUTH_BASE}/verify-pin`, { email, pin });
       return response.data;
     } catch (error) {
-      throw error.response?.data || { message: 'Invalid PIN' };
+      throw error.response?.data || { message: "Invalid PIN" };
     }
   },
 
-  // Step 4: Reset password with verified PIN
+  // ✅ Reset Password
   resetPassword: async (email, pin, newPassword, confirmPassword) => {
     try {
       const response = await api.post(`${AUTH_BASE}/reset-password`, {
@@ -44,19 +51,24 @@ export const authService = {
       });
       return response.data;
     } catch (error) {
-      throw error.response?.data || { message: 'Password reset failed' };
+      throw error.response?.data || { message: "Password reset failed" };
     }
   },
 
-  // Logout
+  // ✅ Logout (frontend only)
   logout: () => {
-    localStorage.removeItem('currentUser');
-    localStorage.removeItem('token');
+    localStorage.removeItem("currentUser");
   },
 
-  // Get stored token
+  // ✅ Get stored user
+  getCurrentUser: () => {
+    const stored = localStorage.getItem("currentUser");
+    return stored ? JSON.parse(stored) : null;
+  },
+
+  // ✅ Get token safely
   getToken: () => {
-    const user = localStorage.getItem('currentUser');
-    return user ? JSON.parse(user).token : null;
+    const user = authService.getCurrentUser();
+    return user?.token || null;
   },
 };
