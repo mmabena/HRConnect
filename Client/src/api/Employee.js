@@ -46,10 +46,10 @@ export const addEmployee = async (employee) => {
   }
 };
 
-export const editEmployee = async (employeeNumber, employee) => {
+export const editEmployee = async (employeeId, employee) => {
   try {
     const response = await axios.put(
-      `${API_BASE}/edit/${employeeNumber}`,
+      `${API_BASE}/${employeeId}`,
       employee,
       {
         headers: { "Content-Type": "application/json" },

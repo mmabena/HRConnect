@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import CompanyManagementNavBar from "../../../Components/CompanyManagement/companyManagementNavBar";
 import { useNavigate, useLocation } from "react-router-dom";
+import { editEmployee } from "../../../api/Employee";
 import api from "../../../api/api";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
 
 const ManageUserPositions = ({ title }) => {
@@ -21,7 +22,7 @@ const ManageUserPositions = ({ title }) => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { positionTitle } = location.state || {};
+  const { currentPositionTitle, newPositionTitle } = location.state || {};
   const pageOptions = [10, 15, 20, 25];
 
   const navTabs = [
@@ -32,35 +33,11 @@ const ManageUserPositions = ({ title }) => {
     "Manage Companies",
     "Salary Budgets",
   ];
-
   const tabWidths = [168, 133, 122, 134, 154, 125];
 
-  // ==============================
-  // Checkbox handlers
-  // ==============================
-  const handleCheckboxChange = (employeeId) => {
-    setSelectedEmployees((prev) => ({
-      ...prev,
-      [employeeId]: !prev[employeeId],
-    }));
-  };
-
-  const handleSelectAll = () => {
-    const allSelected = currentEmployees.every(
-      (emp) => selectedEmployees[emp.employeeId]
-    );
-
-    const newSelection = { ...selectedEmployees };
-    currentEmployees.forEach((emp) => {
-      newSelection[emp.employeeId] = !allSelected;
-    });
-
-    setSelectedEmployees(newSelection);
-  };
-
-  // ==============================
+  // ----------------------------
   // Date & Time
-  // ==============================
+  // ----------------------------
   useEffect(() => {
     const updateDateTime = () => {
       const now = new Date();
@@ -72,24 +49,22 @@ const ManageUserPositions = ({ title }) => {
         minute: "2-digit",
         hour12: false,
       });
-
       setCurrentDate(`${month}. ${day}, ${year}`);
       setCurrentTime(time);
     };
-
     updateDateTime();
     const intervalId = setInterval(updateDateTime, 60000);
     return () => clearInterval(intervalId);
   }, []);
 
-  // ==============================
+  // ----------------------------
   // Initialization & Auth
-  // ==============================
+  // ----------------------------
   useEffect(() => {
     const initialize = async () => {
       setLoading(true);
-
       const token = localStorage.getItem("token");
+
       if (!token) {
         toast.error("You are not logged in.");
         setLoading(false);
@@ -113,30 +88,49 @@ const ManageUserPositions = ({ title }) => {
 
         setHasAccess(true);
 
+        // Fetch employees and positions
         const [employeesRes, positionsRes] = await Promise.all([
           api.get("/employee"),
           api.get("/positions"),
         ]);
 
-        const allEmployees = employeesRes.data;
-        const allPositions = positionsRes.data;
-
+        const allEmployees = employeesRes.data || [];
+        const allPositions = positionsRes.data || [];
         setPositions(allPositions);
 
-        // Find position by title
-        const matchedPosition = allPositions.find(
-          (pos) => pos.positionTitle === positionTitle
+        // Filter employees by CURRENT position
+        const matchedCurrent = allPositions.find(
+          (pos) => pos.positionTitle === currentPositionTitle
         );
 
-        // Filter employees by matching positionId
-        const filteredEmployees = matchedPosition
+        const filteredEmployees = matchedCurrent
           ? allEmployees.filter(
-              (emp) =>
-                Number(emp.positionId) === Number(matchedPosition.positionId)
+              (emp) => Number(emp.positionId) === Number(matchedCurrent.positionId)
             )
           : [];
 
         setEmployees(filteredEmployees);
+
+        // Pre-select all filtered employees
+        const initialSelection = {};
+        filteredEmployees.forEach((emp) => {
+          initialSelection[emp.employeeId] = true;
+        });
+        setSelectedEmployees(initialSelection);
+
+        // Find new position
+        const matchedNew = allPositions.find(
+          (pos) => pos.positionTitle === newPositionTitle
+        );
+
+        if (matchedNew) {
+          setSelectedPosition(String(matchedNew.positionId));
+        } else {
+          const firstOther = allPositions.find(
+            (pos) => pos.positionId !== matchedCurrent?.positionId
+          );
+          setSelectedPosition(firstOther ? String(firstOther.positionId) : "");
+        }
       } catch (error) {
         console.error("Initialization error:", error);
         toast.error("Failed to load data.");
@@ -146,51 +140,62 @@ const ManageUserPositions = ({ title }) => {
     };
 
     initialize();
-  }, [positionTitle]);
+  }, [currentPositionTitle, newPositionTitle]);
 
-  // ==============================
-  // Default selected position
-  // ==============================
-  useEffect(() => {
-    if (positions.length > 0 && !selectedPosition) {
-      setSelectedPosition(positions[0].positionId);
-    }
-  }, [positions]);
+  // ----------------------------
+  // Checkbox Handlers
+  // ----------------------------
+  const handleCheckboxChange = (employeeId) => {
+    setSelectedEmployees((prev) => ({
+      ...prev,
+      [employeeId]: !prev[employeeId],
+    }));
+  };
+
+  const handleSelectAll = () => {
+    const allSelected = currentEmployees.every(
+      (emp) => selectedEmployees[emp.employeeId]
+    );
+    const newSelection = { ...selectedEmployees };
+    currentEmployees.forEach((emp) => {
+      newSelection[emp.employeeId] = !allSelected;
+    });
+    setSelectedEmployees(newSelection);
+  };
+
+  // ----------------------------
+  // Position Mapping
+  // ----------------------------
+  const positionMap = Object.fromEntries(
+    positions.map((pos) => [pos.positionId, pos.positionTitle])
+  );
 
   const handlePositionChange = (e) => {
     setSelectedPosition(e.target.value);
   };
 
-  // ==============================
-  // Position lookup map
-  // ==============================
-  const positionMap = Object.fromEntries(
-    positions.map((pos) => [pos.positionId, pos.positionTitle])
-  );
-
-  // ==============================
+  // ----------------------------
   // Pagination
-  // ==============================
+  // ----------------------------
   const totalPages = Math.ceil(employees.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentEmployees = employees.slice(indexOfFirstItem, indexOfLastItem);
 
-  const handlePrev = () =>
-    currentPage > 1 && setCurrentPage((prev) => prev - 1);
+  const handlePrev = () => currentPage > 1 && setCurrentPage((prev) => prev - 1);
   const handleNext = () =>
     currentPage < totalPages && setCurrentPage((prev) => prev + 1);
   const handlePageClick = (num) => setCurrentPage(num);
 
-  // ==============================
-  // Save Changes
-  // ==============================
+  // ----------------------------
+  // Save Changes (Promote/Demote)
+  // ----------------------------
   const handleSave = async () => {
     const selectedIds = Object.keys(selectedEmployees).filter(
       (id) => selectedEmployees[id]
     );
 
-    if (selectedIds.length === 0) {
+    if (!selectedIds.length) {
       toast.error("Please select at least one employee.");
       return;
     }
@@ -200,16 +205,23 @@ const ManageUserPositions = ({ title }) => {
       return;
     }
 
-    const updates = selectedIds.map((employeeId) => ({
-      employeeId: Number(employeeId),
-      positionId: Number(selectedPosition),
-    }));
-
     try {
-      await api.put("/employee/updatePositions", { updates });
+      const updatePromises = selectedIds
+        .map((employeeId) => {
+          const emp = employees.find(
+            (e) => e.employeeId.toString() === employeeId
+          );
+          if (!emp) return null;
+
+          const updatedEmp = { ...emp, positionId: Number(selectedPosition) };
+          return editEmployee(emp.employeeId, updatedEmp);
+        })
+        .filter(Boolean);
+
+      await Promise.all(updatePromises);
+
       toast.success("Positions updated successfully.");
 
-      // Update local employee data
       setEmployees((prev) =>
         prev.map((emp) =>
           selectedIds.includes(emp.employeeId.toString())
@@ -220,14 +232,11 @@ const ManageUserPositions = ({ title }) => {
 
       setSelectedEmployees({});
     } catch (error) {
-      console.error(error);
-      toast.error("Failed to save changes.");
+      console.error("Failed to update positions:", error.response || error.message);
+      toast.error("Failed to save changes. Check console for details.");
     }
   };
 
-  // ==============================
-  // Render
-  // ==============================
   if (loading) return <h3>Loading...</h3>;
   if (!hasAccess) return <h2>Access Denied. SuperUser only.</h2>;
 
@@ -248,21 +257,17 @@ const ManageUserPositions = ({ title }) => {
           </div>
         </div>
 
-        <div className="nav-bar-with-buttons">
-          <CompanyManagementNavBar
-            tabs={navTabs}
-            activeTab={activeTab}
-            onTabChange={(tab) => {
-              if (tab !== "Position Management") {
-                navigate("/companyManagement");
-              } else {
-                setActiveTab(tab);
-              }
-            }}
-            tabWidths={tabWidths}
-          />
-        </div>
+        <CompanyManagementNavBar
+          tabs={navTabs}
+          activeTab={activeTab}
+          onTabChange={(tab) => {
+            if (tab !== "Position Management") navigate("/companyManagement");
+            else setActiveTab(tab);
+          }}
+          tabWidths={tabWidths}
+        />
 
+        {/* Move Users Dropdown */}
         <div className="move-users-wrapper">
           <div className="move-users-row">
             <p className="move-users-label">Move users to:</p>
@@ -277,7 +282,7 @@ const ManageUserPositions = ({ title }) => {
                 {positions.map((position) => (
                   <option
                     key={position.positionId}
-                    value={position.positionId}
+                    value={String(position.positionId)}
                   >
                     {position.positionTitle}
                   </option>
@@ -290,65 +295,65 @@ const ManageUserPositions = ({ title }) => {
               />
             </div>
           </div>
-
-          <div className="save-button-wrapper">
-            <button className="save-position-button" onClick={handleSave}>
-              Save
-            </button>
-          </div>
+          <button className="save-position-button" onClick={handleSave}>
+            Save
+          </button>
         </div>
 
-        <div className="content-container-">
-          <table className="position-table-manage-User">
-            <thead>
+        {/* Employee Table */}
+        <table className="position-table-manage-User">
+          <thead>
+            <tr>
+              <th>
+                <input
+                  type="checkbox"
+                  checked={
+                    currentEmployees.length > 0 &&
+                    currentEmployees.every(
+                      (emp) => selectedEmployees[emp.employeeId]
+                    )
+                  }
+                  onChange={handleSelectAll}
+                />{" "}
+                Name
+              </th>
+              <th>Branch</th>
+              <th>Current Position</th>
+              <th>New Position</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentEmployees.length === 0 ? (
               <tr>
-                <th>
-                  <input
-                    type="checkbox"
-                    checked={
-                      currentEmployees.length > 0 &&
-                      currentEmployees.every(
-                        (emp) => selectedEmployees[emp.employeeId]
-                      )
-                    }
-                    onChange={handleSelectAll}
-                  />{" "}
-                  Name
-                </th>
-                <th>Branch</th>
-                <th>Current Position</th>
-                <th>Position Title</th>
+                <td colSpan={4} style={{ textAlign: "center" }}>
+                  No users found.
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {currentEmployees.length === 0 ? (
-                <tr>
-                  <td colSpan={4} style={{ textAlign: "center" }}>
-                    No users found.
+            ) : (
+              currentEmployees.map((employee) => (
+                <tr key={employee.employeeId}>
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={!!selectedEmployees[employee.employeeId]}
+                      onChange={() =>
+                        handleCheckboxChange(employee.employeeId)
+                      }
+                    />{" "}
+                    {employee.name} {employee.surname}
+                  </td>
+                  <td>{employee.branch || "N/A"}</td>
+                  <td>{positionMap[employee.positionId] || "N/A"}</td>
+                  <td>
+                    {selectedEmployees[employee.employeeId]
+                      ? positionMap[Number(selectedPosition)]
+                      : "-"}
                   </td>
                 </tr>
-              ) : (
-                currentEmployees.map((employee) => (
-                  <tr key={employee.employeeId}>
-                    <td>
-                      <input
-                        type="checkbox"
-                        checked={!!selectedEmployees[employee.employeeId]}
-                        onChange={() =>
-                          handleCheckboxChange(employee.employeeId)
-                        }
-                      />{" "}
-                      {employee.name} {employee.surname}
-                    </td>
-                    <td>{employee.branch || "N/A"}</td>
-                    <td>{positionMap[employee.positionId] || "N/A"}</td>
-                    <td>{positionMap[employee.positionId] || "N/A"}</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+              ))
+            )}
+          </tbody>
+        </table>
 
         {/* Pagination */}
         <div className="pagination-wrapper">

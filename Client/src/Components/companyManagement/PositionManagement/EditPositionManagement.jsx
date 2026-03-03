@@ -12,6 +12,9 @@ const EditPositionManagement = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  const [originalTitle, setOriginalTitle] = useState("");
+  const [allPositions, setAllPositions] = useState([]);
+
   const [formData, setFormData] = useState({
     positionId: id,
     positionTitle: "",
@@ -28,7 +31,6 @@ const EditPositionManagement = () => {
   useEffect(() => {
     const initialize = async () => {
       const token = localStorage.getItem("token");
-
       if (!token) {
         setLoading(false);
         return;
@@ -36,7 +38,6 @@ const EditPositionManagement = () => {
 
       try {
         const decoded = jwtDecode(token);
-
         const role =
           decoded?.role ||
           decoded?.[
@@ -50,17 +51,22 @@ const EditPositionManagement = () => {
 
         setHasAccess(true);
 
-        // Fetch dropdowns + position data
-        const [gradesRes, levelsRes, positionRes] = await Promise.all([
-          api.get("/jobgrades"),
-          api.get("/occupationallevels"),
-          api.get(`/positions/${id}`),
-        ]);
+        const [gradesRes, levelsRes, positionRes, positionsRes] =
+          await Promise.all([
+            api.get("/jobgrades"),
+            api.get("/occupationallevels"),
+            api.get(`/positions/${id}`),
+            api.get("/positions"),
+          ]);
 
         setJobGrades(gradesRes.data);
         setOccupationalLevels(levelsRes.data);
+        setAllPositions(positionsRes.data);
 
         const posData = positionRes.data;
+
+        // ✅ Store original title from DB
+        setOriginalTitle(posData.positionTitle);
 
         setFormData({
           positionId: posData.positionId,
@@ -72,7 +78,7 @@ const EditPositionManagement = () => {
           occupationalLevelId: posData.occupationalLevelId?.toString() || "",
         });
       } catch (error) {
-        console.error("Initialization error:", error);
+        console.error(error);
         toast.error("Failed to load position data.");
       } finally {
         setLoading(false);
@@ -82,7 +88,6 @@ const EditPositionManagement = () => {
     initialize();
   }, [id]);
 
-  // Handle input change
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -93,10 +98,8 @@ const EditPositionManagement = () => {
         buttons: [
           {
             label: "Yes",
-            onClick: () => {
-              setFormData((prev) => ({ ...prev, jobGradeId: value }));
-              toast.info("Job Grade changed.");
-            },
+            onClick: () =>
+              setFormData((prev) => ({ ...prev, jobGradeId: value })),
           },
           { label: "No" },
         ],
@@ -107,164 +110,162 @@ const EditPositionManagement = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Submit using axios instance (JWT auto-attached)
-  // Submit using axios instance (JWT auto-attached)
- const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  const { positionTitle, jobGradeId, occupationalLevelId } = formData;
+    const { positionTitle, jobGradeId, occupationalLevelId } = formData;
 
-  // Basic validation
-  if (!positionTitle || !jobGradeId || !occupationalLevelId) {
-    toast.error("All fields are required");
-    return;
-  }
-
-  try {
-    //Fetch all employees linked to this position
-    const employeesRes = await api.get("/employee");
-    const linkedEmployees = employeesRes.data.filter(
-      (emp) => emp.positionId === parseInt(id)
-    );
-
-    // Fetch all positions to check for duplicate titles
-    const positionsRes = await api.get("/positions");
-    const duplicateTitle = positionsRes.data.find(
-      (pos) =>
-        pos.positionTitle.toLowerCase() === positionTitle.toLowerCase() &&
-        pos.positionId !== parseInt(id)
-    );
-
-    //If there are linked employees or duplicate title, go to ChangePositionManagement
-    if (linkedEmployees.length > 0 || duplicateTitle) {
-      navigate("/changePositionManagement", {
-        state: {
-          currentPosition: formData.positionTitle,
-          linkedEmployeesCount: linkedEmployees.length,
-          attemptedTitle: positionTitle,
-        },
-      });
-      return; // Stop normal save
+    if (!positionTitle || !jobGradeId || !occupationalLevelId) {
+      toast.error("All fields are required");
+      return;
     }
 
-    // No conflicts → proceed with normal save
-    await api.put(`/positions/${id}`, {
-      positionTitle,
-      jobGradeId: parseInt(jobGradeId),
-      occupationalLevelId: parseInt(occupationalLevelId),
-      isActive: true,
-    });
+    try {
+      const employeesRes = await api.get("/employee");
+      const linkedEmployees = employeesRes.data.filter(
+        (emp) => emp.positionId === parseInt(id)
+      );
 
-    toast.success("Position updated successfully.");
-    navigate("/positionManagement");
-  } catch (error) {
-    console.error("Error updating position:", error.response?.data || error.message);
-    toast.error(
-      error.response?.data?.message || "Something went wrong. Please try again."
-    );
-  }
-};
+      const duplicateTitle = allPositions.find(
+        (pos) =>
+          pos.positionTitle.toLowerCase() === positionTitle.toLowerCase() &&
+          pos.positionId !== parseInt(id)
+      );
 
-  // Render control AFTER hooks
+      if (linkedEmployees.length > 0 || duplicateTitle) {
+        navigate("/changePositionManagement", {
+          state: {
+            currentPosition: originalTitle,
+            linkedEmployeesCount: linkedEmployees.length,
+            attemptedTitle: positionTitle,
+          },
+        });
+        return;
+      }
+
+      await api.put(`/positions/${id}`, {
+        positionTitle,
+        jobGradeId: parseInt(jobGradeId),
+        occupationalLevelId: parseInt(occupationalLevelId),
+        isActive: true,
+      });
+
+      toast.success("Position updated successfully.");
+      navigate("/positionManagement");
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong.");
+    }
+  };
+
   if (loading) return <h3>Loading...</h3>;
   if (!hasAccess) return <h2>Access Denied. SuperUser only.</h2>;
 
-return (
-  <div className="modal-overlay">
-    <div className="modal-content">
-
-      <div className="headings-container">
-        <div className="apm-logo">
-          <span className="apm-logo-bold">singular</span>
-          <span className="apm-logo-light">express</span>
+  return (
+    <div className="modal-overlay">
+      <div className="modal-content">
+        <div className="headings-container">
+          <div className="apm-logo">
+            <span className="apm-logo-bold">singular</span>
+            <span className="apm-logo-light">express</span>
+          </div>
+          <h2 className="apm-title">Edit Position</h2>
         </div>
-        <h2 className="apm-title">Edit Position</h2>
+
+        <form onSubmit={handleSubmit} className="apm-form">
+
+          {/* Position Dropdown WITH icon */}
+          <div className="apm-input-group apm-dropdown-wrapper">
+            <select
+              name="positionTitle"
+              className="apm-input select-dropdown"
+              value={formData.positionTitle}
+              onChange={handleChange}
+              required
+            >
+              <option value="">Select Position</option>
+              {allPositions.map((pos) => (
+                <option key={pos.positionId} value={pos.positionTitle}>
+                  {pos.positionTitle}
+                </option>
+              ))}
+            </select>
+
+            <img
+              src="/images/arrow_drop_down_circle.png"
+              alt="Dropdown Icon"
+              className="apm-dropdown-icon"
+            />
+          </div>
+
+          <div className="apm-input-group">
+            <input
+              type="date"
+              name="effectiveDate"
+              className="apm-input"
+              value={formData.effectiveDate}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div className="apm-input-group apm-dropdown-wrapper">
+            <select
+              name="jobGradeId"
+              className="apm-input select-dropdown"
+              value={formData.jobGradeId}
+              onChange={handleChange}
+              required
+            >
+              <option value="">Position Grade</option>
+              {jobGrades.map((grade) => (
+                <option key={grade.jobGradeId} value={grade.jobGradeId}>
+                  {grade.name}
+                </option>
+              ))}
+            </select>
+
+            <img
+              src="/images/arrow_drop_down_circle.png"
+              alt="Dropdown Icon"
+              className="apm-dropdown-icon"
+            />
+          </div>
+
+          <div className="apm-input-group apm-dropdown-wrapper">
+            <select
+              name="occupationalLevelId"
+              className="apm-input select-dropdown"
+              value={formData.occupationalLevelId}
+              onChange={handleChange}
+              required
+            >
+              <option value="">Occupational Level</option>
+              {occupationalLevels.map((level) => (
+                <option
+                  key={level.occupationalLevelId}
+                  value={level.occupationalLevelId}
+                >
+                  {level.description}
+                </option>
+              ))}
+            </select>
+
+            <img
+              src="/images/arrow_drop_down_circle.png"
+              alt="Dropdown Icon"
+              className="apm-dropdown-icon"
+            />
+          </div>
+
+          <button type="submit" className="apm-save-button">
+            Save
+          </button>
+
+        </form>
       </div>
-
-      <form onSubmit={handleSubmit} className="apm-form">
-        <div className="apm-input-group">
-          <input
-            type="text"
-            name="positionTitle"
-            placeholder="Position title"
-            className="apm-input"
-            value={formData.positionTitle}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div className="apm-input-group">
-          <input
-            type="date"
-            name="effectiveDate"
-            className="apm-input"
-            value={formData.effectiveDate}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div className="apm-input-group apm-dropdown-wrapper">
-          <select
-            name="jobGradeId"
-            className="apm-input select-dropdown"
-            value={formData.jobGradeId}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Position Grade</option>
-            {jobGrades.map((grade) => (
-              <option key={grade.jobGradeId} value={grade.jobGradeId}>
-                {grade.name}
-              </option>
-            ))}
-          </select>
-          <img
-            src="/images/arrow_drop_down_circle.png"
-            alt="Dropdown Icon"
-            className="apm-dropdown-icon"
-          />
-        </div>
-
-        <div className="apm-input-group apm-dropdown-wrapper">
-          <select
-            name="occupationalLevelId"
-            className="apm-input select-dropdown"
-            value={formData.occupationalLevelId}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Occupational Level</option>
-            {occupationalLevels.map((level) => (
-              <option
-                key={level.occupationalLevelId}
-                value={level.occupationalLevelId}
-              >
-                {level.description}
-              </option>
-            ))}
-          </select>
-          <img
-            src="/images/arrow_drop_down_circle.png"
-            alt="Dropdown Icon"
-            className="apm-dropdown-icon"
-          />
-        </div>
-
-        <button type="submit" className="apm-save-button">
-          Save
-        </button>
-
-        <div className="apm-footer">
-          <p>Privacy Policy | Terms & Conditions</p>
-          <p>Copyright © 2025 Singular Systems. All rights reserved.</p>
-        </div>
-      </form>
-
     </div>
-  </div>
-);
+  );
 };
 
 export default EditPositionManagement;
