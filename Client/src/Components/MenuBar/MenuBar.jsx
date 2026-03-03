@@ -1,6 +1,7 @@
 import "./MenuBar.css";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 
 const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
@@ -48,6 +49,8 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
 
   const isUserManagementPage = location.pathname.startsWith("/userManagement");
 
+  const baseUrl = process.env.REACT_APP_API_BASE_URL;
+
   useEffect(() => {
     console.log("MenuBar user role:", role);
   }, [currentUser, role]);
@@ -79,21 +82,20 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
     if(localStorage.getItem('currentUser') !== null && localStorage.getItem('currentUser') !== undefined) {
       const token = localStorage.getItem('token');
       const email = JSON.parse(localStorage.getItem('currentUser')).email;
-      console.log("Current user", email);
-      try {
-          axios.get("http://localhost:5147/api/employee/email/" + email, {
+      const decodedTokenEmail = jwtDecode(token).sub;
+      if (decodedTokenEmail == email) {
+        try {
+          axios.get(`${baseUrl}/employee/email/${email}`, {
               headers: {
                   "Authorization": `Bearer ${token}`
               }
           })
           .then(response => {
               if (response.status === 200) {
-                  console.log("Employee status for menu bar:",response.data);
                   const employementStatus = response.data.employmentStatus;
                   const employeeAge = response.data.dateOfBirth;
                   if (employementStatus === 0 && (calculateAge(employeeAge) < 65)) {
                     setCanProjectPension(true);
-                    console.log("Employee can project pension:",canProjectPension)
                   }
               } else {
                   console.error("Unexpeted status:", response.status);
@@ -102,10 +104,11 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
           .catch(error => {
               console.error("Error:", error);
           });
-      }
-
-      catch (error) {
-          console.error("Failed to fetch your employee details:", error)
+        } catch (error) {
+            console.error("Failed to fetch your employee details:", error)
+        }
+      } else {
+        console.error("User data may have changed without authorization");
       }
     }
   })

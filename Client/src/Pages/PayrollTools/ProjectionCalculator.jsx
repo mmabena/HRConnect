@@ -1,4 +1,6 @@
 import { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 
 import "./ProjectionCalculator.css";
@@ -28,21 +30,29 @@ const ProjectionCalculator = () => {
         { value: 12.5, label: '12.5%' },
         { value: 15, label: '15%' },
     ];
+    const navigate = useNavigate();
+    const baseUrl = process.env.REACT_APP_API_BASE_URL;
 
     useEffect(() => {
         const token = localStorage.getItem('token');
         const email = JSON.parse(localStorage.getItem('currentUser')).email;
-
-        axios.get(`http://localhost:5147/api/employee/email/${email}`, {
-            headers: { "Authorization": `Bearer ${token}` }
-        })
-        .then(response => {
-            if (response.status === 200) {
-                setEmployeeDetails(response.data);
-                setEmployeeAge(calculateAge(response.data.dateOfBirth));
-            }
-        })
-        .catch(error => console.error("Error:", error));
+        const decodedTokenEmail = jwtDecode(token).sub;
+        if (decodedTokenEmail == email) { 
+            axios.get(`${baseUrl}/employee/email/${email}`, {
+                headers: { "Authorization": `Bearer ${token}` }
+            })
+            .then(response => {
+                if (response.status === 200) {
+                    setEmployeeDetails(response.data);
+                    setEmployeeAge(calculateAge(response.data.dateOfBirth));
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        } else {
+            console.error("User data may have changed without authorization");
+            navigate("/dashboard");
+        }
+        
     }, []);
 
     useEffect(() => {
@@ -114,8 +124,9 @@ const ProjectionCalculator = () => {
                 setVoluntaryContributionIsCapped(true);
                 voluntaryContributionInputRef.current.style.borderColor = "red";
                 const maxVoluntaryContribution =((employeeDetails.monthlySalary * MAX_PENSIONCONTRIBUTION_PERCENTAGE) - (employeeDetails.monthlySalary * selectedPercentage())).toFixed(2);
-                setVoluntaryContributionError({Error: `Voluntary Contribution + Monthly Salary Contribution cannot exceed 27.5% of salary. Maximum contribution: R ${maxVoluntaryContribution}` });
-
+                setVoluntaryContributionError(
+                    {Error: `Voluntary Contribution + Monthly Salary Contribution cannot exceed 27.5% of salary. Maximum contribution: R ${maxVoluntaryContribution}`}
+                );
             } else {
                 setVoluntaryContributionIsCapped(false);
                 voluntaryContributionInputRef.current.style.borderColor = "#355867";
