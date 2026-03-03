@@ -549,7 +549,7 @@
           .ReturnsAsync(dbData);
 
       // Act & Assert
-      var exception = await Assert.ThrowsAsync<ValidationException>(
+      var exception = await Assert.ThrowsAsync<Api.Middleware.ValidationException>(
           () => _service.BulkUpdateMedicalOptionsByCategoryAsync(categoryId, bulkUpdateDto));
       Assert.NotNull(exception);
     }
@@ -585,7 +585,7 @@
         .ReturnsAsync(dbData);
 
       // Act & Assert
-      var exception = await Assert.ThrowsAsync<ValidationException>(
+      var exception = await Assert.ThrowsAsync<Api.Middleware.ValidationException>(
         () => _service.BulkUpdateMedicalOptionsByCategoryAsync(categoryId, bulkUpdateDto));
   
       
@@ -632,7 +632,7 @@
           .ReturnsAsync(dbData);
 
       // Act & Assert
-      var exception = await Assert.ThrowsAsync<ValidationException>(
+      var exception = await Assert.ThrowsAsync<Api.Middleware.ValidationException>(
           () => _service.BulkUpdateMedicalOptionsByCategoryAsync(categoryId, bulkUpdateDto, testDate));
       Assert.Contains("do not exist", exception.Message);
     }
