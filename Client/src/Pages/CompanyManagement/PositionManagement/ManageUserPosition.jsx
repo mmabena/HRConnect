@@ -3,7 +3,7 @@ import CompanyManagementNavBar from "../../../Components/CompanyManagement/compa
 import { useNavigate, useLocation } from "react-router-dom";
 import { editEmployee } from "../../../api/Employee";
 import api from "../../../api/api";
-import { jwtDecode } from "jwt-decode";
+import {jwtDecode} from "jwt-decode";
 import { toast } from "react-toastify";
 
 const ManageUserPositions = ({ title }) => {
@@ -33,6 +33,7 @@ const ManageUserPositions = ({ title }) => {
     "Manage Companies",
     "Salary Budgets",
   ];
+
   const tabWidths = [168, 133, 122, 134, 154, 125];
 
   // ----------------------------
@@ -96,13 +97,15 @@ const ManageUserPositions = ({ title }) => {
 
         const allEmployees = employeesRes.data || [];
         const allPositions = positionsRes.data || [];
+
         setPositions(allPositions);
 
-        // Filter employees by CURRENT position
+        // Find current position
         const matchedCurrent = allPositions.find(
           (pos) => pos.positionTitle === currentPositionTitle
         );
 
+        // Filter employees by CURRENT position
         const filteredEmployees = matchedCurrent
           ? allEmployees.filter(
               (emp) => Number(emp.positionId) === Number(matchedCurrent.positionId)
@@ -111,14 +114,7 @@ const ManageUserPositions = ({ title }) => {
 
         setEmployees(filteredEmployees);
 
-        // Pre-select all filtered employees
-        const initialSelection = {};
-        filteredEmployees.forEach((emp) => {
-          initialSelection[emp.employeeId] = true;
-        });
-        setSelectedEmployees(initialSelection);
-
-        // Find new position
+        // Find new position after positions are loaded
         const matchedNew = allPositions.find(
           (pos) => pos.positionTitle === newPositionTitle
         );
@@ -182,13 +178,14 @@ const ManageUserPositions = ({ title }) => {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentEmployees = employees.slice(indexOfFirstItem, indexOfLastItem);
 
-  const handlePrev = () => currentPage > 1 && setCurrentPage((prev) => prev - 1);
+  const handlePrev = () =>
+    currentPage > 1 && setCurrentPage((prev) => prev - 1);
   const handleNext = () =>
     currentPage < totalPages && setCurrentPage((prev) => prev + 1);
   const handlePageClick = (num) => setCurrentPage(num);
 
   // ----------------------------
-  // Save Changes (Promote/Demote)
+  // Save Changes (Update Position)
   // ----------------------------
   const handleSave = async () => {
     const selectedIds = Object.keys(selectedEmployees).filter(
@@ -206,17 +203,40 @@ const ManageUserPositions = ({ title }) => {
     }
 
     try {
-      const updatePromises = selectedIds
-        .map((employeeId) => {
-          const emp = employees.find(
-            (e) => e.employeeId.toString() === employeeId
-          );
-          if (!emp) return null;
+      const updatePromises = selectedIds.map((employeeId) => {
+        const emp = employees.find((e) => e.employeeId.toString() === employeeId);
+        if (!emp) return null;
 
-          const updatedEmp = { ...emp, positionId: Number(selectedPosition) };
-          return editEmployee(emp.employeeId, updatedEmp);
-        })
-        .filter(Boolean);
+        //Send full employee object with updated positionId
+        const updatedEmp = {
+          ...emp,
+          positionId: Number(selectedPosition),
+          nationality: emp.nationality || "Not specified", // required field
+          title: emp.title || "Mr/Ms", // fill if missing
+          name: emp.name || "",
+          surname: emp.surname || "",
+          idNumber: emp.idNumber || "",
+          passportNumber: emp.passportNumber || "",
+          gender: emp.gender || "Male",
+          contactNumber: emp.contactNumber || "",
+          taxNumber: emp.taxNumber || "",
+          email: emp.email || "",
+          physicalAddress: emp.physicalAddress || "",
+          city: emp.city || "",
+          zipCode: emp.zipCode || "",
+          hasDisability: emp.hasDisability || false,
+          disabilityDescription: emp.disabilityDescription || "",
+          dateOfBirth: emp.dateOfBirth || new Date().toISOString().split("T")[0],
+          startDate: emp.startDate || new Date().toISOString().split("T")[0],
+          branch: emp.branch || "",
+          monthlySalary: emp.monthlySalary || 0,
+          employmentStatus: emp.employmentStatus || "Permanent",
+          careerManagerID: emp.careerManagerID || "",
+          profileImage: emp.profileImage || "",
+        };
+
+        return editEmployee(emp.employeeId, updatedEmp);
+      }).filter(Boolean);
 
       await Promise.all(updatePromises);
 
@@ -280,10 +300,7 @@ const ManageUserPositions = ({ title }) => {
                 required
               >
                 {positions.map((position) => (
-                  <option
-                    key={position.positionId}
-                    value={String(position.positionId)}
-                  >
+                  <option key={position.positionId} value={String(position.positionId)}>
                     {position.positionTitle}
                   </option>
                 ))}
@@ -336,9 +353,7 @@ const ManageUserPositions = ({ title }) => {
                     <input
                       type="checkbox"
                       checked={!!selectedEmployees[employee.employeeId]}
-                      onChange={() =>
-                        handleCheckboxChange(employee.employeeId)
-                      }
+                      onChange={() => handleCheckboxChange(employee.employeeId)}
                     />{" "}
                     {employee.name} {employee.surname}
                   </td>
@@ -346,7 +361,7 @@ const ManageUserPositions = ({ title }) => {
                   <td>{positionMap[employee.positionId] || "N/A"}</td>
                   <td>
                     {selectedEmployees[employee.employeeId]
-                      ? positionMap[Number(selectedPosition)]
+                      ? positionMap[selectedPosition]
                       : "-"}
                   </td>
                 </tr>

@@ -82,7 +82,7 @@ const ChangePositionManagement = () => {
             Move users to a new position
           </label>
 
-          {/* ✅ Link appears ONLY when Move Users is selected */}
+          {/*Link appears ONLY when Move Users is selected */}
         {moveUsers && (
   <div className="apm-view-users">
     <span
