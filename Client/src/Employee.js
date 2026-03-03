@@ -46,10 +46,10 @@ export const addEmployee = async (employee) => {
   }
 };
 
-export const editEmployee = async (employeeNumber, employee) => {
+export const editEmployee = async (employeeId, employee) => {
   try {
     const response = await axios.put(
-      `${API_BASE}/edit/${employeeNumber}`,
+      `${API_BASE}/${employeeId}`,
       employee,
       {
         headers: { "Content-Type": "application/json" },
@@ -97,11 +97,11 @@ export const fetchEmployeeByIdNumber = async (idNumber) => {
   }
 };
 
-export const GetEmployeeByEmployeeNumberAsync = async (employeeNumber) => {
+export const GetEmployeeByEmployeeNumberAsync = async (employeeId) => {
   try {
-    const encoded = encodeURIComponent(employeeNumber);
+    const encoded = encodeURIComponent(employeeId);
     const response = await axios.get(
-      `${API_BASE}/by-employee-number/${encoded}`
+      `${API_BASE}/${encoded}`
     );
     return response.data || {};
   } catch (error) {
@@ -265,19 +265,19 @@ export const validateEmail = (email) => {
 
 export const validateRequiredFields = (employee) => {
   const requiredFields = [
+    "title",
     "firstName",
     "lastName",
     "idNumber",
     "dateOfBirth",
     "contactNumber",
-    "maritalStatus",
     "homeAddress",
     "postalCode",
+    "taxNumber",
     "city",
     "gender",
     "startDate",
-    "department",
-    "employeeNumber",
+    "branch",
     "jobTitle",
     "employeeStatus",
     "reportsTo",

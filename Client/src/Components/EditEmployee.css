@@ -1,0 +1,341 @@
+/* ===== Edit Employee.css  ===== */
+.new-menu-background {
+  position: fixed;
+  top: 0;
+  left: 375px;
+  right: 0;
+  bottom: 0;
+  padding: 26px 20px 20px 20px;
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: linear-gradient(135deg,
+      #EEEEF1,
+      #EFF1F3,
+      #E7EAEB,
+      #D6D6D9,
+      #C4C4C5);
+  color: rgba(0, 0, 0, 0.411);
+  box-sizing: border-box;
+  text-align: center;
+  overflow: hidden;
+  z-index: 1;
+  overflow-y: auto;
+}
+
+.new-edit-employee-heading-row {
+  justify-content: flex-start;
+  display: flex;
+  gap: 20px;
+}
+
+.new-em-edit-button,
+.btn-edit {
+  width: 150px;
+  height: 47px;
+  background-color: var(--success-color);
+  border: none;
+  border-radius: var(--border-radius-medium);
+  padding: 5px 10px;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: background-color var(--transition-default);
+  font-family: 'Anek Bangla', serif;
+  letter-spacing: 2%;
+}
+
+.new-edit-button-top-right {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.new-em-edit-button:hover,
+.btn-edit:hover {
+  background-color: #95a860;
+}
+
+.new-edit-employee-form-container {
+  position: absolute;
+  top: 180px;
+
+  left: -375px;
+
+  right: 70px;
+
+  height: 696px;
+  padding: 30px 50px;
+  box-sizing: border-box;
+  background: transparent;
+
+  z-index: 2;
+}
+
+.new-custom-header {
+  width: 1446px;
+  height: 45px;
+  padding: 0 16px 0 13px;
+  border-top-left-radius: 10px;
+  /* Rounded top-left corner */
+  border-top-right-radius: 10px;
+  /* Rounded top-right corner */
+  border-bottom-left-radius: 0;
+  /* Square bottom-left corner */
+  border-bottom-right-radius: 0;
+  /* Square bottom-right corner */
+  background-color: #C7D9E5;
+  display: flex;
+  align-items: center;
+
+  box-sizing: border-box;
+  box-shadow: none;
+  border: none;
+  margin-left: 370px;
+  margin-right: 70px;
+  font-family: 'Anek Bangla', sans-serif;
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 100%;
+  letter-spacing: 2%;
+  color: #002D40;
+}
+
+.new-sub-container {
+  width: 1446px;
+  height: 100%;
+  padding: 20px 31px 34px 31px;
+  background-color: #FFFFFF;
+  border-radius: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  margin-left: 370px;
+  margin-right: 70px;
+  margin-top: 0;
+}
+
+.new-fields-container {
+  display: flex;
+  flex-direction: row;
+  gap: 65px;
+  height: 70px;
+  margin-bottom: 10px;
+
+}
+
+/* For rows with 6 fields */
+.new-fields-container.row-6 {
+  width: 1384px;
+  /* fixed width */
+  justify-content: space-between;
+}
+
+.new-fields-container.row-6 .field {
+  width: 176.5px;
+  /* per field */
+}
+
+/* Row container for 3 fields */
+.new-fields-container.row-3 {
+  width: 1384px;
+  /* same width as row-6 */
+  display: flex;
+  justify-content: space-between;
+  /* equal spacing between fields */
+  gap: 65px;
+  margin-bottom: 20px;
+  /* spacing between rows */
+}
+
+/* Each field in row-3 */
+.new-fields-container.row-3 .field {
+  width: 418px;
+  height: 70px;
+}
+
+.new-field {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  /* Inherit width from row-specific styles */
+  height: 70px;
+  box-sizing: border-box;
+}
+
+.new-field-label {
+  font-family: 'Anek Bangla', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 100%;
+  letter-spacing: 2%;
+  color: #002D40;
+  margin: 0;
+
+  padding-left: 10px;
+
+  height: 30px;
+  /* fixed height for label to help layout */
+  display: flex;
+  align-items: center;
+  /* vertical center the label text */
+  user-select: none;
+}
+
+.new-field-input {
+  width: 100%;
+  /* Stretch to fill parent .field */
+  height: 40px;
+  border-radius: 5px;
+  border: 2px solid #C7D9E5;
+  padding: 5px 10px;
+  background-color: #FFFFFF;
+  box-sizing: border-box;
+  font-family: 'Anek Bangla', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  outline-offset: 2px;
+
+}
+
+.new-edit-employee-top-container {
+  position: relative;
+  height: 200px;
+  display: flex;
+  align-items: flex-start;
+  padding-left: 20px;
+}
+
+/* Image block */
+.new-photo-block {
+  width: 241px;
+  height: 185px;
+  padding: 0;
+  background-color: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 0;
+  margin-right: 30px;
+}
+
+/* Image styling */
+.new-photo-block img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+}
+
+/* Text beside image */
+.new-photo-text-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+}
+
+/* Name */
+.new-photo-text-container .new-title {
+  font-family: 'Anek Bangla', sans-serif;
+  font-weight: 700;
+  font-size: 40px;
+  color: #006088;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Job Title */
+.new-photo-text-container{
+  font-family: 'Anek Bangla', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: #006088;
+  margin-top: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-left: 0;
+}
+
+.new-subtitle {
+  font-family: 'Anek Bangla', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: #006088;
+  margin-top: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-left: 0;
+}
+
+.new-subsubtitle {
+  font-family: 'Anek Bangla', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: #04445f86;
+  margin-top: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-left: 0;
+}
+
+
+/* Active tab color */
+.heading-item.selected {
+  color: #01A19A;
+}
+
+.toast-confirm-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toast-confirm-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.toast-confirm-btn {
+  padding: 6px 12px;
+  border: none;
+  cursor: pointer;
+  color: white;
+  font-weight: 600;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.toast-confirm-btn.confirm {
+  background-color: #4caf50;
+}
+
+.toast-confirm-btn.confirm:hover {
+  background-color: #45a049;
+}
+
+.toast-confirm-btn.cancel {
+  background-color: #f44336;
+}
+
+.toast-confirm-btn.cancel:hover {
+  background-color: #da190b;
+}

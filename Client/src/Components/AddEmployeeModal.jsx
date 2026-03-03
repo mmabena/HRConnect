@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "../Components/AddEmployeeModal.css";
+import axios from "axios";
 
 import {
   addEmployee,
@@ -15,6 +16,8 @@ import {
   showConfirmationToast,
   convertDDMMYYYYtoISO,
   GetEmployeeByEmployeeNumberAsync,
+  validateIdNumber,
+  generateEmployeeNumber,
 } from "../Employee";
 
 /// </summary>
@@ -27,8 +30,15 @@ const AddEmployeeModal = ({ closeModal }) => {
   const navigate = useNavigate();
   const [userRole, setUserRole] = useState(null);
   const [formErrors, setFormErrors] = useState({});
+  const [positions, setPositions] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
+  const [idType, setIdType] = useState("ID"); // "ID" or "Passport"
+  const [idValue, setIdValue] = useState("");
+  const [dob, setDob] = useState("");
+  const [gender, setGender] = useState("");
+  const [nationality, setNationality] = useState("");
   const [employeesList, setEmployeesList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [idNumberError, setIdNumberError] = useState("");
@@ -36,527 +46,487 @@ const AddEmployeeModal = ({ closeModal }) => {
   const [reportsToOptions, setReportsToOptions] = useState([]);
   const [allEmployees, setAllEmployees] = useState([]);
 
+  const titles = ["Mr", "Mrs", "Ms", "Dr", "Prof"];
+  const genders = ["Male", "Female"];
+  const branches = ["Johannesburg", "CapeTown", "UK"];
+  const employmentStatuses = ["Permanent", "FixedTerm", "Contract"];
+
   const [employee, setEmployee] = useState({
-    employeeNumber: "",
+    title: "",
     firstName: "",
     lastName: "",
-    maidenName: "",
-    title: "",
-    dateOfBirth: "",
-    initials: "",
     idType: "id",
     idNumber: "",
-    preferredName: "",
-    gender: "",
-    middleName: "",
-    contactNumber: "",
+    passportNumber: "",
     nationality: "",
-    citizenship: "",
-    disability: "",
-    disabilityType: "",
+    gender: "",
+    contactNumber: "",
+    taxNumber: "",
     email: "",
-    maritalStatus: "",
     homeAddress: "",
     city: "",
     postalCode: "",
     startDate: "",
-    department: "",
+    branch: "",
+    monthlySalary: "",
     jobTitle: "",
     employeeStatus: "",
     reportsTo: "",
+    disability: false,
+    disabilityType: "",
     documentPath: "",
   });
 
   useEffect(() => {
     setUserRole(getCurrentUserRole());
-    const fetchEmployees = async () => {
+    const fetchData = async () => {
       try {
-        const data = await fetchAllEmployees();
-        setEmployeesList(data);
-        setAllEmployees(data);
+        const employeesData = await fetchAllEmployees();
+        setAllEmployees(employeesData);
+
+        const positionsRes = await axios.get(
+          "http://localhost:5147/api/positions",
+        );
+        setPositions(positionsRes.data);
       } catch (err) {
-        console.error("Failed to fetch employees:", err);
+        console.error(err);
       }
     };
-    fetchEmployees();
+    fetchData();
   }, []);
 
-  useEffect(() => {
-    const query = employee.reportsTo.trim().toLowerCase();
-
-    if (query.length < 2) {
-      setReportsToOptions([]);
-      return;
-    }
-
-    const matches = allEmployees
-      .filter((emp) =>
-        `${emp.firstName} ${emp.lastName}`.toLowerCase().includes(query)
-      )
-      .map((emp) => `${emp.firstName} ${emp.lastName}`);
-
-    setReportsToOptions(matches);
-  }, [employee.reportsTo, allEmployees]);
-
-  useEffect(() => {
-    console.log("AddEmployee rendered");
-    console.log("loading:", loading);
-  }, [loading]);
-
   if (userRole !== "superuser") {
-    return (
-      <div>
-        Access Denied. Only super users can access this page.
-      </div>
-    );
-  }
-
-  const handleSave = async () => {
-    const confirmed = await showConfirmationToast(
-      "Are you sure you want to save changes?"
-    );
-    if (!confirmed) return;
-
-    const reportsToValid = allEmployees.some(
-      (emp) =>
-        `${emp.firstName} ${emp.lastName}`.toLowerCase() ===
-        employee.reportsTo.toLowerCase()
-    );
-    const dateOfBirthISO =
-      employee.idType === "passport"
-        ? convertDDMMYYYYtoISO(employee.dateOfBirth)
-        : toISOStringSafe(employee.dateOfBirth);
-
-    if (!reportsToValid) {
-      setFormErrors((prev) => ({
-        ...prev,
-        reportsTo: "Select a valid reporting manager",
-      }));
-      toast.error("Select a valid reporting manager.");
-      return;
-    }
-
-    /// </summary>
-    /// Require gender only if idType is 'passport'
-    /// </summary>
-    if (employee.idType === "passport" && !employee.gender) {
-      setFormErrors((prev) => ({
-        ...prev,
-        gender: "Gender is required when ID type is passport",
-      }));
-      toast.error("Please select a gender.");
-      return;
-    }
-
-    const validation = validateRequiredFields(employee);
-    const emailError = validateEmail(employee.email);
-    if (emailError) {
-      validation.errors.email = emailError;
-      validation.isValid = false;
-    }
-    setFormErrors(validation.errors);
-    if (!validation.isValid) return;
-    const mappedIdType = employee.idType === "id" ? "ZA" : "NZA";
-
-    /// </summary>
-    /// Make gender drop down accessible if idType is passport
-    /// </summary>
-
-    const payload = {
-      ...employee,
-      idType: mappedIdType,
-      disability: employee.disability === "yes",
-      dateOfBirth: dateOfBirthISO,
-      startDate: toISOStringSafe(employee.startDate),
-      gender:
-        employee.idType === "id" || employee.idType === "ZA"
-          ? employee.gender
-          : employee.idType === "passport" || employee.idType === "NZA"
-          ? employee.gender
-          : null,
-    };
-
-    try {
-      setLoading(true);
-      console.log("Employee details:", payload);
-      const saved = await addEmployee(payload);
-
-      toast.success("Employee saved successfully!");
-      console.log(employee.email);
-      console.log(employee.contactNumber);
-
-      const freshEmployee = await GetEmployeeByEmployeeNumberAsync(
-        saved.employeeNumber
-      );
-      closeModal();
-    } catch (error) {
-      if (error.response?.data) {
-        const data = error.response.data;
-        const generalMessage = data.message || "Validation failed";
-
-        setFormErrors({});
-
-        toast.error(generalMessage);
-
-        if (Array.isArray(data.errors)) {
-          /// </summary>
-          /// errors is an array of objects with {field, message}
-          /// </summary>
-          const errorsObj = {};
-          data.errors.forEach(({ field, message }) => {
-            errorsObj[field] = message;
-            toast.error(`${field}: ${message}`);
-          });
-          setFormErrors(errorsObj);
-        } else if (typeof data.errors === "object") {
-          /// </summary>
-          /// fallback if errors is an object instead of array
-          /// </summary>
-
-          setFormErrors(data.errors);
-          Object.entries(data.errors).forEach(([field, msg]) =>
-            toast.error(`${field}: ${msg}`)
-          );
-        }
-      } else {
-        toast.error("Failed to save employee. Please try again.");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  function onBlurField(e) {
-    const { name } = e.target;
-    setTouched((prev) => ({ ...prev, [name]: true }));
+    return <div>Access Denied. Only super users can access this page.</div>;
   }
 
   const onInputChange = (e) => {
     const { name, value } = e.target;
-    let newValue = value;
 
+    setFormErrors((prev) => ({ ...prev, [name]: null }));
+
+    // Handle disability
     if (name === "disability") {
-      newValue = value === "yes";
-    }
-
-    if (["contactNumber", "postalCode"].includes(name)) {
-      if (/\D/.test(value)) {
-        setFormErrors((prev) => ({ ...prev, [name]: "Only numbers allowed" }));
-        return;
-      } else {
-        setFormErrors((prev) => ({ ...prev, [name]: null }));
-      }
-    }
-
-    if (name === "idType") {
-      /// </summary>
-      /// When idType changes, reset fields accordingly
-      /// </summary>
-
       setEmployee((prev) => ({
         ...prev,
-        idType: value,
-        idNumber: "",
-        dateOfBirth: value === "id" ? "" : prev.dateOfBirth,
-        nationality: value === "id" ? "" : "Non-South African",
-        citizenship: value === "id" ? "" : "Non-South African",
-        /// </summary>
-        /// For passport, keep existing gender or force user to select
-        /// </summary>
-
-        gender: value === "id" ? "" : "",
+        disability: value === "yes",
+        disabilityType: value === "no" ? "" : prev.disabilityType,
       }));
       return;
     }
 
-    if (name === "idNumber") {
-      if (value.length <= 13) {
-        if (employee.idType === "id" && value.length === 13) {
-          const derived = populateFromIdNumber(value);
-          setEmployee((prev) => ({
-            ...prev,
-            idNumber: value,
-            dateOfBirth: derived.dateOfBirth || "",
-            gender: derived.gender || "",
-            nationality: derived.nationality || "",
-            citizenship: derived.citizenship || "",
-          }));
-        } else {
-          /// </summary>
-          /// for passport or idNumber less than 13 for id, just update idNumber
-          /// </summary>
-
-          setEmployee((prev) => ({
-            ...prev,
-            idNumber: value,
-            ...(employee.idType === "id"
-              ? {
-                  dateOfBirth: "",
-                  gender: "",
-                  nationality: "",
-                  citizenship: "",
-                }
-              : {}),
-          }));
-        }
+    // Numeric validation
+    if (
+      ["contactNumber", "postalCode", "monthlySalary", "taxNumber"].includes(
+        name,
+      )
+    ) {
+      // allow empty string
+      const regex = name === "contactNumber" ? /^[\d+-]*$/ : /^\d*$/;
+      if (value === "" || regex.test(value)) {
+        setFormErrors((prev) => ({ ...prev, [name]: null }));
+        setEmployee((prev) => ({ ...prev, [name]: value }));
+      } else {
+        setFormErrors((prev) => ({ ...prev, [name]: "Invalid characters" }));
       }
       return;
     }
 
-    if (name === "dateOfBirth" && employee.idType === "id") {
+    // ID type change
+    if (name === "idType") {
+      setEmployee((prev) => ({
+        ...prev,
+        idType: value,
+        idNumber: "",
+        dateOfBirth: "",
+        nationality: value === "id" ? "" : "Non-South African",
+        gender: "",
+      }));
       return;
-      /// </summary>
-      /// dateOfBirth auto derived for id
-      /// </summary>
     }
 
-    if (name === "gender") {
-      /// </summary>
-      /// Only allow manual gender input when idType is NOT "id"
-      /// </summary>
-
-      if (employee.idType !== "id") {
-        setEmployee((prev) => ({
+    // ID number -> derive DOB/gender/nationality for SA IDs
+    if (name === "idNumber" && employee.idType === "id") {
+      setEmployee((prev) => {
+        const derived = populateFromIdNumber(value);
+        return {
           ...prev,
-          gender: value,
-        }));
-      }
+          idNumber: value,
+          dateOfBirth: derived.dateOfBirth || "",
+          gender: derived.gender || "",
+          nationality: derived.nationality || "",
+          citizenship: derived.citizenship || "",
+        };
+      });
       return;
     }
 
-    handleInputChange(
-      e,
-      employee,
-      setEmployee,
-      setIdNumberError,
-      employeesList
-    );
+    setEmployee((prev) => ({ ...prev, [name]: value }));
   };
 
   const onFileChange = (e) =>
     handleFileChange(e, setEmployee, setUploading, setErrorMessage);
 
-  const idPlaceholder =
-    employee.idType === "passport" ? "Passport Number" : "ID Number";
+  const formatDateForBackend = (dateStr) => {
+    if (!dateStr) return null;
+    const d = new Date(dateStr);
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  };
+
+  const handleSave = async () => {
+    try {
+      setLoading(true);
+
+      const token = localStorage.getItem("token");
+
+      const payload = {
+        employeeId: "",
+
+        title: employee.title || null,
+        name: employee.firstName || null,
+        surname: employee.lastName || null,
+
+        nationality: employee.nationality || null,
+        gender: employee.gender
+          ? employee.gender.charAt(0).toUpperCase() + employee.gender.slice(1)
+          : null,
+
+        contactNumber: employee.contactNumber || null,
+        taxNumber: employee.taxNumber || null,
+        email: employee.email || null,
+
+        physicalAddress: employee.homeAddress || null,
+        city: employee.city || null,
+        zipCode: employee.postalCode || null,
+
+        hasDisability: employee.disability || false,
+        disabilityDescription: employee.disabilityType || null,
+
+        dateOfBirth: employee.dateOfBirth || null,
+        startDate: employee.startDate || null,
+
+        branch: employee.branch || null,
+        monthlySalary: employee.monthlySalary
+          ? parseFloat(employee.monthlySalary)
+          : 0,
+
+        positionId: employee.jobTitle ? parseInt(employee.jobTitle) : null,
+
+        employmentStatus: employee.employeeStatus || null,
+        careerManagerID: employee.reportsTo || null,
+
+        profileImage: employee.documentPath || null,
+      };
+
+      if (employee.idType === "id") {
+        payload.idNumber = employee.idNumber;
+      } else {
+        payload.passportNumber = employee.idNumber;
+      }
+
+      console.log("Sending employee payload:", payload);
+
+      const response = await fetch("http://localhost:5147/api/employee", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        if (errorData.errors) {
+          setFormErrors(errorData.errors);
+        } else if (errorData.message) {
+          const message = errorData.message;
+
+          const newErrors = {};
+
+          if (message.includes("Email")) newErrors.email = message;
+          else if (message.includes("Contact number"))
+            newErrors.contactNumber = message;
+          else if (message.includes("ID number")) newErrors.idNumber = message;
+          else if (message.includes("Tax Number")) newErrors.taxNumber = message;
+          else if (message.includes("Start date")) newErrors.startDate = message;
+          else if (message.includes("Position")) newErrors.jobTitle = message;
+          else if (message.includes("Branch")) newErrors.branch = message;
+          else if (message.includes("Monthly salary"))
+            newErrors.monthlySalary = message;
+          else newErrors.general = message;
+
+          setFormErrors(newErrors);
+        }
+        throw new Error("Validation failed");
+      }
+
+      await response.json();
+
+      toast.success("Employee created successfully!");
+      closeModal();
+    } catch (error) {
+      console.error("Error saving employee:", error);
+      toast.error("Failed to create employee.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-
-      <div className="center-frame">
-        <div className="left-frame">
-          <div className="left-frame-centered">
-            <div className="headings-container">
-              <div className="center-logo">
-                <span className="center-logo-text-bold">singular</span>
-                <span className="center-logo-text-light">express</span>
-              </div>
-              <h1 className="new-employee-title">New Employee</h1>
+    <div className="center-frame">
+      <div className="left-frame">
+        <div className="left-frame-centered">
+          <div className="headings-container">
+            <div className="center-logo">
+              <span className="center-logo-text-bold">singular</span>
+              <span className="center-logo-text-light">express</span>
             </div>
+            <h1 className="new-employee-title">New Employee</h1>
           </div>
-          <div className="left-frame">
-            <div className="personal-details-container">
-              <div className="personal-details-heading">
-                <span>Personal</span> <span>Details</span>
-              </div>
-            </div>
+        </div>
 
-            <div className="name-surname-container">
-              {/* First Name */}
+        <div className="personal-details-container">
+          <div className="personal-details-heading">
+            <span>Personal</span> <span>Details</span>
+          </div>
+        </div>
+
+        <div className="name-surname-container">
+          <div className="form-grid">
+            {/* Title */}
+            <div className="full-width">
+              <select
+                className="name-input"
+                value={employee.title}
+                onChange={onInputChange}
+                name="title"
+              >
+                <option value="">Title</option>
+                {titles.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {/* First Name | Last Name */}
+            <div className="two-col">
               <input
                 type="text"
-                placeholder={
-                  touched.firstName && formErrors.firstName
-                    ? formErrors.firstName
-                    : "First Name"
-                }
-                className={`name-input ${
-                  touched.firstName && formErrors.firstName ? "input-error" : ""
-                }`}
+                placeholder="Full Name"
+                className="name-input-col"
                 name="firstName"
                 value={employee.firstName}
                 onChange={onInputChange}
-                onBlur={onBlurField}
               />
-
-              {/* Fixed Last Name */}
               <input
                 type="text"
-                placeholder={
-                  touched.lastName && formErrors.lastName
-                    ? formErrors.lastName
-                    : "Last Name"
-                }
-                className={`name-input ${
-                  touched.lastName && formErrors.lastName ? "input-error" : ""
-                }`}
+                placeholder="Last Name"
+                className="name-input-col"
                 name="lastName"
                 value={employee.lastName}
                 onChange={onInputChange}
-                onBlur={onBlurField}
               />
+            </div>
 
-              {/* ID Type & ID Number */}
-              <div className="input-row">
-                <div className="gender-select-wrapper">
-                  <select
-                    className="name-input gender-select"
-                    name="idType"
-                    value={employee.idType}
-                    onChange={onInputChange}
-                  >
-                    <option value="id">ID Number</option>
-                    <option value="passport">Passport Number</option>
-                  </select>
-                  <img
-                    src="/images/arrow_drop_down_circle.png"
-                    alt="Dropdown icon"
-                    className="dropdown-icon"
-                  />
-                </div>
+            {/* ID Type | ID Number */}
+            <div className="two-col">
+              <select
+                className="name-input-col"
+                name="idType"
+                value={employee.idType}
+                onChange={onInputChange}
+              >
+                <option value="id">ID Number</option>
+                <option value="passport">Passport Number</option>
+              </select>
 
-                <input
-                  type="text"
-                  placeholder={formErrors.idNumber || idPlaceholder}
-                  className={`name-input ${
-                    formErrors.idNumber ? "input-error" : ""
-                  }`}
-                  name="idNumber"
-                  value={employee.idNumber}
-                  onChange={onInputChange}
-                />
-              </div>
-
-              {/* DOB - read-only -Editable only for passport */}
               <input
                 type="text"
-                placeholder="Birthday"
+                className="name-input-col"
+                name="idNumber"
+                value={employee.idNumber}
+                onChange={onInputChange}
+                placeholder={
+                  employee.idType === "passport"
+                    ? "Passport Number"
+                    : "ID Number"
+                }
+              />
+            </div>
+
+            {/* Nationality */}
+            <div className="full-width">
+              <input
+                type="text"
+                name="nationality"
+                placeholder="Nationality"
+                value={employee.nationality}
+                onChange={onInputChange}
+                disabled={employee.idType === "id"}
                 className="name-input"
+              />
+            </div>
+
+            {/* DOB | Gender */}
+            <div className="two-col">
+              <input
+                className="name-input-col"
+                type="date"
                 name="dateOfBirth"
                 value={employee.dateOfBirth}
                 onChange={onInputChange}
                 disabled={employee.idType === "id"}
               />
+              <select
+                name="gender"
+                className="name-input-col"
+                value={employee.gender}
+                onChange={onInputChange}
+                disabled={employee.idType === "id"}
+              >
+                <option value="">Gender</option>
+                {genders.map((g) => (
+                  <option key={g} value={g.toLowerCase()}>
+                    {g}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-              {/* Disability */}
-              <div className="input-row">
-                <div className="gender-select-wrapper">
-                  <select
-                    className="name-input gender-select"
+            {/* Disability (radio buttons) */}
+            <div className="two-col">
+              <div className="disability-row">
+                <span className="disability-label">Disability:</span>
+
+                <label className="radio-option">
+                  <input
+                    type="radio"
                     name="disability"
-                    value={employee.disability}
+                    value="yes"
+                    checked={employee.disability === true}
                     onChange={onInputChange}
-                  >
-                    <option value="" disabled>
-                      Do you have a disability?
-                    </option>
-                    <option value="yes">Yes</option>
-                    <option value="no">No</option>
-                  </select>
-
-                  <img
-                    src="/images/arrow_drop_down_circle.png"
-                    alt="Dropdown icon"
-                    className="dropdown-icon"
                   />
-                </div>
+                  Yes
+                </label>
 
-                {employee.disability === "yes" && (
+                <label className="radio-option">
+                  <input
+                    type="radio"
+                    name="disability"
+                    value="no"
+                    checked={employee.disability === false}
+                    onChange={onInputChange}
+                  />
+                  No
+                </label>
+
+                {employee.disability && (
                   <input
                     type="text"
-                    placeholder="Disability Type"
-                    className="name-input"
                     name="disabilityType"
-                    value={employee.disabilityType || ""}
+                    placeholder="Describe disability"
+                    value={employee.disabilityType}
                     onChange={onInputChange}
+                    className="disability-input"
                   />
                 )}
               </div>
+            </div>
 
-              {/* Contact Number (numeric only) */}
+            {/* Contact Number */}
+            <div className="full-width">
               <input
                 type="text"
-                placeholder={formErrors.contactNumber || "Contact Number"}
-                className={`name-input ${
-                  formErrors.contactNumber ? "input-error" : ""
-                }`}
+                placeholder="Contact Number"
+                className="name-input"
                 name="contactNumber"
                 value={employee.contactNumber}
                 onChange={onInputChange}
               />
+            </div>
 
-              {/* Marital Status */}
-              <div className="gender-select-wrapper">
-                <select
-                  className="name-input gender-select"
-                  name="maritalStatus"
-                  value={employee.maritalStatus}
-                  onChange={onInputChange}
-                >
-                  <option value="" disabled>
-                    Marital Status
-                  </option>
-                  <option value="single">Single</option>
-                  <option value="married">Married</option>
-                  <option value="divorced">Divorced</option>
-                  <option value="widow">Widow</option>
-                  <option value="widower">Widower</option>
-                </select>
-                <img
-                  src="/images/arrow_drop_down_circle.png"
-                  alt="Dropdown icon"
-                  className="dropdown-icon"
-                />
-              </div>
-
-              {/* Address */}
+            {/* Email */}
+            <div className="full-width">
+              <input
+                type="email"
+                placeholder="Email Address"
+                className="name-input"
+                name="email"
+                value={employee.email}
+                onChange={onInputChange}
+              />
+              {formErrors.email && <span className="error-message">{formErrors.email}</span>}
+            </div>
+            {/* Home Address */}
+            <div className="full-width">
               <input
                 type="text"
-                placeholder={formErrors.homeAddress || "Home address"}
-                className={`name-input ${
-                  formErrors.homeAddress ? "input-error" : ""
-                }`}
+                placeholder="Home Address"
+                className="name-input"
                 name="homeAddress"
                 value={employee.homeAddress}
                 onChange={onInputChange}
               />
+            </div>
 
-              {/* City & Postal Code (numeric) */}
-              <div className="city-postal-container">
+            {/* City | Postal Code */}
+            <div className="two-col">
+              <input
+                type="text"
+                placeholder="City"
+                className="name-input-col"
+                name="city"
+                value={employee.city}
+                onChange={onInputChange}
+              />
+              <input
+                type="text"
+                placeholder="Postal Code"
+                name="postalCode"
+                className="name-input-col"
+                value={employee.postalCode}
+                onChange={onInputChange}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Right frame */}
+      <div className="right-frame">
+        <div className="right-form-container">
+          <div className="right-frame-content">
+            <div className="name-surname-container">
+              <div className="personal-details-container"></div>
+              <div className="form-group">
+                {/* Start Date */}
                 <input
-                  type="text"
-                  placeholder={formErrors.city || "City"}
-                  className={`name-input city-input ${
-                    formErrors.city ? "input-error" : ""
-                  }`}
-                  name="city"
-                  value={employee.city}
+                  type="date"
+                  className="name-input"
+                  placeholder="Employee Start Date"
+                  value={employee.startDate}
                   onChange={onInputChange}
-                />
-                <input
-                  type="text"
-                  placeholder={formErrors.postalCode || "Postal Code"}
-                  className={`name-input postal-input ${
-                    formErrors.postalCode ? "input-error" : ""
-                  }`}
-                  name="postalCode"
-                  value={employee.postalCode}
-                  onChange={onInputChange}
+                  name="startDate"
                 />
               </div>
-
-              {/* Gender (auto-derived, disabled) -Editable only for passport */}
-              <div className="gender-select-wrapper">
+              {/* Branch */}
+              <div className="full-width">
                 <select
-                  className="name-input gender-select"
-                  name="gender"
-                  value={employee.gender}
+                  className="name-input"
+                  value={employee.branch}
                   onChange={onInputChange}
-                  disabled={employee.idType === "id"}
+                  name="branch"
                 >
-                  <option value="" disabled>
-                    Gender
-                  </option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
+                  <option value="">Department</option>
+                  {branches.map((b) => (
+                    <option key={b} value={b}>
+                      {b}
+                    </option>
+                  ))}
                 </select>
                 <img
                   src="/images/arrow_drop_down_circle.png"
@@ -564,199 +534,111 @@ const AddEmployeeModal = ({ closeModal }) => {
                   className="dropdown-icon"
                 />
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Right frame */}
-        <div className="right-frame">
-          <div className="right-form-container">
-            <div className="right-frame-content">
-              <div className="name-surname-container">
-                <div className="personal-details-container">
-                </div>
-                <div className="form-group">
-                  <label htmlFor="startDate" className="form-label">
-                    Employee Start Date
-                  </label>
-                  <input
-                    type="date"
-                    id="startDate"
-                    name="startDate"
-                    value={employee.startDate}
-                    onChange={onInputChange}
-                    className={`name-input ${
-                      formErrors.startDate ? "input-error" : ""
-                    }`}
-                  />
-                </div>
-
-                {/* Department */}
-                <div className="gender-select-wrapper">
-                  <select
-                    className="name-input gender-select"
-                    name="department"
-                    value={employee.department}
-                    onChange={onInputChange}
-                  >
-                    <option value="" disabled>
-                      Select Department
-                    </option>
-                    <option value=" Cape Town ">Cape Town</option>
-                    <option value="Johannesburg">Johannesburg</option>
-                    <option value="Share Trust">Share Trust</option>
-                    <option value="Financial Services">
-                      Financial Services
-                    </option>
-                  </select>
-                  <img
-                    src="/images/arrow_drop_down_circle.png"
-                    alt="Dropdown icon"
-                    className="dropdown-icon"
-                  />
-                </div>
-
-                {/* Employee Code - disabled */}
+              {/* Monthly Salary */}
+              <div className="full-width">
                 <input
                   type="text"
+                  placeholder="Monthly Salary"
                   className="name-input"
-                  name="employeeNumber"
-                  value={employee.employeeNumber}
-                  placeholder="Employee Code"
-                  disabled
+                  name="monthlySalary"
+                  value={employee.monthlySalary}
+                  onChange={onInputChange}
                 />
-
-                {/* Job Title */}
+              </div>
+              {/* Tax Number */}
+              <div className="full-width">
                 <input
                   type="text"
-                  placeholder={formErrors.jobTitle || "Job Title"}
-                  className={`name-input ${
-                    formErrors.jobTitle ? "input-error" : ""
-                  }`}
+                  placeholder="Tax Number"
+                  className="name-input"
+                  name="taxNumber"
+                  value={employee.taxNumber}
+                  onChange={onInputChange}
+                />
+              </div>
+              {/* Job Title */}
+              <div className="full-width">
+                <select
                   name="jobTitle"
                   value={employee.jobTitle}
                   onChange={onInputChange}
-                />
-
-                {/* Employee Status */}
-                <div className="gender-select-wrapper">
-                  <select
-                    name="employeeStatus"
-                    value={employee.employeeStatus}
-                    className={`name-input gender-select ${
-                      formErrors.employeeStatus ? "input-error" : ""
-                    }`}
-                    onChange={onInputChange}
-                  >
-                    <option value="" disabled>
-                      Select Employee Status
+                  className="name-input"
+                >
+                  <option value="">Select Job Title</option>
+                  {positions.map((p) => (
+                    <option key={p.positionId} value={p.positionId}>
+                      {p.positionTitle}
                     </option>
-                    <option value="Permanent">Permanent</option>
-                    <option value="Fixed-term contract">
-                      Fixed-term contract
+                  ))}
+                </select>
+              </div>
+              {/* Employment Status */}
+              <div className="full-width">
+                <select
+                  className="name-input"
+                  value={employee.employeeStatus}
+                  onChange={onInputChange}
+                  name="employeeStatus"
+                >
+                  <option value="">Employment Status</option>
+                  {employmentStatuses.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
                     </option>
-                  </select>
-                  <img
-                    src="/images/arrow_drop_down_circle.png"
-                    alt="Dropdown icon"
-                    className="dropdown-icon"
-                  />
-                </div>
-
-                {/* Reports To */}
-                <input
-                  list="reportsToList"
-                  placeholder={formErrors.reportsTo || "Reports to"}
-                  className={`name-input ${
-                    formErrors.reportsTo ? "input-error" : ""
-                  }`}
+                  ))}
+                </select>
+              </div>
+              {/* Career Manager */}
+              <div className="full-width">
+                <select
                   name="reportsTo"
                   value={employee.reportsTo}
                   onChange={onInputChange}
-                />
-
-                <datalist id="reportsToList">
-                  {reportsToOptions.map((name, index) => (
-                    <option key={index} value={name} />
-                  ))}
-                </datalist>
-
-                {/* Email */}
-                <input
-                  type="text"
-                  placeholder={formErrors.email || "Work email address"}
-                  className={`name-input blue-text ${
-                    formErrors.email ? "input-error" : ""
-                  }`}
-                  name="email"
-                  value={employee.email}
-                  onChange={onInputChange}
-                />
-
-                {/* File Upload */}
-                <div className="gender-select-wrapper">
-                  <input
-                    type="file"
-                    accept=".jpg,.jpeg"
-                    className="name-input"
-                    id="documentUpload"
-                    name="documentPath"
-                    onChange={onFileChange}
-                  />
-                  <img
-                    src="/images/arrow_upload_ready.png"
-                    alt="Upload icon"
-                    className="dropdown-icon"
-                  />
-                </div>
-                {uploading && (
-                  <div className="paceholder-text">Uploading...</div>
-                )}
-                {errorMessage && (
-                  <div
-                    className="error-text"
-                    >
-                    {errorMessage}
-                  </div>
-                )}
-                {employee.documentPath && (
-                  <div>
-                    Uploaded file:{" "}
-                    <a
-                      href={employee.documentPath}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      View Document
-                    </a>
-                  </div>
-                )}
-
-                {/* Save Button */}
-                <button
-                  className="save-button"
-                  onClick={handleSave}
-                  disabled={loading}
+                  className="name-input"
                 >
-                  {loading ? "Saving..." : "Save"}
-                </button>
+                  <option value="">Select Career Manager</option>
+                  {allEmployees.map((emp) => (
+                    <option key={emp.employeeId} value={emp.employeeId}>
+                      {emp.name} {emp.surname}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-                <div className="right-frame-bottom">
-                  <p className="right-frame-bottom-text">
-                    <span className="align-right">
-                      Privacy Policy | Terms & Conditions
-                    </span>
-                    <br />
-                    <span className="align-left">
-                      Copyright © 2025 Singular Systems. All rights reserved.
-                    </span>
-                  </p>
-                </div>
+              <div className="full-width">
+                <input
+                  type="file"
+                  className="name-input"
+                  onChange={onFileChange}
+                  name="documentPath"
+                />
+              </div>
+
+              {/* Save Button */}
+              <button
+                className="save-button"
+                onClick={handleSave}
+                disabled={loading}
+              >
+                {loading ? "Saving..." : "Save"}
+              </button>
+
+              <div className="right-frame-bottom">
+                <p className="right-frame-bottom-text">
+                  <span className="align-right">
+                    Privacy Policy | Terms & Conditions
+                  </span>
+                  <br />
+                  <span className="align-left">
+                    Copyright © 2025 Singular Systems. All rights reserved.
+                  </span>
+                </p>
               </div>
             </div>
           </div>
         </div>
       </div>
+    </div>
   );
 };
 

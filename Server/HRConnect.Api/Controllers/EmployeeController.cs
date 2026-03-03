@@ -4,6 +4,7 @@ namespace HRConnect.Api.Controllers
     using System.Linq;
     using System.Threading.Tasks;
     using HRConnect.Api.Mappers;
+    using HRConnect.Api.Models;
     using Microsoft.AspNetCore.Mvc;
     using HRConnect.Api.Interfaces;
     using HRConnect.Api.DTOs.Employee;

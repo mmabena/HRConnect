@@ -33,7 +33,7 @@ namespace HRConnect.Api.Mappers
                 Branch = employeeModel.Branch,
                 MonthlySalary = employeeModel.MonthlySalary,
                 PositionId = employeeModel.PositionId,
-                PositionTitle = employeeModel.Position.PositionTitle != null
+                PositionTitle = employeeModel.Position != null
                 ? employeeModel.Position.PositionTitle : null,
                 EmploymentStatus = employeeModel.EmploymentStatus,
                 CareerManagerID = employeeModel.CareerManagerID,

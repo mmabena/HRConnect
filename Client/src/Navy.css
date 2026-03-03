@@ -453,7 +453,7 @@
       #E7EAEB,
       #D6D6D9,
       #C4C4C5);
-  color: black;
+  color: rgba(0, 0, 0, 0.411);
   box-sizing: border-box;
   text-align: center;
   overflow: hidden;
