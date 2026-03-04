@@ -15,10 +15,6 @@ namespace HRConnect.Api.Controllers
         {
             _employeeService = employeeService;
         }
-
-        // ============================
-        // CREATE EMPLOYEE
-        // ============================
         [HttpPost]
         public async Task<ActionResult<EmployeeResponse>> Create(
             [FromBody] CreateEmployeeRequest request)
@@ -28,20 +24,12 @@ namespace HRConnect.Api.Controllers
                 new { id = result.Id },
                 result);
         }
-
-        // ============================
-        // GET ALL
-        // ============================
         [HttpGet]
         public async Task<ActionResult<List<EmployeeResponse>>> GetAll()
         {
             var employees = await _employeeService.GetAllEmployeesAsync();
             return Ok(employees);
         }
-
-        // ============================
-        // GET BY ID
-        // ============================
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<EmployeeResponse>> GetById(Guid id)
         {
@@ -52,10 +40,6 @@ namespace HRConnect.Api.Controllers
 
             return Ok(employee);
         }
-
-        // ============================
-        // UPDATE POSITION
-        // ============================
         [HttpPut("{id:guid}/position/{newPositionId:int}")]
         public async Task<ActionResult<EmployeeResponse>> UpdatePosition(
             Guid id,
@@ -66,13 +50,6 @@ namespace HRConnect.Api.Controllers
 
             return Ok(updated);
         }
-        //[HttpPost("process-carryover-notifications")]
-        //public async Task<IActionResult> TriggerCarryoverNotifications()
-        //{
-        //    await _employeeService.ProcessCarryOverNotificationAsync();
-        //            return Ok("Carryover notifications processed.");
-        //}
-
         [HttpPost("process-annual-reset")]
         public async Task<IActionResult> TriggerAnnualReset(
      [FromQuery] int? overrideYear)
@@ -86,12 +63,12 @@ namespace HRConnect.Api.Controllers
             await _employeeService.UpdateLeaveEntitlementRuleAsync(request);
             return Ok("Rule updated and employees recalculated.");
         }
-        //[HttpPost("{id:guid}/recalculate-sick")]
-        ///public async Task<IActionResult> RecalculateSick(Guid id)
-        //{
-        //    await _employeeService.RecalculateSickLeaveAsync(id);
-        //    return Ok("Sick leave recalculated.");
-        //}
+        [HttpPost("{id:guid}/recalculate-sick")]
+        public async Task<IActionResult> RecalculateSick(Guid id)
+        {
+            await _employeeService.RecalculateSickLeaveAsync(id);
+            return Ok("Sick leave recalculated.");
+        }
         [HttpPut("update-used-days")]
         public async Task<IActionResult> UpdateUsedDays(
         [FromBody] UpdateUsedDaysRequest request)
@@ -99,24 +76,12 @@ namespace HRConnect.Api.Controllers
             await _employeeService.UpdateUsedDaysAsync(request);
             return Ok("Used days updated successfully.");
         }
-        //[HttpPost("{id:guid}/new-pregnancy")]
-        //public async Task<IActionResult> RegisterNewPregnancy(Guid id)
-        //{
-        //   await _employeeService.ResetMaternityLeaveForNewPregnancy(id);
-        //    return Ok("Maternity leave reset for new pregnancy.");
-        //}
-        //[HttpPost("{id:guid}/recalculate-frl")]
-        //public async Task<IActionResult> RecalculateFRL(Guid id)
-        //{
-        //    await _employeeService.RecalculateFamilyResponsibilityLeaveAsync(id);
-        //   return Ok("Family Responsibility Leave recalculated.");
-        //}
-        //[HttpPost("recalculate-all-frl")]
-        //public async Task<IActionResult> RecalculateAllFRL()
-        //{
-        //    await _employeeService.RecalculateAllFamilyResponsibilityLeaveAsync();
-        //    return Ok("All FRL recalculated.");
-        //}
+        [HttpPost("{id:guid}/recalculate-frl")]
+        public async Task<IActionResult> RecalculateFRL(Guid id)
+        {
+            await _employeeService.RecalculateFamilyResponsibilityLeaveAsync(id);
+            return Ok("Family Responsibility Leave recalculated.");
+        }
         [HttpGet("project-annual-leave")]
         public async Task<IActionResult> ProjectAnnualLeave(
             Guid employeeId,

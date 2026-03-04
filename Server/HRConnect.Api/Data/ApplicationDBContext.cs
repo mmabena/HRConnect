@@ -89,6 +89,9 @@ namespace HRConnect.Api.Data
             modelBuilder.Entity<LeaveType>()
                 .HasIndex(l => l.Code)
                 .IsUnique();
+            modelBuilder.Entity<LeaveType>()
+                .HasIndex(l => l.Name)
+                .IsUnique();
         }
 
         private static void ConfigureLeaveEntitlementRule(ModelBuilder modelBuilder)
@@ -107,6 +110,10 @@ namespace HRConnect.Api.Data
                 .WithMany()
                 .HasForeignKey(r => r.JobGradeId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<LeaveEntitlementRule>()
+                .HasIndex(r => new { r.LeaveTypeId, r.JobGradeId, r.MinYearsService })
+                .IsUnique();
         }
 
         private static void ConfigureEmployeeLeaveBalance(ModelBuilder modelBuilder)
@@ -125,6 +132,10 @@ namespace HRConnect.Api.Data
                 .WithMany()
                 .HasForeignKey(b => b.LeaveTypeId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<EmployeeLeaveBalance>()
+                .HasIndex(b => new { b.EmployeeId, b.LeaveTypeId })
+                .IsUnique();
         }
 
         private static void ConfigureLeaveApplication(ModelBuilder modelBuilder)
@@ -143,6 +154,9 @@ namespace HRConnect.Api.Data
                 .WithMany()
                 .HasForeignKey(l => l.LeaveTypeId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<LeaveApplication>()
+                .HasIndex(l => new { l.EmployeeId, l.StartDate, l.EndDate });
         }
 
         // ================= SEED DATA =================

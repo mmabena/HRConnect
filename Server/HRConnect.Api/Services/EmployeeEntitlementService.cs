@@ -208,10 +208,28 @@ namespace HRConnect.Api.Services
                     "Used days cannot exceed available days.");
 
             balance.UsedDays = request.UsedDays;
-            balance.AvailableDays =
-                balance.EntitledDays - balance.UsedDays;
+            if (balance.LeaveType.Code == "AL")
+            {
+                balance.AvailableDays =
+                    balance.CarryoverDays +
+                    balance.EntitledDays -
+                    balance.UsedDays;
+            }
+            else
+            {
+                balance.AvailableDays =
+                    balance.EntitledDays - balance.UsedDays;
+            }
 
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                throw new InvalidOperationException(
+                    "This leave balance was modified by another process. Please refresh and try again.");
+            }
         }
         public async Task InitializeEmployeeLeaveBalancesAsync(Guid employeeId)
         {
@@ -518,84 +536,101 @@ HRConnect
         }
         public async Task ProcessAnnualResetAsync(int? overrideYear = null)
         {
-            var today = DateTime.UtcNow.Date;
 
-            // If overrideYear provided → use it
-            // Otherwise use real current year
-            var currentYear = overrideYear ?? today.Year;
-
-            var annualLeave = await _context.LeaveTypes
-                .FirstOrDefaultAsync(l => l.Code == "AL" && l.IsActive);
-
-            if (annualLeave == null)
-                throw new InvalidOperationException("Annual Leave not configured.");
-
-            var balances = await _context.EmployeeLeaveBalances
-                .Include(b => b.Employee)
-                    .ThenInclude(e => e.Position)
-                    .ThenInclude(p => p.JobGrade)
-                .Where(b => b.LeaveTypeId == annualLeave.Id)
-                .ToListAsync();
-
-            foreach (var balance in balances)
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
-                // IDEMPOTENCY CHECK
-                if (balance.LastResetYear == currentYear)
-                    continue;
-                // ================================
-                // 🔹 STORE CLOSED YEAR SNAPSHOT (LEDGER CORRECT)
-                // ================================
+                var today = DateTime.UtcNow.Date;
 
-                var yearToClose = currentYear - 1;
+                // If overrideYear provided → use it
+                // Otherwise use real current year
+                var currentYear = overrideYear ?? today.Year;
 
-                // Snapshot values BEFORE reset
-                var openingBalance = balance.CarryoverDays;
-                var accrued = balance.EntitledDays;
-                var used = balance.UsedDays;
+                var annualLeave = await _context.LeaveTypes
+                    .FirstOrDefaultAsync(l => l.Code == "AL" && l.IsActive);
 
-                // True closing balance before forfeiture
-                var closingBalance = openingBalance + accrued - used;
+                if (annualLeave == null)
+                    throw new InvalidOperationException("Annual Leave not configured.");
 
-                // Carryover applied to next year
-                var carryoverApplied = CalculateCarryover(closingBalance);
+                var balances = await _context.EmployeeLeaveBalances
+                    .Include(b => b.Employee)
+                        .ThenInclude(e => e.Position)
+                        .ThenInclude(p => p.JobGrade)
+                    .Where(b => b.LeaveTypeId == annualLeave.Id)
+                    .ToListAsync();
 
-                // True forfeiture amount
-                var forfeited = closingBalance - carryoverApplied;
-
-                var alreadyExists = await _context.AnnualLeaveAccrualHistories
-                    .AnyAsync(x =>
-                        x.EmployeeId == balance.EmployeeId &&
-                        x.Year == yearToClose);
-
-                if (!alreadyExists)
+                foreach (var balance in balances)
                 {
-                    await _context.AnnualLeaveAccrualHistories.AddAsync(
-                        new AnnualLeaveAccrualHistory
-                        {
-                            EmployeeId = balance.EmployeeId,
-                            Year = yearToClose,
+                    // IDEMPOTENCY CHECK
+                    if (balance.LastResetYear == currentYear)
+                        continue;
+                    // ================================
+                    // 🔹 STORE CLOSED YEAR SNAPSHOT (LEDGER CORRECT)
+                    // ================================
 
-                            OpeningBalance = openingBalance,
-                            Accrued = accrued,
-                            Used = used,
-                            Forfeited = forfeited,
-                            ClosingBalance = closingBalance,
+                    var yearToClose = currentYear - 1;
 
-                            CreatedDate = DateTime.UtcNow
-                        });
+                    // Snapshot values BEFORE reset
+                    var openingBalance = balance.CarryoverDays;
+                    var accrued = balance.EntitledDays;
+                    var used = balance.UsedDays;
+
+                    // True closing balance before forfeiture
+                    var closingBalance = openingBalance + accrued - used;
+
+                    // Carryover applied to next year
+                    var carryoverApplied = CalculateCarryover(closingBalance);
+
+                    // True forfeiture amount
+                    var forfeited = closingBalance - carryoverApplied;
+
+                    var alreadyExists = await _context.AnnualLeaveAccrualHistories
+                        .AnyAsync(x =>
+                            x.EmployeeId == balance.EmployeeId &&
+                            x.Year == yearToClose);
+
+                    if (!alreadyExists)
+                    {
+                        await _context.AnnualLeaveAccrualHistories.AddAsync(
+                            new AnnualLeaveAccrualHistory
+                            {
+                                EmployeeId = balance.EmployeeId,
+                                Year = yearToClose,
+
+                                OpeningBalance = openingBalance,
+                                Accrued = accrued,
+                                Used = used,
+                                Forfeited = forfeited,
+                                ClosingBalance = closingBalance,
+
+                                CreatedDate = DateTime.UtcNow
+                            });
+                    }
+
+                    // ================================
+                    // 🔹 RESET LIVE STATE (UNCHANGED LOGIC)
+                    // ================================
+
+                    balance.CarryoverDays = carryoverApplied;
+                    balance.ForfeitedDays = 0;
+
+                    balance.EntitledDays = 0;
+                    balance.AccruedDays = 0;
+                    balance.AvailableDays = carryoverApplied;
+
+                    balance.UsedDays = 0;
+                    balance.LastResetYear = currentYear;
                 }
-
-                // ================================
-                // 🔹 RESET LIVE STATE (UNCHANGED LOGIC)
-                // ================================
-
-                balance.CarryoverDays = carryoverApplied;
-                balance.ForfeitedDays = 0; // live table no longer stores historical forfeiture
-                balance.UsedDays = 0;
-                balance.LastResetYear = currentYear;
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                Console.WriteLine($"Error during annual reset: {ex.Message}");
             }
 
-            await _context.SaveChangesAsync();
+
         }
         public async Task UpdateLeaveEntitlementRuleAsync(UpdateLeaveRuleRequest request)
         {
@@ -666,6 +701,13 @@ HRConnect
                 .Where(e => e.Position.JobGradeId == rule.JobGradeId)
                 .ToListAsync();
 
+            var employeeIds = employees.Select(e => e.EmployeeId).ToList();
+
+            // Load all active accrual segments in one query
+            var segments = await _context.EmployeeAccrualRateHistories
+                .Where(x => employeeIds.Contains(x.EmployeeId) && x.EffectiveTo == null)
+                .ToListAsync();
+
             foreach (var employee in employees)
             {
                 var years = CalculateYearsOfService(employee.StartDate);
@@ -683,23 +725,36 @@ HRConnect
                 if (balance == null)
                     continue;
 
-                balance.EntitledDays = rule.DaysAllocated;
-                balance.AvailableDays = rule.DaysAllocated - balance.UsedDays;
+                // Find segment in memory instead of querying DB
+                var segment = segments
+                    .FirstOrDefault(x => x.EmployeeId == employee.EmployeeId);
+
+                if (segment != null)
+                {
+                    segment.AnnualEntitlement = rule.DaysAllocated;
+                    segment.DailyRate = rule.DaysAllocated / 260m;
+                }
+
+                // Recalculate using existing engine
+                await RecalculateAnnualLeaveAsync(employee.EmployeeId);
+
+                var updatedBalance = employee.LeaveBalances
+                    .First(lb => lb.LeaveTypeId == rule.LeaveTypeId);
 
                 await _emailService.SendEmailAsync(
                     employee.Email,
                     "Leave Policy Updated",
                     $"""
-            Dear {employee.FirstName},
+Dear {employee.FirstName},
 
-            The company has updated the leave policy.
+The company has updated the leave policy.
 
-            Your new annual entitlement is {rule.DaysAllocated} days.
-            Your available balance is now {balance.AvailableDays} days.
+Your new annual entitlement is {rule.DaysAllocated} days.
+Your available balance is now {updatedBalance.AvailableDays} days.
 
-            Regards,
-            HRConnect
-            """);
+Regards,
+HRConnect
+""");
             }
 
             await _context.SaveChangesAsync();
@@ -759,9 +814,9 @@ HRConnect
 
             decimal entitledDays;
 
-            // -------------------------
-            // PHASE 1 — First 6 Months
-            // -------------------------
+            // =========================
+            // Phase 1 – First 6 Months
+            // =========================
             if (monthsWorked < 6)
             {
                 entitledDays = monthsWorked;
@@ -771,20 +826,22 @@ HRConnect
                 entitledDays = 30;
             }
 
-            // -------------------------
-            // PHASE 3 — 36-Month Reset
-            // -------------------------
-            if (monthsWorked >= 36)
+            // =========================
+            // 36-Month Cycle Reset
+            // =========================
+
+            var cycleNumber = monthsWorked / 36;
+
+            if (balance.LastResetYear == null || balance.LastResetYear != cycleNumber)
             {
                 balance.UsedDays = 0;
-                entitledDays = 30;
+                balance.LastResetYear = cycleNumber;
             }
 
             balance.EntitledDays = entitledDays;
             balance.AvailableDays = Math.Max(0, entitledDays - balance.UsedDays);
 
             await _context.SaveChangesAsync();
-
         }
         public async Task RecalculateAllSickLeaveAsync()
         {
@@ -845,11 +902,17 @@ HRConnect
 
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
-            // Determine this year's anniversary date
+            var month = employee.StartDate.Month;
+
+            var day = Math.Min(
+                employee.StartDate.Day,
+                DateTime.DaysInMonth(today.Year, month)
+            );
+
             var anniversaryThisYear = new DateOnly(
                 today.Year,
-                employee.StartDate.Month,
-                employee.StartDate.Day
+                month,
+                day
             );
 
             // If anniversary hasn’t happened yet this year,

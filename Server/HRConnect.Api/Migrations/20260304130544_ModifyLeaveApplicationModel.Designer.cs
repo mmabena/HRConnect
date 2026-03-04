@@ -4,6 +4,7 @@ using HRConnect.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRConnect.Api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260304130544_ModifyLeaveApplicationModel")]
+    partial class ModifyLeaveApplicationModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -191,10 +194,9 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("LeaveTypeId");
+                    b.HasIndex("EmployeeId");
 
-                    b.HasIndex("EmployeeId", "LeaveTypeId")
-                        .IsUnique();
+                    b.HasIndex("LeaveTypeId");
 
                     b.ToTable("EmployeeLeaveBalances");
                 });
@@ -283,9 +285,9 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("LeaveTypeId");
+                    b.HasIndex("EmployeeId");
 
-                    b.HasIndex("EmployeeId", "StartDate", "EndDate");
+                    b.HasIndex("LeaveTypeId");
 
                     b.ToTable("LeaveApplications");
                 });
@@ -325,8 +327,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("JobGradeId1");
 
-                    b.HasIndex("LeaveTypeId", "JobGradeId", "MinYearsService")
-                        .IsUnique();
+                    b.HasIndex("LeaveTypeId");
 
                     b.ToTable("LeaveEntitlementRules");
 
@@ -525,7 +526,7 @@ namespace HRConnect.Api.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("ResetDay")
                         .HasColumnType("int");
@@ -539,9 +540,6 @@ namespace HRConnect.Api.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("Code")
-                        .IsUnique();
-
-                    b.HasIndex("Name")
                         .IsUnique();
 
                     b.ToTable("LeaveTypes");
