@@ -48,7 +48,7 @@
   /// - Category-option relationship validation
   /// - Temporal validation support for testing scenarios
   /// </remarks>
-  public class MedicalOptionService:IMedicalOptionService
+  public class MedicalOptionService : IMedicalOptionService
   {
     private readonly IMedicalOptionRepository _medicalOptionRepository;
 
@@ -283,7 +283,7 @@
       var options = await _medicalOptionRepository
         .GetAllOptionsUnderCategoryAsync(categoryId);
 
-      return options.FirstOrDefault() ?? throw 
+      return options.FirstOrDefault() ?? throw
         new KeyNotFoundException($"no medical option found for category {categoryId}");
     }
 
@@ -572,7 +572,7 @@
 
       if (bulkUpdateDto == null || bulkUpdateDto.Count == 0)
       {
-        throw new ArgumentException("Bulk update data cannot be null or empty", 
+        throw new ArgumentException("Bulk update data cannot be null or empty",
           nameof(bulkUpdateDto));
       }
 
@@ -583,7 +583,7 @@
       // Perform comprehensive validation using the existing validator
       var validationResult = await MedicalOptionValidator
         .ValidateAllCategoryVariantsComprehensiveAsync(
-        categoryId, bulkUpdateDto, _medicalOptionRepository, dbData.Select(dto => new MedicalOption 
+        categoryId, bulkUpdateDto, _medicalOptionRepository, dbData.Select(dto => new MedicalOption
         {
           // Map DTO back to entity for validation
           MedicalOptionId = dto.MedicalOptionId,
@@ -615,8 +615,8 @@
         }
 
         throw new ValidationException(
-          validationResult.ErrorMessage ?? "Validation failed",
-          validationErrors);
+          validationResult.ErrorMessage ?? "Validation failed");
+        // validationErrors);
       }
 
       // If validation passes, proceed with bulk update
