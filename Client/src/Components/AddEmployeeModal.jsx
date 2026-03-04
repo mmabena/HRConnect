@@ -7,17 +7,9 @@ import axios from "axios";
 import {
   addEmployee,
   validateRequiredFields,
-  validateEmail,
   handleFileChange,
-  handleInputChange,
   fetchAllEmployees,
-  toISOStringSafe,
   populateFromIdNumber,
-  showConfirmationToast,
-  convertDDMMYYYYtoISO,
-  GetEmployeeByEmployeeNumberAsync,
-  validateIdNumber,
-  generateEmployeeNumber,
 } from "../Employee";
 
 /// </summary>
@@ -33,28 +25,16 @@ const AddEmployeeModal = ({ closeModal }) => {
   const [positions, setPositions] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-
-  const [idType, setIdType] = useState("ID"); // "ID" or "Passport"
-  const [idValue, setIdValue] = useState("");
-  const [dob, setDob] = useState("");
-  const [gender, setGender] = useState("");
-  const [nationality, setNationality] = useState("");
-  const [employeesList, setEmployeesList] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [idNumberError, setIdNumberError] = useState("");
-  const [touched, setTouched] = useState({});
-  const [reportsToOptions, setReportsToOptions] = useState([]);
   const [allEmployees, setAllEmployees] = useState([]);
-
   const titles = ["Mr", "Mrs", "Ms", "Dr", "Prof"];
   const genders = ["Male", "Female"];
   const branches = ["Johannesburg", "CapeTown", "UK"];
   const employmentStatuses = ["Permanent", "FixedTerm", "Contract"];
-
   const [employee, setEmployee] = useState({
     title: "",
-    firstName: "",
-    lastName: "",
+    name: "",
+    surname: "",
     idType: "id",
     idNumber: "",
     passportNumber: "",
@@ -63,9 +43,9 @@ const AddEmployeeModal = ({ closeModal }) => {
     contactNumber: "",
     taxNumber: "",
     email: "",
-    homeAddress: "",
+    physicalAddress: "",
     city: "",
-    postalCode: "",
+    zipCode: "",
     startDate: "",
     branch: "",
     monthlySalary: "",
@@ -116,9 +96,7 @@ const AddEmployeeModal = ({ closeModal }) => {
 
     // Numeric validation
     if (
-      ["contactNumber", "postalCode", "monthlySalary", "taxNumber"].includes(
-        name,
-      )
+      ["contactNumber", "zipCode", "monthlySalary", "taxNumber"].includes(name)
     ) {
       // allow empty string
       const regex = name === "contactNumber" ? /^[\d+-]*$/ : /^\d*$/;
@@ -179,34 +157,35 @@ const AddEmployeeModal = ({ closeModal }) => {
     try {
       setLoading(true);
 
-      const token = localStorage.getItem("token");
+      const { errors: requiredErrors, isValid } =
+        validateRequiredFields(employee);
+
+      setFormErrors(requiredErrors);
+
+      if (!isValid) {
+        setLoading(false);
+        return;
+      }
 
       const payload = {
         employeeId: "",
-
         title: employee.title || null,
-        name: employee.firstName || null,
-        surname: employee.lastName || null,
-
+        name: employee.name || null,
+        surname: employee.surname || null,
         nationality: employee.nationality || null,
         gender: employee.gender
           ? employee.gender.charAt(0).toUpperCase() + employee.gender.slice(1)
           : null,
-
-        contactNumber: employee.contactNumber || null,
+        contactNumber: employee.contactNumber,
         taxNumber: employee.taxNumber || null,
         email: employee.email || null,
-
-        physicalAddress: employee.homeAddress || null,
+        physicalAddress: employee.physicalAddress || null,
         city: employee.city || null,
-        zipCode: employee.postalCode || null,
-
+        zipCode: employee.zipCode || null,
         hasDisability: employee.disability || false,
         disabilityDescription: employee.disabilityType || null,
-
         dateOfBirth: employee.dateOfBirth || null,
         startDate: employee.startDate || null,
-
         branch: employee.branch || null,
         monthlySalary: employee.monthlySalary
           ? parseFloat(employee.monthlySalary)
@@ -226,80 +205,52 @@ const AddEmployeeModal = ({ closeModal }) => {
         payload.passportNumber = employee.idNumber;
       }
 
-      console.log("Sending employee payload:", payload);
-
-      const response = await fetch("http://localhost:5147/api/employee", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        if (errorData.errors) {
-          setFormErrors(errorData.errors);
-        } else if (errorData.message) {
-          const message = errorData.message;
-
-          const newErrors = {};
-
-          if (message.includes("Email")) newErrors.email = message;
-          else if (message.includes("Contact number"))
-            newErrors.contactNumber = message;
-          else if (message.includes("ID number")) newErrors.idNumber = message;
-          else if (message.includes("Tax Number")) newErrors.taxNumber = message;
-          else if (message.includes("Start date")) newErrors.startDate = message;
-          else if (message.includes("Position")) newErrors.jobTitle = message;
-          else if (message.includes("Branch")) newErrors.branch = message;
-          else if (message.includes("Monthly salary"))
-            newErrors.monthlySalary = message;
-          else newErrors.general = message;
-
-          setFormErrors(newErrors);
-        }
-        throw new Error("Validation failed");
-      }
-
-      await response.json();
+      await addEmployee(payload);
 
       toast.success("Employee created successfully!");
       closeModal();
     } catch (error) {
       console.error("Error saving employee:", error);
-      toast.error("Failed to create employee.");
+
+      // Optionally, if the API returns validation errors
+      if (error.response?.data?.errors) {
+        setFormErrors((prevErrors) => ({
+          ...prevErrors,
+          ...error.response.data.errors,
+        }));
+      } else {
+        toast.error("Failed to create employee.");
+      }
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="center-frame">
-      <div className="left-frame">
-        <div className="left-frame-centered">
-          <div className="headings-container">
-            <div className="center-logo">
-              <span className="center-logo-text-bold">singular</span>
-              <span className="center-logo-text-light">express</span>
+    <div className="emp-center-frame">
+      <div className="emp-left-frame">
+        <div className="emp-left-frame-centered">
+          <div className="emp-headings-container">
+            <div className="emp-center-logo">
+              <span className="emp-center-logo-text-bold">singular</span>
+              <span className="emp-center-logo-text-light">express</span>
             </div>
-            <h1 className="new-employee-title">New Employee</h1>
+            <h1 className="emp-new-employee-title">New Employee</h1>
           </div>
         </div>
 
-        <div className="personal-details-container">
-          <div className="personal-details-heading">
+        <div className="emp-personal-details-container">
+          <div className="emp-personal-details-heading">
             <span>Personal</span> <span>Details</span>
           </div>
         </div>
 
-        <div className="name-surname-container">
-          <div className="form-grid">
+        <div className="emp-name-surname-container">
+          <div className="emp-form-grid">
             {/* Title */}
-            <div className="full-width">
+            <div className="emp-full-width">
               <select
-                className="name-input"
+                className={`emp-name-input ${formErrors.title ? "emp-error-input" : ""}`}
                 value={employee.title}
                 onChange={onInputChange}
                 name="title"
@@ -311,98 +262,138 @@ const AddEmployeeModal = ({ closeModal }) => {
                   </option>
                 ))}
               </select>
+              {formErrors.title && (
+                <span className="emp-error-message">{formErrors.title}</span>
+              )}
             </div>
             {/* First Name | Last Name */}
-            <div className="two-col">
-              <input
-                type="text"
-                placeholder="Full Name"
-                className="name-input-col"
-                name="firstName"
-                value={employee.firstName}
-                onChange={onInputChange}
-              />
-              <input
-                type="text"
-                placeholder="Last Name"
-                className="name-input-col"
-                name="lastName"
-                value={employee.lastName}
-                onChange={onInputChange}
-              />
+            <div className="emp-two-col">
+              <div className="emp-input-wrapper">
+                <input
+                  type="text"
+                  placeholder="First Name"
+                  className={`emp-name-input-col ${formErrors.name ? "emp-error-input" : ""}`}
+                  name="name"
+                  value={employee.name}
+                  onChange={onInputChange}
+                />
+                {formErrors.name && (
+                  <span className="emp-error-message">{formErrors.name}</span>
+                )}
+              </div>
+              <div className="emp-input-wrapper">
+                <input
+                  type="text"
+                  placeholder="Last Name"
+                  className={`emp-name-input-col ${formErrors.surname ? "emp-error-input" : ""}`}
+                  name="surname"
+                  value={employee.surname}
+                  onChange={onInputChange}
+                />
+                {formErrors.lastNsurnameame && (
+                  <span className="emp-error-message">
+                    {formErrors.surname}
+                  </span>
+                )}
+              </div>
             </div>
 
             {/* ID Type | ID Number */}
-            <div className="two-col">
-              <select
-                className="name-input-col"
-                name="idType"
-                value={employee.idType}
-                onChange={onInputChange}
-              >
-                <option value="id">ID Number</option>
-                <option value="passport">Passport Number</option>
-              </select>
-
-              <input
-                type="text"
-                className="name-input-col"
-                name="idNumber"
-                value={employee.idNumber}
-                onChange={onInputChange}
-                placeholder={
-                  employee.idType === "passport"
-                    ? "Passport Number"
-                    : "ID Number"
-                }
-              />
+            <div className="emp-two-col">
+              <div className="emp-input-wrapper">
+                <select
+                  className={`emp-name-input-col ${formErrors.idType ? "emp-error-input" : ""}`}
+                  name="idType"
+                  value={employee.idType}
+                  onChange={onInputChange}
+                >
+                  <option value="id">ID Number</option>
+                  <option value="passport">Passport Number</option>
+                </select>
+              </div>
+              <div className="emp-input-wrapper">
+                <input
+                  type="text"
+                  className={`emp-name-input-col ${formErrors.idNumber ? "emp-error-input" : ""}`}
+                  name="idNumber"
+                  value={employee.idNumber}
+                  onChange={onInputChange}
+                  placeholder={
+                    employee.idType === "passport"
+                      ? "Passport Number"
+                      : "ID Number"
+                  }
+                />
+                {formErrors.idNumber && (
+                  <span className="emp-error-message">
+                    {formErrors.idNumber}
+                  </span>
+                )}
+              </div>
             </div>
 
             {/* Nationality */}
-            <div className="full-width">
+            <div className="emp-full-width">
               <input
                 type="text"
-                name="nationality"
                 placeholder="Nationality"
+                className={`emp-name-input ${formErrors.nationality ? "emp-error-input" : ""}`}
+                name="nationality"
                 value={employee.nationality}
                 onChange={onInputChange}
                 disabled={employee.idType === "id"}
-                className="name-input"
               />
+              {formErrors.nationality && (
+                <span className="emp-error-message">
+                  {formErrors.nationality}
+                </span>
+              )}
             </div>
 
             {/* DOB | Gender */}
-            <div className="two-col">
-              <input
-                className="name-input-col"
-                type="date"
-                name="dateOfBirth"
-                value={employee.dateOfBirth}
-                onChange={onInputChange}
-                disabled={employee.idType === "id"}
-              />
-              <select
-                name="gender"
-                className="name-input-col"
-                value={employee.gender}
-                onChange={onInputChange}
-                disabled={employee.idType === "id"}
-              >
-                <option value="">Gender</option>
-                {genders.map((g) => (
-                  <option key={g} value={g.toLowerCase()}>
-                    {g}
-                  </option>
-                ))}
-              </select>
+            <div className="emp-two-col">
+              <div className="emp-input-wrapper">
+                <input
+                  className="emp-name-input-col"
+                  type="date"
+                  name="dateOfBirth"
+                  value={employee.dateOfBirth}
+                  onChange={onInputChange}
+                  disabled={employee.idType === "id"}
+                />
+                {formErrors.dateOfBirth && (
+                  <span className="emp-error-message">
+                    {formErrors.dateOfBirth}
+                  </span>
+                )}
+              </div>
+              <div className="emp-input-wrapper">
+                <select
+                  name="gender"
+                  className="emp-name-input-col"
+                  value={employee.gender}
+                  onChange={onInputChange}
+                  disabled={employee.idType === "id"}
+                >
+                  <option value="">Gender</option>
+                  {genders.map((g) => (
+                    <option key={g} value={g.toLowerCase()}>
+                      {g}
+                    </option>
+                  ))}
+                </select>
+                {formErrors.gender && (
+                  <span className="emp-error-message">{formErrors.gender}</span>
+                )}
+              </div>
             </div>
 
             {/* Disability (radio buttons) */}
-            <div className="two-col">
-              <div className="disability-row">
-                <span className="disability-label">Disability:</span>
+            <div className="emp-two-col">
+              <div className="emp-disability-row">
+                <span className="emp-disability-label">Disability:</span>
 
-                <label className="radio-option">
+                <label className="emp-radio-option">
                   <input
                     type="radio"
                     name="disability"
@@ -413,7 +404,7 @@ const AddEmployeeModal = ({ closeModal }) => {
                   Yes
                 </label>
 
-                <label className="radio-option">
+                <label className="emp-radio-option">
                   <input
                     type="radio"
                     name="disability"
@@ -431,92 +422,122 @@ const AddEmployeeModal = ({ closeModal }) => {
                     placeholder="Describe disability"
                     value={employee.disabilityType}
                     onChange={onInputChange}
-                    className="disability-input"
+                    className="emp-disability-input"
                   />
                 )}
               </div>
             </div>
 
             {/* Contact Number */}
-            <div className="full-width">
+            <div className="emp-full-width">
               <input
                 type="text"
                 placeholder="Contact Number"
-                className="name-input"
+                className={`emp-name-input ${formErrors.contactNumber ? "emp-error-input" : ""}`}
                 name="contactNumber"
                 value={employee.contactNumber}
                 onChange={onInputChange}
               />
+              {formErrors.contactNumber && (
+                <span className="emp-error-message">
+                  {formErrors.contactNumber}
+                </span>
+              )}
             </div>
 
             {/* Email */}
-            <div className="full-width">
+            <div className="emp-full-width">
               <input
                 type="email"
                 placeholder="Email Address"
-                className="name-input"
+                className={`emp-name-input ${formErrors.email ? "emp-error-input" : ""}`}
                 name="email"
                 value={employee.email}
                 onChange={onInputChange}
               />
-              {formErrors.email && <span className="error-message">{formErrors.email}</span>}
+              {formErrors.email && (
+                <span className="emp-error-message">{formErrors.email}</span>
+              )}
             </div>
             {/* Home Address */}
-            <div className="full-width">
+            <div className="emp-input-wrapper full-width">
               <input
                 type="text"
                 placeholder="Home Address"
-                className="name-input"
-                name="homeAddress"
-                value={employee.homeAddress}
+                className={`emp-name-input ${formErrors.physicalAddress ? "emp-error-input" : ""}`}
+                name="physicalAddress"
+                value={employee.physicalAddress}
                 onChange={onInputChange}
               />
+              {formErrors.physicalAddress && (
+                <span className="emp-error-message">
+                  {formErrors.physicalAddress}
+                </span>
+              )}
             </div>
 
             {/* City | Postal Code */}
-            <div className="two-col">
-              <input
-                type="text"
-                placeholder="City"
-                className="name-input-col"
-                name="city"
-                value={employee.city}
-                onChange={onInputChange}
-              />
-              <input
-                type="text"
-                placeholder="Postal Code"
-                name="postalCode"
-                className="name-input-col"
-                value={employee.postalCode}
-                onChange={onInputChange}
-              />
+            <div className="emp-two-col">
+              <div className="emp-input-wrapper">
+                <input
+                  type="text"
+                  placeholder="City"
+                  className={`emp-name-input-col ${formErrors.city ? "emp-error-input" : ""}`}
+                  name="city"
+                  value={employee.city}
+                  onChange={onInputChange}
+                />
+                {formErrors.city && (
+                  <span className="emp-error-message">{formErrors.city}</span>
+                )}
+              </div>
+              <div className="emp-input-wrapper">
+                <input
+                  type="text"
+                  placeholder="Postal Code"
+                  name="zipCode"
+                  className={`emp-name-input-col ${formErrors.zipCode ? "emp-error-input" : ""}`}
+                  value={employee.zipCode}
+                  onChange={onInputChange}
+                />
+                {formErrors.zipCode && (
+                  <span className="emp-error-message">
+                    {formErrors.zipCode}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Right frame */}
-      <div className="right-frame">
-        <div className="right-form-container">
-          <div className="right-frame-content">
-            <div className="name-surname-container">
-              <div className="personal-details-container"></div>
-              <div className="form-group">
+      <div className="emp-right-frame">
+        <div className="emp-right-form-container">
+          <div className="emp-right-frame-content">
+            <div className="emp-name-surname-container">
+              <div className="emp-personal-details-container"></div>
+              <div className="emp-form-group">
                 {/* Start Date */}
                 <input
                   type="date"
-                  className="name-input"
+                  className={`emp-name-input ${formErrors.startDate ? "emp-error-input" : ""}`}
                   placeholder="Employee Start Date"
                   value={employee.startDate}
                   onChange={onInputChange}
                   name="startDate"
                 />
+
+                {formErrors.startDate && (
+                  <span className="emp-error-message">
+                    {formErrors.startDate}
+                  </span>
+                )}
               </div>
               {/* Branch */}
-              <div className="full-width">
+              <div className="emp-full-width">
                 <select
-                  className="name-input"
+                  className={`emp-name-input ${formErrors.branch ? "emp-error-input" : ""}`}
                   value={employee.branch}
                   onChange={onInputChange}
                   name="branch"
@@ -528,6 +549,9 @@ const AddEmployeeModal = ({ closeModal }) => {
                     </option>
                   ))}
                 </select>
+                {formErrors.branch && (
+                  <span className="emp-error-message">{formErrors.branch}</span>
+                )}
                 <img
                   src="/images/arrow_drop_down_circle.png"
                   alt="Dropdown icon"
@@ -535,34 +559,47 @@ const AddEmployeeModal = ({ closeModal }) => {
                 />
               </div>
               {/* Monthly Salary */}
-              <div className="full-width">
+              <div className="emp-input-wrapper full-width">
                 <input
-                  type="text"
+                  type="number"
+                  min="0"
+                  step="100"
                   placeholder="Monthly Salary"
-                  className="name-input"
+                  className={`emp-name-input ${formErrors.monthlySalary ? "emp-error-input" : ""}`}
                   name="monthlySalary"
                   value={employee.monthlySalary}
                   onChange={onInputChange}
                 />
+                {formErrors.monthlySalary && (
+                  <span className="emp-error-message">
+                    {formErrors.monthlySalary}
+                  </span>
+                )}
               </div>
               {/* Tax Number */}
-              <div className="full-width">
+              <div className="emp-full-width">
                 <input
                   type="text"
                   placeholder="Tax Number"
-                  className="name-input"
+                  className={`emp-name-input ${formErrors.taxNumber ? "emp-error-input" : ""}`}
                   name="taxNumber"
                   value={employee.taxNumber}
                   onChange={onInputChange}
                 />
+
+                {formErrors.taxNumber && (
+                  <span className="emp-error-message">
+                    {formErrors.taxNumber}
+                  </span>
+                )}
               </div>
               {/* Job Title */}
-              <div className="full-width">
+              <div className="emp-full-width">
                 <select
                   name="jobTitle"
                   value={employee.jobTitle}
                   onChange={onInputChange}
-                  className="name-input"
+                  className={`emp-name-input ${formErrors.jobTitle ? "emp-error-input" : ""}`}
                 >
                   <option value="">Select Job Title</option>
                   {positions.map((p) => (
@@ -571,11 +608,17 @@ const AddEmployeeModal = ({ closeModal }) => {
                     </option>
                   ))}
                 </select>
+
+                {formErrors.jobTitle && (
+                  <span className="emp-error-message">
+                    {formErrors.jobTitle}
+                  </span>
+                )}
               </div>
               {/* Employment Status */}
-              <div className="full-width">
+              <div className="emp-full-width">
                 <select
-                  className="name-input"
+                  className={`emp-name-input ${formErrors.employeeStatus ? "emp-error-input" : ""}`}
                   value={employee.employeeStatus}
                   onChange={onInputChange}
                   name="employeeStatus"
@@ -587,14 +630,19 @@ const AddEmployeeModal = ({ closeModal }) => {
                     </option>
                   ))}
                 </select>
+                {formErrors.employeeStatus && (
+                  <span className="emp-error-message">
+                    {formErrors.employeeStatus}
+                  </span>
+                )}
               </div>
               {/* Career Manager */}
-              <div className="full-width">
+              <div className="emp-full-width">
                 <select
                   name="reportsTo"
                   value={employee.reportsTo}
                   onChange={onInputChange}
-                  className="name-input"
+                  className={`emp-name-input ${formErrors.reportsTo ? "emp-error-input" : ""}`}
                 >
                   <option value="">Select Career Manager</option>
                   {allEmployees.map((emp) => (
@@ -603,33 +651,47 @@ const AddEmployeeModal = ({ closeModal }) => {
                     </option>
                   ))}
                 </select>
+
+                {formErrors.reportsTo && (
+                  <span className="emp-error-message">
+                    {formErrors.reportsTo}
+                  </span>
+                )}
               </div>
 
-              <div className="full-width">
+              <div className="emp-full-width">
                 <input
                   type="file"
-                  className="name-input"
+                  className={`emp-name-input ${formErrors.documentPath ? "emp-error-input" : ""}`}
                   onChange={onFileChange}
                   name="documentPath"
                 />
+                {formErrors.documentPath && (
+                  <span className="emp-error-message">
+                    {formErrors.documentPath}
+                  </span>
+                )}
               </div>
 
               {/* Save Button */}
+              {formErrors.general && (
+                <div className="emp-error-message">{formErrors.general}</div>
+              )}
               <button
-                className="save-button"
+                className="emp-save-button"
                 onClick={handleSave}
                 disabled={loading}
               >
                 {loading ? "Saving..." : "Save"}
               </button>
 
-              <div className="right-frame-bottom">
-                <p className="right-frame-bottom-text">
-                  <span className="align-right">
+              <div className="emp-right-frame-bottom">
+                <p className="emp-right-frame-bottom-text">
+                  <span className="emp-align-right">
                     Privacy Policy | Terms & Conditions
                   </span>
                   <br />
-                  <span className="align-left">
+                  <span className="emp-align-left">
                     Copyright © 2025 Singular Systems. All rights reserved.
                   </span>
                 </p>

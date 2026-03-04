@@ -365,22 +365,22 @@ const EditEmployee = () => {
   };
 
   return (
-    <div className="new-menu-background">
-      <div className="new-edit-employee-top-container">
-        <div className="new-photo-block">
+    <div className="emp-menu-background">
+      <div className="emp-edit-employee-top-container">
+        <div className="emp-photo-block">
           <img
             src={employeeData.documentPath || "/default-profile.png"}
             alt="Employee"
           />
         </div>
-        <div className="new-photo-text-container">
-          <div className="new-title">{`${employeeData.firstName} ${employeeData.lastName}`}</div>
-          <div className="new-subtitle">{employeeData.jobTitle}</div>
-          <div className="new-subsubtitle">{employeeData.department}</div>
+        <div className="emp-photo-text-container">
+          <div className="emp-title">{`${employeeData.firstName} ${employeeData.lastName}`}</div>
+          <div className="emp-subtitle">{employeeData.jobTitle}</div>
+          <div className="emp-subsubtitle">{employeeData.department}</div>
         </div>
       </div>
 
-      <div className="new-edit-employee-heading-row">
+      <div className="emp-edit-employee-heading-row">
         {[
           "Personal",
           "Career",
@@ -391,7 +391,7 @@ const EditEmployee = () => {
         ].map((tab) => (
           <div
             key={tab}
-            className={`heading-item ${activeTab === tab ? "selected" : ""}`}
+            className={`emp-heading-item ${activeTab === tab ? "selected" : ""}`}
             onClick={() => setActiveTab(tab)}
           >
             {tab}
@@ -399,36 +399,36 @@ const EditEmployee = () => {
         ))}
       </div>
 
-      <div className="new-edit-employee-form-container">
-        <div className="new-edit-button-top-right">
+      <div className="emp-edit-employee-form-container">
+        <div className="emp-edit-button-top-right">
           {!readOnly && (
             <button
-              className="new-em-edit-button"
+              className="emp-em-edit-button"
               onClick={handleEditSaveClick}
             >
               {isEditable ? "Save" : "Edit Profile"}
             </button>
           )}
         </div>
-        <div className="new-custom-header">Personal Information</div>
+        <div className="emp-custom-header">Personal Information</div>
 
-        <div className="new-sub-container">
+        <div className="emp-sub-container">
           {/* ROW 1 */}
-          <div className="new-fields-container row-6">
-            <div className="new-field">
-              <label className="new-field-label">Employee Id</label>
+          <div className="emp-fields-container row-6">
+            <div className="emp-field">
+              <label className="emp-field-label">Employee Id</label>
               <input
-                className="new-field-input"
+                className="emp-field-input"
                 id="employeeId"
                 value={employeeData.employeeId || ""}
                 readOnly
               />
             </div>
 
-            <div className="new-field">
-              <label className="new-field-label">Title</label>
+            <div className="emp-field">
+              <label className="emp-field-label">Title</label>
               <select
-                className="new-field-input"
+                className="emp-field-input"
                 id="title"
                 value={employeeData.title || ""}
                 onChange={handleInputChange}
@@ -443,20 +443,20 @@ const EditEmployee = () => {
               </select>
             </div>
 
-            <div className="new-field">
-              <label className="new-field-label">Id Number</label>
+            <div className="emp-field">
+              <label className="emp-field-label">Id Number</label>
               <input
-                className="new-field-input"
+                className="emp-field-input"
                 id="idNumber"
                 value={employeeData.idNumber || ""}
                 readOnly
               />
             </div>
 
-            <div className="new-field">
-              <label className="new-field-label">Passport Number</label>
+            <div className="emp-field">
+              <label className="emp-field-label">Passport Number</label>
               <input
-                className="new-field-input"
+                className="emp-field-input"
                 id="passportNumber"
                 value={employeeData.passportNumber || ""}
                 onChange={handleInputChange}
@@ -464,10 +464,10 @@ const EditEmployee = () => {
               />
             </div>
 
-            <div className="new-field">
-              <label className="new-field-label">Nationality</label>
+            <div className="emp-field">
+              <label className="emp-field-label">Nationality</label>
               <input
-                className="new-field-input"
+                className="emp-field-input"
                 id="nationality"
                 value={employeeData.nationality || ""}
                 onChange={handleInputChange}
@@ -477,15 +477,15 @@ const EditEmployee = () => {
           </div>
 
           {/* ROW 2 */}
-          <div className="new-fields-container row-6">
+          <div className="emp-fields-container row-6">
             {[
               ["Date of Birth", "dateOfBirth"],
               ["Gender", "gender"],
             ].map(([label, id]) => (
-              <div className="new-field" key={id}>
-                <label className="new-field-label">{label}</label>
+              <div className="emp-field" key={id}>
+                <label className="emp-field-label">{label}</label>
                 <input
-                  className="new-field-input"
+                  className="emp-field-input"
                   id={id}
                   value={
                     id === "dateOfBirth"
@@ -497,10 +497,10 @@ const EditEmployee = () => {
               </div>
             ))}
 
-            <div className="new-field">
-              <label className="new-field-label">Disability Status</label>
+            <div className="emp-field">
+              <label className="emp-field-label">Disability Status</label>
               <select
-                className="new-field-input"
+                className="emp-field-input"
                 id="disability"
                 value={employeeData.disability ? "yes" : "no"}
                 onChange={handleInputChange}
@@ -511,10 +511,10 @@ const EditEmployee = () => {
               </select>
             </div>
 
-            <div className="new-field">
-              <label className="new-field-label">Disability Description</label>
+            <div className="emp-field">
+              <label className="emp-field-label">Disability Description</label>
               <input
-                className="new-field-input"
+                className="emp-field-input"
                 id="disabilityType"
                 value={employeeData.disabilityType || ""}
                 onChange={handleInputChange}
@@ -524,21 +524,21 @@ const EditEmployee = () => {
           </div>
 
           {/* ROW 3 */}
-          <div className="new-fields-container row-3">
-            <div className="new-field">
-              <label className="new-field-label">First Name</label>
+          <div className="emp-fields-container row-3">
+            <div className="emp-field">
+              <label className="emp-field-label">First Name</label>
               <input
-                className="new-field-input"
+                className="emp-field-input"
                 id="firstName"
                 value={employeeData.firstName || ""}
                 onChange={handleInputChange}
                 readOnly={(!isEditable)}
               />
             </div>
-            <div className="new-field">
-              <label className="new-field-label">Last Name</label>
+            <div className="emp-field">
+              <label className="emp-field-label">Last Name</label>
               <input
-                className="new-field-input"
+                className="emp-field-input"
                 id="lastName"
                 value={employeeData.lastName || ""}
                 onChange={handleInputChange}
@@ -548,21 +548,21 @@ const EditEmployee = () => {
           </div>
 
           {/* ROW 4 */}
-          <div className="new-fields-container row-3">
-            <div className="new-field">
-              <label className="new-field-label">Contact Number</label>
+          <div className="emp-fields-container row-3">
+            <div className="emp-field">
+              <label className="emp-field-label">Contact Number</label>
               <input
-                className="new-field-input"
+                className="emp-field-input"
                 id="contactNumber"
                 value={employeeData.contactNumber || ""}
                 onChange={handleInputChange}
                 readOnly={(!isEditable)}
               />
             </div>
-            <div className="new-field">
-              <label className="new-field-label">Email Address</label>
+            <div className="emp-field">
+              <label className="emp-field-label">Email Address</label>
               <input
-                className="new-field-input"
+                className="emp-field-input"
                 id="email"
                 value={employeeData.email || ""}
                 onChange={handleInputChange}
@@ -572,21 +572,21 @@ const EditEmployee = () => {
           </div>
 
           {/* ROW 5 */}
-          <div className="new-fields-container row-3">
-            <div className="new-field">
-              <label className="new-field-label">Home Address</label>
+          <div className="emp-fields-container row-3">
+            <div className="emp-field">
+              <label className="emp-field-label">Home Address</label>
               <input
-                className="new-field-input"
+                className="emp-field-input"
                 id="homeAddress"
                 value={employeeData.homeAddress || ""}
                 onChange={handleInputChange}
                 readOnly={(!isEditable)}
               />
             </div>
-            <div className="new-field">
-              <label className="new-field-label">City</label>
+            <div className="emp-field">
+              <label className="emp-field-label">City</label>
               <input
-                className="new-field-input"
+                className="emp-field-input"
                 id="city"
                 value={employeeData.city || ""}
                 onChange={handleInputChange}
@@ -596,11 +596,11 @@ const EditEmployee = () => {
           </div>
 
           {/* ROW 6 */}
-          <div className="new-fields-container row-3">
-            <div className="new-field">
-              <label className="new-field-label">Postal Code</label>
+          <div className="emp-fields-container row-3">
+            <div className="emp-field">
+              <label className="emp-field-label">Postal Code</label>
               <input
-                className="new-field-input"
+                className="emp-field-input"
                 id="postalCode"
                 value={employeeData.postalCode || ""}
                 onChange={handleInputChange}
@@ -608,10 +608,10 @@ const EditEmployee = () => {
               />
             </div>
 
-            <div className="new-field">
-              <label className="new-field-label">Monthly Salary</label>
+            <div className="emp-field">
+              <label className="emp-field-label">Monthly Salary</label>
               <input
-                className="new-field-input"
+                className="emp-field-input"
                 id="monthlySalary"
                 value={employeeData.monthlySalary || ""}
                 onChange={handleInputChange}
@@ -619,10 +619,10 @@ const EditEmployee = () => {
               />
             </div>
 
-            <div className="new-field">
-              <label className="new-field-label">Department</label>
+            <div className="emp-field">
+              <label className="emp-field-label">Department</label>
               <select
-                className="new-field-input"
+                className="emp-field-input"
                 id="department"
                 value={employeeData.department || ""}
                 onChange={handleInputChange}
@@ -639,11 +639,11 @@ const EditEmployee = () => {
           </div>
 
           {/* ROW 7 */}
-          <div className="new-fields-container row-3">
-            <div className="new-field">
-              <label className="new-field-label">Employment Status</label>
+          <div className="emp-fields-container row-3">
+            <div className="emp-field">
+              <label className="emp-field-label">Employment Status</label>
               <select
-                className="new-field-input"
+                className="emp-field-input"
                 id="employeeStatus"
                 value={employeeData.employeeStatus || ""}
                 onChange={handleInputChange}
@@ -659,10 +659,10 @@ const EditEmployee = () => {
             </div>
 
             {/* Career Manager DROPDOWN */}
-            <div className="new-field">
-              <label className="new-field-label">Career Manager</label>
+            <div className="emp-field">
+              <label className="emp-field-label">Career Manager</label>
               <select
-                className="new-field-input"
+                className="emp-field-input"
                 id="reportsTo"
                 value={employeeData.reportsTo}
                 onChange={handleInputChange}

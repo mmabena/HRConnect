@@ -11,6 +11,7 @@ using HRConnect.Api.Services;
 using HRConnect.Api.Repository;
 using Microsoft.AspNetCore.Identity;
 using HRConnect.Api.Models;
+using HRConnect.Api.Middleware;
 using HRConnect.Api.Services;
 using HRConnect.Api.Utils;
 using OfficeOpenXml;
@@ -174,5 +175,6 @@ if (app.Environment.IsDevelopment())
 app.UseCors("AllowReact");
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<ExceptionMiddleware>();
 app.MapControllers();
 app.Run();

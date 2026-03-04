@@ -1,5 +1,5 @@
 /* ===== Edit Employee.css  ===== */
-.new-menu-background {
+.emp-menu-background {
   position: fixed;
   top: 0;
   left: 375px;
@@ -11,12 +11,14 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  background: linear-gradient(135deg,
-      #EEEEF1,
-      #EFF1F3,
-      #E7EAEB,
-      #D6D6D9,
-      #C4C4C5);
+  background: linear-gradient(
+    135deg,
+    #eeeef1,
+    #eff1f3,
+    #e7eaeb,
+    #d6d6d9,
+    #c4c4c5
+  );
   color: rgba(0, 0, 0, 0.411);
   box-sizing: border-box;
   text-align: center;
@@ -25,14 +27,14 @@
   overflow-y: auto;
 }
 
-.new-edit-employee-heading-row {
+.emp-edit-employee-heading-row {
   justify-content: flex-start;
   display: flex;
   gap: 20px;
 }
 
-.new-em-edit-button,
-.btn-edit {
+.emp-em-edit-button,
+.emp-btn-edit {
   width: 150px;
   height: 47px;
   background-color: var(--success-color);
@@ -44,22 +46,22 @@
   color: white;
   cursor: pointer;
   transition: background-color var(--transition-default);
-  font-family: 'Anek Bangla', serif;
+  font-family: "Anek Bangla", serif;
   letter-spacing: 2%;
 }
 
-.new-edit-button-top-right {
+.emp-edit-button-top-right {
   display: flex;
   justify-content: flex-end;
   margin-bottom: 1rem;
 }
 
-.new-em-edit-button:hover,
-.btn-edit:hover {
+.emp-em-edit-button:hover,
+.emp-btn-edit:hover {
   background-color: #95a860;
 }
 
-.new-edit-employee-form-container {
+.emp-edit-employee-form-container {
   position: absolute;
   top: 180px;
 
@@ -75,7 +77,7 @@
   z-index: 2;
 }
 
-.new-custom-header {
+.emp-custom-header {
   width: 1446px;
   height: 45px;
   padding: 0 16px 0 13px;
@@ -87,7 +89,7 @@
   /* Square bottom-left corner */
   border-bottom-right-radius: 0;
   /* Square bottom-right corner */
-  background-color: #C7D9E5;
+  background-color: #c7d9e5;
   display: flex;
   align-items: center;
 
@@ -96,19 +98,19 @@
   border: none;
   margin-left: 370px;
   margin-right: 70px;
-  font-family: 'Anek Bangla', sans-serif;
+  font-family: "Anek Bangla", sans-serif;
   font-weight: 600;
   font-size: 24px;
   line-height: 100%;
   letter-spacing: 2%;
-  color: #002D40;
+  color: #002d40;
 }
 
-.new-sub-container {
+.emp-sub-container {
   width: 1446px;
   height: 100%;
   padding: 20px 31px 34px 31px;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   border-radius: 0;
   box-sizing: border-box;
   display: flex;
@@ -119,29 +121,28 @@
   margin-top: 0;
 }
 
-.new-fields-container {
+.emp-fields-container {
   display: flex;
   flex-direction: row;
   gap: 65px;
-  height: 70px;
   margin-bottom: 10px;
-
+  align-items: flex-start;
 }
 
 /* For rows with 6 fields */
-.new-fields-container.row-6 {
+.emp-fields-container.row-6 {
   width: 1384px;
   /* fixed width */
   justify-content: space-between;
 }
 
-.new-fields-container.row-6 .field {
+.emp-fields-container.row-6 .field {
   width: 176.5px;
   /* per field */
 }
 
 /* Row container for 3 fields */
-.new-fields-container.row-3 {
+.emp-fields-container.row-3 {
   width: 1384px;
   /* same width as row-6 */
   display: flex;
@@ -153,27 +154,40 @@
 }
 
 /* Each field in row-3 */
-.new-fields-container.row-3 .field {
+.emp-fields-container.row-3 .emp-emp-field {
   width: 418px;
   height: 70px;
 }
 
-.new-field {
+.emp-field {
   display: flex;
   flex-direction: column;
   width: 100%;
-  /* Inherit width from row-specific styles */
-  height: 70px;
+  min-height: 70px;
   box-sizing: border-box;
 }
 
-.new-field-label {
-  font-family: 'Anek Bangla', sans-serif;
+.emp-error-text {
+  color: #d32f2f;
+  font-size: 12px;
+  margin-top: 4px;
+  padding-left: 10px;
+  min-height: 16px;
+}
+
+.emp-field-input.error {
+  border: 2px solid #d32f2f;
+}
+
+
+
+.emp-field-label {
+  font-family: "Anek Bangla", sans-serif;
   font-weight: 400;
   font-size: 16px;
   line-height: 100%;
   letter-spacing: 2%;
-  color: #002D40;
+  color: #002d40;
   margin: 0;
 
   padding-left: 10px;
@@ -186,23 +200,22 @@
   user-select: none;
 }
 
-.new-field-input {
+.emp-field-input {
   width: 100%;
   /* Stretch to fill parent .field */
   height: 40px;
   border-radius: 5px;
-  border: 2px solid #C7D9E5;
+  border: 2px solid #c7d9e5;
   padding: 5px 10px;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   box-sizing: border-box;
-  font-family: 'Anek Bangla', sans-serif;
+  font-family: "Anek Bangla", sans-serif;
   font-weight: 400;
   font-size: 14px;
   outline-offset: 2px;
-
 }
 
-.new-edit-employee-top-container {
+.emp-edit-employee-top-container {
   position: relative;
   height: 200px;
   display: flex;
@@ -211,7 +224,7 @@
 }
 
 /* Image block */
-.new-photo-block {
+.emp-photo-block {
   width: 241px;
   height: 185px;
   padding: 0;
@@ -225,7 +238,7 @@
 }
 
 /* Image styling */
-.new-photo-block img {
+.emp-photo-block img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -234,16 +247,15 @@
 }
 
 /* Text beside image */
-.new-photo-text-container {
+.emp-photo-text-container {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-
 }
 
 /* Name */
-.new-photo-text-container .new-title {
-  font-family: 'Anek Bangla', sans-serif;
+.emp-photo-text-container .emp-title {
+  font-family: "Anek Bangla", sans-serif;
   font-weight: 700;
   font-size: 40px;
   color: #006088;
@@ -254,8 +266,8 @@
 }
 
 /* Job Title */
-.new-photo-text-container{
-  font-family: 'Anek Bangla', sans-serif;
+.emp-photo-text-container {
+  font-family: "Anek Bangla", sans-serif;
   font-weight: 400;
   font-size: 16px;
   line-height: 1;
@@ -268,8 +280,8 @@
   margin-left: 0;
 }
 
-.new-subtitle {
-  font-family: 'Anek Bangla', sans-serif;
+.emp-subtitle {
+  font-family: "Anek Bangla", sans-serif;
   font-weight: 400;
   font-size: 16px;
   line-height: 1;
@@ -282,8 +294,8 @@
   margin-left: 0;
 }
 
-.new-subsubtitle {
-  font-family: 'Anek Bangla', sans-serif;
+.emp-subsubtitle {
+  font-family: "Anek Bangla", sans-serif;
   font-weight: 400;
   font-size: 16px;
   line-height: 1;
@@ -296,25 +308,24 @@
   margin-left: 0;
 }
 
-
 /* Active tab color */
-.heading-item.selected {
-  color: #01A19A;
+.emp-heading-item.selected {
+  color: #01a19a;
 }
 
-.toast-confirm-container {
+.emp-toast-confirm-container {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.toast-confirm-buttons {
+.emp-toast-confirm-buttons {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
 }
 
-.toast-confirm-btn {
+.emp-toast-confirm-btn {
   padding: 6px 12px;
   border: none;
   cursor: pointer;
@@ -324,18 +335,18 @@
   transition: background-color 0.3s ease;
 }
 
-.toast-confirm-btn.confirm {
+.emp-toast-confirm-btn.confirm {
   background-color: #4caf50;
 }
 
-.toast-confirm-btn.confirm:hover {
+.emp-toast-confirm-btn.confirm:hover {
   background-color: #45a049;
 }
 
-.toast-confirm-btn.cancel {
+.emp-toast-confirm-btn.cancel {
   background-color: #f44336;
 }
 
-.toast-confirm-btn.cancel:hover {
+.emp-toast-confirm-btn.cancel:hover {
   background-color: #da190b;
 }

@@ -1,3 +1,10 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+
 /* ===== OVERLAY BACKDROP ===== */
 .add-employee-overlay {
   position: fixed;
@@ -45,9 +52,10 @@
 }
 
 
-.center-frame {
+.emp-center-frame {
   width: 61.8vw;
-  height: 86.7vh;
+  max-height: 98vh;
+  height: 100%;
   border-radius: 10px;
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -63,7 +71,7 @@
 }
 
 
-.left-frame {
+.emp-left-frame {
   width: 100%;
   height: 100%;
   padding: 50px;
@@ -73,7 +81,7 @@
   margin-top: -90px;
 }
 
-.left-frame-centered {
+.emp-left-frame-centered {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -84,7 +92,7 @@
   margin-top: 10px;
 }
 
-.left-frame-bottom {
+.emp-left-frame-bottom {
   display: flex;
   flex-direction: column;
   width: 360px;
@@ -94,7 +102,7 @@
 
 
 
-.right-frame {
+.emp-right-frame {
   width: 100%;
   height: 100%;
   padding: 50px;
@@ -104,7 +112,7 @@
   position: relative;
 }
 
-.right-form-container {
+.emp-right-form-container {
   width: 360px;
   display: flex;
   flex-direction: column;
@@ -112,13 +120,13 @@
   margin-top: 120px;
 }
 
-.right-frame-content {
+.emp-right-frame-content {
   width: 100%;
   display: flex;
   justify-content: center;
 }
 
-.right-frame-bottom {
+.emp-right-frame-bottom {
   width: 100%;
   min-height: 104px;
   display: flex;
@@ -132,7 +140,7 @@
   font-size: 12px;
   line-height: 18px;
 }
-.right-frame-bottom-text {
+.emp-right-frame-bottom-text {
   font-family: 'Instrument Sans', sans-serif;
   font-weight: 400;
   font-size: 12px;
@@ -144,7 +152,7 @@
 }
 
 
-.align-right {
+.emp-align-right {
   display: block;
   text-align: right;
   padding: 0;
@@ -153,20 +161,20 @@
 }
 
 
-.align-left {
+.emp-align-left {
   display: block;
   text-align: left;
   padding: 0;
   margin-left: 20px;
 }
 
-.headings-container {
+.emp-headings-container {
   width: 360px;
   margin: 0 auto 30px;
   text-align: center;
 }
 
-.center-logo {
+.emp-center-logo {
   width: 279.32px;
   height: 35.14px;
   margin: 0 0 30px -5px;
@@ -177,25 +185,25 @@
 }
 
 
-.center-logo-text-bold,
-.center-logo-text-light {
+.emp-center-logo-text-bold,
+.emp-center-logo-text-light {
   font-family: 'Anek Bangla', serif;
   font-size: 40px;
   line-height: 100%;
   letter-spacing: 2%;
 }
 
-.center-logo-text-bold {
+.emp-center-logo-text-bold {
   font-weight: 700;
   color: #002D40;
 }
 
-.center-logo-text-light {
+.emp-center-logo-text-light {
   font-weight: 300;
   color: #006088;
 }
 
-.new-employee-title {
+.emp-new-employee-title {
   width: 360px;
   height: 26px;
   font-family: 'Inter', sans-serif;
@@ -210,7 +218,7 @@
   justify-content: left;
   margin: 0 auto 20px auto;
 }
-.new-employee-subtitle {
+.emp-new-employee-subtitle {
   width: 338px;
   height: auto;
   font-family: 'Instrument Sans', sans-serif;
@@ -223,7 +231,7 @@
   margin-left: -20px;
 }
 
-.employee-word {
+.emp-employee-word {
   display: block;
   text-align: center;
   transform: translateX(-25px);
@@ -231,7 +239,7 @@
 
 
 
-.personal-details-heading {
+.emp-personal-details-heading {
   font-family: 'Instrument Sans', sans-serif;
   font-weight: 700;
   font-size: 14px;
@@ -245,7 +253,7 @@
   margin-top: -40px;
 }
 
-.name-surname-container {
+.emp-name-surname-container {
   display: flex;
   flex-direction: column;
  width: 100%;
@@ -255,8 +263,8 @@
 
 }
 
-.name-input,
-.surname-input, .title-input {
+.emp-name-input,
+.emp-surname-input, .emp-title-input {
   width: 100%;
   height: 33px;
   border: none;
@@ -273,48 +281,47 @@
 
 }
 
-.name-input-col{
+.emp-name-input-col{
     width: 100%;
     height: 33px;
     border: none;
     border-bottom: 1.5px solid #006088;
     padding-left: 5px;
-    padding-right: 25px;
+    padding-right: 5px;
     padding-bottom: 5px;
     font-size: 14px;
     outline: none;
     box-sizing: border-box;
     border-radius: 0;
     background-color: transparent;
-    margin: 0 auto;
     font-family: 'Instrument Sans', sans-serif
 }
 
-.input-row {
+.emp-input-row {
   display: flex;
   align-items: center;
   gap: 12px;
 }
-.name-input::placeholder,
-.surname-input::placeholder {
+.emp-name-input::placeholder,
+.emp-surname-input::placeholder {
   color: black;
 }
 
 
 
-.name-input.input-error::placeholder {
+.emp-name-input.input-error::placeholder {
   color: red;
 }
 
 
-.city-postal-container {
+.emp-city-postal-container {
   display: flex;
   width: 100%;
   gap: 10px;
 }
 
-.city-input,
-.postal-input {
+.emp-city-input,
+.emp-postal-input {
   flex: 1;
   height: 33px;
   border: none;
@@ -328,13 +335,13 @@
   background-color: transparent;
 }
 
-.gender-select-wrapper {
+.emp-gender-select-wrapper {
   position: relative;
   width: 100%;
   height: 33px;
 }
 
-.gender-select {
+.emp-gender-select {
   width: 100%;
   height: 33px;
   border: none;
@@ -353,7 +360,7 @@
   color: black;
 }
 
-.dropdown-icon {
+.emp-dropdown-icon {
   position: absolute;
   right: 5px;
   top: 50%;
@@ -364,7 +371,7 @@
 
 }
 
-.input-label {
+.emp-input-label {
   font-size: 14px;
   color: #002D40;
   font-weight: 400;
@@ -374,12 +381,12 @@
 
 
 
-.grey-text::placeholder {
+.emp-grey-text::placeholder {
   color: #3D3D3D;
   font-weight: 400;
 }
 
-.blue-text::placeholder {
+.emp-blue-text::placeholder {
   color: #002D40;
   font-weight: 400;
 
@@ -387,13 +394,13 @@
 
 
 
-.bottom-line-container {
+.emp-bottom-line-container {
   width: 360px;
   border-bottom: 1.5px solid #006088;
   padding-bottom: 5px;
 }
 
-.save-button {
+.emp-save-button {
   font-family: 'Instrument Sans', sans-serif;
   width: 360px;
   height: 37px;
@@ -413,11 +420,11 @@
   margin-top: 25px;
 }
 
-.save-button:hover {
+.emp-save-button:hover {
   background-color: #004d6b;
 }
 
-.menu-background {
+.emp-menu-background {
   position: fixed;
   top: 0;
   left: 375px;
@@ -443,7 +450,7 @@
   overflow-y: auto;
 }
 
-.corner-fill-top {
+.emp-corner-fill-top {
   position: fixed;
   top: 0;
   left: 375px;
@@ -454,7 +461,7 @@
   pointer-events: none;
 }
 
-.corner-fill-bottom {
+.emp-corner-fill-bottom {
   position: fixed;
   bottom: 0;
   left: 375px;
@@ -465,32 +472,32 @@
   pointer-events: none;
 }
 
-.toast-confirm-container {
+.emp-toast-confirm-container {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.radio-row {
+.emp-radio-row {
   display: flex;
   gap: 25px;
   align-items: center;
 }
 
-.radio-option {
+.emp-radio-option {
   display: flex;
   align-items: center;
   gap: 6px;
   cursor: pointer;
 }
 
-.toast-confirm-buttons {
+.emp-toast-confirm-buttons {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
 }
 
-.toast-confirm-btn {
+.emp-toast-confirm-btn {
   padding: 6px 12px;
   border: none;
   cursor: pointer;
@@ -500,44 +507,63 @@
   transition: background-color 0.3s ease;
 }
 
-.form-grid {
+.emp-form-grid {
   display: flex;
   flex-direction: column;
   gap: 18px;
   width: 100%;
 }
 
-.two-col {
+.emp-input-wrapper.full-width {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.emp-input-wrapper {
+  width: 100%;
+  display: block;
+}
+
+.emp-input-wrapper input,
+.emp-input-wrapper select {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.emp-two-col {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 15px;
-}
-
-.full-width {
   width: 100%;
 }
 
-.disability-group {
+.emp-full-width {
+  width: 100%;
+}
+
+.emp-disability-group {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.disability-row {
+.emp-disability-row {
   display: flex;
   align-items: center;
   gap: 18px;
   width: 100%;
 }
 
-.disability-label {
+.emp-disability-label {
   font-size: 14px;
   color: #002D40;
   font-weight: 500;
   white-space: nowrap;
 }
 
-.disability-input {
+.emp-disability-input {
   flex: 1;
   height: 33px;
   border: none;
@@ -549,29 +575,29 @@
   outline: none;
 }
 
-.radio-row {
+.emp-radio-row {
   display: flex;
   gap: 20px;
   align-items: center;
 }
 
-.toast-confirm-btn.confirm {
+.emp-toast-confirm-btn.confirm {
   background-color: #4caf50;
 }
 
-.toast-confirm-btn.confirm:hover {
+.emp-toast-confirm-btn.confirm:hover {
   background-color: #45a049;
 }
 
-.toast-confirm-btn.cancel {
+.emp-toast-confirm-btn.cancel {
   background-color: #f44336;
 }
 
-.toast-confirm-btn.cancel:hover {
+.emp-toast-confirm-btn.cancel:hover {
   background-color: #da190b;
 }
 
-.form-label {
+.emp-form-label {
   font-size: 14px;
   color: #aaa;
   font-weight: 400;
@@ -581,12 +607,12 @@
 
 }
 
-.error-input {
+.emp-error-input {
   border: 1px solid red !important;
   outline: none;
 }
 
-.error-message {
+.emp-error-message {
   color: red;
   font-size: 12px;
   margin-top: 2px;
