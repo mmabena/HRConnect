@@ -3,7 +3,7 @@ import CompanyManagementNavBar from "../../../Components/CompanyManagement/compa
 import { useNavigate, useLocation } from "react-router-dom";
 import { editEmployee } from "../../../api/Employee";
 import api from "../../../api/api";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
 
 const ManageUserPositions = ({ title }) => {
@@ -102,13 +102,14 @@ const ManageUserPositions = ({ title }) => {
 
         // Find current position
         const matchedCurrent = allPositions.find(
-          (pos) => pos.positionTitle === currentPositionTitle
+          (pos) => pos.positionTitle === currentPositionTitle,
         );
 
         // Filter employees by CURRENT position
         const filteredEmployees = matchedCurrent
           ? allEmployees.filter(
-              (emp) => Number(emp.positionId) === Number(matchedCurrent.positionId)
+              (emp) =>
+                Number(emp.positionId) === Number(matchedCurrent.positionId),
             )
           : [];
 
@@ -116,14 +117,14 @@ const ManageUserPositions = ({ title }) => {
 
         // Find new position after positions are loaded
         const matchedNew = allPositions.find(
-          (pos) => pos.positionTitle === newPositionTitle
+          (pos) => pos.positionTitle === newPositionTitle,
         );
 
         if (matchedNew) {
           setSelectedPosition(String(matchedNew.positionId));
         } else {
           const firstOther = allPositions.find(
-            (pos) => pos.positionId !== matchedCurrent?.positionId
+            (pos) => pos.positionId !== matchedCurrent?.positionId,
           );
           setSelectedPosition(firstOther ? String(firstOther.positionId) : "");
         }
@@ -150,7 +151,7 @@ const ManageUserPositions = ({ title }) => {
 
   const handleSelectAll = () => {
     const allSelected = currentEmployees.every(
-      (emp) => selectedEmployees[emp.employeeId]
+      (emp) => selectedEmployees[emp.employeeId],
     );
     const newSelection = { ...selectedEmployees };
     currentEmployees.forEach((emp) => {
@@ -163,7 +164,7 @@ const ManageUserPositions = ({ title }) => {
   // Position Mapping
   // ----------------------------
   const positionMap = Object.fromEntries(
-    positions.map((pos) => [pos.positionId, pos.positionTitle])
+    positions.map((pos) => [pos.positionId, pos.positionTitle]),
   );
 
   const handlePositionChange = (e) => {
@@ -189,7 +190,7 @@ const ManageUserPositions = ({ title }) => {
   // ----------------------------
   const handleSave = async () => {
     const selectedIds = Object.keys(selectedEmployees).filter(
-      (id) => selectedEmployees[id]
+      (id) => selectedEmployees[id],
     );
 
     if (!selectedIds.length) {
@@ -203,40 +204,45 @@ const ManageUserPositions = ({ title }) => {
     }
 
     try {
-      const updatePromises = selectedIds.map((employeeId) => {
-        const emp = employees.find((e) => e.employeeId.toString() === employeeId);
-        if (!emp) return null;
+      const updatePromises = selectedIds
+        .map((employeeId) => {
+          const emp = employees.find(
+            (e) => e.employeeId.toString() === employeeId,
+          );
+          if (!emp) return null;
 
-        //Send full employee object with updated positionId
-        const updatedEmp = {
-          ...emp,
-          positionId: Number(selectedPosition),
-          nationality: emp.nationality || "Not specified", // required field
-          title: emp.title || "Mr/Ms", // fill if missing
-          name: emp.name || "",
-          surname: emp.surname || "",
-          idNumber: emp.idNumber || "",
-          passportNumber: emp.passportNumber || "",
-          gender: emp.gender || "Male",
-          contactNumber: emp.contactNumber || "",
-          taxNumber: emp.taxNumber || "",
-          email: emp.email || "",
-          physicalAddress: emp.physicalAddress || "",
-          city: emp.city || "",
-          zipCode: emp.zipCode || "",
-          hasDisability: emp.hasDisability || false,
-          disabilityDescription: emp.disabilityDescription || "",
-          dateOfBirth: emp.dateOfBirth || new Date().toISOString().split("T")[0],
-          startDate: emp.startDate || new Date().toISOString().split("T")[0],
-          branch: emp.branch || "",
-          monthlySalary: emp.monthlySalary || 0,
-          employmentStatus: emp.employmentStatus || "Permanent",
-          careerManagerID: emp.careerManagerID || "",
-          profileImage: emp.profileImage || "",
-        };
+          //Send full employee object with updated positionId
+          const updatedEmp = {
+            ...emp,
+            positionId: Number(selectedPosition),
+            nationality: emp.nationality || "Not specified", // required field
+            title: emp.title || "Mr/Ms", // fill if missing
+            name: emp.name || "",
+            surname: emp.surname || "",
+            idNumber: emp.idNumber || "",
+            passportNumber: emp.passportNumber || "",
+            gender: emp.gender || "Male",
+            contactNumber: emp.contactNumber || "",
+            taxNumber: emp.taxNumber || "",
+            email: emp.email || "",
+            physicalAddress: emp.physicalAddress || "",
+            city: emp.city || "",
+            zipCode: emp.zipCode || "",
+            hasDisability: emp.hasDisability || false,
+            disabilityDescription: emp.disabilityDescription || "",
+            dateOfBirth:
+              emp.dateOfBirth || new Date().toISOString().split("T")[0],
+            startDate: emp.startDate || new Date().toISOString().split("T")[0],
+            branch: emp.branch || "",
+            monthlySalary: emp.monthlySalary || 0,
+            employmentStatus: emp.employmentStatus || "Permanent",
+            careerManagerID: emp.careerManagerID || "",
+            profileImage: emp.profileImage || "",
+          };
 
-        return editEmployee(emp.employeeId, updatedEmp);
-      }).filter(Boolean);
+          return editEmployee(emp.employeeId, updatedEmp);
+        })
+        .filter(Boolean);
 
       await Promise.all(updatePromises);
 
@@ -246,13 +252,16 @@ const ManageUserPositions = ({ title }) => {
         prev.map((emp) =>
           selectedIds.includes(emp.employeeId.toString())
             ? { ...emp, positionId: Number(selectedPosition) }
-            : emp
-        )
+            : emp,
+        ),
       );
 
       setSelectedEmployees({});
     } catch (error) {
-      console.error("Failed to update positions:", error.response || error.message);
+      console.error(
+        "Failed to update positions:",
+        error.response || error.message,
+      );
       toast.error("Failed to save changes. Check console for details.");
     }
   };
@@ -291,16 +300,18 @@ const ManageUserPositions = ({ title }) => {
         <div className="move-users-wrapper">
           <div className="move-users-row">
             <p className="move-users-label">Move users to:</p>
-            <div className="dropdown">
+            <div className="apm-dropdown-wrapper">
               <select
-                name="positionId-dropdown"
                 className="apm-input select-dropdown"
                 value={selectedPosition}
                 onChange={handlePositionChange}
                 required
               >
                 {positions.map((position) => (
-                  <option key={position.positionId} value={String(position.positionId)}>
+                  <option
+                    key={position.positionId}
+                    value={String(position.positionId)}
+                  >
                     {position.positionTitle}
                   </option>
                 ))}
@@ -318,31 +329,36 @@ const ManageUserPositions = ({ title }) => {
         </div>
 
         {/* Employee Table */}
-        <table className="position-table-manage-User">
+           <div className="manage-positions"></div>
+        <table className="positions-table">
           <thead>
             <tr>
               <th>
-                <input
-                  type="checkbox"
-                  checked={
-                    currentEmployees.length > 0 &&
-                    currentEmployees.every(
-                      (emp) => selectedEmployees[emp.employeeId]
-                    )
-                  }
-                  onChange={handleSelectAll}
-                />{" "}
-                Name
+                <div className="checkbox-cell">
+                  <input
+                    type="checkbox"
+                    checked={
+                      currentEmployees.length > 0 &&
+                      currentEmployees.every(
+                        (emp) => selectedEmployees[emp.employeeId],
+                      )
+                    }
+                    onChange={handleSelectAll}
+                  />
+                  <span>Name</span>
+                </div>
               </th>
+
               <th>Branch</th>
               <th>Current Position</th>
               <th>New Position</th>
             </tr>
           </thead>
+
           <tbody>
             {currentEmployees.length === 0 ? (
               <tr>
-                <td colSpan={4} style={{ textAlign: "center" }}>
+                <td >
                   No users found.
                 </td>
               </tr>
@@ -350,13 +366,20 @@ const ManageUserPositions = ({ title }) => {
               currentEmployees.map((employee) => (
                 <tr key={employee.employeeId}>
                   <td>
-                    <input
-                      type="checkbox"
-                      checked={!!selectedEmployees[employee.employeeId]}
-                      onChange={() => handleCheckboxChange(employee.employeeId)}
-                    />{" "}
-                    {employee.name} {employee.surname}
+                    <div className="checkbox-cell">
+                      <input
+                        type="checkbox"
+                        checked={!!selectedEmployees[employee.employeeId]}
+                        onChange={() =>
+                          handleCheckboxChange(employee.employeeId)
+                        }
+                      />
+                      <span>
+                        {employee.name} {employee.surname}
+                      </span>
+                    </div>
                   </td>
+
                   <td>{employee.branch || "N/A"}</td>
                   <td>{positionMap[employee.positionId] || "N/A"}</td>
                   <td>
@@ -371,90 +394,52 @@ const ManageUserPositions = ({ title }) => {
         </table>
 
         {/* Pagination */}
-        <div className="pagination-wrapper">
-          <div className="pagination-left">
-            <span className="pagination-range">
-              <strong className="pagination-bold">
-                {employees.length === 0 ? 0 : indexOfFirstItem + 1} -{" "}
-                {Math.min(indexOfLastItem, employees.length)}
-              </strong>{" "}
-              of {employees.length}
-            </span>
+{/* Pagination */}
+{employees.length > itemsPerPage && (
+  <div className="pagination-placeholder">
+    <div className="pagination-wrapper">
+      <div className="pagination-right">
+        <img
+          src="/images/arrow_drop_down_circle.png"
+          alt="Previous"
+          className="pagination-arrow prev"
+          onClick={handlePrev}
+          style={{
+            transform: "rotate(90deg)",
+            cursor: currentPage > 1 ? "pointer" : "not-allowed",
+            opacity: currentPage > 1 ? 1 : 0.4,
+          }}
+        />
 
-            <div
-              className="per-page-box"
-              onClick={() => setShowPageOptions(!showPageOptions)}
+        <div className="page-numbers">
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i + 1}
+              className={`page-number ${
+                currentPage === i + 1 ? "active-page" : ""
+              }`}
+              onClick={() => handlePageClick(i + 1)}
             >
-              <span className="per-page-number">{itemsPerPage}</span>
-              <img
-                src="/images/arrow_drop_down_circle.png"
-                alt="Dropdown"
-                className="dropdown-icon"
-              />
-              {showPageOptions && (
-                <ul className="per-page-dropdown">
-                  {pageOptions.map((option) => (
-                    <li
-                      key={option}
-                      className="per-page-option"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setItemsPerPage(option);
-                        setShowPageOptions(false);
-                        setCurrentPage(1);
-                      }}
-                    >
-                      {option}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-            <span className="per-page-label">Per page</span>
-          </div>
-
-          <div className="pagination-right">
-            <img
-              src="/images/arrow_drop_down_circle.png"
-              alt="Previous"
-              className="pagination-arrow prev"
-              onClick={handlePrev}
-              style={{
-                transform: "rotate(90deg)",
-                cursor: currentPage > 1 ? "pointer" : "not-allowed",
-                opacity: currentPage > 1 ? 1 : 0.4,
-              }}
-            />
-
-            <div className="page-numbers">
-              {Array.from({ length: totalPages }, (_, i) => (
-                <button
-                  key={i + 1}
-                  className={`page-number ${
-                    currentPage === i + 1 ? "active-page" : ""
-                  }`}
-                  onClick={() => handlePageClick(i + 1)}
-                >
-                  {i + 1}
-                </button>
-              ))}
-            </div>
-
-            <img
-              src="/images/arrow_drop_down_circle.png"
-              alt="Next"
-              className="pagination-arrow next"
-              onClick={handleNext}
-              style={{
-                transform: "rotate(-90deg)",
-                cursor: currentPage < totalPages ? "pointer" : "not-allowed",
-                opacity: currentPage < totalPages ? 1 : 0.4,
-              }}
-            />
-
-            <div className="pagination-info">{employees.length} Users @ Singular</div>
-          </div>
+              {i + 1}
+            </button>
+          ))}
         </div>
+
+        <img
+          src="/images/arrow_drop_down_circle.png"
+          alt="Next"
+          className="pagination-arrow next"
+          onClick={handleNext}
+          style={{
+            transform: "rotate(-90deg)",
+            cursor: currentPage < totalPages ? "pointer" : "not-allowed",
+            opacity: currentPage < totalPages ? 1 : 0.4,
+          }}
+        />
+      </div>
+    </div>
+  </div>
+)}
       </div>
     </header>
   );

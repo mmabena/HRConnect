@@ -65,7 +65,7 @@ const EditPositionManagement = () => {
 
         const posData = positionRes.data;
 
-        //Store original title from DB
+        // Store original title from DB
         setOriginalTitle(posData.positionTitle);
 
         setFormData({
@@ -176,6 +176,7 @@ const EditPositionManagement = () => {
 
           {/* Position Dropdown WITH icon */}
           <div className="apm-input-group apm-dropdown-wrapper">
+             <label className="title-placeholder">Position title</label>
             <select
               name="positionTitle"
               className="apm-input select-dropdown"
@@ -198,18 +199,10 @@ const EditPositionManagement = () => {
             />
           </div>
 
-          <div className="apm-input-group">
-            <input
-              type="date"
-              name="effectiveDate"
-              className="apm-input"
-              value={formData.effectiveDate}
-              onChange={handleChange}
-              required
-            />
-          </div>
+
 
           <div className="apm-input-group apm-dropdown-wrapper">
+             <label className="title-placeholder">Position Grade</label>
             <select
               name="jobGradeId"
               className="apm-input select-dropdown"
@@ -233,6 +226,7 @@ const EditPositionManagement = () => {
           </div>
 
           <div className="apm-input-group apm-dropdown-wrapper">
+             <label className="title-placeholder">Occupational Description</label>
             <select
               name="occupationalLevelId"
               className="apm-input select-dropdown"
@@ -257,11 +251,27 @@ const EditPositionManagement = () => {
               className="apm-dropdown-icon"
             />
           </div>
+           <label className="title-placeholder">Effective Date</label>
+                    <div className="apm-input-group">
+            <input
+              type="date"
+              name="effectiveDate"
+              className="apm-input"
+              value={formData.effectiveDate}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
           <button type="submit" className="apm-save-button">
             Save
           </button>
-
+  <div className="apm-footer">
+            <p>Privacy Policy &nbsp; | &nbsp; Terms & Conditions</p>
+            <p>
+              Copyright © 2026 Singular Systems. All rights reserved.
+            </p>
+          </div>
         </form>
       </div>
     </div>

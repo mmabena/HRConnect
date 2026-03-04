@@ -23,7 +23,7 @@
   gap: 20px; /* space between dropdown row and button */
   margin-top: 40px;
   padding-left: 35px;
-  margin-bottom:30px;
+  margin-bottom:10px;
 }
 
 .move-users-row {
@@ -42,11 +42,22 @@
 }
 
 .apm-dropdown-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* spacing between select and image */
   max-width: 250px;
-  flex-shrink: 0; /* prevents dropdown from shrinking too much */
+  flex-shrink: 0;
 }
-.positionId-dropdown .apm-input select-dropdown{
-  color: var(--primary-color);
+
+.select-dropdown {
+  flex: 1; /* allow select to take available space */
+  appearance: none; /* remove default browser arrow */
+}
+
+.apm-dropdown-icon {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
 }
 
 .save-position-button {
@@ -64,12 +75,48 @@
 }
 
 .save-position-button:hover {
-  background-color: #5a7b3e;
+  background-color: #638549;
 }
 .save-button-wrapper {
   flex-shrink: 0; /* prevents the button from shrinking */
 }
 
+.checkbox-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;        /* 👈 SAME spacing everywhere */
+}
+
+/* Optional: force consistent checkbox size */
+.checkbox-cell input[type="checkbox"] {
+ appearance: none;          /* Remove default styling */
+  -webkit-appearance: none;  /* Safari */
+  width: 16px;
+  height: 16px;
+  border: 1px solid #dddddd; /* Border color */
+  border-radius: 2px;        /* Optional: rounded corners */
+  position: relative;
+  cursor: pointer;
+  outline: none;
+  background-color: white;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.checkbox-cell input[type="checkbox"]:checked {
+  background-color: #355867; /* Blue fill */
+  border-color: #a0a0a0;
+}
+.checkbox-cell input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 0px;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
 /*Company Management Section*/
 /* Wrapper for table to apply rounded borders */
 .content-container-table {
@@ -85,6 +132,50 @@
   margin-left: 30px;
   background-color: #fff;    /* optional, for contrast */
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+.positions-table{
+   table-layout: fixed; /* forces columns to obey widths */
+  width: 95%;   
+  border-collapse: separate;  /* allows rounded corners on wrapper */
+  border-spacing: 0;          /* no spacing between cells */
+  table-layout: fixed;
+  font-family: 'Anek Bangla', sans-serif; 
+  font-size: 14px;   
+  margin:30px;
+    border-radius: 15px;      /* rounded corners for the container */
+  overflow: hidden;          /* ensures corners clip content */
+}
+.positions-table th,
+.positions-table td {
+  padding: 20px 10px;
+  background-color: white;
+  border: none;              
+  border-bottom: 2px solid rgb(211, 210, 210); /* only bottom border */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #355867;
+  font-size: 16px;
+  gap:35px;
+  text-align:left;
+}
+
+.positions-table th {
+  background-color: var(--primary-color);
+  color: #ffffff;
+  font-weight: bold;
+  gap:10px;
+
+}
+
+
+.occupational-description {
+  display: inline-block;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: help; /* shows hover tooltip */
 }
 
 /* Table without outer borders, only border-bottom */
@@ -108,12 +199,12 @@
 .position-table-manage-User td {
   padding: 20px 10px;
   background-color: #f1f1f1;
-  border: none;               /* remove all borders */
+  border: none;              
   border-bottom: 2px solid rgb(211, 210, 210); /* only bottom border */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: #002D40;
+  color: #355867;
   font-size: 16px;
   gap:10px;
   text-align:left;
@@ -126,6 +217,16 @@
   font-weight: bold;
 
 }
+.positions-table th:nth-child(1),
+.positions-table td:nth-child(1) { width: 25%; } /* Position Title */
+.positions-table th:nth-child(2),
+.positions-table td:nth-child(2) { width: 20%; } /* Position Grade */
+.positions-table th:nth-child(3),
+.positions-table td:nth-child(3) { width: 30%; } /* Occupational Description */
+.positions-table th:nth-child(4),
+.positions-table td:nth-child(4) { width: 20%; } /* Effective Date */
+.positions-table th:nth-child(5),
+.positions-table td:nth-child(5) { width: 10%; } /* Actions */
 
 /* Header styles */
 
@@ -234,7 +335,237 @@
   white-space: nowrap;
 }
 
+/* ================================ */
+/* Change Position Management Modal */
+/* ================================ */
 
+/* Fullscreen dark overlay */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* Main modal container */
+.modal-content {
+  width: 630px; /* slightly smaller for neatness */
+  height:800px;
+  padding: 90px 60px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #f4f4f4 0%, #dcdcdc 100%);
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Header alignment */
+.headings-container {
+  text-align: center;
+  margin-left:70px;
+  margin-bottom: 35px;
+}
+
+.apm-logo {
+  font-size: 28px;
+  margin-bottom: 30px;
+}
+
+.apm-logo-bold {
+  font-weight: 700;
+  color: #0e2d36;
+}
+
+.apm-logo-light {
+  font-weight: 400;
+  color: #2e6c8c;
+}
+
+.apm-title {
+  font-size: 30px;
+  font-weight: 600;
+  margin-left:80px;
+  color: #1e2b32;
+  margin-bottom:30px;
+}
+
+/* Position label */
+.title-placeholder {
+  align-self: flex-start;
+  font-size: 14px;
+  color: #121212;
+  margin-left:120px;
+  margin-bottom: 6px;
+}
+
+/* Input group styling (dropdown) */
+.apm-input-group {
+  width:100%;
+   margin-right:50px;
+  border-bottom: 2px solid #2e6c8c;
+  padding-bottom: 8px;
+  margin-bottom: 25px;
+}
+
+.apm-input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 15px;
+}
+
+/* Dropdown wrapper */
+.apm-dropdown-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.apm-dropdown-icon {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+  cursor: pointer;
+}
+
+/* Info text */
+.apm-info-text {
+  text-align: center;
+  font-size: 14px;
+  margin-right:20px;
+  margin-bottom: 25px;
+  color: #002D40;
+}
+
+/* Question text */
+.Question {
+  align-self: flex-start;
+  font-size: 15px;
+  margin-bottom: 10px;
+  padding-left:100px;
+     color: #002D40;
+}
+
+/* Form spacing */
+.apm-form {
+  width: 100%;
+ padding-left:100px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Checkbox alignment */
+.checkbox-cell-position {
+  padding-left: 0;
+  padding:15px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Optional: consistent checkbox style */
+.checkbox-cell-position input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1px solid #dddddd;
+  border-radius: 2px;
+  position: relative;
+  cursor: pointer;
+  outline: none;
+  background-color: white;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.checkbox-cell-position input[type="checkbox"]:checked {
+  background-color: #355867;
+  border-color: #a0a0a0;
+}
+
+.checkbox-cell-position input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 0px;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* Reserve space for conditional link so container doesn't jump */
+.apm-view-users {
+  height: 30px;
+  margin:5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.apm-view-users.hide {
+  visibility: hidden;
+}
+
+.apm-view-users.show {
+  visibility: visible;
+}
+
+/* Link styling */
+.apm-link {
+  color: #2e6c8c;
+  cursor: pointer;
+  font-weight: 500;
+  margin-right:90px;
+
+}
+
+.apm-link:hover {
+  text-decoration: none;
+}
+
+/* Save button */
+.apm-save-button {
+  margin-top: -6px;
+  align-self: center;
+  margin-right:80px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  background-color: #355867;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.apm-save-button:hover {
+  background-color: #355867;
+
+}
+
+/* Footer */
+.apm-footer {
+  margin-top: 40px;
+margin-right:90px;
+  text-align: center;
+  font-size: 11px;
+  color:   #355867;
+}
 
 
 

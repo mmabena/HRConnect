@@ -186,8 +186,8 @@ const PositionManagement = ({ title }) => {
         )}
       </div>
 
-      <div className="content-container">
-        <table className="position-table">
+      <div className="manage-positions">
+        <table className="positions-table">
           <thead>
             <tr>
               <th>Position Title</th>
@@ -197,60 +197,50 @@ const PositionManagement = ({ title }) => {
               <th>Actions</th>
             </tr>
           </thead>
-          <tbody>
-            {currentPositions.length === 0 ? (
-              <tr>
-                <td colSpan="5" style={{ textAlign: "center" }}>
-                  No positions found.
-                </td>
-              </tr>
-            ) : (
-              currentPositions.map((position) => (
-                <tr key={position.positionId}>
-                  <td>{position.positionTitle}</td>
-                  <td>{position.jobGrade?.name || "N/A"}</td>
-                  <td>{position.occupationalLevel?.description || "N/A"}</td>
-                  <td>
-                    {new Date(position.createdDate).toLocaleDateString(
-                      "en-GB",
-                      {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                      },
-                    )}
-                  </td>
-                  <td>
-                    <div className="edit-button-group">
-                      <button
-                        className="text-button"
-                        onClick={() =>
-                          navigate(
-                            `/editPositionManagement/${position.positionId}`,
-                          )
-                        }
-                      >
-                        Edit
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
+<tbody>
+  {currentPositions.length === 0 ? (
+    <tr>
+      <td colSpan={5}>No positions found.</td>
+    </tr>
+  ) : (
+    currentPositions.map((position) => (
+      <tr key={position.positionId}>
+        <td>{position.positionTitle}</td>
+        <td>{position.jobGrade?.name || "N/A"}</td>
+        {/* Add title attribute for hover tooltip */}
+      <td  title={position.occupationalLevel?.description || "N/A"}>
+  {position.occupationalLevel?.description || "N/A"}
+</td>
+        <td>
+          {new Date(position.createdDate).toLocaleDateString("en-GB", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          })}
+        </td>
+        <td>
+          <div className="edit-button-group">
+            <button
+              className="text-button"
+              onClick={() =>
+                navigate(`/editPositionManagement/${position.positionId}`)
+              }
+            >
+              Edit
+            </button>
+          </div>
+        </td>
+      </tr>
+    ))
+  )}
+</tbody>
         </table>
       </div>
 
       {/* PAGINATION */}
       <div className="pagination-wrapper">
         <div className="pagination-left">
-          <span className="pagination-range">
-            <strong className="pagination-bold">
-              {positions.length === 0 ? 0 : indexOfFirstItem + 1} -{" "}
-              {Math.min(indexOfLastItem, positions.length)}
-            </strong>{" "}
-            of {positions.length}
-          </span>
+         
 
           <div
             className="per-page-box"
