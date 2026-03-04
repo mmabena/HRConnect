@@ -14,7 +14,9 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   const [manualReportToggle, setManualReportToggle] = useState(false);
   const [manualAdminToggle, setManualAdminToggle] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-  
+
+  const [activeIndex, setActiveIndex] = useState(null);
+
   //displaying user initials
   const displayName =
   currentUser?.username ||
@@ -30,6 +32,15 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   
   const navigate = useNavigate();
   const location = useLocation();
+
+  const isActive = (paths) => {
+  return paths.some(path => location.pathname.startsWith(path));
+  };
+
+  const handleHeadingClick = (index, toggleFunction) => {
+    setActiveIndex(prev => (prev === index ? null : index));
+    toggleFunction(); // keeps your existing toggle working
+  };
 
   // FIX: Access the role directly from the currentUser object
   const role = currentUser?.role?.toLowerCase();
@@ -138,6 +149,13 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
     onAccessDenied && onAccessDenied("");
   };
 
+  const menuPaths = {
+  1: ["/employeeList", "/addEmployee", "/editEmployee", "/terminateemployee", "/transferemployee", "/trnsferhistory"],
+  2: ["/taxtablemanagement", "/leavemanagement", "/positionManagement", "/company-details", "/salarybudgets"],
+  3: ["/earnings", "/pension-funds", "/assign-pension", "/medical-aid", "/company-contributions", "/bcea", "/oid", "/stock"],
+  4: ["/userManagement"]
+  };
+  
   return (
     <div className="menu-bar-container">
       <div className="menu-inner">
@@ -162,13 +180,13 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
           {/* Employee Management */}
           {permissions.isAdmin && (
             <li>
-              <div className="menu-item-wrapper" onClick={toggleReport}>
+              <div className="menu-item-wrapper" onClick={() => handleHeadingClick(1, toggleReport)}>
                 <img
                   src="/images/cases.png"
                   alt="Employee Management"
                   className="menu-icon"
                                                  />
-                <span className="menu-heading">
+                <span className={`menu-heading ${isActive(menuPaths[1]) ? "active" : ""}`}>
                   Employee Management
                   <span className="menu-dropdown">{reportOpen ? "▲" : "▼"}</span>
                 </span>
@@ -231,13 +249,16 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
           {/* ✅ Company Management */}
           {permissions.isAdmin && (
             <li>
-              <div className="menu-item-wrapper" onClick={toggleCompany}>
+              <div
+                    className="menu-item-wrapper"
+                    onClick={() => handleHeadingClick(2, toggleCompany)}
+                  >
                 <img
                   src="/images/building-2.png"
                   alt="Company Management"
                   className="menu-icon"
                 />
-                <span className="menu-heading">
+                <span className={`menu-heading ${isActive(menuPaths[2]) ? "active" : ""}`}>
                   Company Management
                   <span className="menu-dropdown">{companyOpen ? "▲" : "▼"}</span>
                 </span>
@@ -272,7 +293,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                   <li>
                     <span
                       className="menu-subitem"
-                      onClick={() => navigate("/company-contribution")}
+                      onClick={() => navigate("/company-details")}
                     >
                       Company Details
                     </span>
@@ -294,15 +315,15 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
           {permissions.isAdmin && (
             <li>
               <div
-                className="menu-item-wrapper"
-                onClick={togglePay} // <-- Add this onClick handler
-              >
+                    className="menu-item-wrapper"
+                    onClick={() => handleHeadingClick(3, togglePay)}
+                  >
                 <img
                   src="/images/hand-coins.png"
                   alt="Payroll icon"
                   className="menu-icon"
                 />
-                <span className="menu-heading">Payroll Management
+                <span className={`menu-heading ${isActive(menuPaths[3]) ? "active" : ""}`}>Payroll Management
                   <span className="menu-dropdown">{payOpen ? "▲" : "▼"}</span>
                 </span>
               </div>
@@ -405,13 +426,16 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
           {/* Admin tools (SuperUser only) */}
           {permissions.isAdmin && (
             <li>
-              <div className="menu-item-wrapper" onClick={toggleAdmin}>
+              <div
+                    className="menu-item-wrapper"
+                    onClick={() => handleHeadingClick(4, toggleAdmin)}
+                  >
                 <img
                   src="/images/user-star.png"
                   alt="Admin Tools icon"
                   className="menu-icon"
                 />
-                <span className="menu-heading">
+                <span className={`menu-heading ${isActive(menuPaths[4]) ? "active" : ""}`}>
                   Admin Management tools
                   <span className="menu-dropdown">{adminOpen ? "▲" : "▼"}</span>
                 </span>

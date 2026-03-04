@@ -98,6 +98,16 @@
   align-items: center;
   flex-grow: 1;
   user-select: none;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.menu-heading:hover {
+  color: #638549;
+}
+
+.menu-heading.active {
+  color: #638549 !important;
 }
 
 .menu-dropdown {
@@ -2398,13 +2408,13 @@ input:checked + .slider:before {
 
 .user-dropdown {
   position: absolute;
-  bottom: 30px;
-  right: 0;
+  bottom: 50px;
+  right: 30px;
   background: rgba(255, 255, 255, 0.774);
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   padding: 8px 0;
-  width: 160px;
+  width: 250px;
   z-index: 1000;
 }
 
@@ -2412,6 +2422,7 @@ input:checked + .slider:before {
   width: 100%;
   padding: 10px 15px;
   border: none;
+  font-family: '';
   background: none;
   text-align: left;
   cursor: pointer;

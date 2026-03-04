@@ -118,7 +118,7 @@ function App() {
         <Route path="/profile" element={<Profile currentUser={currentUser} />}/>
         <Route path="/company-contribution" element={<CompanyContribution />} />
          <Route path="/compensationPlanning" element={<CompensationPlanning />} />
-          <Route path="/change-password" element={<ChangePassword currentUser={currentUser}/>} />
+          <Route path="/changepassword" element={<ChangePassword currentUser={currentUser}/>} />
  </Routes>
 
 </div>

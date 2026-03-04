@@ -1,0 +1,56 @@
+.notification-bell-wrapper {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.cm-notification-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.notification-dot {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 12px;
+  height: 12px;
+  background-color: #fd1c03;
+  border-radius: 60%;
+}
+
+.notification-modal {
+  position: absolute;
+  top: 30px;
+  right: 0;
+  width: 300px;
+  max-height: 400px;
+  background: rgb(255, 253, 253);
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 1000;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  justify-content: center;
+  font-family: 'Anek Bangla';
+  font-size: 18px;
+  padding: 10px;
+  font-weight: 500;
+  color: #002D40;
+  border-bottom: 1px solid #ccc;
+}
+
+.modal-list {
+  list-style: none;
+  margin: 0;
+  padding: 10px;
+}
+
+.modal-list li {
+  padding: 6px 0;
+}
