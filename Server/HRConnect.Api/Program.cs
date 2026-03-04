@@ -6,6 +6,7 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using Resend;
 using HRConnect.Api.Interfaces;
+using HRConnect.Api.Middleware;
 using HRConnect.Api.Repositories;
 using HRConnect.Api.Services;
 using HRConnect.Api.Repository;
@@ -142,6 +143,9 @@ builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IStatutoryContributionRepository, StatutoryContributionRepository>();
 builder.Services.AddScoped<IStatutoryContributionService, StatutoryContributionService>();
 builder.Services.AddTransient<IPensionProjectionService, PensionProjectionService>();
+builder.Services.AddScoped<IMedicalOptionRepository, MedicalOptionRepository>();
+builder.Services.AddScoped<HRConnect.Api.Interfaces.IMedicalOptionService, 
+  HRConnect.Api.Services.MedicalOptionService>();
 builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowReact",
@@ -165,6 +169,8 @@ if (app.Environment.IsDevelopment())
 
 // app.UseHttpsRedirection();
 app.UseCors("AllowReact");
+// Adding Global Exception Handler
+app.UseGlobalExceptionHandler();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
