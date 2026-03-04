@@ -111,7 +111,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
         console.error("User data may have changed without authorization");
       }
     }
-  })
+  }, [])
 
   const calculateAge = (dateOfBirth) => {
         let today = new Date();
