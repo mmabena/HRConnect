@@ -22,7 +22,7 @@ const ProjectionCalculator = () => {
     const percentageMap = { 0: 0, 1: 2.5, 2: 5, 3: 7.5, 4: 10, 5: 12.5, 6: 15 };
     const reverseMap = { 0: 0, 2.5: 1, 5: 2, 7.5: 3, 10: 4, 12.5: 5, 15: 6 };
     const [selectedPensionPercentage, setSelectedPensionPercentage] = useState(reverseMap[2.5]); 
-    const marks = [
+    const baseMarks = [
         { value: 2.5, label: '2.5%' },
         { value: 5, label: '5%' },
         { value: 7.5, label: '7.5%' },
@@ -30,6 +30,7 @@ const ProjectionCalculator = () => {
         { value: 12.5, label: '12.5%' },
         { value: 15, label: '15%' },
     ];
+    const [marks, setMarks] = useState(baseMarks);
     const navigate = useNavigate();
     const baseUrl = process.env.REACT_APP_API_BASE_URL;
 
@@ -53,7 +54,7 @@ const ProjectionCalculator = () => {
             navigate("/dashboard");
         }
         
-    }, []);
+    },[baseUrl, navigate]);
 
     useEffect(() => {
         if (!employeeDetails) return;
@@ -96,7 +97,7 @@ const ProjectionCalculator = () => {
                     voluntaryContributionInputRef.current.style.borderColor = "red";
                     const maxVoluntaryContribution = Math.round(((employeeDetails.monthlySalary * MAX_PENSIONCONTRIBUTION_PERCENTAGE) - (employeeDetails.monthlySalary * percentageFromParameter)) * 10000) / 10000;
                     setVoluntaryContributionError({
-                        Error: `Voluntary Contribution + Monthly Salary Contribution cannot exceed 27.5% of salary. Maximum contribution: R ${maxVoluntaryContribution}`
+                        Error: `Voluntary Contribution + Monthly Salary Contribution cannot exceed 27.5% of salary. Maximum voluntary contribution: R ${maxVoluntaryContribution}`
                     })
                 } else {
                     setVoluntaryContributionIsCapped(false);
@@ -109,6 +110,17 @@ const ProjectionCalculator = () => {
             }
         }
         setSelectedPensionPercentage(reverseMap[newValue]);
+
+        const updatedMarks = baseMarks.map(mark => ({
+            ...mark,
+            label: (
+                <span style={{ fontWeight: mark.value === newValue ? "bold" : "normal" }}>
+                    {mark.label}
+                </span>
+            )
+        }));
+
+        setMarks(updatedMarks);
     };
 
     const handleVolutaryContributionFrequency = (event) => {
@@ -174,27 +186,28 @@ const ProjectionCalculator = () => {
                     <h3>Adjust Your Contribution Percentage:</h3>
 
                     <div className="voluntary-contribution">
-
                         <div className="contribution">
                             Voluntary Contribution
-                            <input
-                                type="number"
-                                placeholder="0"
-                                value={voluntaryContribution}
-                                onChange={handleVolutaryContributionInput}
-                                ref={voluntaryContributionInputRef}
-                            />
+                            <span className="input-container">
+                                <input
+                                    type="number"
+                                    placeholder="0"
+                                    value={voluntaryContribution}
+                                    onChange={handleVolutaryContributionInput}
+                                    ref={voluntaryContributionInputRef}
+                                />
+                            </span>
                             {voluntaryContributionError.Error &&
                                 <div className="voluntary-contribution-error">{voluntaryContributionError.Error}</div>
                             }
                         </div>
 
                         <div className="contribution-frequency">
-                            <div>
+                            <div className="contribution-frequency-radio"> 
                                 <input className="radio" type="radio" value={1} checked={selectedVoluntaryContributionFrequency === 1} onChange={handleVolutaryContributionFrequency} />
                                 <label> Once-Off</label>
                             </div>
-                            <div>
+                            <div className="contribution-frequency-radio">
                                 <input className="radio" type="radio" value={2} checked={selectedVoluntaryContributionFrequency === 2} onChange={handleVolutaryContributionFrequency} />
                                 <label> Permanent</label>
                             </div>
@@ -219,39 +232,37 @@ const ProjectionCalculator = () => {
                 </div>
 
                 <div className="pension-projection-details">
-
                     <div className="pension-projection-detail">
                         <h4>Monthly Salary:</h4>
-                        <label>R {employeeDetails?.monthlySalary}</label>
+                        <label>R {employeeDetails && (employeeDetails.monthlySalary).toLocaleString("en-US")}</label>
                     </div>
 
                     <div className="pension-projection-detail">
                         <h4>Monthly Contribution:</h4>
-                        <label>R {(employeeDetails?.monthlySalary * selectedPercentage()).toFixed(2)}</label>
+                        <label>R {employeeDetails && ((employeeDetails.monthlySalary * selectedPercentage()).toFixed(2)).toLocaleString("en-US")}</label>
                     </div>
 
                     <div className="pension-projection-detail">
                         <h4>Lump Sum in 35 years:</h4>
-                        <label>R {projectedPensionDetails && projectedPensionDetails.lumpSum}</label>
+                        <label>R {projectedPensionDetails && (projectedPensionDetails.lumpSum).toLocaleString("en-US")}</label>
                     </div>
 
                     <div className="pension-projection-detail">
                         <h4>Monthly Income 65-75:</h4>
-                        <label>R {projectedPensionDetails && projectedPensionDetails.monthlyIncomeAfterRetirement}</label>
+                        <label>R {projectedPensionDetails && (projectedPensionDetails.monthlyIncomeAfterRetirement).toLocaleString("en-US")}</label>
                     </div>
-
                 </div>
 
                 <div className="pension-projection-total">
                     <h4>Estimated Total in 35 Years:</h4>
-                    <label>R {projectedPensionDetails && projectedPensionDetails.totalProjectedSavings}</label>
+                    <label>R {projectedPensionDetails && (projectedPensionDetails.totalProjectedSavings).toLocaleString("en-US")}</label>
                 </div>
 
                 <div className="pension-projection-disclaimer">
                     <h5 className="warning">Disclaimer</h5>
                     <p className="message">
-                         The results shown are estimates are intended for guidance only. Calculations assume a 5% annual salary increase and a 6% annual pension growth rate.
-                        Actual outcomes may differ from these projections. Monthly contributions are capped at R29166,66 per month.
+                         The results shown are estimates and are intended for guidance only. Calculations assume a 5% annual salary increase and a 6% annual pension growth rate.
+                        Actual outcomes may differ from these projections. Monthly contributions are capped at R29,166.66 per month.
                     </p>
                 </div>
 

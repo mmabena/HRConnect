@@ -13,17 +13,6 @@
   margin-left: 144px;
 }
 
-.cm-datetime-wrapper {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 10px;
-  height: 34px;
-  box-sizing: border-box;
-  margin-right: 135px;
-}
-
-
 .my-custom-slider {
   width: 100%;
 }
@@ -111,6 +100,7 @@
 .pension-employee-detail {
     text-align: left;
     margin-top: 5px;
+    font-size: 22px;
 }
 
 
@@ -120,11 +110,16 @@
     gap: 20px;
 }
 
+.pension-projection-voluntary-contribution h3 {
+    font-size: 24px;
+}
+
 .voluntary-contribution {
     display: grid;
-    grid-template-columns: 250px 1fr;
-    gap: 20px;
+    grid-template-columns: 350px 1fr;
+    gap: 40px;
     width: 100%;
+    height: 160px;
 }
 
 .contribution {
@@ -138,11 +133,12 @@
     border: 1px solid var(--primary-color);
     text-align: center;
 
-    height: 60px;
+    height: 90px;
     width: 100%;
-    max-width: 210px;
+    max-width: 348px;
 
     font-size: 28px;
+    color: var(--primary-color);
     box-sizing: border-box;
 }
 
@@ -165,13 +161,19 @@
 }
 
 .contribution-frequency-radio {
-    margin-top: 20px;
+    display: flex;
+    margin-bottom: 21px;
+    margin-top: 4px;
 }
 
-
+input[type="radio"] {
+    width: 24px;
+    height: 24px;
+    margin-top: 5px;
+}
 
 .contribution-frequency-radio label {
-    margin-left: 20px;
+    margin-left: 10px;
 }
 
 
@@ -190,6 +192,11 @@ input{
  background: transparent;
 }
 
+input::-webkit-outer-spin-button, ::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
 .pension-projection-details {
     display: flex;
     flex-wrap: wrap;
@@ -204,7 +211,7 @@ input{
 .pension-projection-detail {
     flex: 1 1 220px;
     min-width: 200px;
-    max-width: 280px;
+    width: 270px;
 
     height: 140px;
     padding: 20px;
@@ -226,7 +233,8 @@ input{
 
 .pension-projection-total {
     width: 100%;
-    max-width: 1200px;
+    height: 141px;
+    max-width: 1196px;
     margin: 0 auto;
 
     display: flex;
@@ -251,7 +259,7 @@ input{
 .pension-projection-disclaimer {
     text-align: left;
     max-width: 1200px;
-    margin: 0 auto;
+    margin-top: 30px;
 }
 
 .warning {
@@ -292,7 +300,8 @@ input{
 
     .contribution input {
         font-size: 20px;
-        height: 50px;
+        height: 90px;
+        width: 348px;
     }
 
     .pension-projection-details {
