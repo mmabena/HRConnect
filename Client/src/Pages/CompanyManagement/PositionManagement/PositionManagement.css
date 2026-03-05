@@ -2,8 +2,8 @@
 .error-texts {
   color: red;
   font-size: 0.9em;
-  margin-top: 4px;
   display: block;
+
 }
 
 
@@ -392,23 +392,57 @@
   color: #1e2b32;
   margin-bottom:30px;
 }
+.apm-title-edit{
+  font-size: 30px;
+  font-weight: 600;
+  margin-left:20px;
+  color: #1e2b32;
+
+}
 
 /* Position label */
-.title-placeholder {
+.title-placeholder-add {
   align-self: flex-start;
   font-size: 14px;
   color: #121212;
-  margin-left:120px;
+  margin-right:320px;
+}
+.title-placeholder-edit {
+  align-self: flex-start;
+  font-size: 14px;
+  color: #121212;
+  margin-top: 6px;
+  
+}
+.title-placeholder-change {
+  align-self: flex-start;
+  font-size: 14px;
+  color: #121212;
+  margin-left:110px;
   margin-bottom: 6px;
 }
+
 
 /* Input group styling (dropdown) */
 .apm-input-group {
   width:100%;
-   margin-right:50px;
+  margin-right:50px;
   border-bottom: 2px solid #2e6c8c;
   padding-bottom: 8px;
-  margin-bottom: 25px;
+ 
+
+}
+.apm-input-group-add {
+  width:100%;
+  border-bottom: 2px solid #2e6c8c;
+ 
+}
+.apm-input-group-edit {
+  width:100%;
+  margin-right:50px;
+  border-bottom: 2px solid #2e6c8c;
+     margin-bottom: 25px;
+ 
 }
 
 .apm-input {
@@ -424,7 +458,7 @@
   position: relative;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .apm-dropdown-icon {
@@ -443,7 +477,8 @@
   text-align: center;
   font-size: 14px;
   margin-right:20px;
-  margin-bottom: 25px;
+  margin-top:25px;
+  margin-bottom: 30px;
   color: #002D40;
 }
 
@@ -566,7 +601,6 @@ margin-right:90px;
   font-size: 11px;
   color:   #355867;
 }
-
 
 
 

@@ -79,7 +79,7 @@ const ChangePositionManagement = () => {
           </div>
           <h2 className="apm-title">Change Position</h2>
         </div>
-             <label className="title-placeholder">Position title</label>
+             <label className="title-placeholder-change">Position title</label>
 
         {/* Position Dropdown */}
         <div className="apm-input-group apm-dropdown-wrapper">

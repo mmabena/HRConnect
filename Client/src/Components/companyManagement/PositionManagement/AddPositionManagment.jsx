@@ -136,7 +136,8 @@ const AddPositionManagement = ({ isOpen, onClose }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="apm-form">
-          <div className="apm-input-group">
+          <div className="apm-input-group-add">
+             <label className="title-placeholder-add">Position title</label>
             <input
               type="text"
               name="positionTitle"
@@ -145,10 +146,12 @@ const AddPositionManagement = ({ isOpen, onClose }) => {
               onChange={handleChange}
               className={`apm-input ${errors.positionTitle ? "inputs-error" : ""}`}
             />
-            {errors.positionTitle && <span className="error-texts">{errors.positionTitle}</span>}
+          
           </div>
+            {errors.positionTitle && <span className="error-texts">{errors.positionTitle}</span>}
 
           <div className="apm-input-group apm-dropdown-wrapper">
+             <label className="title-placeholder-edit">Position title</label>
             <select
               name="jobGradeId"
               value={formData.jobGradeId}
@@ -160,15 +163,17 @@ const AddPositionManagement = ({ isOpen, onClose }) => {
                 <option key={grade.jobGradeId} value={grade.jobGradeId}>{grade.name}</option>
               ))}
             </select>
-            {errors.jobGradeId && <span className="error-texts">{errors.jobGradeId}</span>}
  <img
                 src="/images/arrow_drop_down_circle.png"
                 alt="Dropdown Icon"
                 className="apm-dropdown-icon"
               />
           </div>
+          
+            {errors.jobGradeId && <span className="error-texts">{errors.jobGradeId}</span>}
 
           <div className="apm-input-group apm-dropdown-wrapper">
+             <label className="title-placeholder-edit">Position title</label>
             <select
               name="occupationalLevelId"
               value={formData.occupationalLevelId}
@@ -180,15 +185,17 @@ const AddPositionManagement = ({ isOpen, onClose }) => {
                 <option key={level.occupationalLevelId} value={level.occupationalLevelId}>{level.description}</option>
               ))}
             </select>
-            {errors.occupationalLevelId && <span className="error-texts">{errors.occupationalLevelId}</span>}
+           
  <img
                 src="/images/arrow_drop_down_circle.png"
                 alt="Dropdown Icon"
                 className="apm-dropdown-icon"
               />
           </div>
+           {errors.occupationalLevelId && <span className="error-texts">{errors.occupationalLevelId}</span>}
 
-          <div className="apm-input-group">
+          <div className="apm-input-group-add">
+             <label className="title-placeholder-add">Position title</label>
             <input
               type="date"
               name="effectiveDate"
@@ -196,8 +203,9 @@ const AddPositionManagement = ({ isOpen, onClose }) => {
               onChange={handleChange}
               className={`apm-input ${errors.effectiveDate ? "inputs-error" : ""}`}
             />
-            {errors.effectiveDate && <span className="error-texts">{errors.effectiveDate}</span>}
+        
           </div>
+              {errors.effectiveDate && <span className="error-texts">{errors.effectiveDate}</span>}
 
           <button type="submit" className="apm-save-button">Save</button>
   <div className="apm-footer">

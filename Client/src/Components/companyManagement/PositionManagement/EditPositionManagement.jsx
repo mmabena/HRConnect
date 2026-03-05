@@ -169,14 +169,14 @@ const EditPositionManagement = () => {
             <span className="apm-logo-bold">singular</span>
             <span className="apm-logo-light">express</span>
           </div>
-          <h2 className="apm-title">Edit Position</h2>
+          <h2 className="apm-title-edit">Edit Position</h2>
         </div>
 
         <form onSubmit={handleSubmit} className="apm-form">
-
+              <label className="title-placeholder-edit">Position title</label>
           {/* Position Dropdown WITH icon */}
           <div className="apm-input-group apm-dropdown-wrapper">
-             <label className="title-placeholder">Position title</label>
+         
             <select
               name="positionTitle"
               className="apm-input select-dropdown"
@@ -202,7 +202,7 @@ const EditPositionManagement = () => {
 
 
           <div className="apm-input-group apm-dropdown-wrapper">
-             <label className="title-placeholder">Position Grade</label>
+            <label className="title-placeholder-edit">Effective Date</label>
             <select
               name="jobGradeId"
               className="apm-input select-dropdown"
@@ -226,7 +226,7 @@ const EditPositionManagement = () => {
           </div>
 
           <div className="apm-input-group apm-dropdown-wrapper">
-             <label className="title-placeholder">Occupational Description</label>
+             <label className="title-placeholder-edit">Occupational Description</label>
             <select
               name="occupationalLevelId"
               className="apm-input select-dropdown"
@@ -251,8 +251,8 @@ const EditPositionManagement = () => {
               className="apm-dropdown-icon"
             />
           </div>
-           <label className="title-placeholder">Effective Date</label>
-                    <div className="apm-input-group">
+           <label className="title-placeholder-edit">Effective Date</label>
+                    <div className="apm-input-group-edit">
             <input
               type="date"
               name="effectiveDate"
