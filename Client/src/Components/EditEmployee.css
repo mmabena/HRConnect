@@ -31,13 +31,15 @@
   justify-content: flex-start;
   display: flex;
   gap: 20px;
+  font-weight: 6000;
+
 }
 
 .emp-em-edit-button,
 .emp-btn-edit {
   width: 150px;
   height: 47px;
-  background-color: var(--success-color);
+  background-color: #638549;
   border: none;
   border-radius: var(--border-radius-medium);
   padding: 5px 10px;
@@ -51,14 +53,17 @@
 }
 
 .emp-edit-button-top-right {
+  position: absolute; 
+  top: 120px;          
+  right: 40px;  
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 1rem;
+
 }
 
 .emp-em-edit-button:hover,
 .emp-btn-edit:hover {
-  background-color: #95a860;
+  background-color: #758155;
 }
 
 .emp-edit-employee-form-container {
@@ -97,6 +102,7 @@
   box-shadow: none;
   border: none;
   margin-left: 370px;
+  margin-top: 20px;
   margin-right: 70px;
   font-family: "Anek Bangla", sans-serif;
   font-weight: 600;
@@ -113,6 +119,8 @@
   background-color: #ffffff;
   border-radius: 0;
   box-sizing: border-box;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -128,11 +136,10 @@
   margin-bottom: 10px;
   align-items: flex-start;
 }
-
 /* For rows with 6 fields */
 .emp-fields-container.row-6 {
   width: 1384px;
-  /* fixed width */
+
   justify-content: space-between;
 }
 
@@ -170,9 +177,7 @@
 .emp-error-text {
   color: #d32f2f;
   font-size: 12px;
-  margin-top: 4px;
   padding-left: 10px;
-  min-height: 16px;
 }
 
 .emp-field-input.error {
@@ -189,15 +194,27 @@
   letter-spacing: 2%;
   color: #002d40;
   margin: 0;
-
   padding-left: 10px;
-
   height: 30px;
   /* fixed height for label to help layout */
   display: flex;
   align-items: center;
   /* vertical center the label text */
   user-select: none;
+}
+
+/* Grey out read-only inputs */
+.emp-field-input[readonly],
+.emp-field-input:disabled {
+  background-color: #f0f0f0; /* light grey */
+  color: #555; /* darker grey for text */
+  cursor: not-allowed; /* optional, shows "disabled" cursor */
+}
+
+/* Optional: grey the placeholder text as well */
+.emp-field-input[readonly]::placeholder,
+.emp-field-input:disabled::placeholder {
+  color: #999;
 }
 
 .emp-field-input {
@@ -219,14 +236,21 @@
   position: relative;
   height: 200px;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   padding-left: 20px;
+  justify-content: flex-start;
+  
 }
+
+
 
 /* Image block */
 .emp-photo-block {
   width: 241px;
+  position: relative;
+  cursor: pointer;
   height: 185px;
+  margin-bottom: 40px;
   padding: 0;
   background-color: #f0f0f0;
   display: flex;
@@ -235,6 +259,20 @@
   overflow: hidden;
   border-radius: 0;
   margin-right: 30px;
+}
+
+.emp-uploading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255,255,255,0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  color: #333;
 }
 
 /* Image styling */
@@ -246,12 +284,6 @@
   display: block;
 }
 
-/* Text beside image */
-.emp-photo-text-container {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
 
 /* Name */
 .emp-photo-text-container .emp-title {
@@ -265,15 +297,26 @@
   text-overflow: ellipsis;
 }
 
+.emp-edit-employee-heading-row.side-tabs {
+  display: flex;
+  flex-direction: row; /* stack tabs vertically */
+  margin-left: 10px;
+  margin-top: 40px ;
+  font-weight: 400px;
+}
+
 /* Job Title */
 .emp-photo-text-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   font-family: "Anek Bangla", sans-serif;
   font-weight: 400;
   font-size: 16px;
   line-height: 1;
   letter-spacing: 0.02em;
   color: #006088;
-  margin-top: 10px;
+  margin-bottom: 18px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -283,10 +326,10 @@
 .emp-subtitle {
   font-family: "Anek Bangla", sans-serif;
   font-weight: 400;
-  font-size: 16px;
-  line-height: 1;
+  font-size: 18px;
+  line-height: 100%;
   letter-spacing: 0.02em;
-  color: #006088;
+  color: #002D40;
   margin-top: 10px;
   white-space: nowrap;
   overflow: hidden;
@@ -300,7 +343,7 @@
   font-size: 16px;
   line-height: 1;
   letter-spacing: 0.02em;
-  color: #04445f86;
+  color: #9A9A9A;
   margin-top: 10px;
   white-space: nowrap;
   overflow: hidden;
@@ -310,6 +353,28 @@
 
 /* Active tab color */
 .emp-heading-item.selected {
+  background-color: #c7d9e5;
+  color: #01a19a;
+}
+
+.emp-heading-item {
+  cursor: pointer;
+  font-family: "Anek Bangla";
+  font-weight: 700;
+  font-size: 20px;
+  color: #002d40;
+  padding: 5px 10px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  background-color: transparent;
+}
+
+.emp-heading-item:first-child {
+  color: #638549;
+}
+
+.emp-heading-item.selected {
+  background-color: #c7d9e5;
   color: #01a19a;
 }
 

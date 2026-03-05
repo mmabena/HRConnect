@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import "../Components/EditEmployee.css";
+import axios from "axios";
 import {
   editEmployee,
   formatDateForDisplay,
-  toISOStringSafe,
   fetchAllEmployees,
   showConfirmationToast,
   GetEmployeeByEmployeeNumberAsync,
@@ -28,6 +28,8 @@ const EditEmployee = () => {
   const [isEditable, setIsEditable] = useState(false);
   const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
   const [formErrors, setFormErrors] = useState({});
   //const positionTitle = positions.find(p => p.positionId === employeeData.jobTitle)?.positionTitle || "";
   /// </summary>
@@ -43,8 +45,8 @@ const EditEmployee = () => {
   const employmentStatuses = ["Permanent", "FixedTerm", "Contract"];
   const [employeeData, setEmployeeData] = useState({
     employeeId: "",
-    firstName: "",
-    lastName: "",
+    name: "",
+    surname: "",
     title: "",
     dateOfBirth: "",
     idType: "id",
@@ -56,23 +58,23 @@ const EditEmployee = () => {
     disability: false,
     disabilityType: "",
     email: "",
-    homeAddress: "",
+    physicalAddress: "",
     city: "",
-    postalCode: "",
-    department: "",
+    zipCode: "",
+    branch: "",
+    monthlySalary: "",
     jobTitle: "",
-    positionTitle: "",
     employeeStatus: "",
     reportsTo: "",
-    documentPath: "",
+    profileImage: "",
   });
 
-  const getInitials = (firstName, lastName) => {
+  const getInitials = (name, surname) => {
     let initials = "";
 
-    if (firstName) initials += firstName.charAt(0).toUpperCase();
+    if (name) initials += name.charAt(0).toUpperCase();
 
-    if (lastName) initials += lastName.charAt(0).toUpperCase();
+    if (surname) initials += surname.charAt(0).toUpperCase();
 
     return initials;
   };
@@ -104,10 +106,10 @@ const EditEmployee = () => {
 
           const transformed = {
             employeeId: employee.employeeId || "",
-            firstName: employee.name || "",
-            lastName: employee.surname || "",
+            name: employee.name || "",
+            surname: employee.surname || "",
             title: employee.title || "",
-            department: employee.branch || "",
+            branch: employee.branch || "",
             dateOfBirth: employee.dateOfBirth
               ? formatDateForDisplay(employee.dateOfBirth)
               : "",
@@ -116,9 +118,10 @@ const EditEmployee = () => {
             gender: employee.gender || "",
             contactNumber: employee.contactNumber || "",
             email: employee.email || "",
-            homeAddress: employee.physicalAddress || "",
+            physicalAddress: employee.physicalAddress || "",
             city: employee.city || "",
-            postalCode: employee.zipCode || "",
+            monthlySalary: employee.monthlySalary || "",
+            zipCode: employee.zipCode || "",
             disability: employee.hasDisability || false,
             disabilityType: employee.disabilityDescription || "N/A",
             jobTitle: employee.positionTitle || "",
@@ -126,7 +129,7 @@ const EditEmployee = () => {
             employeeStatus: employee.employmentStatus || "",
             reportsTo: employee.careerManagerID || "",
             startDate: employee.startDate || "",
-            documentPath: employee.profileImage || "",
+            profileImage: employee.profileImage || "",
             initials: getInitials(employee.name, employee.surname),
           };
 
@@ -146,8 +149,8 @@ const EditEmployee = () => {
 
         const transformed = {
           employeeId: employee.employeeId || "",
-          firstName: employee.name || "",
-          lastName: employee.surname || "",
+          name: employee.name || "",
+          surname: employee.surname || "",
           title: employee.title || "",
           dateOfBirth: employee.dateOfBirth
             ? formatDateForDisplay(employee.dateOfBirth)
@@ -157,12 +160,12 @@ const EditEmployee = () => {
           gender: employee.gender || "",
           contactNumber: employee.contactNumber || "",
           email: employee.email || "",
-          homeAddress: employee.physicalAddress || "",
+          physicalAddress: employee.physicalAddress || "",
           city: employee.city || "",
           passportNumber: employee.passportNumber || "",
           monthlySalary: employee.monthlySalary || "",
-          department: employee.branch || "",
-          postalCode: employee.zipCode || "",
+          branch: employee.branch || "",
+          zipCode: employee.zipCode || "",
           disability: employee.hasDisability || false,
           disabilityType: employee.disabilityDescription || "N/A",
           jobTitle: employee.positionTitle || "",
@@ -170,7 +173,7 @@ const EditEmployee = () => {
           employeeStatus: employee.employmentStatus || "",
           reportsTo: employee.careerManagerID || "",
           startDate: employee.startDate || "",
-          documentPath: employee.profileImage || "",
+          profileImage: employee.profileImage || "",
         };
 
         setEmployeeData(transformed);
@@ -187,6 +190,46 @@ const EditEmployee = () => {
   useEffect(() => {
     console.log("Current employee data being viewed/edited:", employeeData);
   }, [employeeData]);
+
+  const handleFileChange = async (
+    e,
+    setEmployee,
+    setUploading,
+    setErrorMessage,
+  ) => {
+    const file = e.target.files[0];
+    if (file && (file.type === "image/jpeg" || file.type === "image/jpg")) {
+      try {
+        setUploading(true);
+        setErrorMessage("");
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("upload_preset", "unsigned_preset");
+        formData.append("folder", "samples/ecommerce");
+
+        const response = await axios.post(
+          "https://api.cloudinary.com/v1_1/djmafre5k/image/upload",
+          formData,
+        );
+
+        const imageUrl = response.data.secure_url;
+        // <-- Set profileImage instead of documentPath
+        setEmployee((prev) => ({ ...prev, profileImage: imageUrl }));
+        setUploading(false);
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        setErrorMessage("Error uploading image.");
+        setUploading(false);
+      }
+    } else {
+      setErrorMessage("Only .jpg or .jpeg images are allowed.");
+      setEmployee((prev) => ({ ...prev, profileImage: "" }));
+    }
+  };
+
+  const onFileChange = async (e) => {
+    await handleFileChange(e, setEmployeeData, setUploading, setUploadError);
+  };
 
   /// </summary>
   /// Disability validation & styling logic
@@ -222,24 +265,63 @@ const EditEmployee = () => {
     }
   }, [employeeData.disability, employeeData.disabilityType]);
 
-  useEffect(() => {
-    if (!employeeData.disability && employeeData.disabilityType !== "N/A") {
-      setEmployeeData((prev) => ({
-        ...prev,
-        disabilityType: "N/A",
-      }));
-    }
-  }, [employeeData.disability, employeeData.disabilityType]);
-
   if (userRole !== "superuser") {
     return <div>Access Denied. Only super users can access this page.</div>;
   }
 
   const handleEditSaveClick = async () => {
+    if (uploading) {
+      toast.warning("Please wait for image upload to complete before saving.");
+      return;
+    }
+
     if (!isEditable) {
       setIsEditable(true);
       return;
     }
+
+    const validateEmployee = () => {
+      const errors = {};
+
+      if (!employeeData.title) errors.title = "Title is required";
+      if (!employeeData.name?.trim()) errors.name = "First name is required";
+      if (!employeeData.surname?.trim())
+        errors.surname = "Last name is required";
+
+      if (!employeeData.contactNumber?.trim())
+        errors.contactNumber = "Contact number is required";
+
+      if (!employeeData.email?.trim())
+        errors.email = "Email address is required";
+
+      if (!employeeData.physicalAddress?.trim())
+        errors.physicalAddress = "Home address is required";
+
+      if (!employeeData.city?.trim()) errors.city = "City is required";
+
+      if (!employeeData.zipCode?.trim())
+        errors.zipCode = "Postal code is required";
+
+      if (!employeeData.monthlySalary)
+        errors.monthlySalary = "Monthly salary is required";
+
+      if (!employeeData.branch) errors.branch = "Department is required";
+
+      if (!employeeData.employeeStatus)
+        errors.employeeStatus = "Employment status is required";
+
+      if (!employeeData.reportsTo)
+        errors.reportsTo = "Career Manager is required";
+
+      if (employeeData.disability && !employeeData.disabilityType?.trim()) {
+        errors.disabilityType =
+          "Disability description is required when disability is Yes";
+      }
+
+      setFormErrors(errors);
+
+      return Object.keys(errors).length === 0;
+    };
 
     const confirmed = await showConfirmationToast(
       "Are you sure you want to save changes?",
@@ -251,8 +333,8 @@ const EditEmployee = () => {
     /// </summary>
     /// Prevent saving if validation errors exist
     /// </summary>
-    if (Object.keys(formErrors).length > 0) {
-      toast.error("Please fix validation errors before saving.");
+    if (!validateEmployee()) {
+      toast.error("Please correct the highlighted fields.");
       return;
     }
 
@@ -261,17 +343,17 @@ const EditEmployee = () => {
     const payload = {
       employeeId: employeeData.employeeId,
       title: employeeData.title || null,
-      name: employeeData.firstName || null,
-      surname: employeeData.lastName || null,
+      name: employeeData.name || null,
+      surname: employeeData.surname || null,
       idNumber: employeeData.idNumber,
       nationality: employeeData.nationality || null,
       gender: employeeData.gender || null,
       contactNumber: employeeData.contactNumber || null,
       taxNumber: employeeData.taxNumber || null,
       email: employeeData.email || null,
-      physicalAddress: employeeData.homeAddress || null,
+      physicalAddress: employeeData.physicalAddress || null,
       city: employeeData.city || null,
-      zipCode: employeeData.postalCode || null,
+      zipCode: employeeData.zipCode || null,
       hasDisability: employeeData.disability || false,
       disabilityDescription:
         employeeData.disabilityType === "N/A"
@@ -279,14 +361,12 @@ const EditEmployee = () => {
           : employeeData.disabilityType,
       dateOfBirth: formatDateToYYYYMMDD(employeeData.dateOfBirth),
       startDate: formatDateToYYYYMMDD(employeeData.startDate),
-      branch: employeeData.department || "Johannesburg", // map string to enum in backend if needed
-      monthlySalary: employeeData.monthlySalary
-        ? parseFloat(employeeData.monthlySalary)
-        : 0,
+      branch: employeeData.branch || "Johannesburg", // map string to enum in backend if needed
+      monthlySalary: Number(employeeData.monthlySalary) || 0,
       positionId: employeeData.positionId,
       employmentStatus: employeeData.employeeStatus || "Permanent",
       careerManagerID: employeeData.reportsTo || null,
-      profileImage: employeeData.documentPath || null,
+      profileImage: employeeData.profileImage || null,
     };
 
     if (employeeData.passportNumber) {
@@ -297,43 +377,68 @@ const EditEmployee = () => {
 
     try {
       setLoading(true);
+
       await editEmployee(payload.employeeId, payload);
 
       toast.success("Employee updated successfully!");
       setIsEditable(false);
+
       setOriginalIdNumber(payload.idNumber);
       setOriginalTaxNumber(payload.taxNumber);
       setOriginalDateOfBirth(payload.dateOfBirth);
     } catch (error) {
-      const responseData = error.response?.data;
+      const response = error.response;
 
-      if (responseData) {
-        const generalMessage = responseData.message || "Validation failed";
-        const errors = responseData.errors;
+      if (!response) {
+        toast.error("Server not reachable.");
+        return;
+      }
 
-        setFormErrors({});
+      const { message, errors, type } = response.data;
 
-        toast.error(generalMessage);
+      setFormErrors({});
 
-        if (Array.isArray(errors)) {
-          const errorMap = {};
-          errors.forEach(({ field, message }) => {
-            errorMap[field] = message;
-            toast.error(`${field}: ${message}`);
-          });
-          setFormErrors(errorMap);
-        } else if (typeof errors === "object" && errors !== null) {
-          setFormErrors(errors);
-          Object.entries(errors).forEach(([field, message]) => {
-            toast.error(`${field}: ${message}`);
-          });
-        }
-      } else {
-        /// </summary>
-        /// If there is no structured response from server
-        /// </summary>
+      if (message) toast.error(message);
 
-        toast.error("Could not update employee. Please try again.");
+      const mappedErrors = {};
+
+      if (errors) {
+        // If backend returns field-specific errors
+        Object.entries(errors).forEach(([field, msg]) => {
+          if (field === "general") {
+            const lowerMsg = msg.toLowerCase();
+            if (lowerMsg.includes("zip") || lowerMsg.includes("postal")) {
+              mappedErrors.zipCode = msg;
+            } else if (lowerMsg.includes("city")) {
+              mappedErrors.city = msg;
+            } else if (lowerMsg.includes("contact")) {
+              mappedErrors.contactNumber = msg;
+            } else if (lowerMsg.includes("email")) {
+              mappedErrors.email = msg;
+            } else if (lowerMsg.includes("name")) {
+              mappedErrors.name = msg;
+            } else if (lowerMsg.includes("surname")) {
+              mappedErrors.surname = msg;
+            } else if (lowerMsg.includes("address")) {
+              mappedErrors.physicalAddress = msg;
+            } else {
+              // If cannot map, still show toast
+              toast.error(msg);
+            }
+          } else {
+            mappedErrors[field] = msg;
+          }
+        });
+      }
+
+      setFormErrors(mappedErrors);
+
+      if (type === "BusinessRuleException") {
+        toast.error(message);
+      }
+
+      if (type === "NotFoundException") {
+        toast.error("Employee not found.");
       }
     } finally {
       setLoading(false);
@@ -343,7 +448,7 @@ const EditEmployee = () => {
   const handleInputChange = (e) => {
     const { id, value, type, checked } = e.target;
 
-    if (["email", "dateOfBirth", "idNumber"].includes(id)) {
+    if (["dateOfBirth", "idNumber"].includes(id)) {
       return;
     }
 
@@ -362,44 +467,64 @@ const EditEmployee = () => {
 
       return updatedData;
     });
+
+    if (formErrors[id]) {
+      setFormErrors((prev) => {
+        const updated = { ...prev };
+        delete updated[id];
+        return updated;
+      });
+    }
+
+    if (loading) {
+      return <div className="emp-loading">Loading employee...</div>;
+    }
   };
 
   return (
     <div className="emp-menu-background">
       <div className="emp-edit-employee-top-container">
-        <div className="emp-photo-block">
+        <div
+          className="emp-photo-block"
+          onClick={() => document.getElementById("emp-photo-input").click()}
+        >
           <img
-            src={employeeData.documentPath || "/default-profile.png"}
+            src={employeeData.profileImage || "/default-profile.png"}
             alt="Employee"
           />
+          {uploading && (
+            <div className="emp-uploading-overlay">Uploading...</div>
+          )}
         </div>
+        <input
+          type="file"
+          id="emp-photo-input"
+          style={{ display: "none" }}
+          onChange={onFileChange}
+        />
+        {uploadError && <div className="emp-error-text">{uploadError}</div>}
+
         <div className="emp-photo-text-container">
-          <div className="emp-title">{`${employeeData.firstName} ${employeeData.lastName}`}</div>
+          <div className="emp-title">{`${employeeData.name} ${employeeData.surname}`}</div>
           <div className="emp-subtitle">{employeeData.jobTitle}</div>
-          <div className="emp-subsubtitle">{employeeData.department}</div>
-        </div>
-      </div>
-
-      <div className="emp-edit-employee-heading-row">
-        {[
-          "Personal",
-          "Career",
-          "Leave",
-          "Tax Profile",
-          "Payroll",
-          "Documents",
-        ].map((tab) => (
-          <div
-            key={tab}
-            className={`emp-heading-item ${activeTab === tab ? "selected" : ""}`}
-            onClick={() => setActiveTab(tab)}
-          >
-            {tab}
+          <div className="emp-subsubtitle">{employeeData.branch}</div>
+          <div className="emp-edit-employee-heading-row side-tabs">
+            {[
+              "Personal Information",
+              "Payroll Information",
+              "Leave",
+              "Payroll Tools",
+            ].map((tab) => (
+              <div
+                key={tab}
+                className={`emp-heading-item ${activeTab === tab ? "selected" : ""}`}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-
-      <div className="emp-edit-employee-form-container">
+        </div>
         <div className="emp-edit-button-top-right">
           {!readOnly && (
             <button
@@ -410,13 +535,16 @@ const EditEmployee = () => {
             </button>
           )}
         </div>
+      </div>
+
+      <div className="emp-edit-employee-form-container">
         <div className="emp-custom-header">Personal Information</div>
 
         <div className="emp-sub-container">
           {/* ROW 1 */}
           <div className="emp-fields-container row-6">
             <div className="emp-field">
-              <label className="emp-field-label">Employee Id</label>
+              <label className="emp-field-label">Employee Code*</label>
               <input
                 className="emp-field-input"
                 id="employeeId"
@@ -428,7 +556,7 @@ const EditEmployee = () => {
             <div className="emp-field">
               <label className="emp-field-label">Title</label>
               <select
-                className="emp-field-input"
+                className={`emp-field-input ${formErrors.title ? "error" : ""}`}
                 id="title"
                 value={employeeData.title || ""}
                 onChange={handleInputChange}
@@ -441,10 +569,11 @@ const EditEmployee = () => {
                   </option>
                 ))}
               </select>
+              <div className="emp-error-text">{formErrors.title}</div>
             </div>
 
             <div className="emp-field">
-              <label className="emp-field-label">Id Number</label>
+              <label className="emp-field-label">ID Number*</label>
               <input
                 className="emp-field-input"
                 id="idNumber"
@@ -465,15 +594,16 @@ const EditEmployee = () => {
             </div>
 
             <div className="emp-field">
-              <label className="emp-field-label">Nationality</label>
+              <label className="emp-field-label">Nationality*</label>
               <input
-                className="emp-field-input"
+                className={`emp-field-input ${formErrors.nationality ? "error" : ""}`}
                 id="nationality"
                 value={employeeData.nationality || ""}
                 onChange={handleInputChange}
                 readOnly={!isEditable}
               />
             </div>
+            <div className="emp-error-text">{formErrors.nationality}</div>
           </div>
 
           {/* ROW 2 */}
@@ -487,11 +617,7 @@ const EditEmployee = () => {
                 <input
                   className="emp-field-input"
                   id={id}
-                  value={
-                    id === "dateOfBirth"
-                      ? formatDateForDisplay(employeeData[id])
-                      : employeeData[id] || ""
-                  }
+                  value={employeeData[id] || ""}
                   readOnly
                 />
               </div>
@@ -500,26 +626,28 @@ const EditEmployee = () => {
             <div className="emp-field">
               <label className="emp-field-label">Disability Status</label>
               <select
-                className="emp-field-input"
+                className={`emp-field-input ${formErrors.disability ? "error" : ""}`}
                 id="disability"
                 value={employeeData.disability ? "yes" : "no"}
                 onChange={handleInputChange}
-                disabled={(!isEditable)}
+                disabled={!isEditable}
               >
                 <option value="no">No</option>
                 <option value="yes">Yes</option>
               </select>
+              <div className="emp-error-text">{formErrors.disability}</div>
             </div>
 
             <div className="emp-field">
               <label className="emp-field-label">Disability Description</label>
               <input
-                className="emp-field-input"
+                className={`emp-field-input ${formErrors.disabilityType ? "error" : ""}`}
                 id="disabilityType"
                 value={employeeData.disabilityType || ""}
                 onChange={handleInputChange}
-                readOnly={!employeeData.disability == "yes"}
+                readOnly={!employeeData.disability}
               />
+              <div className="emp-error-text">{formErrors.disabilityType}</div>
             </div>
           </div>
 
@@ -528,70 +656,76 @@ const EditEmployee = () => {
             <div className="emp-field">
               <label className="emp-field-label">First Name</label>
               <input
-                className="emp-field-input"
-                id="firstName"
-                value={employeeData.firstName || ""}
+                className={`emp-field-input ${formErrors.name ? "error" : ""}`}
+                id="name"
+                value={employeeData.name || ""}
                 onChange={handleInputChange}
-                readOnly={(!isEditable)}
+                readOnly={!isEditable}
               />
+              <div className="emp-error-text">{formErrors.name}</div>
             </div>
             <div className="emp-field">
               <label className="emp-field-label">Last Name</label>
               <input
-                className="emp-field-input"
-                id="lastName"
-                value={employeeData.lastName || ""}
+                className={`emp-field-input ${formErrors.surname ? "error" : ""}`}
+                id="surname"
+                value={employeeData.surname || ""}
                 onChange={handleInputChange}
-                readOnly={(!isEditable)}
+                readOnly={!isEditable}
               />
+              <div className="emp-error-text">{formErrors.surname}</div>
             </div>
           </div>
 
           {/* ROW 4 */}
           <div className="emp-fields-container row-3">
             <div className="emp-field">
-              <label className="emp-field-label">Contact Number</label>
+              <label className="emp-field-label">Contact Number*</label>
               <input
-                className="emp-field-input"
+                className={`emp-field-input ${formErrors.contactNumber ? "error" : ""}`}
                 id="contactNumber"
                 value={employeeData.contactNumber || ""}
                 onChange={handleInputChange}
-                readOnly={(!isEditable)}
+                readOnly={!isEditable}
               />
+              <div className="emp-error-text">{formErrors.contactNumber}</div>
             </div>
             <div className="emp-field">
               <label className="emp-field-label">Email Address</label>
               <input
-                className="emp-field-input"
+                className={`emp-field-input ${formErrors.email ? "error" : ""}`}
                 id="email"
                 value={employeeData.email || ""}
                 onChange={handleInputChange}
-                readOnly={(!isEditable)}
+                readOnly={!isEditable}
               />
+              <div className="emp-error-text">{formErrors.email}</div>
             </div>
           </div>
 
           {/* ROW 5 */}
           <div className="emp-fields-container row-3">
             <div className="emp-field">
-              <label className="emp-field-label">Home Address</label>
+              <label className="emp-field-label">Home Address*</label>
               <input
-                className="emp-field-input"
-                id="homeAddress"
-                value={employeeData.homeAddress || ""}
+                className={`emp-field-input ${formErrors.physicalAddress ? "error" : ""}`}
+                id="physicalAddress"
+                value={employeeData.physicalAddress || ""}
                 onChange={handleInputChange}
-                readOnly={(!isEditable)}
+                readOnly={!isEditable}
               />
+              <div className="emp-error-text">{formErrors.physicalAddress}</div>
             </div>
             <div className="emp-field">
               <label className="emp-field-label">City</label>
               <input
-                className="emp-field-input"
+                className={`emp-field-input ${formErrors.city ? "error" : ""}`}
                 id="city"
                 value={employeeData.city || ""}
                 onChange={handleInputChange}
-                readOnly={(!isEditable)}
+                readOnly={!isEditable}
               />
+              <div className="emp-error-text">{formErrors.city}</div>
             </div>
           </div>
 
@@ -600,33 +734,38 @@ const EditEmployee = () => {
             <div className="emp-field">
               <label className="emp-field-label">Postal Code</label>
               <input
-                className="emp-field-input"
-                id="postalCode"
-                value={employeeData.postalCode || ""}
+                className={`emp-field-input ${formErrors.zipCode ? "error" : ""}`}
+                id="zipCode"
+                value={employeeData.zipCode || ""}
                 onChange={handleInputChange}
-                readOnly={(!isEditable)}
+                readOnly={!isEditable}
               />
+              <div className="emp-error-text">{formErrors.zipCode}</div>
             </div>
 
             <div className="emp-field">
               <label className="emp-field-label">Monthly Salary</label>
               <input
-                className="emp-field-input"
+                type="number"
+                min="0"
+                step="100"
+                className={`emp-field-input ${formErrors.monthlySalary ? "error" : ""}`}
                 id="monthlySalary"
                 value={employeeData.monthlySalary || ""}
                 onChange={handleInputChange}
-                readOnly={(!isEditable)}
+                readOnly={!isEditable}
               />
+              <div className="emp-error-text">{formErrors.monthlySalary}</div>
             </div>
 
             <div className="emp-field">
               <label className="emp-field-label">Department</label>
               <select
-                className="emp-field-input"
-                id="department"
-                value={employeeData.department || ""}
+                className={`emp-field-input ${formErrors.branch ? "error" : ""}`}
+                id="branch"
+                value={employeeData.branch || ""}
                 onChange={handleInputChange}
-                disabled={(!isEditable)}
+                disabled={!isEditable}
               >
                 <option value="">Select Department</option>
                 {branches.map((branch) => (
@@ -635,6 +774,7 @@ const EditEmployee = () => {
                   </option>
                 ))}
               </select>
+              <div className="emp-error-text">{formErrors.branch}</div>
             </div>
           </div>
 
@@ -643,7 +783,7 @@ const EditEmployee = () => {
             <div className="emp-field">
               <label className="emp-field-label">Employment Status</label>
               <select
-                className="emp-field-input"
+                className={`emp-field-input ${formErrors.employeeStatus ? "error" : ""}`}
                 id="employeeStatus"
                 value={employeeData.employeeStatus || ""}
                 onChange={handleInputChange}
@@ -656,17 +796,18 @@ const EditEmployee = () => {
                   </option>
                 ))}
               </select>
+              <div className="emp-error-text">{formErrors.employeeStatus}</div>
             </div>
 
             {/* Career Manager DROPDOWN */}
             <div className="emp-field">
               <label className="emp-field-label">Career Manager</label>
               <select
-                className="emp-field-input"
+                className={`emp-field-input ${formErrors.reportsTo ? "error" : ""}`}
                 id="reportsTo"
                 value={employeeData.reportsTo}
                 onChange={handleInputChange}
-                disabled={(!isEditable)}
+                disabled={!isEditable}
               >
                 <option value="">Select Career Manager</option>
                 {/* Replace this later with real employee list */}
@@ -675,8 +816,8 @@ const EditEmployee = () => {
                     {emp.name} {emp.surname}
                   </option>
                 ))}
-                
               </select>
+              <div className="emp-error-text">{formErrors.reportsTo}</div>
             </div>
           </div>
         </div>

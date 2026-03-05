@@ -135,20 +135,6 @@ const EmployeeList = () => {
       <div className="wrapper-container">
         <div className="singular-staff-heading-container">
           Singular Staff
-          <div className="icon-wrapper">
-            <img
-              src="/images/notifications.png"
-              alt="Notification Icon"
-              className="heading-icon"
-            />
-            <img
-              src="/images/Settings.png"
-              alt="Settings Icon"
-              className="heading-icon"
-            />
-            <div className="utility-box large-box">{currentDate}</div>
-            <div className="utility-box small-box">{currentTime}</div>
-          </div>
         </div>
 
         <div className="employee-list-heading-row">

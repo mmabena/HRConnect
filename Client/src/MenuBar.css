@@ -1404,6 +1404,8 @@
   align-items: center;
   gap: 10px;
   height: 56px;
+  position: relative;
+    bottom: 65px;
 
 }
 

@@ -248,7 +248,7 @@ const AddEmployeeModal = ({ closeModal }) => {
         <div className="emp-name-surname-container">
           <div className="emp-form-grid">
             {/* Title */}
-            <div className="emp-full-width">
+            <div className="emp-full-width dropdown-wrapper">
               <select
                 className={`emp-name-input ${formErrors.title ? "emp-error-input" : ""}`}
                 value={employee.title}
@@ -265,6 +265,11 @@ const AddEmployeeModal = ({ closeModal }) => {
               {formErrors.title && (
                 <span className="emp-error-message">{formErrors.title}</span>
               )}
+              <img
+                src="/images/arrow_drop_down_circle.png"
+                alt="Dropdown icon"
+                className="dropdown-icon"
+              />
             </div>
             {/* First Name | Last Name */}
             <div className="emp-two-col">
@@ -300,7 +305,7 @@ const AddEmployeeModal = ({ closeModal }) => {
 
             {/* ID Type | ID Number */}
             <div className="emp-two-col">
-              <div className="emp-input-wrapper">
+              <div className="emp-input-wrapper dropdown-wrapper">
                 <select
                   className={`emp-name-input-col ${formErrors.idType ? "emp-error-input" : ""}`}
                   name="idType"
@@ -310,6 +315,11 @@ const AddEmployeeModal = ({ closeModal }) => {
                   <option value="id">ID Number</option>
                   <option value="passport">Passport Number</option>
                 </select>
+                <img
+                src="/images/arrow_drop_down_circle.png"
+                alt="Dropdown icon"
+                className="dropdown-icon"
+              />
               </div>
               <div className="emp-input-wrapper">
                 <input
@@ -356,6 +366,7 @@ const AddEmployeeModal = ({ closeModal }) => {
                 <input
                   className="emp-name-input-col"
                   type="date"
+                  placeholder="Date of Birth"
                   name="dateOfBirth"
                   value={employee.dateOfBirth}
                   onChange={onInputChange}
@@ -367,7 +378,7 @@ const AddEmployeeModal = ({ closeModal }) => {
                   </span>
                 )}
               </div>
-              <div className="emp-input-wrapper">
+              <div className="emp-input-wrapper dropdown-wrapper">
                 <select
                   name="gender"
                   className="emp-name-input-col"
@@ -385,14 +396,19 @@ const AddEmployeeModal = ({ closeModal }) => {
                 {formErrors.gender && (
                   <span className="emp-error-message">{formErrors.gender}</span>
                 )}
+                <img
+                src="/images/arrow_drop_down_circle.png"
+                alt="Dropdown icon"
+                className="dropdown-icon"
+              />
               </div>
             </div>
 
             {/* Disability (radio buttons) */}
-            <div className="emp-two-col">
-              <div className="emp-disability-row">
+           <div className="emp-two-col">
+          <div className="emp-disability-row">    
                 <span className="emp-disability-label">Disability:</span>
-
+ 
                 <label className="emp-radio-option">
                   <input
                     type="radio"
@@ -535,7 +551,7 @@ const AddEmployeeModal = ({ closeModal }) => {
                 )}
               </div>
               {/* Branch */}
-              <div className="emp-full-width">
+              <div className="emp-full-width dropdown-wrapper">
                 <select
                   className={`emp-name-input ${formErrors.branch ? "emp-error-input" : ""}`}
                   value={employee.branch}
@@ -594,7 +610,7 @@ const AddEmployeeModal = ({ closeModal }) => {
                 )}
               </div>
               {/* Job Title */}
-              <div className="emp-full-width">
+              <div className="emp-full-width dropdown-wrapper">
                 <select
                   name="jobTitle"
                   value={employee.jobTitle}
@@ -614,9 +630,14 @@ const AddEmployeeModal = ({ closeModal }) => {
                     {formErrors.jobTitle}
                   </span>
                 )}
+                <img
+                src="/images/arrow_drop_down_circle.png"
+                alt="Dropdown icon"
+                className="dropdown-icon"
+              />
               </div>
               {/* Employment Status */}
-              <div className="emp-full-width">
+              <div className="emp-full-width dropdown-wrapper">
                 <select
                   className={`emp-name-input ${formErrors.employeeStatus ? "emp-error-input" : ""}`}
                   value={employee.employeeStatus}
@@ -635,9 +656,14 @@ const AddEmployeeModal = ({ closeModal }) => {
                     {formErrors.employeeStatus}
                   </span>
                 )}
+                <img
+                src="/images/arrow_drop_down_circle.png"
+                alt="Dropdown icon"
+                className="dropdown-icon"
+              />
               </div>
               {/* Career Manager */}
-              <div className="emp-full-width">
+              <div className="emp-full-width dropdown-wrapper">
                 <select
                   name="reportsTo"
                   value={employee.reportsTo}
@@ -657,9 +683,14 @@ const AddEmployeeModal = ({ closeModal }) => {
                     {formErrors.reportsTo}
                   </span>
                 )}
+                <img
+                src="/images/arrow_drop_down_circle.png"
+                alt="Dropdown icon"
+                className="dropdown-icon"
+              />
               </div>
 
-              <div className="emp-full-width">
+              <div className="emp-full-width dropdown-wrapper">
                 <input
                   type="file"
                   className={`emp-name-input ${formErrors.documentPath ? "emp-error-input" : ""}`}
@@ -671,6 +702,11 @@ const AddEmployeeModal = ({ closeModal }) => {
                     {formErrors.documentPath}
                   </span>
                 )}
+                <img
+                src="/images/arrow_upload_ready.png"
+                alt="Dropdown icon"
+                className="dropdown-icon"
+              />
               </div>
 
               {/* Save Button */}
