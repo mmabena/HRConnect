@@ -5,13 +5,13 @@
 namespace HRConnect.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class RenameRemainingDaysToAvailableDays : Migration
+    public partial class RenameAvailableDaysToAvailableDays : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.RenameColumn(
-                name: "RemainingDays",
+                name: "AvailableDays",
                 table: "EmployeeLeaveBalances",
                 newName: "AvailableDays");
         }
@@ -22,7 +22,7 @@ namespace HRConnect.Api.Migrations
             migrationBuilder.RenameColumn(
                 name: "AvailableDays",
                 table: "EmployeeLeaveBalances",
-                newName: "RemainingDays");
+                newName: "AvailableDays");
         }
     }
 }

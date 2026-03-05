@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRConnect.Api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20260303134153_RenameAvailableDaysToAvailableDays")]
-    partial class RenameAvailableDaysToAvailableDays
+    [Migration("20260305104827_AddApprovalToken")]
+    partial class AddApprovalToken
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -183,14 +183,21 @@ namespace HRConnect.Api.Migrations
                     b.Property<int>("LeaveTypeId")
                         .HasColumnType("int");
 
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
                     b.Property<decimal>("UsedDays")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EmployeeId");
-
                     b.HasIndex("LeaveTypeId");
+
+                    b.HasIndex("EmployeeId", "LeaveTypeId")
+                        .IsUnique();
 
                     b.ToTable("EmployeeLeaveBalances");
                 });
@@ -243,6 +250,10 @@ namespace HRConnect.Api.Migrations
                     b.Property<DateTime>("AppliedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("ApprovalToken")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ApprovedBy")
                         .HasColumnType("nvarchar(max)");
 
@@ -265,18 +276,26 @@ namespace HRConnect.Api.Migrations
                     b.Property<int>("LeaveTypeId")
                         .HasColumnType("int");
 
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
                     b.Property<DateOnly>("StartDate")
                         .HasColumnType("date");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("TokenExpiry")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EmployeeId");
-
                     b.HasIndex("LeaveTypeId");
+
+                    b.HasIndex("EmployeeId", "StartDate", "EndDate");
 
                     b.ToTable("LeaveApplications");
                 });
@@ -316,7 +335,8 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("JobGradeId1");
 
-                    b.HasIndex("LeaveTypeId");
+                    b.HasIndex("LeaveTypeId", "JobGradeId", "MinYearsService")
+                        .IsUnique();
 
                     b.ToTable("LeaveEntitlementRules");
 
@@ -515,7 +535,7 @@ namespace HRConnect.Api.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int?>("ResetDay")
                         .HasColumnType("int");
@@ -529,6 +549,9 @@ namespace HRConnect.Api.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.HasIndex("Name")
                         .IsUnique();
 
                     b.ToTable("LeaveTypes");

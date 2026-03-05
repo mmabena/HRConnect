@@ -247,6 +247,10 @@ namespace HRConnect.Api.Migrations
                     b.Property<DateTime>("AppliedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("ApprovalToken")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ApprovedBy")
                         .HasColumnType("nvarchar(max)");
 
@@ -280,6 +284,9 @@ namespace HRConnect.Api.Migrations
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
+
+                    b.Property<DateTime>("TokenExpiry")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 

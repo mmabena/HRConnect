@@ -194,7 +194,7 @@ namespace HRConnect.Api.Migrations
                     EntitledDays = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     AccruedDays = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     UsedDays = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    RemainingDays = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                    AvailableDays = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
                 },
                 constraints: table =>
                 {

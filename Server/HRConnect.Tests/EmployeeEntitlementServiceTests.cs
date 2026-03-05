@@ -313,7 +313,7 @@ namespace HRConnect.Tests
 
             var updated = context.EmployeeLeaveBalances.First();
 
-            Assert.Equal(updated.EntitledDays - 5, updated.RemainingDays);
+            Assert.Equal(updated.EntitledDays - 5, updated.AvailableDays);
         }
         [Fact]
         public async Task RecalculationShouldNotCompoundIfCalledTwice()
@@ -828,7 +828,7 @@ namespace HRConnect.Tests
 
             var balance = context.EmployeeLeaveBalances.Single();
 
-            balance.RemainingDays = 12; // > 5
+            balance.AvailableDays = 12; // > 5
             await context.SaveChangesAsync();
 
             await service.ProcessAnnualResetAsync();
@@ -889,7 +889,7 @@ namespace HRConnect.Tests
 
             var balance = context.EmployeeLeaveBalances.Single();
 
-            balance.RemainingDays = 3; // < 5
+            balance.AvailableDays = 3; // < 5
             await context.SaveChangesAsync();
 
             var originalEntitlement = balance.EntitledDays;
@@ -949,7 +949,7 @@ namespace HRConnect.Tests
             await service.InitializeEmployeeLeaveBalancesAsync(employee.EmployeeId);
 
             var balance = context.EmployeeLeaveBalances.Single();
-            balance.RemainingDays = 8;
+            balance.AvailableDays = 8;
             await context.SaveChangesAsync();
 
             await service.ProcessAnnualResetAsync();
@@ -1039,8 +1039,8 @@ namespace HRConnect.Tests
                 .Single(b => b.LeaveTypeId == 2);
 
             // Modify values to detect unintended reset
-            annual.RemainingDays = 8;
-            sick.RemainingDays = 20;
+            annual.AvailableDays = 8;
+            sick.AvailableDays = 20;
 
             await context.SaveChangesAsync();
 
@@ -1057,7 +1057,7 @@ namespace HRConnect.Tests
             Assert.Equal(Math.Min(5m, 8m), updatedAnnual.EntitledDays);
 
             // Sick should remain unchanged
-            Assert.Equal(20, updatedSick.RemainingDays);
+            Assert.Equal(20, updatedSick.AvailableDays);
         }
         [Fact]
         public async Task ResetTwiceShouldNotChangeCarryoverOrForfeited()
@@ -1111,7 +1111,7 @@ namespace HRConnect.Tests
             await service.InitializeEmployeeLeaveBalancesAsync(employee.EmployeeId);
 
             var balance = context.EmployeeLeaveBalances.Single();
-            balance.RemainingDays = 8; // 5 carryover, 3 forfeited
+            balance.AvailableDays = 8; // 5 carryover, 3 forfeited
             await context.SaveChangesAsync();
 
             // First reset
@@ -1180,7 +1180,7 @@ namespace HRConnect.Tests
             await service.InitializeEmployeeLeaveBalancesAsync(employee.EmployeeId);
 
             var balance = context.EmployeeLeaveBalances.Single();
-            balance.RemainingDays = 0;
+            balance.AvailableDays = 0;
             await context.SaveChangesAsync();
 
             var originalEntitlement = balance.EntitledDays;
@@ -1245,7 +1245,7 @@ namespace HRConnect.Tests
             await service.InitializeEmployeeLeaveBalancesAsync(employee.EmployeeId);
 
             var balance = context.EmployeeLeaveBalances.Single();
-            balance.RemainingDays = -3; // Corrupted state
+            balance.AvailableDays = -3; // Corrupted state
             await context.SaveChangesAsync();
 
             var originalEntitlement = balance.EntitledDays;
@@ -1469,7 +1469,7 @@ namespace HRConnect.Tests
             {
                 EmployeeId = employee.EmployeeId,
                 LeaveTypeId = 1,
-                RemainingDays = 8
+                AvailableDays = 8
             });
 
             await context.SaveChangesAsync();

@@ -1,10 +1,10 @@
-
 namespace HRConnect.Api.DTOs
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+
     public class CreateLeaveTypeRequest
     {
         public string Name { get; set; } = null!;
@@ -15,6 +15,7 @@ namespace HRConnect.Api.DTOs
 
         public List<LeaveEntitlementRuleRequest> Rules { get; set; } = new();
     }
+
     public class LeaveEntitlementRuleRequest
     {
         public int JobGradeId { get; set; }
@@ -25,6 +26,18 @@ namespace HRConnect.Api.DTOs
 
         public decimal DaysAllocated { get; set; }
     }
+
+    public class UpdateLeaveTypeRequest
+    {
+        public string Name { get; set; } = null!;
+
+        public string? Description { get; set; }
+
+        public bool FemaleOnly { get; set; }
+
+        public List<LeaveEntitlementRuleRequest> Rules { get; set; } = new();
+    }
+
     public class LeaveTypeResponse
     {
         public int Id { get; set; }
@@ -39,6 +52,7 @@ namespace HRConnect.Api.DTOs
 
         public List<LeaveEntitlementRuleSummary> Rules { get; set; } = new();
     }
+
     public class LeaveEntitlementRuleSummary
     {
         public int JobGradeId { get; set; }
@@ -49,5 +63,4 @@ namespace HRConnect.Api.DTOs
 
         public decimal DaysAllocated { get; set; }
     }
-
 }

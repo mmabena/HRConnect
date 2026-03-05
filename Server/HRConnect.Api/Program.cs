@@ -95,6 +95,9 @@ builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.
 //Mpho Mosia - Leave Type Services
 builder.Services.AddScoped<IEmployeeEntitlementService, EmployeeEntitlementService>();
 builder.Services.AddHostedService<LeaveAutomationBackgroundService>();
+builder.Services.AddScoped<IEmployeeEntitlementService, EmployeeEntitlementService>();
+builder.Services.AddScoped<ILeaveTypeManagementService, LeaveTypeManagementService>();
+builder.Services.AddScoped<ILeaveApplicationService, LeaveApplicationService>();
 
 builder.Services.AddCors(options =>
 {

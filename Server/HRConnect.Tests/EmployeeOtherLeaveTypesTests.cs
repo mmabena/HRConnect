@@ -196,7 +196,7 @@ namespace HRConnect.Tests
             await service.RecalculateSickLeaveAsync(employee.EmployeeId);
 
             Assert.Equal(0, balance.UsedDays);
-            Assert.Equal(30, balance.RemainingDays);
+            Assert.Equal(30, balance.AvailableDays);
         }
 
         [Fact]
@@ -233,7 +233,7 @@ namespace HRConnect.Tests
             await service.RecalculateFamilyResponsibilityLeaveAsync(employee.EmployeeId);
 
             Assert.Equal(0, frl.UsedDays);
-            Assert.Equal(3, frl.RemainingDays);
+            Assert.Equal(3, frl.AvailableDays);
         }
 
         [Fact]
@@ -269,7 +269,7 @@ namespace HRConnect.Tests
             await service.ResetMaternityLeaveForNewPregnancy(employee.EmployeeId);
 
             Assert.Equal(0, ml.UsedDays);
-            Assert.Equal(120, ml.RemainingDays);
+            Assert.Equal(120, ml.AvailableDays);
         }
 
         [Fact]

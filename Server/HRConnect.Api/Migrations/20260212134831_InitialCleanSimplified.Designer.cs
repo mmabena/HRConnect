@@ -89,7 +89,7 @@ namespace HRConnect.Api.Migrations
                     b.Property<int>("LeaveTypeId")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("RemainingDays")
+                    b.Property<decimal>("AvailableDays")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("UsedDays")

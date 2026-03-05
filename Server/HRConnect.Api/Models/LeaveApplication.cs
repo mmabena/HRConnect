@@ -34,14 +34,16 @@ namespace HRConnect.Api.Models
         public string? ApprovedBy { get; set; }
         public enum LeaveApplicationStatus
         {
-            Pending,
-            Approved,
-            Rejected,
-            Cancelled
+            Pending = 0,
+            Approved = 1,
+            Rejected = 2
         }
+        public string ApprovalToken { get; set; } = Guid.NewGuid().ToString();
 
+        public DateTime TokenExpiry { get; set; } = DateTime.UtcNow.AddDays(2);
         [Timestamp]
         public byte[] RowVersion { get; set; } = Array.Empty<byte>();
 
     }
+
 }
