@@ -17,6 +17,7 @@ using OfficeOpenXml;
 using HRConnect.Api.Interfaces.PensionProjection;
 using Audit.Core;
 using Audit.EntityFramework;
+using Quartz;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -121,6 +122,32 @@ builder.Services.AddAuthorizationBuilder()
     .AddPolicy("NormalUserOnly", policy => policy.RequireRole("NormalUser"))
     .AddPolicy("SuperOrNormalUser", policy => policy.RequireRole("SuperUser", "NormalUser"));
 
+builder.Services.AddQuartz(q =>
+{
+  var jobKey = new JobKey("PayrollRolloverJob");
+
+  //Add a service for to run as a background job 
+  q.AddJob<PayrollRolloverJob>(opts => opts.WithIdentity(jobKey));
+
+  //Triggers that will need to be fired to run background job
+  // using Cron Schedule
+  // Second, Minute, Hour, Day of The Month, Month, Day of The Week
+  q.AddTrigger(opts => opts
+  .ForJob(jobKey)
+  .WithIdentity("PayrollRolloverTrigger")
+  .WithCronSchedule("0 0 0 1 * ?"));
+  // 0 -> 0 seconds
+  // 0 -> 0 minutes
+  // 0 -> 0 hours
+  // 1 -> first day of the year
+  // * -> for any/every month 
+  // ? -> for all days of the week
+});
+builder.Services.AddQuartzHostedService(q =>
+{
+  q.WaitForJobsToComplete = true;
+});
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
@@ -144,7 +171,7 @@ builder.Services.AddScoped<IStatutoryContributionRepository, StatutoryContributi
 builder.Services.AddScoped<IStatutoryContributionService, StatutoryContributionService>();
 builder.Services.AddTransient<IPensionProjectionService, PensionProjectionService>();
 builder.Services.AddScoped<IMedicalOptionRepository, MedicalOptionRepository>();
-builder.Services.AddScoped<HRConnect.Api.Interfaces.IMedicalOptionService, 
+builder.Services.AddScoped<HRConnect.Api.Interfaces.IMedicalOptionService,
   HRConnect.Api.Services.MedicalOptionService>();
 builder.Services.AddCors(options =>
 {

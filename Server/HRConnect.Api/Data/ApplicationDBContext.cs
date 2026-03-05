@@ -105,8 +105,8 @@ namespace HRConnect.Api.Data
       .WithOne()
       .HasForeignKey(p => p.PayrollRunId);
     }
-    public override async Task<int> SaveChangesAsync(CancellationToken
-    cancellationToken = default)
+    //Override 'SaveChangesAsync' for Payroll Records to enforce locked records on a payroll run 
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
       //Intercept all instances of saving to db
       var modifiedRecords = ChangeTracker.Entries<PayrollRecord>()

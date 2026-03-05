@@ -246,7 +246,7 @@
     /// }
     /// </code>
     /// </example>
-    public static async Task<bool> ValidateAllIdsExistAsync(
+    public static bool ValidateAllIdsExistAsync(
       IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto,
       IMedicalOptionRepository repository, List<MedicalOption> dbData)
     {
@@ -316,7 +316,7 @@
     /// }
     /// </code>
     /// </example>
-    public static async Task<bool> ValidateAllIdsInCategoryAsync(
+    public static bool ValidateAllIdsInCategoryAsync(
       IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto,
       int categoryId,
       IMedicalOptionRepository repository, List<MedicalOption> dbData)
@@ -728,7 +728,7 @@
     /// <summary>
     /// Comprehensive validation for bulk update operations
     /// </summary>
-    public static async Task<BulkValidationResult> ValidateBulkUpdateAsync(
+    public static BulkValidationResult ValidateBulkUpdateAsync(
       int categoryId,
       IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto,
       IMedicalOptionRepository repository, List<MedicalOption> dbData)
@@ -757,14 +757,14 @@
         }
 
         // 3. ID Validations
-        if (!await ValidateAllIdsExistAsync(bulkUpdateDto, repository, dbData))
+        if (!ValidateAllIdsExistAsync(bulkUpdateDto, repository, dbData))
         {
           result.IsValid = false;
           result.ErrorMessage = "One or more medical options are invalid";
           return result;
         }
 
-        if (!await ValidateAllIdsInCategoryAsync(bulkUpdateDto, categoryId, repository, dbData))
+        if (!ValidateAllIdsInCategoryAsync(bulkUpdateDto, categoryId, repository, dbData))
         {
           result.IsValid = false;
           result.ErrorMessage = "One or more medical options are invalid within the " +
@@ -1335,7 +1335,7 @@
           return result;
         }
         // 1.5. PRE-FILTER ID VALIDATION (Before variant grouping)
-        if (!await ValidateAllIdsExistAsync(bulkUpdateDto, repository, dbData))
+        if (!ValidateAllIdsExistAsync(bulkUpdateDto, repository, dbData))
         {
           result.IsValid = false;
           result.ErrorMessage = "One or more medical option IDs do not exist in the database";
@@ -1365,7 +1365,7 @@
         // 4. VALIDATE EACH VARIANT INDIVIDUALLY
         foreach (var variantGroup in variantGroups)
         {
-          var variantValidation = await ValidateSingleVariantWithExistingLogicAsync(
+          var variantValidation = ValidateSingleVariantWithExistingLogicAsync(
             variantGroup.Key,
             variantGroup.Value,
             bulkUpdateDto,
@@ -1486,7 +1486,7 @@
     /// <summary>
     /// SINGLE VARIANT VALIDATION USING EXISTING LOGIC
     /// </summary>
-    private static async Task<BulkValidationResult> ValidateSingleVariantWithExistingLogicAsync(
+    private static BulkValidationResult ValidateSingleVariantWithExistingLogicAsync(
       string variantName,
       List<UpdateMedicalOptionVariantsDto> variantOptions,
       IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto,
@@ -1511,7 +1511,7 @@
         }
 
         // 2. ID existence validation 
-        if (!await ValidateAllIdsExistAsync(variantUpdateDtos, repository, dbData))
+        if (!ValidateAllIdsExistAsync(variantUpdateDtos, repository, dbData))
         {
           result.IsValid = false;
           result.ErrorMessage = $"One or more medical option IDs do not exist in variant '{variantName}'";
@@ -1519,7 +1519,7 @@
         }
 
         // 3. Category membership validation 
-        if (!await ValidateAllIdsInCategoryAsync(variantUpdateDtos, categoryId, repository, dbData))
+        if (!ValidateAllIdsInCategoryAsync(variantUpdateDtos, categoryId, repository, dbData))
         {
           result.IsValid = false;
           result.ErrorMessage = $"One or more medical option IDs do not belong to category {categoryId} in variant '{variantName}'";
@@ -1630,7 +1630,7 @@
     }
 
     // Validate count on variant groups
-    private static async Task<BulkValidationResult> ValidateVarientGroupCountAgainstDbCount(
+    private static BulkValidationResult ValidateVarientGroupCountAgainstDbCount(
       List<UpdateMedicalOptionVariantsDto> variantGroups, List<MedicalOption> dbData)
     {
       var result = new BulkValidationResult() { IsValid = true };

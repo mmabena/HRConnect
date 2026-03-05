@@ -12,7 +12,7 @@
     /// <summary>
     /// Comprehensive validation for bulk update operations
     /// </summary>
-    public static async Task<BulkValidationResult> ValidateBulkUpdateAsync(
+    public static BulkValidationResult ValidateBulkUpdateAsync(
       int categoryId,
       IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto,
       IMedicalOptionRepository repository, List<MedicalOption> dbData)
@@ -41,14 +41,14 @@
         }
 
         // 3. ID Validations
-        if (!await MedicalOptionBasicValidations.ValidateAllIdsExistAsync(bulkUpdateDto, repository, dbData))
+        if (!MedicalOptionBasicValidations.ValidateAllIdsExistAsync(bulkUpdateDto, repository, dbData))
         {
           result.IsValid = false;
           result.ErrorMessage = "One or more medical options are invalid";
           return result;
         }
 
-        if (!await MedicalOptionBasicValidations.ValidateAllIdsInCategoryAsync(bulkUpdateDto, categoryId, repository, dbData))
+        if (!MedicalOptionBasicValidations.ValidateAllIdsInCategoryAsync(bulkUpdateDto, categoryId, repository, dbData))
         {
           result.IsValid = false;
           result.ErrorMessage = "One or more medical options are invalid within the " +
@@ -61,13 +61,13 @@
         {
           var dbOption = dbData
             .First(o => o.MedicalOptionId == entity.MedicalOptionId);
-          var categoryName = 
+          var categoryName =
             dbOption.MedicalOptionCategory?.MedicalOptionCategoryName ?? string.Empty;
 
           // Salary bracket restriction validation
-          var restricted = MedicalOptionSalaryBracketValidations.ValidateSalaryBracketRestriction(categoryName, 
+          var restricted = MedicalOptionSalaryBracketValidations.ValidateSalaryBracketRestriction(categoryName,
             entity.SalaryBracketMin, entity.SalaryBracketMax);
-          
+
           if (!restricted)
           {
             result.IsValid = false;

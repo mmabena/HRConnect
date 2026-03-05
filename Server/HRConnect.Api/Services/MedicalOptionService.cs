@@ -614,9 +614,9 @@
           validationErrors["Validation"] = new[] { validationResult.ErrorMessage };
         }
 
-        throw new ValidationException(
-          validationResult.ErrorMessage ?? "Validation failed");
-        // validationErrors);
+        throw new HRConnect.Api.Middleware.ValidationException(
+          validationResult.ErrorMessage ?? "Validation failed",
+        validationErrors);
       }
 
       // If validation passes, proceed with bulk update

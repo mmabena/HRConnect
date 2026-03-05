@@ -2,7 +2,7 @@
 {
   using HRConnect.Api.DTOs.MedicalOption;
   using HRConnect.Api.Models;
-  
+
   /// <summary>
   /// Defines the contract for data access operations related to medical options and their categories.
   /// This repository provides methods for retrieving, validating, and updating medical option data,
@@ -103,7 +103,7 @@
     /// More efficient than retrieving the full option entity when only checking existence.
     /// </remarks>
     Task<Boolean> MedicalOptionExistsAsync(int optionId);
-    
+
     /// <summary>
     /// Retrieves all medical options belonging to a specific category.
     /// </summary>
@@ -113,7 +113,7 @@
     /// Use for displaying all available options within a category for employee selection.
     /// Options are returned in their natural order from the data source.
     /// </remarks>
-    Task<List<MedicalOptionDto>> GetAllOptionsUnderCategoryAsync(int categoryId);
+    Task<List<MedicalOptionDto?>> GetAllOptionsUnderCategoryAsync(int categoryId);
 
     /// <summary>
     /// Validates that a specific medical option exists within a particular category.
@@ -127,7 +127,7 @@
     /// Useful for preventing invalid associations in business logic.
     /// </remarks>
     Task<Boolean> MedicalOptionExistsWithinCategoryAsync(int categoryId, int optionId);
-    
+
     /// <summary>
     /// Performs bulk updates of medical options within a specific category.
     /// </summary>
@@ -154,6 +154,6 @@
     /// </example>
     Task<IReadOnlyList<MedicalOptionDto>> BulkUpdateByCategoryIdAsync(int categoryId,
       IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto);
-    
+
   }
 }
