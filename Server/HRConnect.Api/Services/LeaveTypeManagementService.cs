@@ -1,4 +1,3 @@
-
 namespace HRConnect.Api.Services
 {
     using System;
@@ -10,6 +9,7 @@ namespace HRConnect.Api.Services
     using HRConnect.Api.Data;
     using Microsoft.EntityFrameworkCore;
     using HRConnect.Api.Interfaces;
+
     public class LeaveTypeManagementService : ILeaveTypeManagementService
     {
         private readonly ApplicationDBContext _context;
@@ -18,6 +18,7 @@ namespace HRConnect.Api.Services
         {
             _context = context;
         }
+
         public async Task<List<LeaveTypeResponse>> GetLeaveTypesAsync()
         {
             var leaveTypes = await _context.LeaveTypes
@@ -26,6 +27,7 @@ namespace HRConnect.Api.Services
 
             return leaveTypes.Select(MapToResponse).ToList();
         }
+
         public async Task<LeaveTypeResponse> GetLeaveTypeByIdAsync(int id)
         {
             var leaveType = await _context.LeaveTypes
@@ -33,24 +35,40 @@ namespace HRConnect.Api.Services
                 .FirstOrDefaultAsync(l => l.Id == id);
 
             if (leaveType == null)
-                throw new InvalidOperationException("LeaveType not found");
+                throw new InvalidOperationException("Leave type not found.");
 
             return MapToResponse(leaveType);
         }
+
         public async Task<LeaveTypeResponse> CreateLeaveTypeAsync(CreateLeaveTypeRequest request)
         {
+            var errors = new List<string>();
+
             if (string.IsNullOrWhiteSpace(request.Name))
-                throw new InvalidOperationException("Leave type name required.");
+                errors.Add("Leave type name is required.");
+
+            if (string.IsNullOrWhiteSpace(request.Code))
+                errors.Add("Leave type code is required.");
 
             if (request.Rules.Count == 0)
-                throw new InvalidOperationException("At least one entitlement rule is required.");
+                errors.Add("At least one entitlement rule must be defined.");
 
-            var exists = await _context.LeaveTypes
-                .AnyAsync(x =>
-                    string.Equals(x.Name, request.Name, StringComparison.OrdinalIgnoreCase));
+            var existingNames = await _context.LeaveTypes
+                .Select(x => x.Name)
+                .ToListAsync();
 
-            if (exists)
-                throw new InvalidOperationException("Leave type name must be unique.");
+            if (existingNames.Any(x => string.Equals(x, request.Name, StringComparison.OrdinalIgnoreCase)))
+                errors.Add($"Leave type name '{request.Name}' already exists.");
+
+            var existingCodes = await _context.LeaveTypes
+                .Select(x => x.Code)
+                .ToListAsync();
+
+            if (existingCodes.Any(x => string.Equals(x, request.Code, StringComparison.OrdinalIgnoreCase)))
+                errors.Add($"Leave type code '{request.Code}' already exists.");
+
+            if (errors.Count > 0)
+                throw new InvalidOperationException(string.Join(" | ", errors));
 
             ValidateRules(request.Rules);
 
@@ -93,30 +111,33 @@ namespace HRConnect.Api.Services
             if (leaveType == null)
                 throw new InvalidOperationException("Leave type not found.");
 
+            var errors = new List<string>();
+
             if (string.IsNullOrWhiteSpace(request.Name))
-                throw new InvalidOperationException("Leave type name is required.");
+                errors.Add("Leave type name is required.");
 
             if (request.Rules.Count == 0)
-                throw new InvalidOperationException("At least one entitlement rule is required.");
+                errors.Add("At least one entitlement rule must be defined.");
 
-            var exists = await _context.LeaveTypes
-                .AnyAsync(x => x.Id != id &&
-                               string.Equals(x.Name, request.Name, StringComparison.OrdinalIgnoreCase));
+            var existingNames = await _context.LeaveTypes
+                .Where(x => x.Id != id)
+                .Select(x => x.Name)
+                .ToListAsync();
 
-            if (exists)
-                throw new InvalidOperationException("Leave type name must be unique.");
+            if (existingNames.Any(x => string.Equals(x, request.Name, StringComparison.OrdinalIgnoreCase)))
+                errors.Add($"Leave type name '{request.Name}' already exists.");
+
+            if (errors.Count > 0)
+                throw new InvalidOperationException(string.Join(" | ", errors));
 
             ValidateRules(request.Rules);
 
-            // Update editable fields only
             leaveType.Name = request.Name;
             leaveType.Description = request.Description;
             leaveType.FemaleOnly = request.FemaleOnly;
 
-            // Remove existing rules
             _context.LeaveEntitlementRules.RemoveRange(leaveType.EntitlementRules);
 
-            // Add updated rules
             foreach (var rule in request.Rules)
             {
                 await _context.LeaveEntitlementRules.AddAsync(new LeaveEntitlementRule
@@ -134,19 +155,57 @@ namespace HRConnect.Api.Services
 
             return await GetLeaveTypeByIdAsync(leaveType.Id);
         }
+
         public static void ValidateRules(List<LeaveEntitlementRuleRequest> rules)
         {
+            var errors = new List<string>();
+
             foreach (var rule in rules)
             {
                 if (rule.MinYearsService < 0)
-                    throw new InvalidOperationException("MinYearsService cannot be negative.");
+                    errors.Add($"MinYearsService cannot be negative for JobGrade {rule.JobGradeId}.");
 
-                if (rule.MaxYearsService.HasValue && rule.MaxYearsService.Value < rule.MinYearsService)
-                    throw new InvalidOperationException("MaxYearsService cannot be less than MinYearsService.");
+                if (rule.MaxYearsService.HasValue &&
+                    rule.MaxYearsService.Value < rule.MinYearsService)
+                    errors.Add($"MaxYearsService cannot be less than MinYearsService for JobGrade {rule.JobGradeId}.");
 
-                if (rule.DaysAllocated < 0)
-                    throw new InvalidOperationException("DaysAllocated cannot be negative.");
+                if (rule.DaysAllocated <= 0)
+                    errors.Add($"DaysAllocated must be greater than zero for JobGrade {rule.JobGradeId}.");
             }
+
+            var grouped = rules.GroupBy(r => r.JobGradeId);
+
+            foreach (var group in grouped)
+            {
+                var ordered = group
+                    .OrderBy(r => r.MinYearsService)
+                    .ToList();
+
+                for (int i = 0; i < ordered.Count - 1; i++)
+                {
+                    var current = ordered[i];
+                    var next = ordered[i + 1];
+
+                    if (!current.MaxYearsService.HasValue)
+                    {
+                        errors.Add($"Rule for JobGrade {group.Key} cannot have unlimited MaxYearsService when additional rules exist.");
+                        continue;
+                    }
+
+                    if (next.MinYearsService <= current.MaxYearsService.Value)
+                    {
+                        errors.Add($"Overlapping service ranges detected for JobGrade {group.Key}.");
+                    }
+
+                    if (next.MinYearsService > current.MaxYearsService.Value + 0.01m)
+                    {
+                        errors.Add($"Gap detected in service ranges for JobGrade {group.Key}. Ranges must be continuous.");
+                    }
+                }
+            }
+
+            if (errors.Count > 0)
+                throw new InvalidOperationException(string.Join(" | ", errors));
         }
         private static LeaveTypeResponse MapToResponse(LeaveType l)
         {
