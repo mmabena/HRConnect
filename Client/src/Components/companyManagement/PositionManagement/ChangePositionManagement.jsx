@@ -76,7 +76,7 @@ const ChangePositionManagement = () => {
           <div className="apm-logo">
             <span className="apm-logo-bold">singular</span>
             <span className="apm-logo-light">express</span>
-          </div>
+          </div>  
           <h2 className="apm-title">Change Position</h2>
         </div>
              <label className="title-placeholder-change">Position title</label>

@@ -123,13 +123,13 @@ const EditPositionManagement = () => {
     try {
       const employeesRes = await api.get("/employee");
       const linkedEmployees = employeesRes.data.filter(
-        (emp) => emp.positionId === parseInt(id)
+        (emp) => emp.positionId === parseInt(id),
       );
 
       const duplicateTitle = allPositions.find(
         (pos) =>
           pos.positionTitle.toLowerCase() === positionTitle.toLowerCase() &&
-          pos.positionId !== parseInt(id)
+          pos.positionId !== parseInt(id),
       );
 
       if (linkedEmployees.length > 0 || duplicateTitle) {
@@ -163,23 +163,22 @@ const EditPositionManagement = () => {
 
   return (
     <div className="modal-overlay">
-      <div className="modal-content">
+      <div className="modal-content-edit">
         <div className="headings-container">
           <div className="apm-logo">
             <span className="apm-logo-bold">singular</span>
             <span className="apm-logo-light">express</span>
           </div>
-          <h2 className="apm-title-edit">Edit Position</h2>
+          <h2 className="pm-title-edit">Edit Position</h2>
         </div>
 
         <form onSubmit={handleSubmit} className="apm-form">
-              <label className="title-placeholder-edit">Position title</label>
           {/* Position Dropdown WITH icon */}
-          <div className="apm-input-group apm-dropdown-wrapper">
-         
+          <div className="pm-input-group-edit pm-dropdown-wrapper-edit">
+            <label className="title-placeholder-edit">Position title</label>
             <select
               name="positionTitle"
-              className="apm-input select-dropdown"
+              className="apm-input "
               value={formData.positionTitle}
               onChange={handleChange}
               required
@@ -199,13 +198,11 @@ const EditPositionManagement = () => {
             />
           </div>
 
-
-
-          <div className="apm-input-group apm-dropdown-wrapper">
-            <label className="title-placeholder-edit">Effective Date</label>
+          <div className="pm-input-group-edit pm-dropdown-wrapper-edit">
+            <label className="title-placeholder-edit">Position Grade</label>
             <select
               name="jobGradeId"
-              className="apm-input select-dropdown"
+              className="apm-input "
               value={formData.jobGradeId}
               onChange={handleChange}
               required
@@ -224,12 +221,14 @@ const EditPositionManagement = () => {
               className="apm-dropdown-icon"
             />
           </div>
-
-          <div className="apm-input-group apm-dropdown-wrapper">
-             <label className="title-placeholder-edit">Occupational Description</label>
+  <label className="title-placeholder-edit">
+              Occupational Description
+            </label>
+          <div className="pm-input-group-edit pm-dropdown-wrapper-edit">
+          
             <select
               name="occupationalLevelId"
-              className="apm-input select-dropdown"
+              className="apm-input"
               value={formData.occupationalLevelId}
               onChange={handleChange}
               required
@@ -251,8 +250,9 @@ const EditPositionManagement = () => {
               className="apm-dropdown-icon"
             />
           </div>
-           <label className="title-placeholder-edit">Effective Date</label>
-                    <div className="apm-input-group-edit">
+
+          <div className="pm-input-group-edit">
+            <label className="title-placeholder-edit">Effective Date</label>
             <input
               type="date"
               name="effectiveDate"
@@ -266,11 +266,11 @@ const EditPositionManagement = () => {
           <button type="submit" className="apm-save-button">
             Save
           </button>
-  <div className="apm-footer">
-            <p>Privacy Policy &nbsp; | &nbsp; Terms & Conditions</p>
-            <p>
-              Copyright © 2026 Singular Systems. All rights reserved.
+          <div className="pm-footer">
+            <p className="footer1">
+              Privacy Policy &nbsp; | &nbsp; Terms & Conditions
             </p>
+            <p>Copyright © 2026 Singular Systems. All rights reserved.</p>
           </div>
         </form>
       </div>

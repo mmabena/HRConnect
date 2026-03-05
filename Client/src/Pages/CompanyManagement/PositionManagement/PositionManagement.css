@@ -49,10 +49,6 @@
   flex-shrink: 0;
 }
 
-.select-dropdown {
-  flex: 1; /* allow select to take available space */
-  appearance: none; /* remove default browser arrow */
-}
 
 .apm-dropdown-icon {
   width: 20px;
@@ -351,10 +347,11 @@
 }
 
 /* Main modal container */
-.modal-content {
-  width: 630px; /* slightly smaller for neatness */
+.modal-content-add,
+.modal-content-edit {
+  width: 640px; /* slightly smaller for neatness */
   height:800px;
-  padding: 90px 60px;
+  padding: 90px 40px;
   border-radius: 14px;
   background: linear-gradient(180deg, #f4f4f4 0%, #dcdcdc 100%);
   box-shadow: 0 30px 70px rgba(0, 0, 0, 0.25);
@@ -392,13 +389,16 @@
   color: #1e2b32;
   margin-bottom:30px;
 }
-.apm-title-edit{
-  font-size: 30px;
-  font-weight: 600;
-  margin-left:20px;
+
+.pm-title-add,
+.pm-title-edit{
+  font-size: 32px;
+  font-weight: 700;
+  margin-left:50px;
   color: #1e2b32;
 
 }
+
 
 /* Position label */
 .title-placeholder-add {
@@ -408,12 +408,16 @@
   margin-right:320px;
 }
 .title-placeholder-edit {
-  align-self: flex-start;
+  display: block;
+  width: 360px;       /* same width as input */
   font-size: 14px;
-  color: #121212;
-  margin-top: 6px;
-  
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: black;
+  font-family: 'Instrument Sans', sans-serif;
+  text-align: left;
 }
+
 .title-placeholder-change {
   align-self: flex-start;
   font-size: 14px;
@@ -424,52 +428,55 @@
 
 
 /* Input group styling (dropdown) */
-.apm-input-group {
-  width:100%;
-  margin-right:50px;
-  border-bottom: 2px solid #2e6c8c;
-  padding-bottom: 8px;
- 
+.pm-input-add::placeholder {
+  color: black;
+  opacity: 1; /* ensures it is not faded in some browsers */
+}
+.pm-input-add {
+  width: 360px;
 
-}
-.apm-input-group-add {
-  width:100%;
-  border-bottom: 2px solid #2e6c8c;
- 
-}
-.apm-input-group-edit {
-  width:100%;
-  margin-right:50px;
-  border-bottom: 2px solid #2e6c8c;
-     margin-bottom: 25px;
- 
-}
-
-.apm-input {
-  width: 100%;
+  height: 33px;
   border: none;
-  background: transparent;
+  border-bottom: 1.5px solid #006088;
+  padding-left: 5px;
+  padding-bottom: 5px;
+  font-size: 14px;
+  font-family: 'Instrument Sans', sans-serif;
   outline: none;
-  font-size: 15px;
+  box-sizing: border-box;
+  background-color: transparent;
 }
+
+
+.pm-input-group-add,
+.pm-input-group-edit {
+  width:360px;
+  margin-bottom:20px;
+ 
+}
+
+
 
 /* Dropdown wrapper */
-.apm-dropdown-wrapper {
+.pm-dropdown-wrapper-add,
+.pm-dropdown-wrapper-edit {
   position: relative;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.pm-dropdown-wrapper-add  select,
+.pm-dropdown-wrapper-edit select {
+  width: 360px;
+  appearance: none;
 }
 
 .apm-dropdown-icon {
   position: absolute;
   right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 20px;
-  height: 20px;
+  bottom: 8px;
+  width: 18px;
+  height: 18px;
   pointer-events: none;
-  cursor: pointer;
 }
 
 /* Info text */
@@ -573,19 +580,43 @@
 }
 
 /* Save button */
-.apm-save-button {
-  margin-top: -6px;
-  align-self: center;
-  margin-right:80px;
-  padding: 10px 20px;
-  border-radius: 8px;
-  border: none;
+.pm-save-button-add {
+  font-family: 'Instrument Sans', sans-serif;
+  width: 360px;
+  height: 37px;
   background-color: #355867;
+  border: none;
+  border-radius: 10px;
+  padding: 0 39px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
   color: white;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: 0.3s ease;
+  transition: background-color 0.2s ease;
+  margin-top: 25px;
+}
+.apm-save-button {
+   font-family: 'Instrument Sans', sans-serif;
+  width: 360px;
+  height: 37px;
+  background-color: #355867;
+  border: none;
+  border-radius: 10px;
+  padding: 0 39px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+margin-top: -6px;
 }
 
 .apm-save-button:hover {
@@ -594,12 +625,17 @@
 }
 
 /* Footer */
-.apm-footer {
+.pm-footer {
   margin-top: 40px;
-margin-right:90px;
+margin-right:100px;
   text-align: center;
-  font-size: 11px;
-  color:   #355867;
+  font-size: 12px;
+  color:   #002D40;
+}
+.footer1{
+  margin-top:-10px;
+margin-bottom:8px;
+font-weight:10px;
 }
 
 

@@ -87,20 +87,24 @@ const AddPositionManagement = ({ isOpen, onClose }) => {
     if (!validateForm()) return;
 
     try {
-      const token = localStorage.getItem("token")
-      const response = await fetch("http://localhost:5147/api/positions/Create", {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}` },
-          
-        body: JSON.stringify({
-          positionTitle: formData.positionTitle,
-          jobGradeId: parseInt(formData.jobGradeId),
-          occupationalLevelId: parseInt(formData.occupationalLevelId),
-          createdDate: new Date().toISOString(),
-        }),
-      });
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        "http://localhost:5147/api/positions/Create",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+
+          body: JSON.stringify({
+            positionTitle: formData.positionTitle,
+            jobGradeId: parseInt(formData.jobGradeId),
+            occupationalLevelId: parseInt(formData.occupationalLevelId),
+            createdDate: new Date().toISOString(),
+          }),
+        },
+      );
 
       if (!response.ok) throw new Error("Failed to create position");
       await response.json();
@@ -125,93 +129,107 @@ const AddPositionManagement = ({ isOpen, onClose }) => {
 
   return (
     <div className="modal-overlay">
-      <div className="modal-content">
-
+      <div className="modal-content-add">
         <div className="headings-container">
           <div className="apm-logo">
             <span className="apm-logo-bold">singular</span>
             <span className="apm-logo-light">express</span>
           </div>
-          <h2 className="apm-title">Position Details</h2>
+          <h2 className="pm-title-add">Position Details</h2>
         </div>
 
         <form onSubmit={handleSubmit} className="apm-form">
-          <div className="apm-input-group-add">
-             <label className="title-placeholder-add">Position title</label>
+          <div className="pm-input-group-add">
             <input
               type="text"
               name="positionTitle"
               placeholder="Position title"
               value={formData.positionTitle}
               onChange={handleChange}
-              className={`apm-input ${errors.positionTitle ? "inputs-error" : ""}`}
+              className={`pm-input-add ${errors.positionTitle ? "inputs-error" : ""}`}
             />
-          
           </div>
-            {errors.positionTitle && <span className="error-texts">{errors.positionTitle}</span>}
+          {errors.positionTitle && (
+            <span className="error-texts">{errors.positionTitle}</span>
+          )}
 
-          <div className="apm-input-group apm-dropdown-wrapper">
-             <label className="title-placeholder-edit">Position title</label>
+          <div className="pm-input-group-add pm-dropdown-wrapper-add">
             <select
               name="jobGradeId"
               value={formData.jobGradeId}
               onChange={handleChange}
-              className={`apm-input select-dropdown ${errors.jobGradeId ? "inputs-error" : ""}`}
+              className={`pm-input-add ${errors.jobGradeId ? "inputs-error" : ""}`}
             >
               <option value="">Position Grade</option>
-              {jobGrades.filter(g => g.isActive).map((grade) => (
-                <option key={grade.jobGradeId} value={grade.jobGradeId}>{grade.name}</option>
-              ))}
+              {jobGrades
+                .filter((g) => g.isActive)
+                .map((grade) => (
+                  <option key={grade.jobGradeId} value={grade.jobGradeId}>
+                    {grade.name}
+                  </option>
+                ))}
             </select>
- <img
-                src="/images/arrow_drop_down_circle.png"
-                alt="Dropdown Icon"
-                className="apm-dropdown-icon"
-              />
+            <img
+              src="/images/arrow_drop_down_circle.png"
+              alt="Dropdown Icon"
+              className="apm-dropdown-icon"
+            />
           </div>
-          
-            {errors.jobGradeId && <span className="error-texts">{errors.jobGradeId}</span>}
 
-          <div className="apm-input-group apm-dropdown-wrapper">
-             <label className="title-placeholder-edit">Position title</label>
+          {errors.jobGradeId && (
+            <span className="error-texts">{errors.jobGradeId}</span>
+          )}
+
+          <div className="pm-input-group-add pm-dropdown-wrapper-add">
             <select
               name="occupationalLevelId"
               value={formData.occupationalLevelId}
               onChange={handleChange}
-              className={`apm-input select-dropdown ${errors.occupationalLevelId ? "inputs-error" : ""}`}
+              className={`pm-input-add  ${errors.occupationalLevelId ? "inputs-error" : ""}`}
             >
               <option value="">Occupational Description</option>
-              {occupationalLevels.filter(l => l.isActive).map((level) => (
-                <option key={level.occupationalLevelId} value={level.occupationalLevelId}>{level.description}</option>
-              ))}
+              {occupationalLevels
+                .filter((l) => l.isActive)
+                .map((level) => (
+                  <option
+                    key={level.occupationalLevelId}
+                    value={level.occupationalLevelId}
+                  >
+                    {level.description}
+                  </option>
+                ))}
             </select>
-           
- <img
-                src="/images/arrow_drop_down_circle.png"
-                alt="Dropdown Icon"
-                className="apm-dropdown-icon"
-              />
-          </div>
-           {errors.occupationalLevelId && <span className="error-texts">{errors.occupationalLevelId}</span>}
 
-          <div className="apm-input-group-add">
-             <label className="title-placeholder-add">Position title</label>
+            <img
+              src="/images/arrow_drop_down_circle.png"
+              alt="Dropdown Icon"
+              className="apm-dropdown-icon"
+            />
+          </div>
+          {errors.occupationalLevelId && (
+            <span className="error-texts">{errors.occupationalLevelId}</span>
+          )}
+
+          <div className="pm-input-group-add">
             <input
               type="date"
               name="effectiveDate"
               value={formData.effectiveDate}
               onChange={handleChange}
-              className={`apm-input ${errors.effectiveDate ? "inputs-error" : ""}`}
+              className={`pm-input-add ${errors.effectiveDate ? "inputs-error" : ""}`}
             />
-        
+            {errors.effectiveDate && (
+              <span className="error-texts">{errors.effectiveDate}</span>
+            )}
           </div>
-              {errors.effectiveDate && <span className="error-texts">{errors.effectiveDate}</span>}
 
-          <button type="submit" className="apm-save-button">Save</button>
-  <div className="apm-footer">
-              <p>Privacy Policy &nbsp; | &nbsp; Terms & Conditions</p>
-              <p>Copyright © 2025 Singular Systems. All rights reserved.</p>
-            </div>
+          <button type="submit" className="apm-save-button">
+            Save
+          </button>
+          <div className="pm-footer">
+            <p className="footer1">Privacy Policy &nbsp; | &nbsp; Terms & Conditions</p>
+            <p className="footer2">Copyright © 2025 Singular Systems. All rights reserved.</p>
+          </div>
         </form>
       </div>
     </div>
