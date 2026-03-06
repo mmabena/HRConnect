@@ -167,8 +167,8 @@ namespace HRConnect.Api.Services
                 {
                     EmployeeId = employeeId,
                     AnnualEntitlement = newRule.DaysAllocated,
-                    DailyRate = newRule.DaysAllocated / 260m,
-                    EffectiveFrom = today,   // 🔥 starts immediately
+                    DailyRate = (newRule.DaysAllocated / 12m) / 21.67m,
+                    EffectiveFrom = today,   // starts immediately
                     EffectiveTo = null,
                     CreatedDate = DateTime.UtcNow
                 });
@@ -807,7 +807,7 @@ HRConnect
 
             var monthsWorked =
                 (today.Year - employee.StartDate.Year) * 12 +
-                (today.Month - employee.StartDate.Month);
+                (today.Month - employee.StartDate.Month) + 1;
 
             if (monthsWorked < 0)
                 monthsWorked = 0;
@@ -862,7 +862,7 @@ HRConnect
 
                 var monthsWorked =
                     (today.Year - employee.StartDate.Year) * 12 +
-                    (today.Month - employee.StartDate.Month);
+                    (today.Month - employee.StartDate.Month) + 1;
 
                 if (monthsWorked < 0)
                     monthsWorked = 0;
@@ -978,6 +978,7 @@ HRConnect
         {
             var employee = await _context.Employees
                 .Include(e => e.LeaveBalances)
+                .Include(e => e.Position)
                 .FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
 
             if (employee == null)
@@ -992,7 +993,7 @@ HRConnect
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
             // ============================================================
-            // ✅ Correct Cycle Start Logic
+            // Cycle start logic
             // ============================================================
 
             var yearStart = new DateOnly(projectionDate.Year, 1, 1);
@@ -1011,7 +1012,7 @@ HRConnect
             }
 
             // ============================================================
-            // If projecting backwards or today → return current state
+            // If projecting today or backwards
             // ============================================================
 
             if (projectionDate <= today)
@@ -1028,57 +1029,99 @@ HRConnect
             }
 
             // ============================================================
-            // Future Projection Using Historical Segments
+            // Load entitlement rules once (avoid DB queries in loop)
             // ============================================================
 
-            decimal projectedTotal = balance.EntitledDays;
-
-            var projectionStart = today.AddDays(1);
-
-            var segments = await _context.EmployeeAccrualRateHistories
-                .Where(x => x.EmployeeId == employeeId)
-                .OrderBy(x => x.EffectiveFrom)
+            var rules = await _context.LeaveEntitlementRules
+                .Where(r =>
+                    r.LeaveTypeId == annualLeave.Id &&
+                    r.JobGradeId == employee.Position.JobGradeId &&
+                    r.IsActive)
+                .OrderBy(r => r.MinYearsService)
                 .ToListAsync();
 
-            foreach (var segment in segments)
+            // ============================================================
+            // Projection engine
+            // ============================================================
+
+            decimal projectedAvailable = balance.AvailableDays;
+            decimal projectedEntitled = balance.EntitledDays;
+            decimal projectedCarryover = balance.CarryoverDays;
+
+            var currentDate = today;
+
+            while (currentDate <= projectionDate)
             {
-                // Ignore segments that ended before projection window
-                if (segment.EffectiveTo.HasValue &&
-                    segment.EffectiveTo.Value < projectionStart)
-                    continue;
+                var yearEnd = new DateOnly(currentDate.Year, 12, 31);
 
-                var windowStart = segment.EffectiveFrom > projectionStart
-                    ? segment.EffectiveFrom
-                    : projectionStart;
+                var periodStart = currentDate;
+                var periodEnd = projectionDate < yearEnd ? projectionDate : yearEnd;
 
-                var windowEnd = segment.EffectiveTo.HasValue
-                    ? (segment.EffectiveTo.Value < projectionDate
-                        ? segment.EffectiveTo.Value
-                        : projectionDate)
-                    : projectionDate;
+                // ============================================
+                // Determine years of service
+                // ============================================
 
-                if (windowEnd < windowStart)
-                    continue;
+                decimal yearsOfService =
+                    (periodStart.DayNumber - employee.StartDate.DayNumber) / 365.25m;
+
+                var rule = rules.First(r =>
+                    r.MinYearsService <= yearsOfService &&
+                    (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService));
+
+                // ============================================
+                // Calculate accrual
+                // ============================================
 
                 int workingDays = WorkingDayCalculator.CountWorkingDays(
-                    windowStart,
-                    windowEnd);
+                    periodStart,
+                    periodEnd);
 
-                projectedTotal += workingDays * segment.DailyRate;
+                decimal dailyRate =
+                    Math.Round((rule.DaysAllocated / 12m) / 21.67m, 6);
+
+                decimal accrued = workingDays * dailyRate;
+
+                projectedEntitled += accrued;
+
+                // Cap entitlement
+                if (projectedEntitled > rule.DaysAllocated)
+                    projectedEntitled = rule.DaysAllocated;
+
+                projectedAvailable =
+                    projectedCarryover +
+                    projectedEntitled -
+                    balance.UsedDays;
+
+                // ============================================
+                // Move to next leave year
+                // ============================================
+
+                if (periodEnd == yearEnd && projectionDate > yearEnd)
+                {
+                    var remaining = projectedAvailable;
+
+                    projectedCarryover = remaining > 5 ? 5 : remaining;
+
+                    projectedEntitled = 0;
+                    projectedAvailable = projectedCarryover;
+
+                    currentDate = yearEnd.AddDays(1);
+                }
+                else
+                {
+                    break;
+                }
             }
 
-            projectedTotal = Math.Round(projectedTotal, 2);
+            projectedAvailable = Math.Round(projectedAvailable, 2);
 
             return new LeaveProjectionResponse
             {
                 EmployeeName = $"{employee.FirstName} {employee.LastName}",
                 ProjectionDate = projectionDate,
-                ProjectedEntitledDays = projectedTotal,
+                ProjectedEntitledDays = projectedEntitled,
                 UsedDays = balance.UsedDays,
-                ProjectedAvailableDays =
-                    balance.CarryoverDays +
-                    projectedTotal -
-                    balance.UsedDays,
+                ProjectedAvailableDays = projectedAvailable,
                 DaysWorked = totalDaysWorked
             };
         }
@@ -1105,7 +1148,7 @@ HRConnect
                     r.JobGradeId == employee.Position.JobGradeId &&
                     r.IsActive);
 
-            decimal dailyRate = rule.DaysAllocated / 260m;
+            decimal dailyRate = (rule.DaysAllocated / 12m) / 21.67m;
 
             var endOfPreviousYear = new DateOnly(currentYear - 1, 12, 31);
 
@@ -1175,7 +1218,7 @@ HRConnect
                 {
                     EmployeeId = employee.EmployeeId,
                     AnnualEntitlement = rule.DaysAllocated,
-                    DailyRate = rule.DaysAllocated / 260m,
+                    DailyRate = (rule.DaysAllocated / 12m) / 21.67m,
                     EffectiveFrom = employee.StartDate,
                     EffectiveTo = null,
                     CreatedDate = DateTime.UtcNow

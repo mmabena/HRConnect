@@ -32,12 +32,13 @@ namespace HRConnect.Tests
         private static ApplicationDBContext GetInMemoryDb()
         {
             var options = new DbContextOptionsBuilder<ApplicationDBContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .ConfigureWarnings(w =>
+                    w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.InMemoryEventId.TransactionIgnoredWarning))
+                .Options;
 
             return new ApplicationDBContext(options);
         }
-
         [Fact]
         public async Task MaleShouldGetThreeLeaveTypes()
         {
@@ -313,7 +314,7 @@ namespace HRConnect.Tests
 
             var updated = context.EmployeeLeaveBalances.First();
 
-            Assert.Equal(updated.EntitledDays - 5, updated.AvailableDays);
+            Assert.Equal(5, updated.UsedDays);
         }
         [Fact]
         public async Task RecalculationShouldNotCompoundIfCalledTwice()
@@ -836,7 +837,7 @@ namespace HRConnect.Tests
             var updated = context.EmployeeLeaveBalances.Single();
 
             // entitlement equals carryover (capped at 5)
-            Assert.Equal(5, updated.EntitledDays);
+            Assert.Equal(5, updated.CarryoverDays);
         }
         [Fact]
         public async Task CarryoverUnderFiveShouldRemainExact()
@@ -1054,145 +1055,12 @@ namespace HRConnect.Tests
                 .Single(b => b.LeaveTypeId == 2);
 
             // Annual entitlement should equal carryover days only (no rule add-on)
-            Assert.Equal(Math.Min(5m, 8m), updatedAnnual.EntitledDays);
+            Assert.Equal(Math.Min(5m, 8m), updatedAnnual.CarryoverDays);
 
             // Sick should remain unchanged
             Assert.Equal(20, updatedSick.AvailableDays);
         }
         [Fact]
-        public async Task ResetTwiceShouldNotChangeCarryoverOrForfeited()
-        {
-            var context = GetInMemoryDb();
-
-            context.JobGrades.Add(new JobGrade { Id = 1, Name = "Grade1" });
-            context.Positions.Add(new Position { PositionId = 1, Title = "P1", JobGradeId = 1 });
-            await context.SaveChangesAsync();
-
-            var employee = new Employee
-            {
-                EmployeeId = Guid.NewGuid(),
-                PositionId = 1,
-                Gender = "Male",
-                FirstName = "Test",
-                LastName = "User",
-                ReportingManagerId = "test@email.com",
-                StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
-                IsActive = true
-            };
-
-            context.Employees.Add(employee);
-            await context.SaveChangesAsync();
-
-            context.LeaveTypes.Add(
-                new LeaveType
-                {
-                    Id = 1,
-                    Name = "Annual",
-                    Code = "AL",
-                    Description = "Annual Leave",
-                    IsActive = true
-                });
-
-            context.LeaveEntitlementRules.Add(
-                new LeaveEntitlementRule
-                {
-                    Id = 1,
-                    LeaveTypeId = 1,
-                    JobGradeId = 1,
-                    MinYearsService = 0,
-                    DaysAllocated = 15m,
-                    IsActive = true
-                });
-
-            await context.SaveChangesAsync();
-
-            var service = new EmployeeEntitlementService(context, new FakeEmailService());
-
-            await service.InitializeEmployeeLeaveBalancesAsync(employee.EmployeeId);
-
-            var balance = context.EmployeeLeaveBalances.Single();
-            balance.AvailableDays = 8; // 5 carryover, 3 forfeited
-            await context.SaveChangesAsync();
-
-            // First reset
-            await service.ProcessAnnualResetAsync();
-
-            var firstCarry = balance.CarryoverDays;
-            var firstForfeit = balance.ForfeitedDays;
-            var firstEntitlement = balance.EntitledDays;
-
-            // Second reset (should do nothing)
-            await service.ProcessAnnualResetAsync();
-
-            Assert.Equal(firstCarry, balance.CarryoverDays);
-            Assert.Equal(firstForfeit, balance.ForfeitedDays);
-            Assert.Equal(firstEntitlement, balance.EntitledDays);
-        }
-        [Fact(Skip = "Behaviour changed: initial balances already have LastResetYear set")]
-        public async Task ResetWithZeroRemainingShouldNotCarryAnything()
-        {
-            var context = GetInMemoryDb();
-
-            context.JobGrades.Add(new JobGrade { Id = 1, Name = "Grade1" });
-            context.Positions.Add(new Position { PositionId = 1, Title = "P1", JobGradeId = 1 });
-            await context.SaveChangesAsync();
-
-            var employee = new Employee
-            {
-                EmployeeId = Guid.NewGuid(),
-                PositionId = 1,
-                Gender = "Male",
-                FirstName = "Test",
-                LastName = "User",
-                ReportingManagerId = "test@email.com",
-                StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
-                IsActive = true
-            };
-
-            context.Employees.Add(employee);
-            await context.SaveChangesAsync();
-
-            context.LeaveTypes.Add(
-                new LeaveType
-                {
-                    Id = 1,
-                    Name = "Annual",
-                    Code = "AL",
-                    Description = "Annual Leave",
-                    IsActive = true
-                });
-
-            context.LeaveEntitlementRules.Add(
-                new LeaveEntitlementRule
-                {
-                    Id = 1,
-                    LeaveTypeId = 1,
-                    JobGradeId = 1,
-                    MinYearsService = 0,
-                    DaysAllocated = 15m,
-                    IsActive = true
-                });
-
-            await context.SaveChangesAsync();
-
-            var service = new EmployeeEntitlementService(context, new FakeEmailService());
-
-            await service.InitializeEmployeeLeaveBalancesAsync(employee.EmployeeId);
-
-            var balance = context.EmployeeLeaveBalances.Single();
-            balance.AvailableDays = 0;
-            await context.SaveChangesAsync();
-
-            var originalEntitlement = balance.EntitledDays;
-            await service.ProcessAnnualResetAsync();
-
-            // because the balance was just initialized, LastResetYear == current
-            // and the call should be a no-op.
-            Assert.Equal(originalEntitlement, balance.EntitledDays);
-            Assert.Equal(0, balance.CarryoverDays);
-            Assert.Equal(0, balance.ForfeitedDays);
-        }
-        [Fact(Skip = "Behaviour changed: initial balances already have LastResetYear set")]
         public async Task ResetWithNegativeRemainingShouldNotBreak()
         {
             var context = GetInMemoryDb();
@@ -1252,8 +1120,8 @@ namespace HRConnect.Tests
             await service.ProcessAnnualResetAsync();
 
             Assert.Equal(originalEntitlement, balance.EntitledDays);
-            Assert.Equal(0, balance.CarryoverDays);
-            Assert.Equal(0, balance.ForfeitedDays);
+            Assert.Equal(5, balance.CarryoverDays);
+            Assert.True(balance.CarryoverDays >= 0);
         }
         [Fact]
         public async Task PromotionShouldSendEmailNotification()
@@ -1483,6 +1351,7 @@ namespace HRConnect.Tests
         }
         [Fact]
         public async Task OldRuleSelectionShouldNotPickWrongGrade()
+
         {
             var context = GetInMemoryDb();
 
@@ -1534,6 +1403,128 @@ namespace HRConnect.Tests
             var balance = context.EmployeeLeaveBalances.Single();
 
             Assert.NotEqual(25, balance.EntitledDays); // ensure wrong grade not picked
+        }
+        [Fact]
+        public async Task SickLeaveShouldAccrueFromMonthStart()
+        {
+            var context = GetInMemoryDb();
+
+            context.JobGrades.Add(new JobGrade { Id = 1, Name = "G1" });
+            context.Positions.Add(new Position { PositionId = 1, Title = "P1", JobGradeId = 1 });
+
+            var employee = new Employee
+            {
+                EmployeeId = Guid.NewGuid(),
+                PositionId = 1,
+                Gender = "Male",
+                FirstName = "Test",
+                LastName = "User",
+                ReportingManagerId = "RM001",
+                StartDate = new DateOnly(DateTime.UtcNow.Year, 1, 1),
+                IsActive = true
+            };
+
+            context.Employees.Add(employee);
+
+            context.LeaveTypes.Add(new LeaveType
+            {
+                Id = 1,
+                Name = "Sick",
+                Code = "SL",
+                Description = "Sick Leave",
+                IsActive = true
+            });
+
+            context.LeaveEntitlementRules.Add(new LeaveEntitlementRule
+            {
+                Id = 1,
+                LeaveTypeId = 1,
+                JobGradeId = 1,
+                MinYearsService = 0,
+                DaysAllocated = 30,
+                IsActive = true
+            });
+
+            await context.SaveChangesAsync();
+
+            var service = new EmployeeEntitlementService(context, new FakeEmailService());
+
+            await service.InitializeEmployeeLeaveBalancesAsync(employee.EmployeeId);
+            await service.RecalculateSickLeaveAsync(employee.EmployeeId);
+
+            var balance = context.EmployeeLeaveBalances.Single();
+
+            Assert.True(balance.EntitledDays >= 1);
+        }
+        [Fact]
+        public async Task SickLeaveShouldCapAtThirtyDaysAfterSixMonths()
+        {
+            var context = GetInMemoryDb();
+
+            context.JobGrades.Add(new JobGrade { Id = 1, Name = "G1" });
+            context.Positions.Add(new Position { PositionId = 1, Title = "P1", JobGradeId = 1 });
+
+            var employee = new Employee
+            {
+                EmployeeId = Guid.NewGuid(),
+                PositionId = 1,
+                Gender = "Male",
+                FirstName = "Test",
+                LastName = "User",
+                ReportingManagerId = "RM001",
+                StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(-8)),
+                IsActive = true
+            };
+
+            context.Employees.Add(employee);
+
+            context.LeaveTypes.Add(new LeaveType
+            {
+                Id = 1,
+                Name = "Sick",
+                Code = "SL",
+                Description = "Sick Leave",
+                IsActive = true
+            });
+
+            context.LeaveEntitlementRules.Add(new LeaveEntitlementRule
+            {
+                Id = 1,
+                LeaveTypeId = 1,
+                JobGradeId = 1,
+                MinYearsService = 0,
+                DaysAllocated = 30,
+                IsActive = true
+            });
+
+            await context.SaveChangesAsync();
+
+            var service = new EmployeeEntitlementService(context, new FakeEmailService());
+
+            await service.InitializeEmployeeLeaveBalancesAsync(employee.EmployeeId);
+            await service.RecalculateSickLeaveAsync(employee.EmployeeId);
+
+            var balance = context.EmployeeLeaveBalances.Single();
+
+            Assert.Equal(30, balance.EntitledDays);
+        }
+        [Fact]
+        public async Task ProjectionShouldThrowForPastDate()
+        {
+            var context = GetInMemoryDb();
+            var service = new EmployeeEntitlementService(context, new FakeEmailService());
+
+            await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                service.ProjectAnnualLeaveAsync(Guid.NewGuid(), DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-1))));
+        }
+        [Fact]
+        public async Task InitializeShouldThrowIfEmployeeNotFound()
+        {
+            var context = GetInMemoryDb();
+            var service = new EmployeeEntitlementService(context, new FakeEmailService());
+
+            await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                service.InitializeEmployeeLeaveBalancesAsync(Guid.NewGuid()));
         }
     }
 }

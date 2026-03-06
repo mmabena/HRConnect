@@ -23,4 +23,8 @@ namespace HRConnect.Api.DTOs
         public decimal DaysRequested { get; set; }
         public string Status { get; set; } = null!;
     }
+    public class RejectLeaveRequest
+    {
+        public string Reason { get; set; } = string.Empty;
+    }
 }

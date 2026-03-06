@@ -31,14 +31,15 @@ namespace HRConnect.Api.Models
 
         public DateTime? DecisionDate { get; set; }
 
-        public string? ApprovedBy { get; set; }
+        public string? DecisionBy { get; set; }
         public enum LeaveApplicationStatus
         {
             Pending = 0,
             Approved = 1,
             Rejected = 2
         }
-        public string ApprovalToken { get; set; } = Guid.NewGuid().ToString();
+        public string? RejectionReason { get; set; }
+        public Guid ApprovalToken { get; set; } = Guid.NewGuid();
 
         public DateTime TokenExpiry { get; set; } = DateTime.UtcNow.AddDays(2);
         [Timestamp]

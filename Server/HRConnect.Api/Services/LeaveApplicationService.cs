@@ -32,6 +32,14 @@ namespace HRConnect.Api.Services
             if (request.EndDate < request.StartDate)
                 throw new InvalidOperationException("End date cannot be before start date.");
 
+            // Prevent leave requests crossing entitlement cycles
+            if (request.StartDate.Year != request.EndDate.Year)
+            {
+                throw new InvalidOperationException(
+                    "Leave requests cannot span multiple years. " +
+                    "Please submit separate leave requests for each year.");
+            }
+
             var leaveType = await _context.LeaveTypes
                 .FirstOrDefaultAsync(l => l.Id == request.LeaveTypeId);
 
@@ -69,7 +77,7 @@ namespace HRConnect.Api.Services
             return MapToResponse(application);
         }
 
-        public async Task ApproveLeaveAsync(int applicationId, string token)
+        public async Task ApproveLeaveAsync(int applicationId, Guid token)
         {
             var application = await _context.LeaveApplications
                 .FirstOrDefaultAsync(a => a.Id == applicationId);
@@ -95,14 +103,14 @@ namespace HRConnect.Api.Services
 
             application.Status = LeaveApplication.LeaveApplicationStatus.Approved;
             application.DecisionDate = DateTime.UtcNow;
-            application.ApprovedBy = "Manager";
+            application.DecisionBy = "Manager";
 
             await _context.SaveChangesAsync();
 
             await SendEmployeeDecisionEmail(application, true);
         }
 
-        public async Task RejectLeaveAsync(int applicationId, string token)
+        public async Task RejectLeaveAsync(int applicationId, Guid token, string? reason)
         {
             var application = await _context.LeaveApplications
                 .FirstOrDefaultAsync(a => a.Id == applicationId);
@@ -116,12 +124,13 @@ namespace HRConnect.Api.Services
             if (application.TokenExpiry < DateTime.UtcNow)
                 throw new InvalidOperationException("Approval link expired");
 
-            if (application.Status !=  LeaveApplication.LeaveApplicationStatus.Pending)
+            if (application.Status != LeaveApplication.LeaveApplicationStatus.Pending)
                 throw new InvalidOperationException("Only pending applications can be rejected");
 
             application.Status = LeaveApplication.LeaveApplicationStatus.Rejected;
             application.DecisionDate = DateTime.UtcNow;
-            application.ApprovedBy = "Manager";
+            application.DecisionBy = "Manager";
+            application.RejectionReason = reason;
 
             await _context.SaveChangesAsync();
 
@@ -159,6 +168,7 @@ namespace HRConnect.Api.Services
 <p>Hello {employee.FirstName},</p>
 
 <p>Your leave request has been <strong>{decision}</strong>.</p>
+{(approved ? "" : $"<p><strong>Reason:</strong> {application.RejectionReason}</p>")}
 
 <p><strong>Leave Type:</strong> {leaveType.Name}</p>
 <p><strong>Dates:</strong> {application.StartDate} to {application.EndDate}</p>
@@ -182,7 +192,12 @@ namespace HRConnect.Api.Services
 
             var leaveType = await _context.LeaveTypes
                 .FirstAsync(l => l.Id == application.LeaveTypeId);
-
+            if (application.ApprovalToken == Guid.Empty)
+            {
+                application.ApprovalToken = Guid.NewGuid();
+                application.TokenExpiry = DateTime.UtcNow.AddHours(48); // 48 hour approval window
+                await _context.SaveChangesAsync();
+            }
             var approveLink =
                 $"http://localhost:5147/api/LeaveApplication/{application.Id}/approve?token={application.ApprovalToken}";
 

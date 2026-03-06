@@ -10,7 +10,7 @@ namespace HRConnect.Api.Interfaces
     public interface ILeaveApplicationService
     {
         Task<LeaveApplicationResponse> ApplyForLeaveAsync(CreateApplicationRequest request);
-        Task ApproveLeaveAsync(int applicationId, string token);
-        Task RejectLeaveAsync(int applicationId, string token);
+        Task ApproveLeaveAsync(int applicationId, Guid token);
+        Task RejectLeaveAsync(int applicationId, Guid token, string? reason);
     }
 }

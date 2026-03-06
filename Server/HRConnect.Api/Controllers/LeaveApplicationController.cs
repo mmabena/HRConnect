@@ -24,7 +24,7 @@ namespace HRConnect.Api.Controllers
             return Ok(result);
         }
         [HttpGet("{id}/approve")]
-        public async Task<IActionResult> ApproveLeave(int id, string token)
+        public async Task<IActionResult> ApproveLeave(int id, [FromQuery] Guid token)
         {
             await _service.ApproveLeaveAsync(id, token);
 
@@ -38,17 +38,48 @@ namespace HRConnect.Api.Controllers
         }
 
         [HttpGet("{id}/reject")]
-        public async Task<IActionResult> RejectLeave(int id, string token)
+        public IActionResult RejectLeave(int id, [FromQuery] Guid token)
         {
-            await _service.RejectLeaveAsync(id, token);
+            return Content($"""
+<html>
+<body style="font-family:Arial;text-align:center;margin-top:40px;">
+
+<h2 style="color:red;">Reject Leave Request</h2>
+
+<form method="post" action="/api/LeaveApplication/{id}/reject?token={token}">
+    
+    <p>Please provide a reason for rejecting this leave request:</p>
+
+    <textarea name="reason" rows="4" cols="40" required></textarea>
+
+    <br><br>
+
+    <button type="submit" 
+        style="background-color:red;color:white;padding:10px 20px;border:none;">
+        Confirm Rejection
+    </button>
+
+</form>
+
+</body>
+</html>
+""", "text/html");
+        }
+        [HttpPost("{id}/reject")]
+        public async Task<IActionResult> RejectLeavePost(
+    int id,
+    [FromQuery] Guid token,
+    [FromForm] string reason)
+        {
+            await _service.RejectLeaveAsync(id, token, reason);
 
             return Content("""
-    <html>
-    <body style="font-family:Arial;text-align:center;margin-top:40px;">
-        <h2 style="color:red;">Leave Rejected</h2>
-    </body>
-    </html>
-    """, "text/html");
+<html>
+<body style="font-family:Arial;text-align:center;margin-top:40px;">
+    <h2 style="color:red;">Leave Rejected Successfully</h2>
+</body>
+</html>
+""", "text/html");
         }
     }
 }
