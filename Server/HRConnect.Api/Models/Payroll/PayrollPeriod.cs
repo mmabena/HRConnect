@@ -1,4 +1,4 @@
-namespace HRConnect.Api.Models
+namespace HRConnect.Api.Models.Payroll
 {
   using System.ComponentModel.DataAnnotations;
   public class PayrollPeriod
