@@ -3,7 +3,7 @@ namespace HRConnect.Api.Repository
   using HRConnect.Api.DTOs.Payroll;
   using HRConnect.Api.Mappers.Payroll;
   using HRConnect.Api.Data;
-  using HRConnect.Api.Models;
+  using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Interfaces;
   using Microsoft.EntityFrameworkCore;
 
@@ -22,7 +22,11 @@ namespace HRConnect.Api.Repository
       return period.ToPayrollPeriodDto();
     }
     public async Task<PayrollPeriod> GetActivePeriod(DateTime dateTime)
-    { throw new NotImplementedException(); }
+    {
+      await Task.Delay(500);
+
+      return new PayrollPeriod { StartDate = dateTime, EndDate = dateTime, IsClosed = false, IsLocked = false };
+    }
     public async Task<PayrollPeriodDto> CreatePeriodAsync(PayrollPeriod payrollPeriod)
     {
       await _context.PayrollPeriods.AddAsync(payrollPeriod);
@@ -33,6 +37,16 @@ namespace HRConnect.Api.Repository
     public async Task<IEnumerable<PayrollPeriod>> GetAllPayrollPeriod()
     {
       return await _context.PayrollPeriods.ToListAsync();
+    }
+
+    Task<IEnumerable<PayrollPeriod>> IPayrollPeriodRepository.GetAllPayrollPeriod()
+    {
+      throw new NotImplementedException();
+    }
+
+    Task<PayrollPeriod?> IPayrollPeriodRepository.GetActivePeriod(DateTime dateTime)
+    {
+      throw new NotImplementedException();
     }
   }
 }

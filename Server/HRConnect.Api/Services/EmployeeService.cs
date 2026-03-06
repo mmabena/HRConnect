@@ -385,6 +385,10 @@ namespace HRConnect.Api.Services
       if (employeeRequestDto.PositionId <= 0)
         throw new ValidationException("Position ID must be greater than 0");
 
+      if (employeeRequestDto.PensionOptionId <= 0)
+      {
+        throw new ValidationException("Permanent employees must be linked to an active Pension Plan");
+      }
 
       var extension = Path.GetExtension(employeeRequestDto.ProfileImage);
 

@@ -65,7 +65,8 @@ namespace HRConnect.Api.Mappers
                 PositionId = employeeRequestDto.PositionId,
                 EmploymentStatus = employeeRequestDto.EmploymentStatus,
                 CareerManagerID = employeeRequestDto.CareerManagerID,
-                ProfileImage = employeeRequestDto.ProfileImage
+                ProfileImage = employeeRequestDto.ProfileImage,
+                PensionOptionId = employeeRequestDto.PensionOptionId
             };
         }
     }

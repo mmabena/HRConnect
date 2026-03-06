@@ -5,6 +5,8 @@ namespace HRConnect.Api.Repository
   using HRConnect.Api.Mappers.Payroll;
   using HRConnect.Api.Models;
   using HRConnect.Api.DTOs.Payroll;
+  using HRConnect.Api.Models.Payroll;
+
   public class PayrollRunRepository : IPayrollRunRepository
   {
     private readonly ApplicationDBContext _context;
@@ -34,6 +36,11 @@ namespace HRConnect.Api.Repository
       //Update the current run to be marked as Finalised 
       _context.PayrollRuns.Update(payrollRun);
       await _context.SaveChangesAsync();
+    }
+
+    Task<PayrollRun?> IPayrollRunRepository.GetCurrentRunAsync()
+    {
+      throw new NotImplementedException();
     }
   }
 }

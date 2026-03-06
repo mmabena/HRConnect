@@ -1,6 +1,9 @@
 namespace HRConnect.Api.Data
 {
   using HRConnect.Api.Models;
+  using HRConnect.Api.Models.Payroll;
+  using HRConnect.Api.Models.PayrollContribution;
+  using HRConnect.Api.Models.Pension;
   using Microsoft.EntityFrameworkCore;
 
   public class ApplicationDBContext(DbContextOptions dbContextOptions) : DbContext(dbContextOptions)
@@ -22,6 +25,9 @@ namespace HRConnect.Api.Data
     public DbSet<PayrollPeriod> PayrollPeriods { get; set; }
     public DbSet<PayrollRun> PayrollRuns { get; set; }
     public DbSet<PayrollRecord> PayrollRecords { get; set; }
+    public DbSet<PensionOption> PensionOptions { get; set; }
+    public DbSet<EmployeePensionEnrollment> EmployeePensionEnrollments { get; set; }
+    public DbSet<PensionDeduction> PensionDeductions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -104,6 +110,39 @@ namespace HRConnect.Api.Data
       modelBuilder.Entity<PayrollRun>().HasMany(p => p.Records)
       .WithOne()
       .HasForeignKey(p => p.PayrollRunId);
+
+      /*I am here*/
+
+      modelBuilder.Entity<PensionOption>()
+        .HasMany(e => e.Employee)
+        .WithOne(po => po.PensionOption)
+        .HasForeignKey(po => po.PensionOptionId)
+        .IsRequired();
+
+      modelBuilder.Entity<Employee>()
+        .HasMany(epe => epe.EmployeePensionEnrollment)
+        .WithOne(e => e.Employee)
+        .HasForeignKey(e => e.EmployeeId)
+        .IsRequired();
+
+      modelBuilder.Entity<PensionOption>()
+        .HasMany(epe => epe.EmployeePensionEnrollment)
+        .WithOne(po => po.PensionOption)
+        .HasForeignKey(po => po.PensionOptionId)
+        .IsRequired();
+
+      /*modelBuilder.Entity<PayrollRun>()
+        .HasMany(epe => epe.EmployeePensionEnrollment)
+        .WithOne(pr => pr.PayrollRun)
+        .HasForeignKey(pr => pr.PayrollRunId)
+        .IsRequired();
+
+      modelBuilder.Entity<PayrollRun>()
+        .HasMany(pd => pd.PensionDeduction)
+        .WithOne(pr => pr.PayrollRun)
+        .HasForeignKey(pr => pr.PayrollRunId)
+        .IsRequired();
+      */
     }
     //Override 'SaveChangesAsync' for Payroll Records to enforce locked records on a payroll run 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
