@@ -2,6 +2,8 @@ namespace HRConnect.Api.Data
 {
   using HRConnect.Api.Models;
   using Microsoft.EntityFrameworkCore;
+  using Models.Payroll;
+  using Models.PayrollContribution;
 
   public class ApplicationDBContext(DbContextOptions dbContextOptions) : DbContext(dbContextOptions)
   {
@@ -22,6 +24,7 @@ namespace HRConnect.Api.Data
     public DbSet<PayrollPeriod> PayrollPeriods { get; set; }
     public DbSet<PayrollRun> PayrollRuns { get; set; }
     public DbSet<PayrollRecord> PayrollRecords { get; set; }
+    public DbSet<MedicalAidDeduction> MedicalAidDeductions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

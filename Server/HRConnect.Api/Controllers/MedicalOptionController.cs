@@ -26,7 +26,7 @@
     {
       _medicalOptionService = medicalOptionService;
     }
-    
+    //Get | Medical Option
     /// <summary>
     /// Retrieves all medical options grouped by their categories.
     /// </summary>
@@ -63,7 +63,73 @@
 
       return Ok(groupedOptions);
     }
+    
+    //Get eligible options for employee
+    [HttpGet("eligible/{employeeId}")]
+    [Authorize(Roles = "SuperUser")]
+    public async Task<IActionResult> GetEmployeeEligibleOptions([FromRoute] string employeeId)
+    {
+      return null;
+    }
+    
+    //Get All options within Employee's salary earnings | Add dependencies within body or cater that in the service
+    [HttpGet("options/{salaryAmount}/salary-bracket")]
+    [Authorize(Roles = "SuperUser")]
+    public async Task<IActionResult> GetAllOptionsWithinEmployeeSalary(
+      [FromRoute] decimal salaryAmount)
+    {
+      return null;
+    }
 
+    //Get | Medical Option Category
+    
+    //Get all categories
+    [HttpGet("categories/all")]
+    [Authorize(Roles = "SuperUser")]
+    public async Task<IActionResult> GetAllMedicalOptionCategories()
+    {
+      return null;
+    }
+    
+    // Get options by category Id
+    [HttpGet("{id}/category/options")]
+    [Authorize(Roles = "SuperUser")]
+    public async Task<IActionResult> GetAllCategoryOptionsById([FromRoute] int id)
+    {
+      return null;
+    }
+    
+    // Get Category by Id (this will replace some repo calls that where using linqs to obtain a
+    // category, or confirm whether a category exists or not)
+    [HttpGet("{id}/category")]
+    [Authorize(Roles = "SuperUser")]
+    public async Task<IActionResult> GetCategoryById([FromRoute] int id)
+    {
+      return null;
+    }
+
+    // Posts
+    // Medical options
+    [HttpPost("{catId}/category/options")]
+    [Authorize(Roles = "SuperUser")]
+    public async Task<IActionResult> CreateBulkOptionsByExistingCategoryId([FromRoute] int catId,
+      [FromBody] CreateMedicalOptionVariantsDto createDto)
+    {
+      return null;
+    }
+    
+    // Medical Option Categories
+    // Create A medical Option Category
+    [HttpPost("categories")]
+    [Authorize(Roles = "SuperUser")]
+    public async Task<IActionResult> CreateMedicalOptionCategory(
+      [FromBody] CreateMedicalOptionCategoryDto createCategoryPayload)
+    {
+      return null;
+    }
+    
+    // Puts
+    
     /// <summary>
     /// Performs bulk updates of medical options within a specific category.
     /// </summary>
@@ -113,6 +179,14 @@
       if (result == null || !result.Any()) return NotFound();
 
       return NoContent();
+    }
+    
+    // update categories
+    [HttpPut("{id}/category")]
+    [Authorize(Roles = "SuperUser")]
+    public async Task<IActionResult> UpdateCategoryById ([FromRoute] int id, [FromBody] UpdateMedicalOptionCategoryDto updatePayload)
+    {
+      return null;
     }
   }
 }

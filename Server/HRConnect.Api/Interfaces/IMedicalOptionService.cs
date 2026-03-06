@@ -218,5 +218,27 @@
     /// </example>
     public Task<IReadOnlyList<MedicalOptionDto>> BulkUpdateMedicalOptionsByCategoryAsync(
       int categoryId, IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto, DateTime? testDate = null);
+    
+    // New Methods
+    // Get
+      // Get all Possible options for employee based on salary
+    Task<IReadOnlyList<MedicalOptionDto>> GetAllOptionsWithinEmployeeSalary(decimal salaryAmount);
+      // Get eligible options for employee
+    Task<IReadOnlyCollection<MedicalOptionDto>> GetEmployeeEligibleOptions(string employeeId);
+      // Get All options under category via category ID
+    Task<IReadOnlyList<MedicalOptionDto>> GetAllCategoryOptionsById(int id);
+      
+      // Medical Options Category
+    Task<List<MedicalOptionCategoryDto>> GetAllMedicalOptionCategories();
+
+    Task<MedicalOptionCategoryDto> GetCategoryById(int id);
+     
+      // Create
+    Task<MedicalOptionCategoryDto> CreateMedicalOptionCategory(CreateMedicalOptionCategoryDto createCategoryPayload);
+    Task<List<CreateMedicalOptionVariantsDto>> CreateBulkOptionsByExistingCategoryId(int id, CreateMedicalOptionVariantsDto createOptionsPayload)
+      // Update
+    Task<MedicalOptionCategoryDto> UpdateExistingCategoryById(int id,
+      UpdateMedicalOptionCategoryDto updateCategoryPayload);
+    
   }  
 }
