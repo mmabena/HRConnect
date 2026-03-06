@@ -18,7 +18,7 @@ axios.interceptors.response.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 /// </summary>
@@ -48,13 +48,9 @@ export const addEmployee = async (employee) => {
 
 export const editEmployee = async (employeeId, employee) => {
   try {
-    const response = await axios.put(
-      `${API_BASE}/${employeeId}`,
-      employee,
-      {
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    const response = await axios.put(`${API_BASE}/${employeeId}`, employee, {
+      headers: { "Content-Type": "application/json" },
+    });
     return response.data || {};
   } catch (error) {
     if (error.response) {
@@ -70,7 +66,7 @@ export const editEmployee = async (employeeId, employee) => {
 export const fetchEmployeeByIdNumber = async (idNumber) => {
   try {
     const response = await axios.get(
-      `${API_BASE}/by-idnumber/${encodeURIComponent(idNumber)}`
+      `${API_BASE}/by-idnumber/${encodeURIComponent(idNumber)}`,
     );
 
     /// </summary>
@@ -81,16 +77,16 @@ export const fetchEmployeeByIdNumber = async (idNumber) => {
     if (error.response) {
       console.error(
         "Fetch employee by ID number error response data:",
-        error.response.data
+        error.response.data,
       );
       console.error(
         "Fetch employee by ID number error status:",
-        error.response.status
+        error.response.status,
       );
     } else {
       console.error(
         "Fetch employee by ID number error message:",
-        error.message
+        error.message,
       );
     }
     throw error;
@@ -100,9 +96,7 @@ export const fetchEmployeeByIdNumber = async (idNumber) => {
 export const GetEmployeeByEmployeeNumberAsync = async (employeeId) => {
   try {
     const encoded = encodeURIComponent(employeeId);
-    const response = await axios.get(
-      `${API_BASE}/${encoded}`
-    );
+    const response = await axios.get(`${API_BASE}/${encoded}`);
     return response.data || {};
   } catch (error) {
     console.error("Fetch employee by employee number error:", error);
@@ -118,7 +112,7 @@ export const fetchAllEmployees = async () => {
     if (error.response) {
       console.error(
         "Fetch employees error response data:",
-        error.response.data
+        error.response.data,
       );
       console.error("Fetch employees error status:", error.response.status);
     } else {
@@ -266,13 +260,13 @@ export const validateEmail = (email) => {
 export const validateRequiredFields = (employee) => {
   const requiredFields = [
     "title",
-    "firstName",
-    "lastName",
+    "name",
+    "surname",
     "idNumber",
     "dateOfBirth",
     "contactNumber",
-    "homeAddress",
-    "postalCode",
+    "physicalAddress",
+    "zipCode",
     "taxNumber",
     "city",
     "gender",
@@ -305,10 +299,15 @@ export const handleFileChange = async (
   e,
   setEmployee,
   setUploading,
-  setErrorMessage
+  setErrorMessage,
 ) => {
   const file = e.target.files[0];
-  if (file && (file.type === "image/jpeg" || file.type === "image/jpg")) {
+  if (
+    file &&
+    (file.type === "image/jpeg" ||
+      file.type === "image/jpg" ||
+      file.type === "image/png")
+  ) {
     try {
       setUploading(true);
       setErrorMessage("");
@@ -319,7 +318,7 @@ export const handleFileChange = async (
 
       const response = await axios.post(
         "https://api.cloudinary.com/v1_1/djmafre5k/image/upload",
-        formData
+        formData,
       );
 
       const imageUrl = response.data.secure_url;
@@ -331,7 +330,7 @@ export const handleFileChange = async (
       setUploading(false);
     }
   } else {
-    setErrorMessage("Only .jpg or .jpeg images are allowed.");
+    setErrorMessage("Only .jpg, .jpeg or .png images are allowed.");
     setEmployee((prev) => ({ ...prev, documentPath: "" }));
   }
 };
@@ -379,7 +378,7 @@ export const handleInputChange = (
   employee,
   setEmployee,
   setIdNumberError,
-  employeesList = []
+  employeesList = [],
 ) => {
   const { name, value, type, checked } = e.target;
 
@@ -391,7 +390,7 @@ export const handleInputChange = (
 
     if (name === "lastName") {
       const existingCount = employeesList.filter((emp) =>
-        emp.lastName.toLowerCase().startsWith(value.toLowerCase())
+        emp.lastName.toLowerCase().startsWith(value.toLowerCase()),
       ).length;
       updated.employeeNumber = generateEmployeeNumber(value, existingCount);
     }
@@ -448,7 +447,7 @@ export const showConfirmationToast = (message) => {
         autoClose: false,
         closeOnClick: false,
         draggable: false,
-      }
+      },
     );
   });
 };

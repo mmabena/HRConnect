@@ -205,6 +205,8 @@ const AddEmployeeModal = ({ closeModal }) => {
         payload.passportNumber = employee.idNumber;
       }
 
+      console.log("Payload:", payload);
+
       await addEmployee(payload);
 
       toast.success("Employee created successfully!");
@@ -295,7 +297,7 @@ const AddEmployeeModal = ({ closeModal }) => {
                   value={employee.surname}
                   onChange={onInputChange}
                 />
-                {formErrors.lastNsurnameame && (
+                {formErrors.surname && (
                   <span className="emp-error-message">
                     {formErrors.surname}
                   </span>
