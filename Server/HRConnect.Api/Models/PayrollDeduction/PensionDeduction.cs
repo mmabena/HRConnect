@@ -1,4 +1,4 @@
-namespace HRConnect.Api.Models.PayrollContribution
+namespace HRConnect.Api.Models.PayrollDeduction
 {
   public class PensionDeduction
   {
