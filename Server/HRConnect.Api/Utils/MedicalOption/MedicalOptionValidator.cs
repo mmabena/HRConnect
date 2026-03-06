@@ -2040,7 +2040,7 @@
       IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto,
       List<MedicalOption> dbData) // Add dbData parameter
     {
-      var result = new BulkValidationResult();
+      var result = new BulkValidationResult() { IsValid = true };
 
       try
       {
