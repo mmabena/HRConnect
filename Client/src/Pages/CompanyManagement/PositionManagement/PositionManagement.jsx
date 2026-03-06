@@ -276,7 +276,7 @@ const PositionManagement = ({ title }) => {
           <img
             src="/images/arrow_drop_down_circle.png"
             alt="Previous"
-            className="pagination-arrow prev"
+            className="pagination-arrow-prev"
             onClick={handlePrev}
             style={{
               transform: "rotate(90deg)",
