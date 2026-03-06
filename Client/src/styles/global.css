@@ -10,9 +10,10 @@
 /* ==================== GLOBAL VARIABLES & RESETS ==================== */
 
 :root {
-  --primary-color: #002D40;
+  --primary-color: #355867;
   --primary-dark: #001a25;
   --primary-light: #004d6b;
+  --white: #fff;
   --accent-blue: #006088;
   --accent-blue-dark: #004d6b;
   --success-color: #AFBF74;
@@ -27,7 +28,7 @@
   --border-color: #cccccc;
   --error-color: #d32f2f;
   --warning-color: #f57c00;
-  --success-text-color: #2e7d32;
+  --success-text-color: #638549;
   --border-radius-small: 5px;
   --border-radius-medium: 10px;
   --transition-default: 0.2s ease;
@@ -204,6 +205,22 @@ body {
 
 .sign-in-button:hover {
   background-color: var(--accent-blue-dark);
+}
+
+.loading-row{
+  grid-column: span 8;
+  text-align: center;
+}
+
+.error-row{
+  grid-column: span 8;
+  text-align: center;
+  color: var(--error-color);
+}
+
+.no-data-row{
+  grid-column: span 8;
+  text-align: center;
 }
 
 /* ==================== FORMS & INPUT FIELDS ==================== */

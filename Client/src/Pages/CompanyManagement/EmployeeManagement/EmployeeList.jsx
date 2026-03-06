@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { fetchAllEmployees } from "../Employee";
+import { fetchAllEmployees } from "../../../Employee";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import AddEmployeeModal from "./AddEmployeeModal";
-import "../MenuBar.css";
+import AddEmployeeModal from "../../../Components/EmployeeManagement/AddEmployeeModal";
+import "../../../MenuBar.css";
+import "./EmployeeList.css";
 
 const EmployeeList = () => {
   const tabs = ["All staff", "Johannesburg", "Cape Town", "UK(London)"];
@@ -27,7 +28,13 @@ const EmployeeList = () => {
   /// </summary>
   ///colors for the initial circles
   /// </summary>
-  const COLORS = ["#006088", "#01A19A", "#AFBF74", "#002D40"];
+  
+  const COLORS = [
+    "blue",
+    "teal",
+    "lime",
+    "dark-blue"
+  ]
 
   /// </summary>
   /// Array to recycle colors after array ends
@@ -148,7 +155,6 @@ const EmployeeList = () => {
                 setSelectedTab(tab); /// </summary>
                 setActivePage(1); /// reset page on tab change
               }} /// </summary>
-              style={{ cursor: "pointer" }}
             >
               {tab}
             </div>
@@ -157,11 +163,11 @@ const EmployeeList = () => {
             <div className="heading-item filter-search-wrapper">
               <span className="filter-label">Filter</span>
               <div className="search-bar-container">
-                {/* <img
-                src="/images/Leading-icon.png"
+                <img
+                src="/images/menu.svg"
                 alt="Left Icon"
                 className="search-icon"
-              /> */}
+              />
                 <div className="input-wrapper">
                   <input
                     type="text"
@@ -177,7 +183,7 @@ const EmployeeList = () => {
                   />
                 </div>
                 <img
-                  src="/images/Trailing-Elements.png"
+                  src="/images/search.svg"
                   alt="Right Icon"
                   className="search-icon"
                 />
@@ -206,7 +212,6 @@ const EmployeeList = () => {
             {loading && (
               <div
                 className="loading-row"
-                style={{ gridColumn: "span 8", textAlign: "center" }}
               >
                 Loading employees...
               </div>
@@ -215,11 +220,6 @@ const EmployeeList = () => {
             {error && (
               <div
                 className="error-row"
-                style={{
-                  gridColumn: "span 8",
-                  textAlign: "center",
-                  color: "red",
-                }}
               >
                 {error}
               </div>
@@ -228,7 +228,6 @@ const EmployeeList = () => {
             {!loading && !error && currentEmployees.length === 0 && (
               <div
                 className="no-data-row"
-                style={{ gridColumn: "span 8", textAlign: "center" }}
               >
                 No employees found.
               </div>
@@ -242,8 +241,9 @@ const EmployeeList = () => {
 
                   <div className="table-cell name-surname-cell">
                     <div
-                      className="initials-circle"
-                      style={{ backgroundColor: getInitialColorByIndex(index) }}
+                      className={`initials-circle ${
+                        COLORS[index % COLORS.length]
+                      }`}
                     >
                       {(
                         emp.initials ||

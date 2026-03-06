@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useParams } from "react-router-dom";
-import "../Components/EditEmployee.css";
+import "./EditEmployee.css";
 import axios from "axios";
 import {
   editEmployee,
@@ -9,7 +9,7 @@ import {
   showConfirmationToast,
   GetEmployeeByEmployeeNumberAsync,
   formatDateToYYYYMMDD,
-} from "../Employee";
+} from "../../Employee";
 
 import { toast } from "react-toastify";
 /// </summary>
@@ -198,7 +198,7 @@ const EditEmployee = () => {
     setErrorMessage,
   ) => {
     const file = e.target.files[0];
-    if (file && (file.type === "image/jpeg" || file.type === "image/jpg")) {
+    if (file && (file.type === "image/jpeg" || file.type === "image/jpg"|| file.type ==="image/png")) {
       try {
         setUploading(true);
         setErrorMessage("");
@@ -222,7 +222,7 @@ const EditEmployee = () => {
         setUploading(false);
       }
     } else {
-      setErrorMessage("Only .jpg or .jpeg images are allowed.");
+      setErrorMessage("Only .jpg, .jpeg or .png images are allowed.");
       setEmployee((prev) => ({ ...prev, profileImage: "" }));
     }
   };
