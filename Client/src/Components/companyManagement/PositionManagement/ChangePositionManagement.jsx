@@ -1,31 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
 import api from "../../../api/api";
+import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "../../MenuBar/MenuBar.css";
 import "../../../Pages/CompanyManagement/PositionManagement/PositionManagement.css";
 
-const ChangePositionManagement = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  const { currentPosition, linkedEmployeesCount, attemptedTitle } =
-    location.state || {};
-
+const ChangePositionManagement = ({ isOpen, onClose, currentPosition, linkedEmployeesCount, attemptedTitle }) => {
   const [moveUsers, setMoveUsers] = useState(false);
-
+  const [allPositions, setAllPositions] = useState([]);
+    const navigate = useNavigate();
   const [formData, setFormData] = useState({
     positionTitle: attemptedTitle || "",
   });
-
-  const [allPositions, setAllPositions] = useState([]);
-
-  // Redirect if no position passed
-  useEffect(() => {
-    if (!currentPosition) {
-      navigate("/positionManagement");
-    }
-  }, [currentPosition, navigate]);
 
   // Fetch all positions for dropdown
   useEffect(() => {
@@ -38,11 +24,26 @@ const ChangePositionManagement = () => {
         toast.error("Could not load positions.");
       }
     };
-
     fetchPositions();
   }, []);
 
-  // Handle dropdown change
+  // Set default dropdown value when positions are loaded
+  useEffect(() => {
+    if (allPositions.length > 0) {
+      const validPosition =
+        allPositions.find(
+          (pos) =>
+            pos.positionTitle.toLowerCase() ===
+            (attemptedTitle || currentPosition || "").toLowerCase()
+        )?.positionTitle || "";
+      setFormData((prev) => ({
+        ...prev,
+        positionTitle: validPosition,
+      }));
+    }
+  }, [allPositions, attemptedTitle, currentPosition]);
+
+  // Dropdown change
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -51,7 +52,6 @@ const ChangePositionManagement = () => {
     }));
   };
 
-  // Handle submit
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -62,31 +62,31 @@ const ChangePositionManagement = () => {
       });
 
       toast.success("Position updated successfully.");
-      navigate("/positionManagement");
+      onClose();
     } catch (error) {
       console.error("Update failed:", error);
       toast.error("Failed to update position.");
     }
   };
 
+  if (!isOpen) return null;
+
   return (
     <div className="modal-overlay">
-      <div className="modal-content">
+      <div className="modal-content-change">
         <div className="headings-container">
           <div className="apm-logo">
             <span className="apm-logo-bold">singular</span>
             <span className="apm-logo-light">express</span>
-          </div>  
-          <h2 className="apm-title">Change Position</h2>
+          </div>
+          <h2 className="pm-title-change">Change Position</h2>
         </div>
-             <label className="title-placeholder-change">Position title</label>
 
-        {/* Position Dropdown */}
-        <div className="apm-input-group apm-dropdown-wrapper">
-     
+        <label className="title-placeholder-change">Position title</label>
+        <div className="pm-input-group-change pm-dropdown-wrapper-change">
           <select
             name="positionTitle"
-            className="apm-input select-dropdown"
+            className="pm-input-change"
             value={formData.positionTitle}
             onChange={handleChange}
             required
@@ -98,22 +98,24 @@ const ChangePositionManagement = () => {
               </option>
             ))}
           </select>
-
           <img
             src="/images/arrow_drop_down_circle.png"
             alt="Dropdown Icon"
             className="apm-dropdown-icon"
           />
         </div>
-        <div className= "apm-info-text">
-        <p >
-          This position currently has{" "}
-          <b>{linkedEmployeesCount} users</b>  assigned.
-        </p>
+
+        <div className="apm-info-text">
+          <p>
+            This position currently has <b>{linkedEmployeesCount}</b> users assigned.
+          </p>
         </div>
-          <p className="Question"><b>What would you like to do?</b></p>
-        <form onSubmit={handleSubmit} className="apm-form">
-          {/* Keep Users */}
+
+        <p className="Question">
+          <b>What would you like to do?</b>
+        </p>
+
+        <form onSubmit={handleSubmit} className="pm-form">
           <div className="checkbox-cell-position">
             <input
               type="checkbox"
@@ -123,7 +125,6 @@ const ChangePositionManagement = () => {
             Keep users in current position
           </div>
 
-          {/* Move Users */}
           <div className="checkbox-cell-position">
             <input
               type="checkbox"
@@ -134,31 +135,31 @@ const ChangePositionManagement = () => {
           </div>
 
           {/* Conditional Link */}
-        <div className={`apm-view-users ${moveUsers ? "show" : "hide"}`}>
-  <span
-    className="apm-link"
-    onClick={() =>
-      navigate(`/manageUserPosition`, {
-        state: {
-          currentPositionTitle: currentPosition,
-          newPositionTitle: formData.positionTitle,
-        },
-      })
-    }
-  >
-  <b>  View Users List &gt;</b>
-  </span>
-</div>
+          <div className={`apm-view-users ${moveUsers ? "show" : "hide"}`}>
+            <span
+              className="apm-link"
+              onClick={() =>
+                navigate(`/manageUserPosition`, {
+                  state: {
+                    currentPositionTitle: currentPosition,
+                    newPositionTitle: formData.positionTitle,
+                  },
+                })
+              }
+            >
+              <b> View Users List &gt;</b>
+            </span>
+          </div>
 
           <button type="submit" className="apm-save-button">
             Save
           </button>
 
-          <div className="apm-footer">
-            <p>Privacy Policy &nbsp; | &nbsp; Terms & Conditions</p>
-            <p>
-              Copyright © 2026 Singular Systems. All rights reserved.
+          <div className="pm-footer">
+            <p className="footer1">
+              Privacy Policy &nbsp; | &nbsp; Terms & Conditions
             </p>
+            <p>Copyright © 2026 Singular Systems. All rights reserved.</p>
           </div>
         </form>
       </div>

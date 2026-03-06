@@ -8,8 +8,7 @@ import api from "../../../api/api";
 import { jwtDecode } from "jwt-decode";
 import { useParams, useNavigate } from "react-router-dom";
 
-const EditPositionManagement = () => {
-  const { id } = useParams();
+const EditPositionManagement = ({ id, isOpen, onClose, onOpenChangeModal })  => {
   const navigate = useNavigate();
 
   const [originalTitle, setOriginalTitle] = useState("");
@@ -29,6 +28,7 @@ const EditPositionManagement = () => {
   const [hasAccess, setHasAccess] = useState(false);
 
   useEffect(() => {
+     if (!id) return; 
     const initialize = async () => {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -132,16 +132,17 @@ const EditPositionManagement = () => {
           pos.positionId !== parseInt(id),
       );
 
-      if (linkedEmployees.length > 0 || duplicateTitle) {
-        navigate("/changePositionManagement", {
-          state: {
-            currentPosition: originalTitle,
+   if (linkedEmployees.length > 0 || duplicateTitle) {
+  if (onOpenChangeModal) {
+    onOpenChangeModal({
+      currentPosition: originalTitle,
             linkedEmployeesCount: linkedEmployees.length,
             attemptedTitle: positionTitle,
-          },
-        });
-        return;
-      }
+    });
+    onClose(); // Close the edit modal
+  }
+  return; // Stop further submission
+}
 
       await api.put(`/positions/${id}`, {
         positionTitle,
@@ -172,13 +173,14 @@ const EditPositionManagement = () => {
           <h2 className="pm-title-edit">Edit Position</h2>
         </div>
 
-        <form onSubmit={handleSubmit} className="apm-form">
+        <form onSubmit={handleSubmit} className="pm-form-edit">
           {/* Position Dropdown WITH icon */}
-          <div className="pm-input-group-edit pm-dropdown-wrapper-edit">
             <label className="title-placeholder-edit">Position title</label>
+          <div className="pm-input-group-edit pm-dropdown-wrapper-edit">
+          
             <select
               name="positionTitle"
-              className="apm-input "
+              className="pm-input-edit "
               value={formData.positionTitle}
               onChange={handleChange}
               required
@@ -197,12 +199,12 @@ const EditPositionManagement = () => {
               className="apm-dropdown-icon"
             />
           </div>
-
+     <label className="title-placeholder-edit">Position Grade</label>
           <div className="pm-input-group-edit pm-dropdown-wrapper-edit">
-            <label className="title-placeholder-edit">Position Grade</label>
+       
             <select
               name="jobGradeId"
-              className="apm-input "
+              className="pm-input-edit "
               value={formData.jobGradeId}
               onChange={handleChange}
               required
@@ -228,7 +230,7 @@ const EditPositionManagement = () => {
           
             <select
               name="occupationalLevelId"
-              className="apm-input"
+              className="pm-input-edit"
               value={formData.occupationalLevelId}
               onChange={handleChange}
               required

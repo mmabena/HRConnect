@@ -2,14 +2,16 @@ import React, { useState, useEffect } from "react";
 // import CompanyManagementHeader from "../../../Components/CompanyManagement/companyManagementHeader";
 import CompanyManagementNavBar from "../../../Components/CompanyManagement/companyManagementNavBar";
 import { useNavigate } from "react-router-dom";
-import api from "../../../api/api"; // use axios instance
+import api from "../../../api/api"; // axios instance
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
 import AddPositionManagement from "../../../Components/CompanyManagement/PositionManagement/AddPositionManagment";
+import EditPositionManagement from "../../../Components/CompanyManagement/PositionManagement/EditPositionManagement";
+import ChangePositionManagement from "../../../Components/CompanyManagement/PositionManagement/ChangePositionManagement";
 
 const PositionManagement = ({ title }) => {
-    const [currentTime, setCurrentTime] = useState('');
-  const [currentDate, setCurrentDate] = useState('');
+  const [currentTime, setCurrentTime] = useState("");
+  const [currentDate, setCurrentDate] = useState("");
   const [positions, setPositions] = useState([]);
   const [jobGrades, setJobGrades] = useState([]);
   const [occupationalLevels, setOccupationalLevels] = useState([]);
@@ -20,8 +22,14 @@ const PositionManagement = ({ title }) => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [showPageOptions, setShowPageOptions] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+
+  const [selectedPositionId, setSelectedPositionId] = useState(null);
 
   const [activeTab, setActiveTab] = useState("Position Management");
+
+  // For ChangePositionManagement modal
+  const [changeModalData, setChangeModalData] = useState(null);
 
   const navigate = useNavigate();
   const pageOptions = [10, 15, 20, 25];
@@ -35,32 +43,31 @@ const PositionManagement = ({ title }) => {
   ];
   const tabWidths = [168, 133, 122, 134, 154, 125, 120];
 
-   useEffect(() => {
+  // -------------------
+  // Date & Time
+  // -------------------
+  useEffect(() => {
     const updateDateTime = () => {
       const now = new Date();
-
-      const month = now.toLocaleDateString('en-ZA', { month: 'short' });
-      const day = now.toLocaleDateString('en-ZA', { day: '2-digit' });
-      const year = now.toLocaleDateString('en-ZA', { year: 'numeric' });
-
-      const time = now.toLocaleTimeString('en-ZA', {
-        hour: '2-digit',
-        minute: '2-digit',
+      const month = now.toLocaleDateString("en-ZA", { month: "short" });
+      const day = now.toLocaleDateString("en-ZA", { day: "2-digit" });
+      const year = now.toLocaleDateString("en-ZA", { year: "numeric" });
+      const time = now.toLocaleTimeString("en-ZA", {
+        hour: "2-digit",
+        minute: "2-digit",
         hour12: false,
       });
-
       setCurrentDate(`${month}. ${day}, ${year}`);
       setCurrentTime(time);
     };
-
     updateDateTime();
     const intervalId = setInterval(updateDateTime, 60000);
     return () => clearInterval(intervalId);
   }, []);
 
-  // --------------------------
-  // INITIALIZATION + AUTH
-  // --------------------------
+  // -------------------
+  // Initialization + Auth
+  // -------------------
   useEffect(() => {
     const initialize = async () => {
       setLoading(true);
@@ -89,7 +96,7 @@ const PositionManagement = ({ title }) => {
 
         setHasAccess(true);
 
-        // Fetch positions, job grades, and occupational levels
+        // Fetch positions, job grades, occupational levels
         const [positionsRes, gradesRes, levelsRes] = await Promise.all([
           api.get("/positions"),
           api.get("/jobgrades"),
@@ -110,9 +117,9 @@ const PositionManagement = ({ title }) => {
     initialize();
   }, []);
 
-  // --------------------------
-  // PAGINATION LOGIC
-  // --------------------------
+  // -------------------
+  // Pagination
+  // -------------------
   const totalPages = Math.ceil(positions.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -123,122 +130,113 @@ const PositionManagement = ({ title }) => {
   const handleNext = () =>
     currentPage < totalPages && setCurrentPage((prev) => prev + 1);
   const handlePageClick = (num) => setCurrentPage(num);
-  const handleAddPositionClick = () => setShowAddModal(true);
 
-  const jobGradeMap = Object.fromEntries(
-    jobGrades.map((grade) => [grade.jobGradeId, grade.name]),
-  );
-  const occupationalLevelMap = Object.fromEntries(
-    occupationalLevels.map((level) => [
-      level.occupationalLevelId,
-      level.description,
-    ]),
-  );
+  // -------------------
+  // Change Modal Controls
+  // -------------------
+  const openChangeModal = (data) => {
+    setChangeModalData(data);
+  };
+  const closeChangeModal = () => {
+    setChangeModalData(null);
+  };
 
-  // --------------------------
-  // RENDER
-  // --------------------------
   if (loading) return <h3>Loading...</h3>;
   if (!hasAccess) return <h2>Access Denied. SuperUser only.</h2>;
 
   return (
-       <header className="cmn-header-main-frame">
-    <div className="menu-background custom-scrollbar">
-      {/* <CompanyManagementHeader title={activeTab} /> */}
-       <div className="cmn-header-left-section">
-        <h1 className="cmn-logo-text">{title || 'Company Management'}</h1>
-      </div>
-      <div className="cmn-header-right-section">
-   
-    
-        <div className="cmn-datetime-wrapper">
-          <div className="cmn-datetime-date-container">
-            <span className="cmn-datetime-month">{currentDate}</span>
-          </div>
-          <div className="cmn-datetime-time-container">
-            <span className="cmn-datetime-time">{currentTime}</span>
+    <header className="cmn-header-main-frame">
+      <div className="menu-background custom-scrollbar">
+        <div className="cmn-header-left-section">
+          <h1 className="cmn-logo-text">{title || "Company Management"}</h1>
+        </div>
+        <div className="cmn-header-right-section">
+          <div className="cmn-datetime-wrapper">
+            <div className="cmn-datetime-date-container">
+              <span className="cmn-datetime-month">{currentDate}</span>
+            </div>
+            <div className="cmn-datetime-time-container">
+              <span className="cmn-datetime-time">{currentTime}</span>
+            </div>
           </div>
         </div>
-      </div>
-      
 
-      <div className="nav-bar-with-buttons">
-        <CompanyManagementNavBar
-          tabs={navTabs}
-          activeTab={activeTab}
-          onTabChange={(tab) => {
-            if (tab !== "Position Management") {
-              navigate("/companyManagement");
-            } else {
-              setActiveTab(tab);
-            }
-          }}
-          tabWidths={tabWidths}
-        />
-
-        {activeTab === "Position Management" && (
-          <button
-            className="add-position-button"
-            onClick={handleAddPositionClick}
-          >
-            Add New Position
-          </button>
-        )}
-      </div>
-
-      <div className="manage-positions">
-        <table className="positions-table">
-          <thead>
-            <tr>
-              <th>Position Title</th>
-              <th>Position Grade</th>
-              <th>Occupational Description</th>
-              <th>Effective Date</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-<tbody>
-  {currentPositions.length === 0 ? (
-    <tr>
-      <td colSpan={5}>No positions found.</td>
-    </tr>
-  ) : (
-    currentPositions.map((position) => (
-      <tr key={position.positionId}>
-        <td>{position.positionTitle}</td>
-        <td>{position.jobGrade?.name || "N/A"}</td>
-        {/* Add title attribute for hover tooltip */}
-      <td  title={position.occupationalLevel?.description || "N/A"}>
-  {position.occupationalLevel?.description || "N/A"}
-</td>
-        <td>
-          {new Date(position.createdDate).toLocaleDateString("en-GB", {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-          })}
-        </td>
-        <td>
-          <div className="edit-button-group">
-            <button
-              className="text-button"
-              onClick={() =>
-                navigate(`/editPositionManagement/${position.positionId}`)
+        <div className="nav-bar-with-buttons">
+          <CompanyManagementNavBar
+            tabs={navTabs}
+            activeTab={activeTab}
+            onTabChange={(tab) => {
+              if (tab !== "Position Management") {
+                navigate("/companyManagement");
+              } else {
+                setActiveTab(tab);
               }
+            }}
+            tabWidths={tabWidths}
+          />
+          {activeTab === "Position Management" && (
+            <button
+              className="add-position-button"
+              onClick={() => setShowAddModal(true)}
             >
-              Edit
+              Add New Position
             </button>
-          </div>
-        </td>
-      </tr>
-    ))
-  )}
-</tbody>
-        </table>
-      </div>
+          )}
+        </div>
 
-      {/* PAGINATION */}
-      <div className="pagination-wrapper">
+        <div className="manage-positions">
+          <table className="positions-table">
+            <thead>
+              <tr>
+                <th>Position Title</th>
+                <th>Position Grade</th>
+                <th>Occupational Description</th>
+                <th>Effective Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {currentPositions.length === 0 ? (
+                <tr>
+                  <td colSpan={5}>No positions found.</td>
+                </tr>
+              ) : (
+                currentPositions.map((position) => (
+                  <tr key={position.positionId}>
+                    <td>{position.positionTitle}</td>
+                    <td>{position.jobGrade?.name || "N/A"}</td>
+                    <td title={position.occupationalLevel?.description || "N/A"}>
+                      {position.occupationalLevel?.description || "N/A"}
+                    </td>
+                    <td>
+                      {new Date(position.createdDate).toLocaleDateString(
+                        "en-GB",
+                        { day: "numeric", month: "long", year: "numeric" }
+                      )}
+                    </td>
+                    <td>
+                      <div className="edit-button-group">
+                        <button
+                          className="text-button"
+                          onClick={() => {
+                            setSelectedPositionId(position.positionId);
+                            setShowEditModal(true);
+                          }}
+                        >
+                          Edit
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination & Modals */}
+        <div className="pagination-wrapper">
+
         <div className="pagination-left">
          
 
@@ -312,15 +310,33 @@ const PositionManagement = ({ title }) => {
           <div className="pagination-info">
             {positions.length} Positions @ Singular
           </div>
+          {/* Pagination controls omitted for brevity */}
           {showAddModal && (
             <AddPositionManagement
               isOpen={showAddModal}
               onClose={() => setShowAddModal(false)}
             />
           )}
+          {showEditModal && (
+            <EditPositionManagement
+              id={selectedPositionId}
+              isOpen={showEditModal}
+              onClose={() => setShowEditModal(false)}
+              onOpenChangeModal={openChangeModal} // <-- Pass parent handler
+            />
+          )}
+          {changeModalData && (
+            <ChangePositionManagement
+              isOpen={!!changeModalData}
+              onClose={closeChangeModal}
+              currentPosition={changeModalData.currentPosition}
+              linkedEmployeesCount={changeModalData.linkedEmployeesCount}
+              attemptedTitle={changeModalData.attemptedTitle}
+            />
+          )}
+        </div>
         </div>
       </div>
-    </div>
     </header>
   );
 };

@@ -138,7 +138,7 @@ const AddPositionManagement = ({ isOpen, onClose }) => {
           <h2 className="pm-title-add">Position Details</h2>
         </div>
 
-        <form onSubmit={handleSubmit} className="apm-form">
+        <form onSubmit={handleSubmit} className="pm-form">
           <div className="pm-input-group-add">
             <input
               type="text"
@@ -149,8 +149,10 @@ const AddPositionManagement = ({ isOpen, onClose }) => {
               className={`pm-input-add ${errors.positionTitle ? "inputs-error" : ""}`}
             />
           </div>
-          {errors.positionTitle && (
+          {errors.positionTitle ? (
             <span className="error-texts">{errors.positionTitle}</span>
+          ) : (
+            <span className="error-texts">&nbsp;</span> // empty space to reserve
           )}
 
           <div className="pm-input-group-add pm-dropdown-wrapper-add">
@@ -176,8 +178,10 @@ const AddPositionManagement = ({ isOpen, onClose }) => {
             />
           </div>
 
-          {errors.jobGradeId && (
+          {errors.jobGradeId ? (
             <span className="error-texts">{errors.jobGradeId}</span>
+          ) : (
+            <span className="error-texts">&nbsp;</span> // empty space to reserve
           )}
 
           <div className="pm-input-group-add pm-dropdown-wrapper-add">
@@ -206,8 +210,10 @@ const AddPositionManagement = ({ isOpen, onClose }) => {
               className="apm-dropdown-icon"
             />
           </div>
-          {errors.occupationalLevelId && (
+          {errors.occupationalLevelId ? (
             <span className="error-texts">{errors.occupationalLevelId}</span>
+          ) : (
+            <span className="error-texts">&nbsp;</span> // empty space to reserve
           )}
 
           <div className="pm-input-group-add">
@@ -218,17 +224,22 @@ const AddPositionManagement = ({ isOpen, onClose }) => {
               onChange={handleChange}
               className={`pm-input-add ${errors.effectiveDate ? "inputs-error" : ""}`}
             />
-            {errors.effectiveDate && (
-              <span className="error-texts">{errors.effectiveDate}</span>
-            )}
           </div>
-
+          {errors.effectiveDate ? (
+            <span className="error-texts">{errors.effectiveDate}</span>
+          ) : (
+            <span className="error-texts">&nbsp;</span> // empty space to reserve
+          )}
           <button type="submit" className="apm-save-button">
             Save
           </button>
           <div className="pm-footer">
-            <p className="footer1">Privacy Policy &nbsp; | &nbsp; Terms & Conditions</p>
-            <p className="footer2">Copyright © 2025 Singular Systems. All rights reserved.</p>
+            <p className="footer1">
+              Privacy Policy &nbsp; | &nbsp; Terms & Conditions
+            </p>
+            <p className="footer2">
+              Copyright © 2025 Singular Systems. All rights reserved.
+            </p>
           </div>
         </form>
       </div>

@@ -2,8 +2,11 @@
 .error-texts {
   color: red;
   font-size: 0.9em;
-  display: block;
-
+ line-height: 1rem;     /* ensures the height of the text */
+  min-height: 1rem; 
+  display: block;          /* makes it take full width below input */
+  margin-top: -25px;     /* small space below input */
+  text-align: left;        /* align text to the left */
 }
 
 
@@ -56,6 +59,7 @@
   cursor: pointer;
 }
 
+
 .save-position-button {
   background-color: #668c4d;
   color: white;
@@ -64,7 +68,7 @@
   border-radius: 8px;
   font-size: 18px;
   font-weight: 700;
-  margin-left:700px;
+  margin-left:790px;
   cursor: pointer;
   transition: background-color 0.3s ease;
   white-space: nowrap; /* prevent button text from wrapping */
@@ -80,7 +84,7 @@
 .checkbox-cell {
   display: flex;
   align-items: center;
-  gap: 12px;        /* 👈 SAME spacing everywhere */
+  gap: 12px;        /*SAME spacing everywhere */
 }
 
 /* Optional: force consistent checkbox size */
@@ -348,7 +352,8 @@
 
 /* Main modal container */
 .modal-content-add,
-.modal-content-edit {
+.modal-content-edit,
+.modal-content-change {
   width: 640px; /* slightly smaller for neatness */
   height:800px;
   padding: 90px 40px;
@@ -391,7 +396,8 @@
 }
 
 .pm-title-add,
-.pm-title-edit{
+.pm-title-edit,
+.pm-title-change{
   font-size: 32px;
   font-weight: 700;
   margin-left:50px;
@@ -401,18 +407,12 @@
 
 
 /* Position label */
-.title-placeholder-add {
-  align-self: flex-start;
-  font-size: 14px;
-  color: #121212;
-  margin-right:320px;
-}
-.title-placeholder-edit {
+.title-placeholder-edit,
+.title-placeholder-change{
   display: block;
   width: 360px;       /* same width as input */
   font-size: 14px;
   font-weight: 500;
-  margin-bottom: 6px;
   color: black;
   font-family: 'Instrument Sans', sans-serif;
   text-align: left;
@@ -432,9 +432,9 @@
   color: black;
   opacity: 1; /* ensures it is not faded in some browsers */
 }
-.pm-input-add {
+.pm-input-add,
+.pm-input-change{
   width: 360px;
-
   height: 33px;
   border: none;
   border-bottom: 1.5px solid #006088;
@@ -445,6 +445,19 @@
   outline: none;
   box-sizing: border-box;
   background-color: transparent;
+}
+
+.pm-input-edit{
+   width: 360px;
+   height: 33px;
+    border: none;
+    margin-top:-100px;
+     outline: none;
+    background-color: transparent;
+    border-bottom: 1.5px solid #006088;
+    padding-bottom: 5px;
+  font-size: 17px;
+  font-family: 'Instrument Sans', sans-serif;
 }
 
 
@@ -459,13 +472,15 @@
 
 /* Dropdown wrapper */
 .pm-dropdown-wrapper-add,
-.pm-dropdown-wrapper-edit {
+.pm-dropdown-wrapper-edit,
+.pm-dropdown-wrapper-change {
   position: relative;
   margin-bottom: 20px;
 }
 
 .pm-dropdown-wrapper-add  select,
-.pm-dropdown-wrapper-edit select {
+.pm-dropdown-wrapper-edit select,
+.pm-dropdown-wrapper-change select {
   width: 360px;
   appearance: none;
 }
@@ -483,8 +498,8 @@
 .apm-info-text {
   text-align: center;
   font-size: 14px;
-  margin-right:20px;
-  margin-top:25px;
+  margin-right:80px;
+  margin-top:15px;
   margin-bottom: 30px;
   color: #002D40;
 }
@@ -493,14 +508,24 @@
 .Question {
   align-self: flex-start;
   font-size: 15px;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
   padding-left:100px;
      color: #002D40;
 }
 
 /* Form spacing */
-.apm-form {
+.pm-form {
   width: 100%;
+  margin-top:30px;
+ padding-left:100px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.pm-form-edit{
+  width: 100%;
+
  padding-left:100px;
   display: flex;
   flex-direction: column;
@@ -571,7 +596,7 @@
   color: #2e6c8c;
   cursor: pointer;
   font-weight: 500;
-  margin-right:90px;
+  margin-right:100px;
 
 }
 
