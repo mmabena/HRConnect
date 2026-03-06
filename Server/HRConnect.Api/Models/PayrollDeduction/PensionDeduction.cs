@@ -1,5 +1,7 @@
 namespace HRConnect.Api.Models.PayrollDeduction
 {
+  using HRConnect.Api.Models.Payroll;
+
   public class PensionDeduction
   {
     public int PensionDeductionID { get; set; }
