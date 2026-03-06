@@ -198,7 +198,7 @@ const ForgotPassword = ({ onBackToLogin }) => {
                         type="button"
                       >
                         <img
-                          src={showPassword ? '/images/visibility_on.png' : '/images/visibility_off'}
+                          src={showPassword ? '/images/visibility_on.png' : '/images/visibility_off.svg'}
                           alt="toggle"
                         />
                       </button>

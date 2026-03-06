@@ -104,7 +104,6 @@ function TaxTableUpload({ onClose, onUploadSuccess, existingYears = [] }) {
   return (
     <div className="tax-table-popup-container">
       <div className="tax-table-frame">
-        <div className="tax-table-content-centered">
 
           <button className="x-btn" onClick={onClose}>✕</button>
 
@@ -117,7 +116,7 @@ function TaxTableUpload({ onClose, onUploadSuccess, existingYears = [] }) {
             <h1 className="upload-title">Upload Tax Table</h1>
             <p className="file-type-text">Only Excel files (.xls, .xlsx) are supported</p>
 
-            <div className="gender-select-wrapper"> 
+            <div className="select-wrapper"> 
               <select
                     className={`tax-name-input ${yearError ? "error" : ""}`}
                     value={year}
@@ -149,7 +148,7 @@ function TaxTableUpload({ onClose, onUploadSuccess, existingYears = [] }) {
               />
             </div>
           </div>
-
+                 <div className="space"></div> 
           <div className="dashed-box">
             <div className="upload-section">
               <p className="drop-files-text">Drop files here</p>
@@ -175,8 +174,6 @@ function TaxTableUpload({ onClose, onUploadSuccess, existingYears = [] }) {
               )}
             </div>
           </div>
-
-        </div>
       </div>
     </div>
   );

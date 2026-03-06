@@ -7,40 +7,25 @@
 
 /* ------------------- Center frame and content ------------------- */
 .tax-table-frame {
-  width: 61.8vw;
-  height: 86.7vh;
-  border-radius: 10px;
-  background: linear-gradient(
-    135deg,
-    #EEEEF1,
-    #EFF1F3,
-    #E7EAEB,
-    #D6D6D9,
-    #C4C4C5
-  );
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  z-index: 0;
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  position: relative;
-}
-
-.tax-table-content-centered {
-  display: flex;
+  width: 1013px;
+  height: 828px;
   flex-direction: column;
   align-items: center;
-  width: 100%;
-  padding: 20px;
+  gap: 15px;
+  border-radius: 10px;
+  background: var(--BG);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
 }
 
 .tax-table-headings-container {
-  width: 360px;
-  margin: 20px auto 0;
-  text-align: center;
+  display: flex;
+  padding-top: 50px;
+  flex-direction: column;
+  align-items: center;
+  gap: 26px;
+  align-self: stretch;
 }
-
 
 /* ----------------------- Logo styling ----------------------- */
 .tax-table-logo {
@@ -54,7 +39,7 @@
 
 .tax-table-logo-text-bold,
 .tax-table-logo-text-light {
-  font-family: 'Anek Bangla', serif;
+  font-family: "Anek Bangla", serif;
   font-size: 40px;
   line-height: 100%;
   letter-spacing: 0.02em;
@@ -63,7 +48,7 @@
 
 .tax-table-logo-text-bold {
   font-weight: 700;
-  color: #002D40;
+  color: #002d40;
 }
 
 .tax-table-logo-text-light {
@@ -71,29 +56,24 @@
   color: #006088;
 }
 
-
 .upload-title {
-  width: 360px;
-  font-family: 'Inter', sans-serif;
-  font-weight: 700;
-  font-size: 30px;
-  line-height: 36px;
-  letter-spacing: 0;
-  color: #002D40;
+  color: #002d40;
   text-align: center;
-  margin: 0 auto 20px;
+  font-family: "Inter", sans-serif;
+  font-size: 36px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 26px;
+  align-self: stretch;
 }
 
 .file-type-text {
-  width: 360px;
-  font-family: 'Instrument Sans', sans-serif;
+  color: #002d40;
+  font-family: "Instrument Sans", sans-serif;
+  font-size: 14px;
   font-weight: 400;
-  font-size: 12px;
-  line-height: 18px;
-  letter-spacing: 0;
-  color: #002D40;
-  text-align: center;
-  margin: 0 auto 20px;
+  font-style: normal;
+  line-height: 21px;
 }
 
 .name-input {
@@ -110,13 +90,13 @@
   border-radius: 0;
   background-color: transparent;
   margin: 0 auto;
-  font-family: 'Instrument Sans', sans-serif;
+  font-family: "Instrument Sans", sans-serif;
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
 }
 
-.gender-select-wrapper {
+.select-wrapper {
   position: relative;
   width: 360px;
   height: 33px;
@@ -126,7 +106,7 @@
 /* ----------------------- Messages ----------------------- */
 .error-message {
   color: #ff0000;
-  font-family: 'Instrument Sans', sans-serif;
+  font-family: "Instrument Sans", sans-serif;
   font-size: 12px;
   margin: 10px auto 0;
   text-align: center;
@@ -135,7 +115,7 @@
 
 .success-message {
   color: #006088;
-  font-family: 'Instrument Sans', sans-serif;
+  font-family: "Instrument Sans", sans-serif;
   font-size: 12px;
   margin: 10px auto 0;
   text-align: center;
@@ -164,7 +144,7 @@
 
   position: relative;
   background: var(--BG);
-  box-shadow: 0px 4px 4px rgba(0,0,0,0.25);
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
 }
 
 .dashed-box::before {
@@ -176,31 +156,32 @@
   background:
     /* Top */
     repeating-linear-gradient(
-      90deg,
-      var(--primary-color) 0 34px,
-      transparent 34px 68px
-    ) top left / 100% 5px no-repeat,
-
+        90deg,
+        var(--primary-color) 0 34px,
+        transparent 34px 68px
+      )
+      top left / 100% 5px no-repeat,
     /* Bottom */
     repeating-linear-gradient(
-      90deg,
-      var(--primary-color) 0 34px,
-      transparent 34px 68px
-    ) bottom left / 100% 5px no-repeat,
-
+        90deg,
+        var(--primary-color) 0 34px,
+        transparent 34px 68px
+      )
+      bottom left / 100% 5px no-repeat,
     /* Left */
     repeating-linear-gradient(
-      180deg,
-      var(--primary-color) 0 34px,
-      transparent 34px 68px
-    ) top left / 5px 100% no-repeat,
-
+        180deg,
+        var(--primary-color) 0 34px,
+        transparent 34px 68px
+      )
+      top left / 5px 100% no-repeat,
     /* Right */
     repeating-linear-gradient(
-      180deg,
-      var(--primary-color) 0 34px,
-      transparent 34px 68px
-    ) top right / 5px 100% no-repeat;
+        180deg,
+        var(--primary-color) 0 34px,
+        transparent 34px 68px
+      )
+      top right / 5px 100% no-repeat;
 }
 
 /* ----------------- Dropdown and upload elements ----------------- */
@@ -218,7 +199,7 @@
   max-width: 885px;
   width: 100%;
   height: 26px;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-style: normal;
   font-weight: 700;
   font-size: 36px;
@@ -227,27 +208,34 @@
   justify-content: center;
   align-items: center;
   text-align: center;
-  color: #002D40;
+  color: #002d40;
   position: relative;
   left: 15px;
   margin: 0;
 }
 
 .tax-name-input {
-  width: 100%;
-  height: 33px;
-  padding-right: 35px; /* space for arrow */
-  padding-left: 5px;
-  padding-bottom: 5px;
+  display: flex;
+  width: 360px;
+  height: 32px;
   border: none;
+  padding: 0 5px 5px 5px;
+  align-items: center;
+  gap: 5px;
   border-bottom: 1.5px solid #006088;
-  border-radius: 0;
+  border-radius: 5px;
+  color: #3d3d3d;
+  flex: 1 0 0;
+  font-family: "Instrument Sans";
   font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 26px;
   outline: none;
   box-sizing: border-box;
   background-color: transparent;
-  font-family: sans-serif;
-  
+
+  padding-right: 35px;
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
@@ -257,13 +245,13 @@
   width: 100%;
   max-width: 100%;
   height: 21px;
-  font-family: 'Instrument Sans', sans-serif;
+  font-family: "Instrument Sans", sans-serif;
   font-style: normal;
   font-weight: 400;
   font-size: 16px;
   line-height: 21px;
   text-align: center;
-  color: #002D40;
+  color: #002d40;
   flex: none;
   order: 1;
   align-self: stretch;
@@ -280,7 +268,7 @@
   gap: 5.51px;
   width: 105px;
   height: 21px;
-  background: #002D40;
+  background: #002d40;
   border-radius: 12px;
   position: relative;
   left: 15px;
@@ -291,7 +279,7 @@
 .upload-file-button {
   width: 80px;
   height: 15px;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-style: normal;
   font-weight: 500;
   font-size: 16px;
@@ -299,7 +287,7 @@
   display: flex;
   align-items: center;
   text-align: center;
-  color: #FFFFFF;
+  color: #ffffff;
   flex: none;
   order: 0;
   flex-grow: 0;
@@ -321,8 +309,10 @@
 }
 
 .selected-file-text {
-  color: #002D40;
-  font-family: Álvaro Sans, sans-serif;
+  color: #002d40;
+  font-family:
+    Álvaro Sans,
+    sans-serif;
   font-size: 13px;
   margin-top: 8px;
   text-align: center;
@@ -333,164 +323,130 @@
 }
 
 .x-btn {
-  position: absolute;
-  top: 15px;
-  right: 20px;
-
-  font-size: 22px;
-  color: #002D40;
-  background: none;
+  display: flex;
+  height: 30px;
+  padding: 23px 16px 14px 954px;
+  padding-bottom: 20px;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 10px;
+  flex-shrink: 0;
+  align-self: stretch;
   border: none;
-  cursor: pointer;
+  font-size: 30px;
 
-  transition: transform 0.2s ease, color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    color 0.2s ease;
 }
 
 .x-btn:hover {
-  transform: scale(1.2);
+  color: #5f864c;
+}
+
+/* ----------------------- Active tax table section ----------------------- */
+.wrap-container {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%; /* make it responsive */
+  max-width: 1441px;
+  box-sizing: border-box;
+  padding-left: 60px;    /* move wrapper to the left */
+  padding-right: 10px; /* optional right padding */ /* responsive padding */
+  overflow: visible;
+  position: relative;
+}
+
+.heading-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* left and right alignment */
+  width: 100%; /* responsive width */
+  height: 69px;
+  min-height: 75px;
+  gap: 90px;
+  box-sizing: border-box;
+  font-family: "Anek Bangla", sans-serif;
+  font-weight: 700;
+  font-size: 36px;
+  line-height: 100%;
+  letter-spacing: 2%;
   color: #006088;
 }
 
-.company-heading-container {
-  display: grid;
-  width: 1496px;
-  height: 50px;
-  padding-left: 50px;
-  column-gap: 10px;
-  flex-shrink: 0;
-  grid-template-rows: 69px 46px;
-  grid-template-columns: repeat(2,minmax(0,1fr));
-}
-
-.heading{
- display: flex;
- align-items: flex-end;
- gap: 10px;
- align-self: stretch;
- grid-row: 1 / span 1;
- grid-column: 1/ span 1;
- justify-self: stretch;
- color: #006088;
- font-family: 'Anek Bangla';
- font-size: 36px;
- font-style: normal;
- font-weight: 700;
- line-height: normal;
- letter-spacing: 0.72px;
-
-}
-
-/* Icon container */
 .icon {
   display: flex;
-  justify-content: flex-end; 
+  flex-direction: row;
+  gap: 20px;
   align-items: center;
-  gap: 33px;
-  position: relative;     
-  top: 0;                 
-  right: -43%;                
-  height: 100%;            
-  padding-right: 20px;     
-  flex-wrap: wrap;          
-  z-index: 1000;           
-}
-
-/* Utility boxes inside icon group */
-.util-box, .m-box, .s-box {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-radius: 6px;
-  padding: 6px 11px;
-  box-sizing: border-box;
-}
-
-.util-box {
-  background-color: #7878801F;
-  font-family: 'League Spartan', sans-serif;
-  font-weight: 400;
-  font-size: 20px;
-  line-height: 22px;
-  letter-spacing: -0.43px;
-  color: #355867;
-  min-width: 32px;
-}
-
-.m-box {
-  min-width: 109px;
-}
-
-.s-box {
-  min-width: 74px;
+  justify-content: flex-end; /* aligns icons to the right */
+  padding: 0; /* remove fixed padding */
+  width: auto; /* width adjusts based on content */
 }
 
 /* Responsive adjustments */
-@media (max-width: 1440px) {
+@media (max-width: 1200px) {
+  .heading-container {
+    font-size: 28px;
+    gap: 20px;
+  }
   .icon {
-    right: -35%;
-    gap: 30px;
-  }
-}
-
-@media (max-width: 1024px) {
-   .icon {
-    right: -25%;
-    gap: 25px;
-    padding-right: 15px;
-  }
-  .util-box, .m-box, .s-box {
-    font-size: 18px;
-    padding: 5px 10px;
+    gap: 16px;
   }
 }
 
 @media (max-width: 768px) {
-   .icon {
-    right: -15%;
-    gap: 20px;
-    padding-right: 10px;
+  .heading-container {
+    font-size: 22px;
+    gap: 12px;
+    flex-direction: column;
+    align-items: flex-start;
+    height: auto;
   }
-  .util-box, .m-box, .s-box {
-    font-size: 16px;
-    padding: 4px 8px;
-    min-width: auto; /* shrink on mobile */
-  }
-
-  @media (max-width: 480px) {
   .icon {
-    right: -5%;
-    gap: 15px;
-    padding-right: 5px;
-    flex-wrap: wrap;
-    }
+    width: 100%;
+    justify-content: flex-end;
+    margin-top: 10px;
   }
 }
 
-/* ----------------------- Active tax table section ----------------------- */
+@media (min-width: 1600px) {
+  .heading-container {
+    font-size: 40px;
+    gap: 40px;
+  }
+  .icon {
+    gap: 28px;
+  }
+}
+
 .card-container {
   background: #ffffff;
   padding: 0;
-  margin-top: 70px;
+  margin-top: 40px;
   border-radius: 12px;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.08);
   overflow: hidden;
-  width: 93.2%;
+  width: 81%;
+  min-height: 90px;
   position: relative;
   left: 60px;
+  
 }
 
 /* Header */
 .card-header {
-  background-color: #C7D9E5;
+  background-color: #c7d9e5;
   height: 65px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 20px;
-  font-family: 'Anek Bangla', sans-serif;
+  font-family: "Anek Bangla", sans-serif;
   font-size: 22px;
   font-weight: 500;
-  color: #002D40;
+  color: #002d40;
   padding: 16px 13px;
   gap: 10px;
 }
@@ -515,7 +471,7 @@
   font-size: 18px;
   font-style: bold;
   font-weight: 700;
-  font-family: 'Anek Bangla';
+  font-family: "Anek Bangla";
   letter-spacing: 2%;
 }
 
@@ -545,15 +501,15 @@
 }
 
 .label {
-  color: #002D40;
-  font-family: 'Anek Bangla';
+  color: #002d40;
+  font-family: "Anek Bangla";
   font-weight: 500;
   font-size: 20px;
   line-height: 100%;
   letter-spacing: 2%;
 }
 
-.label1{
+.label1 {
   color: #b9aaaa;
 }
 
@@ -582,14 +538,14 @@
 .date-value {
   color: #355867;
   font-weight: 500;
-  font-family: 'Anek Bangla';
+  font-family: "Anek Bangla";
   font-size: 20px;
   line-height: 100%;
   letter-spacing: 2%;
   justify-content: center;
 }
 
-.label-effective-label{
+.label-effective-label {
   color: #355867;
   font-weight: 400;
   font-style: normal;
@@ -619,12 +575,12 @@
 .custom-table td {
   padding: 15px 20px;
   border-bottom: 1px solid #eee;
-  color: #002D40;
+  color: #002d40;
   text-align: left;
   vertical-align: middle;
   font-size: 16px;
   font-weight: 500;
-  font-family: 'Anek Bangla' ;
+  font-family: "Anek Bangla";
   font-style: normal;
   line-height: 18px;
 }
@@ -635,7 +591,7 @@
 
 /* View Link */
 .view-link {
-  color: #002D40;
+  color: #002d40;
   font-weight: 500;
   text-decoration: none;
 }
@@ -663,12 +619,12 @@
   width: 100px;
   height: 40px;
   border-radius: 10px;
-  padding: 5px 10px ;
+  padding: 5px 10px;
   gap: 10px;
   opacity: 90%;
   font-size: 14px;
   color: #638549;
-  font-family: 'Anek Bangla';
+  font-family: "Anek Bangla";
   font-weight: 700;
   font-size: 16px;
   line-height: 100%;
@@ -698,25 +654,25 @@
   cursor: not-allowed;
 }
 
-.status-active{
+.status-active {
   width: 64px;
   height: 20px;
   color: #638549;
   border-radius: 10px;
-  font-family: 'Anek Bangla';
+  font-family: "Anek Bangla";
   font-size: 16px;
   font-weight: 500;
   opacity: 90%;
 }
 
-.status{
-  color: #002D40;
+.status {
+  color: #002d40;
   width: 64px;
   height: 20px;
   top: -3px;
   left: 14px;
   position: relative;
-  font-family: 'Anek Bangla';
+  font-family: "Anek Bangla";
   font-weight: 500;
   font-size: 16px;
   line-height: 100%;
@@ -728,9 +684,8 @@
   color: #d32f2f;
   font-size: 13px;
   margin-top: 6px;
-  font-family: 'League Spartan', sans-serif;
+  font-family: "League Spartan", sans-serif;
 }
 .tax-name-input.error {
   border: 1px solid #d32f2f;
 }
-

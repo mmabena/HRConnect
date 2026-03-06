@@ -1,12 +1,12 @@
-import axios from "axios";
+import api from "./api.js";
 import { toast } from "react-toastify";
 
-const API_BASE = "http://localhost:5037/api/employee";
+const API_BASE = "http://localhost:5147/api/employee";
 
 /// </summary>
 /// Add a response interceptor to handle empty responses gracefully
 /// </summary>
-axios.interceptors.response.use(
+api.interceptors.response.use(
   (response) => {
     /// </summary>
     /// If response data is an empty string, replace it with null to avoid JSON parse errors
@@ -27,7 +27,7 @@ axios.interceptors.response.use(
 
 export const addEmployee = async (employee) => {
   try {
-    const response = await axios.post(`${API_BASE}/add`, employee, {
+    const response = await api.post(`${API_BASE}/add`, employee, {
       headers: { "Content-Type": "application/json" },
     });
 
@@ -48,7 +48,7 @@ export const addEmployee = async (employee) => {
 
 export const editEmployee = async (employeeNumber, employee) => {
   try {
-    const response = await axios.put(
+    const response = await api.put(
       `${API_BASE}/edit/${employeeNumber}`,
       employee,
       {
@@ -69,7 +69,7 @@ export const editEmployee = async (employeeNumber, employee) => {
 
 export const fetchEmployeeByIdNumber = async (idNumber) => {
   try {
-    const response = await axios.get(
+    const response = await api.get(
       `${API_BASE}/by-idnumber/${encodeURIComponent(idNumber)}`
     );
 
@@ -100,7 +100,7 @@ export const fetchEmployeeByIdNumber = async (idNumber) => {
 export const GetEmployeeByEmployeeNumberAsync = async (employeeNumber) => {
   try {
     const encoded = encodeURIComponent(employeeNumber);
-    const response = await axios.get(
+    const response = await api.get(
       `${API_BASE}/by-employee-number/${encoded}`
     );
     return response.data || {};
@@ -112,7 +112,7 @@ export const GetEmployeeByEmployeeNumberAsync = async (employeeNumber) => {
 
 export const fetchAllEmployees = async () => {
   try {
-    const response = await axios.get(`${API_BASE}/all`);
+    const response = await api.get(`${API_BASE}`);
     return response.data || [];
   } catch (error) {
     if (error.response) {
@@ -317,7 +317,7 @@ export const handleFileChange = async (
       formData.append("upload_preset", "unsigned_preset");
       formData.append("folder", "samples/ecommerce");
 
-      const response = await axios.post(
+      const response = await api.post(
         "https://api.cloudinary.com/v1_1/djmafre5k/image/upload",
         formData
       );

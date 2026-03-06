@@ -3,9 +3,8 @@ import api from "../../../api/api.js";
 import "../../../styles/global.css";
 import TaxTableUpload from "./TaxTableUpload";
 import NavBar from "../../NavBar.jsx";
-import NotificationBell from "../../NotificationBell/NotificationBell.jsx";
 
-function TaxTableManagement({currentUser}) {
+function TaxTableManagement({ currentUser }) {
   const [activeTable, setActiveTable] = useState(null);
   const [futureTable, setFutureTable] = useState(null);
   const [previousTables, setPreviousTables] = useState([]);
@@ -14,7 +13,6 @@ function TaxTableManagement({currentUser}) {
   const [currentTime, setCurrentTime] = useState("");
   const [currentDate, setCurrentDate] = useState("");
 
-  
   const fetchTaxTables = useCallback(async () => {
     try {
       const response = await api.get("/taxtableupload");
@@ -39,32 +37,32 @@ function TaxTableManagement({currentUser}) {
           effectiveDateString: t.effectiveFrom.split("T")[0], // strip time
         }))
         .sort((a, b) =>
-          b.effectiveDateString.localeCompare(a.effectiveDateString)
+          b.effectiveDateString.localeCompare(a.effectiveDateString),
         );
 
       /* -------- ACTIVE TABLE --------
-      */
+       */
       const activeCandidates = normalized
-      .filter((t) => t.effectiveDateString <= todayString)
-      .sort((a, b) =>
-        b.effectiveDateString.localeCompare(a.effectiveDateString)
-      );
+        .filter((t) => t.effectiveDateString <= todayString)
+        .sort((a, b) =>
+          b.effectiveDateString.localeCompare(a.effectiveDateString),
+        );
 
       const active = activeCandidates[0] || null;
 
-    const futureCandidates = normalized
-      .filter((t) => t.effectiveDateString > todayString)
-      .sort((a, b) =>
-        a.effectiveDateString.localeCompare(b.effectiveDateString)
-      );
+      const futureCandidates = normalized
+        .filter((t) => t.effectiveDateString > todayString)
+        .sort((a, b) =>
+          a.effectiveDateString.localeCompare(b.effectiveDateString),
+        );
 
       const future = futureCandidates[0] || null;
 
       /* -------- PREVIOUS TABLES --------
-      */
+       */
       const previous = active
         ? normalized.filter(
-            (t) => t.effectiveDateString < active.effectiveDateString
+            (t) => t.effectiveDateString < active.effectiveDateString,
           )
         : [];
 
@@ -95,14 +93,14 @@ function TaxTableManagement({currentUser}) {
           hour: "numeric",
           minute: "2-digit",
           hour12: true,
-        })
+        }),
       );
       setCurrentDate(
         now.toLocaleDateString("en-US", {
           year: "numeric",
           month: "short",
           day: "numeric",
-        })
+        }),
       );
     };
 
@@ -120,47 +118,27 @@ function TaxTableManagement({currentUser}) {
       year: "numeric",
     });
 
-  const taxRange = (year) =>
-    `March ${year} - February ${Number(year) + 1}`;
+  const taxRange = (year) => `March ${year} - February ${Number(year) + 1}`;
 
-
-  // Determine if admin should get "Add new tax table" notification
-  const showTaxTableNotification = () => {
-    if (!currentUser) return false;
-    if (!["admin", "superuser"].includes(currentUser.role.toLowerCase())) return false;
-
-    const today = new Date();
-    const month = today.getMonth(); // 0 = Jan, 1 = Feb, ...
-    const year = today.getFullYear();
-
-    // Check if active table exists for current year
-    const activeYear = activeTable?.taxYear;
-
-    // Show notification if it's Jan (month === 0) and no table exists for this year
-    return month === 0 && activeYear !== year;
-  };
-  
   return (
     <div className="menu-background custom-scrollbar">
-      <div className="wrapper-container">
-        <div className="company-heading-container">
-          <span className="heading">Comapany Management</span> 
+      <div className="wrap-container">
+        <div className="heading-container">
+          Comapany Management
           <div className="icon">
-            
-            <NotificationBell 
-              currentUser={currentUser} 
-              notifications={showTaxTableNotification() ? [
-                { id: 1, role: currentUser.role, message: "Please upload the tax table for this year" }
-              ] : []} 
-            />            
-
-            <div className="util-box m-box">{currentDate}</div>
-            <div className="util-box s-box">{currentTime}</div>
+            <img
+              src="/images/notifications.png"
+              alt="Notification Icon"
+              className="heading-icon"
+            />
+            <div className="utility-box large-box">{currentDate}</div>
+            <div className="utility-box small-box">{currentTime}</div>
           </div>
         </div>
       </div>
-
-      <NavBar />
+      <div className="navbar-with-button">
+        <NavBar />
+      </div>
 
       {/* ================= ACTIVE SECTION ================= */}
       <div className="card-container">
@@ -181,18 +159,12 @@ function TaxTableManagement({currentUser}) {
                 <span className="label">Status:</span>
 
                 {futureTable ? (
-                  <span className="status-badge uploaded">
-                    Uploaded
-                  </span>
+                  <span className="status-badge uploaded">Uploaded</span>
                 ) : (
-                  <span className="status-badge active">
-                    Active
-                  </span>
+                  <span className="status-badge active">Active</span>
                 )}
 
-                <span className="label effective-label">
-                  Effective Date:
-                </span>
+                <span className="label effective-label">Effective Date:</span>
 
                 <span className="date-value">
                   {futureTable
@@ -218,9 +190,7 @@ function TaxTableManagement({currentUser}) {
                     <td>{futureTable.taxYear}</td>
                     <td>{taxRange(futureTable.taxYear)}</td>
                     <td>
-                      <span className="status">
-                            -
-                      </span>
+                      <span className="status">-</span>
                     </td>
                   </tr>
                 )}
@@ -231,9 +201,7 @@ function TaxTableManagement({currentUser}) {
                     <td>{activeTable.taxYear}</td>
                     <td>{taxRange(activeTable.taxYear)}</td>
                     <td>
-                      <span className="status-active">
-                        Active
-                      </span>
+                      <span className="status-active">Active</span>
                     </td>
                   </tr>
                 )}

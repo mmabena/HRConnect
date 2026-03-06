@@ -1,8 +1,16 @@
 .neo-nav {
-  padding: 14px 3.2%;
+  padding-left: 40px;
   position: sticky;
   top: 0;
   z-index: 1000;
+}
+
+.navbar-with-button {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 24px;
+    margin-top: 20px;
 }
 
 /* INNER CONTAINER */
