@@ -614,7 +614,7 @@
           validationErrors["Validation"] = new[] { validationResult.ErrorMessage };
         }
 
-        throw new ValidationException(
+        throw new Middleware.ValidationException(
           validationResult.ErrorMessage ?? "Validation failed",
           validationErrors);
       }

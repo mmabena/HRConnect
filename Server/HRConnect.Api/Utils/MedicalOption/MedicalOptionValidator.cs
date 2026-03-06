@@ -1947,7 +1947,7 @@ private static BulkValidationResult ValidateNetworkChoiceChildContributions(
   IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto,
   List<MedicalOption> dbData) // Add dbData parameter
 {
-  var result = new BulkValidationResult();
+  var result = new BulkValidationResult(){IsValid = true};
 
   try {
     // Only apply to Network Choice variants
