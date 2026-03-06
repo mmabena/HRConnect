@@ -3,7 +3,7 @@ namespace HRConnect.Api.Repository
   using HRConnect.Api.DTOs.Payroll;
   using HRConnect.Api.Mappers.Payroll;
   using HRConnect.Api.Data;
-  using HRConnect.Api.Models;
+  using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Interfaces;
   using Microsoft.EntityFrameworkCore;
 
@@ -21,8 +21,15 @@ namespace HRConnect.Api.Repository
         return null;
       return period.ToPayrollPeriodDto();
     }
+    /*Active period depends on the financial year. April-March*/
+
     public async Task<PayrollPeriod> GetActivePeriod(DateTime dateTime)
-    { throw new NotImplementedException(); }
+    {
+      return await _context.PayrollPeriods.FirstOrDefaultAsync(
+         p => p.StartDate <= dateTime &&
+         p.EndDate >= dateTime)!;
+    }
+
     public async Task<PayrollPeriodDto> CreatePeriodAsync(PayrollPeriod payrollPeriod)
     {
       await _context.PayrollPeriods.AddAsync(payrollPeriod);

@@ -2,7 +2,7 @@ namespace HRConnect.Api.Models.Payroll
 {
   using System.ComponentModel.DataAnnotations;
 
-  public class PayrollRecord
+  public abstract class PayrollRecord
   {
     [Key]
     public int PayrollRecordId { get; set; }

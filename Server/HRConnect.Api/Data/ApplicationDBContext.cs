@@ -1,6 +1,7 @@
 namespace HRConnect.Api.Data
 {
   using HRConnect.Api.Models;
+  using HRConnect.Api.Models.Payroll;
   using Microsoft.EntityFrameworkCore;
 
   public class ApplicationDBContext(DbContextOptions dbContextOptions) : DbContext(dbContextOptions)
@@ -104,6 +105,10 @@ namespace HRConnect.Api.Data
       modelBuilder.Entity<PayrollRun>().HasMany(p => p.Records)
       .WithOne()
       .HasForeignKey(p => p.PayrollRunId);
+
+      modelBuilder.Entity<PayrollRun>()
+      .Property(p => p.PayrollRunId)
+      .ValueGeneratedNever();//PayrollRunId is not a regular Id
     }
     //Override 'SaveChangesAsync' for Payroll Records to enforce locked records on a payroll run 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
