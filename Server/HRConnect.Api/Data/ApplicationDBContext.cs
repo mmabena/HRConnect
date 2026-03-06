@@ -2,6 +2,7 @@ namespace HRConnect.Api.Data
 {
   using HRConnect.Api.Models;
   using Microsoft.EntityFrameworkCore;
+
   public class ApplicationDBContext(DbContextOptions dbContextOptions) : DbContext(dbContextOptions)
   {
     public DbSet<User> Users { get; set; }
@@ -18,6 +19,9 @@ namespace HRConnect.Api.Data
     public DbSet<StatutoryContribution> StatutoryContributions { get; set; }
     public DbSet<AuditLogs> AuditLogs { get; set; }
     public DbSet<StatutoryContributionType> StatutoryContributionTypes { get; set; }
+    public DbSet<PayrollPeriod> PayrollPeriods { get; set; }
+    public DbSet<PayrollRun> PayrollRuns { get; set; }
+    public DbSet<PayrollRecord> PayrollRecords { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -34,7 +38,6 @@ namespace HRConnect.Api.Data
           .WithMany(e => e.Subordinates)
           .HasForeignKey(e => e.CareerManagerID)
           .OnDelete(DeleteBehavior.Restrict);
-
 
       // Position - OccupationalLevel
       modelBuilder.Entity<Position>()
@@ -93,6 +96,31 @@ namespace HRConnect.Api.Data
       modelBuilder.Entity<StatutoryContributionType>().Property(e => e.EmployerRate)
         .HasColumnType("decimal(18,4)")
         .HasDefaultValue(0.01m);
+
+      modelBuilder.Entity<PayrollPeriod>().HasMany(p => p.Runs)
+      .WithOne()
+      .HasForeignKey(p => p.PeriodId);
+
+      modelBuilder.Entity<PayrollRun>().HasMany(p => p.Records)
+      .WithOne()
+      .HasForeignKey(p => p.PayrollRunId);
+    }
+    //Override 'SaveChangesAsync' for Payroll Records to enforce locked records on a payroll run 
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+      //Intercept all instances of saving to db
+      var modifiedRecords = ChangeTracker.Entries<PayrollRecord>()
+      .Where(e => e.State == EntityState.Modified);
+
+      foreach (var e in modifiedRecords)
+      {
+        //Any locked record/entity should be under a Hard Lock. Don't allow any changes
+        if (e.Entity.IsLocked)
+        {
+          throw new InvalidOperationException("Record under Hard Lock. Cannot be modified");
+        }
+      }
+      return await base.SaveChangesAsync(cancellationToken);
     }
   }
 }

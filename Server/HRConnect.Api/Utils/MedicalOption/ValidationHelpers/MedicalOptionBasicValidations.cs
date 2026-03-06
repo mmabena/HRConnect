@@ -16,7 +16,7 @@
     /// <param name="dateTime"></param>
     public static bool ValidateUpdatePeriod(DateTime dateTime)
     {
-      dateTime = DateTime.Now;
+      // dateTime = DateTime.Now;
       return DateRangeUpdatePeriod.CategoryOptionsUpdatePeriod.Contains(dateTime);
     }
 
@@ -31,14 +31,15 @@
     /// <summary>
     /// Validates if all medical option IDs in the payload exist in the database
     /// </summary>
-    public static async Task<bool> ValidateAllIdsExistAsync(
+    public static bool ValidateAllIdsExistAsync(
       IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto,
-      IMedicalOptionRepository repository,List<MedicalOption> dbData)
+      IMedicalOptionRepository repository, List<MedicalOption> dbData)
     {
       var existingIds = dbData.Select(o => o.MedicalOptionId).ToHashSet();
-  
-      foreach (var entity in bulkUpdateDto) {
-        if (!existingIds.Contains(entity.MedicalOptionId)) 
+
+      foreach (var entity in bulkUpdateDto)
+      {
+        if (!existingIds.Contains(entity.MedicalOptionId))
           // In-memory check
           return false;
       }
@@ -49,16 +50,17 @@
     /// <summary>
     /// Validates if all entities belong to the specified category
     /// </summary>
-    public static async Task<bool> ValidateAllIdsInCategoryAsync(
+    public static bool ValidateAllIdsInCategoryAsync(
       IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto,
       int categoryId,
       IMedicalOptionRepository repository, List<MedicalOption> dbData)
     {
       var categoryOptions = dbData
         .Where(o => o.MedicalOptionCategoryId == categoryId).ToHashSet();
-  
-      foreach (var entity in bulkUpdateDto) {
-        if (!categoryOptions.Any(o => o.MedicalOptionId == entity.MedicalOptionId)) 
+
+      foreach (var entity in bulkUpdateDto)
+      {
+        if (!categoryOptions.Any(o => o.MedicalOptionId == entity.MedicalOptionId))
           // In-memory check
           return false;
       }
