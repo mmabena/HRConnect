@@ -184,7 +184,10 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
-
+//This is to ensure the Payroll Run Ids are set correctly on app startup
+var scope = app.Services.CreateScope();
+var payrunservice = scope.ServiceProvider.GetRequiredService<ParyollRunService>();
+await payrunservice.CreatePayrollRunAsync(new HRConnect.Api.Models.Payroll.PayrollRun());
 if (app.Environment.IsDevelopment())
 {
   app.UseSwagger();
