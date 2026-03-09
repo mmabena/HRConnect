@@ -9,7 +9,7 @@
   - Table styles: .styled-table, .user-table, .empty-table-message, .action-buttons
   - Modal styles: .actions-modal, .actions-modal-overlay, .actions-modal-header, .actions-modal-content, .toast-confirm-containers, .toast-confirm-buttons
   - Typography: .page-title, .instruction-text, .back-to-login, .footer-text
-  - Backgrounds: .full-screen-bg, .signin-container, .edit-employee-background
+  - Backgrounds: .full-screen-bg, .signin-container, .menu-background
   
   Component-specific overrides and custom variations are preserved below.
   For shared styles, always use classes from styles/global.css

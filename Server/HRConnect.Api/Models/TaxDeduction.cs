@@ -1,5 +1,8 @@
 namespace HRConnect.Api.Models
 {
+  using System.ComponentModel.DataAnnotations.Schema;
+
+  [Table("TaxDeductions")]
   public class TaxDeduction
   {
     public int Id { get; set; }

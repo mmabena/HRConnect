@@ -132,16 +132,16 @@ const ForgotPassword = ({ onBackToLogin }) => {
 
       <div className="auth-content">
         <div className="column left-column">
-          <div className="left-inner-column" style={{ marginLeft: '50px' }}>
+          <div className="left-inner-column">
             <div className="adjusted-content">
-              <div className="welcome-text">Forgot Password?</div>
+              <div className="forgot-password-heading">Forgot Password?</div>
               <div className="log-details">
                 {/* Step 1: Enter Email */}
                 {step === 1 && (
                   <>
-                    <p style={{ marginBottom: '15px', fontSize: '0.95rem' }}>
+                    <h2 className="forgot-ins">
                       Enter your email to receive a password reset PIN.
-                    </p>
+                    </h2>
                     <div className="input-group">
                       <img src="/images/mail2.svg" alt="email icon" className="input-icon-mail" />
                       <input
@@ -159,7 +159,7 @@ const ForgotPassword = ({ onBackToLogin }) => {
                 {/* Step 2: Enter PIN */}
                 {step === 2 && (
                   <>
-                    <p style={{ marginBottom: '15px', fontSize: '0.95rem' }}>
+                    <p>
                       Enter the 4-digit PIN sent to your email.
                     </p>
                     <div className="input-group">
@@ -247,11 +247,10 @@ const ForgotPassword = ({ onBackToLogin }) => {
                 </button>
 
                 <button
-                  className="forgot-password"
+                  className="forgot-password-reset"
                   onClick={onBackToLogin}
                   type="button"
                   disabled={loading}
-                  style={{ marginTop: '10px', border: 'none', background: 'none', color: '#1976d2', cursor: 'pointer', fontSize: '0.95rem' }}
                 >
                   Back to Login
                 </button>
@@ -261,9 +260,9 @@ const ForgotPassword = ({ onBackToLogin }) => {
         </div>
         <div className="column right-column">
           <img
-            src="/images/iMAGEgENFORWEB.svg"
+            src="/images/password_image.png"
             alt="Image Gen For Web"
-            className="right-column-image"
+            className="forgot-column-image"
           />
         </div>
       </div>
