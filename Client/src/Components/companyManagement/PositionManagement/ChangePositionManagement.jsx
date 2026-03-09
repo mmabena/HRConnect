@@ -105,9 +105,9 @@ const ChangePositionManagement = ({ isOpen, onClose, currentPosition, linkedEmpl
           />
         </div>
 
-        <div className="apm-info-text">
-          <p>
-            This position currently has <b>{linkedEmployeesCount}</b> users assigned.
+        <div className="pm-info-text">
+          <p className="info-text">
+            This position currently has <b>{linkedEmployeesCount} users </b>assigned.
           </p>
         </div>
 

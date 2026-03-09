@@ -319,7 +319,7 @@ const ManageUserPositions = ({ title }) => {
               <img
                 src="/images/arrow_drop_down_circle.png"
                 alt="Dropdown Icon"
-                className="apm-dropdown-icon"
+                className="apm-dropdown-icon-new"
               />
             </div>
           </div>
@@ -351,7 +351,7 @@ const ManageUserPositions = ({ title }) => {
 
               <th>Branch</th>
               <th>Current Position</th>
-              <th>New Position</th>
+              <th>Position Title</th>
             </tr>
           </thead>
 
@@ -382,11 +382,7 @@ const ManageUserPositions = ({ title }) => {
 
                   <td>{employee.branch || "N/A"}</td>
                   <td>{positionMap[employee.positionId] || "N/A"}</td>
-                  <td>
-                    {selectedEmployees[employee.employeeId]
-                      ? positionMap[selectedPosition]
-                      : "-"}
-                  </td>
+                <td>{positionMap[selectedPosition] || "-"}</td>
                 </tr>
               ))
             )}

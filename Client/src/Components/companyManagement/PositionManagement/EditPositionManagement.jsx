@@ -162,6 +162,17 @@ const EditPositionManagement = ({ id, isOpen, onClose, onOpenChangeModal })  => 
   if (loading) return <h3>Loading...</h3>;
   if (!hasAccess) return <h2>Access Denied. SuperUser only.</h2>;
 
+  /*A FUNCTION FOR THE DATE */
+  const formatDate = (date) => {
+    if(!date) return "";
+
+    return new Date(date).toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "long",
+      year: "numeric"
+    });
+  };
+
   return (
     <div className="modal-overlay">
       <div className="modal-content-edit">
@@ -253,22 +264,39 @@ const EditPositionManagement = ({ id, isOpen, onClose, onOpenChangeModal })  => 
             />
           </div>
 
-          <div className="pm-input-group-edit">
-            <label className="title-placeholder-edit">Effective Date</label>
-            <input
-              type="date"
-              name="effectiveDate"
-              className="apm-input"
-              value={formData.effectiveDate}
-              onChange={handleChange}
-              required
-            />
-          </div>
+<div className="pm-input-group-edit date-input-wrapper">
+  <label className="title-placeholder-edit">
+    Effective Date
+  </label>
+
+  <div className="date-input-container">
+    <input
+      type="date"
+      name="effectiveDate"
+      className="apm-input date-input"
+      value={formData.effectiveDate}
+      onChange={handleChange}
+      required
+    />
+
+    {formData.effectiveDate && (
+      <span className="formatted-date-inside">
+        {formatDate(formData.effectiveDate)}
+      </span>
+    )}
+
+    <img
+      src="/images/date-picker-removebg-preview.png"
+      alt="Date picker"
+      className="date-picker-icon"
+    />
+  </div>
+</div>
 
           <button type="submit" className="apm-save-button">
             Save
           </button>
-          <div className="pm-footer">
+          <div className="pm-footer-edit">
             <p className="footer1">
               Privacy Policy &nbsp; | &nbsp; Terms & Conditions
             </p>

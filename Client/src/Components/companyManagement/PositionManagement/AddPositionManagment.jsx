@@ -6,7 +6,6 @@ import { toast } from "react-toastify";
 import "../../../Pages/CompanyManagement/PositionManagement/PositionManagement.css";
 
 const AddPositionManagement = ({ isOpen, onClose }) => {
-  // Hooks always first
   const [formData, setFormData] = useState({
     positionTitle: "",
     effectiveDate: "",
@@ -96,21 +95,19 @@ const AddPositionManagement = ({ isOpen, onClose }) => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-
           body: JSON.stringify({
             positionTitle: formData.positionTitle,
             jobGradeId: parseInt(formData.jobGradeId),
             occupationalLevelId: parseInt(formData.occupationalLevelId),
             createdDate: new Date().toISOString(),
           }),
-        },
+        }
       );
 
       if (!response.ok) throw new Error("Failed to create position");
       await response.json();
       toast.success("Position created successfully!");
 
-      // Reset form and close modal
       setFormData({
         positionTitle: "",
         effectiveDate: "",
@@ -125,7 +122,16 @@ const AddPositionManagement = ({ isOpen, onClose }) => {
     }
   };
 
-  if (!isOpen) return null; // only render when open
+  if (!isOpen) return null;
+
+  const formatDate = (date) => {
+    if (!date) return "";
+    return new Date(date).toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  };
 
   return (
     <div className="modal-overlay">
@@ -139,6 +145,7 @@ const AddPositionManagement = ({ isOpen, onClose }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="pm-form">
+          {/* Position Title */}
           <div className="pm-input-group-add">
             <input
               type="text"
@@ -146,21 +153,26 @@ const AddPositionManagement = ({ isOpen, onClose }) => {
               placeholder="Position title"
               value={formData.positionTitle}
               onChange={handleChange}
-              className={`pm-input-add ${errors.positionTitle ? "inputs-error" : ""}`}
+              className={`pm-input-add ${
+                errors.positionTitle ? "inputs-error" : ""
+              }`}
             />
           </div>
           {errors.positionTitle ? (
             <span className="error-texts">{errors.positionTitle}</span>
           ) : (
-            <span className="error-texts">&nbsp;</span> // empty space to reserve
+            <span className="error-texts">&nbsp;</span>
           )}
 
+          {/* Job Grade */}
           <div className="pm-input-group-add pm-dropdown-wrapper-add">
             <select
               name="jobGradeId"
               value={formData.jobGradeId}
               onChange={handleChange}
-              className={`pm-input-add ${errors.jobGradeId ? "inputs-error" : ""}`}
+              className={`pm-input-add ${
+                errors.jobGradeId ? "inputs-error" : ""
+              }`}
             >
               <option value="">Position Grade</option>
               {jobGrades
@@ -177,19 +189,21 @@ const AddPositionManagement = ({ isOpen, onClose }) => {
               className="apm-dropdown-icon"
             />
           </div>
-
           {errors.jobGradeId ? (
             <span className="error-texts">{errors.jobGradeId}</span>
           ) : (
-            <span className="error-texts">&nbsp;</span> // empty space to reserve
+            <span className="error-texts">&nbsp;</span>
           )}
 
+          {/* Occupational Level */}
           <div className="pm-input-group-add pm-dropdown-wrapper-add">
             <select
               name="occupationalLevelId"
               value={formData.occupationalLevelId}
               onChange={handleChange}
-              className={`pm-input-add  ${errors.occupationalLevelId ? "inputs-error" : ""}`}
+              className={`pm-input-add ${
+                errors.occupationalLevelId ? "inputs-error" : ""
+              }`}
             >
               <option value="">Occupational Description</option>
               {occupationalLevels
@@ -203,7 +217,6 @@ const AddPositionManagement = ({ isOpen, onClose }) => {
                   </option>
                 ))}
             </select>
-
             <img
               src="/images/arrow_drop_down_circle.png"
               alt="Dropdown Icon"
@@ -213,26 +226,55 @@ const AddPositionManagement = ({ isOpen, onClose }) => {
           {errors.occupationalLevelId ? (
             <span className="error-texts">{errors.occupationalLevelId}</span>
           ) : (
-            <span className="error-texts">&nbsp;</span> // empty space to reserve
+            <span className="error-texts">&nbsp;</span>
           )}
 
-          <div className="pm-input-group-add">
-            <input
-              type="date"
-              name="effectiveDate"
-              value={formData.effectiveDate}
-              onChange={handleChange}
-              className={`pm-input-add ${errors.effectiveDate ? "inputs-error" : ""}`}
-            />
+          {/* Effective Date with placeholder */}
+          <div className="pm-input-group-add ">
+            <div className="date-input-container">
+              {/* Hidden native date input */}
+              <input
+                type="date"
+                name="effectiveDate"
+                className="apm-input date-input hidden-date-picker"
+                value={formData.effectiveDate}
+                onChange={handleChange}
+              />
+
+              {/* Fake input to show placeholder / formatted date */}
+              <div
+                className={`apm-input fake-date-input ${
+                  errors.effectiveDate ? "inputs-error" : ""
+                }`}
+                onClick={() =>
+                  document.querySelector(".hidden-date-picker").showPicker()
+                }
+              >
+                {formData.effectiveDate
+                  ? formatDate(formData.effectiveDate)
+                  : "Effective Date"}
+              </div>
+
+              <img
+                src="/images/date-picker-removebg-preview.png"
+                alt="Date picker"
+                className="date-picker-icon"
+                onClick={() =>
+                  document.querySelector(".hidden-date-picker").showPicker()
+                }
+              />
+            </div>
           </div>
           {errors.effectiveDate ? (
             <span className="error-texts">{errors.effectiveDate}</span>
           ) : (
-            <span className="error-texts">&nbsp;</span> // empty space to reserve
+            <span className="error-texts">&nbsp;</span>
           )}
+
           <button type="submit" className="apm-save-button">
             Save
           </button>
+
           <div className="pm-footer">
             <p className="footer1">
               Privacy Policy &nbsp; | &nbsp; Terms & Conditions
