@@ -68,3 +68,9 @@ dotnet_code_quality_unused_parameters = all:error
 # Analyzer severity escalation
 #############################################
 dotnet_analyzer_diagnostic.severity = error
+
+#############################################
+# Suppress CA1720 for NoUpdateOnMedicalOptionCategory
+#############################################
+[**/NoUpdateOnMedicalOptionCategory.cs]
+dotnet_diagnostic.CA1720.severity = none

@@ -1,6 +1,8 @@
 import "./MenuBar.css";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
+import axios from "axios";
 
 const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   const [reportOpen, setReportOpen] = useState(false);
@@ -17,7 +19,11 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   const [activeIndex, setActiveIndex] = useState(null);
 
   //displaying user initials
-  const displayName = currentUser?.username || currentUser?.email || "User";
+  const displayName =
+  currentUser?.username ||
+  currentUser?.email ||
+  "User";
+  const [canProjectPension, setCanProjectPension] = useState(false);
 
   const initials = displayName
     .split(" ")
@@ -54,6 +60,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   const isUserManagementPage = location.pathname.startsWith("/userManagement");
 
 
+  const baseUrl = process.env.REACT_APP_API_BASE_URL;
 
   useEffect(() => {
     console.log("MenuBar user role:", role);
@@ -81,6 +88,55 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
     isEmployeeManagementPage,
     isUserManagementPage,
   ]);
+
+  useEffect(() => {
+    if(localStorage.getItem('currentUser') !== null && localStorage.getItem('currentUser') !== undefined) {
+      const token = localStorage.getItem('token');
+      const email = JSON.parse(localStorage.getItem('currentUser')).email;
+      const decodedTokenEmail = jwtDecode(token).sub;
+      if (decodedTokenEmail == email) {
+        try {
+          axios.get(`${baseUrl}/employee/email/${email}`, {
+              headers: {
+                  "Authorization": `Bearer ${token}`
+              }
+          })
+          .then(response => {
+              if (response.status === 200) {
+                  const employementStatus = response.data.employmentStatus;
+                  const employeeAge = response.data.dateOfBirth;
+                  if (employementStatus === 0 && (calculateAge(employeeAge) < 65)) {
+                    setCanProjectPension(true);
+                  }
+              } else {
+                  console.error("Unexpeted status:", response.status);
+              }
+          })
+          .catch(error => {
+              console.error("Error:", error);
+          });
+        } catch (error) {
+            console.error("Failed to fetch your employee details:", error)
+        }
+      } else {
+        console.error("User data may have changed without authorization");
+      }
+    }
+  }, [])
+
+  const calculateAge = (dateOfBirth) => {
+        let today = new Date();
+        let birthDate = new Date(dateOfBirth);
+        let age = today.getFullYear() - birthDate.getFullYear();
+        
+        if (today.getMonth() < birthDate.getMonth()) {
+            age--;
+        } else if ((today.getMonth() === birthDate.getMonth()) && (today.getDay() < birthDate.getDay())){
+            age--;
+        }
+
+        return age;
+    }
 
   useEffect(() => {
     const handleClickOutside = () => {
@@ -593,7 +649,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                   </span>
                 </span>
               </div>
-              {payrollOpen && (
+              {canProjectPension && payrollOpen && (
                 <ul className="submenu show">
                   <li>
                     <span

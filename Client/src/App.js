@@ -23,7 +23,8 @@ import TaxTableManagement from "./Components/companyManagement/TaxTableManagemen
 import ChangePassword from "./Components/ChangePassword";
 import MenuBar from "./Components/MenuBar/MenuBar";
 import EmployeeList from "./Pages/EmployeeManagement/EmployeeList";
-import PositionManagement from "./Pages/CompanyManagement/PositionManagement/PositionManagement";
+import PositionManagement from "./Pages/CompanyManagement/PositionManagement/PositionManagement"; 
+import ProjectionCalculator from "./Pages/PayrollTools/ProjectionCalculator";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -62,6 +63,7 @@ function App() {
   // FIXED: Use backend user object directly
  const handleLoginSuccess = (userWithToken) => {
   setCurrentUser(userWithToken);
+
    localStorage.setItem("currentUser", JSON.stringify(userWithToken));
    console.log("App currentUser:", userWithToken);
   setIsLoggedIn(true);
@@ -99,27 +101,32 @@ function App() {
  <div>
  <ToastContainer position="top-right" autoClose={3000} />
  <Routes>
-        <Route path="/dashboard" element={<div>Welcome to Dashboard</div>} />
-        <Route path="/addEmployee" element={<AddEmployee />} />
-        <Route path="/editEmployee" element={<EditEmployee />} />
-        <Route path="/editEmployee/:employeeNumber" element={<EditEmployee />} />
-        <Route path="/addCompany" element={<AddCompany />} />
-        <Route path="/companyManagement" element={<CompanyManagement/>} />
-        <Route path="/editCompany/:id" element={<EditCompany />} />
-        <Route path="/employeeList" element={<EmployeeList />} />
-        <Route path="/company-contribution" element={<CompanyContribution />} />
-        <Route path="/userManagement" element={<UserManagement />} /> 
-         <Route path="/taxTableManagement" element={<TaxTableManagement />} />
-         <Route path="/taxTableUpload" element={<TaxTableUpload />} />
-        <Route path="/positionManagement" element={<PositionManagement />} />
-        <Route path="/addPositionManagement" element={<AddPositionManagement />} />
-        <Route path="/editPositionManagement/:id" element={<EditPositionManagement />} />
-        <Route path="/viewPositionManagement/:id" element={<ViewPositionManagement />} />
-        <Route path="/profile" element={<Profile currentUser={currentUser} />}/>
-        <Route path="/company-contribution" element={<CompanyContribution />} />
-         <Route path="/compensationPlanning" element={<CompensationPlanning />} />
-          <Route path="/changepassword" element={<ChangePassword currentUser={currentUser}/>} />
- </Routes>
+      <Route path="/dashboard" element={<div>Welcome to Dashboard</div>} />
+      <Route path="/addEmployee" element={<AddEmployee />} />
+      <Route path="/editEmployee" element={<EditEmployee />} />
+      <Route path="/editEmployee/:employeeNumber" element={<EditEmployee />} />
+      <Route path="/addCompany" element={<AddCompany />} />
+      <Route path="/companyManagement" element={<CompanyManagement/>} />
+      <Route path="/editCompany/:id" element={<EditCompany />} />
+      <Route path="/employeeList" element={<EmployeeList />} />
+      <Route path="/company-contribution" element={<CompanyContribution />} />
+      <Route path="/userManagement" element={<UserManagement />} /> 
+      <Route path="/taxTableManagement" element={<TaxTableManagement />} />
+      <Route path="/taxTableUpload" element={<TaxTableUpload />} />
+      <Route path="/positionManagement" element={<PositionManagement />} />
+      <Route path="/addPositionManagement" element={<AddPositionManagement />} />
+      <Route path="/editPositionManagement/:id" element={<EditPositionManagement />} />
+      <Route path="/viewPositionManagement/:id" element={<ViewPositionManagement />} />
+      <Route path="/profile" element={<Profile currentUser={currentUser} />}/>
+      <Route path="/company-contribution" element={<CompanyContribution />} />
+      <Route path="/compensationPlanning" element={<CompensationPlanning />} />
+      <Route path="/change-password" element={<ChangePassword currentUser={currentUser}/>} />
+      <Route 
+      path="/profile"
+        element={<Profile currentUser={currentUser} />}
+      />
+      <Route path="/projection-calculator" element={<ProjectionCalculator />} />
+  </Routes>
 
 </div>
  </div>
