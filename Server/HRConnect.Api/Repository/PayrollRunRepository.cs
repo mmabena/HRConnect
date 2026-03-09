@@ -46,24 +46,6 @@ namespace HRConnect.Api.Repository
       var payrun = await _context.PayrollRuns.FirstOrDefaultAsync(
         p => p.PeriodDate == dateTime);
       return payrun;
-      /*
-            //if this month doesn't have a run, create one
-            int lastRunId = await _context.PayrollRuns.OrderByDescending(r => r.PeriodDate)
-            .Select(r => r.PayrollRunId)
-            .FirstOrDefaultAsync();
-
-            int nextRunId = lastRunId + 1;
-            //wrap around the payrunId. We only have 12 runs per financial year
-            //Make sure that this aligns with the months
-            if (nextRunId > 12)
-              nextRunId = 1;
-            //Create a new payrun for the current payroll period
-            var newPayrun = new PayrollRun
-            {
-              PayrollRunId = nextRunId,
-              PeriodDate = dateTime
-            };
-            */
     }
     public async Task UpdateRunAsync(PayrollRun payrollRun)
     {

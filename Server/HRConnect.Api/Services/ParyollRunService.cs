@@ -28,10 +28,25 @@ namespace HRConnect.Api.Services
     public async Task<PayrollRunDto> CreatePayrollRunAsync(PayrollRun payrollRun)
     {
 
+      var exists = await _payrollRunRepo.GetCurrentRunAsync();
+
+      if (exists != null)
+        return exists.ToPayrollRunDto();
+
+      DateTime currentMonth = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
+
+      //maps current financial month to 1-12
+      var runId = ((currentMonth.Month + 8) % 12) + 1;
+      payrollRun.PayrollRunId = runId;
+      payrollRun.IsFinalised = false;
+      payrollRun.PeriodDate = currentMonth;
+
+      await _payrollRunRepo.CreatePayrollRunAsync(payrollRun);
+      return payrollRun.ToPayrollRunDto();
     }
     public async Task<PayrollRun?> GetRunByDateAsync(DateTime dateTime)
     {
-
+      throw new NotImplementedException();
     }
     public async Task<PayrollRun> GetCurrentRunAsync()
     {
@@ -39,11 +54,19 @@ namespace HRConnect.Api.Services
 
       if (payrun == null)
         return null;
+      return payrun;
+    }
 
+    public async Task AddRecordToCurrentRunAsync(PayrollRecord payrollRecord)
+    {
+      var currentRun = await _payrollRunRepo.GetCurrentRunAsync();
+      if (currentRun == null)
+        return;
+      currentRun.Records!.Add(payrollRecord); //records may be null
     }
     public async Task UpdateRunAsync(PayrollRun payrollRun)
     {
-
+      await _payrollRunRepo.UpdateRunAsync(payrollRun);
     }
   }
 }

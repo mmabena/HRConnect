@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
-using Resend;
+// using Resend;
 using HRConnect.Api.Interfaces;
 using HRConnect.Api.Middleware;
 using HRConnect.Api.Repositories;
@@ -18,6 +18,7 @@ using HRConnect.Api.Interfaces.PensionProjection;
 using Audit.Core;
 using Audit.EntityFramework;
 using Quartz;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -127,26 +128,42 @@ builder.Services.AddQuartz(q =>
   var jobKey = new JobKey("PayrollRolloverJob");
 
   //Add a service for to run as a background job 
-  q.AddJob<PayrollRolloverJob>(opts => opts.WithIdentity(jobKey));
+  q.AddJob<PayrollRolloverJob>(opts =>
+  opts.WithIdentity(jobKey)
+  .StoreDurably());
 
   //Triggers that will need to be fired to run background job
   // using Cron Schedule
   // Second, Minute, Hour, Day of The Month, Month, Day of The Week
   q.AddTrigger(opts => opts
   .ForJob(jobKey)
-  .WithIdentity("PayrollRolloverTrigger")
-  .WithCronSchedule("0 0 0 1 * ?"));
+  .WithIdentity("PayrollRollover-Trigger")
+  .WithCronSchedule("0 0 0 1 * ?", x =>
+  x.WithMisfireHandlingInstructionFireAndProceed())); //when a job misfire happens. 
+                                                      // Properly re-execute it and proceed as usual
+
   // 0 -> 0 seconds
   // 0 -> 0 minutes
   // 0 -> 0 hours
   // 1 -> first day of the year
   // * -> for any/every month 
   // ? -> for all days of the week
+
+  //Adding persistence to quartz to be able to be run in the back
+  q.UsePersistentStore(options =>
+  {
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!);
+    options.UseSerializer<Quartz.Simpl.SystemTextJsonObjectSerializer>();
+    options.UseProperties = true;
+  });
 });
+
 builder.Services.AddQuartzHostedService(q =>
 {
   q.WaitForJobsToComplete = true;
 });
+
+//Register payroll stuff
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();

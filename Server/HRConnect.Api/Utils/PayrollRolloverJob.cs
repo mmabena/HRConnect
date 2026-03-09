@@ -2,6 +2,9 @@ namespace HRConnect.Api.Utils
 {
   using HRConnect.Api.Interfaces;
   using Quartz;
+
+  // Prevent multiple of these jobs from running concurrently
+  [DisallowConcurrentExecution]
   public class PayrollRolloverJob : IJob
   {
     //payrollRun repo        
