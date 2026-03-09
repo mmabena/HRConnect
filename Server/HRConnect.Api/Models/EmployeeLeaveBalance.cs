@@ -18,11 +18,10 @@ namespace HRConnect.Api.Models
         public int LeaveTypeId { get; set; }
         public LeaveType LeaveType { get; set; } = null!;
 
-        public decimal EntitledDays { get; set; }
         public decimal AccruedDays { get; set; }
         public DateOnly? LastAccrualDate { get; set; }
 
-        public decimal UsedDays { get; set; }
+        public decimal TakenDays { get; set; }
         public decimal AvailableDays { get; set; }
         public decimal CarryoverDays { get; set; }
         public decimal ForfeitedDays { get; set; }

@@ -58,7 +58,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("EmployeeId");
 
-                    b.ToTable("AnnualLeaveAccrualHistories");
+                    b.ToTable("AnnualLeaveAccrualHistories", (string)null);
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.Employee", b =>
@@ -106,7 +106,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("PositionId");
 
-                    b.ToTable("Employees");
+                    b.ToTable("Employees", (string)null);
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.EmployeeAccrualRateHistory", b =>
@@ -135,11 +135,20 @@ namespace HRConnect.Api.Migrations
                     b.Property<Guid>("EmployeeId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("PositionId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PositionName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("EmployeeId");
 
-                    b.ToTable("EmployeeAccrualRateHistories");
+                    b.HasIndex("PositionId");
+
+                    b.ToTable("EmployeeAccrualRateHistories", (string)null);
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.EmployeeLeaveBalance", b =>
@@ -162,9 +171,6 @@ namespace HRConnect.Api.Migrations
                     b.Property<Guid>("EmployeeId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal>("EntitledDays")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<decimal>("ForfeitedDays")
                         .HasColumnType("decimal(18,2)");
 
@@ -186,7 +192,7 @@ namespace HRConnect.Api.Migrations
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion");
 
-                    b.Property<decimal>("UsedDays")
+                    b.Property<decimal>("TakenDays")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
@@ -196,7 +202,7 @@ namespace HRConnect.Api.Migrations
                     b.HasIndex("EmployeeId", "LeaveTypeId")
                         .IsUnique();
 
-                    b.ToTable("EmployeeLeaveBalances");
+                    b.ToTable("EmployeeLeaveBalances", (string)null);
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.JobGrade", b =>
@@ -216,7 +222,7 @@ namespace HRConnect.Api.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("JobGrades");
+                    b.ToTable("JobGrades", (string)null);
 
                     b.HasData(
                         new
@@ -296,7 +302,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("EmployeeId", "StartDate", "EndDate");
 
-                    b.ToTable("LeaveApplications");
+                    b.ToTable("LeaveApplications", (string)null);
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.LeaveEntitlementRule", b =>
@@ -337,7 +343,7 @@ namespace HRConnect.Api.Migrations
                     b.HasIndex("LeaveTypeId", "JobGradeId", "MinYearsService")
                         .IsUnique();
 
-                    b.ToTable("LeaveEntitlementRules");
+                    b.ToTable("LeaveEntitlementRules", (string)null);
 
                     b.HasData(
                         new
@@ -553,7 +559,7 @@ namespace HRConnect.Api.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("LeaveTypes");
+                    b.ToTable("LeaveTypes", (string)null);
 
                     b.HasData(
                         new
@@ -627,7 +633,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("PasswordHistories");
+                    b.ToTable("PasswordHistories", (string)null);
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.PasswordResetPin", b =>
@@ -660,7 +666,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("PasswordResetPins");
+                    b.ToTable("PasswordResetPins", (string)null);
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.Position", b =>
@@ -682,7 +688,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("JobGradeId");
 
-                    b.ToTable("Positions");
+                    b.ToTable("Positions", (string)null);
 
                     b.HasData(
                         new
@@ -747,7 +753,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.AnnualLeaveAccrualHistory", b =>
@@ -780,7 +786,15 @@ namespace HRConnect.Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("HRConnect.Api.Models.Position", "Position")
+                        .WithMany()
+                        .HasForeignKey("PositionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Employee");
+
+                    b.Navigation("Position");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.EmployeeLeaveBalance", b =>

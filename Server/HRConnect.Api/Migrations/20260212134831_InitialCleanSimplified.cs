@@ -191,9 +191,8 @@ namespace HRConnect.Api.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     EmployeeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     LeaveTypeId = table.Column<int>(type: "int", nullable: false),
-                    EntitledDays = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     AccruedDays = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    UsedDays = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TakenDays = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     AvailableDays = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
                 },
                 constraints: table =>

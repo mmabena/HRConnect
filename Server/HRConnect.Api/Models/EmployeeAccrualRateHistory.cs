@@ -6,22 +6,28 @@ namespace HRConnect.Api.Models
     using System.Linq;
     using System.Threading.Tasks;
     using System.ComponentModel.DataAnnotations.Schema;
-
     public class EmployeeAccrualRateHistory
     {
         public int Id { get; set; }
 
         public Guid EmployeeId { get; set; }
 
-        public decimal AnnualEntitlement { get; set; } // e.g. 15, 18
+        public int PositionId { get; set; }   
+        public string PositionName { get; set; } = string.Empty;
+
+        public decimal AnnualEntitlement { get; set; } 
+
         [Column(TypeName = "decimal(18,6)")]
-        public decimal DailyRate { get; set; } // cached value
+        public decimal DailyRate { get; set; } 
 
         public DateOnly EffectiveFrom { get; set; }
 
-        public DateOnly? EffectiveTo { get; set; } // null = active
+        public DateOnly? EffectiveTo { get; set; } 
 
         public DateTime CreatedDate { get; set; }
+
         public Employee? Employee { get; set; }
+
+        public Position? Position { get; set; }   
     }
 }

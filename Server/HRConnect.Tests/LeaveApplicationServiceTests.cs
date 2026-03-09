@@ -66,9 +66,9 @@ namespace HRConnect.Tests
             {
                 EmployeeId = employee.EmployeeId,
                 LeaveTypeId = 1,
-                EntitledDays = 10,
+                AccruedDays = 10,
                 AvailableDays = 10,
-                UsedDays = 0
+                TakenDays = 0
             });
 
             await context.SaveChangesAsync();
@@ -202,7 +202,7 @@ namespace HRConnect.Tests
 
             var balance = context.EmployeeLeaveBalances.First();
 
-            Assert.Equal(2, balance.UsedDays);
+            Assert.Equal(2, balance.TakenDays);
             Assert.Equal(8, balance.AvailableDays);
         }
 

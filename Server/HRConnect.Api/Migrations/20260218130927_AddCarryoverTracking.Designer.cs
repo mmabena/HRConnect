@@ -86,7 +86,7 @@ namespace HRConnect.Api.Migrations
                     b.Property<Guid>("EmployeeId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal>("EntitledDays")
+                    b.Property<decimal>("AccruedDays")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int?>("LastResetYear")
@@ -98,7 +98,7 @@ namespace HRConnect.Api.Migrations
                     b.Property<decimal>("AvailableDays")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("UsedDays")
+                    b.Property<decimal>("TakenDays")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");

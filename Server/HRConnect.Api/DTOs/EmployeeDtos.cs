@@ -37,8 +37,8 @@ namespace HRConnect.Api.DTOs
     public class LeaveBalanceSummary
     {
         public string LeaveType { get; set; } = null!;
-        public decimal EntitledDays { get; set; }
-        public decimal UsedDays { get; set; }
+        public decimal AccruedDays { get; set; }
+        public decimal TakenDays { get; set; }
         public decimal AvailableDays { get; set; }
     }
     public class UpdateLeaveRuleRequest
@@ -46,11 +46,11 @@ namespace HRConnect.Api.DTOs
         public int RuleId { get; set; }
         public decimal NewDaysAllocated { get; set; }
     }
-    public class UpdateUsedDaysRequest
+    public class UpdateTakenDaysRequest
     {
         public Guid EmployeeId { get; set; }
         public int LeaveTypeId { get; set; }
-        public decimal UsedDays { get; set; }
+        public decimal TakenDays { get; set; }
     }
     public class LeaveProjectionRequest
     {
@@ -61,8 +61,8 @@ namespace HRConnect.Api.DTOs
     {
         public string EmployeeName { get; set; } = string.Empty;
         public DateOnly ProjectionDate { get; set; }
-        public decimal ProjectedEntitledDays { get; set; }
-        public decimal UsedDays { get; set; }
+        public decimal ProjectedAccruedDays { get; set; }
+        public decimal TakenDays { get; set; }
         public decimal ProjectedAvailableDays { get; set; }
         public int DaysWorked { get; set; }
     }

@@ -260,10 +260,10 @@ namespace HRConnect.Tests
 
             var balance = context.EmployeeLeaveBalances.First();
             // post‑promotion entitlement should be greater than prior to promotion
-            Assert.True(balance.EntitledDays > 0);
+            Assert.True(balance.AccruedDays > 0);
         }
         [Fact]
-        public async Task PromotionShouldPreserveUsedDays()
+        public async Task PromotionShouldPreserveTakenDays()
         {
             var context = GetInMemoryDb();
 
@@ -303,7 +303,7 @@ namespace HRConnect.Tests
             await service.InitializeEmployeeLeaveBalancesAsync(employee.EmployeeId);
 
             var balance = context.EmployeeLeaveBalances.First();
-            balance.UsedDays = 5;
+            balance.TakenDays = 5;
             await context.SaveChangesAsync();
 
             employee.PositionId = 2;
@@ -314,7 +314,7 @@ namespace HRConnect.Tests
 
             var updated = context.EmployeeLeaveBalances.First();
 
-            Assert.Equal(5, updated.UsedDays);
+            Assert.Equal(5, updated.TakenDays);
         }
         [Fact]
         public async Task RecalculationShouldNotCompoundIfCalledTwice()
@@ -361,11 +361,11 @@ namespace HRConnect.Tests
             await context.SaveChangesAsync();
 
             await service.RecalculateAnnualLeaveAsync(employee.EmployeeId);
-            var firstResult = context.EmployeeLeaveBalances.First().EntitledDays;
+            var firstResult = context.EmployeeLeaveBalances.First().AccruedDays;
 
             // Call again
             await service.RecalculateAnnualLeaveAsync(employee.EmployeeId);
-            var secondResult = context.EmployeeLeaveBalances.First().EntitledDays;
+            var secondResult = context.EmployeeLeaveBalances.First().AccruedDays;
 
             Assert.Equal(firstResult, secondResult);
         }
@@ -429,7 +429,7 @@ namespace HRConnect.Tests
 
             // Current implementation does not award pro‑rated entitlement
             // on hire; balance remains at the initialized value (0).
-            Assert.Equal(0m, balance.EntitledDays);
+            Assert.Equal(0m, balance.AccruedDays);
         }
 
         [Fact]
@@ -495,7 +495,7 @@ namespace HRConnect.Tests
             if (expectedMonths < 0)
                 expectedMonths = 0;
 
-            Assert.Equal(expectedMonths, balance.EntitledDays);
+            Assert.Equal(expectedMonths, balance.AccruedDays);
         }
 
         [Fact]
@@ -626,7 +626,7 @@ namespace HRConnect.Tests
             var balance = context.EmployeeLeaveBalances.Single();
 
             // should have greater entitlement after promotion
-            Assert.True(balance.EntitledDays > 0);
+            Assert.True(balance.AccruedDays > 0);
         }
 
         [Fact]
@@ -693,17 +693,17 @@ namespace HRConnect.Tests
             await context.SaveChangesAsync();
 
             var balance = context.EmployeeLeaveBalances.Single();
-            var baseEntitlement = balance.EntitledDays;
+            var baseEntitlement = balance.AccruedDays;
 
             var projectionDate = today.AddDays(10);
             var result = await service.ProjectAnnualLeaveAsync(employee.EmployeeId, projectionDate);
 
             // result must be greater than the current balance and not equal to
             // a projection computed using the outdated rate.
-            Assert.True(result.ProjectedEntitledDays > baseEntitlement);
+            Assert.True(result.ProjectedAccruedDays > baseEntitlement);
             var workingDaysContract = WorkingDayCalculator.CountWorkingDays(today.AddDays(1), projectionDate);
             var expectedOld = Math.Round(baseEntitlement + workingDaysContract * oldRate, 2);
-            Assert.NotEqual(expectedOld, result.ProjectedEntitledDays);
+            Assert.NotEqual(expectedOld, result.ProjectedAccruedDays);
         }
 
         [Fact]
@@ -766,17 +766,17 @@ namespace HRConnect.Tests
             await context.SaveChangesAsync();
 
             var balance = context.EmployeeLeaveBalances.Single();
-            var baseEntitlement = balance.EntitledDays;
+            var baseEntitlement = balance.AccruedDays;
 
             var projectionDate = today.AddDays(10);
             var result = await service.ProjectAnnualLeaveAsync(employee.EmployeeId, projectionDate);
 
             // projection must reflect a decrease relative to the old rate but still
             // increase over the base balance
-            Assert.True(result.ProjectedEntitledDays > baseEntitlement);
+            Assert.True(result.ProjectedAccruedDays > baseEntitlement);
             var workingDaysContract = WorkingDayCalculator.CountWorkingDays(today.AddDays(1), projectionDate);
             var expectedOld = Math.Round(baseEntitlement + workingDaysContract * oldRate, 2);
-            Assert.NotEqual(expectedOld, result.ProjectedEntitledDays);
+            Assert.NotEqual(expectedOld, result.ProjectedAccruedDays);
         }
         [Fact]
         public async Task CarryoverShouldBeCappedAtFiveDays()
@@ -893,12 +893,12 @@ namespace HRConnect.Tests
             balance.AvailableDays = 3; // < 5
             await context.SaveChangesAsync();
 
-            var originalEntitlement = balance.EntitledDays;
+            var originalEntitlement = balance.AccruedDays;
             await service.ProcessAnnualResetAsync();
 
             var updated = context.EmployeeLeaveBalances.Single();
 
-            Assert.Equal(originalEntitlement, updated.EntitledDays);
+            Assert.Equal(originalEntitlement, updated.AccruedDays);
         }
         [Fact]
         public async Task ResetShouldNotRunTwiceInSameYear()
@@ -954,10 +954,10 @@ namespace HRConnect.Tests
             await context.SaveChangesAsync();
 
             await service.ProcessAnnualResetAsync();
-            var first = context.EmployeeLeaveBalances.Single().EntitledDays;
+            var first = context.EmployeeLeaveBalances.Single().AccruedDays;
 
             await service.ProcessAnnualResetAsync(); // second run
-            var second = context.EmployeeLeaveBalances.Single().EntitledDays;
+            var second = context.EmployeeLeaveBalances.Single().AccruedDays;
 
             Assert.Equal(first, second);
         }
@@ -1116,10 +1116,10 @@ namespace HRConnect.Tests
             balance.AvailableDays = -3; // Corrupted state
             await context.SaveChangesAsync();
 
-            var originalEntitlement = balance.EntitledDays;
+            var originalEntitlement = balance.AccruedDays;
             await service.ProcessAnnualResetAsync();
 
-            Assert.Equal(originalEntitlement, balance.EntitledDays);
+            Assert.Equal(originalEntitlement, balance.AccruedDays);
             Assert.Equal(5, balance.CarryoverDays);
             Assert.True(balance.CarryoverDays >= 0);
         }
@@ -1216,7 +1216,7 @@ namespace HRConnect.Tests
                 service.RecalculateAnnualLeaveAsync(employee.EmployeeId));
         }
         [Fact]
-        public async Task UpdateRuleShouldThrowIfReducingBelowUsedDays()
+        public async Task UpdateRuleShouldThrowIfReducingBelowTakenDays()
         {
             var context = GetInMemoryDb();
 
@@ -1257,7 +1257,7 @@ namespace HRConnect.Tests
             await service.InitializeEmployeeLeaveBalancesAsync(employee.EmployeeId);
 
             var balance = context.EmployeeLeaveBalances.Single();
-            balance.UsedDays = 10;
+            balance.TakenDays = 10;
             await context.SaveChangesAsync();
 
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
@@ -1402,7 +1402,7 @@ namespace HRConnect.Tests
 
             var balance = context.EmployeeLeaveBalances.Single();
 
-            Assert.NotEqual(25, balance.EntitledDays); // ensure wrong grade not picked
+            Assert.NotEqual(25, balance.AccruedDays); // ensure wrong grade not picked
         }
         [Fact]
         public async Task SickLeaveShouldAccrueFromMonthStart()
@@ -1454,7 +1454,7 @@ namespace HRConnect.Tests
 
             var balance = context.EmployeeLeaveBalances.Single();
 
-            Assert.True(balance.EntitledDays >= 1);
+            Assert.True(balance.AccruedDays >= 1);
         }
         [Fact]
         public async Task SickLeaveShouldCapAtThirtyDaysAfterSixMonths()
@@ -1506,7 +1506,7 @@ namespace HRConnect.Tests
 
             var balance = context.EmployeeLeaveBalances.Single();
 
-            Assert.Equal(30, balance.EntitledDays);
+            Assert.Equal(30, balance.AccruedDays);
         }
         [Fact]
         public async Task ProjectionShouldThrowForPastDate()

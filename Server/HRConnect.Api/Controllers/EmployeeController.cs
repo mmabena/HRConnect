@@ -51,7 +51,7 @@ namespace HRConnect.Api.Controllers
 
             return Ok(updated);
         }
-        
+
         [HttpPut("update-rule")]
         public async Task<IActionResult> UpdateRule(UpdateLeaveRuleRequest request)
         {
@@ -59,12 +59,20 @@ namespace HRConnect.Api.Controllers
             return Ok("Rule updated and employees recalculated.");
         }
         [HttpPut("update-used-days")]
-        public async Task<IActionResult> UpdateUsedDays(
-        [FromBody] UpdateUsedDaysRequest request)
+        public async Task<IActionResult> UpdateTakenDays(
+        [FromBody] UpdateTakenDaysRequest request)
         {
-            await _employeeService.UpdateUsedDaysAsync(request);
+            await _employeeService.UpdateTakenDaysAsync(request);
             return Ok("Used days updated successfully.");
         }
+        /// <summary>
+        /// Projects annual leave entitlement for a specific employee. This api will be used later to calculate termination leave payout based on projected entitlement at termination date. 
+        /// The projection logic takes into account the employee's start date, any changes in their accrual rate throughout the year, 
+        /// and the specified projection date to provide an accurate estimate of their leave entitlement at that future point in time.
+        /// </summary>
+        /// <param name="employeeId">The ID of the employee.</param>
+        /// <param name="projectionDate">The date for which to project leave entitlement.</param>
+        /// <returns>The projected leave entitlement.</returns>
         [HttpGet("project-annual-leave")]
         public async Task<IActionResult> ProjectAnnualLeave(
             Guid employeeId,

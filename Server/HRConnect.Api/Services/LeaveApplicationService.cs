@@ -6,7 +6,7 @@ namespace HRConnect.Api.Services
     using HRConnect.Api.Models;
     using HRConnect.Api.Utils;
     using Microsoft.EntityFrameworkCore;
-
+//UsedDays
     public class LeaveApplicationService : ILeaveApplicationService
     {
         private readonly ApplicationDBContext _context;
@@ -98,7 +98,7 @@ namespace HRConnect.Api.Services
                 .FirstAsync(b => b.EmployeeId == application.EmployeeId &&
                                  b.LeaveTypeId == application.LeaveTypeId);
 
-            balance.UsedDays += application.DaysRequested;
+            balance.TakenDays += application.DaysRequested;
             balance.AvailableDays -= application.DaysRequested;
 
             application.Status = LeaveApplication.LeaveApplicationStatus.Approved;

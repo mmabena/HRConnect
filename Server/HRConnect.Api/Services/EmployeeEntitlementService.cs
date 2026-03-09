@@ -146,6 +146,7 @@ namespace HRConnect.Api.Services
                 new EmployeeAccrualRateHistory
                 {
                     EmployeeId = employeeId,
+                    PositionId = employee.PositionId,
                     AnnualEntitlement = newRule.DaysAllocated,
                     DailyRate = (newRule.DaysAllocated / 12m) / 21.67m,
                     EffectiveFrom = today,   // starts immediately
@@ -160,9 +161,9 @@ namespace HRConnect.Api.Services
             return await GetEmployeeByIdAsync(employeeId)
                    ?? throw new InvalidOperationException("Failed to load updated employee.");
         }
-        public async Task UpdateUsedDaysAsync(UpdateUsedDaysRequest request)
+        public async Task UpdateTakenDaysAsync(UpdateTakenDaysRequest request)
         {
-            if (request.UsedDays < 0)
+            if (request.TakenDays < 0)
                 throw new InvalidOperationException("Used days cannot be negative.");
 
             var balance = await _context.EmployeeLeaveBalances
@@ -178,22 +179,22 @@ namespace HRConnect.Api.Services
             if (balance.LeaveType.Code == "SL")
                 await RecalculateSickLeaveAsync(request.EmployeeId);
 
-            if (request.UsedDays > balance.AvailableDays)
+            if (request.TakenDays > balance.AvailableDays)
                 throw new InvalidOperationException(
                     "Used days cannot exceed available days.");
 
-            balance.UsedDays = request.UsedDays;
+            balance.TakenDays = request.TakenDays;
             if (balance.LeaveType.Code == "AL")
             {
                 balance.AvailableDays =
                     balance.CarryoverDays +
-                    balance.EntitledDays -
-                    balance.UsedDays;
+                    balance.AccruedDays -
+                    balance.TakenDays;
             }
             else
             {
                 balance.AvailableDays =
-                    balance.EntitledDays - balance.UsedDays;
+                    balance.AccruedDays - balance.TakenDays;
             }
 
             try
@@ -251,9 +252,8 @@ namespace HRConnect.Api.Services
                     {
                         EmployeeId = employee.EmployeeId,
                         LeaveTypeId = leaveType.Id,
-                        EntitledDays = 0,
-                        UsedDays = 0,
                         AccruedDays = 0,
+                        TakenDays = 0,
                         AvailableDays = 0,
                         CarryoverDays = 0,
                         ForfeitedDays = 0,
@@ -287,9 +287,8 @@ namespace HRConnect.Api.Services
                     {
                         EmployeeId = employee.EmployeeId,
                         LeaveTypeId = leaveType.Id,
-                        EntitledDays = rule.DaysAllocated,
-                        UsedDays = 0,
-                        AccruedDays = 0,
+                        AccruedDays = rule.DaysAllocated,
+                        TakenDays = 0,
                         AvailableDays = rule.DaysAllocated
                     };
 
@@ -309,9 +308,8 @@ namespace HRConnect.Api.Services
                     {
                         EmployeeId = employee.EmployeeId,
                         LeaveTypeId = leaveType.Id,
-                        EntitledDays = rule.DaysAllocated,
-                        UsedDays = 0,
-                        AccruedDays = 0,
+                        AccruedDays = rule.DaysAllocated,
+                        TakenDays = 0,
                         AvailableDays = rule.DaysAllocated,
                         LastResetYear = DateTime.UtcNow.Year
                     };
@@ -330,9 +328,8 @@ namespace HRConnect.Api.Services
                 {
                     EmployeeId = employee.EmployeeId,
                     LeaveTypeId = leaveType.Id,
-                    EntitledDays = rule.DaysAllocated,
-                    UsedDays = 0,
-                    AccruedDays = 0,
+                    AccruedDays = rule.DaysAllocated,
+                    TakenDays = 0,
                     AvailableDays = rule.DaysAllocated
                 };
 
@@ -396,13 +393,13 @@ namespace HRConnect.Api.Services
 
             totalAccrued = Math.Round(totalAccrued, 2);
 
-            balance.EntitledDays = totalAccrued;
+            balance.AccruedDays = totalAccrued;
 
             // Available = Carryover + AccruedThisYear − Used
             balance.AvailableDays =
                 balance.CarryoverDays +
                 totalAccrued -
-                balance.UsedDays;
+                balance.TakenDays;
             balance.LastCalculatedDate = today;
 
             await _context.SaveChangesAsync();
@@ -422,8 +419,8 @@ Your position has recently been updated to: {employee.Position.Title}.
 
 As a result, your annual leave entitlement has been recalculated.
 
-New Annual Entitlement: {balance.EntitledDays} days
-Used Days: {balance.UsedDays} days
+New Annual Entitlement: {balance.AccruedDays} days
+Used Days: {balance.TakenDays} days
 Available Days: {balance.AvailableDays} days
 
 This adjustment was calculated proportionally based on the promotion date.
@@ -540,8 +537,8 @@ HRConnect
 
                     // Snapshot values BEFORE reset
                     var openingBalance = balance.CarryoverDays;
-                    var accrued = balance.EntitledDays;
-                    var used = balance.UsedDays;
+                    var accrued = balance.AccruedDays;
+                    var used = balance.TakenDays;
 
                     // True closing balance before forfeiture
                     var closingBalance = openingBalance + accrued - used;
@@ -582,11 +579,11 @@ HRConnect
                     balance.CarryoverDays = carryoverApplied;
                     balance.ForfeitedDays = 0;
 
-                    balance.EntitledDays = 0;
+                    balance.AccruedDays = 0;
                     balance.AccruedDays = 0;
                     balance.AvailableDays = carryoverApplied;
 
-                    balance.UsedDays = 0;
+                    balance.TakenDays = 0;
                     balance.LastResetYear = currentYear;
                 }
                 await _context.SaveChangesAsync();
@@ -647,7 +644,7 @@ HRConnect
                     continue;
 
                 // PROTECTION: cannot reduce below used days
-                if (request.NewDaysAllocated < balance.UsedDays)
+                if (request.NewDaysAllocated < balance.TakenDays)
                     throw new InvalidOperationException(
                         $"Cannot reduce entitlement below used days for employee {employee.FirstName}.");
             }
@@ -744,8 +741,8 @@ HRConnect
                 LeaveBalances = e.LeaveBalances.Select(lb => new LeaveBalanceSummary
                 {
                     LeaveType = lb.LeaveType.Name,
-                    EntitledDays = lb.EntitledDays,
-                    UsedDays = lb.UsedDays,
+                    AccruedDays = lb.AccruedDays,
+                    TakenDays = lb.TakenDays,
                     AvailableDays = lb.AvailableDays
                 }).ToList()
             };
@@ -780,18 +777,18 @@ HRConnect
             if (monthsWorked < 0)
                 monthsWorked = 0;
 
-            decimal entitledDays;
+            decimal AccruedDays;
 
             // =========================
             // Phase 1 – First 6 Months
             // =========================
             if (monthsWorked < 6)
             {
-                entitledDays = monthsWorked;
+                AccruedDays = monthsWorked;
             }
             else
             {
-                entitledDays = 30;
+                AccruedDays = 30;
             }
 
             // =========================
@@ -802,12 +799,12 @@ HRConnect
 
             if (balance.LastResetYear == null || balance.LastResetYear != cycleNumber)
             {
-                balance.UsedDays = 0;
+                balance.TakenDays = 0;
                 balance.LastResetYear = cycleNumber;
             }
 
-            balance.EntitledDays = entitledDays;
-            balance.AvailableDays = Math.Max(0, entitledDays - balance.UsedDays);
+            balance.AccruedDays = AccruedDays;
+            balance.AvailableDays = Math.Max(0, AccruedDays - balance.TakenDays);
 
             await _context.SaveChangesAsync();
         }
@@ -841,13 +838,13 @@ HRConnect
                 // 36-month automatic reset
                 if (monthsWorked >= 36)
                 {
-                    sickBalance.UsedDays = 0;
+                    sickBalance.TakenDays = 0;
                     entitled = 30;
                 }
 
-                sickBalance.EntitledDays = entitled;
+                sickBalance.AccruedDays = entitled;
                 sickBalance.AvailableDays =
-                    Math.Max(0, entitled - sickBalance.UsedDays);
+                    Math.Max(0, entitled - sickBalance.TakenDays);
             }
 
             await _context.SaveChangesAsync();
@@ -894,8 +891,8 @@ HRConnect
             if (frlBalance.LastResetYear == null ||
                 frlBalance.LastResetYear != anniversaryYear)
             {
-                frlBalance.UsedDays = 0;
-                frlBalance.EntitledDays = 3;
+                frlBalance.TakenDays = 0;
+                frlBalance.AccruedDays = 3;
                 frlBalance.AvailableDays = 3;
                 frlBalance.LastResetYear = anniversaryYear;
 
@@ -934,8 +931,8 @@ HRConnect
             if (mlBalance == null)
                 throw new InvalidOperationException("Maternity Leave not configured.");
 
-            mlBalance.UsedDays = 0;
-            mlBalance.EntitledDays = 120;
+            mlBalance.TakenDays = 0;
+            mlBalance.AccruedDays = 120;
             mlBalance.AvailableDays = 120;
 
             await _context.SaveChangesAsync();
@@ -989,8 +986,8 @@ HRConnect
                 {
                     EmployeeName = $"{employee.FirstName} {employee.LastName}",
                     ProjectionDate = projectionDate,
-                    ProjectedEntitledDays = balance.EntitledDays,
-                    UsedDays = balance.UsedDays,
+                    ProjectedAccruedDays = balance.AccruedDays,
+                    TakenDays = balance.TakenDays,
                     ProjectedAvailableDays = balance.AvailableDays,
                     DaysWorked = totalDaysWorked
                 };
@@ -1013,7 +1010,7 @@ HRConnect
             // ============================================================
 
             decimal projectedAvailable = balance.AvailableDays;
-            decimal projectedEntitled = balance.EntitledDays;
+            decimal projectedEntitled = balance.AccruedDays;
             decimal projectedCarryover = balance.CarryoverDays;
 
             var currentDate = today;
@@ -1056,9 +1053,9 @@ HRConnect
                     projectedEntitled = rule.DaysAllocated;
 
                 projectedAvailable =
-                    projectedCarryover +
-                    projectedEntitled -
-                    balance.UsedDays;
+    projectedEntitled +
+    projectedCarryover -
+    balance.TakenDays;
 
                 // ============================================
                 // Move to next leave year
@@ -1087,8 +1084,8 @@ HRConnect
             {
                 EmployeeName = $"{employee.FirstName} {employee.LastName}",
                 ProjectionDate = projectionDate,
-                ProjectedEntitledDays = projectedEntitled,
-                UsedDays = balance.UsedDays,
+                ProjectedAccruedDays = projectedEntitled + projectedCarryover,
+                TakenDays = balance.TakenDays,
                 ProjectedAvailableDays = projectedAvailable,
                 DaysWorked = totalDaysWorked
             };
@@ -1157,7 +1154,7 @@ HRConnect
 
             // Set live balance state (NO forfeited stored live)
             balance.CarryoverDays = carryover;
-            balance.UsedDays = 0;
+            balance.TakenDays = 0;
             balance.LastResetYear = currentYear;
         }
         private async Task CreateInitialAccrualSegmentAsync(Employee employee)
@@ -1181,10 +1178,16 @@ HRConnect
                     (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
                     r.IsActive);
 
+            await _context.Entry(employee)
+                .Reference(e => e.Position)
+                .LoadAsync();
+
             await _context.EmployeeAccrualRateHistories.AddAsync(
                 new EmployeeAccrualRateHistory
                 {
                     EmployeeId = employee.EmployeeId,
+                    PositionId = employee.PositionId,
+                    PositionName = employee.Position.Title,
                     AnnualEntitlement = rule.DaysAllocated,
                     DailyRate = (rule.DaysAllocated / 12m) / 21.67m,
                     EffectiveFrom = employee.StartDate,

@@ -16,7 +16,7 @@ namespace HRConnect.Api.Interfaces
         Task RecalculateAnnualLeaveAsync(Guid employeeId);
         Task RecalculateSickLeaveAsync(Guid employeeId);
         Task RecalculateAllSickLeaveAsync();
-        Task UpdateUsedDaysAsync(UpdateUsedDaysRequest request);
+        Task UpdateTakenDaysAsync(UpdateTakenDaysRequest request);
         Task ResetMaternityLeaveForNewPregnancy(Guid employeeId);
         Task ProcessCarryOverNotificationAsync();
         //Task ProcessAnnualResetAsync();
