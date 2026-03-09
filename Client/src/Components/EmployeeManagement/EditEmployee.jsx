@@ -499,7 +499,7 @@ const EditEmployee = () => {
         <input
           type="file"
           id="emp-photo-input"
-          style={{ display: "none" }}
+          className="emp-photo-input"
           onChange={onFileChange}
         />
         {uploadError && <div className="emp-error-text">{uploadError}</div>}
@@ -562,6 +562,7 @@ const EditEmployee = () => {
                 onChange={handleInputChange}
                 disabled={!isEditable}
               >
+                
                 <option value="">Select Title</option>
                 {titles.map((t) => (
                   <option key={t} value={t}>
@@ -569,7 +570,7 @@ const EditEmployee = () => {
                   </option>
                 ))}
               </select>
-              <div className="emp-error-text">{formErrors.title}</div>
+            
             </div>
 
             <div className="emp-field">

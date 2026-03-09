@@ -241,16 +241,17 @@ const AddEmployeeModal = ({ closeModal }) => {
           </div>
         </div>
 
-        <div className="emp-personal-details-container">
-          <div className="emp-personal-details-heading">
-            <span>Personal</span> <span>Details</span>
-          </div>
-        </div>
+      
 
         <div className="emp-name-surname-container">
           <div className="emp-form-grid">
+
+          <div className="emp-personal-details-heading">
+            <span>Personal</span> <span>Details</span>
+            </div>
+         
             {/* Title */}
-            <div className="emp-full-width dropdown-wrapper">
+            <div className="emp-full-width dropdown-wrapper emp-input-wrapper">
               <select
                 className={`emp-name-input ${formErrors.title ? "emp-error-input" : ""}`}
                 value={employee.title}
@@ -345,7 +346,7 @@ const AddEmployeeModal = ({ closeModal }) => {
             </div>
 
             {/* Nationality */}
-            <div className="emp-full-width">
+            <div className="emp-full-width emp-input-wrapper">
               <input
                 type="text"
                 placeholder="Nationality"
@@ -363,12 +364,13 @@ const AddEmployeeModal = ({ closeModal }) => {
             </div>
 
             {/* DOB | Gender */}
+            
             <div className="emp-two-col">
               <div className="emp-input-wrapper">
                 <input
-                  className="emp-name-input-col"
+                  className="emp-name-input-col emp-name-input"
                   type="date"
-                  placeholder="Date of Birth"
+                 
                   name="dateOfBirth"
                   value={employee.dateOfBirth}
                   onChange={onInputChange}
@@ -379,6 +381,11 @@ const AddEmployeeModal = ({ closeModal }) => {
                     {formErrors.dateOfBirth}
                   </span>
                 )}
+                 <img
+                  src="/images/calendar-range.svg"
+                  alt="Dropdown icon"
+                  className="dropdown-icon"
+                />
               </div>
               <div className="emp-input-wrapper dropdown-wrapper">
                 <select
@@ -447,7 +454,7 @@ const AddEmployeeModal = ({ closeModal }) => {
             </div>
 
             {/* Contact Number */}
-            <div className="emp-full-width">
+            <div className="emp-full-width emp-input-wrapper">
               <input
                 type="text"
                 placeholder="Contact Number"
@@ -464,7 +471,7 @@ const AddEmployeeModal = ({ closeModal }) => {
             </div>
 
             {/* Email */}
-            <div className="emp-full-width">
+            <div className="emp-full-width emp-input-wrapper">
               <input
                 type="email"
                 placeholder="Email Address"
@@ -523,11 +530,13 @@ const AddEmployeeModal = ({ closeModal }) => {
                     {formErrors.zipCode}
                   </span>
                 )}
+                
               </div>
             </div>
           </div>
         </div>
       </div>
+      
 
       {/* Right frame */}
       <div className="emp-right-frame">
@@ -535,7 +544,8 @@ const AddEmployeeModal = ({ closeModal }) => {
           <div className="emp-right-frame-content">
             <div className="emp-name-surname-container">
               <div className="emp-personal-details-container"></div>
-              <div className="emp-form-group">
+              <div className="emp-form-group emp-input-wrapper">
+                
                 {/* Start Date */}
                 <input
                   type="date"
@@ -551,9 +561,14 @@ const AddEmployeeModal = ({ closeModal }) => {
                     {formErrors.startDate}
                   </span>
                 )}
+                <img
+                  src="/images/calendar-range.svg"
+                  alt="Dropdown icon"
+                  className="dropdown-icon"
+                />
               </div>
               {/* Branch */}
-              <div className="emp-full-width dropdown-wrapper">
+              <div className="emp-full-width dropdown-wrapper emp-input-wrapper">
                 <select
                   className={`emp-name-input ${formErrors.branch ? "emp-error-input" : ""}`}
                   value={employee.branch}
@@ -595,7 +610,7 @@ const AddEmployeeModal = ({ closeModal }) => {
                 )}
               </div>
               {/* Tax Number */}
-              <div className="emp-full-width">
+              <div className="emp-full-width emp-input-wrapper">
                 <input
                   type="text"
                   placeholder="Tax Number"
@@ -612,7 +627,7 @@ const AddEmployeeModal = ({ closeModal }) => {
                 )}
               </div>
               {/* Job Title */}
-              <div className="emp-full-width dropdown-wrapper">
+              <div className="emp-full-width dropdown-wrapper emp-input-wrapper">
                 <select
                   name="jobTitle"
                   value={employee.jobTitle}
@@ -639,7 +654,7 @@ const AddEmployeeModal = ({ closeModal }) => {
               />
               </div>
               {/* Employment Status */}
-              <div className="emp-full-width dropdown-wrapper">
+              <div className="emp-full-width dropdown-wrapper emp-input-wrapper">
                 <select
                   className={`emp-name-input ${formErrors.employeeStatus ? "emp-error-input" : ""}`}
                   value={employee.employeeStatus}
@@ -665,7 +680,7 @@ const AddEmployeeModal = ({ closeModal }) => {
               />
               </div>
               {/* Career Manager */}
-              <div className="emp-full-width dropdown-wrapper">
+              <div className="emp-full-width dropdown-wrapper emp-input-wrapper">
                 <select
                   name="reportsTo"
                   value={employee.reportsTo}
@@ -692,7 +707,7 @@ const AddEmployeeModal = ({ closeModal }) => {
               />
               </div>
 
-              <div className="emp-full-width dropdown-wrapper">
+              <div className="emp-full-width dropdown-wrapper emp-input-wrapper">
                 <input
                   type="file"
                   className={`emp-name-input ${formErrors.documentPath ? "emp-error-input" : ""}`}
@@ -730,7 +745,7 @@ const AddEmployeeModal = ({ closeModal }) => {
                   </span>
                   <br />
                   <span className="emp-align-left">
-                    Copyright © 2025 Singular Systems. All rights reserved.
+                    Copyright © 2026 Singular Systems. All rights reserved.
                   </span>
                 </p>
               </div>
@@ -739,6 +754,7 @@ const AddEmployeeModal = ({ closeModal }) => {
         </div>
       </div>
     </div>
+    
   );
 };
 

@@ -424,7 +424,7 @@
 
 /* Active tab color */
 .heading-item.selected {
-  color: #01A19A;
+  color: var(--success-text-color);
 }
 
 .toast-confirm-container {
@@ -1237,14 +1237,15 @@
 
 /*Employee List css------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 .wrapper-container {
+  position: relative;
   display: flex;
+  align-items: center;
   flex-direction: column;
   gap: 5px;
   width: 1441px;
   box-sizing: border-box;
-  padding-left: 20px;
+  padding-left: 50px;
   overflow: visible;
-  position: relative;
 }
 
 /* ===== MODAL OVERLAY ===== */
@@ -1404,6 +1405,7 @@
 }
 
 .heading-item {
+  font-size: 20px;
   padding: 0.5rem 1rem;
   background-color: transparent;
   border-radius: 4px;
@@ -1512,7 +1514,7 @@
 /* Header cell styling */
 .table-header {
   background-color: var(--primary-color);
-  color: white;
+  color: var(--white);
   font-family: 'Anek Bangla', sans-serif;
   font-weight: 700;
   font-size: 16px;
@@ -1530,18 +1532,19 @@
 
 /* Regular cell styling */
 .table-cell {
-  background-color: white;
+  line-height: 15px; /* 93.75% */
+  letter-spacing: -0.43px;
+  background-color: var(--white);
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  font-size: 14px;
+  font-size: 16px;
+  font-weight: 400;
   font-family: 'Anek Bangla', sans-serif;
-  color: #002D40;
-  text-align: left;
+  color: var(--text-primary);
+  text-align: center;
   padding-left: 8px;
-
-
-
+  
 }
 
 .name-surname-cell {
@@ -1575,12 +1578,13 @@
 }
 
 .name-text {
-  font-family: 'Anek Bangla', sans-serif;
-  font-weight: 600;
   font-size: 16px;
-  line-height: 15px;
+  font-style: normal;
+  font-weight: 500;
   letter-spacing: -0.43px;
-  color: #002D40;
+  font-family: 'Anek Bangla', sans-serif;
+  line-height: 15px;
+  color: var(--text-primary);
 }
 
 .view-btn {
@@ -1590,9 +1594,15 @@
 }
 
 .edit-btn {
-  color: #006088;
+  text-align: center;
+  font-family: "Anek Bangla";
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  letter-spacing: 0.32px;
+  color: var(--text-primary);
   text-decoration: none;
-  font-weight: 600;
 }
 
 .view-edit-cell {
@@ -1601,7 +1611,6 @@
   font-size: 16px;
   line-height: 15px;
   letter-spacing: 0;
-  color: #006088;
   display: flex;
   align-items: center;
   justify-content: center;

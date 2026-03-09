@@ -53,12 +53,13 @@
 
 
 .emp-center-frame {
-  width: 61.8vw;
-  max-height: 98vh;
+  grid-template-rows: repeat(1,minmax(0,1fr));
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  width: 1186px;
+  max-height: 843px;
   height: 100%;
   border-radius: 10px;
   display: grid;
-  grid-template-columns: 1fr 1fr;
   background: linear-gradient(135deg,
       #EEEEF1,
       #EFF1F3,
@@ -72,13 +73,16 @@
 
 
 .emp-left-frame {
-  width: 100%;
-  height: 100%;
-  padding: 50px;
   display: flex;
+  padding-top: 50px;
   flex-direction: column;
-  position: relative;
-  margin-top: -90px;
+  align-items: center;
+  gap: 35px;
+  align-self: stretch;
+  grid-row: 1 / span 1;
+  grid-column: 1 / span 1;
+  justify-self: stretch;
+
 }
 
 .emp-left-frame-centered {
@@ -204,15 +208,16 @@
 }
 
 .emp-new-employee-title {
+  color: var(--text-primary);
+  text-align: center;
+  font-size: 30px;
+  font-style: normal;
+  font-weight: 700;
   width: 360px;
   height: 26px;
   font-family: 'Inter', sans-serif;
-  font-weight: 700;
-  font-size: 36px;
   line-height: 26px;
   letter-spacing: 0;
-  color: #002D40;
-  text-align: left;
   display: flex;
   align-items: left;
   justify-content: left;
@@ -240,17 +245,12 @@
 
 
 .emp-personal-details-heading {
-  font-family: 'Instrument Sans', sans-serif;
-  font-weight: 700;
+  color: var(--accent-blue);
+  font-family: "Instrument Sans";
   font-size: 14px;
-  line-height: 26px;
-  letter-spacing: 0;
-  margin: 0 auto 20px auto;
-  color: #006088;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  margin-top: -40px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 26px; 
 }
 
 .emp-name-surname-container {
@@ -263,25 +263,71 @@
 
 }
 
+.emp-input-wrapper{
+  position: relative;
+  width: 100%;
+  display: flex;
+  height: 33px;
+  padding: 0 5px 5px 5px;
+  align-items: flex-start;
+  gap: 5px;
+  border-radius: 5px;
+  border-bottom: 1px solid #006088;
+  background-color: transparent;
+}
+
+
+.emp-name-input[type="date"]::-webkit-calendar-picker-indicator {
+  text-transform: uppercase;
+  color: #898989; /* text color */
+  opacity: 0;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+/* DATE PLACEHOLDER (browser controlled but can influence color) */
+.emp-name-input[type="date"]::-webkit-datetime-edit {
+  color: #898989 ;
+  text-transform: uppercase;
+}
+
+.custom-calendar-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
 .emp-name-input,
 .emp-surname-input, .emp-title-input {
   width: 100%;
   height: 33px;
   border: none;
   color: #006088;
-  border-bottom: 1.5px solid #006088;
+  /* border-bottom: 1.5px solid #006088; */
   padding-left: 5px;
   padding-right: 5px;
   padding-bottom: 5px;
   font-size: 14px;
   outline: none;
   box-sizing: border-box;
-  border-radius: 0;
+  border-radius: 5px;
   background-color: transparent;
   font-family: sans-serif;
 
 }
 
+.emp-date{
+  color: #898989;
+  font-family: "Instrument Sans";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 26px;
+}
 .emp-name-input-col{
     width: 100%;
     height: 33px;
@@ -411,8 +457,6 @@
   margin-bottom: 5px;
 }
 
-
-
 .emp-grey-text::placeholder {
   color: #3D3D3D;
   font-weight: 400;
@@ -424,11 +468,9 @@
 
 }
 
-
-
 .emp-bottom-line-container {
   width: 360px;
-  border-bottom: 1.5px solid #006088;
+  border-bottom: 1.5px solid var(--accent-blue);
   padding-bottom: 5px;
 }
 
@@ -436,7 +478,7 @@
   font-family: 'Instrument Sans', sans-serif;
   width: 360px;
   height: 37px;
-  background-color: #006088;
+  background-color: var(--primary-color);
   border: none;
   border-radius: 10px;
   padding: 0 39px;
@@ -453,7 +495,7 @@
 }
 
 .emp-save-button:hover {
-  background-color: #004d6b;
+  background-color: var(--primary-light);
 }
 
 .emp-menu-background {
@@ -488,7 +530,7 @@
   left: 375px;
   width: 20px;
   height: 20px;
-  background-color: #002D40;
+  background-color: var(--text-primary);
   z-index: 0;
   pointer-events: none;
 }
@@ -499,7 +541,7 @@
   left: 375px;
   width: 20px;
   height: 20px;
-  background-color: #002D40;
+  background-color: var(--text-primary);
   z-index: 0;
   pointer-events: none;
 }
@@ -555,9 +597,11 @@
 
 .emp-form-grid {
   display: flex;
+  height: 600px;
+  width: 360px;
   flex-direction: column;
-  gap: 18px;
-  width: 100%;
+  align-items: flex-start;
+  gap: 20px;
 }
 
 .emp-input-wrapper.full-width {
@@ -602,15 +646,15 @@
   grid-template-columns: 1fr 1fr;
   gap: 15px;
   width: 100%;
-  color: #006088;
+  color: var(--text-primary);
 }
 
 .emp-name-input-col::placeholder {
-  color: #006088;
+  color: var(--text-primary);
 }
 
 .emp-name-input::placeholder {
-  color: #006088;
+  color: var(--text-primary);
 }
 
 .emp-full-width {
@@ -624,6 +668,13 @@
 }
 
 .emp-disability-row {
+  color: var(--text-primary);
+  font-family: "Anek Bangla";
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 150%; /* 24px */
+  letter-spacing: 0.15px;
   display: flex;
   align-items: center;
   gap: 18px;
@@ -692,3 +743,4 @@
   margin-top: 2px;
   display: block;
 }
+

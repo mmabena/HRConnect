@@ -129,6 +129,9 @@ namespace HRConnect.Api.Services
       //Check for duplicate entries
       await CheckDuplicateOnUpdate(employeeId, employeeDto);
 
+      // Ensure Title and Gender combination is valid
+      ValidateTitleAndGender(employeeDto);
+
       var position = await _positionRepo.GetPositionByIdAsync(employeeDto.PositionId);
       if (position == null)
         throw new ValidationException($"Position with ID {employeeDto.PositionId} does not exist.");
@@ -266,7 +269,7 @@ namespace HRConnect.Api.Services
     /// </summary>
     /// <param name="employeeRequestDto">The employee creation request DTO</param>
     /// <returns>Validation error if title and gender are not logically valid</returns>
-    private static void ValidateTitleAndGender(CreateEmployeeRequestDto employeeRequestDto)
+    private static void ValidateTitleAndGender(EmployeeBaseRequestDto employeeRequestDto)
     {
       EmployeeValidationHelpers.ValidateTitleGenderCombo(employeeRequestDto.Title, employeeRequestDto.Gender);
     }

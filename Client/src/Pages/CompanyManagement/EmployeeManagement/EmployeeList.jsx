@@ -199,15 +199,15 @@ const EmployeeList = () => {
         </div>
 
         <div className="content-container">
-          <div className="table-grid">
-            <div className="table-header">Employee ID</div>
+          <div className="employee-table-grid">
+            <div className="table-header">Employee Code</div>
             <div className="table-header">Name & Surname</div>
             <div className="table-header">Job Title</div>
             <div className="table-header">Contact Number</div>
             <div className="table-header">Email</div>
             <div className="table-header">Employment Status</div>
             <div className="table-header">Branch</div>
-            <div className="table-header">Action</div>
+            <div className="table-header-action">Action</div>
 
             {loading && (
               <div
