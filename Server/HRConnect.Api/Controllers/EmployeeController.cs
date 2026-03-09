@@ -10,7 +10,6 @@ namespace HRConnect.Api.Controllers
   using Microsoft.AspNetCore.Authorization;
   [Route("api/employee")]
   [ApiController]
-  [Authorize(Roles = "SuperUser")]
   public class EmployeeController : ControllerBase
   {
     private readonly IEmployeeService _employeeService;
@@ -23,6 +22,7 @@ namespace HRConnect.Api.Controllers
     /// </summary>
     /// <returns> A List of all Employees as EmployeeDTO objects</returns>
     [HttpGet]
+    [Authorize(Roles = "SuperUser")]
     public async Task<IActionResult> GetAllEmployees()
     {
       var employees = await _employeeService.GetAllEmployeesAsync();
@@ -34,6 +34,7 @@ namespace HRConnect.Api.Controllers
     /// <param name="EmployeeId">The employee identifier</param>
     /// <returns>The employee with the same Employee Id provided as EmployeeDTODto object or NotFound if the Employee Id does not exist</returns>
     [HttpGet("{EmployeeId}")]
+    [Authorize(Roles = "SuperUser")]
     public async Task<IActionResult> GetEmployeeById(string EmployeeId)
     {
       var employee = await _employeeService.GetEmployeeByIdAsync(EmployeeId);
@@ -44,11 +45,24 @@ namespace HRConnect.Api.Controllers
       return Ok(employee);
     }
     /// <summary>
+    /// Retrieves a single employee by their Employee email.
+    /// </summary>
+    /// <param name="employeeEmail">The employee email</param>
+    /// <returns>The employee with the same Employee email provided as EmployeeDTODto object or NotFound if the Employee Id does not exist</returns>
+    [HttpGet("email/{employeeEmail}")]
+    [Authorize(Policy = "SuperOrNormalUser")]
+    public async Task<IActionResult> GetEmployeeByEmail(string employeeEmail)
+    {
+      EmployeeDto? employee = await _employeeService.GetEmployeeByEmailAsync(employeeEmail);
+      return employee == null ? NotFound() : Ok(employee);
+    }
+    /// <summary>
     /// Creates a new Employee in the database (SuperUsers only).
     /// </summary>
     /// <param name="employeeDto">The employee data request to create</param>
     /// <returns>The created employee as employeeDto or appropriate error response depending on e.g. missing fields or duplicate data</returns>
     [HttpPost]
+    [Authorize(Roles = "SuperUser")]
     public async Task<IActionResult> CreateEmployee([FromBody] CreateEmployeeRequestDto employeeDto)
     {
       var employee = await _employeeService.CreateEmployeeAsync(employeeDto);
@@ -61,6 +75,7 @@ namespace HRConnect.Api.Controllers
     /// <param name="employeeDto">The updated employee data</param>
     /// <returns>The updated employee as employeeDto, or error if not found, conflict and missing fields</returns>
     [HttpPut("{EmployeeId}")]
+    [Authorize(Roles = "SuperUser")]
     public async Task<IActionResult> UpdateEmployee(string EmployeeId, [FromBody] UpdateEmployeeRequestDto employeeDto)
     {
       var updatedEmployee = await _employeeService.UpdateEmployeeAsync(EmployeeId, employeeDto);
@@ -75,6 +90,7 @@ namespace HRConnect.Api.Controllers
     /// <param name="EmployeeId">The employee ID</param>
     /// <returns>success message if employee is deleted successfully, NotFound if employee does not exist</returns>
     [HttpDelete("{EmployeeId}")]
+    [Authorize(Roles = "SuperUser")]
     public async Task<IActionResult> DeleteEmployee(string EmployeeId)
     {
       var deletedEmployee = await _employeeService.DeleteEmployeeAsync(EmployeeId);
