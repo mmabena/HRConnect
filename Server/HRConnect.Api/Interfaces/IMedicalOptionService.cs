@@ -216,7 +216,7 @@
     /// Console.WriteLine($"Successfully updated {updatedOptions.Count} medical options");
     /// </code>
     /// </example>
-    public Task<IReadOnlyList<MedicalOptionDto>> BulkUpdateMedicalOptionsByCategoryAsync(
+    Task<IReadOnlyList<MedicalOptionDto>> BulkUpdateMedicalOptionsByCategoryAsync(
       int categoryId, IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto, DateTime? testDate = null);
     
     // New Methods
@@ -235,7 +235,7 @@
      
       // Create
     Task<MedicalOptionCategoryDto> CreateMedicalOptionCategory(CreateMedicalOptionCategoryDto createCategoryPayload);
-    Task<List<CreateMedicalOptionVariantsDto>> CreateBulkOptionsByExistingCategoryId(int id, CreateMedicalOptionVariantsDto createOptionsPayload)
+    Task<List<CreateMedicalOptionVariantsDto>> CreateBulkOptionsByExistingCategoryId(int id, CreateMedicalOptionVariantsDto createOptionsPayload);
       // Update
     Task<MedicalOptionCategoryDto> UpdateExistingCategoryById(int id,
       UpdateMedicalOptionCategoryDto updateCategoryPayload);

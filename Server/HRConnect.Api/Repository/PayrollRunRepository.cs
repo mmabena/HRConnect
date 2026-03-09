@@ -4,7 +4,10 @@ namespace HRConnect.Api.Repository
   using HRConnect.Api.Data;
   using HRConnect.Api.Mappers.Payroll;
   using HRConnect.Api.Models;
+  using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.DTOs.Payroll;
+
+
   public class PayrollRunRepository : IPayrollRunRepository
   {
     private readonly ApplicationDBContext _context;

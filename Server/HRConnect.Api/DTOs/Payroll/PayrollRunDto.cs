@@ -1,6 +1,8 @@
 namespace HRConnect.Api.DTOs.Payroll
 {
   using HRConnect.Api.Models;
+  using HRConnect.Api.Models.Payroll;
+
   public class PayrollRunDto
   {
     public int PayrollRunId { get; set; }
