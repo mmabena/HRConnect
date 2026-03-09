@@ -19,6 +19,7 @@ namespace HRConnect.Api.Repository
     }
     public async Task<PayrollRun?> GetPayrunByIdAsync(int id)
     {
+
       var payrun = await _context.PayrollRuns.FirstOrDefaultAsync(p => p.PayrollRunId == id);
       return payrun;
     }
@@ -38,11 +39,15 @@ namespace HRConnect.Api.Repository
     /*Get the current payrun using the date and time when this is called*/
     public async Task<PayrollRun?> GetCurrentRunAsync()
     {
-      DateTime dateTime = new DateTime(
-        DateTime.Now.Year, DateTime.Now.Month, 1);
-      Console.WriteLine($"CURRENT DATE WHEN GETTING RUN {dateTime}");
-      var payrun = await _context.PayrollRuns.FirstOrDefaultAsync(
-        p => p.PeriodDate.Month == dateTime.Month);
+      // DateTime dateTime = new DateTime(
+      //   DateTime.Now.Year, DateTime.Now.Month, 1);
+      // Console.WriteLine($"CURRENT DATE WHEN GETTING RUN {dateTime}");
+
+      // var payrun = await _context.PayrollRuns.FirstOrDefaultAsync(
+      //   p => p.PeriodDate.Month == dateTime.Month);
+      var payrun = await _context.PayrollRuns.AsNoTracking().Where(r => r.IsLocked)
+        .OrderByDescending(r => r.PayrollRunId)
+        .FirstOrDefaultAsync();
       return payrun;
     }
 
@@ -55,6 +60,11 @@ namespace HRConnect.Api.Repository
       //Update the current run to be marked as Finalised 
       _context.PayrollRuns.Update(payrollRun);
       await _context.SaveChangesAsync();
+    }
+    public async Task<PayrollRun> GetLastPayrun()
+    {
+      return await _context.PayrollRuns.OrderByDescending(r => r.PayrollRunId)
+        .FirstOrDefaultAsync();
     }
   }
 }

@@ -80,7 +80,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
     {
-      options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+      options.UseSqlServer(builder.Configuration.GetConnectionString("DBeaverConnection"));
       options.AddInterceptors(new AuditSaveChangesInterceptor());
     });
 
@@ -152,7 +152,7 @@ builder.Services.AddQuartz(q =>
   //Adding persistence to quartz to be able to be run in the back
   q.UsePersistentStore(options =>
   {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!);
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DBeaverConnection")!);
     options.UseSerializer<Quartz.Simpl.SystemTextJsonObjectSerializer>();
     options.UseProperties = true;
   });

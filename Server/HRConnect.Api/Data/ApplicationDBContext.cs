@@ -145,9 +145,13 @@ namespace HRConnect.Api.Data
       foreach (var e in modifiedRecords)
       {
         //Any locked entity should be under a Hard Lock. Don't allow any changes
-        if (e.Entity.IsLocked)
+        //Move from not locked to locked
+        var prevLockState = (bool)e.OriginalValues["IsLocked"]!;
+        var curLockState = e.Entity.IsLocked;
+        if (prevLockState)
         {
           throw new InvalidOperationException("Record/Run under Hard Lock. Cannot be modified");
+          // throw new HRConnect.Api.Middleware.ValidationException("HARD LOCK");
         }
       }
       return await base.SaveChangesAsync(cancellationToken);

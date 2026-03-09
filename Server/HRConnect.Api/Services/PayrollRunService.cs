@@ -35,8 +35,8 @@ namespace HRConnect.Api.Services
       if (exists != null)
         return exists.ToPayrollRunDto();
 
-      DateTime currentMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
-
+      DateTime currentMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+      Console.WriteLine($"Creating payroll run for month: {currentMonth}");
       //maps current financial month to 1-12
       // var runId = _payrollInit.GetPayrunNumber(currentMonth);
       payrollRun.IsFinalised = false;
@@ -69,5 +69,6 @@ namespace HRConnect.Api.Services
     {
       await _payrollRunRepo.UpdateRunAsync(payrollRun);
     }
+
   }
 }

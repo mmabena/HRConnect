@@ -55,7 +55,7 @@ namespace HRConnect.Api.Utils.Payroll
       var payperiod = await _payrollPeriodRepo.GetActivePeriod(DateTime.Now);
       if (payperiod == null)
       {
-        PayrollPeriod p = new PayrollPeriod
+        payperiod = new PayrollPeriod
         {
           PayrollPeriodId = Guid.NewGuid(),
           StartDate = start,
@@ -66,7 +66,7 @@ namespace HRConnect.Api.Utils.Payroll
         };
         //create the period after saving the run
         Console.WriteLine($"CREATED A PAYROLL PERIOD");
-        await _payrollPeriodRepo.CreatePeriodAsync(p);
+        await _payrollPeriodRepo.CreatePeriodAsync(payperiod);
       }
       int run = GetPayrunNumber(DateTime.Now);
       //Do the same thing for the period
