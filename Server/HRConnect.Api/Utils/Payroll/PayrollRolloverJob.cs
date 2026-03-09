@@ -1,4 +1,4 @@
-namespace HRConnect.Api.Utils
+namespace HRConnect.Api.Utils.Payroll
 {
   using HRConnect.Api.Interfaces;
   using Quartz;
@@ -17,15 +17,17 @@ namespace HRConnect.Api.Utils
     public async Task Execute(IJobExecutionContext context)
     {
       var currentPayRun = await _payrollRunRepo.GetCurrentRunAsync();
-
+      Console.WriteLine("=============A JOB RAN==========");
       if (currentPayRun == null)
         return;
 
       //Finalise and lock a run isnt't finalised and still running
-      if (!currentPayRun.IsFinalised && DateTime.UtcNow >= currentPayRun.PeriodDate)
+      if (!currentPayRun.IsFinalised && !currentPayRun.IsLocked
+      && DateTime.UtcNow >= currentPayRun.PeriodDate)
       {
         //Finalise a payroll run and add timestamp
         currentPayRun.IsFinalised = true;
+        currentPayRun.IsLocked = true;
         currentPayRun.FinalisedDate = DateTime.UtcNow;
 
         //update the current run to implement lock

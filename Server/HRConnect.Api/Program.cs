@@ -13,6 +13,7 @@ using HRConnect.Api.Repository;
 using Microsoft.AspNetCore.Identity;
 using HRConnect.Api.Models;
 using HRConnect.Api.Utils;
+using HRConnect.Api.Utils.Payroll;
 using OfficeOpenXml;
 using HRConnect.Api.Interfaces.PensionProjection;
 using Audit.Core;
@@ -137,7 +138,7 @@ builder.Services.AddQuartz(q =>
   q.AddTrigger(opts => opts
   .ForJob(jobKey)
   .WithIdentity("PayrollRollover-Trigger")
-  .WithCronSchedule("0 0 0 1 * ?", x =>
+  .WithCronSchedule("1 0/1 * * * ?", x =>
   x.WithMisfireHandlingInstructionFireAndProceed())); //when a job misfire happens. 
                                                       // Properly re-execute it and proceed as usual
 
@@ -163,6 +164,11 @@ builder.Services.AddQuartzHostedService(q =>
 });
 
 //Register payroll stuff
+builder.Services.AddScoped<IPayrollPeriodRepository, PayrollPeriodRepository>();
+builder.Services.AddScoped<IPayrollRunRepository, PayrollRunRepository>();
+builder.Services.AddScoped<IPayrollRunService, PayrollRunService>();
+builder.Services.AddScoped<PayrollRolloverJob>();//for Quartz
+builder.Services.AddScoped<PayrollInit>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
@@ -200,6 +206,14 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+  var initialiser = scope.ServiceProvider.GetRequiredService<PayrollInit>();
+
+  //initialise a payperiod and payrun
+  await initialiser.InitialisePayrollPeriod();
+}
 
 if (app.Environment.IsDevelopment())
 {

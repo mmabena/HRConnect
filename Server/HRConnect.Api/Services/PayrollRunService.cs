@@ -4,13 +4,16 @@ namespace HRConnect.Api.Services
   using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.DTOs.Payroll;
   using HRConnect.Api.Mappers.Payroll;
+  using HRConnect.Api.Utils.Payroll;
 
-  public class ParyollRunService
+  public class PayrollRunService : IPayrollRunService
   {
     private readonly IPayrollRunRepository _payrollRunRepo;
-    public ParyollRunService(IPayrollRunRepository payrollRunRepo)
+    // private readonly PayrollInit _payrollInit;
+    public PayrollRunService(IPayrollRunRepository payrollRunRepo)
     {
       _payrollRunRepo = payrollRunRepo;
+      // _payrollInit = new PayrollInit();
     }
     public async Task<PayrollRunDto?> GetPayrunByIdAsync(int id)
     {
@@ -27,17 +30,15 @@ namespace HRConnect.Api.Services
     /// CONSIDER CHANGING THE RETURN TYPE OF THIS TASK
     public async Task<PayrollRunDto> CreatePayrollRunAsync(PayrollRun payrollRun)
     {
-
       var exists = await _payrollRunRepo.GetCurrentRunAsync();
 
       if (exists != null)
         return exists.ToPayrollRunDto();
 
-      DateTime currentMonth = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
+      DateTime currentMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
 
       //maps current financial month to 1-12
-      var runId = ((currentMonth.Month + 8) % 12) + 1;
-      payrollRun.PayrollRunId = runId;
+      // var runId = _payrollInit.GetPayrunNumber(currentMonth);
       payrollRun.IsFinalised = false;
       payrollRun.PeriodDate = currentMonth;
 

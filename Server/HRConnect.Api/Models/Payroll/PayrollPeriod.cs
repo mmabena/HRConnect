@@ -9,6 +9,6 @@ namespace HRConnect.Api.Models.Payroll
     public DateTime EndDate { get; set; }
     public bool IsClosed { get; set; }
     public bool IsLocked { get; set; }
-    public ICollection<PayrollRun>? Runs { get; set; }
+    public ICollection<PayrollRun>? Runs { get; set; } = new List<PayrollRun>();
   }
 }

@@ -39,11 +39,16 @@ namespace HRConnect.Api.Repository
     public async Task<PayrollRun?> GetCurrentRunAsync()
     {
       DateTime dateTime = new DateTime(
-        DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
-
+        DateTime.Now.Year, DateTime.Now.Month, 1);
+      Console.WriteLine($"CURRENT DATE WHEN GETTING RUN {dateTime}");
       var payrun = await _context.PayrollRuns.FirstOrDefaultAsync(
-        p => p.PeriodDate == dateTime)!;
+        p => p.PeriodDate.Month == dateTime.Month);
       return payrun;
+    }
+
+    public Task AddRecordToCurrentRunAsync(PayrollRecord payrollRecord)
+    {
+      throw new NotImplementedException();
     }
     public async Task UpdateRunAsync(PayrollRun payrollRun)
     {
