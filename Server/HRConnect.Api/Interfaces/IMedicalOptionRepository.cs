@@ -98,14 +98,15 @@
     // New Methods
     // Get
       // Get all Possible options for employee based on salary
-    Task<IReadOnlyList<MedicalOptionDto>> GetAllOptionsWithinEmployeeSalary(decimal salaryAmount);
+    Task<IReadOnlyCollection<MedicalOptionDto>> GetAllOptionsWithinEmployeeSalary(
+      decimal salaryAmount);
       // Get eligible options for employee
     Task<IReadOnlyCollection<MedicalOptionDto>> GetEmployeeEligibleOptions(string employeeId);
       // Get All options under category via category ID
     Task<IReadOnlyList<MedicalOptionDto>> GetAllCategoryOptionsById(int id);
       
       // Medical Options Category
-    Task<List<MedicalOptionCategoryDto>> GetAllMedicalOptionCategories();
+    Task<List<IGrouping<int, MedicalOptionCategory>>> GetAllMedicalOptionCategories();
 
     Task<MedicalOptionCategoryDto> GetCategoryById(int id);
      
