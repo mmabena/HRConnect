@@ -23,27 +23,66 @@ import TaxTableManagement from "./Components/companyManagement/TaxTableManagemen
 import ChangePassword from "./Components/ChangePassword";
 import MenuBar from "./Components/MenuBar/MenuBar";
 import EmployeeList from "./Pages/EmployeeManagement/EmployeeList";
-import PositionManagement from "./Pages/CompanyManagement/PositionManagement/PositionManagement"; 
+import PositionManagement from "./Pages/CompanyManagement/PositionManagement/PositionManagement";
 import ProjectionCalculator from "./Pages/PayrollTools/ProjectionCalculator";
+import api from "../src/api/api.js";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
+useEffect(() => {
+  const fetchUserData = async () => {
     const storedUser = localStorage.getItem("currentUser");
+    const token = localStorage.getItem("token");
 
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        setCurrentUser(parsedUser);
-        setIsLoggedIn(true);
-      } catch {
-        localStorage.removeItem("currentUser");
-      }
+    if (!storedUser || !token) return;
+
+    try {
+      const parsedUser = JSON.parse(storedUser);
+      const email = parsedUser.email;
+
+      // Fetch all positions once (available for all users)
+      const posResp = await api.get(`/positions`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const positions = posResp.data; // Array of { positionId, positionTitle, ... }
+      console.log("All positions loaded:", positions);
+
+      // Fetch employee data
+      const empResp = await api.get(`/employee/email/${email}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const employee = empResp.data;
+      console.log("Employee API response:", employee);
+
+      // Lookup the actual positionTitle from the positions array
+      const position = positions.find(p => p.positionId === employee.positionId);
+      const jobTitle = position.positionTitle; // guaranteed actual title
+
+      // Merge employee and stored user data
+      const mergedUser = {
+        ...parsedUser,
+        username: `${employee.name} ${employee.surname}`,
+        jobTitle,
+        employmentStatus: employee.employmentStatus,
+        dateOfBirth: employee.dateOfBirth,
+      };
+
+      console.log("Merged user:", mergedUser);
+
+      setCurrentUser(mergedUser);
+      setIsLoggedIn(true);
+      localStorage.setItem("currentUser", JSON.stringify(mergedUser));
+    } catch (error) {
+      console.error("Failed to fetch employee or positions:", error);
+      localStorage.removeItem("currentUser");
     }
-  }, []);
+  };
+
+  fetchUserData();
+}, []);
 
   const handleForgotPasswordClick = () => {
     navigate("/forgot-password");
@@ -61,14 +100,14 @@ function App() {
   };
 
   // FIXED: Use backend user object directly
- const handleLoginSuccess = (userWithToken) => {
-  setCurrentUser(userWithToken);
+  const handleLoginSuccess = (mergedUser) => {
+    setCurrentUser(mergedUser);
 
-   localStorage.setItem("currentUser", JSON.stringify(userWithToken));
-   console.log("App currentUser:", userWithToken);
-  setIsLoggedIn(true);
-  navigate("/dashboard");
-};
+    localStorage.setItem("currentUser", JSON.stringify(mergedUser));
+    console.log("App currentUser:", mergedUser);
+    setIsLoggedIn(true);
+    navigate("/dashboard");
+  };
 
   if (!isLoggedIn) {
     return (
@@ -92,44 +131,73 @@ function App() {
     );
   }
 
- console.log("App currentUser:", currentUser);
+  // console.log("App currentUser:", currentUser);
 
- return (
- <div className="App">
- <MenuBar currentUser={currentUser} onLogout={handleLogout} />
- <div>
- <ToastContainer position="top-right" autoClose={3000} />
- <Routes>
-      <Route path="/dashboard" element={<div>Welcome to Dashboard</div>} />
-      <Route path="/addEmployee" element={<AddEmployee />} />
-      <Route path="/editEmployee" element={<EditEmployee />} />
-      <Route path="/editEmployee/:employeeNumber" element={<EditEmployee />} />
-      <Route path="/addCompany" element={<AddCompany />} />
-      <Route path="/companyManagement" element={<CompanyManagement/>} />
-      <Route path="/editCompany/:id" element={<EditCompany />} />
-      <Route path="/employeeList" element={<EmployeeList />} />
-      <Route path="/company-contribution" element={<CompanyContribution />} />
-      <Route path="/userManagement" element={<UserManagement />} /> 
-      <Route path="/taxTableManagement" element={<TaxTableManagement />} />
-      <Route path="/taxTableUpload" element={<TaxTableUpload />} />
-      <Route path="/positionManagement" element={<PositionManagement />} />
-      <Route path="/addPositionManagement" element={<AddPositionManagement />} />
-      <Route path="/editPositionManagement/:id" element={<EditPositionManagement />} />
-      <Route path="/viewPositionManagement/:id" element={<ViewPositionManagement />} />
-      <Route path="/profile" element={<Profile currentUser={currentUser} />}/>
-      <Route path="/company-contribution" element={<CompanyContribution />} />
-      <Route path="/compensationPlanning" element={<CompensationPlanning />} />
-      <Route path="/change-password" element={<ChangePassword currentUser={currentUser}/>} />
-      <Route 
-      path="/profile"
-        element={<Profile currentUser={currentUser} />}
-      />
-      <Route path="/projection-calculator" element={<ProjectionCalculator />} />
-  </Routes>
-
-</div>
- </div>
-);
+  return (
+    <div className="App">
+      <MenuBar currentUser={currentUser} onLogout={handleLogout} />
+      <div>
+        <ToastContainer position="top-right" autoClose={3000} />
+        <Routes>
+          <Route path="/dashboard" element={<div>Welcome to Dashboard</div>} />
+          <Route path="/addEmployee" element={<AddEmployee />} />
+          <Route path="/editEmployee" element={<EditEmployee />} />
+          <Route
+            path="/editEmployee/:employeeNumber"
+            element={<EditEmployee />}
+          />
+          <Route path="/addCompany" element={<AddCompany />} />
+          <Route path="/companyManagement" element={<CompanyManagement />} />
+          <Route path="/editCompany/:id" element={<EditCompany />} />
+          <Route path="/employeeList" element={<EmployeeList />} />
+          <Route
+            path="/company-contribution"
+            element={<CompanyContribution />}
+          />
+          <Route path="/userManagement" element={<UserManagement />} />
+          <Route path="/taxTableManagement" element={<TaxTableManagement />} />
+          <Route path="/taxTableUpload" element={<TaxTableUpload />} />
+          <Route path="/positionManagement" element={<PositionManagement />} />
+          <Route
+            path="/addPositionManagement"
+            element={<AddPositionManagement />}
+          />
+          <Route
+            path="/editPositionManagement/:id"
+            element={<EditPositionManagement />}
+          />
+          <Route
+            path="/viewPositionManagement/:id"
+            element={<ViewPositionManagement />}
+          />
+          <Route
+            path="/profile"
+            element={<Profile currentUser={currentUser} />}
+          />
+          <Route
+            path="/company-contribution"
+            element={<CompanyContribution />}
+          />
+          <Route
+            path="/compensationPlanning"
+            element={<CompensationPlanning />}
+          />
+          <Route
+            path="/change-password"
+            element={<ChangePassword currentUser={currentUser} />}
+          />
+          <Route
+            path="/profile"
+            element={<Profile currentUser={currentUser} />}
+          />
+          <Route
+            path="/projection-calculator"
+            element={<ProjectionCalculator />}
+          />
+        </Routes>
+      </div>
+    </div>
+  );
 }
 
 export default App;
