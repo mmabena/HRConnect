@@ -1,4 +1,4 @@
-import "../MenuBar.css";
+import "./MenuBar";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -20,6 +20,7 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
   const isAdminOrSuperUser = role === "admin" || role === "superuser";
 
   const isEmployeeManagementPage =
+   location.pathname.startsWith("/employeeList") ||
     location.pathname.startsWith("/addEmployee") ||
     location.pathname.startsWith("/employeeList") ||
     location.pathname.startsWith("/editEmployee");
@@ -122,14 +123,6 @@ const MenuBar = ({ currentUser, onAccessDenied }) => {
               </div>
               {reportOpen && (
                 <ul className="submenu show">
-                  <li>
-                    <span
-                      className="menu-subitem"
-                      onClick={() => handleSubmenuClick("/addEmployee")}
-                    >
-                      Add New Employee
-                    </span>
-                  </li>
                   <li>
                     <span
                       className="menu-subitem"

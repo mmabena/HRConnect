@@ -38,7 +38,7 @@ const ProjectionCalculator = () => {
         const token = localStorage.getItem('token');
         const email = JSON.parse(localStorage.getItem('currentUser')).email;
         const decodedTokenEmail = jwtDecode(token).sub;
-        if (decodedTokenEmail == email) { 
+        if (decodedTokenEmail === email) { 
             axios.get(`${baseUrl}/employee/email/${email}`, {
                 headers: { "Authorization": `Bearer ${token}` }
             })

@@ -12,6 +12,8 @@ using HRConnect.Api.Services;
 using HRConnect.Api.Repository;
 using Microsoft.AspNetCore.Identity;
 using HRConnect.Api.Models;
+using HRConnect.Api.Middleware;
+using HRConnect.Api.Services;
 using HRConnect.Api.Utils;
 using OfficeOpenXml;
 using HRConnect.Api.Interfaces.PensionProjection;
@@ -46,7 +48,13 @@ Audit.Core.Configuration.Setup()
 ExcelPackage.License.SetNonCommercialPersonal("YourName");
 
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+      options.JsonSerializerOptions.Converters.Add(
+          new System.Text.Json.Serialization.JsonStringEnumConverter()
+      );
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -200,5 +208,6 @@ app.UseCors("AllowReact");
 app.UseGlobalExceptionHandler();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<ExceptionMiddleware>();
 app.MapControllers();
 app.Run();

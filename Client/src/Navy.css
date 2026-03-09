@@ -453,7 +453,7 @@
       #E7EAEB,
       #D6D6D9,
       #C4C4C5);
-  color: black;
+  color: rgba(0, 0, 0, 0.411);
   box-sizing: border-box;
   text-align: center;
   overflow: hidden;
@@ -550,8 +550,6 @@ body,
   display: flex;
   flex-direction: row;
   width: 100%;
-
-
 }
 
 
@@ -770,6 +768,8 @@ body,
   left: 0px;
   margin-left: 34px;
 }
+
+
 
 .forgot-password {
   width: 324px;

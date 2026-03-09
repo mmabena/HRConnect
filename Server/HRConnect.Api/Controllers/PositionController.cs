@@ -8,11 +8,11 @@ namespace HRConnect.Api.Controllers
   using HRConnect.Api.Interfaces;
   using Microsoft.AspNetCore.Mvc;
 
-  [Route("api/positions")]
-  [ApiController]
-  [Authorize(Roles = "SuperUser")] // Require authentication and SuperAdmin role
-  public class PositionController : ControllerBase
-  {
+    [Route("api/positions")]
+    [ApiController]
+    //[Authorize(Roles = "SuperUser")] // Require authentication and SuperAdmin role
+    public class PositionController : ControllerBase
+    {
     private readonly IPositionService _positionService;
 
     public PositionController(IPositionService positionService)

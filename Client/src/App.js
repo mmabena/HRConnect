@@ -10,6 +10,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 import "./Components/MenuBar/MenuBar.css";
+import AddEmployeeModal from "./Components/AddEmployeeModal";
 import UserManagement from "./Components/UserManagement";
 import ViewPositionManagement from "./Components/ViewPositionManagement";
 import TaxTableUpload from "./Components/companyManagement/TaxTableManagement/TaxTableUpload";
@@ -32,57 +33,46 @@ function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const navigate = useNavigate();
 
-useEffect(() => {
-  const fetchUserData = async () => {
-    const storedUser = localStorage.getItem("currentUser");
-    const token = localStorage.getItem("token");
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const storedUser = localStorage.getItem("currentUser");
+      const token = localStorage.getItem("token");
 
-    if (!storedUser || !token) return;
+      if (!storedUser || !token) return;
 
-    try {
-      const parsedUser = JSON.parse(storedUser);
-      const email = parsedUser.email;
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        const email = parsedUser.email;
 
-      // Fetch all positions once (available for all users)
-      const posResp = await api.get(`/positions`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const positions = posResp.data; // Array of { positionId, positionTitle, ... }
-      console.log("All positions loaded:", positions);
+        // Fetch employee data (now includes positionTitle)
+        const empResp = await api.get(`/employee/email/${email}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const employee = empResp.data;
+        console.log("Employee API response:", employee);
 
-      // Fetch employee data
-      const empResp = await api.get(`/employee/email/${email}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const employee = empResp.data;
-      console.log("Employee API response:", employee);
+        // Merge employee and stored user data
+        const mergedUser = {
+          ...parsedUser,
+          username: `${employee.name} ${employee.surname}`,
+          jobTitle: employee.PositionTitle  || "N/A", // now directly from backend
+          employmentStatus: employee.employmentStatus,
+          dateOfBirth: employee.dateOfBirth,
+        };
 
-      // Lookup the actual positionTitle from the positions array
-      const position = positions.find(p => p.positionId === employee.positionId);
-      const jobTitle = position.positionTitle; // guaranteed actual title
+        console.log("Merged user:", mergedUser);
 
-      // Merge employee and stored user data
-      const mergedUser = {
-        ...parsedUser,
-        username: `${employee.name} ${employee.surname}`,
-        jobTitle,
-        employmentStatus: employee.employmentStatus,
-        dateOfBirth: employee.dateOfBirth,
-      };
+        setCurrentUser(mergedUser);
+        setIsLoggedIn(true);
+        localStorage.setItem("currentUser", JSON.stringify(mergedUser));
+      } catch (error) {
+        console.error("Failed to fetch employee:", error);
+        localStorage.removeItem("currentUser");
+      }
+    };
 
-      console.log("Merged user:", mergedUser);
-
-      setCurrentUser(mergedUser);
-      setIsLoggedIn(true);
-      localStorage.setItem("currentUser", JSON.stringify(mergedUser));
-    } catch (error) {
-      console.error("Failed to fetch employee or positions:", error);
-      localStorage.removeItem("currentUser");
-    }
-  };
-
-  fetchUserData();
-}, []);
+    fetchUserData();
+  }, []);
 
   const handleForgotPasswordClick = () => {
     navigate("/forgot-password");
@@ -100,13 +90,29 @@ useEffect(() => {
   };
 
   // FIXED: Use backend user object directly
-  const handleLoginSuccess = (mergedUser) => {
-    setCurrentUser(mergedUser);
+ const handleLoginSuccess = async (backendUserData) => {
+    try {
+      // Fetch employee data immediately after login
+      const empResp = await api.get(`/employee/email/${backendUserData.email}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      const employee = empResp.data;
+      const mergedUser = {
+        ...backendUserData,
+        username: `${employee.name} ${employee.surname}`,
+        jobTitle: employee.PositionTitle,
+        employmentStatus: employee.employmentStatus,
+        dateOfBirth: employee.dateOfBirth,
+      };
 
-    localStorage.setItem("currentUser", JSON.stringify(mergedUser));
-    console.log("App currentUser:", mergedUser);
-    setIsLoggedIn(true);
-    navigate("/dashboard");
+      // Update state + localStorage instantly
+      setCurrentUser(mergedUser);
+      localStorage.setItem("currentUser", JSON.stringify(mergedUser));
+      setIsLoggedIn(true);
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Failed to fetch employee on login:", error);
+    }
   };
 
   if (!isLoggedIn) {
@@ -141,6 +147,7 @@ useEffect(() => {
         <Routes>
           <Route path="/dashboard" element={<div>Welcome to Dashboard</div>} />
           <Route path="/addEmployee" element={<AddEmployee />} />
+          <Route path="/addEmployeeModal" element={<AddEmployeeModal />} />
           <Route path="/editEmployee" element={<EditEmployee />} />
           <Route
             path="/editEmployee/:employeeNumber"
