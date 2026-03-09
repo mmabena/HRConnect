@@ -78,6 +78,8 @@ namespace HRConnect.Api.Middleware
                 errors["lastName"] = message;
             else if (message.Contains("name", StringComparison.OrdinalIgnoreCase))
                 errors["firstName"] = message;
+            else if (message.Contains("title", StringComparison.OrdinalIgnoreCase))
+                errors["title"] = message;
             else
                 errors["general"] = message;
 
