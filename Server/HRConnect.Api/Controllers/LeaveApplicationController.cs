@@ -10,6 +10,7 @@ namespace HRConnect.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    //[Authorize(Roles = "SuperUser")]
     public class LeaveApplicationController : ControllerBase
     {
         private readonly ILeaveApplicationService _service;

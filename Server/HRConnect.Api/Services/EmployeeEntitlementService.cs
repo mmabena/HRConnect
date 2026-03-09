@@ -103,33 +103,21 @@ namespace HRConnect.Api.Services
 
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
-            // ============================================================
-            // 1️⃣ Close or overwrite current active accrual segment
-            // ============================================================
-
             var currentSegment = await _context.EmployeeAccrualRateHistories
                 .Where(x => x.EmployeeId == employeeId && x.EffectiveTo == null)
                 .FirstOrDefaultAsync();
 
             if (currentSegment != null)
             {
-                // 🔥 SAME-DAY CHANGE RULE:
-                // If the active segment already started today,
-                // remove it entirely (overwrite previous change today)
                 if (currentSegment.EffectiveFrom == today)
                 {
                     _context.EmployeeAccrualRateHistories.Remove(currentSegment);
                 }
                 else
                 {
-                    // Otherwise close it cleanly today
                     currentSegment.EffectiveTo = today.AddDays(-1); // Effective until end of yesterday
                 }
             }
-
-            // ============================================================
-            // 2️⃣ Update employee position
-            // ============================================================
 
             employee.PositionId = newPositionId;
             employee.UpdatedDate = DateTime.UtcNow;
@@ -140,10 +128,6 @@ namespace HRConnect.Api.Services
             await _context.Entry(employee.Position)
                 .Reference(p => p.JobGrade)
                 .LoadAsync();
-
-            // ============================================================
-            // 3️⃣ Determine new entitlement rule
-            // ============================================================
 
             var annualLeave = await _context.LeaveTypes
                 .FirstAsync(l => l.Code == "AL" && l.IsActive);
@@ -158,10 +142,6 @@ namespace HRConnect.Api.Services
                     (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
                     r.IsActive);
 
-            // ============================================================
-            // 4️⃣ Create new accrual segment STARTING TODAY
-            // ============================================================
-
             await _context.EmployeeAccrualRateHistories.AddAsync(
                 new EmployeeAccrualRateHistory
                 {
@@ -174,10 +154,6 @@ namespace HRConnect.Api.Services
                 });
 
             await _context.SaveChangesAsync();
-
-            // ============================================================
-            // 5️⃣ Recalculate using full historical model
-            // ============================================================
 
             await RecalculateAnnualLeaveAsync(employeeId);
 
@@ -199,7 +175,6 @@ namespace HRConnect.Api.Services
             if (balance == null)
                 throw new InvalidOperationException("Leave balance not found.");
 
-            // Ensure sick leave is up to date before validation
             if (balance.LeaveType.Code == "SL")
                 await RecalculateSickLeaveAsync(request.EmployeeId);
 
@@ -385,12 +360,10 @@ namespace HRConnect.Api.Services
 
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
-            // Determine cycle start (1 Jan or employee start if hired this year)
             var cycleStart = employee.StartDate.Year == today.Year
                 ? employee.StartDate
                 : new DateOnly(today.Year, 1, 1);
 
-            // 🔥 IMPORTANT: Use ALL segments, not just active one
             var segments = await _context.EmployeeAccrualRateHistories
                 .Where(x => x.EmployeeId == employeeId)
                 .OrderBy(x => x.EffectiveFrom)
@@ -403,7 +376,6 @@ namespace HRConnect.Api.Services
 
             foreach (var segment in segments)
             {
-                // Determine effective window inside current cycle
                 var segmentStart = segment.EffectiveFrom > cycleStart
                     ? segment.EffectiveFrom
                     : cycleStart;
@@ -478,7 +450,6 @@ HRConnect
             var totalDays = today.DayNumber - startDate.DayNumber;
             return Math.Round(totalDays / 365.25m, 2);
         }
-        //Annual Carryover Logic Methods
         private decimal CalculateCarryover(decimal remaining)
         {
             if (remaining <= 0)
@@ -564,9 +535,6 @@ HRConnect
                     // IDEMPOTENCY CHECK
                     if (balance.LastResetYear == currentYear)
                         continue;
-                    // ================================
-                    // 🔹 STORE CLOSED YEAR SNAPSHOT (LEDGER CORRECT)
-                    // ================================
 
                     var yearToClose = currentYear - 1;
 
@@ -608,7 +576,7 @@ HRConnect
                     }
 
                     // ================================
-                    // 🔹 RESET LIVE STATE (UNCHANGED LOGIC)
+                    // RESET LIVE STATE (UNCHANGED LOGIC)
                     // ================================
 
                     balance.CarryoverDays = carryoverApplied;
@@ -1163,7 +1131,7 @@ HRConnect
 
             var yearToClose = currentYear - 1;
 
-            // 🔹 Store historical snapshot
+            // Store historical snapshot
             var alreadyExists = await _context.AnnualLeaveAccrualHistories
                 .AnyAsync(x =>
                     x.EmployeeId == employee.EmployeeId &&
@@ -1187,7 +1155,7 @@ HRConnect
                     });
             }
 
-            // 🔹 Set live balance state (NO forfeited stored live)
+            // Set live balance state (NO forfeited stored live)
             balance.CarryoverDays = carryover;
             balance.UsedDays = 0;
             balance.LastResetYear = currentYear;

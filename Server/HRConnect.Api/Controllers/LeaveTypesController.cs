@@ -12,6 +12,7 @@ namespace HRConnect.Api.Controllers
     using HRConnect.Api.Interfaces;
     [ApiController]
     [Route("api/leave-types")]
+    //[Authorize(Roles = "SuperUser")]
     public class LeaveTypesController : ControllerBase
     {
         private readonly ILeaveTypeManagementService _service;
