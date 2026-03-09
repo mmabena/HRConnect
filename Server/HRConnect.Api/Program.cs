@@ -18,7 +18,6 @@ using HRConnect.Api.Interfaces.PensionProjection;
 using Audit.Core;
 using Audit.EntityFramework;
 using Quartz;
-using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 

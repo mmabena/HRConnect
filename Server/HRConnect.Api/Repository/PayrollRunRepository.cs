@@ -4,9 +4,7 @@ namespace HRConnect.Api.Repository
   using HRConnect.Api.Data;
   // using HRConnect.Api.Mappers.Payroll;
   using HRConnect.Api.Models.Payroll;
-  using HRConnect.Api.DTOs.Payroll;
   using Microsoft.EntityFrameworkCore;
-  using HRConnect.Api.Mappers.Payroll;
 
   public class PayrollRunRepository : IPayrollRunRepository
   {
@@ -38,13 +36,13 @@ namespace HRConnect.Api.Repository
              p => p.PeriodDate == dateTime);
     }
     /*Get the current payrun using the date and time when this is called*/
-    public async Task<PayrollRun> GetCurrentRunAsync()
+    public async Task<PayrollRun?> GetCurrentRunAsync()
     {
       DateTime dateTime = new DateTime(
         DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
 
       var payrun = await _context.PayrollRuns.FirstOrDefaultAsync(
-        p => p.PeriodDate == dateTime);
+        p => p.PeriodDate == dateTime)!;
       return payrun;
     }
     public async Task UpdateRunAsync(PayrollRun payrollRun)
