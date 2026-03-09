@@ -98,7 +98,7 @@
          };
          
          // Act
-         var result = await MedicalOptionValidator.ValidateAllIdsExistAsync(bulkUpdateDto, _mockRepository.Object, dbData);
+         var result = MedicalOptionValidator.ValidateAllIdsExistAsync(bulkUpdateDto, _mockRepository.Object, dbData);
          
          // Assert
          Assert.True(result);
@@ -121,7 +121,7 @@
          };
          
          // Act
-         var result = await MedicalOptionValidator.ValidateAllIdsExistAsync(bulkUpdateDto, _mockRepository.Object, dbData);
+         var result = MedicalOptionValidator.ValidateAllIdsExistAsync(bulkUpdateDto, _mockRepository.Object, dbData);
          
          // Assert
          Assert.False(result);
@@ -147,7 +147,7 @@
          };
          
          // Act
-         var result = await MedicalOptionValidator.ValidateAllIdsInCategoryAsync(bulkUpdateDto, categoryId, _mockRepository.Object, dbData);
+         var result = MedicalOptionValidator.ValidateAllIdsInCategoryAsync(bulkUpdateDto, categoryId, _mockRepository.Object, dbData);
          
          // Assert
          Assert.True(result);
@@ -172,7 +172,7 @@
          };
          
          // Act
-         var result = await MedicalOptionValidator.ValidateAllIdsInCategoryAsync(bulkUpdateDto, categoryId, _mockRepository.Object, dbData);
+         var result = MedicalOptionValidator.ValidateAllIdsInCategoryAsync(bulkUpdateDto, categoryId, _mockRepository.Object, dbData);
          
          // Assert
          Assert.False(result);
