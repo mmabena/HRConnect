@@ -78,7 +78,10 @@
     public async Task<IActionResult> GetAllOptionsWithinEmployeeSalary(
       [FromRoute] decimal salaryAmount)
     {
-      return null;
+      var groupedEligibleOptions =
+         await _medicalOptionService.GetAllOptionsWithinEmployeeSalary(salaryAmount);
+      
+      return Ok(groupedEligibleOptions);
     }
 
     //Get | Medical Option Category
@@ -88,7 +91,9 @@
     [Authorize(Roles = "SuperUser")]
     public async Task<IActionResult> GetAllMedicalOptionCategories()
     {
-      return null;
+      var allCategories = await _medicalOptionService.GetAllMedicalOptionCategories();
+
+      return Ok(allCategories);
     }
     
     // Get options by category Id
@@ -105,7 +110,8 @@
     [Authorize(Roles = "SuperUser")]
     public async Task<IActionResult> GetCategoryById([FromRoute] int id)
     {
-      return null;
+      var requestedCategory = await _medicalOptionService.GetCategoryById(id);
+      return Ok(requestedCategory);
     }
 
     // Posts
@@ -128,6 +134,17 @@
       return null;
     }
     
+    // Testing Endpoints
+    // Get Current DB Copy
+    [HttpGet("db-copy")]
+    [Authorize(Roles = "SuperUser")]
+    public async Task<IActionResult> GetCurrentDBCopy()
+    {
+      var currentDbState = await _medicalOptionService.GetCurrentDbCopy();
+
+      return Ok(currentDbState);
+    }
+
     // Puts
     
     /// <summary>

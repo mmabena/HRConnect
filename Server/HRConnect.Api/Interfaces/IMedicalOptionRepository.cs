@@ -94,29 +94,39 @@
     /// <exception cref="ArgumentException">Thrown when categoryId is invalid or no matching options found.</exception>
     Task<IReadOnlyList<MedicalOptionDto>> BulkUpdateByCategoryIdAsync(int categoryId,
       IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto);
-    
-    // New Methods
+
+// New Methods
     // Get
-      // Get all Possible options for employee based on salary
-    Task<IReadOnlyCollection<MedicalOptionDto>> GetAllOptionsWithinEmployeeSalary(
+    // Get all Possible options for employee based on salary
+    Task<List<IGrouping<int, MedicalOption>>> GetAllOptionsWithinEmployeeSalary(
       decimal salaryAmount);
-      // Get eligible options for employee
-    Task<IReadOnlyCollection<MedicalOptionDto>> GetEmployeeEligibleOptions(string employeeId);
-      // Get All options under category via category ID
-    Task<IReadOnlyList<MedicalOptionDto>> GetAllCategoryOptionsById(int id);
-      
-      // Medical Options Category
+
+    // Get eligible options for employee
+    Task<List<IGrouping<int, MedicalOptionDto>>> GetEmployeeEligibleOptions(string employeeId);
+
+    // Get All options under category via category ID
+    Task<List<IGrouping<int, MedicalOption>>> GetAllCategoryOptionsById(int id);
+
+    // Medical Options Category
     Task<List<IGrouping<int, MedicalOptionCategory>>> GetAllMedicalOptionCategories();
 
-    Task<MedicalOptionCategoryDto> GetCategoryById(int id);
-     
-      // Create
-    Task<MedicalOptionCategoryDto> CreateMedicalOptionCategory(CreateMedicalOptionCategoryDto createCategoryPayload);
-    Task<List<CreateMedicalOptionVariantsDto>> CreateBulkOptionsByExistingCategoryId(int id, CreateMedicalOptionVariantsDto createOptionsPayload);
-      // Update
+    Task<List<MedicalOptionCategory>> GetCategoryById(int id);
+    
+    // Get Current DB Copy
+    Task<IReadOnlyList<MedicalOptionDto>> GetCurrentDbCopy();
+
+    // Create
+    Task<MedicalOptionCategoryDto> CreateMedicalOptionCategory(
+      CreateMedicalOptionCategoryDto createCategoryPayload);
+
+    Task<List<CreateMedicalOptionVariantsDto>> CreateBulkOptionsByExistingCategoryId(int id,
+      CreateMedicalOptionVariantsDto createOptionsPayload);
+
+    // Update
     Task<MedicalOptionCategoryDto> UpdateExistingCategoryById(int id,
-        UpdateMedicalOptionCategoryDto updateCategoryPayload);
-
-
+      UpdateMedicalOptionCategoryDto updateCategoryPayload);
   }
 }
+
+
+

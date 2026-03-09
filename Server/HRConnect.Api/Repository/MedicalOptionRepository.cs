@@ -4,6 +4,7 @@
   using HRConnect.Api.Data;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
+  using HRConnect.Api.Utils;
   using Microsoft.EntityFrameworkCore;
   using HRConnect.Api.Mappers;
   using Microsoft.Data.SqlClient;
@@ -129,7 +130,9 @@
     {
       var groupedMedicalOptions = await _context.MedicalOptions
         .Include(mo => mo.MedicalOptionCategory)
-        .Where(mo => mo.MedicalOptionCategory != null /*&& mo.MedicalOptionCategoryId != null*/) //this will always evaluate to true. 'int' != 'int?' or 'null'
+        .Where(mo =>
+          mo.MedicalOptionCategory !=
+          null /*&& mo.MedicalOptionCategoryId != null*/) //this will always evaluate to true. 'int' != 'int?' or 'null'
         .GroupBy(mo => mo.MedicalOptionCategoryId)
         .ToListAsync();
 
@@ -180,8 +183,8 @@
       }
 
       var medicalOption = await _context.MedicalOptions
-          .Include(opt => opt.MedicalOptionCategory)
-          .FirstOrDefaultAsync(opt => opt.MedicalOptionId == id);
+        .Include(opt => opt.MedicalOptionCategory)
+        .FirstOrDefaultAsync(opt => opt.MedicalOptionId == id);
 
       if (medicalOption == null)
       {
@@ -228,8 +231,8 @@
       }
 
       var medicalOptions = await _context.MedicalOptions
-          .Include(mo => mo.MedicalOptionCategory)
-          .FirstOrDefaultAsync(mo => mo.MedicalOptionCategoryId == id);
+        .Include(mo => mo.MedicalOptionCategory)
+        .FirstOrDefaultAsync(mo => mo.MedicalOptionCategoryId == id);
 
       if (medicalOptions is null)
       {
@@ -280,9 +283,9 @@
       }
 
       var medicalOptions = await _context.MedicalOptions
-          .Where(mo => ids.Contains(mo.MedicalOptionId))
-          .Include(mo => mo.MedicalOptionCategory)
-          .ToListAsync();
+        .Where(mo => ids.Contains(mo.MedicalOptionId))
+        .Include(mo => mo.MedicalOptionCategory)
+        .ToListAsync();
 
       if (medicalOptions.Count == 0)
       {
@@ -331,7 +334,7 @@
       }
 
       var category = await _context.MedicalOptionCategories
-          .FirstOrDefaultAsync(c => c.MedicalOptionCategoryId == id);
+        .FirstOrDefaultAsync(c => c.MedicalOptionCategoryId == id);
 
       if (category == null)
       {
@@ -388,9 +391,9 @@
       }
 
       var medicalOptions = await _context.MedicalOptions
-          .Include(mo => mo.MedicalOptionCategory)
-          .Where(mo => mo.MedicalOptionName.Contains(optionName))
-          .ToListAsync();
+        .Include(mo => mo.MedicalOptionCategory)
+        .Where(mo => mo.MedicalOptionName.Contains(optionName))
+        .ToListAsync();
 
       if (medicalOptions.Count == 0) // move to service layer where used
       {
@@ -442,7 +445,7 @@
       }
 
       return await _context.MedicalOptionCategories
-          .AnyAsync(moc => moc.MedicalOptionCategoryId == categoryId);
+        .AnyAsync(moc => moc.MedicalOptionCategoryId == categoryId);
     }
 
     /// <summary>
@@ -485,7 +488,7 @@
       }
 
       return await _context.MedicalOptions
-          .AnyAsync(o => o.MedicalOptionId == optionId);
+        .AnyAsync(o => o.MedicalOptionId == optionId);
     }
 
     /// <summary>
@@ -545,8 +548,8 @@
       }
 
       var allOptions = await _context.MedicalOptions
-          .Where(co => co.MedicalOptionCategoryId == categoryId)
-          .ToListAsync();
+        .Where(co => co.MedicalOptionCategoryId == categoryId)
+        .ToListAsync();
 
       return allOptions.Select(mo => mo?.ToMedicalOptionDto()).ToList();
     }
@@ -603,8 +606,8 @@
       }
 
       return await _context.MedicalOptions
-          .AnyAsync(o => o.MedicalOptionCategoryId == categoryId &&
-                         o.MedicalOptionId == optionId);
+        .AnyAsync(o => o.MedicalOptionCategoryId == categoryId &&
+                       o.MedicalOptionId == optionId);
     }
 
     /// <summary>
@@ -722,9 +725,9 @@
         .ToList();
 
       var existingOptions = await _context.MedicalOptions
-          .Where(o => o.MedicalOptionCategoryId == categoryId &&
-                      optionIdsToUpdate.Contains(o.MedicalOptionId))
-          .ToListAsync();
+        .Where(o => o.MedicalOptionCategoryId == categoryId &&
+                    optionIdsToUpdate.Contains(o.MedicalOptionId))
+        .ToListAsync();
 
       if (existingOptions.Count == 0)
       {
@@ -745,9 +748,10 @@
           if (updateDto.SalaryBracketMin >= updateDto.SalaryBracketMax)
           {
             throw new ArgumentException(
-                $"Invalid salary bracket range for option ID {entity.MedicalOptionId}: " +
-                "Minimum must be less than maximum");
+              $"Invalid salary bracket range for option ID {entity.MedicalOptionId}: " +
+              "Minimum must be less than maximum");
           }
+
           entity.UpdateFromDto(updateDto);
         }
       }
@@ -757,21 +761,21 @@
       {
         BatchSize = 1000,
         PropertiesToInclude = new List<string>
-            {
-                nameof(MedicalOption.SalaryBracketMin),
-                nameof(MedicalOption.SalaryBracketMax),
-                nameof(MedicalOption.MonthlyMsaContributionAdult),
-                nameof(MedicalOption.MonthlyMsaContributionChild),
-                nameof(MedicalOption.MonthlyMsaContributionPrincipal),
-                nameof(MedicalOption.MonthlyRiskContributionAdult),
-                nameof(MedicalOption.MonthlyRiskContributionChild),
-                nameof(MedicalOption.MonthlyRiskContributionChild2),
-                nameof(MedicalOption.MonthlyRiskContributionPrincipal),
-                nameof(MedicalOption.TotalMonthlyContributionsAdult),
-                nameof(MedicalOption.TotalMonthlyContributionsChild),
-                nameof(MedicalOption.TotalMonthlyContributionsChild2),
-                nameof(MedicalOption.TotalMonthlyContributionsPrincipal)
-            }
+        {
+          nameof(MedicalOption.SalaryBracketMin),
+          nameof(MedicalOption.SalaryBracketMax),
+          nameof(MedicalOption.MonthlyMsaContributionAdult),
+          nameof(MedicalOption.MonthlyMsaContributionChild),
+          nameof(MedicalOption.MonthlyMsaContributionPrincipal),
+          nameof(MedicalOption.MonthlyRiskContributionAdult),
+          nameof(MedicalOption.MonthlyRiskContributionChild),
+          nameof(MedicalOption.MonthlyRiskContributionChild2),
+          nameof(MedicalOption.MonthlyRiskContributionPrincipal),
+          nameof(MedicalOption.TotalMonthlyContributionsAdult),
+          nameof(MedicalOption.TotalMonthlyContributionsChild),
+          nameof(MedicalOption.TotalMonthlyContributionsChild2),
+          nameof(MedicalOption.TotalMonthlyContributionsPrincipal)
+        }
       });
 
       // Map to DTOs to avoid circular reference
@@ -781,27 +785,38 @@
       return responseDtos.AsReadOnly();
     }
 
-    public async Task<IReadOnlyCollection<MedicalOptionDto>> GetAllOptionsWithinEmployeeSalary(decimal salaryAmount)
+    //Works
+    public async Task<List<IGrouping<int, MedicalOption>>> GetAllOptionsWithinEmployeeSalary(
+      decimal salaryAmount)
     {
-      var response = await _context.MedicalOptions
+      return await _context.MedicalOptions
         .Include(o => o.MedicalOptionCategory)
-        .Where(s => s.SalaryBracketMin.Value != null || s.SalaryBracketMax.Value != null)
-        .GroupBy(o=> o.MedicalOptionCategory.MedicalOptionCategoryId)
-        .FirstOrDefaultAsync(s => s.SalaryBracketMin < salaryAmount && salaryAmount < s.SalaryBracketMax)
+        .Where(o => o.MedicalOptionCategoryId != null && o.MedicalOptionId != null &&
+                    o.SalaryBracketMin != null)
+        .Where(o =>
+          salaryAmount >= o.SalaryBracketMin &&
+          (!o.SalaryBracketMax.HasValue ||
+           salaryAmount <=
+           o.SalaryBracketMax)) // added helper method salary >= min && (!max.HasValue || salary <= max)
+        .GroupBy(o => o.MedicalOptionCategory.MedicalOptionCategoryId)
         .ToListAsync();
-        // Fix Linq Query
-      return response.AsReadOnly();
+      // Fix Linq Query
     }
 
-    public async Task<IReadOnlyCollection<MedicalOptionDto>> GetEmployeeEligibleOptions(string employeeId)
+    public async Task<List<IGrouping<int, MedicalOptionDto>>> GetEmployeeEligibleOptions(
+      string employeeId)
     {
       // Depends on above
       throw new NotImplementedException();
     }
 
-    public async Task<IReadOnlyList<MedicalOptionDto>> GetAllCategoryOptionsById(int id)
+    public async Task<List<IGrouping<int, MedicalOption>>> GetAllCategoryOptionsById(int id)
     {
-      throw new NotImplementedException();
+      return await _context.MedicalOptions
+        .Include(c => c.MedicalOptionCategory)
+        .Where(c => c.MedicalOptionCategoryId == id)
+        .GroupBy(c => c.MedicalOptionCategoryId)
+        .ToListAsync();
     }
 
     public async Task<List<IGrouping<int, MedicalOptionCategory>>> GetAllMedicalOptionCategories()
@@ -812,14 +827,33 @@
         .ToListAsync();
     }
 
-    public async Task<MedicalOptionCategoryDto> GetCategoryById(int id)
+    public async Task<List<MedicalOptionCategory>> GetCategoryById(int id)
     {
       return await _context.MedicalOptionCategories
         .Where(c => c.MedicalOptionCategoryId == id)
         .ToListAsync();
     }
 
-    public async Task<MedicalOptionCategoryDto> CreateMedicalOptionCategory(CreateMedicalOptionCategoryDto createCategoryPayload)
+    public async Task<IReadOnlyList<MedicalOptionDto>> GetCurrentDbCopy()
+    {
+      var currentDbState = await _context.MedicalOptions
+        .Include(opt => opt.MedicalOptionCategory)
+        .ToListAsync();
+
+     var response = currentDbState
+        .Select(options => options.ToMedicalOptionDto()).ToList();
+
+     return response.AsReadOnly();
+     /*
+      *       var responseDtos = existingOptions
+        .Select(option => option.ToMedicalOptionDto()).ToList();
+
+      return responseDtos.AsReadOnly();
+      */
+    }
+
+    public async Task<MedicalOptionCategoryDto> CreateMedicalOptionCategory(
+      CreateMedicalOptionCategoryDto createCategoryPayload)
     {
       throw new NotImplementedException();
     }
@@ -827,11 +861,19 @@
     public Task<List<CreateMedicalOptionVariantsDto>> CreateBulkOptionsByExistingCategoryId(int id,
       CreateMedicalOptionVariantsDto createOptionsPayload)
     {
+      // We will use EFCore.BulkExtensions
+      // TODO : Validations
+      
+      // Get current DB Copy (Used to verify if option added isn't already present)
+      //var dbCopy = 
+      
       throw new NotImplementedException();
     }
 
-    public Task<MedicalOptionCategoryDto> UpdateExistingCategoryById(int id, UpdateMedicalOptionCategoryDto updateCategoryPayload)
+    public Task<MedicalOptionCategoryDto> UpdateExistingCategoryById(int id,
+      UpdateMedicalOptionCategoryDto updateCategoryPayload)
     {
+      // Updating a single category
       throw new NotImplementedException();
     }
   }

@@ -23,7 +23,7 @@ namespace HRConnect.Api.Repository
         return null;
       return period.ToPayrollPeriodDto();
     }
-    public async Task<PayrollPeriod> GetActivePeriod(DateTime dateTime)
+    public async Task<PayrollPeriod?> GetActivePeriod(DateTime dateTime)
     { throw new NotImplementedException(); }
     public async Task<PayrollPeriodDto> CreatePeriodAsync(PayrollPeriod payrollPeriod)
     {

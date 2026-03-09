@@ -622,5 +622,67 @@
       // If validation passes, proceed with bulk update
       return await _medicalOptionRepository.BulkUpdateByCategoryIdAsync(categoryId, bulkUpdateDto);
     }
+
+    // New
+    
+    public async Task<List<MedicalOptionCategoryDto>> GetAllOptionsWithinEmployeeSalary(
+      decimal salaryAmount)
+    {
+      // Call Repo to get Applicable options for employee based on Salary
+      // Return List<IGrouping<int, MedicalOptions>>
+      var employeeOptions =
+        await _medicalOptionRepository.GetAllOptionsWithinEmployeeSalary(salaryAmount);
+
+      return employeeOptions
+        .Select(group => group.ToMedicalOptionCategoryDto()).ToList();
+    }
+
+    public async Task<List<IGrouping<int, MedicalOptionDto>>> GetEmployeeEligibleOptions(string employeeId)
+    {
+      throw new NotImplementedException();
+    }
+
+    public async Task<List<MedicalOptionCategoryDto>> GetAllCategoryOptionsById(int id)
+    {
+      var groupedCategorySpecificOptions = await _medicalOptionRepository.GetAllCategoryOptionsById(id);
+
+      return groupedCategorySpecificOptions
+        .Select(group => group.ToMedicalOptionCategoryDto()).ToList();
+    }
+
+
+    public async Task<List<IGrouping<int, MedicalOptionCategory>>> GetAllMedicalOptionCategories()
+    {
+      return await _medicalOptionRepository.GetAllMedicalOptionCategories();
+    }
+
+    public async Task<List<MedicalOptionCategoryOnlyDto>> GetCategoryById(int id)
+    {
+      var response = await _medicalOptionRepository.GetCategoryById(id);
+      
+      return response
+        .Select(cat => cat.ToMedicalOptionCategoryOnlyDto()).ToList();
+    }
+
+    public async Task<IReadOnlyList<MedicalOptionDto>> GetCurrentDbCopy()
+    {
+      return await _medicalOptionRepository.GetCurrentDbCopy();
+    }
+
+    public async Task<MedicalOptionCategoryDto> CreateMedicalOptionCategory(CreateMedicalOptionCategoryDto createCategoryPayload)
+    {
+      throw new NotImplementedException();
+    }
+
+    public async Task<List<CreateMedicalOptionVariantsDto>> CreateBulkOptionsByExistingCategoryId(int id,
+      CreateMedicalOptionVariantsDto createOptionsPayload)
+    {
+      throw new NotImplementedException();
+    }
+
+    public async Task<MedicalOptionCategoryDto> UpdateExistingCategoryById(int id, UpdateMedicalOptionCategoryDto updateCategoryPayload)
+    {
+      throw new NotImplementedException();
+    }
   }
 }

@@ -1,6 +1,7 @@
 ﻿namespace HRConnect.Api.Interfaces
 {
   using HRConnect.Api.DTOs.MedicalOption;
+  using HRConnect.Api.Models;
 
   /// <summary>
   /// Defines the contract for managing medical options and their categories within the HR Connect system.
@@ -217,28 +218,37 @@
     /// </code>
     /// </example>
     Task<IReadOnlyList<MedicalOptionDto>> BulkUpdateMedicalOptionsByCategoryAsync(
-      int categoryId, IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto, DateTime? testDate = null);
-    
+      int categoryId, IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto,
+      DateTime? testDate = null);
+
     // New Methods
     // Get
-      // Get all Possible options for employee based on salary
-    Task<IReadOnlyList<MedicalOptionDto>> GetAllOptionsWithinEmployeeSalary(decimal salaryAmount);
-      // Get eligible options for employee
-    Task<IReadOnlyCollection<MedicalOptionDto>> GetEmployeeEligibleOptions(string employeeId);
-      // Get All options under category via category ID
-    Task<IReadOnlyList<MedicalOptionDto>> GetAllCategoryOptionsById(int id);
-      
-      // Medical Options Category
-    Task<List<MedicalOptionCategoryDto>> GetAllMedicalOptionCategories();
+    // Get all Possible options for employee based on salary
+    Task<List<MedicalOptionCategoryDto>> GetAllOptionsWithinEmployeeSalary(
+      decimal salaryAmount);
 
-    Task<MedicalOptionCategoryDto> GetCategoryById(int id);
-     
-      // Create
-    Task<MedicalOptionCategoryDto> CreateMedicalOptionCategory(CreateMedicalOptionCategoryDto createCategoryPayload);
-    Task<List<CreateMedicalOptionVariantsDto>> CreateBulkOptionsByExistingCategoryId(int id, CreateMedicalOptionVariantsDto createOptionsPayload);
-      // Update
+    // Get eligible options for employee
+    Task<List<IGrouping<int, MedicalOptionDto>>> GetEmployeeEligibleOptions(string employeeId);
+
+    // Get All options under category via category ID
+    Task<List<MedicalOptionCategoryDto>> GetAllCategoryOptionsById(int id);
+
+    // Medical Options Category
+    Task<List<IGrouping<int, MedicalOptionCategory>>> GetAllMedicalOptionCategories();
+
+    Task<List<MedicalOptionCategoryOnlyDto>> GetCategoryById(int id);
+    
+    Task<IReadOnlyList<MedicalOptionDto>> GetCurrentDbCopy();
+
+    // Create
+    Task<MedicalOptionCategoryDto> CreateMedicalOptionCategory(
+      CreateMedicalOptionCategoryDto createCategoryPayload);
+
+    Task<List<CreateMedicalOptionVariantsDto>> CreateBulkOptionsByExistingCategoryId(int id,
+      CreateMedicalOptionVariantsDto createOptionsPayload);
+
+    // Update
     Task<MedicalOptionCategoryDto> UpdateExistingCategoryById(int id,
       UpdateMedicalOptionCategoryDto updateCategoryPayload);
-    
-  }  
+  }
 }

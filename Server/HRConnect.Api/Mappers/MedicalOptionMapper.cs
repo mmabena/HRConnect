@@ -213,5 +213,16 @@
       entity.TotalMonthlyContributionsChild2 = dto.TotalMonthlyContributionsChild2;
       entity.TotalMonthlyContributionsPrincipal = dto.TotalMonthlyContributionsPrincipal;
     }
+    
+    //Mapping MedicalOptionCategory -> MedicalOptionCategoeyOnlyDto
+    public static MedicalOptionCategoryOnlyDto ToMedicalOptionCategoryOnlyDto(
+      this MedicalOptionCategory dto)
+    {
+      return new MedicalOptionCategoryOnlyDto
+      {
+        // Omitting Id for security reasons
+        MedicalOptionCategoryName = dto.MedicalOptionCategoryName
+      };
+    }
   }
 }

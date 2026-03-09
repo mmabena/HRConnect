@@ -12,7 +12,7 @@
     public int PayrollRunId { get; set; }
     //FK
     [ForeignKey(nameof(Employee))]
-    public int EmployeeId { get; set; }
+    public string EmployeeId { get; set; }
     //FK
     [ForeignKey(nameof(MedicalOption))]
     public int MedicalOptionId { get; set; }
