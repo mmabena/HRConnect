@@ -375,9 +375,11 @@ namespace HRConnect.Api.Migrations
 
             modelBuilder.Entity("HRConnect.Api.Models.Payroll.PayrollPeriod", b =>
                 {
-                    b.Property<Guid>("PayrollPeriodId")
+                    b.Property<int>("PayrollPeriodId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PayrollPeriodId"));
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
@@ -425,8 +427,11 @@ namespace HRConnect.Api.Migrations
 
             modelBuilder.Entity("HRConnect.Api.Models.Payroll.PayrollRun", b =>
                 {
-                    b.Property<int>("PayrollRunId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime?>("FinalisedDate")
                         .HasColumnType("datetime2");
@@ -437,15 +442,19 @@ namespace HRConnect.Api.Migrations
                     b.Property<bool>("IsLocked")
                         .HasColumnType("bit");
 
+                    b.Property<int>("PayrollRunId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("PeriodDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("PeriodId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("PeriodId")
+                        .HasColumnType("int");
 
-                    b.HasKey("PayrollRunId");
+                    b.HasKey("Id");
 
-                    b.HasIndex("PeriodId");
+                    b.HasIndex("PeriodId", "PayrollRunId")
+                        .IsUnique();
 
                     b.ToTable("PayrollRuns");
                 });

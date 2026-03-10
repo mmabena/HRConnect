@@ -30,15 +30,15 @@ namespace HRConnect.Api.Services
     /// CONSIDER CHANGING THE RETURN TYPE OF THIS TASK
     public async Task<PayrollRunDto> CreatePayrollRunAsync(PayrollRun payrollRun)
     {
-      var exists = await _payrollRunRepo.GetCurrentRunAsync();
+      // var exists = await _payrollRunRepo.GetCurrentRunAsync();
 
-      if (exists != null)
-        return exists.ToPayrollRunDto();
+      // if (exists != null)
+      //   return exists.ToPayrollRunDto();
 
       DateTime currentMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
       Console.WriteLine($"Creating payroll run for month: {currentMonth}");
       //maps current financial month to 1-12
-      // var runId = _payrollInit.GetPayrunNumber(currentMonth);
+      payrollRun.IsLocked = false;
       payrollRun.IsFinalised = false;
       payrollRun.PeriodDate = currentMonth;
 

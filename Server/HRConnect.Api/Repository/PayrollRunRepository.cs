@@ -45,9 +45,11 @@ namespace HRConnect.Api.Repository
 
       // var payrun = await _context.PayrollRuns.FirstOrDefaultAsync(
       //   p => p.PeriodDate.Month == dateTime.Month);
-      var payrun = await _context.PayrollRuns.AsNoTracking().Where(r => r.IsLocked)
+      var payrun = await _context.PayrollRuns.Where(r => !r.IsLocked)
         .OrderByDescending(r => r.PayrollRunId)
         .FirstOrDefaultAsync();
+      if (payrun != null)
+        Console.WriteLine($"-------CURRENT RUN ID {payrun.PayrollRunId}-------");
       return payrun;
     }
 
@@ -61,7 +63,7 @@ namespace HRConnect.Api.Repository
       _context.PayrollRuns.Update(payrollRun);
       await _context.SaveChangesAsync();
     }
-    public async Task<PayrollRun> GetLastPayrun()
+    public async Task<PayrollRun?> GetLastPayrun()
     {
       return await _context.PayrollRuns.OrderByDescending(r => r.PayrollRunId)
         .FirstOrDefaultAsync();

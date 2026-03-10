@@ -122,6 +122,7 @@ namespace HRConnect.Api.Data
       .Property(p => p.PayrollRunId)
       .ValueGeneratedNever();//PayrollRunId is not a regular Id
 
+      modelBuilder.Entity<PayrollRun>().HasIndex(r => new { r.PeriodId, r.PayrollRunId }).IsUnique();
       //EF needs to know the derived classes as well
       // modelBuilder.Entity<PensionDeduction>()
       // .HasKey(p => p.PensionDeductionID);
@@ -137,21 +138,41 @@ namespace HRConnect.Api.Data
     //Override 'SaveChangesAsync' for Payroll Records to enforce locked records on a payroll run 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-      //Intercept all instances of saving to db
-      // var modifiedRecords = ChangeTracker.Entries<PayrollRecord>()
-      var modifiedRecords = ChangeTracker.Entries<PayrollRun>()
-            .Where(e => e.State == EntityState.Modified);
+      //Intercept all instances of saving any changes to db
+      var modifiedRecords = ChangeTracker.Entries()
+            .Where(e => e.State == EntityState.Modified &&
+            (
+            e.Entity is PayrollPeriod ||
+            e.Entity is PayrollRun ||
+            e.Entity is PayrollRecord
+            ));
 
       foreach (var e in modifiedRecords)
       {
         //Any locked entity should be under a Hard Lock. Don't allow any changes
-        //Move from not locked to locked
         var prevLockState = (bool)e.OriginalValues["IsLocked"]!;
-        var curLockState = e.Entity.IsLocked;
         if (prevLockState)
         {
           throw new InvalidOperationException("Record/Run under Hard Lock. Cannot be modified");
-          // throw new HRConnect.Api.Middleware.ValidationException("HARD LOCK");
+        }
+      }
+
+      //Do the same locking for entities to prevent deletion
+      modifiedRecords = ChangeTracker.Entries()
+           .Where(e => e.State == EntityState.Deleted &&
+           (
+           e.Entity is PayrollPeriod ||
+           e.Entity is PayrollRun ||
+           e.Entity is PayrollRecord
+           ));
+
+      foreach (var e in modifiedRecords)
+      {
+        //Any locked entity should be under a Hard Lock. Don't allow any changes
+        var prevLockState = (bool)e.OriginalValues["IsLocked"]!;
+        if (prevLockState)
+        {
+          throw new InvalidOperationException("Record/Run under Hard Lock. Cannot be modified");
         }
       }
       return await base.SaveChangesAsync(cancellationToken);

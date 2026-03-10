@@ -5,38 +5,14 @@ namespace HRConnect.Api.Utils.Payroll
 
   public class PayrollInit
   {
-    private readonly IPayrollPeriodRepository _payrollPeriodRepo;
+    private readonly IPayrollPeriodService _payrollPeriodService;
     private readonly IPayrollRunRepository _payrollRunRepo;
-    public PayrollInit(IPayrollPeriodRepository payrollPeriodRepository, IPayrollRunRepository payrollRunRepository)
+    public PayrollInit(IPayrollPeriodService payrollPeriodService, IPayrollRunRepository payrollRunRepository)
     {
-      _payrollPeriodRepo = payrollPeriodRepository;
+      _payrollPeriodService = payrollPeriodService;
       _payrollRunRepo = payrollRunRepository;
     }
 
-    /// <summary>
-    /// Get the current tax month 
-    /// 4 -> April. The first month of our financial period
-    /// 3-> March. The last month of our financial period
-    /// <summary>
-    public (DateTime start, DateTime end) GetCurrectFinancialPeriod()
-    {
-      DateTime today = DateTime.Now;
-      int startYear = 0;
-      if (today.Month >= 4)
-      {
-        //April -> December: Current financial year
-        startYear = today.Year;
-      }
-      else
-      {
-        // Jan -> March: Previoud financial year
-        startYear = today.Year - 1;
-      }
-      //1st of April
-      DateTime start = new DateTime(startYear, 4, 1);
-      DateTime end = new DateTime(startYear + 1, 3, 31);
-      return (start, end);
-    }
 
     /// <summary >
     /// Helper function to get the current payroll run number based on current date
@@ -49,26 +25,27 @@ namespace HRConnect.Api.Utils.Payroll
 
     public async Task InitialisePayrollPeriod()
     {
-      //Get the current payroll period
-      (DateTime start, DateTime end) = GetCurrectFinancialPeriod();
 
-      var payperiod = await _payrollPeriodRepo.GetActivePeriod(DateTime.Now);
+      // var payperiod = await _payrollPeriodService.GetActivePeriod(DateTime.Now);
+      var payperiod = await _payrollPeriodService.GetLastPeriodAsync(); // in production remove this
       if (payperiod == null)
       {
-        payperiod = new PayrollPeriod
-        {
-          PayrollPeriodId = Guid.NewGuid(),
-          StartDate = start,
-          EndDate = end,
-          IsLocked = false,
-          IsClosed = false,
-          Runs = new List<PayrollRun>()
-        };
-        //create the period after saving the run
-        Console.WriteLine($"CREATED A PAYROLL PERIOD");
-        await _payrollPeriodRepo.CreatePeriodAsync(payperiod);
+        payperiod = new PayrollPeriod();
+        await _payrollPeriodService.CreatePeriodAsync(payperiod);
+        // payperiod = new PayrollPeriod
+        // {
+        //   PayrollPeriodId = Guid.NewGuid(),
+        //   StartDate = start,
+        //   EndDate = end,
+        //   IsLocked = false,
+        //   IsClosed = false,
+        //   Runs = new List<PayrollRun>()
+        // };
+        // //create the period after saving the run
+        // Console.WriteLine($"=======>CREATED A PAYROLL PERIOD<=======");
+        // await _payrollPeriodService.CreatePeriodAsync(payperiod);
       }
-      int run = GetPayrunNumber(DateTime.Now);
+      int run = 1;// GetPayrunNumber(DateTime.Now);
       //Do the same thing for the period
       var runExists = await _payrollRunRepo.GetPayrunByIdAsync(run);
       if (runExists == null)
@@ -79,13 +56,15 @@ namespace HRConnect.Api.Utils.Payroll
           PayrollRunId = run,//GetPayrunNumber(DateTime.Now),
           IsLocked = false,
           Period = payperiod,
+          PeriodDate = DateTime.Now,
           Records = new List<PayrollRecord>()
         };
-        // payperiod.Runs.Add(newRun);
+        payperiod.Runs.Add(newRun);
 
+        await _payrollPeriodService.UpdateAsync(payperiod);
         await _payrollRunRepo.CreatePayrollRunAsync(newRun);
 
-        Console.WriteLine($"CREATED A PAYROLL RUN");
+        Console.WriteLine($"=======>CREATED A PAYROLL RUN<=======");
       }
 
     }
