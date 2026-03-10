@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import "../../MenuBar/MenuBar.css";
 import api from "../../../api/api";
 import { jwtDecode } from "jwt-decode";
@@ -134,8 +134,8 @@ const AddPositionManagement = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content-add">
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content-add" onClick={(e) => e.stopPropagation()}>
         <div className="headings-container">
           <div className="apm-logo">
             <span className="apm-logo-bold">singular</span>

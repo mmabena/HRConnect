@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import api from "../../../api/api";
-import { useLocation, useNavigate } from "react-router-dom";
+import {useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "../../MenuBar/MenuBar.css";
 import "../../../Pages/CompanyManagement/PositionManagement/PositionManagement.css";
@@ -33,7 +33,7 @@ const ChangePositionManagement = ({ isOpen, onClose, currentPosition, linkedEmpl
       const validPosition =
         allPositions.find(
           (pos) =>
-            pos.positionTitle.toLowerCase() ===
+            pos.positionTitle?.toLowerCase() ===
             (attemptedTitle || currentPosition || "").toLowerCase()
         )?.positionTitle || "";
       setFormData((prev) => ({
@@ -72,8 +72,8 @@ const ChangePositionManagement = ({ isOpen, onClose, currentPosition, linkedEmpl
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content-change">
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content-change"onClick={(e) => e.stopPropagation()}>
         <div className="headings-container">
           <div className="apm-logo">
             <span className="apm-logo-bold">singular</span>
@@ -119,6 +119,7 @@ const ChangePositionManagement = ({ isOpen, onClose, currentPosition, linkedEmpl
           <div className="checkbox-cell-position">
             <input
               type="checkbox"
+              name="moveOption"
               checked={!moveUsers}
               onChange={() => setMoveUsers(false)}
             />
@@ -128,6 +129,7 @@ const ChangePositionManagement = ({ isOpen, onClose, currentPosition, linkedEmpl
           <div className="checkbox-cell-position">
             <input
               type="checkbox"
+              name="moveOption"
               checked={moveUsers}
               onChange={() => setMoveUsers(true)}
             />

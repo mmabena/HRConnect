@@ -1,37 +1,46 @@
-import React, { useState, useEffect } from "react";
-// import CompanyManagementHeader from "../../../Components/CompanyManagement/companyManagementHeader";
-import CompanyManagementNavBar from "../../../Components/CompanyManagement/companyManagementNavBar";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../../../api/api"; // axios instance
-import { jwtDecode } from "jwt-decode";
-import { toast } from "react-toastify";
+
+import CompanyManagementNavBar from "../../../Components/CompanyManagement/companyManagementNavBar";
 import AddPositionManagement from "../../../Components/CompanyManagement/PositionManagement/AddPositionManagment";
 import EditPositionManagement from "../../../Components/CompanyManagement/PositionManagement/EditPositionManagement";
 import ChangePositionManagement from "../../../Components/CompanyManagement/PositionManagement/ChangePositionManagement";
 
-const PositionManagement = ({ title }) => {
-  const [currentTime, setCurrentTime] = useState("");
-  const [currentDate, setCurrentDate] = useState("");
-  const [positions, setPositions] = useState([]);
-  const [jobGrades, setJobGrades] = useState([]);
-  const [occupationalLevels, setOccupationalLevels] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [hasAccess, setHasAccess] = useState(false);
+import  usePositions  from "../../../hooks/usePositions";
+import  usePagination  from "../../../hooks/usePagination";
+import  useDateTime  from "../../../hooks/useDateTime";
+import { COMPANY_NAME } from "../../../config/companyConfig";
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+const PositionManagement = ({ title }) => {
+  const navigate = useNavigate();
+
+  // -------------------
+  // Hooks
+  // -------------------
+  const { positions, loading, hasAccess } = usePositions();
+  const { currentDate, currentTime } = useDateTime();
+  const {
+    currentPage,
+    setCurrentPage,
+    itemsPerPage,
+    setItemsPerPage,
+    totalPages,
+    currentItems: currentPositions,
+    handlePrev,
+    handleNext,
+    handlePageClick,
+  } = usePagination(positions);
+
+  // -------------------
+  // Local UI State
+  // -------------------
   const [showPageOptions, setShowPageOptions] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-
   const [selectedPositionId, setSelectedPositionId] = useState(null);
-
+  const [changeModalData, setChangeModalData] = useState(null);
   const [activeTab, setActiveTab] = useState("Position Management");
 
-  // For ChangePositionManagement modal
-  const [changeModalData, setChangeModalData] = useState(null);
-
-  const navigate = useNavigate();
   const pageOptions = [10, 15, 20, 25];
   const navTabs = [
     "Tax Table Management",
@@ -44,109 +53,21 @@ const PositionManagement = ({ title }) => {
   const tabWidths = [168, 133, 122, 134, 154, 125, 120];
 
   // -------------------
-  // Date & Time
-  // -------------------
-  useEffect(() => {
-    const updateDateTime = () => {
-      const now = new Date();
-      const month = now.toLocaleDateString("en-ZA", { month: "short" });
-      const day = now.toLocaleDateString("en-ZA", { day: "2-digit" });
-      const year = now.toLocaleDateString("en-ZA", { year: "numeric" });
-      const time = now.toLocaleTimeString("en-ZA", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      });
-      setCurrentDate(`${month}. ${day}, ${year}`);
-      setCurrentTime(time);
-    };
-    updateDateTime();
-    const intervalId = setInterval(updateDateTime, 60000);
-    return () => clearInterval(intervalId);
-  }, []);
-
-  // -------------------
-  // Initialization + Auth
-  // -------------------
-  useEffect(() => {
-    const initialize = async () => {
-      setLoading(true);
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        toast.error("You are not logged in.");
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const decoded = jwtDecode(token);
-        const role =
-          decoded?.role ||
-          decoded?.[
-            "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-          ];
-
-        if (role !== "SuperUser") {
-          toast.error("Access Denied. SuperUser only.");
-          setHasAccess(false);
-          setLoading(false);
-          return;
-        }
-
-        setHasAccess(true);
-
-        // Fetch positions, job grades, occupational levels
-        const [positionsRes, gradesRes, levelsRes] = await Promise.all([
-          api.get("/positions"),
-          api.get("/jobgrades"),
-          api.get("/occupationallevels"),
-        ]);
-
-        setPositions(positionsRes.data);
-        setJobGrades(gradesRes.data);
-        setOccupationalLevels(levelsRes.data);
-      } catch (error) {
-        console.error("Initialization error:", error);
-        toast.error("Failed to load data. Unauthorized.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    initialize();
-  }, []);
-
-  // -------------------
-  // Pagination
-  // -------------------
-  const totalPages = Math.ceil(positions.length / itemsPerPage);
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentPositions = positions.slice(indexOfFirstItem, indexOfLastItem);
-
-  const handlePrev = () =>
-    currentPage > 1 && setCurrentPage((prev) => prev - 1);
-  const handleNext = () =>
-    currentPage < totalPages && setCurrentPage((prev) => prev + 1);
-  const handlePageClick = (num) => setCurrentPage(num);
-
-  // -------------------
   // Change Modal Controls
   // -------------------
-  const openChangeModal = (data) => {
-    setChangeModalData(data);
-  };
-  const closeChangeModal = () => {
-    setChangeModalData(null);
-  };
+  const openChangeModal = (data) => setChangeModalData(data);
+  const closeChangeModal = () => setChangeModalData(null);
 
+  // -------------------
+  // Loading & Access
+  // -------------------
   if (loading) return <h3>Loading...</h3>;
   if (!hasAccess) return <h2>Access Denied. SuperUser only.</h2>;
 
   return (
     <header className="cmn-header-main-frame">
       <div className="menu-background custom-scrollbar">
+        {/* Header */}
         <div className="cmn-header-left-section">
           <h1 className="cmn-logo-text">{title || "Company Management"}</h1>
         </div>
@@ -161,22 +82,20 @@ const PositionManagement = ({ title }) => {
           </div>
         </div>
 
+        {/* Navigation & Add Button */}
         <div className="nav-bar-with-buttons">
           <CompanyManagementNavBar
             tabs={navTabs}
             activeTab={activeTab}
             onTabChange={(tab) => {
-              if (tab !== "Position Management") {
-                navigate("/companyManagement");
-              } else {
-                setActiveTab(tab);
-              }
+              if (tab !== "Position Management") navigate("/companyManagement");
+              else setActiveTab(tab);
             }}
             tabWidths={tabWidths}
           />
           {activeTab === "Position Management" && (
             <button
-              className="add-position-button"
+              className="add-positions-button"
               onClick={() => setShowAddModal(true)}
             >
               Add New Position
@@ -184,6 +103,7 @@ const PositionManagement = ({ title }) => {
           )}
         </div>
 
+        {/* Positions Table */}
         <div className="manage-positions">
           <table className="positions-table">
             <thead>
@@ -236,93 +156,87 @@ const PositionManagement = ({ title }) => {
 
         {/* Pagination & Modals */}
         <div className="pagination-wrapper">
+          <div className="pagination-left">
+            <div
+              className="per-page-box"
+              onClick={() => setShowPageOptions(!showPageOptions)}
+            >
+              <span className="per-page-number">{itemsPerPage}</span>
+              <img
+                src="/images/arrow_drop_down_circle.png"
+                alt="Dropdown"
+                className="dropdown-icon"
+              />
+              {showPageOptions && (
+                <ul className="per-page-dropdown">
+                  {pageOptions.map((option) => (
+                    <li
+                      key={option}
+                      className="per-page-option"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setItemsPerPage(option);
+                        setCurrentPage(1);
+                        setShowPageOptions(false);
+                      }}
+                    >
+                      {option}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            <span className="per-page-label">Per page</span>
+          </div>
 
-        <div className="pagination-left">
-         
-
-          <div
-            className="per-page-box"
-            onClick={() => setShowPageOptions(!showPageOptions)}
-          >
-            <span className="per-page-number">{itemsPerPage}</span>
+          <div className="pagination-right">
             <img
               src="/images/arrow_drop_down_circle.png"
-              alt="Dropdown"
-              className="dropdown-icon"
+              alt="Previous"
+              className="pagination-arrow-prev"
+              onClick={handlePrev}
+              style={{
+                transform: "rotate(90deg)",
+                cursor: currentPage > 1 ? "pointer" : "not-allowed",
+                opacity: currentPage > 1 ? 1 : 0.4,
+              }}
             />
-            {showPageOptions && (
-              <ul className="per-page-dropdown">
-                {pageOptions.map((option) => (
-                  <li
-                    key={option}
-                    className="per-page-option"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setItemsPerPage(option);
-                      setShowPageOptions(false);
-                      setCurrentPage(1);
-                    }}
-                  >
-                    {option}
-                  </li>
-                ))}
-              </ul>
-            )}
+            <div className="page-numbers">
+              {Array.from({ length: totalPages }, (_, i) => (
+                <button
+                  key={i + 1}
+                  className={`page-number ${currentPage === i + 1 ? "active-page" : ""}`}
+                  onClick={() => handlePageClick(i + 1)}
+                  aria-label={`Go to page ${i + 1}`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+            </div>
+            <img
+              src="/images/arrow_drop_down_circle.png"
+              alt="Next"
+              className="pagination-arrow next"
+              onClick={handleNext}
+              style={{
+                transform: "rotate(-90deg)",
+                cursor: currentPage < totalPages ? "pointer" : "not-allowed",
+                opacity: currentPage < totalPages ? 1 : 0.4,
+              }}
+            />
+            <div className="pagination-info">{positions.length} Positions @ {COMPANY_NAME}</div>
           </div>
-          <span className="per-page-label">Per page</span>
-        </div>
 
-        <div className="pagination-right">
-          <img
-            src="/images/arrow_drop_down_circle.png"
-            alt="Previous"
-            className="pagination-arrow-prev"
-            onClick={handlePrev}
-            style={{
-              transform: "rotate(90deg)",
-              cursor: currentPage > 1 ? "pointer" : "not-allowed",
-              opacity: currentPage > 1 ? 1 : 0.4,
-            }}
-          />
-          <div className="page-numbers">
-            {Array.from({ length: totalPages }, (_, i) => (
-              <button
-                key={i + 1}
-                className={`page-number ${currentPage === i + 1 ? "active-page" : ""}`}
-                onClick={() => handlePageClick(i + 1)}
-                aria-label={`Go to page ${i + 1}`}
-              >
-                {i + 1}
-              </button>
-            ))}
-          </div>
-          <img
-            src="/images/arrow_drop_down_circle.png"
-            alt="Next"
-            className="pagination-arrow next"
-            onClick={handleNext}
-            style={{
-              transform: "rotate(-90deg)",
-              cursor: currentPage < totalPages ? "pointer" : "not-allowed",
-              opacity: currentPage < totalPages ? 1 : 0.4,
-            }}
-          />
-          <div className="pagination-info">
-            {positions.length} Positions @ Singular
-          </div>
-          {/* Pagination controls omitted for brevity */}
+          {/* Modals */}
           {showAddModal && (
-            <AddPositionManagement
-              isOpen={showAddModal}
-              onClose={() => setShowAddModal(false)}
-            />
+            <AddPositionManagement isOpen={showAddModal} onClose={() => setShowAddModal(false)} />
           )}
           {showEditModal && (
             <EditPositionManagement
               id={selectedPositionId}
               isOpen={showEditModal}
               onClose={() => setShowEditModal(false)}
-              onOpenChangeModal={openChangeModal} // <-- Pass parent handler
+              onOpenChangeModal={openChangeModal}
             />
           )}
           {changeModalData && (
@@ -334,7 +248,6 @@ const PositionManagement = ({ title }) => {
               attemptedTitle={changeModalData.attemptedTitle}
             />
           )}
-        </div>
         </div>
       </div>
     </header>

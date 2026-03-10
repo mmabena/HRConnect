@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import "../../MenuBar/MenuBar.css";
 import { toast } from "react-toastify";
 import { confirmAlert } from "react-confirm-alert";
@@ -6,13 +6,13 @@ import "react-confirm-alert/src/react-confirm-alert.css";
 import "react-toastify/dist/ReactToastify.css";
 import api from "../../../api/api";
 import { jwtDecode } from "jwt-decode";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const EditPositionManagement = ({ id, isOpen, onClose, onOpenChangeModal })  => {
   const navigate = useNavigate();
-
   const [originalTitle, setOriginalTitle] = useState("");
   const [allPositions, setAllPositions] = useState([]);
+
 
   const [formData, setFormData] = useState({
     positionId: id,
@@ -44,12 +44,8 @@ const EditPositionManagement = ({ id, isOpen, onClose, onOpenChangeModal })  => 
             "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
           ];
 
-        if (role !== "SuperUser") {
-          setLoading(false);
-          return;
-        }
-
-        setHasAccess(true);
+      const isSuperUser = role === "SuperUser";
+      setHasAccess(isSuperUser);
 
         const [gradesRes, levelsRes, positionRes, positionsRes] =
           await Promise.all([
@@ -174,8 +170,8 @@ const EditPositionManagement = ({ id, isOpen, onClose, onOpenChangeModal })  => 
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content-edit">
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content-edit" onClick={(e) => e.stopPropagation()}>
         <div className="headings-container">
           <div className="apm-logo">
             <span className="apm-logo-bold">singular</span>

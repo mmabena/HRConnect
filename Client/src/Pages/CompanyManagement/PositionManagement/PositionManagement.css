@@ -134,14 +134,15 @@
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 .positions-table{
-   table-layout: fixed; /* forces columns to obey widths */
+  table-layout: fixed; /* forces columns to obey widths */
   width: 95%;   
   border-collapse: separate;  /* allows rounded corners on wrapper */
   border-spacing: 0;          /* no spacing between cells */
   table-layout: fixed;
   font-family: 'Anek Bangla', sans-serif; 
   font-size: 14px;   
-  margin:30px;
+margin:10px;
+  margin-left:30px;
     border-radius: 15px;      /* rounded corners for the container */
   overflow: hidden;          /* ensures corners clip content */
 }
@@ -193,6 +194,37 @@
 .position-table-manage-User tr{
   padding:10px;
 }
+/* Assuming your wrapper is .nav-bar-with-buttons */
+.nav-bar-with-buttons {
+  display: flex;
+   flex-shrink: 0; 
+  flex-direction: column; /* stack navbar and button vertically */
+
+  gap: 1rem; /* space between navbar and button */
+}
+
+
+
+.add-positions-button {
+  background-color: #668c4d;
+  font-family: 'Anek Bangla'; 
+  color: white;
+  width:187px;
+  height:47px;
+ justify-content:center;
+  border: none;
+  border-radius: 10px;
+  font-size: 20px;
+  line-height: 100%;
+  letter-spacing: 2%;
+  margin-left:83%;
+  font-weight:700;
+  cursor: pointer;
+   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease;
+}
+
+
 
 /* Table headers and cells */
 .position-table-manage-User th,
@@ -356,6 +388,7 @@
 .modal-content-change {
   width: 640px; /* slightly smaller for neatness */
   height:800px;
+  justify-content: center;
   padding: 90px 40px;
   border-radius: 14px;
   background: linear-gradient(180deg, #f4f4f4 0%, #dcdcdc 100%);
@@ -444,7 +477,7 @@
   display: flex;
   padding: 0.5rem 0.5rem;
   font-size: 14px;
-  border-radius: 4px;
+  border-radius: 5px;
   background-color: transparent;
   cursor: text;
   min-height: 40px;
@@ -522,7 +555,7 @@
 .pm-dropdown-wrapper-change select {
   width: 360px;
   appearance: none;
-    border-radius: 4px;
+    border-radius: 5px;
 }
 
 /* Hide the default browser calendar icon */
@@ -579,7 +612,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .apm-input.select-dropdown{
-  border-radius: 4px;
+  border-radius: 5px;
   color:#0e2d36;
   width:360px;
 }
@@ -607,7 +640,7 @@ margin-left: -32px;
   color: #002D40;
 }
 .apm-input.date-input{
-  border-radius: 4px;
+  border-radius: 5px;
   color:#0e2d36;
 }
 
