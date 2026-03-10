@@ -9,6 +9,7 @@
   using HRConnect.Api.Mappers;
   using Microsoft.Data.SqlClient;
   using EFCore.BulkExtensions;
+  using Utils.MedicalOption;
 
   /// <summary>
   /// Repository implementation for managing medical options and their categories in the HR Connect system.
@@ -844,12 +845,6 @@
         .Select(options => options.ToMedicalOptionDto()).ToList();
 
      return response.AsReadOnly();
-     /*
-      *       var responseDtos = existingOptions
-        .Select(option => option.ToMedicalOptionDto()).ToList();
-
-      return responseDtos.AsReadOnly();
-      */
     }
 
     public async Task<MedicalOptionCategoryDto> CreateMedicalOptionCategory(
@@ -858,15 +853,94 @@
       throw new NotImplementedException();
     }
 
-    public Task<List<CreateMedicalOptionVariantsDto>> CreateBulkOptionsByExistingCategoryId(int id,
+    public async Task<List<CreateMedicalOptionVariantsDto>> CreateBulkOptionsByExistingCategoryId(int id,
       CreateMedicalOptionVariantsDto createOptionsPayload)
     {
       // We will use EFCore.BulkExtensions
       // TODO : Validations
       
-      // Get current DB Copy (Used to verify if option added isn't already present)
-      //var dbCopy = 
+      // TODO : Extract to Service Layer
+      //1 Validate category Exists
+      var categoryExists = await _context.MedicalOptionCategories
+        .FirstOrDefaultAsync(c => c.MedicalOptionCategoryId == id);
+
+      if (categoryExists == null)
+        throw new KeyNotFoundException($"Medical option category with ID {id} not found");
+      //2. Validate Update Period (as per the business rules)
+      if (!MedicalOptionValidator.ValidateUpdatePeriod(DateTime.Now))
+        throw new InvalidOperationException(
+          "bulk create operations are only allowed during the update period (November-December)");
       
+      //3. Get existing options in category to check for duplicates
+      var existingOptions = await _context.MedicalOptions
+        .Where(opt => opt.MedicalOptionCategoryId == id)
+        .ToListAsync();
+
+      var existingOptionNames = existingOptions.Select(o => o.MedicalOptionName).ToHashSet();
+
+      //4. validate payload and check for duplicates
+      ArgumentNullException.ThrowIfNull(createOptionsPayload); // Simplified from : throw new ArgumentNullException(nameof(createOptionsPayload));
+      
+      // Check if option name already exists in category
+      if (existingOptionNames.Contains(createOptionsPayload.MedicalOptionName))
+        throw new
+          InvalidOperationException(
+            $"Medical option '{createOptionsPayload.MedicalOptionName}' is already created'");
+      
+      // After successful validation create new entity from DTO
+      var newMedicalOption = new MedicalOption
+      {
+        MedicalOptionName = createOptionsPayload.MedicalOptionName,
+        MedicalOptionCategoryId = id,
+        SalaryBracketMin = createOptionsPayload.SalaryBracketMin,
+        SalaryBracketMax = createOptionsPayload.SalaryBracketMax,
+        MonthlyRiskContributionPrincipal = createOptionsPayload.MonthlyRiskContributionPrincipal,
+        MonthlyRiskContributionAdult = createOptionsPayload.MonthlyRiskContributionAdult,
+        MonthlyRiskContributionChild = createOptionsPayload.MonthlyRiskContributionChild,
+        MonthlyRiskContributionChild2 = createOptionsPayload.MonthlyRiskContributionChild2,
+        MonthlyMsaContributionPrincipal = createOptionsPayload.MonthlyMsaContributionPrincipal,
+        MonthlyMsaContributionAdult = createOptionsPayload.MonthlyMsaContributionAdult,
+        MonthlyMsaContributionChild = createOptionsPayload.MonthlyMsaContributionChild,
+        TotalMonthlyContributionsPrincipal =
+          createOptionsPayload.TotalMonthlyContributionsPrincipal,
+        TotalMonthlyContributionsAdult = createOptionsPayload.TotalMonthlyContributionsAdult,
+        TotalMonthlyContributionsChild = createOptionsPayload.TotalMonthlyContributionsChild,
+        TotalMonthlyContributionsChild2 = createOptionsPayload.TotalMonthlyContributionsChild2
+      };
+      
+      // Perform Bulk Inserts
+      var recordsToInsert = new List<MedicalOption> { newMedicalOption };
+      await _context.BulkInsertAsync(recordsToInsert, new BulkConfig()
+      {
+        BatchSize = 1000,
+        PreserveInsertOrder = true,
+        SetOutputIdentity = true //Obtains the generated IDs back
+      });
+      
+      //Return the created option as Dtos
+      var results = new List<CreateMedicalOptionVariantsDto>
+      {
+        new CreateMedicalOptionVariantsDto
+        {
+          MedicalOptionName = newMedicalOption.MedicalOptionName,
+          MedicalOptionCategoryId = newMedicalOption.MedicalOptionCategoryId,
+          SalaryBracketMin = newMedicalOption.SalaryBracketMin,
+          SalaryBracketMax = newMedicalOption.SalaryBracketMax,
+          MonthlyRiskContributionPrincipal = newMedicalOption.MonthlyRiskContributionPrincipal,
+          MonthlyRiskContributionAdult = newMedicalOption.MonthlyRiskContributionAdult,
+          MonthlyRiskContributionChild = newMedicalOption.MonthlyRiskContributionChild,
+          MonthlyRiskContributionChild2 = newMedicalOption.MonthlyRiskContributionChild2,
+          MonthlyMsaContributionPrincipal = newMedicalOption.MonthlyMsaContributionPrincipal,
+          MonthlyMsaContributionAdult = newMedicalOption.MonthlyMsaContributionAdult,
+          MonthlyMsaContributionChild = newMedicalOption.MonthlyMsaContributionChild,
+          TotalMonthlyContributionsPrincipal = newMedicalOption.TotalMonthlyContributionsPrincipal,
+          TotalMonthlyContributionsAdult = newMedicalOption.TotalMonthlyContributionsAdult,
+          TotalMonthlyContributionsChild = newMedicalOption.TotalMonthlyContributionsChild,
+          TotalMonthlyContributionsChild2 = newMedicalOption.TotalMonthlyContributionsChild2
+        }
+      };
+
+
       throw new NotImplementedException();
     }
 
