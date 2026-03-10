@@ -4,9 +4,16 @@ using Interfaces;
 
 public class MedicalAidDeductionService:IMedicalAidDeductionService
 {
-  public async Task GetMedicalAidDeductions(string employeeId)
+  private readonly IMedicalAidDeductionRepository _medicalAidDeductionRepository;
+  public MedicalAidDeductionService(IMedicalAidDeductionRepository medicalAidDeductionRepository)
   {
-    throw new NotImplementedException();
+    _medicalAidDeductionRepository = medicalAidDeductionRepository;
+  }
+  public async Task<> GetMedicalAidDeductions(string employeeId)
+  {
+    //ToDo: validations
+    //ToDo : Fix Signature ASAP
+    //return _medicalAidDeductionRepository.GetMedicalAidDeductionsByEmployeeIdAsync(employeeId);
   }
 
   public async Task GetAllMedicalAidDeductions()

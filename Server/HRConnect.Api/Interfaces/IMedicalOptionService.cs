@@ -1,7 +1,7 @@
 ﻿namespace HRConnect.Api.Interfaces
 {
-  using HRConnect.Api.DTOs.MedicalOption;
-  using HRConnect.Api.Models;
+  using DTOs.MedicalOption;
+  using Models;
 
   /// <summary>
   /// Defines the contract for managing medical options and their categories within the HR Connect system.
@@ -244,8 +244,8 @@
     Task<MedicalOptionCategoryDto> CreateMedicalOptionCategory(
       CreateMedicalOptionCategoryDto createCategoryPayload);
 
-    Task<List<CreateMedicalOptionVariantsDto>> CreateBulkOptionsByExistingCategoryId(int id,
-      CreateMedicalOptionVariantsDto createOptionsPayload);
+    Task<IReadOnlyList<CreateMedicalOptionVariantsDto>> CreateBulkOptionsByExistingCategoryId(int id,
+      IReadOnlyCollection<CreateMedicalOptionVariantsDto> createOptionsPayload);
 
     // Update
     Task<MedicalOptionCategoryDto> UpdateExistingCategoryById(int id,

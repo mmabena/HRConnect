@@ -1,11 +1,13 @@
 ﻿namespace HRConnect.Api.Interfaces
 {
+  using Models.PayrollContribution;
+
   public interface IMedicalAidDeductionRepository
   {
-    Task GetMedicalAidDeductions(string employeeId);
-    Task GetAllMedicalAidDeductions();
-    Task AddNewMedicalAidDeductions(string employeeId);
-    Task UpdateDeductionByEmpId(string employeeId, int id);
+    Task<List<MedicalAidDeduction>> GetMedicalAidDeductionsByEmployeeIdAsync(string employeeId);
+    Task<IReadOnlyList<MedicalAidDeduction>> GetAllMedicalAidDeductionsAsync();
+    Task AddNewMedicalAidDeductionsAsync(string employeeId);
+    Task UpdateDeductionByEmpIdAsync(string employeeId);
   }
 }
 

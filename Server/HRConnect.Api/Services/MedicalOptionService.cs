@@ -1,14 +1,10 @@
 ﻿namespace HRConnect.Api.Services
 {
-  using System;
-  using System.Collections.Generic;
-  using System.Linq;
-  using HRConnect.Api.DTOs.MedicalOption;
-  using HRConnect.Api.Interfaces;
-  using HRConnect.Api.Mappers;
-  using HRConnect.Api.Models;
-  using HRConnect.Api.Utils.Enums;
-  using Middleware;
+  using DTOs.MedicalOption;
+  using Interfaces;
+  using Mappers;
+  using Models;
+  using Utils.Enums;
   using Utils.MedicalOption;
 
   /// <summary>
@@ -82,6 +78,8 @@
       .GetValues<NoUpdateOnMedicalOptionCategory>()
       .Select(e => e.ToString())
       .ToHashSet();
+
+    private List<object> _temp;   
 
     /// <summary>
     /// Initializes a new instance of the MedicalOptionService class.
@@ -614,7 +612,7 @@
           validationErrors["Validation"] = new[] { validationResult.ErrorMessage };
         }
 
-        throw new HRConnect.Api.Middleware.ValidationException(
+        throw new Middleware.ValidationException(
           validationResult.ErrorMessage ?? "Validation failed",
         validationErrors);
       }
@@ -674,9 +672,83 @@
       throw new NotImplementedException();
     }
 
-    public async Task<List<CreateMedicalOptionVariantsDto>> CreateBulkOptionsByExistingCategoryId(int id,
-      CreateMedicalOptionVariantsDto createOptionsPayload)
+    public async Task<IReadOnlyList<CreateMedicalOptionVariantsDto>>
+      CreateBulkOptionsByExistingCategoryId(int id,
+        IReadOnlyCollection<CreateMedicalOptionVariantsDto> createOptionsPayload)
     {
+      // Validations
+      if (id <= 0)
+      {
+        throw new ArgumentException("Category ID must be greater than 0",
+          nameof(id));
+      }
+
+      if (id == null)
+        throw new ArgumentNullException(nameof(id),
+          "Category Id required, to perform bulk options inserts");
+
+      if (createOptionsPayload == null || createOptionsPayload.Count == 0)
+        throw new ArgumentException("Bulk option insert payload cannot be null or empty",
+          nameof(createOptionsPayload));
+
+      var catDbData = await _medicalOptionRepository.GetCategoryById(id);
+      var tempCatName = catDbData
+        .First();
+        
+
+      if (catDbData.Count == 0 || catDbData == null)
+        throw new InvalidOperationException("Insert failed: No such category exists");
+      
+      //Proceed to obtain DB Copy
+      var dbCurrentCategoryOptions = await _medicalOptionRepository.GetAllOptionsUnderCategoryAsync(id); //Redundant by GetAllOptionsUnderCategoryAsync
+      
+      // Verify name of option if they contain category name (usually first word within the option compound name)
+      // Create a dict for faster lookups
+      var insertDict = createOptionsPayload
+        .ToDictionary(dto => dto.MedicalOptionName, dto => dto);
+      // index counter
+      int i;
+      // Check if we have any options under the category
+      if (dbCurrentCategoryOptions.Count != 0)
+      {
+        _temp = new List<Object>();
+        i = 0;
+        //Check for duplicates
+        // validate entities using the dictionary for faster lookups O(1)
+        foreach (var entity in dbCurrentCategoryOptions)
+        {
+          if (insertDict.TryGetValue(entity.MedicalOptionName, out var insertDto))
+          {
+            
+            // Validate option Name (less strict -> new option should atleast contain the name)
+            if (!insertDto.ToString().Contains(tempCatName.MedicalOptionCategoryName.ToString()))
+            {
+              throw new InvalidDataException(
+                "Variant Name(s) of the update do not correlate to the category name");
+            }
+
+            _temp.Add(insertDto.MedicalOptionName.ToString());
+            // check if first iteration
+            if (i != 0)
+            {
+              if (_temp.Contains(insertDto.MedicalOptionName))
+              {
+                throw new InvalidDataException($"Duplicate entry of {insertDto.MedicalOptionName} detected.");
+              }
+            }
+          }
+          i++;
+        }
+      }
+      
+      
+
+      
+      
+      
+      
+      
+      
       throw new NotImplementedException();
     }
 
