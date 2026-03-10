@@ -7,17 +7,16 @@ namespace HRConnect.Api.Models
 
     public class AnnualLeaveAccrualHistory
     {
-        public int Id { get; set; }                     // PK (int is fine)
+        public int Id { get; set; }                     
 
-        public Guid EmployeeId { get; set; }            // FK → Employee
+        public Guid EmployeeId { get; set; }            
+        public int Year { get; set; }                   
 
-        public int Year { get; set; }                   // Closed year (e.g. 2025)
-
-        public decimal OpeningBalance { get; set; }     // Carryover from previous year
-        public decimal Accrued { get; set; }            // Total accrued during year
-        public decimal Used { get; set; }               // Total used during year
-        public decimal Forfeited { get; set; }          // Lost at reset
-        public decimal ClosingBalance { get; set; }     // Balance at 31 Dec
+        public decimal OpeningBalance { get; set; }     
+        public decimal Accrued { get; set; }            
+        public decimal Used { get; set; }               
+        public decimal Forfeited { get; set; }          
+        public decimal ClosingBalance { get; set; }     
 
         public DateTime CreatedDate { get; set; }
 

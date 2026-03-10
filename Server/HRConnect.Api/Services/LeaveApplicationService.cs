@@ -6,7 +6,7 @@ namespace HRConnect.Api.Services
     using HRConnect.Api.Models;
     using HRConnect.Api.Utils;
     using Microsoft.EntityFrameworkCore;
-//UsedDays
+
     public class LeaveApplicationService : ILeaveApplicationService
     {
         private readonly ApplicationDBContext _context;

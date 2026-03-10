@@ -580,7 +580,6 @@ HRConnect
                     balance.ForfeitedDays = 0;
 
                     balance.AccruedDays = 0;
-                    balance.AccruedDays = 0;
                     balance.AvailableDays = carryoverApplied;
 
                     balance.TakenDays = 0;

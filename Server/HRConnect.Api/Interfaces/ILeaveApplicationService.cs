@@ -1,4 +1,3 @@
-
 namespace HRConnect.Api.Interfaces
 {
     using System;
