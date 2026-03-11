@@ -95,7 +95,8 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
       const decodedTokenEmail = jwtDecode(token).sub;
       if (decodedTokenEmail == email) {
         try {
-          api.get(`/employee/email/${email}`, {
+          api
+            .get("/employee", {
               headers: {
                 Authorization: `Bearer ${token}`,
               },
@@ -243,7 +244,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
         </div>
 
         <ul className="menu-list">
-          {/* ✅ Personal - Static, no toggle */}
+          {/* Personal Information */}
           <li>
             <div className="menu-item-wrapper">
               <img
@@ -251,7 +252,13 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                 alt="Personal icon"
                 className="menu-icon"
               />
-              <span className="menu-heading">Personal Information</span>
+
+              <span
+                className="menu-heading"
+                onClick={() => handleSubmenuClick("/personal")}
+              >
+                Personal Information
+              </span>
             </div>
           </li>
 

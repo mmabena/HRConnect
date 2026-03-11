@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { fetchAllEmployees } from "../../api/Employee";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import AddEmployeeModal from "../../../src/Components/AddEmployeeModal";
-import "../../Components/MenuBar";
+import "../../Components/MenuBar/MenuBar";
 
 const EmployeeList = () => {
   const tabs = ["All staff", "Johannesburg", "Cape Town", "UK(London)"];

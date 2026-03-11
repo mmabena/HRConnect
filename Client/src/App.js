@@ -26,48 +26,52 @@ import MenuBar from "./Components/MenuBar/MenuBar";
 import EmployeeList from "./Pages/EmployeeManagement/EmployeeList";
 import PositionManagement from "./Pages/CompanyManagement/PositionManagement/PositionManagement";
 import ProjectionCalculator from "./Pages/PayrollTools/ProjectionCalculator";
+import PersonalInformation from "./Components/PersonalInformation.jsx";
 import api from "../src/api/api.js";
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    const token = localStorage.getItem("token");
+    const storedUser = localStorage.getItem("currentUser");
+    return !!token && !!storedUser;
+  });
+  const [currentUser, setCurrentUser] = useState(() => {
+    const storedUser = localStorage.getItem("currentUser");
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const storedUser = localStorage.getItem("currentUser");
       const token = localStorage.getItem("token");
+      const storedUser = localStorage.getItem("currentUser");
 
-      if (!storedUser || !token) return;
+      if (!token || !storedUser) return;
 
       try {
         const parsedUser = JSON.parse(storedUser);
         const email = parsedUser.email;
 
-        // Fetch employee data (now includes positionTitle)
         const empResp = await api.get(`/employee/email/${email}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        const employee = empResp.data;
-        console.log("Employee API response:", employee);
 
-        // Merge employee and stored user data
+        const employee = empResp.data;
+
         const mergedUser = {
           ...parsedUser,
+          ...employee,
           username: `${employee.name} ${employee.surname}`,
-          jobTitle: employee.PositionTitle  || "N/A", // now directly from backend
+          jobTitle: employee.positionTitle,
           employmentStatus: employee.employmentStatus,
           dateOfBirth: employee.dateOfBirth,
+          profileImage: employee.profileImage,
         };
 
-        console.log("Merged user:", mergedUser);
-
         setCurrentUser(mergedUser);
-        setIsLoggedIn(true);
         localStorage.setItem("currentUser", JSON.stringify(mergedUser));
       } catch (error) {
         console.error("Failed to fetch employee:", error);
-        localStorage.removeItem("currentUser");
       }
     };
 
@@ -90,28 +94,41 @@ function App() {
   };
 
   // FIXED: Use backend user object directly
- const handleLoginSuccess = async (backendUserData) => {
+  const handleLoginSuccess = async (backendUserData) => {
     try {
-      // Fetch employee data immediately after login
-      const empResp = await api.get(`/employee/email/${backendUserData.email}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-      const employee = empResp.data;
+      const token = localStorage.getItem("token");
+
+      let employee = null;
+
+      try {
+        const empResp = await api.get("/employee", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        employee = empResp.data.find(
+          (emp) => emp.email === backendUserData.email,
+        );
+      } catch (err) {
+        console.warn("Employee endpoint not accessible for this role");
+      }
+
       const mergedUser = {
         ...backendUserData,
-        username: `${employee.name} ${employee.surname}`,
-        jobTitle: employee.PositionTitle,
-        employmentStatus: employee.employmentStatus,
-        dateOfBirth: employee.dateOfBirth,
+        username: employee
+          ? `${employee.name} ${employee.surname}`
+          : backendUserData.email,
+        jobTitle: employee?.positionTitle || "NormalUser",
+        employmentStatus: employee?.employmentStatus,
+        dateOfBirth: employee?.dateOfBirth,
       };
 
-      // Update state + localStorage instantly
       setCurrentUser(mergedUser);
       localStorage.setItem("currentUser", JSON.stringify(mergedUser));
       setIsLoggedIn(true);
+
       navigate("/dashboard");
     } catch (error) {
-      console.error("Failed to fetch employee on login:", error);
+      console.error("Login error:", error);
     }
   };
 
@@ -178,10 +195,6 @@ function App() {
             element={<ViewPositionManagement />}
           />
           <Route
-            path="/profile"
-            element={<Profile currentUser={currentUser} />}
-          />
-          <Route
             path="/company-contribution"
             element={<CompanyContribution />}
           />
@@ -201,6 +214,7 @@ function App() {
             path="/projection-calculator"
             element={<ProjectionCalculator />}
           />
+          <Route path="/personal" element={<PersonalInformation />} />
         </Routes>
       </div>
     </div>
