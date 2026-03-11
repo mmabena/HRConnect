@@ -2,9 +2,6 @@ namespace HRConnect.Api.Models.Payroll
 {
   using System.Text.Json.Serialization;
 
-  //using HRConnect.Api.Models.PayrollContribution;
-  //using HRConnect.Api.Models.Pension;
-
   public class PayrollRun
   {
     public int Id { get; set; }
@@ -16,10 +13,6 @@ namespace HRConnect.Api.Models.Payroll
     public bool IsFinalised { get; set; }
     public bool IsLocked { get; set; }
     public DateTime? FinalisedDate { get; set; }
-    //This is supposed to hold a colletion of 'PayrollRecord' types
-    // like Pension and Medical Aid Contributions/Deductions
-    public ICollection<PayrollRecord> Records { get; set; } = [];
-    //public ICollection<EmployeePensionEnrollment> EmployeePensionEnrollment { get; set; } = [];
-    //public ICollection<PensionDeduction> PensionDeduction { get; set; } = [];
+    public ICollection<PayrollRecord> Records { get; set; } = new List<PayrollRecord>();
   }
 }

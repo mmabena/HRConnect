@@ -491,10 +491,10 @@ namespace HRConnect.Api.Services
 
       var manager = await _employeeRepo.GetEmployeeByIdAsync(CareerMangerId);
 
-            if (manager == null)
-                throw new BusinessRuleException("Career Manager must be an existing Employee");
-                
-        }
+      if (manager == null)
+        throw new BusinessRuleException("Career Manager must be an existing Employee");
+
+    }
 
     public async Task<EmployeeDto?> GetEmployeeByEmailAsync(string employeeEmail)
     {

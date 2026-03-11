@@ -1,9 +1,12 @@
 namespace HRConnect.Api.Data
 {
+  using System.Reflection;
   using HRConnect.Api.Models;
   using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Models.PayrollContribution;
   using HRConnect.Api.Models.Pension;
+  using HRConnect.Api.Models.Payroll;
+  using HRConnect.Api.Models.PayrollDeduction;
   using Microsoft.EntityFrameworkCore;
 
   public class ApplicationDBContext(DbContextOptions dbContextOptions) : DbContext(dbContextOptions)
@@ -24,12 +27,10 @@ namespace HRConnect.Api.Data
     public DbSet<StatutoryContributionType> StatutoryContributionTypes { get; set; }
     public DbSet<PayrollPeriod> PayrollPeriods { get; set; }
     public DbSet<PayrollRun> PayrollRuns { get; set; }
-    public DbSet<PayrollRecord> PayrollRecords { get; set; }
-    public DbSet<PensionOption> PensionOptions { get; set; }
-    public DbSet<EmployeePensionEnrollment> EmployeePensionEnrollments { get; set; }
+    // public DbSet<PayrollRecord> PayrollRecords { get; set; }
     public DbSet<PensionDeduction> PensionDeductions { get; set; }
-    public DbSet<LunchDeduction> LunchDeductions { get; set; }
-
+    public DbSet<MedicalAidDeduction> MedicalAidDeductions { get; set; }
+    public DbSet<TestEntity> TestEntities { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
       base.OnModelCreating(modelBuilder);
@@ -104,18 +105,25 @@ namespace HRConnect.Api.Data
         .HasColumnType("decimal(18,4)")
         .HasDefaultValue(0.01m);
 
-      /*Payroll run*/
+      // modelBuilder.Ignore<PayrollRecord>();
 
       modelBuilder.Entity<PayrollPeriod>().HasMany(p => p.Runs)
-     .WithOne(r => r.Period)
-     .HasForeignKey(p => p.PeriodId);
+      .WithOne(r => r.Period)
+      .HasForeignKey(p => p.PeriodId);
 
       //EF needs to know that PayrollRecord is base type (abstract)
       modelBuilder.Entity<PayrollRecord>().ToTable("PayrollRecords");
 
       //EF needs to know derived types
       modelBuilder.Entity<PensionDeduction>().ToTable("PensionDeductions");
-      modelBuilder.Entity<LunchDeduction>().ToTable("LunchDeductions");
+      modelBuilder.Entity<MedicalAidDeduction>().ToTable("MedicalAidDeductions");
+
+
+
+      //Declare PayrollRunId as an alternative Key that can be used instead of Id
+      modelBuilder.Entity<PayrollRun>().HasAlternateKey(r => r.PayrollRunId);
+      ///////
+      /// 
 
       //Relationship to payroll run
       modelBuilder.Entity<PayrollRun>().HasMany(p => p.Records)
