@@ -18,7 +18,12 @@ namespace HRConnect.Api.Services
         {
             _context = context;
         }
-
+        /// <summary>
+        /// Retrieves a list of all leave types along with their associated entitlement rules from the database,
+        /// maps the data to a list of LeaveTypeResponse DTOs, and returns this list to the caller, 
+        /// allowing for the display or further processing of leave type information in the application.
+        /// </summary>
+        /// <returns></returns>
         public async Task<List<LeaveTypeResponse>> GetLeaveTypesAsync()
         {
             var leaveTypes = await _context.LeaveTypes
@@ -27,7 +32,12 @@ namespace HRConnect.Api.Services
 
             return leaveTypes.Select(MapToResponse).ToList();
         }
-
+        /// <summary>
+        /// Retrieves a specific leave type by its unique identifier from the database, including its associated entitlement rules,
+        /// maps the data to a LeaveTypeResponse DTO, and returns it to the caller, allowing for the display or further processing of the specific leave type information in the application,
+        /// while throwing an InvalidOperationException if the leave type with the specified ID is not found in the database.
+        /// </summary>
+        /// <param name="id"></param>
         public async Task<LeaveTypeResponse> GetLeaveTypeByIdAsync(int id)
         {
             var leaveType = await _context.LeaveTypes
@@ -39,7 +49,16 @@ namespace HRConnect.Api.Services
 
             return MapToResponse(leaveType);
         }
-
+        /// <summary>
+        /// Creates a new leave type in the database based on the provided CreateLeaveTypeRequest DTO,
+        /// including validation of the request data, checking for duplicate names and codes, 
+        /// validating the entitlement rules, and then saving the new leave type along with its associated entitlement rules to the database,
+        /// and finally returning the created leave type as a LeaveTypeResponse DTO to the caller, 
+        /// while throwing an InvalidOperationException if any validation errors occur during the process.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         public async Task<LeaveTypeResponse> CreateLeaveTypeAsync(CreateLeaveTypeRequest request)
         {
             var errors = new List<string>();
@@ -101,7 +120,16 @@ namespace HRConnect.Api.Services
 
             return await GetLeaveTypeByIdAsync(leaveType.Id);
         }
-
+        /// <summary>
+        /// Updates an existing leave type in the database based on the provided UpdateLeaveTypeRequest DTO and the leave type's unique identifier,
+        /// including validation of the request data, checking for duplicate names, validating the entitlement rules, 
+        /// and then saving the updated leave type along with its associated entitlement rules to the database,
+        /// and finally returning the updated leave type as a LeaveTypeResponse DTO to the caller,
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         public async Task<LeaveTypeResponse> UpdateLeaveTypeAsync(int id, UpdateLeaveTypeRequest request)
         {
             var leaveType = await _context.LeaveTypes
@@ -155,7 +183,15 @@ namespace HRConnect.Api.Services
 
             return await GetLeaveTypeByIdAsync(leaveType.Id);
         }
-
+        /// <summary>
+        /// Validates a list of leave entitlement rules to ensure that they meet the required criteria, 
+        /// such as non-negative minimum years of service,
+        /// valid maximum years of service that are not less than the minimum years, 
+        /// positive days allocated, and non-overlapping service ranges for the same job grade,
+        /// while throwing an InvalidOperationException with a detailed error message if any validation errors are found during the process.
+        /// </summary>
+        /// <param name="rules"></param>
+        /// <exception cref="InvalidOperationException"></exception>
         public static void ValidateRules(List<LeaveEntitlementRuleRequest> rules)
         {
             var errors = new List<string>();
@@ -207,6 +243,12 @@ namespace HRConnect.Api.Services
             if (errors.Count > 0)
                 throw new InvalidOperationException(string.Join(" | ", errors));
         }
+        /// <summary>
+        /// Maps a LeaveType entity from the database to a LeaveTypeResponse DTO, including its associated entitlement rules,
+        /// to facilitate the transfer of leave type data from the database to the application layer in a structured and simplified format for display or further processing in the application.
+        /// </summary>
+        /// <param name="l"></param>
+        /// <returns></returns>
         private static LeaveTypeResponse MapToResponse(LeaveType l)
         {
             return new LeaveTypeResponse

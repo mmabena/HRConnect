@@ -19,7 +19,13 @@ namespace HRConnect.Api.Services
             _context = context;
             _emailService = emailService;
         }
-
+        /// <summary>
+        /// Processes a leave application request by validating the employee, leave type, and requested dates, checking the employee's leave balance,
+        /// creating a new leave application record, and sending an email notification to the employee's manager for approval, 
+        /// while ensuring that leave requests cannot span multiple years and that all necessary validations are performed to maintain data integrity.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         public async Task<LeaveApplicationResponse> ApplyForLeaveAsync(CreateApplicationRequest request)
         {
             var employee = await _context.Employees
@@ -76,7 +82,16 @@ namespace HRConnect.Api.Services
 
             return MapToResponse(application);
         }
-
+        /// <summary>
+        /// Approves a pending leave application by validating the application ID and approval token, 
+        /// checking that the application is still pending and that the approval link has not expired(takes 2 days to expire),
+        /// updating the application status to approved, adjusting the employee's leave balance accordingly, 
+        /// and sending an email notification to the employee about the approval decision, 
+        /// while ensuring that all necessary validations are performed to maintain data integrity and that only authorized approvals are processed.
+        /// </summary>
+        /// <param name="applicationId"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
         public async Task ApproveLeaveAsync(int applicationId, Guid token)
         {
             var application = await _context.LeaveApplications
@@ -109,7 +124,15 @@ namespace HRConnect.Api.Services
 
             await SendEmployeeDecisionEmail(application, true);
         }
-
+        /// <summary>
+        /// Rejects a pending leave application by validating the application ID and approval token,
+        /// checking that the application is still pending and that the approval link has not expired,
+        /// updating the application status to rejected, and sending an email notification to the employee about the rejection decision,
+        /// while ensuring that all necessary validations are performed to maintain data integrity and that only authorized rejections are processed.
+        /// </summary>
+        /// <param name="applicationId"></param>
+        /// <param name="token"></param>
+        /// <param name="reason"></param>
         public async Task RejectLeaveAsync(int applicationId, Guid token, string? reason)
         {
             var application = await _context.LeaveApplications
@@ -136,7 +159,12 @@ namespace HRConnect.Api.Services
 
             await SendEmployeeDecisionEmail(application, false);
         }
-
+        /// <summary>
+        /// Maps a LeaveApplication entity to a LeaveApplicationResponse DTO, 
+        /// extracting relevant information such as employee ID, leave type ID, start and end dates, days requested, and application status,
+        /// to provide a structured response object that can be returned to API clients while abstracting away internal entity details and ensuring that only necessary information is exposed.
+        /// </summary>
+        /// <param name="application"></param>
         private static LeaveApplicationResponse MapToResponse(LeaveApplication application)
         {
             return new LeaveApplicationResponse
@@ -150,6 +178,13 @@ namespace HRConnect.Api.Services
                 Status = application.Status.ToString()
             };
         }
+        /// <summary>
+        /// Sends an email notification to the employee regarding the decision on their leave application,
+        /// including details about the leave type, dates, and the decision (approved or rejected),
+        /// </summary>
+        /// <param name="application"></param>
+        /// <param name="approved"></param>
+        /// <returns></returns>
         private async Task SendEmployeeDecisionEmail(
     LeaveApplication application,
     bool approved)
@@ -185,6 +220,14 @@ namespace HRConnect.Api.Services
                 emailBody
             );
         }
+        /// <summary>
+        /// Sends an email notification to the employee's manager requesting approval for a pending leave application,
+        /// including details about the employee, leave type, requested dates, and links to approve or reject the application, 
+        /// while ensuring that the email is sent to the correct manager based on the employee's career manager information and that the approval links contain secure tokens for validation.
+        /// </summary>
+        /// <param name="application"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         private async Task SendManagerApprovalEmail(LeaveApplication application)
         {
             var employee = await _context.Employees
@@ -237,6 +280,16 @@ Reject Leave
                 emailBody
             );
         }
+        /// <summary>
+        /// Generates the HTML content for the leave approval email sent to the manager, 
+        /// including details about the employee, leave type, requested dates, and action links for approving or rejecting the leave application,
+        /// </summary>
+        /// <param name="employee"></param>
+        /// <param name="leaveType"></param>
+        /// <param name="application"></param>
+        /// <param name="approveLink"></param>
+        /// <param name="rejectLink"></param>
+        /// <returns></returns>
         private string GenerateApprovalEmailHtml(
     Employee employee,
     LeaveType leaveType,

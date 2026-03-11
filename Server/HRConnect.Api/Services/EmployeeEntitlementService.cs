@@ -17,6 +17,9 @@ namespace HRConnect.Api.Services
             _context = context;
             _emailService = emailService;
         }
+        /// <summary> Creates a new employee record and initializes their leave balances.
+        /// </summary> <param name="request">The employee details.</param> 
+        /// <returns>The created employee with initialized leave balances.</returns>
         public async Task<EmployeeResponse> CreateEmployeeAsync(CreateEmployeeRequest request)
         {
             var employee = new Employee
@@ -41,7 +44,8 @@ namespace HRConnect.Api.Services
             return await GetEmployeeByIdAsync(employee.EmployeeId)
                    ?? throw new InvalidOperationException("Failed to load created employee.");
         }
-
+        /// <summary> Retrieves all employees with their leave balances, ensuring annual leave is up-to-date.
+        /// </summary> <returns>A list of employees with their leave balances.</returns>
         public async Task<List<EmployeeResponse>> GetAllEmployeesAsync()
         {
             // Recalculate Annual for ALL employees first
@@ -67,6 +71,9 @@ namespace HRConnect.Api.Services
 
             return employees.Select(MapToResponse).ToList();
         }
+        /// <summary> Retrieves an employee by their ID, ensuring their annual leave is up-to-date.
+        /// </summary> <param name="id">The employee ID.</param> 
+        /// <returns>The employee with their leave balances.</returns>
         public async Task<EmployeeResponse?> GetEmployeeByIdAsync(string id)
         {
             await RecalculateAnnualLeaveAsync(id);
@@ -85,6 +92,9 @@ namespace HRConnect.Api.Services
 
             return MapToResponse(employee);
         }
+        /// <summary> Updates an employee's position and recalculates their leave entitlements.
+        /// </summary> <param name="employeeId">The employee ID.</param> <param name="newPositionId">The new position ID.</param> 
+        /// <returns>The updated employee with recalculated leave balances.</returns>
         public async Task<EmployeeResponse> UpdateEmployeePositionAsync(string employeeId, int newPositionId)
         {
             var employee = await _context.Employees
@@ -198,6 +208,8 @@ namespace HRConnect.Api.Services
             return await GetEmployeeByIdAsync(employeeId)
                    ?? throw new InvalidOperationException("Failed to load updated employee.");
         }
+        /// <summary> Updates the taken days for a specific leave type and recalculates available days.
+        /// </summary> <param name="request">The request containing the update details.</param>
         public async Task UpdateTakenDaysAsync(UpdateTakenDaysRequest request)
         {
             if (request.TakenDays < 0)
@@ -244,6 +256,9 @@ namespace HRConnect.Api.Services
                     "This leave balance was modified by another process. Please refresh and try again.");
             }
         }
+        /// <summary> Initializes leave balances for a new employee based on their position, job grade, and years of service.
+        /// This method is called when a new employee is created to set up their initial leave entitlements.
+        /// </summary> <param name="employeeId">The employee ID.</param> <returns>The updated employee with initialized leave balances.</returns>
         public async Task InitializeEmployeeLeaveBalancesAsync(string employeeId)
         {
             var employee = await _context.Employees
@@ -375,6 +390,9 @@ namespace HRConnect.Api.Services
 
             await _context.SaveChangesAsync();
         }
+        /// <summary> Creates the initial accrual segment for a new employee's annual leave based on their job grade and years of service.
+        /// </summary> <param name="employeeId">The employee ID.</param> 
+        /// <returns>The updated employee with the initial accrual segment.</returns>
         public async Task RecalculateAnnualLeaveAsync(string employeeId)
         {
             var employee = await _context.Employees
@@ -442,6 +460,9 @@ namespace HRConnect.Api.Services
             await _context.SaveChangesAsync();
 
         }
+        /// <summary> Backfills historical annual accrual data for an employee based on their start date and position history.
+        /// </summary> <param name="startDate">The employee's start date.</param> 
+        /// <returns>The number of years of service.</returns>
         private decimal CalculateYearsOfService(DateOnly startDate)
         {
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
@@ -452,6 +473,9 @@ namespace HRConnect.Api.Services
             var totalDays = today.DayNumber - startDate.DayNumber;
             return Math.Round(totalDays / 365.25m, 2);
         }
+        /// <summary> Calculates the carryover amount for annual leave based on the remaining balance, applying a maximum cap of 5 days.
+        /// </summary> <param name="remaining">The remaining leave days.</param> 
+        /// <returns>The carryover amount.</returns>
         private decimal CalculateCarryover(decimal remaining)
         {
             if (remaining <= 0)
@@ -459,6 +483,9 @@ namespace HRConnect.Api.Services
 
             return remaining <= 5 ? remaining : 5;
         }
+        /// <summary>
+        /// Sends carryover warning emails to employees who have more than 5 days of annual leave remaining as of December 1st.
+        /// </summary> <returns>A task representing the asynchronous operation.</returns>
         public async Task ProcessCarryOverNotificationAsync()
         {
             var today = DateTime.UtcNow.Date;
@@ -505,6 +532,9 @@ namespace HRConnect.Api.Services
                 );
             }
         }
+        /// <summary> Processes the annual reset of leave balances, applying carryover rules and recording accrual history.
+        /// </summary> <param name="overrideYear">The year to override the current year.</param> 
+        /// <returns>A task representing the asynchronous operation.</returns>
         public async Task ProcessAnnualResetAsync(int? overrideYear = null)
         {
 
@@ -597,6 +627,9 @@ namespace HRConnect.Api.Services
                 Console.WriteLine($"Error during annual reset: {ex.Message}");
             }
         }
+        /// <summary> Updates the days allocated for a specific leave entitlement rule and recalculates affected employees' leave balances.
+        /// </summary> <param name="request">The request containing the updated rule information.</param> 
+        /// <returns>A task representing the asynchronous operation.</returns>
         public async Task UpdateLeaveEntitlementRuleAsync(UpdateLeaveRuleRequest request)
         {
             if (request.NewDaysAllocated < 0)
@@ -657,6 +690,8 @@ namespace HRConnect.Api.Services
             // Recalculate employees
             await RecalculateEmployeesForRuleChangeAsync(rule);
         }
+        /// <summary> Recalculates leave balances for employees affected by a change in a leave entitlement rule and sends notification emails about the update.
+        /// </summary> <param name="rule">The updated leave entitlement rule.</param>
         public async Task RecalculateEmployeesForRuleChangeAsync(LeaveEntitlementRule rule)
         {
             var employees = await _context.Employees
@@ -724,6 +759,9 @@ HRConnect
 
             await _context.SaveChangesAsync();
         }
+        /// <summary> Maps an Employee entity to an EmployeeResponse DTO, including leave balance summaries.
+        /// </summary> <param name="e">The Employee entity.</param> 
+        /// <returns>The mapped EmployeeResponse DTO.</returns>
         private EmployeeResponse MapToResponse(Employee e)
         {
             var annual = e.LeaveBalances
@@ -747,6 +785,10 @@ HRConnect
                 }).ToList()
             };
         }
+        /// <summary>
+        /// Recalculates sick leave balances for an employee based on their months of service, applying specific accrual rules and a 36-month cycle reset.
+        /// </summary>
+        /// <param name="employeeId"></param>
         public async Task RecalculateSickLeaveAsync(string employeeId)
         {
             var employee = await _context.Employees
@@ -808,6 +850,10 @@ HRConnect
 
             await _context.SaveChangesAsync();
         }
+        /// <summary>
+        /// Recalculates sick leave balances for all employees in the system by iterating through each employee and applying the sick leave accrual rules based on their months of service, 
+        /// including the 36-month cycle reset.
+        /// </summary>
         public async Task RecalculateAllSickLeaveAsync()
         {
             var employees = await _context.Employees
@@ -849,6 +895,9 @@ HRConnect
 
             await _context.SaveChangesAsync();
         }
+        /// <summary> Recalculates family responsibility leave balances for an employee based on their work anniversary,
+        ///  resetting the balance annually and ensuring that the reset only occurs once per cycle.
+        /// </summary> <param name="employeeId"></param>
         public async Task RecalculateFamilyResponsibilityLeaveAsync(string employeeId)
         {
             var employee = await _context.Employees
@@ -899,7 +948,9 @@ HRConnect
                 await _context.SaveChangesAsync();
             }
         }
-
+        /// <summary> Recalculates family responsibility leave balances for all employees in the system 
+        /// by iterating through each employee and applying the annual reset logic based on their work anniversary, ensuring that the reset only occurs once per cycle.
+        /// </summary>
         public async Task RecalculateAllFamilyResponsibilityLeaveAsync()
         {
             var employees = await _context.Employees
@@ -912,6 +963,13 @@ HRConnect
                 await RecalculateFamilyResponsibilityLeaveAsync(employee.EmployeeId);
             }
         }
+        /// <summary>
+        /// Resets maternity leave balances for a new pregnancy by setting taken days to 0 and resetting accrued and available days to the full entitlement, 
+        /// ensuring that this reset only
+        /// </summary>
+        /// <param name="employeeId"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         public async Task ResetMaternityLeaveForNewPregnancy(string employeeId)
         {
             var employee = await _context.Employees
@@ -937,6 +995,12 @@ HRConnect
 
             await _context.SaveChangesAsync();
         }
+        /// <summary> Projects an employee's annual leave balance forward to a specified future date, taking into account their start date, 
+        /// position history, and applicable entitlement rules.
+        /// This method calculates projected accrued days, taken days, and available days as of the projection date, 
+        /// allowing employees and managers to see how leave balances will evolve over time based on current policies and employee history.
+        /// </summary> <param name="employeeId">The employee ID.</param> <param name="projectionDate">The future date to project the leave balance to.</param> 
+        /// <returns>A response object containing the projected leave balance information.</returns>
         public async Task<LeaveProjectionResponse> ProjectAnnualLeaveAsync(
      string employeeId,
      DateOnly projectionDate)
@@ -1090,6 +1154,11 @@ HRConnect
                 DaysWorked = totalDaysWorked
             };
         }
+        /// <summary> Backfills historical annual accrual data for an employee based on their start date and position history,
+        /// creating a historical snapshot in the AnnualLeaveAccrualHistory table and adjusting the live balance to reflect the carryover amount, 
+        /// ensuring that the backfill process is idempotent and does not create duplicate records if run multiple times.
+        /// </summary> <param name="employee">The employee for whom to backfill the historical annual accrual data.</param> 
+        /// <returns>A task representing the asynchronous operation.</returns>
         private async Task BackfillHistoricalAnnualAccrualAsync(Employee employee)
         {
             var today = DateTime.UtcNow.Date;
@@ -1162,6 +1231,10 @@ HRConnect
             balance.TakenDays = 0;
             balance.LastResetYear = currentYear;
         }
+        /// <summary> Creates an initial accrual segment for an employee based on their start date and position, applying the appropriate entitlement rule,
+        /// and ensuring that the segment creation process is idempotent to prevent duplicate segments if run multiple times.
+        /// </summary> <param name="employee">The employee for whom to create the initial accrual segment.</param> 
+        /// <returns>A task representing the asynchronous operation.</returns>
         private async Task CreateInitialAccrualSegmentAsync(Employee employee)
         {
             // idempotency: don't create a second segment if one already exists

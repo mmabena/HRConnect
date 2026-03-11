@@ -51,7 +51,12 @@ namespace HRConnect.Api.Controllers
 
             return Ok(updated);
         }
-
+        /// <summary>
+        /// Updates the leave entitlement rule for employees based on the provided UpdateLeaveRuleRequest DTO,
+        /// which includes the employee's ID and the new leave entitlement rule details.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPut("update-rule")]
         public async Task<IActionResult> UpdateRule(UpdateLeaveRuleRequest request)
         {
