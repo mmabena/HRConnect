@@ -6,8 +6,14 @@ import "../../../MenuBar.css";
 import "./EmployeeList.css";
 
 const EmployeeList = () => {
-  const tabs = ["All staff", "Johannesburg", "Cape Town", "UK(London)"];
-  const [selectedTab, setSelectedTab] = useState("All staff");
+  const tabs = [
+    {label: "All staff", value: "All"},
+    {label: "Johannesburg", value: "Johannesburg"},
+    {label: "Cape Town", value: "CapeTown"},
+    {label: "UK(London)", value: "UK"},
+  ];
+
+  const [selectedTab, setSelectedTab] = useState("All");
   const [showAddModal, setShowAddModal] = useState(false);
   const [currentTime, setCurrentTime] = useState("");
   const [currentDate, setCurrentDate] = useState("");
@@ -21,7 +27,7 @@ const EmployeeList = () => {
   /// </summary>
   /// Pagination states
   /// </summary>
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [itemsPerPage, setItemsPerPage] = useState(7);
 
   const [activePage, setActivePage] = useState(1);
 
@@ -97,7 +103,7 @@ const EmployeeList = () => {
   /// Filter by selected tab (location) and search query
   /// </summary>
   const filteredEmployees = employees.filter((emp) => {
-    if (selectedTab !== "All staff") {
+    if (selectedTab !== "All") {
       const empDepartment = (emp.branch || "")
         .toLowerCase()
         .replace(/\s+/g, "");
@@ -147,16 +153,16 @@ const EmployeeList = () => {
         <div className="employee-list-heading-row">
           {tabs.map((tab) => (
             <div
-              key={tab}
+              key={tab.value}
               className={`heading-item ${
-                selectedTab === tab ? "selected" : ""
+                selectedTab === tab.value ? "selected" : ""
               }`}
               onClick={() => {
-                setSelectedTab(tab); /// </summary>
+                setSelectedTab(tab.value); /// </summary>
                 setActivePage(1); /// reset page on tab change
               }} /// </summary>
             >
-              {tab}
+              {tab.label}
             </div>
           ))}
           <div className="right-controls">

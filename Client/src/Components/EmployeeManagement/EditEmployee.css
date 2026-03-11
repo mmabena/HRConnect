@@ -358,16 +358,16 @@
 
 /* Active tab color */
 .emp-heading-item.selected {
-  background-color: #c7d9e5;
-  color: #01a19a;
+  background-color: transparent;
+  color: var(--success-text-color);
 }
 
 .emp-heading-item {
-  cursor: pointer;
   font-family: "Anek Bangla";
   font-weight: 700;
   font-size: 20px;
-  color: #002d40;
+  cursor: pointer;
+  color: var(--text-primary);
   padding: 5px 10px;
   border-radius: 4px;
   transition: all 0.2s;
@@ -376,11 +376,6 @@
 
 .emp-heading-item:first-child {
   color: #638549;
-}
-
-.emp-heading-item.selected {
-  background-color: #c7d9e5;
-  color: #01a19a;
 }
 
 .emp-toast-confirm-container {

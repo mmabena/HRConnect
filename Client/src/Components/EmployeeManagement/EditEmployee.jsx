@@ -601,7 +601,7 @@ const EditEmployee = () => {
                 id="nationality"
                 value={employeeData.nationality || ""}
                 onChange={handleInputChange}
-                readOnly={!isEditable}
+                readOnly
               />
             </div>
             <div className="emp-error-text">{formErrors.nationality}</div>
@@ -819,6 +819,7 @@ const EditEmployee = () => {
                 ))}
               </select>
               <div className="emp-error-text">{formErrors.reportsTo}</div>
+              
             </div>
           </div>
         </div>

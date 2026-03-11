@@ -1,18 +1,26 @@
-.blue{ background-color: var(--accent-blue);}
+.blue { 
+  background-color: var(--accent-blue);
+}
 
-.teal{ background-color: #01A19A;}
+.teal {
+  background-color: var(--teal);
+}
 
-.lime{ background-color: var(--success-color);}
+.lime { 
+  background-color: var(--success-color);
+}
 
-.dark-blue{ background-color: var(--text-color);}
+.dark-blue{ 
+  background-color: var(--primary-color);
+}
 
 .employee-table-grid {
   display: grid;
   grid-template-rows: 59px 68px 68px 68px 68px 68px 68px 68px 64px 64px;
-  grid-template-columns: 137px 258px minmax(0,1fr) minmax(0,1fr) 203px 163px minmax(0,1fr) minmax(0,1fr);
+  grid-template-columns: 137px 258px minmax(0,1fr) minmax(0,1fr) 250px 180px minmax(0,1fr) minmax(0,1fr);
   /*1 header + 10 rows */
   width: 1441px;
-  height: 777px;
+  height: 550px;
   row-gap: 2px;
   border-radius: 10px 10px 5px 10px;
   box-sizing: border-box;
@@ -30,7 +38,7 @@
     grid-column: 8 / span 1;
     justify-self: stretch;
     background-color: var(--primary-color);
-    color: #FFF;
+    color: var(--white);
     font-feature-settings: 'liga' off, 'clig' off;
     font-family: "Anek Bangla";
     font-size: 16px;

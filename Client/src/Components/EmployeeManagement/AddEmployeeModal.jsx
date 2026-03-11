@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "./AddEmployeeModal.css";
@@ -56,6 +56,16 @@ const AddEmployeeModal = ({ closeModal }) => {
     disabilityType: "",
     documentPath: "",
   });
+
+  const fileInputRef = useRef(null);
+  const [fileName, setFileName] = useState("Profile Picture");
+
+  const handleImageClick = () => 
+  {
+    fileInputRef.current.click();
+  };
+
+
 
   useEffect(() => {
     setUserRole(getCurrentUserRole());
@@ -141,8 +151,15 @@ const AddEmployeeModal = ({ closeModal }) => {
     setEmployee((prev) => ({ ...prev, [name]: value }));
   };
 
-  const onFileChange = (e) =>
+
+  const onFileChange = (e) =>{
+    const file = e.target.files[0];
+
+  if (file) {
+    setFileName(file.name); // save file name
+  }
     handleFileChange(e, setEmployee, setUploading, setErrorMessage);
+};
 
   const formatDateForBackend = (dateStr) => {
     if (!dateStr) return null;
@@ -228,6 +245,7 @@ const AddEmployeeModal = ({ closeModal }) => {
     }
   };
 
+
   return (
     <div className="emp-center-frame">
       <div className="emp-left-frame">
@@ -241,15 +259,12 @@ const AddEmployeeModal = ({ closeModal }) => {
           </div>
         </div>
 
-      
-
         <div className="emp-name-surname-container">
           <div className="emp-form-grid">
-
-          <div className="emp-personal-details-heading">
-            <span>Personal</span> <span>Details</span>
+            <div className="emp-personal-details-heading">
+              <span>Personal</span> <span>Details</span>
             </div>
-         
+
             {/* Title */}
             <div className="emp-full-width dropdown-wrapper emp-input-wrapper">
               <select
@@ -319,10 +334,10 @@ const AddEmployeeModal = ({ closeModal }) => {
                   <option value="passport">Passport Number</option>
                 </select>
                 <img
-                src="/images/arrow_drop_down_circle.png"
-                alt="Dropdown icon"
-                className="dropdown-icon"
-              />
+                  src="/images/arrow_drop_down_circle.png"
+                  alt="Dropdown icon"
+                  className="dropdown-icon"
+                />
               </div>
               <div className="emp-input-wrapper">
                 <input
@@ -364,16 +379,17 @@ const AddEmployeeModal = ({ closeModal }) => {
             </div>
 
             {/* DOB | Gender */}
-            
+
             <div className="emp-two-col">
               <div className="emp-input-wrapper">
+                <div className="date-wrapper">
+                  <label className="date-label">DOB</label>
                 <input
-                  className="emp-name-input-col emp-name-input"
                   type="date"
-                 
                   name="dateOfBirth"
                   value={employee.dateOfBirth}
                   onChange={onInputChange}
+                  className={`emp-name-input-col emp-name-input ${formErrors.dateOfBirth ? "emp-error-input" : ""}`}
                   disabled={employee.idType === "id"}
                 />
                 {formErrors.dateOfBirth && (
@@ -381,11 +397,12 @@ const AddEmployeeModal = ({ closeModal }) => {
                     {formErrors.dateOfBirth}
                   </span>
                 )}
-                 <img
+                <img
                   src="/images/calendar-range.svg"
                   alt="Dropdown icon"
                   className="dropdown-icon"
                 />
+                </div>
               </div>
               <div className="emp-input-wrapper dropdown-wrapper">
                 <select
@@ -406,18 +423,17 @@ const AddEmployeeModal = ({ closeModal }) => {
                   <span className="emp-error-message">{formErrors.gender}</span>
                 )}
                 <img
-                src="/images/arrow_drop_down_circle.png"
-                alt="Dropdown icon"
-                className="dropdown-icon"
-              />
+                  src="/images/arrow_drop_down_circle.png"
+                  alt="Dropdown icon"
+                  className="dropdown-icon"
+                />
               </div>
             </div>
 
             {/* Disability (radio buttons) */}
-           <div className="emp-two-col">
-          <div className="emp-disability-row">    
-                <span className="emp-disability-label">Disability:</span>
- 
+            <span className="emp-disability-label">Disability:</span>
+            <div className="emp-two-col">
+              <div className="emp-disability-row">
                 <label className="emp-radio-option">
                   <input
                     type="radio"
@@ -444,7 +460,7 @@ const AddEmployeeModal = ({ closeModal }) => {
                   <input
                     type="text"
                     name="disabilityType"
-                    placeholder="Describe disability"
+                    placeholder="Enter disability"
                     value={employee.disabilityType}
                     onChange={onInputChange}
                     className="emp-disability-input"
@@ -530,13 +546,11 @@ const AddEmployeeModal = ({ closeModal }) => {
                     {formErrors.zipCode}
                   </span>
                 )}
-                
               </div>
             </div>
           </div>
         </div>
       </div>
-      
 
       {/* Right frame */}
       <div className="emp-right-frame">
@@ -545,27 +559,29 @@ const AddEmployeeModal = ({ closeModal }) => {
             <div className="emp-name-surname-container">
               <div className="emp-personal-details-container"></div>
               <div className="emp-form-group emp-input-wrapper">
-                
                 {/* Start Date */}
-                <input
-                  type="date"
-                  className={`emp-name-input ${formErrors.startDate ? "emp-error-input" : ""}`}
-                  placeholder="Employee Start Date"
-                  value={employee.startDate}
-                  onChange={onInputChange}
-                  name="startDate"
-                />
-
-                {formErrors.startDate && (
-                  <span className="emp-error-message">
-                    {formErrors.startDate}
-                  </span>
-                )}
-                <img
-                  src="/images/calendar-range.svg"
-                  alt="Dropdown icon"
-                  className="dropdown-icon"
-                />
+                <div className="date-wrapper">
+                  <label className="date-label">Start Date</label>
+                  
+                  <input
+                    type="date"
+                    id="startDate"
+                    name="startDate"
+                    value={employee.startDate}
+                    onChange={onInputChange}
+                    className={`emp-name-input ${formErrors.startDate ? "emp-error-input" : ""}`}
+                  />
+                  {formErrors.startDate && (
+                    <span className="emp-error-message">
+                      {formErrors.startDate}
+                    </span>
+                  )}
+                  <img
+                    src="/images/calendar-range.svg"
+                    alt="Dropdown icon"
+                    className="dropdown-icon"
+                  />
+                </div>
               </div>
               {/* Branch */}
               <div className="emp-full-width dropdown-wrapper emp-input-wrapper">
@@ -648,10 +664,10 @@ const AddEmployeeModal = ({ closeModal }) => {
                   </span>
                 )}
                 <img
-                src="/images/arrow_drop_down_circle.png"
-                alt="Dropdown icon"
-                className="dropdown-icon"
-              />
+                  src="/images/arrow_drop_down_circle.png"
+                  alt="Dropdown icon"
+                  className="dropdown-icon"
+                />
               </div>
               {/* Employment Status */}
               <div className="emp-full-width dropdown-wrapper emp-input-wrapper">
@@ -674,10 +690,10 @@ const AddEmployeeModal = ({ closeModal }) => {
                   </span>
                 )}
                 <img
-                src="/images/arrow_drop_down_circle.png"
-                alt="Dropdown icon"
-                className="dropdown-icon"
-              />
+                  src="/images/arrow_drop_down_circle.png"
+                  alt="Dropdown icon"
+                  className="dropdown-icon"
+                />
               </div>
               {/* Career Manager */}
               <div className="emp-full-width dropdown-wrapper emp-input-wrapper">
@@ -701,29 +717,36 @@ const AddEmployeeModal = ({ closeModal }) => {
                   </span>
                 )}
                 <img
-                src="/images/arrow_drop_down_circle.png"
-                alt="Dropdown icon"
-                className="dropdown-icon"
-              />
+                  src="/images/arrow_drop_down_circle.png"
+                  alt="Dropdown icon"
+                  className="dropdown-icon"
+                />
               </div>
 
-              <div className="emp-full-width dropdown-wrapper emp-input-wrapper">
+              <div className="emp-input-wrapper">
+                <span className="upload-label">{fileName}</span>
+
                 <input
                   type="file"
-                  className={`emp-name-input ${formErrors.documentPath ? "emp-error-input" : ""}`}
+                  ref={fileInputRef}
+                  className={`emp-name-input hidden-file-input ${formErrors.startDate ? "emp-error-input" : ""}`}
                   onChange={onFileChange}
                   name="documentPath"
+                  accept="image/*"
                 />
+
+                <img
+                  src="/images/arrow_upload_ready.png"
+                  alt="Upload profile"
+                  className="upload-icon"
+                  onClick={handleImageClick}
+                />
+
                 {formErrors.documentPath && (
                   <span className="emp-error-message">
                     {formErrors.documentPath}
                   </span>
                 )}
-                <img
-                src="/images/arrow_upload_ready.png"
-                alt="Dropdown icon"
-                className="dropdown-icon"
-              />
               </div>
 
               {/* Save Button */}
@@ -754,7 +777,6 @@ const AddEmployeeModal = ({ closeModal }) => {
         </div>
       </div>
     </div>
-    
   );
 };
 
