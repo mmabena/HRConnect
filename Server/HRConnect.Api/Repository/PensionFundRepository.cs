@@ -1,4 +1,6 @@
-﻿namespace HRConnect.Api.Repository
+﻿
+
+namespace HRConnect.Api.Repository
 {
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
@@ -6,41 +8,40 @@
   using Microsoft.EntityFrameworkCore;
   using System.Collections.Generic;
   using System.Threading.Tasks;
-
-  public class PensionFundRepository(ApplicationDBContext context) : IPensionRepository
+  using System.Threading;
+  public class PensionFundRepository(ApplicationDBContext context) : IPensionFundRepository
   {
-    public async Task<IEnumerable<PensionFund>> GetPensionFundsAsync()
+    public async Task<IEnumerable<PensionFund>> GetPensionFundsAsync(CancellationToken cancellationToken)
     {
-      return await context.PensionFunds.ToListAsync();
+      return await context.PensionFunds.ToListAsync(cancellationToken);
     }
 
-    public async Task<PensionFund?> GetPensionFundByIdAsync(int id)
+    public async Task<PensionFund?> GetPensionFundByIdAsync(int id, CancellationToken cancellationToken)
     {
       return await context.PensionFunds
-                          .FirstOrDefaultAsync(f => f.PensionFundId == id);
+                          .FirstOrDefaultAsync(f => f.PensionFundId == id, cancellationToken);
     }
 
-    public async Task AddPensionFundAsync(PensionFund fund)
+    public async Task AddPensionFundAsync(PensionFund fund, CancellationToken cancellationToken)
     {
-      _ = await context.PensionFunds.AddAsync(fund);
-      _ = await context.SaveChangesAsync();
+      _ = await context.PensionFunds.AddAsync(fund, cancellationToken);
+      _ = await context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task UpdatePensionFundAsync(PensionFund fund)
+    public async Task UpdatePensionFundAsync(PensionFund fund, CancellationToken cancellationToken)
     {
       _ = context.PensionFunds.Update(fund);
-      _ = await context.SaveChangesAsync();
+      _ = await context.SaveChangesAsync(cancellationToken);
     }
 
-    // Add or update PensionFund for an employee
-    public async Task AddOrUpdatePensionFundAsync(PensionFund fund)
+    public async Task AddOrUpdatePensionFundAsync(PensionFund fund, CancellationToken cancellationToken)
     {
       PensionFund? existingFund = await context.PensionFunds
-          .FirstOrDefaultAsync(f => f.EmployeeId == fund.EmployeeId);
+          .FirstOrDefaultAsync(f => f.EmployeeId == fund.EmployeeId, cancellationToken);
 
       if (existingFund == null)
       {
-        _ = await context.PensionFunds.AddAsync(fund);
+        _ = await context.PensionFunds.AddAsync(fund, cancellationToken);
       }
       else
       {
@@ -54,41 +55,9 @@
       }
     }
 
-    public async Task SaveChangesAsync()
+    public async Task SaveChangesAsync(CancellationToken cancellationToken)
     {
-      _ = await context.SaveChangesAsync();
-    }
-
-    // Pension Options
-
-    public async Task<IEnumerable<PensionOption>> GetPensionOptionsAsync()
-    {
-      return await context.PensionOptions.ToListAsync();
-    }
-
-    public async Task<PensionOption?> GetPensionOptionByIdAsync(int id)
-    {
-      return await context.PensionOptions
-                          .FirstOrDefaultAsync(o => o.PensionOptionId == id);
-    }
-
-    public async Task AddPensionOptionAsync(PensionOption pensionoption)
-    {
-      _ = await context.PensionOptions.AddAsync(pensionoption);
-      _ = await context.SaveChangesAsync();
-    }
-
-    public async Task UpdatePensionOptionAsync(PensionOption pensionoption)
-    {
-      _ = context.PensionOptions.Update(pensionoption);
-      _ = await context.SaveChangesAsync();
-    }
-
-    // FIX: EmployeeId is a string, not int
-    public async Task<Employee?> GetEmployeeByIdAsync(string id)
-    {
-      return await context.Employees
-                          .FirstOrDefaultAsync(e => e.EmployeeId == id);
+      _ = await context.SaveChangesAsync(cancellationToken);
     }
   }
 }

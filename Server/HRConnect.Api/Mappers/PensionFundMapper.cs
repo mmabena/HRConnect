@@ -5,9 +5,9 @@
 
   public static class PensionFundMapper
   {
-    public static PensionFund ToPensionFundDto(this PensionFund entity)
+    public static PensionFundDto ToDto(this PensionFund entity)
     {
-      return new PensionFund
+      return new PensionFundDto
       {
         PensionFundId = entity.PensionFundId,
         EmployeeId = entity.EmployeeId,
@@ -20,7 +20,7 @@
       };
     }
 
-    public static PensionFund ToEntity(PensionFundDto dto)
+    public static PensionFund ToEntity(this PensionFundDto dto)
     {
       return new PensionFund
       {
@@ -30,8 +30,8 @@
         MonthlySalary = dto.MonthlySalary,
         ContributionPercentage = dto.ContributionPercentage,
         ContributionAmount = dto.ContributionAmount,
-        TaxCode = dto.TaxCode,
-        PensionOptionId = dto.PensionOptionId,
+        TaxCode = (int)dto.TaxCode, 
+        PensionOptionId = dto.PensionOptionId
       };
     }
   }

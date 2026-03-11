@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRConnect.Api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20260227124218_AddPensionFundTables")]
-    partial class AddPensionFundTables
+    [Migration("20260305085831_NewTablesNewDatabase")]
+    partial class NewTablesNewDatabase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

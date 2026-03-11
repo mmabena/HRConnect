@@ -5,7 +5,7 @@
 namespace HRConnect.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialDomainTables : Migration
+    public partial class ChangeTaxCodeToInt2 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

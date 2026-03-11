@@ -31,6 +31,7 @@
 
   public class Employee
   {
+    [Key]
     [Required]
     public string EmployeeId { get; set; } = string.Empty;
 

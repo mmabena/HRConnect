@@ -3,27 +3,21 @@
   using HRConnect.Api.Models;
   using System.Collections.Generic;
   using System.Threading.Tasks;
+  using System.Threading;
 
-  public interface IPensionRepository
+  public interface IPensionFundRepository
   {
     // Pension Funds
-    Task<IEnumerable<PensionFund>> GetPensionFundsAsync();
-    Task<PensionFund?> GetPensionFundByIdAsync(int id);
-    Task AddPensionFundAsync(PensionFund fund);
-    Task UpdatePensionFundAsync(PensionFund fund);
+    Task<IEnumerable<PensionFund>> GetPensionFundsAsync(CancellationToken cancellationToken);
 
-    Task AddOrUpdatePensionFundAsync(PensionFund fund);
+    Task<PensionFund?> GetPensionFundByIdAsync(int id, CancellationToken cancellationToken);
 
-    Task SaveChangesAsync();
+    Task AddPensionFundAsync(PensionFund fund, CancellationToken cancellationToken);
 
-    // Pension Options
-    Task<IEnumerable<PensionOption>> GetPensionOptionsAsync();
-    Task<PensionOption?> GetPensionOptionByIdAsync(int id);
-    Task AddPensionOptionAsync(PensionOption pensionoption);
-    Task UpdatePensionOptionAsync(PensionOption pensionoption);
+    Task UpdatePensionFundAsync(PensionFund fund, CancellationToken cancellationToken);
 
-    // Employees
-    Task<Employee?> GetEmployeeByIdAsync(string id); // FIX: string not int
+    Task AddOrUpdatePensionFundAsync(PensionFund fund, CancellationToken cancellationToken);
+
+    Task SaveChangesAsync(CancellationToken cancellationToken);
   }
 }
-

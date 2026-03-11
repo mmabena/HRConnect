@@ -1,94 +1,97 @@
 ﻿namespace HRConnect.Api.Services
 {
+  using System.Collections.Generic;
+  using System.Threading;
+  using System.Threading.Tasks;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
-  using System.Collections.Generic;
-  using System.Threading.Tasks;
 
-
-  public class PensionFundService(IPensionRepository repo) : IPensionFundService
+  public class PensionFundService(
+      IPensionFundRepository fundRepo,
+      IPensionOptionRepository optionRepo,
+      IEmployeePensionRepository employeeRepo
+  ) : IPensionFundService
   {
+
     // Pension Funds
-
-    public async Task<IEnumerable<PensionFund>> GetPensionFundsAsync()
+    public async Task<IEnumerable<PensionFund>> GetPensionFundsAsync(CancellationToken cancellationToken)
     {
-      return await repo.GetPensionFundsAsync();
+      return await fundRepo.GetPensionFundsAsync(cancellationToken);
     }
 
-    public async Task<PensionFund?> GetPensionFundByIdAsync(int id)
+    public async Task<PensionFund?> GetPensionFundByIdAsync(int id, CancellationToken cancellationToken)
     {
-      return await repo.GetPensionFundByIdAsync(id);
+      return await fundRepo.GetPensionFundByIdAsync(id, cancellationToken);
     }
 
-    public async Task<ServiceResult> AddPensionFundAsync(PensionFund fund)
+    public async Task<ServiceResult> AddPensionFundAsync(PensionFund fund, CancellationToken cancellationToken)
     {
-      await repo.AddPensionFundAsync(fund);
+      await fundRepo.AddPensionFundAsync(fund, cancellationToken);
+      await fundRepo.SaveChangesAsync(cancellationToken);
+
       return ServiceResult.Success("Fund added successfully.");
     }
 
-    public async Task<ServiceResult> UpdatePensionFundAsync(PensionFund fund)
+    public async Task<ServiceResult> UpdatePensionFundAsync(PensionFund fund, CancellationToken cancellationToken)
     {
-      await repo.UpdatePensionFundAsync(fund);
+      await fundRepo.UpdatePensionFundAsync(fund, cancellationToken);
+      await fundRepo.SaveChangesAsync(cancellationToken);
+
       return ServiceResult.Success("Fund updated successfully.");
     }
 
     // Pension Options
-
-    public async Task<IEnumerable<PensionOption>> GetPensionOptionsAsync()
+    public async Task<IEnumerable<PensionOption>> GetPensionOptionsAsync(CancellationToken cancellationToken)
     {
-      return await repo.GetPensionOptionsAsync();
+      return await optionRepo.GetPensionOptionsAsync(cancellationToken);
     }
 
-    public async Task<PensionOption?> GetPensionOptionByIdAsync(int id)
+    public async Task<PensionOption?> GetPensionOptionByIdAsync(int id, CancellationToken cancellationToken)
     {
-      return await repo.GetPensionOptionByIdAsync(id);
+      return await optionRepo.GetPensionOptionByIdAsync(id, cancellationToken);
     }
 
-    public async Task<ServiceResult> AddPensionOptionAsync(PensionOption pensionoption)
+    public async Task<ServiceResult> AddPensionOptionAsync(PensionOption pensionOption, CancellationToken cancellationToken)
     {
-      if (pensionoption.ContributionPercentage is < 0 or > 15)
+      if (pensionOption.ContributionPercentage is < 0 or > 15)
       {
         return ServiceResult.Failure("Percentage must be between 0 and 15.");
       }
 
-      IEnumerable<PensionOption> existingOptions = await repo.GetPensionOptionsAsync();
+      IEnumerable<PensionOption> existingOptions = await optionRepo.GetPensionOptionsAsync(cancellationToken);
 
       foreach (PensionOption option in existingOptions)
       {
-        if (option.ContributionPercentage == pensionoption.ContributionPercentage)
+        if (option.ContributionPercentage == pensionOption.ContributionPercentage)
         {
           return ServiceResult.Failure("An option with this percentage already exists.");
         }
       }
 
-      await repo.AddPensionOptionAsync(pensionoption);
-      return ServiceResult.Success("Option added successfully.");
+      return await optionRepo.AddPensionOptionAsync(pensionOption, cancellationToken);
     }
 
-    public async Task<ServiceResult> UpdatePensionOptionAsync(PensionOption pensionoption)
+    public async Task<ServiceResult> UpdatePensionOptionAsync(PensionOption pensionOption, CancellationToken cancellationToken)
     {
-      if (pensionoption.ContributionPercentage is < 0 or > 15)
-      {
-        return ServiceResult.Failure("Percentage must be between 0 and 15.");
-      }
-
-      await repo.UpdatePensionOptionAsync(pensionoption);
-      return ServiceResult.Success("Option updated successfully.");
+      return pensionOption.ContributionPercentage is < 0 or > 15
+        ? ServiceResult.Failure("Percentage must be between 0 and 15.")
+        : await optionRepo.UpdatePensionOptionAsync(pensionOption, cancellationToken);
     }
 
     // Pension Deduction
-
-    public decimal CalculatePensionDeduction(decimal monthlySalary, PensionOption pensionoption)
+    public decimal CalculatePensionDeduction(decimal monthlySalary, PensionOption pensionOption)
     {
-      return monthlySalary * (pensionoption.ContributionPercentage / 100);
+      return monthlySalary * (pensionOption.ContributionPercentage / 100);
     }
 
-    // Record Pension Option Selection   
-
-    public async Task<ServiceResult> RecordEmployeePensionSelectionAsync(string employeeId, int pensionOptionId)
+    // Employee Pension Selection
+    public async Task<ServiceResult> RecordEmployeePensionSelectionAsync(
+        string employeeId,
+        int pensionOptionId,
+        CancellationToken cancellationToken)
     {
-      Employee? employee = await repo.GetEmployeeByIdAsync(employeeId);
-      PensionOption? option = await repo.GetPensionOptionByIdAsync(pensionOptionId);
+      Employee? employee = await employeeRepo.GetEmployeeByIdAsync(employeeId, cancellationToken);
+      PensionOption? option = await optionRepo.GetPensionOptionByIdAsync(pensionOptionId, cancellationToken);
 
       if (employee == null || option == null)
       {
@@ -100,29 +103,34 @@
         return ServiceResult.Failure("Only permanent employees may select a pension option.");
       }
 
+      PensionFund? fundRecord = await fundRepo.GetPensionFundByIdAsync(1, cancellationToken);
+
+      if (fundRecord == null)
+      {
+        return ServiceResult.Failure("No pension fund available.");
+      }
+
+      employee.PensionOptionId = option.PensionOptionId;
+      employee.PensionFundId = fundRecord.PensionFundId;
+
       decimal salary = employee.MonthlySalary ?? 0m;
       decimal contributionAmount = salary * (option.ContributionPercentage / 100);
 
-
       PensionFund fund = new()
       {
-        PensionFundId = 1,
         EmployeeId = employee.EmployeeId,
         EmployeeName = employee.Name,
         PensionOptionId = option.PensionOptionId,
-        MonthlySalary = employee.MonthlySalary ?? 0m,          // snapshot salary
-        ContributionPercentage = option.ContributionPercentage, // snapshot percentage
+        MonthlySalary = salary,
+        ContributionPercentage = option.ContributionPercentage,
         ContributionAmount = contributionAmount,
-        TaxCode = 4001 // default tax code
+        TaxCode = 4001
       };
 
-      await repo.AddOrUpdatePensionFundAsync(fund);
-      await repo.SaveChangesAsync();
+      await fundRepo.AddOrUpdatePensionFundAsync(fund, cancellationToken);
+      await fundRepo.SaveChangesAsync(cancellationToken);
 
-      return ServiceResult.Success("Pension option recorded and contribution calculated.");
+      return ServiceResult.Success("Pension option selected and employee updated.");
     }
-
-
   }
 }
-

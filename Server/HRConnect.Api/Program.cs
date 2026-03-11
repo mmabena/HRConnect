@@ -93,7 +93,9 @@ builder.Services.AddOptions<ResendClientOptions>().Configure<IConfiguration>((o,
 });
 builder.Services.AddHttpClient<ResendClient>();
 
-builder.Services.AddScoped<IPensionRepository, PensionFundRepository>();
+builder.Services.AddScoped<IPensionFundRepository, PensionFundRepository>();
+builder.Services.AddScoped<IPensionOptionRepository, PensionOptionRepository>();
+builder.Services.AddScoped<IEmployeePensionRepository, EmployeePensionRepository>();
 builder.Services.AddScoped<IPensionFundService, PensionFundService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
