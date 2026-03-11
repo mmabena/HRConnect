@@ -38,17 +38,31 @@ namespace HRConnect.Tests
         {
             var context = GetInMemoryDb();
 
+            // Create manager
+            var manager = new Employee
+            {
+                EmployeeId = Guid.NewGuid().ToString(),
+                Name = "Manager",
+                Surname = "User",
+                Email = "manager@email.com",
+                Gender = Gender.Male,
+                PositionId = 1,
+                StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-5))
+            };
+
+            context.Employees.Add(manager);
+
+            // Create employee linked to manager
             var employee = new Employee
             {
-                EmployeeId = Guid.NewGuid(),
-                FirstName = "Test",
-                LastName = "User",
+                EmployeeId = Guid.NewGuid().ToString(),
+                Name = "Test",
+                Surname = "User",
                 Email = "test@email.com",
-                Gender = "Male",
-                ReportingManagerId = "manager@email.com",
+                Gender = Gender.Male,
+                CareerManagerID = "manager@email.com",
                 PositionId = 1,
-                StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
-                IsActive = true
+                StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1))
             };
 
             context.Employees.Add(employee);
@@ -75,7 +89,6 @@ namespace HRConnect.Tests
 
             return (context, employee);
         }
-
         [Fact]
         public async Task ApplyForLeaveShouldCreateApplication()
         {
@@ -108,7 +121,7 @@ namespace HRConnect.Tests
 
             var request = new CreateApplicationRequest
             {
-                EmployeeId = Guid.NewGuid(),
+                EmployeeId = Guid.NewGuid().ToString(),
                 LeaveTypeId = 1,
                 StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
                 EndDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1))

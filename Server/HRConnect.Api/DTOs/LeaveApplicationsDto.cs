@@ -6,7 +6,7 @@ namespace HRConnect.Api.DTOs
     using System.Threading.Tasks;
     public class CreateApplicationRequest
     {
-        public Guid EmployeeId { get; set; }
+        public string EmployeeId { get; set; }
         public int LeaveTypeId { get; set; }
         public DateOnly StartDate { get; set; }
         public DateOnly EndDate { get; set; }
@@ -15,7 +15,7 @@ namespace HRConnect.Api.DTOs
     public class LeaveApplicationResponse
     {
         public int Id { get; set; }
-        public Guid EmployeeId { get; set; }
+        public string EmployeeId { get; set; }
         public int LeaveTypeId { get; set; }
         public DateOnly StartDate { get; set; }
         public DateOnly EndDate { get; set; }

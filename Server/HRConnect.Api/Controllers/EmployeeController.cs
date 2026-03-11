@@ -3,10 +3,11 @@ namespace HRConnect.Api.Controllers
     using HRConnect.Api.DTOs;
     using HRConnect.Api.Interfaces;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Authorization;
 
     [ApiController]
     [Route("api/[controller]")]
-    //[Authorize(Roles = "SuperUser")]
+    [Authorize(Roles = "SuperUser")]
     public class EmployeeController : ControllerBase
     {
         private readonly IEmployeeEntitlementService _employeeService;
@@ -30,8 +31,8 @@ namespace HRConnect.Api.Controllers
             var employees = await _employeeService.GetAllEmployeesAsync();
             return Ok(employees);
         }
-        [HttpGet("{id:guid}")]
-        public async Task<ActionResult<EmployeeResponse>> GetById(Guid id)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<EmployeeResponse>> GetById(string id)
         {
             var employee = await _employeeService.GetEmployeeByIdAsync(id);
 
@@ -40,9 +41,9 @@ namespace HRConnect.Api.Controllers
 
             return Ok(employee);
         }
-        [HttpPut("{id:guid}/position/{newPositionId:int}")]
+        [HttpPut("{id}/position/{newPositionId:int}")]
         public async Task<ActionResult<EmployeeResponse>> UpdatePosition(
-            Guid id,
+            string id,
             int newPositionId)
         {
             var updated = await _employeeService
@@ -74,7 +75,7 @@ namespace HRConnect.Api.Controllers
         /// <returns>The projected leave entitlement.</returns>
         [HttpGet("project-annual-leave")]
         public async Task<IActionResult> ProjectAnnualLeave(
-            Guid employeeId,
+            string employeeId,
             DateOnly projectionDate)
         {
             var result = await _employeeService.ProjectAnnualLeaveAsync(

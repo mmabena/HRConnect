@@ -21,16 +21,15 @@ namespace HRConnect.Api.Services
         {
             var employee = new Employee
             {
-                EmployeeId = Guid.NewGuid(),
+                EmployeeId = Guid.NewGuid().ToString(),
                 PositionId = request.PositionId,
-                ReportingManagerId = request.ReportingManagerId,
-                FirstName = request.FirstName,
-                LastName = request.LastName,
+                CareerManagerID = request.CareerManagerID,
+                Name = request.Name,
+                Surname = request.Surname,
                 Email = request.Email,
                 Gender = request.Gender,
                 StartDate = request.StartDate,
-                CreatedDate = DateTime.UtcNow,
-                IsActive = true
+                CreatedDate = DateTime.UtcNow
             };
 
             _context.Employees.Add(employee);
@@ -68,7 +67,7 @@ namespace HRConnect.Api.Services
 
             return employees.Select(MapToResponse).ToList();
         }
-        public async Task<EmployeeResponse?> GetEmployeeByIdAsync(Guid id)
+        public async Task<EmployeeResponse?> GetEmployeeByIdAsync(string id)
         {
             await RecalculateAnnualLeaveAsync(id);
             await RecalculateAllSickLeaveAsync();
@@ -86,7 +85,7 @@ namespace HRConnect.Api.Services
 
             return MapToResponse(employee);
         }
-        public async Task<EmployeeResponse> UpdateEmployeePositionAsync(Guid employeeId, int newPositionId)
+        public async Task<EmployeeResponse> UpdateEmployeePositionAsync(string employeeId, int newPositionId)
         {
             var employee = await _context.Employees
                 .Include(e => e.Position)
@@ -157,6 +156,44 @@ namespace HRConnect.Api.Services
             await _context.SaveChangesAsync();
 
             await RecalculateAnnualLeaveAsync(employeeId);
+            var balance = await _context.EmployeeLeaveBalances
+                .Include(b => b.LeaveType)
+                .FirstAsync(b =>
+                b.EmployeeId == employeeId &&
+                b.LeaveType.Code == "AL");
+
+            // ===============================
+            // EMAIL NOTIFICATION SECTION
+            // ===============================
+            try
+            {
+                await _emailService.SendEmailAsync(
+               employee.Email,
+               "Annual Leave Recalculated Due to Position Change",
+               $"""
+                    Dear {employee.Name},
+
+                    Your position has recently been updated to: {employee.Position.PositionTitle}.
+
+                    As a result, your annual leave entitlement has been recalculated.
+
+                    New Annual Entitlement: {balance.AccruedDays} days
+                    Used Days: {balance.TakenDays} days
+                    Available Days: {balance.AvailableDays} days
+
+                    This adjustment was calculated proportionally based on the promotion date.
+
+                    If you have any questions, please contact HR.
+
+                    Regards,
+                    HRConnect
+                    """
+           );
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error sending email: {ex.Message}");
+            }
 
             return await GetEmployeeByIdAsync(employeeId)
                    ?? throw new InvalidOperationException("Failed to load updated employee.");
@@ -207,7 +244,7 @@ namespace HRConnect.Api.Services
                     "This leave balance was modified by another process. Please refresh and try again.");
             }
         }
-        public async Task InitializeEmployeeLeaveBalancesAsync(Guid employeeId)
+        public async Task InitializeEmployeeLeaveBalancesAsync(string employeeId)
         {
             var employee = await _context.Employees
                 .Include(e => e.Position)
@@ -226,7 +263,7 @@ namespace HRConnect.Api.Services
 
             foreach (var leaveType in leaveTypes)
             {
-                if (leaveType.FemaleOnly && employee.Gender != "Female")
+                if (leaveType.FemaleOnly && employee.Gender != Gender.Female)
                     continue;
 
                 if (employee.LeaveBalances.Any(b => b.LeaveTypeId == leaveType.Id))
@@ -338,7 +375,7 @@ namespace HRConnect.Api.Services
 
             await _context.SaveChangesAsync();
         }
-        public async Task RecalculateAnnualLeaveAsync(Guid employeeId)
+        public async Task RecalculateAnnualLeaveAsync(string employeeId)
         {
             var employee = await _context.Employees
                 .Include(e => e.LeaveBalances)
@@ -404,38 +441,6 @@ namespace HRConnect.Api.Services
 
             await _context.SaveChangesAsync();
 
-            // ===============================
-            // EMAIL NOTIFICATION SECTION
-            // ===============================
-            try
-            {
-                await _emailService.SendEmailAsync(
-               employee.Email,
-               "Annual Leave Recalculated Due to Position Change",
-               $"""
-Dear {employee.FirstName},
-
-Your position has recently been updated to: {employee.Position.Title}.
-
-As a result, your annual leave entitlement has been recalculated.
-
-New Annual Entitlement: {balance.AccruedDays} days
-Used Days: {balance.TakenDays} days
-Available Days: {balance.AvailableDays} days
-
-This adjustment was calculated proportionally based on the promotion date.
-
-If you have any questions, please contact HR.
-
-Regards,
-HRConnect
-"""
-           );
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error sending email: {ex.Message}");
-            }
         }
         private decimal CalculateYearsOfService(DateOnly startDate)
         {
@@ -460,9 +465,7 @@ HRConnect
 
             if (today.Month != 12 || today.Day != 1)
             {
-#if !DEBUG
                 return;
-#endif
             }
 
 
@@ -484,7 +487,7 @@ HRConnect
                 var forfeited = balance.AvailableDays - 5;
                 var subject = "Annual Leave Carryover Warning";
                 var body = $@"
-                Dear {balance.Employee.FirstName},
+                Dear {balance.Employee.Name},
                 
                 You currently have {balance.AvailableDays} days of Annual Leave remaining.
                 
@@ -496,7 +499,7 @@ HRConnect
                 ";
 
                 await _emailService.SendEmailAsync(
-                    balance.Employee.Email, //Change this Later
+                    balance.Employee.Email,
                     subject,
                     body
                 );
@@ -593,8 +596,6 @@ HRConnect
                 await transaction.RollbackAsync();
                 Console.WriteLine($"Error during annual reset: {ex.Message}");
             }
-
-
         }
         public async Task UpdateLeaveEntitlementRuleAsync(UpdateLeaveRuleRequest request)
         {
@@ -645,7 +646,7 @@ HRConnect
                 // PROTECTION: cannot reduce below used days
                 if (request.NewDaysAllocated < balance.TakenDays)
                     throw new InvalidOperationException(
-                        $"Cannot reduce entitlement below used days for employee {employee.FirstName}.");
+                        $"Cannot reduce entitlement below used days for employee {employee.Name}.");
             }
 
             // Safe to update rule
@@ -709,7 +710,7 @@ HRConnect
                     employee.Email,
                     "Leave Policy Updated",
                     $"""
-Dear {employee.FirstName},
+Dear {employee.Name},
 
 The company has updated the leave policy.
 
@@ -731,9 +732,9 @@ HRConnect
             return new EmployeeResponse
             {
                 Id = e.EmployeeId,
-                FullName = $"{e.FirstName} {e.LastName}",
-                Gender = e.Gender,
-                Position = e.Position.Title,
+                FullName = $"{e.Name} {e.Surname}",
+                Gender = e.Gender.ToString(),
+                Position = e.Position.PositionTitle,
                 JobGrade = e.Position.JobGrade.Name,
                 StartDate = e.StartDate,
                 AnnualLeaveRemaining = annual?.AvailableDays ?? 0,
@@ -746,7 +747,7 @@ HRConnect
                 }).ToList()
             };
         }
-        public async Task RecalculateSickLeaveAsync(Guid employeeId)
+        public async Task RecalculateSickLeaveAsync(string employeeId)
         {
             var employee = await _context.Employees
                 .Include(e => e.LeaveBalances)
@@ -848,7 +849,7 @@ HRConnect
 
             await _context.SaveChangesAsync();
         }
-        public async Task RecalculateFamilyResponsibilityLeaveAsync(Guid employeeId)
+        public async Task RecalculateFamilyResponsibilityLeaveAsync(string employeeId)
         {
             var employee = await _context.Employees
                 .Include(e => e.LeaveBalances)
@@ -898,7 +899,7 @@ HRConnect
                 await _context.SaveChangesAsync();
             }
         }
-        //Batch Calculation
+
         public async Task RecalculateAllFamilyResponsibilityLeaveAsync()
         {
             var employees = await _context.Employees
@@ -911,7 +912,7 @@ HRConnect
                 await RecalculateFamilyResponsibilityLeaveAsync(employee.EmployeeId);
             }
         }
-        public async Task ResetMaternityLeaveForNewPregnancy(Guid employeeId)
+        public async Task ResetMaternityLeaveForNewPregnancy(string employeeId)
         {
             var employee = await _context.Employees
                 .Include(e => e.LeaveBalances)
@@ -921,7 +922,7 @@ HRConnect
             if (employee == null)
                 throw new InvalidOperationException("Employee not found.");
 
-            if (employee.Gender != "Female")
+            if (employee.Gender != Gender.Female)
                 throw new InvalidOperationException("Maternity leave applies to female employees only.");
 
             var mlBalance = employee.LeaveBalances
@@ -937,7 +938,7 @@ HRConnect
             await _context.SaveChangesAsync();
         }
         public async Task<LeaveProjectionResponse> ProjectAnnualLeaveAsync(
-     Guid employeeId,
+     string employeeId,
      DateOnly projectionDate)
         {
             var employee = await _context.Employees
@@ -983,7 +984,7 @@ HRConnect
             {
                 return new LeaveProjectionResponse
                 {
-                    EmployeeName = $"{employee.FirstName} {employee.LastName}",
+                    EmployeeName = $"{employee.Name} {employee.Surname}",
                     ProjectionDate = projectionDate,
                     ProjectedAccruedDays = balance.AccruedDays,
                     TakenDays = balance.TakenDays,
@@ -1081,7 +1082,7 @@ HRConnect
 
             return new LeaveProjectionResponse
             {
-                EmployeeName = $"{employee.FirstName} {employee.LastName}",
+                EmployeeName = $"{employee.Name} {employee.Surname}",
                 ProjectionDate = projectionDate,
                 ProjectedAccruedDays = projectedEntitled + projectedCarryover,
                 TakenDays = balance.TakenDays,
@@ -1105,6 +1106,11 @@ HRConnect
                 .FirstAsync(b =>
                     b.EmployeeId == employee.EmployeeId &&
                     b.LeaveTypeId == annualLeave.Id);
+
+            await _context.Entry(employee)
+                .Reference(e => e.Position)
+                .LoadAsync();
+
 
             var rule = await _context.LeaveEntitlementRules
                 .FirstAsync(r =>
@@ -1180,13 +1186,16 @@ HRConnect
             await _context.Entry(employee)
                 .Reference(e => e.Position)
                 .LoadAsync();
+            await _context.Entry(employee.Position)
+                .Reference(p => p.JobGrade)
+                .LoadAsync();
 
             await _context.EmployeeAccrualRateHistories.AddAsync(
                 new EmployeeAccrualRateHistory
                 {
                     EmployeeId = employee.EmployeeId,
                     PositionId = employee.PositionId,
-                    PositionName = employee.Position.Title,
+                    PositionName = employee.Position.PositionTitle,
                     AnnualEntitlement = rule.DaysAllocated,
                     DailyRate = (rule.DaysAllocated / 12m) / 21.67m,
                     EffectiveFrom = employee.StartDate,

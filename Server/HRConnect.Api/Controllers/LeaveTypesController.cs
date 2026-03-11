@@ -9,9 +9,11 @@ namespace HRConnect.Api.Controllers
     using Microsoft.Extensions.Logging;
     using HRConnect.Api.DTOs;
     using HRConnect.Api.Interfaces;
+    using Microsoft.AspNetCore.Authorization;
+    
     [ApiController]
     [Route("api/leave-types")]
-    //[Authorize(Roles = "SuperUser")]
+    [Authorize(Roles = "SuperUser")]
     public class LeaveTypesController : ControllerBase
     {
         private readonly ILeaveTypeManagementService _service;

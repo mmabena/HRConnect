@@ -35,6 +35,8 @@ namespace HRConnect.Api.Data
             ConfigureEmployeeLeaveBalance(modelBuilder);
             ConfigureLeaveApplication(modelBuilder);
             ConfigureEmployeeAccrualRateHistory(modelBuilder);
+            ConfigureAnnualLeaveAccrualHistory(modelBuilder);
+            ConfigureDecimalPrecision(modelBuilder);
 
             SeedData(modelBuilder);
         }
@@ -46,11 +48,14 @@ namespace HRConnect.Api.Data
                 .HasOne(x => x.Employee)
                 .WithMany(e => e.AccrualRateHistory)
                 .HasForeignKey(x => x.EmployeeId);
+            modelBuilder.Entity<EmployeeAccrualRateHistory>()
+                .HasIndex(x => new { x.EmployeeId, x.EffectiveFrom })
+                .IsUnique();
         }
         private static void ConfigureJobGrade(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<JobGrade>()
-                .HasKey(j => j.Id);
+                .HasKey(j => j.JobGradeId);
 
             modelBuilder.Entity<JobGrade>()
                 .HasIndex(j => j.Name)
@@ -64,7 +69,7 @@ namespace HRConnect.Api.Data
 
             modelBuilder.Entity<Position>()
                 .HasOne(p => p.JobGrade)
-                .WithMany()
+                .WithMany(j => j.Positions)
                 .HasForeignKey(p => p.JobGradeId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
@@ -103,11 +108,11 @@ namespace HRConnect.Api.Data
                 .HasOne(r => r.LeaveType)
                 .WithMany(l => l.EntitlementRules)
                 .HasForeignKey(r => r.LeaveTypeId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<LeaveEntitlementRule>()
                 .HasOne(r => r.JobGrade)
-                .WithMany()
+                .WithMany(j => j.LeaveEntitlementRules)
                 .HasForeignKey(r => r.JobGradeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
@@ -158,6 +163,36 @@ namespace HRConnect.Api.Data
             modelBuilder.Entity<LeaveApplication>()
                 .HasIndex(l => new { l.EmployeeId, l.StartDate, l.EndDate });
         }
+        private static void ConfigureAnnualLeaveAccrualHistory(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<AnnualLeaveAccrualHistory>()
+                .HasOne(x => x.Employee)
+                .WithMany(e => e.AnnualLeaveAccrualHistories)
+                .HasForeignKey(x => x.EmployeeId)
+                .OnDelete(DeleteBehavior.Cascade);
+        }
+        private static void ConfigureDecimalPrecision(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<EmployeeLeaveBalance>().Property(p => p.AccruedDays).HasPrecision(10, 2);
+            modelBuilder.Entity<EmployeeLeaveBalance>().Property(p => p.AvailableDays).HasPrecision(10, 2);
+            modelBuilder.Entity<EmployeeLeaveBalance>().Property(p => p.CarryoverDays).HasPrecision(10, 2);
+            modelBuilder.Entity<EmployeeLeaveBalance>().Property(p => p.ForfeitedDays).HasPrecision(10, 2);
+            modelBuilder.Entity<EmployeeLeaveBalance>().Property(p => p.TakenDays).HasPrecision(10, 2);
+
+            modelBuilder.Entity<EmployeeAccrualRateHistory>().Property(p => p.AnnualEntitlement).HasPrecision(10, 2);
+
+            modelBuilder.Entity<LeaveApplication>().Property(p => p.DaysRequested).HasPrecision(10, 2);
+
+            modelBuilder.Entity<LeaveEntitlementRule>().Property(p => p.DaysAllocated).HasPrecision(10, 2);
+            modelBuilder.Entity<LeaveEntitlementRule>().Property(p => p.MinYearsService).HasPrecision(10, 2);
+            modelBuilder.Entity<LeaveEntitlementRule>().Property(p => p.MaxYearsService).HasPrecision(10, 2);
+
+            modelBuilder.Entity<AnnualLeaveAccrualHistory>().Property(p => p.Accrued).HasPrecision(10, 2);
+            modelBuilder.Entity<AnnualLeaveAccrualHistory>().Property(p => p.OpeningBalance).HasPrecision(10, 2);
+            modelBuilder.Entity<AnnualLeaveAccrualHistory>().Property(p => p.ClosingBalance).HasPrecision(10, 2);
+            modelBuilder.Entity<AnnualLeaveAccrualHistory>().Property(p => p.Forfeited).HasPrecision(10, 2);
+            modelBuilder.Entity<AnnualLeaveAccrualHistory>().Property(p => p.Used).HasPrecision(10, 2);
+        }
 
         // ================= SEED DATA =================
 
@@ -165,19 +200,19 @@ namespace HRConnect.Api.Data
         {
             // Job Grades
             modelBuilder.Entity<JobGrade>().HasData(
-                new JobGrade { Id = 1, Name = "Unskilled–Middle" },
-                new JobGrade { Id = 2, Name = "Senior Management" },
-                new JobGrade { Id = 3, Name = "Executive Director" }
+                new JobGrade { JobGradeId = 1, Name = "Unskilled–Middle" },
+                new JobGrade { JobGradeId = 2, Name = "Senior Management" },
+                new JobGrade { JobGradeId = 3, Name = "Executive Director" }
             );
 
             // Positions
             modelBuilder.Entity<Position>().HasData(
-                new Position { PositionId = 1, Title = "Unskilled", JobGradeId = 1 },
-                new Position { PositionId = 2, Title = "Skilled/Semi Skilled", JobGradeId = 1 },
-                new Position { PositionId = 3, Title = "Junior Management", JobGradeId = 1 },
-                new Position { PositionId = 4, Title = "Middle Management", JobGradeId = 1 },
-                new Position { PositionId = 5, Title = "Top/Senior Management", JobGradeId = 2 },
-                new Position { PositionId = 6, Title = "Executive Director", JobGradeId = 3 }
+                new Position { PositionId = 1, PositionTitle = "Unskilled", JobGradeId = 1 },
+                new Position { PositionId = 2, PositionTitle = "Skilled/Semi Skilled", JobGradeId = 1 },
+                new Position { PositionId = 3, PositionTitle = "Junior Management", JobGradeId = 1 },
+                new Position { PositionId = 4, PositionTitle = "Middle Management", JobGradeId = 1 },
+                new Position { PositionId = 5, PositionTitle = "Top/Senior Management", JobGradeId = 2 },
+                new Position { PositionId = 6, PositionTitle = "Executive Director", JobGradeId = 3 }
             );
 
             // Leave Types (Policy stored here)

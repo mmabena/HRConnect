@@ -9,7 +9,7 @@ namespace HRConnect.Api.Models
     {
         public int Id { get; set; }                     
 
-        public Guid EmployeeId { get; set; }            
+        public string EmployeeId { get; set; }            
         public int Year { get; set; }                   
 
         public decimal OpeningBalance { get; set; }     

@@ -10,21 +10,20 @@ namespace HRConnect.Api.Interfaces
     {
         Task<EmployeeResponse> CreateEmployeeAsync(CreateEmployeeRequest request);
         Task<List<EmployeeResponse>> GetAllEmployeesAsync();
-        Task<EmployeeResponse?> GetEmployeeByIdAsync(Guid id);
-        Task<EmployeeResponse> UpdateEmployeePositionAsync(Guid employeeId, int newPositionId);
-        Task InitializeEmployeeLeaveBalancesAsync(Guid employeeId);
-        Task RecalculateAnnualLeaveAsync(Guid employeeId);
-        Task RecalculateSickLeaveAsync(Guid employeeId);
+        Task<EmployeeResponse?> GetEmployeeByIdAsync(string id);
+        Task<EmployeeResponse> UpdateEmployeePositionAsync(string employeeId, int newPositionId);
+        Task InitializeEmployeeLeaveBalancesAsync(string employeeId);
+        Task RecalculateAnnualLeaveAsync(string employeeId);
+        Task RecalculateSickLeaveAsync(string employeeId);
         Task RecalculateAllSickLeaveAsync();
         Task UpdateTakenDaysAsync(UpdateTakenDaysRequest request);
-        Task ResetMaternityLeaveForNewPregnancy(Guid employeeId);
+        Task ResetMaternityLeaveForNewPregnancy(string employeeId);
         Task ProcessCarryOverNotificationAsync();
-        //Task ProcessAnnualResetAsync();
         Task UpdateLeaveEntitlementRuleAsync(UpdateLeaveRuleRequest request);
         Task RecalculateEmployeesForRuleChangeAsync(LeaveEntitlementRule rule);
         Task RecalculateAllFamilyResponsibilityLeaveAsync();
-        Task RecalculateFamilyResponsibilityLeaveAsync(Guid employeeId);
-        Task<LeaveProjectionResponse> ProjectAnnualLeaveAsync(Guid employeeId, DateOnly projectionDate);
+        Task RecalculateFamilyResponsibilityLeaveAsync(string employeeId);
+        Task<LeaveProjectionResponse> ProjectAnnualLeaveAsync(string employeeId, DateOnly projectionDate);
         Task ProcessAnnualResetAsync(int? overrideYear = null);
     }
 }

@@ -165,7 +165,7 @@ namespace HRConnect.Api.Services
             var emailBody = $"""
 <h2>Leave Application Update</h2>
 
-<p>Hello {employee.FirstName},</p>
+<p>Hello {employee.Name},</p>
 
 <p>Your leave request has been <strong>{decision}</strong>.</p>
 {(approved ? "" : $"<p><strong>Reason:</strong> {application.RejectionReason}</p>")}
@@ -207,7 +207,7 @@ namespace HRConnect.Api.Services
             var emailBody = $"""
 <h2>Leave Approval Required</h2>
 
-<p><strong>Employee:</strong> {employee.FirstName} {employee.LastName}</p>
+<p><strong>Employee:</strong> {employee.Name} {employee.Surname}</p>
 <p><strong>Leave Type:</strong> {leaveType.Name}</p>
 <p><strong>Dates:</strong> {application.StartDate} to {application.EndDate}</p>
 <p><strong>Days Requested:</strong> {application.DaysRequested}</p>
@@ -225,8 +225,14 @@ Reject Leave
 </a>
 """;
 
+            var manager = await _context.Employees
+     .FirstOrDefaultAsync(e => e.Email == employee.CareerManagerID);
+
+            if (manager == null)
+                throw new InvalidOperationException("Manager not found.");
+
             await _emailService.SendEmailAsync(
-                employee.ReportingManagerId, // manager email for now
+                manager.Email,
                 "Leave Approval Required",
                 emailBody
             );
@@ -246,7 +252,7 @@ Reject Leave
 
 <h2>Leave Approval Required</h2>
 
-<p><strong>Employee:</strong> {employee.FirstName} {employee.LastName}</p>
+<p><strong>Employee:</strong> {employee.Name} {employee.Surname}</p>
 
 <p><strong>Leave Type:</strong> {leaveType.Name}</p>
 

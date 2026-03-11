@@ -9,7 +9,7 @@ namespace HRConnect.Api.Models
     {
         public int Id { get; set; }
 
-        public Guid EmployeeId { get; set; }
+        public string EmployeeId { get; set; }
 
         public int PositionId { get; set; }   
         public string PositionName { get; set; } = string.Empty;

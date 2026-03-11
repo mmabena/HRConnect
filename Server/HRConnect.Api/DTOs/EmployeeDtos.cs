@@ -2,14 +2,15 @@ namespace HRConnect.Api.DTOs
 {
     using System;
     using System.Collections.Generic;
+    using HRConnect.Api.Models;
     public class CreateEmployeeRequest
     {
         public int PositionId { get; set; }
-        public string ReportingManagerId { get; set; } = null!;
-        public string FirstName { get; set; } = null!;
-        public string LastName { get; set; } = null!;
+        public string? CareerManagerID { get; set; }
+        public string Name { get; set; } = null!;
+        public string Surname { get; set; } = null!;
         public string Email { get; set; } = null!;
-        public string Gender { get; set; } = null!;
+        public Gender Gender { get; set; }
         public DateOnly StartDate { get; set; }
     }
     public class UpdatePositionRequest
@@ -18,7 +19,7 @@ namespace HRConnect.Api.DTOs
     }
     public class EmployeeResponse
     {
-        public Guid Id { get; set; }
+        public string Id { get; set; } = string.Empty;
 
         public string FullName { get; set; } = null!;
         public string Gender { get; set; } = null!;
@@ -48,13 +49,13 @@ namespace HRConnect.Api.DTOs
     }
     public class UpdateTakenDaysRequest
     {
-        public Guid EmployeeId { get; set; }
+        public string EmployeeId { get; set; } = string.Empty;
         public int LeaveTypeId { get; set; }
         public decimal TakenDays { get; set; }
     }
     public class LeaveProjectionRequest
     {
-        public Guid EmployeeId { get; set; }
+        public string EmployeeId { get; set; } = string.Empty;
         public DateOnly ProjectionDate { get; set; }
     }
     public class LeaveProjectionResponse
