@@ -40,7 +40,7 @@ namespace HRConnect.Api.Repository
 
     public async Task<IEnumerable<PayrollPeriod>> GetAllPayrollPeriod()
     {
-      return await _context.PayrollPeriods.Include(p => p.Runs).ToListAsync();
+      return await _context.PayrollPeriods.Include(p => p.Runs).ThenInclude(r => r.Records).ToListAsync();
     }
     public async Task UpdateAsync(PayrollPeriod payrollPeriod)
     {
@@ -50,10 +50,12 @@ namespace HRConnect.Api.Repository
 
     public async Task<PayrollPeriod?> GetLastPeriodAsync()
     {
-      return await _context.PayrollPeriods.Include(p => p.Runs).Where(p => !p.IsLocked).OrderByDescending(p => p.PayrollPeriodId)
+      return await _context.PayrollPeriods.Include(p => p.Runs).ThenInclude(r => r.Records).Where(p => !p.IsLocked)
+        .OrderByDescending(p => p.PayrollPeriodId)
       .FirstOrDefaultAsync();
     }
 
+    //This can be replaced
     public async Task<PayrollPeriod?> GetCurrentActivePayrollPeriod()
     {
       return await _context.PayrollPeriods.Include(p => p.Runs).Where(p => !p.IsLocked)

@@ -10,7 +10,7 @@ namespace HRConnect.Api.Utils.Payroll
   {
     private readonly IPayrollPeriodService _payrollPeriodService;
     private readonly IPayrollRunRepository _payrollRunRepo;
-    private static readonly int MAX_RUNS = 3;
+    private static readonly int MAX_RUNS = 12;
     public PayrollRolloverJob(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService)
     {
       _payrollRunRepo = payrollRunRepo;
@@ -79,6 +79,7 @@ namespace HRConnect.Api.Utils.Payroll
         {
           Console.WriteLine($"-----THIS CURRENT PAY IS EMPTY-----");
           await RolloverPayrollRun(payperiod, nextRun);
+          return; //avoiding null dereference warnings
         }
 
         //Finalise and lock a run isnt't finalised and still running
@@ -89,6 +90,10 @@ namespace HRConnect.Api.Utils.Payroll
           currentPayRun.IsLocked = true;
           currentPayRun.FinalisedDate = DateTime.Now;
 
+          foreach (var record in currentPayRun.Records)
+          {
+            record.IsLocked = true;
+          }
           //update the current run to implement lock
           await _payrollRunRepo.UpdateRunAsync(currentPayRun);
           Console.WriteLine($"LOCKED PAYRUN WITH ID {currentPayRun.PayrollRunId}");

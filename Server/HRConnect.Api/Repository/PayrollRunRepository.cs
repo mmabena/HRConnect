@@ -2,8 +2,8 @@ namespace HRConnect.Api.Repository
 {
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Data;
-  // using HRConnect.Api.Mappers.Payroll;
   using HRConnect.Api.Models.Payroll;
+  using HRConnect.Api.Models.PayrollDeduction;
   using Microsoft.EntityFrameworkCore;
 
   public class PayrollRunRepository : IPayrollRunRepository
@@ -13,13 +13,28 @@ namespace HRConnect.Api.Repository
     {
       _context = context;
     }
+
+    public async Task<PayrollRun> GetAllPayRecordsFromPayRun(PayrollRun payrollRun)
+    {
+      var runId = payrollRun.PayrollRunId;
+
+      //Get all pension record from current run
+      var pensionRecords = await _context.Set<PensionDeduction>()
+        .Where(r => r.PayrollRunId == runId)
+      .ToListAsync();
+      var medicalAidRecords = await _context.Set<MedicalAidDeduction>()
+        .Where(r => r.PayrollRunId == runId)
+      .ToListAsync();
+      payrollRun.Records = pensionRecords.Cast<PayrollRecord>()
+                          .Concat(medicalAidRecords.Cast<PayrollRecord>()).ToList();
+      return payrollRun;
+    }
     public async Task<IEnumerable<PayrollRun>> GetAllPayruns()
     {
       return await _context.PayrollRuns.ToListAsync();
     }
     public async Task<PayrollRun?> GetPayrunByIdAsync(int id)
     {
-
       var payrun = await _context.PayrollRuns.FirstOrDefaultAsync(p => p.PayrollRunId == id);
       return payrun;
     }
@@ -53,10 +68,10 @@ namespace HRConnect.Api.Repository
       return payrun;
     }
 
-    public Task AddRecordToCurrentRunAsync(PayrollRecord payrollRecord)
-    {
-      throw new NotImplementedException();
-    }
+    // public Task AddRecordToCurrentRunAsync(PayrollRecord payrollRecord)
+    // {
+    //   throw new NotImplementedException();
+    // }
     public async Task UpdateRunAsync(PayrollRun payrollRun)
     {
       //Update the current run to be marked as Finalised 

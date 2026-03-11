@@ -9,11 +9,11 @@ namespace HRConnect.Api.Services
   public class PayrollRunService : IPayrollRunService
   {
     private readonly IPayrollRunRepository _payrollRunRepo;
-    // private readonly PayrollInit _payrollInit;
-    public PayrollRunService(IPayrollRunRepository payrollRunRepo)
+    private readonly IPayrollPeriodService _payrollPeriodService;
+    public PayrollRunService(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService)
     {
       _payrollRunRepo = payrollRunRepo;
-      // _payrollInit = new PayrollInit();
+      _payrollPeriodService = payrollPeriodService;
     }
     public async Task<PayrollRunDto?> GetPayrunByIdAsync(int id)
     {
@@ -60,14 +60,46 @@ namespace HRConnect.Api.Services
 
     public async Task AddRecordToCurrentRunAsync(PayrollRecord payrollRecord)
     {
-      var currentRun = await _payrollRunRepo.GetCurrentRunAsync();
-      if (currentRun == null)
-        return;
-      currentRun.Records!.Add(payrollRecord); //records may be null
+      // var currentRun = await _payrollRunRepo.GetCurrentRunAsync();
+      // if (currentRun == null)
+      //   return;
+      // currentRun.Records!.Add(payrollRecord); //records may be null
+      var payperiod = await _payrollPeriodService.GetLastPeriodAsync();
+      if (payperiod == null)
+        throw new InvalidDataException("No payroll period found or it is locked");
+
+      var currentPayRun = payperiod.Runs.Where(r => !r.IsLocked).OrderByDescending(r => r.PayrollRunId).FirstOrDefault();
+
+      if (currentPayRun == null)
+        throw new InvalidDataException("No current payroll run found or it is locked");
+
+      Console.WriteLine($"!!!!!-+++++++++--------Adding record to current run with ID {currentPayRun.PayrollRunId}");
+
+      payrollRecord.PayrollRunId = currentPayRun.PayrollRunId;
+
+      Console.WriteLine($"!!!!!-+++++++++-------- record ID {payrollRecord.PayrollRunId}");
+      currentPayRun.Records.Add(payrollRecord);
+      //save changes to db
+      await _payrollRunRepo.UpdateRunAsync(currentPayRun);
     }
     public async Task UpdateRunAsync(PayrollRun payrollRun)
     {
       await _payrollRunRepo.UpdateRunAsync(payrollRun);
+    }
+
+    public async Task<PayrollRun> GetAllPayRecordsFromPayRunAsync(int payrollRunId)
+    {
+
+      var currentPeriod = await _payrollPeriodService.GetLastPeriodAsync();
+      if (currentPeriod == null)
+        throw new InvalidDataException("No payroll period found");
+
+      var run = currentPeriod.Runs
+             .FirstOrDefault(r => r.PayrollRunId == payrollRunId);
+      if (run == null)
+        throw new InvalidDataException("No payroll run found");
+
+      return await _payrollRunRepo.GetAllPayRecordsFromPayRun(run);
     }
 
   }

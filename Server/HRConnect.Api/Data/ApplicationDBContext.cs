@@ -116,7 +116,8 @@ namespace HRConnect.Api.Data
       //Relationship to payroll run
       modelBuilder.Entity<PayrollRun>().HasMany(p => p.Records)
       .WithOne(r => r.PayrollRun)
-      .HasForeignKey(p => p.PayrollRunId);
+      .HasForeignKey(r => r.PayrollRunId)
+      .HasPrincipalKey(p => p.PayrollRunId);
 
       modelBuilder.Entity<PayrollRun>()
       .Property(p => p.PayrollRunId)
