@@ -81,12 +81,12 @@ namespace HRConnect.Api.Models
     [Required]
     public string ProfileImage { get; set; } = string.Empty;
     // ProfileImage
-    public int PensionOptionId { get; set; }
+    public int? PensionOptionId { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     // Allow reverse navigation
     public ICollection<Employee>? Subordinates { get; set; }
-    public PensionOption PensionOption { get; set; }
+    public PensionOption? PensionOption { get; set; }
     public ICollection<EmployeePensionEnrollment> EmployeePensionEnrollment { get; set; } = [];
     public ICollection<PensionDeduction> PensionDeduction { get; set; } = [];
   }

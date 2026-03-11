@@ -28,6 +28,7 @@ namespace HRConnect.Api.Data
     public DbSet<PensionOption> PensionOptions { get; set; }
     public DbSet<EmployeePensionEnrollment> EmployeePensionEnrollments { get; set; }
     public DbSet<PensionDeduction> PensionDeductions { get; set; }
+    public DbSet<LunchDeduction> LunchDeductions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -103,13 +104,32 @@ namespace HRConnect.Api.Data
         .HasColumnType("decimal(18,4)")
         .HasDefaultValue(0.01m);
 
-      modelBuilder.Entity<PayrollPeriod>().HasMany(p => p.Runs)
-      .WithOne()
-      .HasForeignKey(p => p.PeriodId);
+      /*Payroll run*/
 
+      modelBuilder.Entity<PayrollPeriod>().HasMany(p => p.Runs)
+     .WithOne(r => r.Period)
+     .HasForeignKey(p => p.PeriodId);
+
+      //EF needs to know that PayrollRecord is base type (abstract)
+      modelBuilder.Entity<PayrollRecord>().ToTable("PayrollRecords");
+
+      //EF needs to know derived types
+      modelBuilder.Entity<PensionDeduction>().ToTable("PensionDeductions");
+      modelBuilder.Entity<LunchDeduction>().ToTable("LunchDeductions");
+
+      //Relationship to payroll run
       modelBuilder.Entity<PayrollRun>().HasMany(p => p.Records)
-      .WithOne()
-      .HasForeignKey(p => p.PayrollRunId);
+      .WithOne(r => r.PayrollRun)
+      .HasForeignKey(r => r.PayrollRunId)
+      .HasPrincipalKey(p => p.PayrollRunId);
+
+      modelBuilder.Entity<PayrollRun>()
+      .Property(p => p.PayrollRunId)
+      .ValueGeneratedNever();//PayrollRunId is not a regular Id
+
+      modelBuilder.Entity<PayrollRun>().HasIndex(r => new { r.PeriodId, r.PayrollRunId }).IsUnique();
+
+      /*Payroll run*/
 
       /*I am here*/
 
@@ -117,19 +137,33 @@ namespace HRConnect.Api.Data
         .HasMany(e => e.Employee)
         .WithOne(po => po.PensionOption)
         .HasForeignKey(po => po.PensionOptionId)
-        .IsRequired();
+        .OnDelete(DeleteBehavior.SetNull);
 
       modelBuilder.Entity<Employee>()
         .HasMany(epe => epe.EmployeePensionEnrollment)
         .WithOne(e => e.Employee)
         .HasForeignKey(e => e.EmployeeId)
+        .OnDelete(DeleteBehavior.Cascade)
         .IsRequired();
 
       modelBuilder.Entity<PensionOption>()
         .HasMany(epe => epe.EmployeePensionEnrollment)
         .WithOne(po => po.PensionOption)
         .HasForeignKey(po => po.PensionOptionId)
+        .OnDelete(DeleteBehavior.Cascade)
         .IsRequired();
+
+      /*modelBuilder.Entity<PensionDeduction>()
+        .HasOne(e => e.Employee)
+        .WithMany(pd => pd.PensionDeduction)
+        .HasForeignKey(e => e.EmployeeId)
+        .OnDelete(DeleteBehavior.Cascade);*/
+
+      modelBuilder.Entity<PensionDeduction>()
+        .HasOne(po => po.PensionOption)
+        .WithMany(pd => pd.PensionDeduction)
+        .HasForeignKey(po => po.PensionOptionId)
+        .OnDelete(DeleteBehavior.Cascade);
 
       /*modelBuilder.Entity<PayrollRun>()
         .HasMany(epe => epe.EmployeePensionEnrollment)
@@ -141,22 +175,60 @@ namespace HRConnect.Api.Data
         .HasMany(pd => pd.PensionDeduction)
         .WithOne(pr => pr.PayrollRun)
         .HasForeignKey(pr => pr.PayrollRunId)
-        .IsRequired();
-      */
+        .IsRequired();*/
+
+      /*modelBuilder.Entity<PayrollRecord>()
+        .UseTpcMappingStrategy();
+
+      /*modelBuilder.Entity<PayrollRecord>()
+        .ToTable("PayrollRecords");
+
+      modelBuilder.Entity<PensionDeduction>()
+        .ToTable("PensionDeductions")
+        .HasKey(pd => pd.PensionDeductionId);
+
+      modelBuilder.Entity<LunchDeduction>()
+        .ToTable("LunchDeductions")
+        .HasKey(ld => ld.LunchDeductionId);*/
     }
     //Override 'SaveChangesAsync' for Payroll Records to enforce locked records on a payroll run 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-      //Intercept all instances of saving to db
-      var modifiedRecords = ChangeTracker.Entries<PayrollRecord>()
-      .Where(e => e.State == EntityState.Modified);
+      //Intercept all instances of saving any changes to db
+      var modifiedRecords = ChangeTracker.Entries()
+            .Where(e => e.State == EntityState.Modified &&
+            (
+            e.Entity is PayrollPeriod ||
+            e.Entity is PayrollRun ||
+            e.Entity is PayrollRecord
+            ));
 
       foreach (var e in modifiedRecords)
       {
-        //Any locked record/entity should be under a Hard Lock. Don't allow any changes
-        if (e.Entity.IsLocked)
+        //Any locked entity should be under a Hard Lock. Don't allow any changes
+        var prevLockState = (bool)e.OriginalValues["IsLocked"]!;
+        if (prevLockState)
         {
-          throw new InvalidOperationException("Record under Hard Lock. Cannot be modified");
+          throw new InvalidOperationException("Record/Run under Hard Lock. Cannot be modified");
+        }
+      }
+
+      //Do the same locking for entities to prevent deletion
+      modifiedRecords = ChangeTracker.Entries()
+           .Where(e => e.State == EntityState.Deleted &&
+           (
+           e.Entity is PayrollPeriod ||
+           e.Entity is PayrollRun ||
+           e.Entity is PayrollRecord
+           ));
+
+      foreach (var e in modifiedRecords)
+      {
+        //Any locked entity should be under a Hard Lock. Don't allow any changes
+        var prevLockState = (bool)e.OriginalValues["IsLocked"]!;
+        if (prevLockState)
+        {
+          throw new InvalidOperationException("Record/Run under Hard Lock. Cannot be modified");
         }
       }
       return await base.SaveChangesAsync(cancellationToken);

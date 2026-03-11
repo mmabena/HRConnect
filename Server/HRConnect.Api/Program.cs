@@ -18,6 +18,7 @@ using HRConnect.Api.Interfaces.PensionProjection;
 using Audit.Core;
 using Audit.EntityFramework;
 using Quartz;
+using HRConnect.Api.Interfaces.Pension;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -173,6 +174,11 @@ builder.Services.AddTransient<IPensionProjectionService, PensionProjectionServic
 builder.Services.AddScoped<IMedicalOptionRepository, MedicalOptionRepository>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IMedicalOptionService,
   HRConnect.Api.Services.MedicalOptionService>();
+builder.Services.AddScoped<IEmployeePensionEnrollmentRepository, EmployeePensionEnrollmentRepository>();
+builder.Services.AddScoped<IEmployeePensionEnrollmentService, EmployeePensionEnrollmentService>();
+builder.Services.AddScoped<IPensionDeductionRepository, PensionDeductionRepository>();
+builder.Services.AddScoped<IPensionDeductionService, PensionDeductionService>();
+
 builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowReact",
