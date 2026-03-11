@@ -1,5 +1,6 @@
 namespace HRConnect.Api.Data
 {
+  using System.Reflection;
   using HRConnect.Api.Models;
   using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Models.PayrollDeduction;
@@ -26,6 +27,7 @@ namespace HRConnect.Api.Data
     // public DbSet<PayrollRecord> PayrollRecords { get; set; }
     public DbSet<PensionDeduction> PensionDeductions { get; set; }
     public DbSet<MedicalAidDeduction> MedicalAidDeductions { get; set; }
+    public DbSet<TestEntity> TestEntities { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
       base.OnModelCreating(modelBuilder);
@@ -113,17 +115,34 @@ namespace HRConnect.Api.Data
       modelBuilder.Entity<PensionDeduction>().ToTable("PensionDeductions");
       modelBuilder.Entity<MedicalAidDeduction>().ToTable("MedicalAidDeductions");
 
+
+
+      //Declare PayrollRunId as an alternative Key that can be used instead of Id
+      modelBuilder.Entity<PayrollRun>().HasAlternateKey(r => r.PayrollRunId);
+      ///////
+      /// 
+
       //Relationship to payroll run
       modelBuilder.Entity<PayrollRun>().HasMany(p => p.Records)
       .WithOne(r => r.PayrollRun)
       .HasForeignKey(r => r.PayrollRunId)
       .HasPrincipalKey(p => p.PayrollRunId);
 
+
+
+      modelBuilder.Entity<PayrollRun>().HasIndex(r => new { r.PeriodId, r.PayrollRunId }).IsUnique();
+
       modelBuilder.Entity<PayrollRun>()
       .Property(p => p.PayrollRunId)
       .ValueGeneratedNever();//PayrollRunId is not a regular Id
 
-      modelBuilder.Entity<PayrollRun>().HasIndex(r => new { r.PeriodId, r.PayrollRunId }).IsUnique();
+
+      //Testing that any other table can have runID FK
+      modelBuilder.Entity<TestEntity>().HasOne<PayrollRun>()
+      .WithMany()
+      .HasForeignKey(t => t.PayrollRunId)
+      .HasPrincipalKey(p => p.PayrollRunId); //has explicitt FK to payrollRun
+
       //EF needs to know the derived classes as well
       // modelBuilder.Entity<PensionDeduction>()
       // .HasKey(p => p.PensionDeductionID);

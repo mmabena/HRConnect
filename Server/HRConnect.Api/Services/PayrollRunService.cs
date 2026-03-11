@@ -15,6 +15,7 @@ namespace HRConnect.Api.Services
       _payrollRunRepo = payrollRunRepo;
       _payrollPeriodService = payrollPeriodService;
     }
+
     public async Task<PayrollRunDto?> GetPayrunByIdAsync(int id)
     {
       var payrun = await _payrollRunRepo.GetPayrunByIdAsync(id);

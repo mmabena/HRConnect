@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace HRConnect.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class PayrollServices : Migration
+    public partial class PayrollService : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -43,6 +43,7 @@ namespace HRConnect.Api.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PayrollRuns", x => x.Id);
+                    table.UniqueConstraint("AK_PayrollRuns_PayrollRunId", x => x.PayrollRunId);
                     table.ForeignKey(
                         name: "FK_PayrollRuns_PayrollPeriods_PeriodId",
                         column: x => x.PeriodId,
@@ -68,7 +69,27 @@ namespace HRConnect.Api.Migrations
                         name: "FK_PayrollRecords_PayrollRuns_PayrollRunId",
                         column: x => x.PayrollRunId,
                         principalTable: "PayrollRuns",
-                        principalColumn: "Id",
+                        principalColumn: "PayrollRunId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TestEntities",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PayrollRunId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TestEntities", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TestEntities_PayrollRuns_PayrollRunId",
+                        column: x => x.PayrollRunId,
+                        principalTable: "PayrollRuns",
+                        principalColumn: "PayrollRunId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -141,6 +162,11 @@ namespace HRConnect.Api.Migrations
                 table: "PayrollRuns",
                 columns: new[] { "PeriodId", "PayrollRunId" },
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TestEntities_PayrollRunId",
+                table: "TestEntities",
+                column: "PayrollRunId");
         }
 
         /// <inheritdoc />
@@ -151,6 +177,9 @@ namespace HRConnect.Api.Migrations
 
             migrationBuilder.DropTable(
                 name: "PensionDeductions");
+
+            migrationBuilder.DropTable(
+                name: "TestEntities");
 
             migrationBuilder.DropTable(
                 name: "PayrollRecords");

@@ -459,6 +459,28 @@ namespace HRConnect.Api.Migrations
                     b.ToTable("PayrollRuns");
                 });
 
+            modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction.TestEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PayrollRunId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PayrollRunId");
+
+                    b.ToTable("TestEntities");
+                });
+
             modelBuilder.Entity("HRConnect.Api.Models.Position", b =>
                 {
                     b.Property<int>("PositionId")
@@ -821,6 +843,7 @@ namespace HRConnect.Api.Migrations
                     b.HasOne("HRConnect.Api.Models.Payroll.PayrollRun", "PayrollRun")
                         .WithMany("Records")
                         .HasForeignKey("PayrollRunId")
+                        .HasPrincipalKey("PayrollRunId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -836,6 +859,16 @@ namespace HRConnect.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("Period");
+                });
+
+            modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction.TestEntity", b =>
+                {
+                    b.HasOne("HRConnect.Api.Models.Payroll.PayrollRun", null)
+                        .WithMany()
+                        .HasForeignKey("PayrollRunId")
+                        .HasPrincipalKey("PayrollRunId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.Position", b =>

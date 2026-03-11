@@ -34,8 +34,8 @@ namespace HRConnect.Api.Services
       //Get the current payroll period
       (DateTime start, DateTime end) = PayrollUtil.GetCurrectFinancialPeriod();
       // payrollPeriod.PayrollPeriodId = ();
-      // payrollPeriod.StartDate = start;
-      // payrollPeriod.EndDate = end;
+      payrollPeriod.StartDate = start;
+      payrollPeriod.EndDate = end;
       payrollPeriod.IsLocked = false;
       payrollPeriod.IsClosed = false;
       payrollPeriod.Runs = new List<PayrollRun>();
