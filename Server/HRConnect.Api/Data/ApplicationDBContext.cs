@@ -1,9 +1,9 @@
 namespace HRConnect.Api.Data
 {
-  using HRConnect.Api.Models;
   using Microsoft.EntityFrameworkCore;
+  using Models;
   using Models.Payroll;
-  using Models.PayrollContribution;
+  using Models.PayrollDeduction;
 
   public class ApplicationDBContext(DbContextOptions dbContextOptions) : DbContext(dbContextOptions)
   {
@@ -23,9 +23,12 @@ namespace HRConnect.Api.Data
     public DbSet<StatutoryContributionType> StatutoryContributionTypes { get; set; }
     public DbSet<PayrollPeriod> PayrollPeriods { get; set; }
     public DbSet<PayrollRun> PayrollRuns { get; set; }
-    public DbSet<PayrollRecord> PayrollRecords { get; set; }
+    // public DbSet<PayrollRecord> PayrollRecords { get; set; }
+    public DbSet<PensionDeduction> PensionDeductions { get; set; }
     public DbSet<MedicalAidDeduction> MedicalAidDeductions { get; set; }
-
+    public DbSet<TestEntity> TestEntities { get; set; }
+    public DbSet<PayrollRecord> PayrollRecords { get; set; }
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
       base.OnModelCreating(modelBuilder);
@@ -100,27 +103,97 @@ namespace HRConnect.Api.Data
         .HasColumnType("decimal(18,4)")
         .HasDefaultValue(0.01m);
 
+      // modelBuilder.Ignore<PayrollRecord>();
+
       modelBuilder.Entity<PayrollPeriod>().HasMany(p => p.Runs)
-      .WithOne()
+      .WithOne(r => r.Period)
       .HasForeignKey(p => p.PeriodId);
 
+      //EF needs to know that PayrollRecord is base type (abstract)
+      modelBuilder.Entity<PayrollRecord>().ToTable("PayrollRecords");
+
+      //EF needs to know derived types
+      modelBuilder.Entity<PensionDeduction>().ToTable("PensionDeductions");
+      modelBuilder.Entity<MedicalAidDeduction>().ToTable("MedicalAidDeductions");
+
+
+
+      //Declare PayrollRunId as an alternative Key that can be used instead of Id
+      modelBuilder.Entity<PayrollRun>().HasAlternateKey(r => r.PayrollRunId);
+      ///////
+      /// 
+
+      //Relationship to payroll run
       modelBuilder.Entity<PayrollRun>().HasMany(p => p.Records)
-      .WithOne()
-      .HasForeignKey(p => p.PayrollRunId);
+      .WithOne(r => r.PayrollRun)
+      .HasForeignKey(r => r.PayrollRunId)
+      .HasPrincipalKey(p => p.PayrollRunId);
+
+
+
+      modelBuilder.Entity<PayrollRun>().HasIndex(r => new { r.PeriodId, r.PayrollRunId }).IsUnique();
+
+      modelBuilder.Entity<PayrollRun>()
+      .Property(p => p.PayrollRunId)
+      .ValueGeneratedNever();//PayrollRunId is not a regular Id
+
+
+      //Testing that any other table can have runID FK
+      modelBuilder.Entity<TestEntity>().HasOne<PayrollRun>()
+      .WithMany()
+      .HasForeignKey(t => t.PayrollRunId)
+      .HasPrincipalKey(p => p.PayrollRunId); //has explicitt FK to payrollRun
+
+      //EF needs to know the derived classes as well
+      // modelBuilder.Entity<PensionDeduction>()
+      // .HasKey(p => p.PensionDeductionID);
+      // modelBuilder.Entity<MedicalAidDeduction>()
+      // .HasKey(m => m.MedicalAidDeductionId);
+
+      // modelBuilder.Entity<PayrollRecord>()
+      // .HasDiscriminator<string>("PayrollRecordType")
+      // .HasValue<PensionDeduction>("Pension")
+      // .HasValue<MedicalAidDeduction>("MedicalAid");
+
     }
     //Override 'SaveChangesAsync' for Payroll Records to enforce locked records on a payroll run 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-      //Intercept all instances of saving to db
-      var modifiedRecords = ChangeTracker.Entries<PayrollRecord>()
-      .Where(e => e.State == EntityState.Modified);
+      //Intercept all instances of saving any changes to db
+      var modifiedRecords = ChangeTracker.Entries()
+            .Where(e => e.State == EntityState.Modified &&
+            (
+            e.Entity is PayrollPeriod ||
+            e.Entity is PayrollRun ||
+            e.Entity is PayrollRecord
+            ));
 
       foreach (var e in modifiedRecords)
       {
-        //Any locked record/entity should be under a Hard Lock. Don't allow any changes
-        if (e.Entity.IsLocked)
+        //Any locked entity should be under a Hard Lock. Don't allow any changes
+        var prevLockState = (bool)e.OriginalValues["IsLocked"]!;
+        if (prevLockState)
         {
-          throw new InvalidOperationException("Record under Hard Lock. Cannot be modified");
+          throw new InvalidOperationException("Record/Run under Hard Lock. Cannot be modified");
+        }
+      }
+
+      //Do the same locking for entities to prevent deletion
+      modifiedRecords = ChangeTracker.Entries()
+           .Where(e => e.State == EntityState.Deleted &&
+           (
+           e.Entity is PayrollPeriod ||
+           e.Entity is PayrollRun ||
+           e.Entity is PayrollRecord
+           ));
+
+      foreach (var e in modifiedRecords)
+      {
+        //Any locked entity should be under a Hard Lock. Don't allow any changes
+        var prevLockState = (bool)e.OriginalValues["IsLocked"]!;
+        if (prevLockState)
+        {
+          throw new InvalidOperationException("Record/Run under Hard Lock. Cannot be modified");
         }
       }
       return await base.SaveChangesAsync(cancellationToken);

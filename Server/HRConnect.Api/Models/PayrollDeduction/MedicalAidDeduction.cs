@@ -1,10 +1,10 @@
-﻿namespace HRConnect.Api.Models.PayrollContribution
+﻿namespace HRConnect.Api.Models.PayrollDeduction
 {
   using System.ComponentModel.DataAnnotations;
   using System.ComponentModel.DataAnnotations.Schema;
   using Payroll;
 
-  public class MedicalAidDeduction
+  public class MedicalAidDeduction : PayrollRecord
   {
     [Key]
     public int MedicalAidDeductionId { get; set; }
@@ -48,4 +48,3 @@
     public MedicalOptionCategory MedicalOptionCategory { get; set; }
   }
 }
-

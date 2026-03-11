@@ -1,17 +1,11 @@
 namespace HRConnect.Api.Services
 {
-  using System;
-  using System.Collections.Generic;
-  using System.Linq;
-  using System.Threading.Tasks;
-  using HRConnect.Api.DTOs.Employee;
-  using HRConnect.Api.Interfaces;
-  using HRConnect.Api.Models;
-  using HRConnect.Api.Utils;
   using System.Globalization;
-  using HRConnect.Api.Mappers;
-  using System.Data.Common;
-  using System.Runtime.InteropServices;
+  using DTOs.Employee;
+  using Interfaces;
+  using Mappers;
+  using Models;
+  using Utils;
 
   //Inline Custom Exceptions for better error handling and clarity
   public class ValidationException : Exception
@@ -487,10 +481,10 @@ namespace HRConnect.Api.Services
 
       var manager = await _employeeRepo.GetEmployeeByIdAsync(CareerMangerId);
 
-            if (manager == null)
-                throw new BusinessRuleException("Career Manager must be an existing Employee");
-                
-        }
+      if (manager == null)
+        throw new BusinessRuleException("Career Manager must be an existing Employee");
+
+    }
 
     public async Task<EmployeeDto?> GetEmployeeByEmailAsync(string employeeEmail)
     {
