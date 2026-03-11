@@ -3,7 +3,7 @@
   using Data;
   using Interfaces;
   using Microsoft.EntityFrameworkCore;
-  using Models.PayrollContribution;
+  using Models.PayrollDeduction;
 
   public class MedicalAidDeductionRepository : IMedicalAidDeductionRepository
   {

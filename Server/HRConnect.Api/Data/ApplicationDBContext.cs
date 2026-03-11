@@ -95,6 +95,19 @@ namespace HRConnect.Api.Data
         entity.Property(e => e.EffectiveTo);
       });
 
+      // Medical Aid Deduction Delete Nehavior
+      modelBuilder.Entity<MedicalAidDeduction>()
+        .HasOne(m => m.MedicalOption)
+        .WithMany()
+        .HasForeignKey(m => m.MedicalOptionId)
+        .OnDelete(DeleteBehavior.NoAction);
+
+      modelBuilder.Entity<MedicalAidDeduction>()
+        .HasOne(m => m.MedicalOptionCategory)
+        .WithMany()
+        .HasForeignKey(m => m.MedicalCategoryId)
+        .OnDelete(DeleteBehavior.NoAction);
+      
       // StatutoryContributionType with default contribution percentages mandated by law
       modelBuilder.Entity<StatutoryContributionType>().Property(e => e.EmployeeRate)
         .HasColumnType("decimal(18,4)")

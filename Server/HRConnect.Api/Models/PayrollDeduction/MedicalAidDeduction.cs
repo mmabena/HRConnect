@@ -1,19 +1,19 @@
 ﻿namespace HRConnect.Api.Models.PayrollDeduction
 {
-  using System.ComponentModel.DataAnnotations;
   using System.ComponentModel.DataAnnotations.Schema;
   using Payroll;
 
   public class MedicalAidDeduction : PayrollRecord
   {
-    [Key]
+    //[Key]
+    [Column("MedicalAidDeductionId")]
     public int MedicalAidDeductionId { get; set; }
     //FK
-    [ForeignKey(nameof(PayrollRun))]
-    public int PayrollRunId { get; set; }
+    //[ForeignKey(nameof(PayrollRun))]
+    //public int PayrollRunId { get; set; }
     //FK
-    [ForeignKey(nameof(Employee))]
-    public string EmployeeId { get; set; }
+    //[ForeignKey(nameof(Employee))]
+    //public string EmployeeId { get; set; }
     public string Name { get; set; }
     public string Surname { get; set; }
     public string Branch { get; set; }
@@ -43,8 +43,8 @@
     public bool IsActive { get; set; }
 
     public MedicalOption MedicalOption { get; set; }
-    public Employee Employee { get; set; }
-    public PayrollRun PayrollRun { get; set; }
+    //public Employee Employee { get; set; }
+    //public PayrollRun PayrollRun { get; set; }
     public MedicalOptionCategory MedicalOptionCategory { get; set; }
   }
 }

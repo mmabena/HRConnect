@@ -2,7 +2,7 @@
 
 using DTOs.Payroll.PayrollDeduction.MedicalAidDeduction;
 using Interfaces;
-using Models.PayrollContribution;
+using Models.PayrollDeduction;
 
 public class MedicalAidDeductionService:IMedicalAidDeductionService
 {

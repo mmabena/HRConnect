@@ -1,7 +1,7 @@
 ﻿namespace HRConnect.Api.Mappers
 {
   using DTOs.Payroll.PayrollDeduction.MedicalAidDeduction;
-  using Models.PayrollContribution;
+  using Models.PayrollDeduction;
 
   public static class MedicalAidDeductionMapper
   {
