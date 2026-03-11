@@ -6,9 +6,9 @@ import AddPositionManagement from "../../../Components/CompanyManagement/Positio
 import EditPositionManagement from "../../../Components/CompanyManagement/PositionManagement/EditPositionManagement";
 import ChangePositionManagement from "../../../Components/CompanyManagement/PositionManagement/ChangePositionManagement";
 
-import  usePositions  from "../../../hooks/usePositions";
-import  usePagination  from "../../../hooks/usePagination";
-import  useDateTime  from "../../../hooks/useDateTime";
+import usePositions from "../../../hooks/usePositions";
+import usePagination from "../../../hooks/usePagination";
+import useDateTime from "../../../hooks/useDateTime";
 import { COMPANY_NAME } from "../../../config/companyConfig";
 
 const PositionManagement = ({ title }) => {
@@ -19,6 +19,7 @@ const PositionManagement = ({ title }) => {
   // -------------------
   const { positions, loading, hasAccess } = usePositions();
   const { currentDate, currentTime } = useDateTime();
+
   const {
     currentPage,
     setCurrentPage,
@@ -42,6 +43,7 @@ const PositionManagement = ({ title }) => {
   const [activeTab, setActiveTab] = useState("Position Management");
 
   const pageOptions = [10, 15, 20, 25];
+
   const navTabs = [
     "Tax Table Management",
     "Company Details",
@@ -50,6 +52,7 @@ const PositionManagement = ({ title }) => {
     "Manage Companies",
     "Salary Budgets",
   ];
+
   const tabWidths = [168, 133, 122, 134, 154, 125, 120];
 
   // -------------------
@@ -57,6 +60,13 @@ const PositionManagement = ({ title }) => {
   // -------------------
   const openChangeModal = (data) => setChangeModalData(data);
   const closeChangeModal = () => setChangeModalData(null);
+
+  // Destructure modal data for readability
+  const {
+    currentPosition,
+    linkedEmployeesCount,
+    attemptedTitle,
+  } = changeModalData || {};
 
   // -------------------
   // Loading & Access
@@ -67,10 +77,12 @@ const PositionManagement = ({ title }) => {
   return (
     <header className="cmn-header-main-frame">
       <div className="menu-background custom-scrollbar">
+        
         {/* Header */}
         <div className="cmn-header-left-section">
           <h1 className="cmn-logo-text">{title || "Company Management"}</h1>
         </div>
+
         <div className="cmn-header-right-section">
           <div className="cmn-datetime-wrapper">
             <div className="cmn-datetime-date-container">
@@ -93,6 +105,7 @@ const PositionManagement = ({ title }) => {
             }}
             tabWidths={tabWidths}
           />
+
           {activeTab === "Position Management" && (
             <button
               className="add-positions-button"
@@ -115,6 +128,7 @@ const PositionManagement = ({ title }) => {
                 <th>Actions</th>
               </tr>
             </thead>
+
             <tbody>
               {currentPositions.length === 0 ? (
                 <tr>
@@ -125,15 +139,22 @@ const PositionManagement = ({ title }) => {
                   <tr key={position.positionId}>
                     <td>{position.positionTitle}</td>
                     <td>{position.jobGrade?.name || "N/A"}</td>
+
                     <td title={position.occupationalLevel?.description || "N/A"}>
                       {position.occupationalLevel?.description || "N/A"}
                     </td>
+
                     <td>
                       {new Date(position.createdDate).toLocaleDateString(
                         "en-GB",
-                        { day: "numeric", month: "long", year: "numeric" }
+                        {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        }
                       )}
                     </td>
+
                     <td>
                       <div className="edit-button-group">
                         <button
@@ -154,7 +175,7 @@ const PositionManagement = ({ title }) => {
           </table>
         </div>
 
-        {/* Pagination & Modals */}
+        {/* Pagination */}
         <div className="pagination-wrapper">
           <div className="pagination-left">
             <div
@@ -162,11 +183,13 @@ const PositionManagement = ({ title }) => {
               onClick={() => setShowPageOptions(!showPageOptions)}
             >
               <span className="per-page-number">{itemsPerPage}</span>
+
               <img
                 src="/images/arrow_drop_down_circle.png"
                 alt="Dropdown"
                 className="dropdown-icon"
               />
+
               {showPageOptions && (
                 <ul className="per-page-dropdown">
                   {pageOptions.map((option) => (
@@ -186,6 +209,7 @@ const PositionManagement = ({ title }) => {
                 </ul>
               )}
             </div>
+
             <span className="per-page-label">Per page</span>
           </div>
 
@@ -201,11 +225,14 @@ const PositionManagement = ({ title }) => {
                 opacity: currentPage > 1 ? 1 : 0.4,
               }}
             />
+
             <div className="page-numbers">
               {Array.from({ length: totalPages }, (_, i) => (
                 <button
                   key={i + 1}
-                  className={`page-number ${currentPage === i + 1 ? "active-page" : ""}`}
+                  className={`page-number ${
+                    currentPage === i + 1 ? "active-page" : ""
+                  }`}
                   onClick={() => handlePageClick(i + 1)}
                   aria-label={`Go to page ${i + 1}`}
                 >
@@ -213,6 +240,7 @@ const PositionManagement = ({ title }) => {
                 </button>
               ))}
             </div>
+
             <img
               src="/images/arrow_drop_down_circle.png"
               alt="Next"
@@ -224,13 +252,20 @@ const PositionManagement = ({ title }) => {
                 opacity: currentPage < totalPages ? 1 : 0.4,
               }}
             />
-            <div className="pagination-info">{positions.length} Positions @ {COMPANY_NAME}</div>
+
+            <div className="pagination-info">
+              {positions.length} Positions @ {COMPANY_NAME}
+            </div>
           </div>
 
           {/* Modals */}
           {showAddModal && (
-            <AddPositionManagement isOpen={showAddModal} onClose={() => setShowAddModal(false)} />
+            <AddPositionManagement
+              isOpen={showAddModal}
+              onClose={() => setShowAddModal(false)}
+            />
           )}
+
           {showEditModal && (
             <EditPositionManagement
               id={selectedPositionId}
@@ -239,13 +274,14 @@ const PositionManagement = ({ title }) => {
               onOpenChangeModal={openChangeModal}
             />
           )}
+
           {changeModalData && (
             <ChangePositionManagement
-              isOpen={!!changeModalData}
+              isOpen
               onClose={closeChangeModal}
-              currentPosition={changeModalData.currentPosition}
-              linkedEmployeesCount={changeModalData.linkedEmployeesCount}
-              attemptedTitle={changeModalData.attemptedTitle}
+              currentPosition={currentPosition}
+              linkedEmployeesCount={linkedEmployeesCount}
+              attemptedTitle={attemptedTitle}
             />
           )}
         </div>

@@ -81,46 +81,37 @@ const AddPositionManagement = ({ isOpen, onClose }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
+ 
 
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(
-        "http://localhost:5147/api/positions/Create",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            positionTitle: formData.positionTitle,
-            jobGradeId: parseInt(formData.jobGradeId),
-            occupationalLevelId: parseInt(formData.occupationalLevelId),
-            createdDate: new Date().toISOString(),
-          }),
-        }
-      );
+    const handleSubmit = async (e) => {
+  e.preventDefault();
 
-      if (!response.ok) throw new Error("Failed to create position");
-      await response.json();
-      toast.success("Position created successfully!");
+  if (!validateForm()) return;
 
-      setFormData({
-        positionTitle: "",
-        effectiveDate: "",
-        jobGradeId: "",
-        occupationalLevelId: "",
-      });
-      setErrors({});
-      onClose();
-    } catch (error) {
-      console.error("Error saving position:", error);
-      toast.error("This position already exists or there was an error.");
-    }
-  };
+  try {
+    await api.post("/positions/create", {
+      positionTitle: formData.positionTitle,
+      jobGradeId: parseInt(formData.jobGradeId),
+      occupationalLevelId: parseInt(formData.occupationalLevelId),
+      createdDate: new Date().toISOString(),
+    });
+
+    toast.success("Position created successfully!");
+
+    setFormData({
+      positionTitle: "",
+      effectiveDate: "",
+      jobGradeId: "",
+      occupationalLevelId: "",
+    });
+
+    setErrors({});
+    onClose();
+  } catch (error) {
+    console.error("Error saving position:", error);
+    toast.error("This position already exists or there was an error.");
+  }
+};
 
   if (!isOpen) return null;
 

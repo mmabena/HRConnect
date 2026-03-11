@@ -441,8 +441,7 @@ margin:10px;
 
 /* Position label */
 
-.title-placeholder-edit,
-.title-placeholder-change{
+.title-placeholder-edit{
   display: block;
   width: 360px;       /* same width as input */
   font-size: 14px;
@@ -490,7 +489,7 @@ margin:10px;
   align-self: flex-start;
   font-size: 14px;
   color: #121212;
-  margin-left:110px;
+  margin-left:106px;
   margin-bottom: 6px;
 }
 
@@ -649,7 +648,7 @@ margin-left: -32px;
   align-self: flex-start;
   font-size: 15px;
   margin-bottom: 5px;
-  padding-left:100px;
+  padding-left:105px;
      color: #002D40;
 }
 
@@ -735,7 +734,7 @@ margin-left: -32px;
 .apm-link {
   color: #2e6c8c;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 400;
   margin-right:100px;
 
 }
