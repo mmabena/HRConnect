@@ -1,78 +1,47 @@
 import React, { useState, useEffect } from "react";
-import api from "../../../api/api.js";
+import api from "../../../api/api";
 import "../../../styles/global.css";
-import TaxTableUpload from "./TaxTableUpload.jsx";
-import NavBar from "../../NavBar.jsx";
+import TaxTableUpload from "./TaxTableUpload";
 
 function TaxTableManagement() {
   const [activeTable, setActiveTable] = useState(null);
   const [previousTables, setPreviousTables] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showUploadPopup, setShowUploadPopup] = useState(false);
-  const [currentTime, setCurrentTime] = useState("");
-  const [currentDate, setCurrentDate] = useState("");
 
- const fetchTaxTables = async () => {
-  try {
-    const response = await api.get("/taxtableupload");
-    const tables = Array.isArray(response.data)
-      ? response.data
-      : response.data?.data || [];
+  const fetchTaxTables = async () => {
+    try {
+      const response = await api.get("/TaxTableUpload");
 
-    if (tables.length === 0) {
+      const tables = Array.isArray(response.data)
+        ? response.data
+        : response.data?.data || [];
+
+      const active = tables.find(t => t.effectiveTo === null);
+      const previous = tables.filter(t => t.effectiveTo !== null);
+
+      setActiveTable(active || null);
+      setPreviousTables(previous);
+    } catch (err) {
+      console.error("API ERROR:", err.response?.data || err.message);
       setActiveTable(null);
       setPreviousTables([]);
-      return;
+    } finally {
+      setLoading(false);
     }
-
-    // Sort by effectiveFrom DESC (newest first)
-    const sorted = [...tables].sort(
-      (a, b) => new Date(b.effectiveFrom) - new Date(a.effectiveFrom)
-    );
-
-    const active = sorted[0]; // newest is active
-    const previous = sorted.slice(1);
-
-    setActiveTable(active);
-    setPreviousTables(previous);
-
-  } catch (err) {
-    console.error("API ERROR:", err.response?.data || err.message);
-    setActiveTable(null);
-    setPreviousTables([]);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   useEffect(() => {
     fetchTaxTables();
-  }, []);
-
-  useEffect(() => {
-    const now = new Date();
-    setCurrentTime(now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true }));
-    setCurrentDate(now.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }));
   }, []);
 
   if (loading) return <div>Loading...</div>;
 
   return (
     <div className="menu-background custom-scrollbar">
-      <div className="wrapper-container">
-        <div className="company-heading-container">
-          Tax Table Management
-          <div className="icon">
-            <img src="/images/notifications.png" alt="Notification Icon" className="heading-icon" />
-            <div className="util-box m-box">{currentDate}</div>
-            <div className="util-box s-box">{currentTime}</div>
-          </div>
-        </div>
-      </div>
-      <NavBar />
-
+      
       {/* ACTIVE TAX TABLE */}
-     <div className="card-container">
+      <div className="card-container">
         <div className="card-header">
           <h3>Active Tax Table</h3>
           <button className="upload-btn" onClick={() => setShowUploadPopup(true)}>
@@ -81,65 +50,64 @@ function TaxTableManagement() {
         </div>
 
         {activeTable ? (
-            <>
-              <div className="status-row">
-                <div className="status-left">
-                  <span className="label">Status :</span>
-                  <span className="status-badge active">Active</span>
-                </div>
-
-                <div className="status-right">
-                  <span className="label">Effective Date:</span>
-                  <span className="date-value">
-                    {new Date(activeTable.effectiveFrom).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </span>
-                </div>
+          <>
+            <div className="status-row">
+              <div>
+                <strong>Status:</strong>{" "}
+                <span className="status-badge active">Active</span>
               </div>
+              <div>
+                <strong>Effective From:</strong>{" "}
+                {new Date(activeTable.effectiveFrom).toLocaleDateString()}
+              </div>
+            </div>
 
-             <table className="custom-table">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Year</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>{activeTable.fileName}</td>
-                    <td>{activeTable.taxYear}</td>
-                    <td>
-                      <a
-                        href={activeTable.fileUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="view-link"
-                      >
-                        View
-                      </a>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </>
-          ) : (
-            <p>No active tax table found.</p>
-          )}
-        </div>
+            <table className="custom-table">
+              <thead>
+                <tr>
+                  <th>File Name</th>
+                  <th>Tax Year</th>
+                  <th>Effective From</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>{activeTable.fileName}</td>
+                  <td>{activeTable.taxYear}</td>
+                  <td>
+                    <a
+                      href={activeTable.fileUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="link-btn"
+                    >
+                      View
+                    </a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </>
+        ) : (
+          <p>No active tax table found.</p>
+        )}
+      </div>
 
       {/* PREVIOUS TAX TABLES */}
       <div className="card-container">
-        <div className="card-header"><h3>Previous Tax Tables</h3></div>
+        <div className="card-header">
+          <h3>Previous Tax Tables</h3>
+        </div>
 
         <table className="custom-table">
           <thead>
             <tr>
               <th>Name</th>
-              <th>Year</th>
+              <th>Tax Year</th>
+              <th>Effective From</th>
+              <th>Effective To</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -148,11 +116,27 @@ function TaxTableManagement() {
                 <tr key={table.id}>
                   <td>{table.fileName}</td>
                   <td>{table.taxYear}</td>
+                  <td>{new Date(table.effectiveFrom).toLocaleDateString()}</td>
+                  <td>
+                    {table.effectiveTo
+                      ? new Date(table.effectiveTo).toLocaleDateString()
+                      : "-"}
+                  </td>
+                  <td>
+                    <a
+                      href={table.fileUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="link-btn"
+                    >
+                      View
+                    </a>
+                  </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="2">No previous tax tables found</td>
+                <td colSpan="5">No previous tax tables found</td>
               </tr>
             )}
           </tbody>
@@ -162,17 +146,19 @@ function TaxTableManagement() {
       {/* UPLOAD POPUP */}
       {showUploadPopup && (
         <div className="modal-overlay">
-          <TaxTableUpload
-            existingYears={[
-              ...(activeTable ? [activeTable.taxYear] : []),
-              ...previousTables.map(t => t.taxYear),
-            ]}
-            onClose={() => setShowUploadPopup(false)}
-            onUploadSuccess={() => {
-              fetchTaxTables();
-              setShowUploadPopup(false);
-            }}
-          />
+          <div className="modal-content">
+            <TaxTableUpload
+              existingYears={[
+                ...(activeTable ? [activeTable.taxYear] : []),
+                ...previousTables.map(t => t.taxYear),
+              ]}
+              onClose={() => setShowUploadPopup(false)}
+              onUploadSuccess={() => {
+                fetchTaxTables();
+                setShowUploadPopup(false);
+              }}
+            />
+          </div>
         </div>
       )}
     </div>

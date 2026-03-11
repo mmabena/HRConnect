@@ -5,32 +5,33 @@ import ForgotPassword from "./Components/ForgotPassword/ForgotPassword";
 import AddEmployee from "./Components/EmployeeManagement/AddEmployee";
 import EditEmployee from "./Components/EmployeeManagement/EditEmployee";
 import AddCompany from "./addCompany";
-import EditCompany from "./Components/companyManagement/editCompany";
+import EditCompany from "./Components/CompanyManagement/editCompany";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
-import "./Components/MenuBar/MenuBar.css";
 import UserManagement from "./Components/UserManagement";
 import ViewPositionManagement from "./Components/ViewPositionManagement";
-import TaxTableUpload from "./Components/companyManagement/TaxTableManagement/TaxTableUpload";
-import EditPositionManagement from "./Components/companyManagement/PositionManagement/EditPositionManagement";
-import AddPositionManagement from "./Components/companyManagement/PositionManagement/AddPositionManagment";
+import EditPositionManagement from "./Components/CompanyManagement/PositionManagement/EditPositionManagement";
+import AddPositionManagement from "./Components/CompanyManagement/PositionManagement/AddPositionManagment";
+import PositionManagement from "./Pages/CompanyManagement/PositionManagement/PositionManagement";
+import ChangePositionManagement from "./Components/CompanyManagement/PositionManagement/ChangePositionManagement";
 import CompanyManagement from "./companyManagement";
 import CompanyContribution from "./Components/CompanyContribution/CompanyContribution";
 import Profile from "./Components/MyProfile";
 import CompensationPlanning from "./Components/CompensationPlanning";
-import TaxTableManagement from "./Components/companyManagement/TaxTableManagement/TaxTableManagement";
+import TaxTableManagement from "./Components/CompanyManagement/TaxTableManagement/TaxTableManagement";
 import ChangePassword from "./Components/ChangePassword";
-import MenuBar from "./Components/MenuBar/MenuBar";
+import TaxTableUpload from "./Components/CompanyManagement/TaxTableManagement/TaxTableUpload.jsx";
 import EmployeeList from "./Pages/EmployeeManagement/EmployeeList";
-import PositionManagement from "./Pages/CompanyManagement/PositionManagement/PositionManagement"; 
-import ProjectionCalculator from "./Pages/PayrollTools/ProjectionCalculator";
+import MenuBar from "./Components/MenuBar/MenuBar";
+import ManageUserPositions from "./Pages/CompanyManagement/PositionManagement/ManageUserPosition.jsx";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const navigate = useNavigate();
 
+  //Load user from localStorage on refresh
   useEffect(() => {
     const storedUser = localStorage.getItem("currentUser");
 
@@ -63,7 +64,6 @@ function App() {
   // FIXED: Use backend user object directly
  const handleLoginSuccess = (userWithToken) => {
   setCurrentUser(userWithToken);
-
    localStorage.setItem("currentUser", JSON.stringify(userWithToken));
    console.log("App currentUser:", userWithToken);
   setIsLoggedIn(true);
@@ -92,45 +92,43 @@ function App() {
     );
   }
 
+  return (
+    <div className="App">
+      <MenuBar currentUser={currentUser} onLogout={handleLogout} />
 
- console.log("App currentUser:", currentUser);
+      <div>
+        <ToastContainer position="top-right" autoClose={3000} />
 
- return (
- <div className="App">
- <MenuBar currentUser={currentUser} onLogout={handleLogout} />
- <div>
- <ToastContainer position="top-right" autoClose={3000} />
- <Routes>
-      <Route path="/dashboard" element={<div>Welcome to Dashboard</div>} />
-      <Route path="/addEmployee" element={<AddEmployee />} />
-      <Route path="/editEmployee" element={<EditEmployee />} />
-      <Route path="/editEmployee/:employeeNumber" element={<EditEmployee />} />
-      <Route path="/addCompany" element={<AddCompany />} />
-      <Route path="/companyManagement" element={<CompanyManagement/>} />
-      <Route path="/editCompany/:id" element={<EditCompany />} />
-      <Route path="/employeeList" element={<EmployeeList />} />
-      <Route path="/company-contribution" element={<CompanyContribution />} />
-      <Route path="/userManagement" element={<UserManagement />} /> 
-      <Route path="/taxTableManagement" element={<TaxTableManagement />} />
-      <Route path="/taxTableUpload" element={<TaxTableUpload />} />
-      <Route path="/positionManagement" element={<PositionManagement />} />
-      <Route path="/addPositionManagement" element={<AddPositionManagement />} />
-      <Route path="/editPositionManagement/:id" element={<EditPositionManagement />} />
-      <Route path="/viewPositionManagement/:id" element={<ViewPositionManagement />} />
-      <Route path="/profile" element={<Profile currentUser={currentUser} />}/>
-      <Route path="/company-contribution" element={<CompanyContribution />} />
-      <Route path="/compensationPlanning" element={<CompensationPlanning />} />
-      <Route path="/change-password" element={<ChangePassword currentUser={currentUser}/>} />
-      <Route 
-      path="/profile"
-        element={<Profile currentUser={currentUser} />}
-      />
-      <Route path="/projection-calculator" element={<ProjectionCalculator />} />
-  </Routes>
+        <Routes>
+          <Route path="/dashboard" element={<div>Welcome to Dashboard</div>} />
 
-</div>
- </div>
-);
+          <Route path="/addEmployee" element={<AddEmployee />} />
+          <Route path="/editEmployee" element={<EditEmployee />} />
+          <Route path="/editEmployee/:employeeNumber" element={<EditEmployee />} />
+
+          <Route path="/addCompany" element={<AddCompany />} />
+          <Route path="/companyManagement" element={<CompanyManagement />} />
+          <Route path="/editCompany/:id" element={<EditCompany />} />
+
+          <Route path="/employeeList" element={<EmployeeList />} />
+          <Route path="/company-contribution" element={<CompanyContribution />} />
+          <Route path="/userManagement" element={<UserManagement />}/>
+
+          <Route path="/positionManagement" element={<PositionManagement />} />
+          <Route path="/addPositionManagement" element={<AddPositionManagement />} />
+          <Route path="/editPositionManagement/:id" element={<EditPositionManagement />} />
+          <Route path="/viewPositionManagement/:id" element={<ViewPositionManagement />} />
+          <Route path="/changePositionManagement" element={<ChangePositionManagement />} />
+          <Route path="/manageUserPosition" element={<ManageUserPositions />} />
+          <Route path="/taxtablemanagement" element={<TaxTableManagement />} />
+          <Route path="/profile" element={<Profile currentUser={currentUser} />} />
+          <Route path="/compensationPlanning" element={<CompensationPlanning />} />
+          <Route path="/changePassword" element={<ChangePassword currentUser={currentUser} />} />
+          <Route path="/taxTableUpload" element={<TaxTableUpload />} />
+        </Routes>
+      </div>
+    </div>
+  );
 }
 
 export default App;

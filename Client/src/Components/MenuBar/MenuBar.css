@@ -530,7 +530,7 @@
 
 .position-table th,
 .position-table td {
-  padding: 12px 20px;
+  padding: 10px 20px;
   border-bottom: 1px solid #0075A6;
   white-space: nowrap;
   overflow: hidden;
@@ -542,7 +542,7 @@
 /* Column 1: Description (~63%) */
 .position-table th:nth-child(1),
 .position-table td:nth-child(1) {
-  width: 63%;
+  width: 20%;
   text-align: left;
 }
 
@@ -554,7 +554,7 @@
   text-align: left;
   border-left: 1px solid #d4d4d4;
   padding-left: 12px;
-  padding-right: 12px; /* ✅ Reduce from 110px to avoid squashing */
+  padding-right: 12px; /*Reduce from 110px to avoid squashing */
 }
 
 /* Column 4: Action (~9%) */
@@ -566,7 +566,8 @@
 
 /* Table header style */
 .position-table th {
-  background-color: #0075A6;
+  background-color: var(--primary-color);
+;
   color: #ffffff;
   font-weight: bold;
   border-bottom: 1px solid #0075A6;
@@ -742,7 +743,7 @@
 }
 
 .button-row {
-  margin-top: 20px; /* 👈 space between title and button */
+  margin-top: 20px; /* space between title and button */
 }
 
 .position-navbar-bar {
@@ -868,7 +869,7 @@
 
 .apm-title {
   font-family: 'Anek Bangla', serif;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 36px;
   line-height: 26px;
   color: #002D40;
@@ -925,6 +926,17 @@
   background-color: transparent;
 }
 
+.apm-input.error {
+  border: 1px solid red;
+}
+
+.apm-error {
+  color: red;
+  font-size: 0.85rem;
+  margin-top: 2px;
+  display: block;
+}
+
 .apm-input::placeholder {
   font-family: "Instrument Sans", sans-serif;
   font-weight: 600;
@@ -941,7 +953,7 @@
  
 .add-position-button {
   margin-top: 80px;
-  background-color: #9AAC60;
+  background-color: #668c4d;
   color: white;
   padding: 10px 50px; /* thinner vertically, wider horizontally */
   border: none;
@@ -954,10 +966,12 @@
 }
 
 
+
+
 .apm-save-button {
   width: 100%; /* Match .apm-input */
   height: 37px;
-  background-color: #006088;
+  background-color: var(--primary-color);
   border: none;
   border-radius: 10px;
   color: white;
@@ -1240,9 +1254,7 @@
   display: flex;
   flex-direction: column;
   gap: 5px;
-
   width: 1441px;
-
   box-sizing: border-box;
   padding-left: 20px;
   overflow: visible;
@@ -1337,6 +1349,20 @@
   padding: 6px 11px;
 }
 
+.add-employee-button {
+  background-color: #9AAC60;
+  color: white;
+  width: 200px;
+  padding: 10px 50px; /* thinner vertically, wider horizontally */
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  white-space: nowrap; /* Prevent text wrapping */
+}
+
 .heading-icon {
   width: 31px;
   height: 31px;
@@ -1345,16 +1371,20 @@
 
 .employee-list-heading-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 45px;
-  padding: 5px 145px 5px 0;
-  height: 66px;
+  padding: 5px 0;
+  min-height: 58px;
   box-sizing: border-box;
   width: 1441px;
 }
 
-
-
+.right-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-left: auto;
+}
 
 .heading-item {
   padding: 0.5rem 1rem;
@@ -1369,7 +1399,6 @@
   align-items: center;
   gap: 10px;
   height: 56px;
-  margin-left: auto;
 
 }
 
@@ -1433,17 +1462,22 @@
 .content-container {
   display: flex;
   flex-direction: column;
-  width: 1461px;
+  width: 1400px;
   height: 615px;
   padding: 10px;
   gap: 10px;
   box-sizing: border-box;
+  
 
 }
 
   .table-grid {
   display: grid;
-  height: 608px;
+  grid-template-columns: 100px 280px 185px 211px 275px 141px 162px 89px;
+  grid-template-rows: 59px repeat(10, 1fr);
+  /*1 header + 10 rows */
+  width: 1441px;
+  height: 777px;
   row-gap: 5px;
   flex-shrink: 0;
   align-self: stretch;
@@ -1477,7 +1511,7 @@
 
 /* Regular cell styling */
  .table-cell {               
-  background-color: var(--primary-color);;
+  background-color: var(--primary-color);
   display: flex;
   align-items: center;
   justify-content: flex-start;

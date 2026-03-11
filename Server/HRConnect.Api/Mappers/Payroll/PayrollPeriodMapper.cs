@@ -1,7 +1,8 @@
 namespace HRConnect.Api.Mappers.Payroll
 {
   using HRConnect.Api.DTOs.Payroll;
-  using HRConnect.Api.Models;
+  using HRConnect.Api.Models.Payroll;
+
   public static class PayrollPeriodMapper
   {
     public static PayrollPeriodDto ToPayrollPeriodDto(this PayrollPeriod periodModel)

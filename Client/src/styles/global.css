@@ -732,7 +732,11 @@ body {
   z-index: 1;
 }
 
+<<<<<<< HEAD
 /* Menu Background */
+=======
+/* Edit Employee Background */
+>>>>>>> feature/HRC003
 .menu-background {
   position: fixed;
   top: 0;

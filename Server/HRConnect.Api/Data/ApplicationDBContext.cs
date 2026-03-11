@@ -1,6 +1,8 @@
 namespace HRConnect.Api.Data
 {
   using HRConnect.Api.Models;
+   using HRConnect.Api.Models.Payroll;
+ 
   using Microsoft.EntityFrameworkCore;
 
   public class ApplicationDBContext(DbContextOptions dbContextOptions) : DbContext(dbContextOptions)

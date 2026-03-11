@@ -40,10 +40,14 @@ namespace HRConnect.Api.Utils
             int genderCode = int.Parse(IdNumber.AsSpan(6, 4), CultureInfo.InvariantCulture);
             Gender gender = genderCode < 5000 ? Gender.Female : Gender.Male;
 
+            int citizenshipDigit = int.Parse(IdNumber[10].ToString(), CultureInfo.InvariantCulture);
+            bool isCitizen = citizenshipDigit == 0;
+
             return new EmployeeInfo
             {
                 Gender = gender,
-                DateOfBirth = dateOfBirth
+                DateOfBirth = dateOfBirth,
+                IsSouthAfricanCitizen = isCitizen
             };
         }
         /// <summary>
@@ -94,5 +98,6 @@ namespace HRConnect.Api.Utils
     {
         public Gender Gender { get; set; }
         public DateOnly DateOfBirth { get; set; }
+        public bool IsSouthAfricanCitizen { get; set; }
     }
 }

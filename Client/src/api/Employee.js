@@ -1,7 +1,7 @@
 import axios from "axios";
 import { toast } from "react-toastify";
 
-const API_BASE = "http://localhost:5037/api/employee";
+const API_BASE = "http://localhost:5147/api/employee";
 
 /// </summary>
 /// Add a response interceptor to handle empty responses gracefully
@@ -27,7 +27,7 @@ axios.interceptors.response.use(
 
 export const addEmployee = async (employee) => {
   try {
-    const response = await axios.post(`${API_BASE}/add`, employee, {
+    const response = await axios.post(`${API_BASE}`, employee, {
       headers: { "Content-Type": "application/json" },
     });
 
@@ -46,10 +46,10 @@ export const addEmployee = async (employee) => {
   }
 };
 
-export const editEmployee = async (employeeNumber, employee) => {
+export const editEmployee = async (employeeId, employee) => {
   try {
     const response = await axios.put(
-      `${API_BASE}/edit/${employeeNumber}`,
+      `${API_BASE}/${employeeId}`,
       employee,
       {
         headers: { "Content-Type": "application/json" },
@@ -112,7 +112,7 @@ export const GetEmployeeByEmployeeNumberAsync = async (employeeNumber) => {
 
 export const fetchAllEmployees = async () => {
   try {
-    const response = await axios.get(`${API_BASE}/all`);
+    const response = await axios.get(`${API_BASE}`);
     return response.data || [];
   } catch (error) {
     if (error.response) {
