@@ -1,14 +1,13 @@
 ﻿namespace HRConnect.Api.Repository
 {
-  using HRConnect.Api.DTOs.MedicalOption;
-  using HRConnect.Api.Data;
-  using HRConnect.Api.Interfaces;
-  using HRConnect.Api.Models;
-  using HRConnect.Api.Utils;
-  using Microsoft.EntityFrameworkCore;
-  using HRConnect.Api.Mappers;
-  using Microsoft.Data.SqlClient;
+  using Data;
+  using DTOs.MedicalOption;
   using EFCore.BulkExtensions;
+  using Interfaces;
+  using Mappers;
+  using Microsoft.Data.SqlClient;
+  using Microsoft.EntityFrameworkCore;
+  using Models;
   using Utils.MedicalOption;
 
   /// <summary>
@@ -807,6 +806,7 @@
     public async Task<List<IGrouping<int, MedicalOptionDto>>> GetEmployeeEligibleOptions(
       string employeeId)
     {
+      //return await _context.Medical
       // Depends on above
       throw new NotImplementedException();
     }

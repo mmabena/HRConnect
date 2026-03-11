@@ -1,6 +1,8 @@
 ﻿namespace HRConnect.Api.Services;
 
+using DTOs.Payroll.PayrollDeduction.MedicalAidDeduction;
 using Interfaces;
+using Models.PayrollContribution;
 
 public class MedicalAidDeductionService:IMedicalAidDeductionService
 {
@@ -9,24 +11,28 @@ public class MedicalAidDeductionService:IMedicalAidDeductionService
   {
     _medicalAidDeductionRepository = medicalAidDeductionRepository;
   }
-  public async Task<> GetMedicalAidDeductions(string employeeId)
+  public async Task<MedicalAidDeductionDto> GetMedicalAidDeductionsByEmployeeIdAsync(string employeeId)
   {
     //ToDo: validations
     //ToDo : Fix Signature ASAP
+    var employeeDeductions =
+      _medicalAidDeductionRepository.GetMedicalAidDeductionsByEmployeeIdAsync(employeeId);
+    throw new NotImplementedException();
     //return _medicalAidDeductionRepository.GetMedicalAidDeductionsByEmployeeIdAsync(employeeId);
   }
 
-  public async Task GetAllMedicalAidDeductions()
+  public async Task<IReadOnlyList<MedicalAidDeduction>> GetAllMedicalAidDeductions()
   {
     throw new NotImplementedException();
   }
 
-  public async Task AddNewMedicalAidDeductions(string employeeId)
+  public async Task<MedicalAidDeductionDto> AddNewMedicalAidDeductions(string employeeId,
+    int medicalOptionId)
   {
     throw new NotImplementedException();
   }
 
-  public async Task UpdateDeductionByEmpId(string employeeId, int id)
+  public async Task<MedicalAidDeductionDto> UpdateDeductionByEmpId(string employeeId)
   {
     throw new NotImplementedException();
   }

@@ -224,7 +224,7 @@
     // New Methods
     // Get
     // Get all Possible options for employee based on salary
-    Task<List<MedicalOptionCategoryDto>> GetAllOptionsWithinEmployeeSalary(
+    Task<IReadOnlyList<MedicalOptionCategoryDto>> GetAllOptionsWithinEmployeeSalary(
       decimal salaryAmount);
 
     // Get eligible options for employee

@@ -22,7 +22,8 @@
     {
       _context = context;
     }
-    public async Task<List<MedicalAidDeduction>> GetMedicalAidDeductionsByEmployeeIdAsync(string employeeId)
+    public async Task<List<MedicalAidDeduction>> GetMedicalAidDeductionsByEmployeeIdAsync(
+      string employeeId)
     {
       return await _context.MedicalAidDeductions
         .Where(o => o.EmployeeId == employeeId) 

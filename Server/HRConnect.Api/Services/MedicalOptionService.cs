@@ -623,7 +623,7 @@
 
     // New
     
-    public async Task<List<MedicalOptionCategoryDto>> GetAllOptionsWithinEmployeeSalary(
+    public async Task<IReadOnlyList<MedicalOptionCategoryDto>> GetAllOptionsWithinEmployeeSalary(
       decimal salaryAmount)
     {
       // Call Repo to get Applicable options for employee based on Salary

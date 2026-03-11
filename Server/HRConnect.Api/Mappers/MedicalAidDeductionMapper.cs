@@ -5,7 +5,7 @@
 
   public static class MedicalAidDeductionMapper
   {
-    public static MedicalAidDeduction ToMedicalAidDeduction(this MedicalAidDeductionDto dto)
+    public static MedicalAidDeduction ToMedicalAidDeductionDto(this MedicalAidDeductionDto dto)
     {
       return new MedicalAidDeduction
       {
