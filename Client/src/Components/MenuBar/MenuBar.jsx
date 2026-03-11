@@ -19,7 +19,10 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   const [activeIndex, setActiveIndex] = useState(null);
 
   //displaying user initials
-  const displayName = currentUser?.username || currentUser?.email || "User";
+  const displayName =
+  currentUser?.username ||
+  currentUser?.email ||
+  "User";
   const [canProjectPension, setCanProjectPension] = useState(false);
 
   const initials = displayName
