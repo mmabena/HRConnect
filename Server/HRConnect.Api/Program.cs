@@ -196,8 +196,10 @@ builder.Services.AddScoped<IStatutoryContributionRepository, StatutoryContributi
 builder.Services.AddScoped<IStatutoryContributionService, StatutoryContributionService>();
 builder.Services.AddTransient<IPensionProjectionService, PensionProjectionService>();
 builder.Services.AddScoped<IMedicalOptionRepository, MedicalOptionRepository>();
-builder.Services.AddScoped<IMedicalOptionService,
-  MedicalOptionService>();
+builder.Services.AddScoped<IMedicalOptionService, MedicalOptionService>();
+builder.Services.AddScoped<IMedicalAidEligibilityService, MedicalAidEligibilityService>();
+builder.Services.AddScoped<IMedicalAidDeductionRepository, MedicalAidDeductionRepository>();
+builder.Services.AddScoped<IMedicalAidDeductionService, MedicalAidDeductionService>();
 builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowReact",

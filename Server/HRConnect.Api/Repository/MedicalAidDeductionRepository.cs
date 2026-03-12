@@ -36,14 +36,25 @@
         .ToListAsync();
     }
 
-    public async Task AddNewMedicalAidDeductionsAsync(string employeeId) // the other details will be in the payload body
+    public async Task AddNewMedicalAidDeductionsAsync(MedicalAidDeduction deduction)
     {
-      throw new NotImplementedException();
+      await _context.MedicalAidDeductions.AddAsync(deduction);
+      await _context.SaveChangesAsync();
     }
 
-    public async Task UpdateDeductionByEmpIdAsync(string employeeId)
+    public async Task UpdateDeductionByEmpIdAsync(string employeeId, MedicalAidDeduction deduction)
     {
-      throw new NotImplementedException();
+      var existingDeduction = await _context.MedicalAidDeductions
+        .FirstOrDefaultAsync(d => d.EmployeeId == employeeId);
+
+      if (existingDeduction == null)
+      {
+        throw new KeyNotFoundException($"No medical aid deduction found for employee {employeeId}");
+      }
+
+      // Update the existing deduction with new values
+      _context.Entry(existingDeduction).CurrentValues.SetValues(deduction);
+      await _context.SaveChangesAsync();
     }
   }
 }

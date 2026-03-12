@@ -6,8 +6,8 @@
   {
     Task<List<MedicalAidDeduction>> GetMedicalAidDeductionsByEmployeeIdAsync(string employeeId);
     Task<IReadOnlyList<MedicalAidDeduction>> GetAllMedicalAidDeductionsAsync();
-    Task AddNewMedicalAidDeductionsAsync(string employeeId);
-    Task UpdateDeductionByEmpIdAsync(string employeeId);
+    Task AddNewMedicalAidDeductionsAsync(MedicalAidDeduction deduction);
+    Task UpdateDeductionByEmpIdAsync(string employeeId, MedicalAidDeduction deduction);
   }
 }
 
