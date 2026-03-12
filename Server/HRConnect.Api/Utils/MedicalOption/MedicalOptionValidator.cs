@@ -2190,6 +2190,689 @@
       return result;
     }
 
+        #region Bulk Insert Validations
+
+    /// <summary>
+    /// Comprehensive validation for bulk insert operations for new medical options
+    /// </summary>
+    public static async Task<BulkValidationResult> ValidateBulkInsertAsync(
+      int categoryId,
+      IReadOnlyCollection<CreateMedicalOptionVariantsDto> bulkInsertDto,
+      IMedicalOptionRepository repository,
+      MedicalOptionCategory categoryInfo,
+      List<MedicalOptionDto> existingOptions,
+      DateTime? testDate = null)
+    {
+      var result = new BulkValidationResult() { IsValid = true };
+
+      try
+      {
+        // 1. PERIOD VALIDATION
+        var dateToValidate = testDate ?? DateTime.UtcNow;
+        if (!ValidateUpdatePeriod(dateToValidate))
+        {
+          result.IsValid = false;
+          result.ErrorMessage = "Insert operations can only be performed between November and December";
+          return result;
+        }
+
+        // 2. CATEGORY VALIDATION
+        if (categoryInfo == null)
+        {
+          result.IsValid = false;
+          result.ErrorMessage = $"Category {categoryId} not found";
+          return result;
+        }
+
+        // 3. OPTION NAME CONTAINS CATEGORY NAME VALIDATION
+        foreach (var dto in bulkInsertDto)
+        {
+          if (!dto.MedicalOptionName.Contains(categoryInfo.MedicalOptionCategoryName, StringComparison.OrdinalIgnoreCase))
+          {
+            result.IsValid = false;
+            result.ErrorMessage = $"Option name '{dto.MedicalOptionName}' must contain the category name '{categoryInfo.MedicalOptionCategoryName}'";
+            return result;
+          }
+        }
+
+        // 4. CHECK FOR DUPLICATE OPTION NAMES IN PAYLOAD
+        var duplicateNames = bulkInsertDto
+          .GroupBy(d => d.MedicalOptionName, StringComparer.OrdinalIgnoreCase)
+          .Where(g => g.Count() > 1)
+          .Select(g => g.Key)
+          .ToList();
+
+        if (duplicateNames.Count != 0)
+        {
+          result.IsValid = false;
+          result.ErrorMessage = $"Duplicate option names detected in payload: {string.Join(", ", duplicateNames)}";
+          return result;
+        }
+
+        // 5. CHECK FOR DUPLICATE OPTION NAMES AGAINST EXISTING DATABASE OPTIONS
+        foreach (var dto in bulkInsertDto)
+        {
+          if (existingOptions.Any(o => o.MedicalOptionName.Equals(dto.MedicalOptionName, StringComparison.OrdinalIgnoreCase)))
+          {
+            result.IsValid = false;
+            result.ErrorMessage = $"Option name '{dto.MedicalOptionName}' already exists in category {categoryId}";
+            return result;
+          }
+        }
+
+        // 6. GROUP BY VARIANT using factory pattern
+        var variantGroups = GroupInsertOptionsByVariant(bulkInsertDto, categoryInfo.MedicalOptionCategoryName);
+
+        if (variantGroups.Count == 0)
+        {
+          result.IsValid = false;
+          result.ErrorMessage = $"No valid variants found for category ID: {categoryId}";
+          return result;
+        }
+
+        // 7. VALIDATE EACH VARIANT INDIVIDUALLY
+        foreach (var variantGroup in variantGroups)
+        {
+          var variantValidation = ValidateSingleVariantForInsert(
+            variantGroup.Key,
+            variantGroup.Value,
+            categoryInfo.MedicalOptionCategoryName);
+
+          if (!variantValidation.IsValid)
+          {
+            result.IsValid = false;
+            result.ErrorMessage = $"Variant '{variantGroup.Key}' validation failed: {variantValidation.ErrorMessage}";
+            return result;
+          }
+        }
+
+        // 8. SALARY BRACKET RESTRICTIONS (same as update)
+        var isRestricted = Enum.IsDefined(typeof(NoUpdateOnMedicalOptionCategory), categoryInfo.MedicalOptionCategoryName);
+        if (isRestricted)
+        {
+          foreach (var dto in bulkInsertDto)
+          {
+            if (!ValidateSalaryBracketRestriction(categoryInfo.MedicalOptionCategoryName, dto.SalaryBracketMin, dto.SalaryBracketMax))
+            {
+              result.IsValid = false;
+              result.ErrorMessage = $"Salary bracket restrictions apply for category '{categoryInfo.MedicalOptionCategoryName}'. Options should have Min=0 and unlimited Max.";
+              return result;
+            }
+          }
+        }
+
+        // 9. SALARY RANGE VALIDATIONS (gaps, overlaps across all variants in the insert)
+        var salaryValidation = ValidateInsertSalaryRanges(variantGroups, isRestricted);
+        if (!salaryValidation.IsValid)
+        {
+          result.IsValid = false;
+          result.ErrorMessage = salaryValidation.ErrorMessage;
+          return result;
+        }
+
+        // 10. CONTRIBUTION VALUE VALIDATIONS
+        foreach (var dto in bulkInsertDto)
+        {
+          var contributionValidation = ValidateInsertContributionValues(dto);
+          if (!contributionValidation.IsValid)
+          {
+            result.IsValid = false;
+            result.ErrorMessage = $"Invalid contribution values for option '{dto.MedicalOptionName}': {contributionValidation.ErrorMessage}";
+            return result;
+          }
+        }
+
+        // 11. NO DUPLICATE CONTRIBUTION VALUES ACROSS VARIANTS
+        var duplicateValidation = ValidateNoDuplicateContributionsAcrossVariants(variantGroups);
+        if (!duplicateValidation.IsValid)
+        {
+          result.IsValid = false;
+          result.ErrorMessage = duplicateValidation.ErrorMessage;
+          return result;
+        }
+
+        result.IsValid = true;
+      }
+      catch (Exception ex)
+      {
+        result.IsValid = false;
+        result.ErrorMessage = $"Bulk insert validation error: {ex.Message}";
+      }
+
+      return result;
+    }
+
+    /// <summary>
+    /// Groups insert DTOs by variant using category name and option name parsing
+    /// </summary>
+    private static Dictionary<string, List<CreateMedicalOptionVariantsDto>> GroupInsertOptionsByVariant(
+      IReadOnlyCollection<CreateMedicalOptionVariantsDto> bulkInsertDto,
+      string categoryName)
+    {
+      var variantGroups = new Dictionary<string, List<CreateMedicalOptionVariantsDto>>(StringComparer.OrdinalIgnoreCase);
+
+      foreach (var dto in bulkInsertDto)
+      {
+        // Extract variant name from option name by removing category name
+        var variantName = ExtractVariantName(dto.MedicalOptionName, categoryName);
+
+        if (!variantGroups.TryGetValue(variantName, out var value))
+        {
+          value = new List<CreateMedicalOptionVariantsDto>();
+          variantGroups[variantName] = value;
+        }
+
+        value.Add(dto);
+      }
+
+      return variantGroups;
+    }
+
+    /// <summary>
+    /// Extracts variant name from the full option name by removing the category prefix
+    /// Example: "Essential Plus" with category "Essential" -> "Plus"
+    /// </summary>
+    private static string ExtractVariantName(string optionName, string categoryName)
+    {
+      if (optionName.StartsWith(categoryName, StringComparison.OrdinalIgnoreCase))
+      {
+        var variantPart = optionName.Substring(categoryName.Length).Trim();
+        return string.IsNullOrEmpty(variantPart) ? "Default" : variantPart;
+      }
+
+      // If category name is not at the start, try to find it anywhere
+      var index = optionName.IndexOf(categoryName, StringComparison.OrdinalIgnoreCase);
+      if (index >= 0)
+      {
+        // Take everything after the category name
+        var afterCategory = optionName.Substring(index + categoryName.Length).Trim();
+        // Also take everything before if exists
+        var beforeCategory = optionName.Substring(0, index).Trim();
+
+        if (!string.IsNullOrEmpty(beforeCategory) && !string.IsNullOrEmpty(afterCategory))
+        {
+          return $"{beforeCategory} {afterCategory}".Trim();
+        }
+
+        return string.IsNullOrEmpty(afterCategory) ? beforeCategory : afterCategory;
+      }
+
+      return optionName; // Return full name if category not found
+    }
+
+    /// <summary>
+    /// Validates a single variant for insert operations
+    /// </summary>
+    private static BulkValidationResult ValidateSingleVariantForInsert(
+      string variantName,
+      List<CreateMedicalOptionVariantsDto> variantOptions,
+      string categoryName)
+    {
+      var result = new BulkValidationResult() { IsValid = true };
+
+      try
+      {
+        // 1. Contribution structure consistency within variant
+        var structureValidation = ValidateInsertVariantContributionStructure(variantOptions, variantName);
+        if (!structureValidation.IsValid)
+        {
+          return structureValidation;
+        }
+
+        // 2. Variant-specific business rules
+        var rulesValidation = ValidateInsertVariantBusinessRules(variantName, variantOptions, categoryName);
+        if (!rulesValidation.IsValid)
+        {
+          return rulesValidation;
+        }
+
+        result.IsValid = true;
+      }
+      catch (Exception ex)
+      {
+        result.IsValid = false;
+        result.ErrorMessage = $"Single variant validation error for '{variantName}': {ex.Message}";
+      }
+
+      return result;
+    }
+
+    /// <summary>
+    /// Validates contribution structure consistency for insert variants
+    /// </summary>
+    private static BulkValidationResult ValidateInsertVariantContributionStructure(
+      List<CreateMedicalOptionVariantsDto> variantOptions,
+      string variantName)
+    {
+      var result = new BulkValidationResult() { IsValid = true };
+
+      try
+      {
+        if (variantOptions.Count < 2) return result;
+
+        // Check MSA structure consistency
+        var firstHasMsa = variantOptions.First().MonthlyMsaContributionAdult.HasValue &&
+                          variantOptions.First().MonthlyMsaContributionAdult > 0;
+
+        foreach (var option in variantOptions.Skip(1))
+        {
+          var hasMsa = option.MonthlyMsaContributionAdult.HasValue && option.MonthlyMsaContributionAdult > 0;
+          if (firstHasMsa != hasMsa)
+          {
+            result.IsValid = false;
+            result.ErrorMessage = $"Inconsistent MSA structure in variant '{variantName}'";
+            return result;
+          }
+        }
+
+        // Check Principal structure consistency
+        var firstHasPrincipal = variantOptions.First().MonthlyRiskContributionPrincipal.HasValue &&
+                                variantOptions.First().MonthlyRiskContributionPrincipal > 0;
+
+        foreach (var option in variantOptions.Skip(1))
+        {
+          var hasPrincipal = option.MonthlyRiskContributionPrincipal.HasValue && option.MonthlyRiskContributionPrincipal > 0;
+          if (firstHasPrincipal != hasPrincipal)
+          {
+            result.IsValid = false;
+            result.ErrorMessage = $"Inconsistent Principal structure in variant '{variantName}'";
+            return result;
+          }
+        }
+
+        result.IsValid = true;
+      }
+      catch (Exception ex)
+      {
+        result.IsValid = false;
+        result.ErrorMessage = $"Contribution structure validation error: {ex.Message}";
+      }
+
+      return result;
+    }
+
+    /// <summary>
+    /// Validates variant-specific business rules for insert operations
+    /// </summary>
+    private static BulkValidationResult ValidateInsertVariantBusinessRules(
+      string variantName,
+      List<CreateMedicalOptionVariantsDto> variantOptions,
+      string categoryName)
+    {
+      var result = new BulkValidationResult() { IsValid = true };
+
+      try
+      {
+        var hasMsa = variantOptions.Any(o => o.MonthlyMsaContributionAdult.HasValue && o.MonthlyMsaContributionAdult > 0);
+        var hasPrincipal = variantOptions.Any(o => o.MonthlyRiskContributionPrincipal.HasValue && o.MonthlyRiskContributionPrincipal > 0);
+
+        // Network Choice: Risk + Principal (NO MSA)
+        if (variantName.Contains("Network Choice") || categoryName.Contains("Network Choice"))
+        {
+          if (hasMsa)
+          {
+            result.IsValid = false;
+            result.ErrorMessage = $"Network Choice variant '{variantName}' should NOT have MSA contributions";
+            return result;
+          }
+          if (!hasPrincipal)
+          {
+            result.IsValid = false;
+            result.ErrorMessage = $"Network Choice variant '{variantName}' must have Principal contributions";
+            return result;
+          }
+        }
+        // First Choice: Risk only (no MSA, no Principal)
+        else if (variantName.Contains("First Choice") || categoryName.Contains("First Choice"))
+        {
+          if (hasMsa)
+          {
+            result.IsValid = false;
+            result.ErrorMessage = $"First Choice variant '{variantName}' should NOT have MSA contributions";
+            return result;
+          }
+          if (hasPrincipal)
+          {
+            result.IsValid = false;
+            result.ErrorMessage = $"First Choice variant '{variantName}' should NOT have Principal contributions";
+            return result;
+          }
+        }
+        // Essential: Risk + MSA + Principal
+        else if (variantName.Contains("Essential") || categoryName.Contains("Essential"))
+        {
+          if (!hasMsa)
+          {
+            result.IsValid = false;
+            result.ErrorMessage = $"Essential variant '{variantName}' must have MSA contributions";
+            return result;
+          }
+          if (!hasPrincipal)
+          {
+            result.IsValid = false;
+            result.ErrorMessage = $"Essential variant '{variantName}' must have Principal contributions";
+            return result;
+          }
+        }
+        // Double/Alliance: Risk + MSA (no Principal)
+        else if (variantName.Contains("Double") || variantName.Contains("Alliance") ||
+                 categoryName.Contains("Double") || categoryName.Contains("Alliance"))
+        {
+          if (!hasMsa)
+          {
+            result.IsValid = false;
+            result.ErrorMessage = $"{categoryName} variant '{variantName}' must have MSA contributions";
+            return result;
+          }
+          if (hasPrincipal)
+          {
+            result.IsValid = false;
+            result.ErrorMessage = $"{categoryName} variant '{variantName}' should NOT have Principal contributions";
+            return result;
+          }
+        }
+        // Vital/Plus: Risk only (no MSA, no Principal)
+        else if (variantName.Contains("Vital") || variantName.Contains("Plus") ||
+                 categoryName.Contains("Vital"))
+        {
+          if (hasMsa)
+          {
+            result.IsValid = false;
+            result.ErrorMessage = $"Vital variant '{variantName}' should NOT have MSA contributions";
+            return result;
+          }
+          if (hasPrincipal)
+          {
+            result.IsValid = false;
+            result.ErrorMessage = $"Vital variant '{variantName}' should NOT have Principal contributions";
+            return result;
+          }
+        }
+
+        result.IsValid = true;
+      }
+      catch (Exception ex)
+      {
+        result.IsValid = false;
+        result.ErrorMessage = $"Variant business rules validation error: {ex.Message}";
+      }
+
+      return result;
+    }
+
+    /// <summary>
+    /// Validates salary ranges for insert operations across all variants
+    /// </summary>
+    private static BulkValidationResult ValidateInsertSalaryRanges(
+      Dictionary<string, List<CreateMedicalOptionVariantsDto>> variantGroups,
+      bool isRestrictedCategory)
+    {
+      var result = new BulkValidationResult() { IsValid = true };
+
+      try
+      {
+        foreach (var variantGroup in variantGroups)
+        {
+          var salaryBracketRecords = new List<SalaryBracketValidatorRecord>();
+          var sortedOptions = variantGroup.Value.OrderBy(o => o.MedicalOptionName).ToList();
+
+          foreach (var dto in sortedOptions)
+          {
+            if (dto.SalaryBracketMin.HasValue || dto.SalaryBracketMax.HasValue)
+            {
+              // For restricted categories, validate that Min is 0
+              if (isRestrictedCategory && dto.SalaryBracketMin != 0)
+              {
+                result.IsValid = false;
+                result.ErrorMessage = $"First option's Salary Bracket Min must be 0 for restricted category variant '{variantGroup.Key}'";
+                return result;
+              }
+
+              salaryBracketRecords.Add(new SalaryBracketValidatorRecord(
+                0, // New options don't have IDs yet
+                dto.MedicalOptionName,
+                dto.SalaryBracketMin,
+                dto.SalaryBracketMax));
+            }
+          }
+
+          if (salaryBracketRecords.Count > 1 && !isRestrictedCategory)
+          {
+            if (!ValidateNoGapsInSalaryRanges(salaryBracketRecords))
+            {
+              result.IsValid = false;
+              result.ErrorMessage = $"Gaps detected in salary ranges for variant '{variantGroup.Key}'";
+              return result;
+            }
+
+            if (!ValidateNoOverlappingBrackets(salaryBracketRecords))
+            {
+              result.IsValid = false;
+              result.ErrorMessage = $"Overlapping salary brackets detected in variant '{variantGroup.Key}'";
+              return result;
+            }
+          }
+        }
+
+        result.IsValid = true;
+      }
+      catch (Exception ex)
+      {
+        result.IsValid = false;
+        result.ErrorMessage = $"Salary range validation error: {ex.Message}";
+      }
+
+      return result;
+    }
+
+    /// <summary>
+    /// Validates contribution values for insert operations
+    /// </summary>
+    private static BulkValidationResult ValidateInsertContributionValues(CreateMedicalOptionVariantsDto entity)
+    {
+      var result = new BulkValidationResult() { IsValid = true };
+      const decimal tolerance = 0.01m;
+
+      try
+      {
+        var hasMsa = entity.MonthlyMsaContributionAdult.HasValue && entity.MonthlyMsaContributionAdult > 0;
+        var hasPrincipal = entity.MonthlyRiskContributionPrincipal.HasValue && entity.MonthlyRiskContributionPrincipal > 0;
+
+        // Validate Risk contributions are present and non-negative
+        if (entity.MonthlyRiskContributionAdult < 0 || entity.MonthlyRiskContributionChild < 0)
+        {
+          result.IsValid = false;
+          result.ErrorMessage = "Risk contributions cannot be negative";
+          return result;
+        }
+
+        if (hasPrincipal && entity.MonthlyRiskContributionPrincipal < 0)
+        {
+          result.IsValid = false;
+          result.ErrorMessage = "Principal risk contribution cannot be negative";
+          return result;
+        }
+
+        // Validate MSA contributions are positive if present
+        if (hasMsa)
+        {
+          if (!entity.MonthlyMsaContributionAdult.HasValue || entity.MonthlyMsaContributionAdult <= 0 ||
+              !entity.MonthlyMsaContributionChild.HasValue || entity.MonthlyMsaContributionChild <= 0)
+          {
+            result.IsValid = false;
+            result.ErrorMessage = "MSA contributions must be greater than 0 when present";
+            return result;
+          }
+
+          if (hasPrincipal && (!entity.MonthlyMsaContributionPrincipal.HasValue || entity.MonthlyMsaContributionPrincipal <= 0))
+          {
+            result.IsValid = false;
+            result.ErrorMessage = "Principal MSA contribution must be greater than 0 when present";
+            return result;
+          }
+        }
+
+        // Validate Total contributions
+        if (entity.TotalMonthlyContributionsAdult <= 0 || entity.TotalMonthlyContributionsChild <= 0)
+        {
+          result.IsValid = false;
+          result.ErrorMessage = "Total contributions must be greater than 0";
+          return result;
+        }
+
+        // Validate Risk + MSA = Total (when MSA present)
+        if (hasMsa)
+        {
+          var adultTotal = (decimal)entity.MonthlyRiskContributionAdult + (decimal)entity.MonthlyMsaContributionAdult.Value;
+          if (Math.Abs(adultTotal - entity.TotalMonthlyContributionsAdult) > tolerance)
+          {
+            result.IsValid = false;
+            result.ErrorMessage = "Adult: Risk + MSA must equal Total contribution";
+            return result;
+          }
+
+          var childTotal = (decimal)entity.MonthlyRiskContributionChild + (decimal)entity.MonthlyMsaContributionChild.Value;
+          if (Math.Abs(childTotal - (decimal)entity.TotalMonthlyContributionsChild) > tolerance)
+          {
+            result.IsValid = false;
+            result.ErrorMessage = "Child: Risk + MSA must equal Total contribution";
+            return result;
+          }
+
+          if (hasPrincipal)
+          {
+            var principalTotal = (decimal)entity.MonthlyRiskContributionPrincipal.Value + (decimal)entity.MonthlyMsaContributionPrincipal.Value;
+            if (Math.Abs(principalTotal - (decimal)entity.TotalMonthlyContributionsPrincipal.Value) > tolerance)
+            {
+              result.IsValid = false;
+              result.ErrorMessage = "Principal: Risk + MSA must equal Total contribution";
+              return result;
+            }
+          }
+        }
+        // Validate Risk = Total (when no MSA)
+        else
+        {
+          if (Math.Abs((decimal)entity.MonthlyRiskContributionAdult - (decimal)entity.TotalMonthlyContributionsAdult) > tolerance)
+          {
+            result.IsValid = false;
+            result.ErrorMessage = "Adult: Risk must equal Total contribution for non-MSA variants";
+            return result;
+          }
+
+          if (Math.Abs((decimal)entity.MonthlyRiskContributionChild - (decimal)entity.TotalMonthlyContributionsChild) > tolerance)
+          {
+            result.IsValid = false;
+            result.ErrorMessage = "Child: Risk must equal Total contribution for non-MSA variants";
+            return result;
+          }
+
+          if (hasPrincipal && Math.Abs((decimal)entity.MonthlyRiskContributionPrincipal.Value - (decimal)entity.TotalMonthlyContributionsPrincipal.Value) > tolerance)
+          {
+            result.IsValid = false;
+            result.ErrorMessage = "Principal: Risk must equal Total contribution for non-MSA variants";
+            return result;
+          }
+        }
+
+        result.IsValid = true;
+      }
+      catch (Exception ex)
+      {
+        result.IsValid = false;
+        result.ErrorMessage = $"Contribution validation error: {ex.Message}";
+      }
+
+      return result;
+    }
+
+    /// <summary>
+    /// Validates that no two variants have identical contribution values
+    /// </summary>
+    private static BulkValidationResult ValidateNoDuplicateContributionsAcrossVariants(
+      Dictionary<string, List<CreateMedicalOptionVariantsDto>> variantGroups)
+    {
+      var result = new BulkValidationResult() { IsValid = true };
+
+      try
+      {
+        var variants = variantGroups.ToList();
+
+        for (int i = 0; i < variants.Count; i++)
+        {
+          for (int j = i + 1; j < variants.Count; j++)
+          {
+            if (AreInsertContributionsIdentical(variants[i].Value, variants[j].Value))
+            {
+              result.IsValid = false;
+              result.ErrorMessage = $"Variants '{variants[i].Key}' and '{variants[j].Key}' have identical contribution values. Each variant must have distinct contribution structures.";
+              return result;
+            }
+          }
+        }
+
+        result.IsValid = true;
+      }
+      catch (Exception ex)
+      {
+        result.IsValid = false;
+        result.ErrorMessage = $"Duplicate contribution validation error: {ex.Message}";
+      }
+
+      return result;
+    }
+
+    /// <summary>
+    /// Compares contribution values between two variant groups for insert operations
+    /// </summary>
+    private static bool AreInsertContributionsIdentical(
+      List<CreateMedicalOptionVariantsDto> variant1,
+      List<CreateMedicalOptionVariantsDto> variant2)
+    {
+      // Sort by name for consistent comparison
+      var sorted1 = variant1.OrderBy(o => o.MedicalOptionName).ToList();
+      var sorted2 = variant2.OrderBy(o => o.MedicalOptionName).ToList();
+
+      // Must have same number of options
+      if (sorted1.Count != sorted2.Count) return false;
+
+      for (int i = 0; i < sorted1.Count; i++)
+      {
+        var opt1 = sorted1[i];
+        var opt2 = sorted2[i];
+
+        // Compare Risk contributions
+        if (opt1.MonthlyRiskContributionPrincipal != opt2.MonthlyRiskContributionPrincipal ||
+            opt1.MonthlyRiskContributionAdult != opt2.MonthlyRiskContributionAdult ||
+            opt1.MonthlyRiskContributionChild != opt2.MonthlyRiskContributionChild ||
+            opt1.MonthlyRiskContributionChild2 != opt2.MonthlyRiskContributionChild2)
+        {
+          return false;
+        }
+
+        // Compare MSA contributions
+        if (opt1.MonthlyMsaContributionPrincipal != opt2.MonthlyMsaContributionPrincipal ||
+            opt1.MonthlyMsaContributionAdult != opt2.MonthlyMsaContributionAdult ||
+            opt1.MonthlyMsaContributionChild != opt2.MonthlyMsaContributionChild)
+        {
+          return false;
+        }
+
+        // Compare Total contributions
+        if (opt1.TotalMonthlyContributionsPrincipal != opt2.TotalMonthlyContributionsPrincipal ||
+            opt1.TotalMonthlyContributionsAdult != opt2.TotalMonthlyContributionsAdult ||
+            opt1.TotalMonthlyContributionsChild != opt2.TotalMonthlyContributionsChild ||
+            opt1.TotalMonthlyContributionsChild2 != opt2.TotalMonthlyContributionsChild2)
+        {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    #endregion
+    
     /// <summary>
     /// Groups payload DTOs by variant using existing data for context
     /// </summary>

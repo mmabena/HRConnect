@@ -660,5 +660,415 @@
     }
 
     #endregion
+
+        #region CreateBulkOptionsByExistingCategoryId Tests
+
+    [Fact]
+    public async Task CreateBulkOptionsByExistingCategoryIdWithValidDataShouldInsertSuccessfully()
+    {
+        // Arrange
+        var categoryId = 1;
+        var bulkInsertDto = new List<CreateMedicalOptionVariantsDto>
+        {
+            new()
+            {
+                MedicalOptionName = "Essential Plus",
+                MedicalOptionCategoryId = categoryId,
+                SalaryBracketMin = 0,
+                SalaryBracketMax = 15000,
+                MonthlyRiskContributionPrincipal = 1000,
+                MonthlyRiskContributionAdult = 500,
+                MonthlyRiskContributionChild = 300,
+                MonthlyMsaContributionPrincipal = 500,
+                MonthlyMsaContributionAdult = 250,
+                MonthlyMsaContributionChild = 150,
+                TotalMonthlyContributionsPrincipal = 1500,
+                TotalMonthlyContributionsAdult = 750,
+                TotalMonthlyContributionsChild = 450
+            },
+            new()
+            {
+                MedicalOptionName = "Essential Standard",
+                MedicalOptionCategoryId = categoryId,
+                SalaryBracketMin = 15001,
+                SalaryBracketMax = 30000,
+                MonthlyRiskContributionPrincipal = 1200,
+                MonthlyRiskContributionAdult = 600,
+                MonthlyRiskContributionChild = 350,
+                MonthlyMsaContributionPrincipal = 600,
+                MonthlyMsaContributionAdult = 300,
+                MonthlyMsaContributionChild = 175,
+                TotalMonthlyContributionsPrincipal = 1800,
+                TotalMonthlyContributionsAdult = 900,
+                TotalMonthlyContributionsChild = 525
+            }
+        };
+
+        var categoryInfo = new List<MedicalOptionCategory>
+        {
+            new()
+            {
+                MedicalOptionCategoryId = categoryId,
+                MedicalOptionCategoryName = "Essential"
+            }
+        };
+
+        var existingOptions = new List<MedicalOptionDto>(); // Empty - new options
+        var insertedOptions = new List<CreateMedicalOptionVariantsDto>(bulkInsertDto);
+        var testDate = new DateTime(2024, 11, 15);
+
+        // Mock all repository methods
+        _mockRepository.Setup(r => r.GetCategoryById(categoryId))
+            .ReturnsAsync(categoryInfo);
+
+        _mockRepository.Setup(r => r.GetAllOptionsUnderCategoryAsync(categoryId))
+            .ReturnsAsync(existingOptions);
+
+        _mockRepository.Setup(r => r.CreateBulkOptionsByExistingCategoryId(categoryId, bulkInsertDto))
+            .ReturnsAsync(insertedOptions);
+
+        // Act
+        var result = await _service.CreateBulkOptionsByExistingCategoryId(categoryId, bulkInsertDto, testDate);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(2, result.Count);
+        _mockRepository.Verify(r => r.GetCategoryById(categoryId), Times.Once);
+        _mockRepository.Verify(r => r.GetAllOptionsUnderCategoryAsync(categoryId), Times.Once);
+        _mockRepository.Verify(r => r.CreateBulkOptionsByExistingCategoryId(categoryId, bulkInsertDto), Times.Once);
+    }
+
+    [Fact]
+    public async Task CreateBulkOptionsByExistingCategoryIdWithInvalidCategoryIdShouldThrowArgumentException()
+    {
+        // Arrange
+        var invalidCategoryId = 0;
+        var bulkInsertDto = new List<CreateMedicalOptionVariantsDto>
+        {
+            new() { MedicalOptionName = "Essential Plus", MedicalOptionCategoryId = invalidCategoryId }
+        };
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ArgumentException>(
+            () => _service.CreateBulkOptionsByExistingCategoryId(invalidCategoryId, bulkInsertDto));
+        Assert.Contains("Category ID must be greater than 0", exception.Message);
+    }
+
+    [Fact]
+    public async Task CreateBulkOptionsByExistingCategoryIdWithNullPayloadShouldThrowArgumentException()
+    {
+        // Arrange
+        var categoryId = 1;
+        List<CreateMedicalOptionVariantsDto>? nullPayload = null;
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ArgumentException>(
+            () => _service.CreateBulkOptionsByExistingCategoryId(categoryId, nullPayload!));
+        Assert.Contains("cannot be null or empty", exception.Message);
+    }
+
+    [Fact]
+    public async Task CreateBulkOptionsByExistingCategoryIdWithEmptyPayloadShouldThrowArgumentException()
+    {
+        // Arrange
+        var categoryId = 1;
+        var emptyPayload = new List<CreateMedicalOptionVariantsDto>();
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ArgumentException>(
+            () => _service.CreateBulkOptionsByExistingCategoryId(categoryId, emptyPayload));
+        Assert.Contains("cannot be null or empty", exception.Message);
+    }
+
+    [Fact]
+    public async Task CreateBulkOptionsByExistingCategoryIdWithNonExistentCategoryShouldThrowInvalidOperationException()
+    {
+        // Arrange
+        var categoryId = 999;
+        var bulkInsertDto = new List<CreateMedicalOptionVariantsDto>
+        {
+            new() { MedicalOptionName = "Essential Plus", MedicalOptionCategoryId = categoryId }
+        };
+
+        _mockRepository.Setup(r => r.GetCategoryById(categoryId))
+            .ReturnsAsync(new List<MedicalOptionCategory>()); // Empty list - category not found
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _service.CreateBulkOptionsByExistingCategoryId(categoryId, bulkInsertDto));
+        Assert.Contains("does not exist", exception.Message);
+    }
+
+    [Fact]
+    public async Task CreateBulkOptionsByExistingCategoryIdWithMismatchedCategoryIdShouldThrowArgumentException()
+    {
+        // Arrange
+        var categoryId = 1;
+        var bulkInsertDto = new List<CreateMedicalOptionVariantsDto>
+        {
+            new()
+            {
+                MedicalOptionName = "Essential Plus",
+                MedicalOptionCategoryId = 999 // Wrong category ID
+            }
+        };
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ArgumentException>(
+            () => _service.CreateBulkOptionsByExistingCategoryId(categoryId, bulkInsertDto));
+        Assert.Contains("incorrect category ID", exception.Message);
+    }
+
+    [Fact]
+    public async Task CreateBulkOptionsByExistingCategoryIdShouldThrowValidationExceptionWhenValidationFails()
+    {
+        // Arrange
+        var categoryId = 1;
+        var bulkInsertDto = new List<CreateMedicalOptionVariantsDto>
+        {
+            new()
+            {
+                MedicalOptionName = "Invalid Name", // Does not contain category name
+                MedicalOptionCategoryId = categoryId,
+                SalaryBracketMin = 0,
+                SalaryBracketMax = 15000,
+                MonthlyRiskContributionAdult = 500,
+                MonthlyRiskContributionChild = 300,
+                TotalMonthlyContributionsAdult = 500,
+                TotalMonthlyContributionsChild = 300
+            }
+        };
+
+        var categoryInfo = new List<MedicalOptionCategory>
+        {
+            new()
+            {
+                MedicalOptionCategoryId = categoryId,
+                MedicalOptionCategoryName = "Essential"
+            }
+        };
+
+        var existingOptions = new List<MedicalOptionDto>();
+        var testDate = new DateTime(2024, 11, 15);
+
+        _mockRepository.Setup(r => r.GetCategoryById(categoryId))
+            .ReturnsAsync(categoryInfo);
+
+        _mockRepository.Setup(r => r.GetAllOptionsUnderCategoryAsync(categoryId))
+            .ReturnsAsync(existingOptions);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ValidationException>(
+            () => _service.CreateBulkOptionsByExistingCategoryId(categoryId, bulkInsertDto, testDate));
+        Assert.Contains("must contain the category name", exception.Message);
+    }
+
+    [Fact]
+    public async Task CreateBulkOptionsByExistingCategoryIdOutsideUpdatePeriodShouldThrowValidationException()
+    {
+        // Arrange
+        var categoryId = 1;
+        var bulkInsertDto = new List<CreateMedicalOptionVariantsDto>
+        {
+            new()
+            {
+                MedicalOptionName = "Essential Plus",
+                MedicalOptionCategoryId = categoryId,
+                SalaryBracketMin = 0,
+                SalaryBracketMax = 15000,
+                MonthlyRiskContributionAdult = 500,
+                MonthlyRiskContributionChild = 300,
+                TotalMonthlyContributionsAdult = 500,
+                TotalMonthlyContributionsChild = 300
+            }
+        };
+
+        var categoryInfo = new List<MedicalOptionCategory>
+        {
+            new()
+            {
+                MedicalOptionCategoryId = categoryId,
+                MedicalOptionCategoryName = "Essential"
+            }
+        };
+
+        var existingOptions = new List<MedicalOptionDto>();
+        var testDate = new DateTime(2024, 9, 15); // September - outside update period
+
+        _mockRepository.Setup(r => r.GetCategoryById(categoryId))
+            .ReturnsAsync(categoryInfo);
+
+        _mockRepository.Setup(r => r.GetAllOptionsUnderCategoryAsync(categoryId))
+            .ReturnsAsync(existingOptions);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ValidationException>(
+            () => _service.CreateBulkOptionsByExistingCategoryId(categoryId, bulkInsertDto, testDate));
+        Assert.Contains("November and December", exception.Message);
+    }
+
+    [Fact]
+    public async Task CreateBulkOptionsByExistingCategoryIdShouldPassWithTestDateParameter()
+    {
+        // Arrange
+        var categoryId = 1;
+        var bulkInsertDto = new List<CreateMedicalOptionVariantsDto>
+        {
+            new()
+            {
+                MedicalOptionName = "Vital Plus",
+                MedicalOptionCategoryId = categoryId,
+                SalaryBracketMin = 0,
+                SalaryBracketMax = 15000,
+                MonthlyRiskContributionAdult = 500,
+                MonthlyRiskContributionChild = 300,
+                TotalMonthlyContributionsAdult = 500,
+                TotalMonthlyContributionsChild = 300
+            }
+        };
+
+        var categoryInfo = new List<MedicalOptionCategory>
+        {
+            new()
+            {
+                MedicalOptionCategoryId = categoryId,
+                MedicalOptionCategoryName = "Vital"
+            }
+        };
+
+        var existingOptions = new List<MedicalOptionDto>();
+        var insertedOptions = new List<CreateMedicalOptionVariantsDto>(bulkInsertDto);
+
+        // Test with December date
+        var testDate = new DateTime(2024, 12, 15);
+
+        _mockRepository.Setup(r => r.GetCategoryById(categoryId))
+            .ReturnsAsync(categoryInfo);
+
+        _mockRepository.Setup(r => r.GetAllOptionsUnderCategoryAsync(categoryId))
+            .ReturnsAsync(existingOptions);
+
+        _mockRepository.Setup(r => r.CreateBulkOptionsByExistingCategoryId(categoryId, bulkInsertDto))
+            .ReturnsAsync(insertedOptions);
+
+        // Act
+        var result = await _service.CreateBulkOptionsByExistingCategoryId(categoryId, bulkInsertDto, testDate);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Single(result);
+        _mockRepository.Verify(r => r.CreateBulkOptionsByExistingCategoryId(categoryId, bulkInsertDto), Times.Once);
+    }
+
+    [Fact]
+    public async Task CreateBulkOptionsByExistingCategoryIdWithDuplicateOptionNamesShouldThrowValidationException()
+    {
+        // Arrange
+        var categoryId = 1;
+        var bulkInsertDto = new List<CreateMedicalOptionVariantsDto>
+        {
+            new()
+            {
+                MedicalOptionName = "Essential Plus",
+                MedicalOptionCategoryId = categoryId,
+                SalaryBracketMin = 0,
+                SalaryBracketMax = 10000,
+                MonthlyRiskContributionAdult = 500,
+                MonthlyRiskContributionChild = 300,
+                TotalMonthlyContributionsAdult = 500,
+                TotalMonthlyContributionsChild = 300
+            },
+            new()
+            {
+                MedicalOptionName = "Essential Plus", // Duplicate name
+                MedicalOptionCategoryId = categoryId,
+                SalaryBracketMin = 10001,
+                SalaryBracketMax = 20000,
+                MonthlyRiskContributionAdult = 600,
+                MonthlyRiskContributionChild = 350,
+                TotalMonthlyContributionsAdult = 600,
+                TotalMonthlyContributionsChild = 350
+            }
+        };
+
+        var categoryInfo = new List<MedicalOptionCategory>
+        {
+            new()
+            {
+                MedicalOptionCategoryId = categoryId,
+                MedicalOptionCategoryName = "Essential"
+            }
+        };
+
+        var existingOptions = new List<MedicalOptionDto>();
+        var testDate = new DateTime(2024, 11, 15);
+
+        _mockRepository.Setup(r => r.GetCategoryById(categoryId))
+            .ReturnsAsync(categoryInfo);
+
+        _mockRepository.Setup(r => r.GetAllOptionsUnderCategoryAsync(categoryId))
+            .ReturnsAsync(existingOptions);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ValidationException>(
+            () => _service.CreateBulkOptionsByExistingCategoryId(categoryId, bulkInsertDto, testDate));
+        Assert.Contains("Duplicate option names detected", exception.Message);
+    }
+
+    [Fact]
+    public async Task CreateBulkOptionsByExistingCategoryIdWithExistingOptionNameShouldThrowValidationException()
+    {
+        // Arrange
+        var categoryId = 1;
+        var bulkInsertDto = new List<CreateMedicalOptionVariantsDto>
+        {
+            new()
+            {
+                MedicalOptionName = "Essential Plus",
+                MedicalOptionCategoryId = categoryId,
+                SalaryBracketMin = 0,
+                SalaryBracketMax = 15000,
+                MonthlyRiskContributionAdult = 500,
+                MonthlyRiskContributionChild = 300,
+                TotalMonthlyContributionsAdult = 500,
+                TotalMonthlyContributionsChild = 300
+            }
+        };
+
+        var categoryInfo = new List<MedicalOptionCategory>
+        {
+            new()
+            {
+                MedicalOptionCategoryId = categoryId,
+                MedicalOptionCategoryName = "Essential"
+            }
+        };
+
+        // Existing option with same name
+        var existingOptions = new List<MedicalOptionDto>
+        {
+            new()
+            {
+                MedicalOptionId = 1,
+                MedicalOptionName = "Essential Plus",
+                MedicalOptionCategoryId = categoryId
+            }
+        };
+
+        var testDate = new DateTime(2024, 11, 15);
+
+        _mockRepository.Setup(r => r.GetCategoryById(categoryId))
+            .ReturnsAsync(categoryInfo);
+
+        _mockRepository.Setup(r => r.GetAllOptionsUnderCategoryAsync(categoryId))
+            .ReturnsAsync(existingOptions);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ValidationException>(
+            () => _service.CreateBulkOptionsByExistingCategoryId(categoryId, bulkInsertDto, testDate));
+        Assert.Contains("already exists in category", exception.Message);
+    }
+
+    #endregion
   }
 }

@@ -861,10 +861,9 @@
       
       // TODO : Extract to Service Layer
       //1 Validate category Exists
-      var categoryExists = await _context.MedicalOptionCategories
-        .FirstOrDefaultAsync(c => c.MedicalOptionCategoryId == id);
+      var categoryExists = await MedicalOptionCategoryExistsAsync(id);
 
-      if (categoryExists == null)
+      if (!categoryExists)
         throw new KeyNotFoundException($"Medical option category with ID {id} not found");
       //2. Validate Update Period (as per the business rules)
       if (!MedicalOptionValidator.ValidateUpdatePeriod(DateTime.Now))
