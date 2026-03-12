@@ -32,7 +32,8 @@
 
     public async Task<IReadOnlyList<MedicalAidDeduction>> GetAllMedicalAidDeductionsAsync()
     {
-      return await _context.MedicalAidDeductions //It can be trimmed down to omit IDs
+      return await _context.MedicalAidDeductions
+        .Where(ma => ma.MedicalAidDeductionId != 0 || ma.MedicalAidDeductionId != null)//It can be trimmed down to omit IDs
         .ToListAsync();
     }
 

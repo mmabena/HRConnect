@@ -244,8 +244,10 @@
     Task<MedicalOptionCategoryDto> CreateMedicalOptionCategory(
       CreateMedicalOptionCategoryDto createCategoryPayload);
 
-    Task<IReadOnlyList<CreateMedicalOptionVariantsDto>> CreateBulkOptionsByExistingCategoryId(int id,
-      IReadOnlyCollection<CreateMedicalOptionVariantsDto> createOptionsPayload, DateTime? testDate = null);
+    Task<IReadOnlyList<CreateMedicalOptionVariantsDto>> CreateBulkOptionsByExistingCategoryId(
+      int id,
+      IReadOnlyCollection<CreateMedicalOptionVariantsDto> createOptionsPayload,
+      DateTime? testDate = null);
 
     // Update
     Task<MedicalOptionCategoryDto> UpdateExistingCategoryById(int id,

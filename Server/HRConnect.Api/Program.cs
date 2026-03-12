@@ -154,7 +154,7 @@ builder.Services.AddQuartz(q =>
   //Adding persistence to quartz to be able to be run in the back
   q.UsePersistentStore(options =>
   {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!);
+    options.UseSqlServer(builder.Configuration.GetConnectionString("SecondaryConnection")!);
     options.UseSerializer<SystemTextJsonObjectSerializer>();
     options.UseProperties = true;
   });

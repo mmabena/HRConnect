@@ -853,8 +853,9 @@
       throw new NotImplementedException();
     }
 
-    public async Task<List<CreateMedicalOptionVariantsDto>> CreateBulkOptionsByExistingCategoryId(int id,
-      CreateMedicalOptionVariantsDto createOptionsPayload)
+    public async Task<List<CreateMedicalOptionVariantsDto>> CreateBulkOptionsByExistingCategoryId(
+      int id,
+      IReadOnlyCollection<CreateMedicalOptionVariantsDto> createOptionsPayload)
     {
       // We will use EFCore.BulkExtensions
       // TODO : Validations
@@ -862,9 +863,10 @@
       // TODO : Extract to Service Layer
       //1 Validate category Exists
       var categoryExists = await MedicalOptionCategoryExistsAsync(id);
-
+    
       if (!categoryExists)
         throw new KeyNotFoundException($"Medical option category with ID {id} not found");
+      
       //2. Validate Update Period (as per the business rules)
       if (!MedicalOptionValidator.ValidateUpdatePeriod(DateTime.Now))
         throw new InvalidOperationException(
@@ -874,73 +876,50 @@
       var existingOptions = await _context.MedicalOptions
         .Where(opt => opt.MedicalOptionCategoryId == id)
         .ToListAsync();
-
+    
       var existingOptionNames = existingOptions.Select(o => o.MedicalOptionName).ToHashSet();
-
+    
       //4. validate payload and check for duplicates
-      ArgumentNullException.ThrowIfNull(createOptionsPayload); // Simplified from : throw new ArgumentNullException(nameof(createOptionsPayload));
+      ArgumentNullException.ThrowIfNull(createOptionsPayload);
       
-      // Check if option name already exists in category
-      if (existingOptionNames.Contains(createOptionsPayload.MedicalOptionName))
-        throw new
-          InvalidOperationException(
-            $"Medical option '{createOptionsPayload.MedicalOptionName}' is already created'");
+      //5. Create list to hold all new MedicalOption entities
+      var newMedicalOptions = new List<MedicalOption>();
       
-      // After successful validation create new entity from DTO
-      var newMedicalOption = new MedicalOption
+      foreach (var optionDto in createOptionsPayload)
       {
-        MedicalOptionName = createOptionsPayload.MedicalOptionName,
-        MedicalOptionCategoryId = id,
-        SalaryBracketMin = createOptionsPayload.SalaryBracketMin,
-        SalaryBracketMax = createOptionsPayload.SalaryBracketMax,
-        MonthlyRiskContributionPrincipal = createOptionsPayload.MonthlyRiskContributionPrincipal,
-        MonthlyRiskContributionAdult = createOptionsPayload.MonthlyRiskContributionAdult,
-        MonthlyRiskContributionChild = createOptionsPayload.MonthlyRiskContributionChild,
-        MonthlyRiskContributionChild2 = createOptionsPayload.MonthlyRiskContributionChild2,
-        MonthlyMsaContributionPrincipal = createOptionsPayload.MonthlyMsaContributionPrincipal,
-        MonthlyMsaContributionAdult = createOptionsPayload.MonthlyMsaContributionAdult,
-        MonthlyMsaContributionChild = createOptionsPayload.MonthlyMsaContributionChild,
-        TotalMonthlyContributionsPrincipal =
-          createOptionsPayload.TotalMonthlyContributionsPrincipal,
-        TotalMonthlyContributionsAdult = createOptionsPayload.TotalMonthlyContributionsAdult,
-        TotalMonthlyContributionsChild = createOptionsPayload.TotalMonthlyContributionsChild,
-        TotalMonthlyContributionsChild2 = createOptionsPayload.TotalMonthlyContributionsChild2
-      };
-      
-      // Perform Bulk Inserts
-      var recordsToInsert = new List<MedicalOption> { newMedicalOption };
-      await _context.BulkInsertAsync(recordsToInsert, new BulkConfig()
-      {
-        BatchSize = 1000,
-        PreserveInsertOrder = true,
-        SetOutputIdentity = true //Obtains the generated IDs back
-      });
-      
-      //Return the created option as Dtos
-      var results = new List<CreateMedicalOptionVariantsDto>
-      {
-        new CreateMedicalOptionVariantsDto
+        // Check if option name already exists in category
+        if (existingOptionNames.Contains(optionDto.MedicalOptionName))
+          throw new InvalidOperationException(
+            $"Medical option '{optionDto.MedicalOptionName}' already exists in this category");
+        
+        // Create new entity from DTO
+        var newMedicalOption = new MedicalOption
         {
-          MedicalOptionName = newMedicalOption.MedicalOptionName,
-          MedicalOptionCategoryId = newMedicalOption.MedicalOptionCategoryId,
-          SalaryBracketMin = newMedicalOption.SalaryBracketMin,
-          SalaryBracketMax = newMedicalOption.SalaryBracketMax,
-          MonthlyRiskContributionPrincipal = newMedicalOption.MonthlyRiskContributionPrincipal,
-          MonthlyRiskContributionAdult = newMedicalOption.MonthlyRiskContributionAdult,
-          MonthlyRiskContributionChild = newMedicalOption.MonthlyRiskContributionChild,
-          MonthlyRiskContributionChild2 = newMedicalOption.MonthlyRiskContributionChild2,
-          MonthlyMsaContributionPrincipal = newMedicalOption.MonthlyMsaContributionPrincipal,
-          MonthlyMsaContributionAdult = newMedicalOption.MonthlyMsaContributionAdult,
-          MonthlyMsaContributionChild = newMedicalOption.MonthlyMsaContributionChild,
-          TotalMonthlyContributionsPrincipal = newMedicalOption.TotalMonthlyContributionsPrincipal,
-          TotalMonthlyContributionsAdult = newMedicalOption.TotalMonthlyContributionsAdult,
-          TotalMonthlyContributionsChild = newMedicalOption.TotalMonthlyContributionsChild,
-          TotalMonthlyContributionsChild2 = newMedicalOption.TotalMonthlyContributionsChild2
-        }
-      };
-
-
-      throw new NotImplementedException();
+          MedicalOptionName = optionDto.MedicalOptionName,
+          MedicalOptionCategoryId = id,
+          SalaryBracketMin = optionDto.SalaryBracketMin,
+          SalaryBracketMax = optionDto.SalaryBracketMax,
+          MonthlyRiskContributionPrincipal = optionDto.MonthlyRiskContributionPrincipal,
+          MonthlyRiskContributionAdult = optionDto.MonthlyRiskContributionAdult,
+          MonthlyRiskContributionChild = optionDto.MonthlyRiskContributionChild,
+          MonthlyRiskContributionChild2 = optionDto.MonthlyRiskContributionChild2,
+          MonthlyMsaContributionPrincipal = optionDto.MonthlyMsaContributionPrincipal,
+          MonthlyMsaContributionAdult = optionDto.MonthlyMsaContributionAdult,
+          MonthlyMsaContributionChild = optionDto.MonthlyMsaContributionChild,
+          TotalMonthlyContributionsPrincipal = optionDto.TotalMonthlyContributionsPrincipal,
+          TotalMonthlyContributionsAdult = optionDto.TotalMonthlyContributionsAdult,
+          TotalMonthlyContributionsChild = optionDto.TotalMonthlyContributionsChild,
+          TotalMonthlyContributionsChild2 = optionDto.TotalMonthlyContributionsChild2
+        };
+        
+        newMedicalOptions.Add(newMedicalOption);
+      }
+      
+      //6. Perform bulk insert using EFCore.BulkExtensions
+      await _context.BulkInsertAsync(newMedicalOptions);
+      
+      //7. Return the original DTOs (or you could return the created entities)
+      return createOptionsPayload.ToList();
     }
 
     public Task<MedicalOptionCategoryDto> UpdateExistingCategoryById(int id,

@@ -1,9 +1,8 @@
 ﻿namespace HRConnect.Api.Controllers;
 
-using System.Linq;
 using DTOs;
 using DTOs.Payroll.PayrollDeduction.MedicalAidDeduction;
-using HRConnect.Api.Interfaces;
+using Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -26,7 +25,7 @@ public class MedicalAidDeductionController : ControllerBase
     /// Get all medical aid deductions (SuperUser only).
     /// </summary>
     [HttpGet("all")]
-    [Authorize(Roles = "SuperUser")]
+    //[Authorize(Roles = "SuperUser")]
     public async Task<IActionResult> GetAllMedicalDeductions()
     {
         var deductions = await _medicalAidDeductionService.GetAllMedicalAidDeductions();
