@@ -3,25 +3,66 @@ import { useLocation } from "react-router-dom";
 import "../Components/EditEmployee.css";
 import api from "../api/api.js";
 import { toast } from "react-toastify";
+import {
+  fetchAllEmployees,
+  showConfirmationToast,
+  editEmployee,
+  formatDateToYYYYMMDD,
+  formatDateForDisplay,
+} from "../api/Employee.js";
+import axios from "axios";
 
 const PersonalInformation = () => {
   const location = useLocation();
   const readOnly = location.state?.readOnly || false;
-  const [employeeData, setEmployeeData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
   const [activeTab, setActiveTab] = useState("Personal");
   const [isEditable, setIsEditable] = useState(false);
   const [formErrors, setFormErrors] = useState({});
-
-  const [allEmployees, setAllEmployees] = useState([
-    { employeeId: "EMP002", name: "John", surname: "Doe" },
-    { employeeId: "EMP003", name: "Jane", surname: "Smith" },
-  ]);
-
+  const [allEmployees, setAllEmployees] = useState([]);
+  const branches = ["Johannesburg", "CapeTown", "UK"];
   const titles = ["Mr", "Mrs", "Ms", "Dr", "Prof"];
-  const branches = ["Johannesburg", "Cape Town", "Durban"];
-  const employmentStatuses = ["Permanent", "Fixed Term", "Contract"];
-  const tabs = ["Personal", "Employment", "Salary", "Other"];
+  const employmentStatuses = ["Permanent", "FixedTerm", "Contract"];
+  const [employeeData, setEmployeeData] = useState({
+    employeeId: "",
+    name: "",
+    surname: "",
+    title: "",
+    dateOfBirth: "",
+    idType: "id",
+    idNumber: "",
+    gender: "",
+    contactNumber: "",
+    nationality: "",
+    citizenship: "",
+    disability: false,
+    disabilityType: "",
+    email: "",
+    physicalAddress: "",
+    city: "",
+    zipCode: "",
+    branch: "",
+    monthlySalary: "",
+    jobTitle: "",
+    employeeStatus: "",
+    reportsTo: "",
+    profileImage: "",
+  });
+
+  const [originalIdNumber, setOriginalIdNumber] = useState("");
+  const [originalDateOfBirth, setOriginalDateOfBirth] = useState("");
+  const [originalTaxNumber, setOriginalTaxNumber] = useState("");
+
+  useEffect(() => {
+    const loadEmployees = async () => {
+      const employeesData = await fetchAllEmployees();
+      setAllEmployees(employeesData);
+    };
+
+    loadEmployees();
+  }, []);
 
   const getInitials = (name, surname) => {
     let initials = "";
@@ -30,82 +71,348 @@ const PersonalInformation = () => {
     return initials;
   };
 
-useEffect(() => {
-  const currentUserRaw = localStorage.getItem("currentUser");
+  useEffect(() => {
+    const fetchEmployee = async () => {
+      try {
+        const currentUserRaw = localStorage.getItem("currentUser");
+        if (!currentUserRaw) {
+          toast.error("User not logged in");
+          setLoading(false);
+          return;
+        }
+        const currentUser = JSON.parse(currentUserRaw);
 
-  if (!currentUserRaw) {
-    toast.error("User not logged in");
-    setLoading(false);
-    return;
-  }
+        if (!currentUser.email) {
+          toast.error("User email missing");
+          setLoading(false);
+          return;
+        }
 
-  const currentUser = JSON.parse(currentUserRaw);
+        const response = await api.get(`/employee/email/${currentUser.email}`);
+        const emp = response.data;
 
-  const transformed = {
-    employeeId: currentUser.employeeId || "",
-    name: currentUser.name || "",
-    surname: currentUser.surname || "",
-    title: currentUser.title || "",
-    branch: currentUser.branch || "",
-    jobTitle: currentUser.jobTitle || "",
-    dateOfBirth: currentUser.dateOfBirth || "",
-    idNumber: currentUser.idNumber || "",
-    passportNumber: currentUser.passportNumber || "",
-    nationality: currentUser.nationality || "",
-    gender: currentUser.gender || "",
-    contactNumber: currentUser.contactNumber || "",
-    email: currentUser.email || "",
-    physicalAddress: currentUser.physicalAddress || "",
-    city: currentUser.city || "",
-    zipCode: currentUser.zipCode || "",
-    monthlySalary: currentUser.monthlySalary || "",
-    employeeStatus: currentUser.employmentStatus || "",
-    reportsTo: currentUser.careerManagerID || "",
-    disability: currentUser.hasDisability || false,
-    disabilityType: currentUser.disabilityDescription || "",
-    startDate: currentUser.startDate || "",
-    profileImage: currentUser.profileImage || "",
-    initials: getInitials(currentUser.name, currentUser.surname),
+        // Transform to match your form
+        const transformed = {
+          employeeId: emp.employeeId || "",
+          name: emp.name || "",
+          surname: emp.surname || "",
+          title: emp.title || "",
+          branch: emp.branch || "",
+          dateOfBirth: emp.dateOfBirth
+            ? formatDateForDisplay(emp.dateOfBirth)
+            : "",
+          idNumber: emp.idNumber || emp.passportNumber || "",
+          nationality: emp.nationality || "",
+          gender: emp.gender || "",
+          contactNumber: emp.contactNumber || "",
+          email: emp.email || "",
+          physicalAddress: emp.physicalAddress || "",
+          city: emp.city || "",
+          monthlySalary: emp.monthlySalary || "",
+          zipCode: emp.zipCode || "",
+          disability: emp.hasDisability || false,
+          disabilityType: emp.disabilityDescription || "N/A",
+          jobTitle: emp.positionTitle || "",
+          positionId: emp.positionId || 0,
+          employeeStatus: emp.employmentStatus || "",
+          reportsTo: emp.careerManagerID || "",
+          startDate: emp.startDate || "",
+          profileImage: emp.profileImage || "",
+          initials: getInitials(emp.name, emp.surname),
+        };
+        setEmployeeData(transformed);
+      } catch (error) {
+        console.error("Failed to fetch employee", error);
+        toast.error("Failed to load employee data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEmployee();
+  }, []);
+
+  const handleFileChange = async (
+    e,
+    setEmployee,
+    setUploading,
+    setErrorMessage,
+  ) => {
+    const file = e.target.files[0];
+    if (
+      file &&
+      (file.type === "image/jpeg" ||
+        file.type === "image/jpg" ||
+        file.type === "image/png")
+    ) {
+      try {
+        setUploading(true);
+        setErrorMessage("");
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("upload_preset", "unsigned_preset");
+        formData.append("folder", "samples/ecommerce");
+
+        const response = await axios.post(
+          "https://api.cloudinary.com/v1_1/djmafre5k/image/upload",
+          formData,
+        );
+
+        const imageUrl = response.data.secure_url;
+        // <-- Set profileImage instead of documentPath
+        setEmployee((prev) => ({ ...prev, profileImage: imageUrl }));
+        setUploading(false);
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        setErrorMessage("Error uploading image.");
+        setUploading(false);
+      }
+    } else {
+      setErrorMessage("Only .jpg, .jpeg or .png images are allowed.");
+      setEmployee((prev) => ({ ...prev, profileImage: "" }));
+    }
   };
 
-  setEmployeeData(transformed);
-  setLoading(false);
-}, []);   
+  const onFileChange = async (e) => {
+    await handleFileChange(e, setEmployeeData, setUploading, setUploadError);
+  };
 
   const handleInputChange = (e) => {
-    const { id, value } = e.target;
-    let newValue = value;
+    const { id, value, type, checked } = e.target;
 
-    // Special handling for disability yes/no
-    if (id === "disability") {
-      newValue = value === "yes";
+    if (["dateOfBirth", "idNumber"].includes(id)) {
+      return;
     }
 
-    setEmployeeData((prev) => ({ ...prev, [id]: newValue }));
+    setEmployeeData((prevData) => {
+      const updatedData = {
+        ...prevData,
+        [id]: type === "checkbox" ? checked : value,
+      };
+
+      if (id === "disability") {
+        updatedData.disability = value === "yes";
+        if (value !== "yes") {
+          updatedData.disabilityType = "N/A";
+        }
+      }
+
+      return updatedData;
+    });
+
+    if (formErrors[id]) {
+      setFormErrors((prev) => {
+        const updated = { ...prev };
+        delete updated[id];
+        return updated;
+      });
+    }
+
+    if (loading) {
+      return <div className="emp-loading">Loading employee...</div>;
+    }
   };
 
-  const handleEditSaveClick = () => {
-    if (isEditable) {
-      console.log("Saving employee data:", employeeData);
-      // Add API save call here
+  const handleEditSaveClick = async () => {
+    if (uploading) {
+      toast.warning("Please wait for image upload to complete before saving.");
+      return;
     }
-    setIsEditable(!isEditable);
+
+    if (!isEditable) {
+      setIsEditable(true);
+      return;
+    }
+
+    const validateEmployee = () => {
+      const errors = {};
+
+      if (!employeeData.title) errors.title = "Title is required";
+      if (!employeeData.name?.trim()) errors.name = "First name is required";
+      if (!employeeData.surname?.trim())
+        errors.surname = "Last name is required";
+
+      if (!employeeData.contactNumber?.trim())
+        errors.contactNumber = "Contact number is required";
+
+      if (!employeeData.email?.trim())
+        errors.email = "Email address is required";
+
+      if (!employeeData.physicalAddress?.trim())
+        errors.physicalAddress = "Home address is required";
+
+      if (!employeeData.city?.trim()) errors.city = "City is required";
+
+      if (!employeeData.zipCode?.trim())
+        errors.zipCode = "Postal code is required";
+
+      if (!employeeData.monthlySalary)
+        errors.monthlySalary = "Monthly salary is required";
+
+      if (!employeeData.branch) errors.branch = "Department is required";
+
+      if (!employeeData.employeeStatus)
+        errors.employeeStatus = "Employment status is required";
+
+      if (!employeeData.reportsTo)
+        errors.reportsTo = "Career Manager is required";
+
+      if (employeeData.disability && !employeeData.disabilityType?.trim()) {
+        errors.disabilityType =
+          "Disability description is required when disability is Yes";
+      }
+
+      setFormErrors(errors);
+
+      return Object.keys(errors).length === 0;
+    };
+
+    const confirmed = await showConfirmationToast(
+      "Are you sure you want to save changes?",
+    );
+    if (!confirmed) {
+      setIsEditable(false);
+      return;
+    }
+
+    if (!validateEmployee()) {
+      toast.error("Please correct the highlighted fields.");
+      return;
+    }
+
+    const idNumberTrimmed = employeeData.idNumber.trim();
+
+    const payload = {
+      employeeId: employeeData.employeeId,
+      title: employeeData.title || null,
+      name: employeeData.name || null,
+      surname: employeeData.surname || null,
+      idNumber: employeeData.idNumber,
+      nationality: employeeData.nationality || null,
+      gender: employeeData.gender || null,
+      contactNumber: employeeData.contactNumber || null,
+      taxNumber: employeeData.taxNumber || null,
+      email: employeeData.email || null,
+      physicalAddress: employeeData.physicalAddress || null,
+      city: employeeData.city || null,
+      zipCode: employeeData.zipCode || null,
+      hasDisability: employeeData.disability || false,
+      disabilityDescription:
+        employeeData.disabilityType === "N/A"
+          ? null
+          : employeeData.disabilityType,
+      dateOfBirth: formatDateToYYYYMMDD(employeeData.dateOfBirth),
+      startDate: formatDateToYYYYMMDD(employeeData.startDate),
+      branch: employeeData.branch || "Johannesburg", // map string to enum in backend if needed
+      monthlySalary: Number(employeeData.monthlySalary) || 0,
+      positionId: employeeData.positionId,
+      employmentStatus: employeeData.employeeStatus || "Permanent",
+      careerManagerID: employeeData.reportsTo || null,
+      profileImage: employeeData.profileImage || null,
+    };
+
+    if (employeeData.passportNumber) {
+      payload.passportNumber = employeeData.passportNumber;
+    }
+
+    payload.taxNumber = employeeData.taxNumber || originalTaxNumber;
+
+    try {
+      setLoading(true);
+
+      await editEmployee(payload.employeeId, payload);
+
+      toast.success("Employee updated successfully!");
+      setIsEditable(false);
+
+      setOriginalIdNumber(payload.idNumber);
+      setOriginalTaxNumber(payload.taxNumber);
+      setOriginalDateOfBirth(payload.dateOfBirth);
+    } catch (error) {
+      const response = error.response;
+
+      if (!response) {
+        toast.error("Server not reachable.");
+        return;
+      }
+
+      const { message, errors, type } = response.data;
+
+      setFormErrors({});
+
+      if (message) toast.error(message);
+
+      const mappedErrors = {};
+
+      if (errors) {
+        // If backend returns field-specific errors
+        Object.entries(errors).forEach(([field, msg]) => {
+          if (field === "general") {
+            const lowerMsg = msg.toLowerCase();
+            if (lowerMsg.includes("zip") || lowerMsg.includes("postal")) {
+              mappedErrors.zipCode = msg;
+            } else if (lowerMsg.includes("city")) {
+              mappedErrors.city = msg;
+            } else if (lowerMsg.includes("contact")) {
+              mappedErrors.contactNumber = msg;
+            } else if (lowerMsg.includes("email")) {
+              mappedErrors.email = msg;
+            } else if (lowerMsg.includes("name")) {
+              mappedErrors.name = msg;
+            } else if (lowerMsg.includes("surname")) {
+              mappedErrors.surname = msg;
+            } else if (lowerMsg.includes("address")) {
+              mappedErrors.physicalAddress = msg;
+            } else {
+              // If cannot map, still show toast
+              toast.error(msg);
+            }
+          } else {
+            mappedErrors[field] = msg;
+          }
+        });
+      }
+
+      setFormErrors(mappedErrors);
+
+      if (type === "BusinessRuleException") {
+        toast.error(message);
+      }
+
+      if (type === "NotFoundException") {
+        toast.error("Employee not found.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (loading) return <div>Loading employee profile...</div>;
   if (!employeeData) return <div>No employee data found</div>;
 
-  // The rest of your JSX can remain exactly the same
   return (
     <div className="emp-menu-background">
-      {/* TOP PHOTO SECTION */}
       <div className="emp-edit-employee-top-container">
-        <div className="emp-photo-block">
+        <div
+          className="emp-photo-block"
+          onClick={() => document.getElementById("emp-photo-input").click()}
+        >
           <img
             src={employeeData.profileImage || "/default-profile.png"}
-            alt={`${employeeData.name} ${employeeData.surname}`}
+            alt="Employee"
           />
+          {uploading && (
+            <div className="emp-uploading-overlay">Uploading...</div>
+          )}
         </div>
+        <input
+          type="file"
+          id="emp-photo-input"
+          className="emp-photo-input"
+          onChange={onFileChange}
+        />
+        {uploadError && <div className="emp-error-text">{uploadError}</div>}
+
         <div className="emp-photo-text-container">
           <div className="emp-title">{`${employeeData.name} ${employeeData.surname}`}</div>
           <div className="emp-subtitle">{employeeData.jobTitle}</div>
@@ -164,6 +471,7 @@ useEffect(() => {
                 onChange={handleInputChange}
                 disabled={!isEditable}
               >
+                
                 <option value="">Select Title</option>
                 {titles.map((t) => (
                   <option key={t} value={t}>
@@ -171,7 +479,7 @@ useEffect(() => {
                   </option>
                 ))}
               </select>
-              <div className="emp-error-text">{formErrors.title}</div>
+            
             </div>
 
             <div className="emp-field">
@@ -202,7 +510,7 @@ useEffect(() => {
                 id="nationality"
                 value={employeeData.nationality || ""}
                 onChange={handleInputChange}
-                readOnly={!isEditable}
+                readOnly
               />
             </div>
             <div className="emp-error-text">{formErrors.nationality}</div>
@@ -355,7 +663,7 @@ useEffect(() => {
                 id="monthlySalary"
                 value={employeeData.monthlySalary || ""}
                 onChange={handleInputChange}
-                readOnly
+                readOnly={!isEditable}
               />
               <div className="emp-error-text">{formErrors.monthlySalary}</div>
             </div>
@@ -420,6 +728,7 @@ useEffect(() => {
                 ))}
               </select>
               <div className="emp-error-text">{formErrors.reportsTo}</div>
+              
             </div>
           </div>
         </div>

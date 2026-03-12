@@ -7,6 +7,7 @@ import "./ProjectionCalculator.css";
 import Box from "@mui/material/Box";
 import Slider from "@mui/material/Slider";
 import ProjectionCalculatorHeader from "../../Components/PayrollTools/projectionCalculatorHeader";
+import api from "../../api/api";
 
 const ProjectionCalculator = () => {
     const [employeeDetails, setEmployeeDetails] = useState(null);
@@ -39,7 +40,7 @@ const ProjectionCalculator = () => {
         const email = JSON.parse(localStorage.getItem('currentUser')).email;
         const decodedTokenEmail = jwtDecode(token).sub;
         if (decodedTokenEmail === email) { 
-            axios.get(`${baseUrl}/employee/email/${email}`, {
+            api.get(`/employee/email/${email}`, {
                 headers: { "Authorization": `Bearer ${token}` }
             })
             .then(response => {
@@ -68,7 +69,7 @@ const ProjectionCalculator = () => {
                 VoluntaryContributionFrequency: selectedVoluntaryContributionFrequency
             };
 
-            axios.post("http://localhost:5147/api/pension/projection", pensionProjectionRequestDTO, {
+            api.post("/pension/projection", pensionProjectionRequestDTO, {
                 headers: { "Content-Type": "application/json" }
             })
             .then(response => {

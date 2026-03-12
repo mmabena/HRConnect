@@ -339,5 +339,11 @@ namespace HRConnect.Api.Services
     {
       await EmployeeValidationHelpers.ValidateCareerManagerAsync(_employeeRepo, employeeId, careerManagerId);
     }
+
+     public async Task<EmployeeDto?> GetEmployeeByEmailAsync(string employeeEmail)
+    {
+      Employee? employee = await _employeeRepo.GetEmployeeByEmailAsync(employeeEmail);
+      return employee?.ToEmployeeDto();
+    }
   }
 }

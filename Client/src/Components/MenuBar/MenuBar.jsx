@@ -19,10 +19,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   const [activeIndex, setActiveIndex] = useState(null);
 
   //displaying user initials
-  const displayName =
-  currentUser?.username ||
-  currentUser?.email ||
-  "User";
+  const displayName = currentUser?.username || currentUser?.email || "User";
   const [canProjectPension, setCanProjectPension] = useState(false);
 
   const initials = displayName
@@ -99,7 +96,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
       if (decodedTokenEmail == email) {
         try {
           api
-            .get("/employee", {
+            .get(`/employee/email/${email}`, {
               headers: {
                 Authorization: `Bearer ${token}`,
               },
@@ -108,8 +105,11 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
               if (response.status === 200) {
                 const employementStatus = response.data.employmentStatus;
                 const employeeAge = response.data.dateOfBirth;
-                if (employementStatus === 0 && calculateAge(employeeAge) < 65) {
+                
+                if (employementStatus === "Permanent" && calculateAge(employeeAge) < 65) {
                   setCanProjectPension(true);
+                  console.log("Employee date of birth:", employeeAge);
+                  console.log("Employment status:", employementStatus);
                 }
               } else {
                 console.error("Unexpeted status:", response.status);
@@ -210,6 +210,9 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   };
 
   const menuPaths = {
+    0: [
+      "/personal",
+    ],
     1: [
       "/employeeList",
       "/addEmployee",

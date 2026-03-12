@@ -60,7 +60,6 @@ function App() {
 
         const mergedUser = {
           ...parsedUser,
-          ...employee,
           username: `${employee.name} ${employee.surname}`,
           jobTitle: employee.positionTitle,
           employmentStatus: employee.employmentStatus,

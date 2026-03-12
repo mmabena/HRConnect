@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import "../../Components/EditEmployee.css";
 import axios from "axios";
-
 import {
   editEmployee,
   formatDateForDisplay,
@@ -199,7 +198,7 @@ const EditEmployee = () => {
     setErrorMessage,
   ) => {
     const file = e.target.files[0];
-    if (file && (file.type === "image/jpeg" || file.type === "image/jpg")) {
+    if (file && (file.type === "image/jpeg" || file.type === "image/jpg"|| file.type ==="image/png")) {
       try {
         setUploading(true);
         setErrorMessage("");
@@ -223,7 +222,7 @@ const EditEmployee = () => {
         setUploading(false);
       }
     } else {
-      setErrorMessage("Only .jpg or .jpeg images are allowed.");
+      setErrorMessage("Only .jpg, .jpeg or .png images are allowed.");
       setEmployee((prev) => ({ ...prev, profileImage: "" }));
     }
   };
@@ -500,7 +499,7 @@ const EditEmployee = () => {
         <input
           type="file"
           id="emp-photo-input"
-          style={{ display: "none" }}
+          className="emp-photo-input"
           onChange={onFileChange}
         />
         {uploadError && <div className="emp-error-text">{uploadError}</div>}
@@ -563,6 +562,7 @@ const EditEmployee = () => {
                 onChange={handleInputChange}
                 disabled={!isEditable}
               >
+                
                 <option value="">Select Title</option>
                 {titles.map((t) => (
                   <option key={t} value={t}>
@@ -570,7 +570,7 @@ const EditEmployee = () => {
                   </option>
                 ))}
               </select>
-              <div className="emp-error-text">{formErrors.title}</div>
+            
             </div>
 
             <div className="emp-field">
@@ -601,7 +601,7 @@ const EditEmployee = () => {
                 id="nationality"
                 value={employeeData.nationality || ""}
                 onChange={handleInputChange}
-                readOnly={!isEditable}
+                readOnly
               />
             </div>
             <div className="emp-error-text">{formErrors.nationality}</div>
@@ -819,6 +819,7 @@ const EditEmployee = () => {
                 ))}
               </select>
               <div className="emp-error-text">{formErrors.reportsTo}</div>
+              
             </div>
           </div>
         </div>
