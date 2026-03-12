@@ -66,6 +66,31 @@
   background-color: #758155;
 }
 
+.emp-field-dropdown {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.emp-field-dropdown select {
+  width: 100%;
+  padding-right: 35px;
+  -webkit-appearance: none; 
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.emp-field-dropdown .empdropdown-icon {
+  position: absolute;
+  right: 10px;
+  pointer-events: none;
+  width: 20px;
+  height: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
 .emp-edit-employee-form-container {
   position: absolute;
   top: 180px;
@@ -172,6 +197,7 @@
   width: 100%;
   min-height: 70px;
   box-sizing: border-box;
+  position: relative;
 }
 
 .emp-error-text {
@@ -196,10 +222,8 @@
   margin: 0;
   padding-left: 10px;
   height: 30px;
-  /* fixed height for label to help layout */
   display: flex;
   align-items: center;
-  /* vertical center the label text */
   user-select: none;
 }
 
@@ -218,17 +242,22 @@
 }
 
 .emp-field-input {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-self: stretch;
+  border: 2px solid var(--baby-blue);
+  background: var(--white);
+  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25) inset;
   width: 100%;
   /* Stretch to fill parent .field */
   height: 40px;
   border-radius: 5px;
-  border: 2px solid #c7d9e5;
   padding: 5px 10px;
-  background-color: #ffffff;
   box-sizing: border-box;
   font-family: "Anek Bangla", sans-serif;
   font-weight: 400;
-  font-size: 14px;
+  font-size: 16px;
   outline-offset: 2px;
 }
 
@@ -241,8 +270,6 @@
   justify-content: flex-start;
   
 }
-
-
 
 /* Image block */
 .emp-photo-block {
@@ -274,6 +301,9 @@
   font-weight: bold;
   color: #333;
 }
+.emp-photo-input{
+ display: none;
+}
 
 /* Image styling */
 .emp-photo-block img {
@@ -300,7 +330,6 @@
 .emp-edit-employee-heading-row.side-tabs {
   display: flex;
   flex-direction: row; /* stack tabs vertically */
-  margin-left: 10px;
   margin-top: 40px ;
   font-weight: 400px;
 }
@@ -353,16 +382,16 @@
 
 /* Active tab color */
 .emp-heading-item.selected {
-  background-color: #c7d9e5;
-  color: #01a19a;
+  background-color: transparent;
+  color: var(--success-text-color);
 }
 
 .emp-heading-item {
-  cursor: pointer;
   font-family: "Anek Bangla";
   font-weight: 700;
   font-size: 20px;
-  color: #002d40;
+  cursor: pointer;
+  color: var(--text-primary);
   padding: 5px 10px;
   border-radius: 4px;
   transition: all 0.2s;
@@ -371,11 +400,6 @@
 
 .emp-heading-item:first-child {
   color: #638549;
-}
-
-.emp-heading-item.selected {
-  background-color: #c7d9e5;
-  color: #01a19a;
 }
 
 .emp-toast-confirm-container {

@@ -2,17 +2,17 @@ import React, { useState, useEffect } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import SignIn from "./Components/SignIn/SignIn";
 import ForgotPassword from "./Components/ForgotPassword/ForgotPassword";
-import AddEmployee from "./Components/AddEmployee";
-import EditEmployee from "./Components/EditEmployee";
+import AddEmployee from "./Components/EmployeeManagement/AddEmployee";
+import EditEmployee from "./Components/EmployeeManagement/EditEmployee";
 import MenuBar from "./Components/MenuBar";
 import AddCompany from "./addCompany";
-import EditCompany from "./Components/companyManagement/editCompany";
+import EditCompany from "./Components/CompanyManagement/editCompany";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 import "./MenuBar.css";
-import EmployeeList from "./Components/EmployeeList";
-import AddEmployeeModal from "./Components/AddEmployeeModal";
+import EmployeeList from "./Pages/EmployeeManagement/EmployeeList";
+import AddEmployeeModal from "./Components/EmployeeManagement/AddEmployeeModal";
 import UserManagement from "./Components/UserManagement";
 import PositionManagement from "./Components/PositionManagement";
 import ViewPositionManagement from "./Components/ViewPositionManagement";
@@ -62,13 +62,13 @@ function App() {
   };
 
   // FIXED: Use backend user object directly
- const handleLoginSuccess = (userWithToken) => {
-  setCurrentUser(userWithToken);
-   localStorage.setItem("currentUser", JSON.stringify(userWithToken));
-   console.log("App currentUser:", userWithToken);
-  setIsLoggedIn(true);
-  navigate("/dashboard");
-};
+  const handleLoginSuccess = (userWithToken) => {
+    setCurrentUser(userWithToken);
+    localStorage.setItem("currentUser", JSON.stringify(userWithToken));
+    console.log("App currentUser:", userWithToken);
+    setIsLoggedIn(true);
+    navigate("/dashboard");
+  };
 
   if (!isLoggedIn) {
     return (
@@ -105,26 +105,49 @@ function App() {
           <Route path="/addEmployee" element={<AddEmployee />} />
           <Route path="/addEmployeeModal" element={<AddEmployeeModal />} />
           <Route path="/editEmployee" element={<EditEmployee />} />
-          <Route path="/editEmployee/:employeeNumber" element={<EditEmployee />} />
+          <Route
+            path="/editEmployee/:employeeNumber"
+            element={<EditEmployee />}
+          />
 
           <Route path="/addCompany" element={<AddCompany />} />
           <Route path="/companyManagement" element={<CompanyManagement />} />
           <Route path="/editCompany/:id" element={<EditCompany />} />
 
           <Route path="/employeeList" element={<EmployeeList />} />
-          <Route path="/company-contribution" element={<CompanyContribution />} />
-          <Route path="/userManagement" element={<UserManagement />}/>
+          <Route
+            path="/company-contribution"
+            element={<CompanyContribution />}
+          />
+          <Route path="/userManagement" element={<UserManagement />} />
 
           <Route path="/taxTableUpload" element={<TaxTableUpload />} />
           <Route path="/positionManagement" element={<PositionManagement />} />
-          <Route path="/addPositionManagement" element={<AddPositionManagement />} />
-          <Route path="/editPositionManagement/:id" element={<EditPositionManagement />} />
-          <Route path="/viewPositionManagement/:id" element={<ViewPositionManagement />} />
+          <Route
+            path="/addPositionManagement"
+            element={<AddPositionManagement />}
+          />
+          <Route
+            path="/editPositionManagement/:id"
+            element={<EditPositionManagement />}
+          />
+          <Route
+            path="/viewPositionManagement/:id"
+            element={<ViewPositionManagement />}
+          />
           <Route path="/taxtablemanagement" element={<TaxTableManagement />} />
-          <Route path="/profile" element={<Profile currentUser={currentUser} />} />
-          <Route path="/compensationPlanning" element={<CompensationPlanning />} />
-          <Route path="/changePassword" element={<ChangePassword currentUser={currentUser} />} />
-        
+          <Route
+            path="/profile"
+            element={<Profile currentUser={currentUser} />}
+          />
+          <Route
+            path="/compensationPlanning"
+            element={<CompensationPlanning />}
+          />
+          <Route
+            path="/changePassword"
+            element={<ChangePassword currentUser={currentUser} />}
+          />
         </Routes>
       </div>
     </div>

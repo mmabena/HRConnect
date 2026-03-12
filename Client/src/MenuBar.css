@@ -23,7 +23,7 @@
   flex-direction: column;
   align-items: center;
   gap: 51px;
-  background-color: #002D40;
+  background-color: var(--primary-color);
   color: white;
   box-sizing: border-box;
   overflow-y: auto;
@@ -424,7 +424,7 @@
 
 /* Active tab color */
 .heading-item.selected {
-  color: #01A19A;
+  color: var(--success-text-color);
 }
 
 .toast-confirm-container {
@@ -1237,14 +1237,15 @@
 
 /*Employee List css------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 .wrapper-container {
+  position: relative;
   display: flex;
+  align-items: center;
   flex-direction: column;
   gap: 5px;
   width: 1441px;
   box-sizing: border-box;
-  padding-left: 20px;
+  padding-left: 50px;
   overflow: visible;
-  position: relative;
 }
 
 /* ===== MODAL OVERLAY ===== */
@@ -1355,18 +1356,29 @@
 }
 
 .add-employee-button {
-  background-color: #9AAC60;
-  color: white;
-  width: 200px;
-  padding: 10px 50px; /* thinner vertically, wider horizontally */
+  background-color: var(--success-text-color);
+  color: var(--white);
+  height: 47px;
+  width: 150px;
+  display: flex;
+  padding: 5px 10px;
+
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
   border: none;
   border-radius: 8px;
-  font-size: 16px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  white-space: nowrap; /* Prevent text wrapping */
-}
+
+  text-align: center;
+  font-family: "Anek Bangla";
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+  letter-spacing: 0.4px;
+  }
 
 .heading-icon {
   width: 31px;
@@ -1375,6 +1387,7 @@
 }
 
 .employee-list-heading-row {
+  cursor: pointer;
   display: flex;
   align-items: flex-start;
   gap: 45px;
@@ -1392,6 +1405,7 @@
 }
 
 .heading-item {
+  font-size: 20px;
   padding: 0.5rem 1rem;
   background-color: transparent;
   border-radius: 4px;
@@ -1412,18 +1426,23 @@
 
 /* Label: "Filter" */
 .filter-label {
-  font-weight: 500;
+  position: relative;
+  right: 160%;
   white-space: nowrap;
-  /* Prevent line break */
+    /* Prevent line break */
   font-family: 'Anek Bangla', sans-serif;
   font-weight: 700;
-  font-size: 16px;
-  line-height: 100%;
-  letter-spacing: 2%;
-  color: #002D40;
+  color: var(--primary-color);
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+  letter-spacing: 0.4px;
 }
 
 .search-bar-container {
+  position: relative;
+   right: 145%;
   display: flex;
   flex-direction: row;
   width: 360px;
@@ -1437,8 +1456,8 @@
 }
 
 .search-icon {
-  width: 48px;
-  height: 48px;
+  width: 24px;
+  height: 24px;
   object-fit: contain;
 }
 
@@ -1470,13 +1489,12 @@
   display: flex;
   flex-direction: column;
   width: 1461px;
-  height: 615px;
+  height: 570px;
   padding: 10px;
   gap: 10px;
   box-sizing: border-box;
 
 }
-
 
 .table-grid {
   display: grid;
@@ -1494,8 +1512,8 @@
 
 /* Header cell styling */
 .table-header {
-  background-color: #006088;
-  color: white;
+  background-color: var(--primary-color);
+  color: var(--white);
   font-family: 'Anek Bangla', sans-serif;
   font-weight: 700;
   font-size: 16px;
@@ -1507,24 +1525,25 @@
   /* Left align text */
   height: 59px;
   text-align: left;
-  padding-left: 12px;
+  padding: 12px;
 }
 
 
 /* Regular cell styling */
 .table-cell {
-  background-color: white;
+  line-height: 15px; /* 93.75% */
+  letter-spacing: -0.43px;
+  background-color: var(--white);
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  font-size: 14px;
+  font-size: 16px;
+  font-weight: 400;
   font-family: 'Anek Bangla', sans-serif;
-  color: #002D40;
-  text-align: left;
+  color: var(--text-primary);
+  text-align: center;
   padding-left: 8px;
-
-
-
+  
 }
 
 .name-surname-cell {
@@ -1558,12 +1577,13 @@
 }
 
 .name-text {
-  font-family: 'Anek Bangla', sans-serif;
-  font-weight: 600;
   font-size: 16px;
-  line-height: 15px;
+  font-style: normal;
+  font-weight: 500;
   letter-spacing: -0.43px;
-  color: #002D40;
+  font-family: 'Anek Bangla', sans-serif;
+  line-height: 15px;
+  color: var(--text-primary);
 }
 
 .view-btn {
@@ -1573,9 +1593,15 @@
 }
 
 .edit-btn {
-  color: #006088;
+  text-align: center;
+  font-family: "Anek Bangla";
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  letter-spacing: 0.32px;
+  color: var(--text-primary);
   text-decoration: none;
-  font-weight: 600;
 }
 
 .view-edit-cell {
@@ -1584,7 +1610,6 @@
   font-size: 16px;
   line-height: 15px;
   letter-spacing: 0;
-  color: #006088;
   display: flex;
   align-items: center;
   justify-content: center;

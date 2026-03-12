@@ -374,7 +374,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
           )}
           
           {/* Document Management */}
-          {permissions.isAdmin && (
+          {/* {permissions.isAdmin && (
             <li>
               <div className="menu-item-wrapper">
                 <img
@@ -385,7 +385,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                 <span className="menu-heading">Document Management</span>
               </div>
             </li>
-          )}
+          )} */}
 
           {/* Admin tools (SuperUser only) */}
           {permissions.isAdmin && (
@@ -397,7 +397,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                   className="menu-icon"
                 />
                 <span className="menu-heading">
-                  Admin Management tools
+                  Admin Management 
                   <span className="menu-dropdown">{adminOpen ? "▲" : "▼"}</span>
                 </span>
               </div>
