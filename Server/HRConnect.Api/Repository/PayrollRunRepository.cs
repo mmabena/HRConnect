@@ -3,10 +3,8 @@ namespace HRConnect.Api.Repository
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Data;
   using HRConnect.Api.Models.Payroll;
-  //using HRConnect.Api.Models.PayrollDeduction;
+  using HRConnect.Api.Models.PayrollDeduction;
   using Microsoft.EntityFrameworkCore;
-  using HRConnect.Api.Models.PayrollContribution;
-  using HRConnect.Api.Models;
 
   public class PayrollRunRepository : IPayrollRunRepository
   {
@@ -24,11 +22,11 @@ namespace HRConnect.Api.Repository
       var pensionRecords = await _context.Set<PensionDeduction>()
         .Where(r => r.PayrollRunId == runId)
       .ToListAsync();
-      var lunchRecords = await _context.Set<LunchDeduction>()
+      var medicalAidRecords = await _context.Set<MedicalAidDeduction>()
         .Where(r => r.PayrollRunId == runId)
       .ToListAsync();
       payrollRun.Records = pensionRecords.Cast<PayrollRecord>()
-                          .Concat(pensionRecords.Cast<PayrollRecord>()).ToList();
+                          .Concat(medicalAidRecords.Cast<PayrollRecord>()).ToList();
       return payrollRun;
     }
     public async Task<IEnumerable<PayrollRun>> GetAllPayruns()
@@ -62,7 +60,7 @@ namespace HRConnect.Api.Repository
 
       // var payrun = await _context.PayrollRuns.FirstOrDefaultAsync(
       //   p => p.PeriodDate.Month == dateTime.Month);
-      var payrun = await _context.PayrollRuns.Where(r => !r.IsFinalised)
+      var payrun = await _context.PayrollRuns.Where(r => !r.IsLocked)
         .OrderByDescending(r => r.PayrollRunId)
         .FirstOrDefaultAsync();
       if (payrun != null)

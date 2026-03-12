@@ -55,10 +55,9 @@ namespace HRConnect.Api.Repository
       .FirstOrDefaultAsync();
     }
 
-    //This can be replaced
-    public async Task<PayrollPeriod?> GetCurrentActivePayrollPeriod()
+    public async Task<PayrollPeriod?> GetLastPeriodForRollOver()
     {
-      return await _context.PayrollPeriods.Include(p => p.Runs).Where(p => !p.IsLocked)
+      return await _context.PayrollPeriods.Include(p => p.Runs).AsNoTracking().Where(p => !p.IsLocked)
       .FirstOrDefaultAsync();
     }
   }

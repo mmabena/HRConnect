@@ -4,7 +4,7 @@ namespace HRConnect.Api.Services
   using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.DTOs.Payroll;
   using HRConnect.Api.Mappers.Payroll;
-  //using HRConnect.Api.Utils.Payroll;
+  using HRConnect.Api.Utils.Payroll;
 
   public class PayrollRunService : IPayrollRunService
   {
@@ -15,6 +15,7 @@ namespace HRConnect.Api.Services
       _payrollRunRepo = payrollRunRepo;
       _payrollPeriodService = payrollPeriodService;
     }
+
     public async Task<PayrollRunDto?> GetPayrunByIdAsync(int id)
     {
       var payrun = await _payrollRunRepo.GetPayrunByIdAsync(id);
@@ -38,7 +39,7 @@ namespace HRConnect.Api.Services
       DateTime currentMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
       Console.WriteLine($"Creating payroll run for month: {currentMonth}");
       //maps current financial month to 1-12
-      //payrollRun.IsLocked = false;
+      payrollRun.IsLocked = false;
       payrollRun.IsFinalised = false;
       payrollRun.PeriodDate = currentMonth;
 
@@ -68,7 +69,7 @@ namespace HRConnect.Api.Services
       if (payperiod == null)
         throw new InvalidDataException("No payroll period found or it is locked");
 
-      var currentPayRun = payperiod.Runs.Where(r => !r.IsFinalised).OrderByDescending(r => r.PayrollRunId).FirstOrDefault();
+      var currentPayRun = payperiod.Runs.Where(r => !r.IsLocked).OrderByDescending(r => r.PayrollRunId).FirstOrDefault();
 
       if (currentPayRun == null)
         throw new InvalidDataException("No current payroll run found or it is locked");

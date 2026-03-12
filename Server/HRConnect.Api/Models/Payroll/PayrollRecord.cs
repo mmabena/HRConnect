@@ -1,11 +1,11 @@
+
 namespace HRConnect.Api.Models.Payroll
 {
-  //using System.ComponentModel.DataAnnotations;
   using System.Text.Json.Serialization;
 
-  public class PayrollRecord
+  public abstract class PayrollRecord
   {
-    //[Key]
+    // public int PayrollRecordId { get; set; }
     public int Id { get; set; }
     public int PayrollRunId { get; set; }
     [JsonIgnore]

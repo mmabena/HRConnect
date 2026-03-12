@@ -45,7 +45,7 @@ namespace HRConnect.Api.Utils.Payroll
         // Console.WriteLine($"=======>CREATED A PAYROLL PERIOD<=======");
         // await _payrollPeriodService.CreatePeriodAsync(payperiod);
       }
-      int run = 1;// GetPayrunNumber(DateTime.Now);
+      int run = 1;//GetPayrunNumber(DateTime.Now);
       //Do the same thing for the period
       var runExists = await _payrollRunRepo.GetPayrunByIdAsync(run);
       if (runExists == null)
@@ -54,14 +54,14 @@ namespace HRConnect.Api.Utils.Payroll
         {
           PeriodId = payperiod.PayrollPeriodId,
           PayrollRunId = run,//GetPayrunNumber(DateTime.Now),
-          IsFinalised = false,
+          IsLocked = false,
           Period = payperiod,
           PeriodDate = DateTime.Now,
           Records = new List<PayrollRecord>()
         };
         payperiod.Runs.Add(newRun);
 
-        await _payrollPeriodService.UpdateAsync(payperiod);
+        // await _payrollPeriodService.UpdateAsync(payperiod);
         await _payrollRunRepo.CreatePayrollRunAsync(newRun);
 
         Console.WriteLine($"=======>CREATED A PAYROLL RUN<=======");

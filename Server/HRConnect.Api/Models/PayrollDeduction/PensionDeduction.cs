@@ -1,4 +1,4 @@
-namespace HRConnect.Api.Models.PayrollContribution
+namespace HRConnect.Api.Models.PayrollDeduction
 {
   using System.ComponentModel.DataAnnotations.Schema;
   using HRConnect.Api.Models.Payroll;

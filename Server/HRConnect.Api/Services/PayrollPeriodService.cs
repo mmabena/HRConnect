@@ -1,7 +1,7 @@
 namespace HRConnect.Api.Services
 {
   using HRConnect.Api.Interfaces;
-  //using HRConnect.Api.Utils.Payroll;
+  using HRConnect.Api.Utils.Payroll;
   using HRConnect.Api.Mappers.Payroll;
   using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.DTOs.Payroll;
@@ -36,8 +36,8 @@ namespace HRConnect.Api.Services
       //Get the current payroll period
       (DateTime start, DateTime end) = PayrollUtil.GetCurrectFinancialPeriod();
       // payrollPeriod.PayrollPeriodId = ();
-      // payrollPeriod.StartDate = start;
-      // payrollPeriod.EndDate = end;
+      payrollPeriod.StartDate = start;
+      payrollPeriod.EndDate = end;
       payrollPeriod.IsLocked = false;
       payrollPeriod.IsClosed = false;
       payrollPeriod.Runs = new List<PayrollRun>();
