@@ -59,7 +59,7 @@ namespace HRConnect.Api.Services
       return payrun;
     }
 
-    public async Task AddRecordToCurrentRunAsync(PayrollRecord payrollRecord)
+    public async Task AddRecordToCurrentRunAsync(PayrollRecord payrollRecord, string employeeId)
     {
       // var currentRun = await _payrollRunRepo.GetCurrentRunAsync();
       // if (currentRun == null)
@@ -69,16 +69,15 @@ namespace HRConnect.Api.Services
       if (payperiod == null)
         throw new InvalidDataException("No payroll period found or it is locked");
 
-      var currentPayRun = payperiod.Runs.Where(r => !r.IsLocked).OrderByDescending(r => r.PayrollRunId).FirstOrDefault();
+      var currentPayRun = payperiod.Runs.Where(r => !r.IsLocked).OrderByDescending(r => r.PayrollRunNumber).FirstOrDefault();
 
       if (currentPayRun == null)
         throw new InvalidDataException("No current payroll run found or it is locked");
 
-      Console.WriteLine($"!!!!!-+++++++++--------Adding record to current run with ID {currentPayRun.PayrollRunId}");
-
-      payrollRecord.PayrollRunId = currentPayRun.PayrollRunId;
-
-      Console.WriteLine($"!!!!!-+++++++++-------- record ID {payrollRecord.PayrollRunId}");
+      Console.WriteLine($"!!!!!-+++++++++--------Adding record to current run with ID {currentPayRun.PayrollRunNumber}");
+      payrollRecord.PayrollRun = currentPayRun; //shoule have current payrollRunNumber
+      payrollRecord.EmployeeId = employeeId;
+      Console.WriteLine($"!!!!!-+++++++++-------- record ID {payrollRecord.PayrollRun.PayrollRunNumber}");
       currentPayRun.Records.Add(payrollRecord);
       //save changes to db
       await _payrollRunRepo.UpdateRunAsync(currentPayRun);
@@ -88,7 +87,7 @@ namespace HRConnect.Api.Services
       await _payrollRunRepo.UpdateRunAsync(payrollRun);
     }
 
-    public async Task<PayrollRun> GetAllPayRecordsFromPayRunAsync(int payrollRunId)
+    public async Task<PayrollRun> GetAllPayRecordsFromPayRunAsync(int payrollRunNumber)
     {
 
       var currentPeriod = await _payrollPeriodService.GetLastPeriodAsync();
@@ -96,7 +95,7 @@ namespace HRConnect.Api.Services
         throw new InvalidDataException("No payroll period found");
 
       var run = currentPeriod.Runs
-             .FirstOrDefault(r => r.PayrollRunId == payrollRunId);
+             .FirstOrDefault(r => r.PayrollRunNumber == payrollRunNumber);
       if (run == null)
         throw new InvalidDataException("No payroll run found");
 

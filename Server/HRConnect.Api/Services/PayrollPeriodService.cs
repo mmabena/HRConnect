@@ -53,7 +53,8 @@ namespace HRConnect.Api.Services
     }
     public async Task<PayrollPeriod?> GetCurrentActivePayrollPeriod()
     {
-      return await _payrollPeriodRepository.GetCurrentActivePayrollPeriod();
+      // return await _payrollPeriodRepository.GetCurrentActivePayrollPeriod();
+      throw new NotImplementedException();
     }
   }
 }

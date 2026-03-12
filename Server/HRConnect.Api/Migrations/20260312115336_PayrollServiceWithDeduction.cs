@@ -6,11 +6,14 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace HRConnect.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class PayrollService : Migration
+    public partial class PayrollServiceWithDeduction : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateSequence(
+                name: "PayrollRecordSequence");
+
             migrationBuilder.CreateTable(
                 name: "PayrollPeriods",
                 columns: table => new
@@ -28,52 +31,6 @@ namespace HRConnect.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PayrollRuns",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    PayrollRunId = table.Column<int>(type: "int", nullable: false),
-                    PeriodId = table.Column<int>(type: "int", nullable: false),
-                    PeriodDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsFinalised = table.Column<bool>(type: "bit", nullable: false),
-                    IsLocked = table.Column<bool>(type: "bit", nullable: false),
-                    FinalisedDate = table.Column<DateTime>(type: "datetime2", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PayrollRuns", x => x.Id);
-                    table.UniqueConstraint("AK_PayrollRuns_PayrollRunId", x => x.PayrollRunId);
-                    table.ForeignKey(
-                        name: "FK_PayrollRuns_PayrollPeriods_PeriodId",
-                        column: x => x.PeriodId,
-                        principalTable: "PayrollPeriods",
-                        principalColumn: "PayrollPeriodId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "PayrollRecords",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    PayrollRunId = table.Column<int>(type: "int", nullable: false),
-                    IsLocked = table.Column<bool>(type: "bit", nullable: false),
-                    EmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PayrollRecords", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_PayrollRecords_PayrollRuns_PayrollRunId",
-                        column: x => x.PayrollRunId,
-                        principalTable: "PayrollRuns",
-                        principalColumn: "PayrollRunId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "TestEntities",
                 columns: table => new
                 {
@@ -85,11 +42,29 @@ namespace HRConnect.Api.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_TestEntities", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PayrollRuns",
+                columns: table => new
+                {
+                    PayrollRunId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PayrollRunNumber = table.Column<int>(type: "int", nullable: false),
+                    PeriodId = table.Column<int>(type: "int", nullable: false),
+                    PeriodDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsFinalised = table.Column<bool>(type: "bit", nullable: false),
+                    IsLocked = table.Column<bool>(type: "bit", nullable: false),
+                    FinalisedDate = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PayrollRuns", x => x.PayrollRunId);
                     table.ForeignKey(
-                        name: "FK_TestEntities_PayrollRuns_PayrollRunId",
-                        column: x => x.PayrollRunId,
-                        principalTable: "PayrollRuns",
-                        principalColumn: "PayrollRunId",
+                        name: "FK_PayrollRuns_PayrollPeriods_PeriodId",
+                        column: x => x.PeriodId,
+                        principalTable: "PayrollPeriods",
+                        principalColumn: "PayrollPeriodId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -97,27 +72,51 @@ namespace HRConnect.Api.Migrations
                 name: "MedicalAidDeductions",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false, defaultValueSql: "NEXT VALUE FOR [PayrollRecordSequence]"),
+                    PayrollRunId = table.Column<int>(type: "int", nullable: false),
+                    IsLocked = table.Column<bool>(type: "bit", nullable: false),
+                    EmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MedicalAidDeductionId = table.Column<int>(type: "int", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Surname = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Branch = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     MedicalOptionId = table.Column<int>(type: "int", nullable: false),
                     MedicalOptionCategoryId = table.Column<int>(type: "int", nullable: false),
                     EmployeeStartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    PrincipalPremium = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
-                    SpousePremium = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
-                    ChildPremium = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
                     TotalDependentsPremium = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
                     EffectiveDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     FinalisedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false)
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    PrincipalCount = table.Column<int>(type: "int", nullable: false),
+                    AdultCount = table.Column<int>(type: "int", nullable: false),
+                    ChildrenCount = table.Column<int>(type: "int", nullable: false),
+                    PrincipalPremium = table.Column<decimal>(type: "decimal(15,2)", nullable: false),
+                    SpousePremium = table.Column<decimal>(type: "decimal(15,2)", nullable: true),
+                    ChildPremium = table.Column<decimal>(type: "decimal(15,2)", nullable: true),
+                    TotalDeductionAmount = table.Column<decimal>(type: "decimal(15,2)", nullable: false),
+                    Salary = table.Column<decimal>(type: "decimal(15,2)", nullable: false),
+                    MedicalCategoryId = table.Column<int>(type: "int", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_MedicalAidDeductions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_MedicalAidDeductions_PayrollRecords_Id",
-                        column: x => x.Id,
-                        principalTable: "PayrollRecords",
-                        principalColumn: "Id",
+                        name: "FK_MedicalAidDeductions_MedicalOptionCategories_MedicalCategoryId",
+                        column: x => x.MedicalCategoryId,
+                        principalTable: "MedicalOptionCategories",
+                        principalColumn: "MedicalOptionCategoryId");
+                    table.ForeignKey(
+                        name: "FK_MedicalAidDeductions_MedicalOptions_MedicalOptionId",
+                        column: x => x.MedicalOptionId,
+                        principalTable: "MedicalOptions",
+                        principalColumn: "MedicalOptionId");
+                    table.ForeignKey(
+                        name: "FK_MedicalAidDeductions_PayrollRuns_PayrollRunId",
+                        column: x => x.PayrollRunId,
+                        principalTable: "PayrollRuns",
+                        principalColumn: "PayrollRunId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -125,7 +124,11 @@ namespace HRConnect.Api.Migrations
                 name: "PensionDeductions",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false, defaultValueSql: "NEXT VALUE FOR [PayrollRecordSequence]"),
+                    PayrollRunId = table.Column<int>(type: "int", nullable: false),
+                    IsLocked = table.Column<bool>(type: "bit", nullable: false),
+                    EmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PeriodId = table.Column<int>(type: "int", nullable: false),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DateJoinedCompany = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -145,27 +148,36 @@ namespace HRConnect.Api.Migrations
                 {
                     table.PrimaryKey("PK_PensionDeductions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PensionDeductions_PayrollRecords_Id",
-                        column: x => x.Id,
-                        principalTable: "PayrollRecords",
-                        principalColumn: "Id",
+                        name: "FK_PensionDeductions_PayrollRuns_PayrollRunId",
+                        column: x => x.PayrollRunId,
+                        principalTable: "PayrollRuns",
+                        principalColumn: "PayrollRunId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_PayrollRecords_PayrollRunId",
-                table: "PayrollRecords",
+                name: "IX_MedicalAidDeductions_MedicalCategoryId",
+                table: "MedicalAidDeductions",
+                column: "MedicalCategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MedicalAidDeductions_MedicalOptionId",
+                table: "MedicalAidDeductions",
+                column: "MedicalOptionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MedicalAidDeductions_PayrollRunId",
+                table: "MedicalAidDeductions",
                 column: "PayrollRunId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PayrollRuns_PeriodId_PayrollRunId",
+                name: "IX_PayrollRuns_PeriodId",
                 table: "PayrollRuns",
-                columns: new[] { "PeriodId", "PayrollRunId" },
-                unique: true);
+                column: "PeriodId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TestEntities_PayrollRunId",
-                table: "TestEntities",
+                name: "IX_PensionDeductions_PayrollRunId",
+                table: "PensionDeductions",
                 column: "PayrollRunId");
         }
 
@@ -182,13 +194,13 @@ namespace HRConnect.Api.Migrations
                 name: "TestEntities");
 
             migrationBuilder.DropTable(
-                name: "PayrollRecords");
-
-            migrationBuilder.DropTable(
                 name: "PayrollRuns");
 
             migrationBuilder.DropTable(
                 name: "PayrollPeriods");
+
+            migrationBuilder.DropSequence(
+                name: "PayrollRecordSequence");
         }
     }
 }

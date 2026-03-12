@@ -16,18 +16,19 @@ namespace HRConnect.Api.Repository
 
     public async Task<PayrollRun> GetAllPayRecordsFromPayRun(PayrollRun payrollRun)
     {
-      var runId = payrollRun.PayrollRunId;
+      var runId = payrollRun.PayrollRunNumber;
 
-      //Get all pension record from current run
-      var pensionRecords = await _context.Set<PensionDeduction>()
-        .Where(r => r.PayrollRunId == runId)
-      .ToListAsync();
-      var medicalAidRecords = await _context.Set<MedicalAidDeduction>()
-        .Where(r => r.PayrollRunId == runId)
-      .ToListAsync();
-      payrollRun.Records = pensionRecords.Cast<PayrollRecord>()
-                          .Concat(medicalAidRecords.Cast<PayrollRecord>()).ToList();
-      return payrollRun;
+      // //Get all pension record from current run
+      // var pensionRecords = await _context.Set<PensionDeduction>()
+      //   .Where(r => r.PayrollRunId == runId)
+      // .ToListAsync();
+      // var medicalAidRecords = await _context.Set<MedicalAidDeduction>()
+      //   .Where(r => r.PayrollRunId == runId)
+      // .ToListAsync();
+      // payrollRun.Records = pensionRecords.Cast<PayrollRecord>()
+      //                     .Concat(medicalAidRecords.Cast<PayrollRecord>()).ToList();
+      throw new NotImplementedException();
+      // return payrollRun;
     }
     public async Task<IEnumerable<PayrollRun>> GetAllPayruns()
     {
@@ -35,7 +36,7 @@ namespace HRConnect.Api.Repository
     }
     public async Task<PayrollRun?> GetPayrunByIdAsync(int id)
     {
-      var payrun = await _context.PayrollRuns.FirstOrDefaultAsync(p => p.PayrollRunId == id);
+      var payrun = await _context.PayrollRuns.Where(r => !r.IsLocked).FirstOrDefaultAsync(p => p.PayrollRunNumber == id);
       return payrun;
     }
     /// CONSIDER CHANGING THE RETURN TYPE OF THIS TASK
@@ -61,10 +62,10 @@ namespace HRConnect.Api.Repository
       // var payrun = await _context.PayrollRuns.FirstOrDefaultAsync(
       //   p => p.PeriodDate.Month == dateTime.Month);
       var payrun = await _context.PayrollRuns.Where(r => !r.IsLocked)
-        .OrderByDescending(r => r.PayrollRunId)
+        .OrderByDescending(r => r.PayrollRunNumber)
         .FirstOrDefaultAsync();
       if (payrun != null)
-        Console.WriteLine($"-------CURRENT RUN ID {payrun.PayrollRunId}-------");
+        Console.WriteLine($"-------CURRENT RUN ID {payrun.PayrollRunNumber}-------");
       return payrun;
     }
 
@@ -76,11 +77,11 @@ namespace HRConnect.Api.Repository
     {
       //Update the current run to be marked as Finalised 
       _context.PayrollRuns.Update(payrollRun);
-      await _context.SaveChangesAsync();
+      // await _context.SaveChangesAsync();
     }
     public async Task<PayrollRun?> GetLastPayrun()
     {
-      return await _context.PayrollRuns.OrderByDescending(r => r.PayrollRunId)
+      return await _context.PayrollRuns.OrderByDescending(r => r.PayrollRunNumber)
         .FirstOrDefaultAsync();
     }
   }

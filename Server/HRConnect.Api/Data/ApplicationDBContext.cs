@@ -109,7 +109,7 @@ namespace HRConnect.Api.Data
       .HasForeignKey(p => p.PeriodId);
 
       //EF needs to know that PayrollRecord is base type (abstract)
-      modelBuilder.Entity<PayrollRecord>().ToTable("PayrollRecords");
+      modelBuilder.Entity<PayrollRecord>().UseTpcMappingStrategy();
 
       //EF needs to know derived types
       modelBuilder.Entity<PensionDeduction>().ToTable("PensionDeductions");
@@ -118,30 +118,38 @@ namespace HRConnect.Api.Data
 
 
       //Declare PayrollRunId as an alternative Key that can be used instead of Id
-      modelBuilder.Entity<PayrollRun>().HasAlternateKey(r => r.PayrollRunId);
+      // modelBuilder.Entity<PayrollRun>().HasAlternateKey(r => r.PayrollRunId);
       ///////
       /// 
 
-      //Relationship to payroll run
-      modelBuilder.Entity<PayrollRun>().HasMany(p => p.Records)
-      .WithOne(r => r.PayrollRun)
-      .HasForeignKey(r => r.PayrollRunId)
-      .HasPrincipalKey(p => p.PayrollRunId);
-
-
-
-      modelBuilder.Entity<PayrollRun>().HasIndex(r => new { r.PeriodId, r.PayrollRunId }).IsUnique();
-
-      modelBuilder.Entity<PayrollRun>()
-      .Property(p => p.PayrollRunId)
-      .ValueGeneratedNever();//PayrollRunId is not a regular Id
-
 
       //Testing that any other table can have runID FK
-      modelBuilder.Entity<TestEntity>().HasOne<PayrollRun>()
-      .WithMany()
-      .HasForeignKey(t => t.PayrollRunId)
-      .HasPrincipalKey(p => p.PayrollRunId); //has explicitt FK to payrollRun
+      // modelBuilder.Entity<TestEntity>().HasOne<PayrollRun>()
+      // .WithMany()
+      // .HasForeignKey(t => t.PayrollRunId);
+      modelBuilder.Entity<PayrollRun>(b =>
+        {
+          b.HasKey(r => r.PayrollRunId);
+          b.Property(r => r.PayrollRunId).ValueGeneratedOnAdd();//Identity
+          // b.HasCheckConstraint("CK_PayrollRun_PayRunNumber",
+          //                "[PayRunNumber] BETWEEN 1 AND 12");
+
+          b.HasMany(r => r.Records)
+       .WithOne(r => r.PayrollRun)
+       .HasForeignKey(r => r.PayrollRunId);
+        });
+      // Medical Aid Deduction Delete Nehavior
+      modelBuilder.Entity<MedicalAidDeduction>()
+        .HasOne(m => m.MedicalOption)
+        .WithMany()
+        .HasForeignKey(m => m.MedicalOptionId)
+        .OnDelete(DeleteBehavior.NoAction);
+
+      modelBuilder.Entity<MedicalAidDeduction>()
+        .HasOne(m => m.MedicalOptionCategory)
+        .WithMany()
+        .HasForeignKey(m => m.MedicalCategoryId)
+        .OnDelete(DeleteBehavior.NoAction);
 
       //EF needs to know the derived classes as well
       // modelBuilder.Entity<PensionDeduction>()
@@ -177,24 +185,24 @@ namespace HRConnect.Api.Data
         }
       }
 
-      //Do the same locking for entities to prevent deletion
-      modifiedRecords = ChangeTracker.Entries()
-           .Where(e => e.State == EntityState.Deleted &&
-           (
-           e.Entity is PayrollPeriod ||
-           e.Entity is PayrollRun ||
-           e.Entity is PayrollRecord
-           ));
+      // //Do the same locking for entities to prevent deletion
+      // modifiedRecords = ChangeTracker.Entries()
+      //      .Where(e => e.State == EntityState.Deleted &&
+      //      (
+      //      e.Entity is PayrollPeriod ||
+      //      e.Entity is PayrollRun ||
+      //      e.Entity is PayrollRecord
+      //      ));
 
-      foreach (var e in modifiedRecords)
-      {
-        //Any locked entity should be under a Hard Lock. Don't allow any changes
-        var prevLockState = (bool)e.OriginalValues["IsLocked"]!;
-        if (prevLockState)
-        {
-          throw new InvalidOperationException("Record/Run under Hard Lock. Cannot be modified");
-        }
-      }
+      // foreach (var e in modifiedRecords)
+      // {
+      //   //Any locked entity should be under a Hard Lock. Don't allow any changes
+      //   var prevLockState = (bool)e.OriginalValues["IsLocked"]!;
+      //   if (prevLockState)
+      //   {
+      //     throw new InvalidOperationException("Record/Run under Hard Lock. Cannot be modified");
+      //   }
+      // }
       return await base.SaveChangesAsync(cancellationToken);
     }
   }

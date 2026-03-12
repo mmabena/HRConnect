@@ -1,11 +1,12 @@
 namespace HRConnect.Api.Models.PayrollDeduction
 {
   using HRConnect.Api.Models.Payroll;
-  using System.ComponentModel.DataAnnotations;
   public class PensionDeduction : PayrollRecord
   {
     // public int PensionDeductionID { get; set; }
-    // public int EmployeeID { get; set; }
+    public int PeriodId { get; set; }
+    // public int PayrollRunId { get; set; }
+    // public string EmployeeId { get; set; } = string.Empty;
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
     public DateTime DateJoinedCompany { get; set; }

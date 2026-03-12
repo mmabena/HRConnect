@@ -4,8 +4,9 @@ namespace HRConnect.Api.Models.Payroll
 
   public class PayrollRun
   {
-    public int Id { get; set; }
+    // public int Id { get; set; }
     public int PayrollRunId { get; set; }
+    public int PayrollRunNumber { get; set; }
     public int PeriodId { get; set; }
     [JsonIgnore]
     public PayrollPeriod? Period { get; set; }

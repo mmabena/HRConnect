@@ -53,7 +53,7 @@ namespace HRConnect.Api.Utils.Payroll
         PayrollRun newRun = new PayrollRun
         {
           PeriodId = payperiod.PayrollPeriodId,
-          PayrollRunId = run,//GetPayrunNumber(DateTime.Now),
+          PayrollRunNumber = run,//GetPayrunNumber(DateTime.Now),
           IsLocked = false,
           Period = payperiod,
           PeriodDate = DateTime.Now,

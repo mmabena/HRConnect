@@ -138,7 +138,7 @@ builder.Services.AddQuartz(q =>
   q.AddTrigger(opts => opts
   .ForJob(jobKey)
   .WithIdentity("PayrollRollover-Trigger")
-  .WithCronSchedule("1 0/1 * * * ?", x =>
+  .WithCronSchedule("0/10 * * * * ?", x =>
   x.WithMisfireHandlingInstructionFireAndProceed())); //when a job misfire happens. 
                                                       // Properly re-execute it and proceed as usual
 
@@ -196,6 +196,9 @@ builder.Services.AddTransient<IPensionProjectionService, PensionProjectionServic
 builder.Services.AddScoped<IMedicalOptionRepository, MedicalOptionRepository>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IMedicalOptionService,
   HRConnect.Api.Services.MedicalOptionService>();
+builder.Services.AddScoped<IMedicalAidEligibilityService, MedicalAidEligibilityService>();
+builder.Services.AddScoped<IMedicalAidDeductionRepository, MedicalAidDeductionRepository>();
+builder.Services.AddScoped<IMedicalAidDeductionService, MedicalAidDeductionService>();
 builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowReact",
