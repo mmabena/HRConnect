@@ -6,6 +6,7 @@ using HRConnect.Api.Interfaces;
 using HRConnect.Api.Interfaces.PensionProjection;
 using HRConnect.Api.Middleware;
 using HRConnect.Api.Models;
+using HRConnect.Api.Models.PayrollDeduction;
 using HRConnect.Api.Repositories;
 using HRConnect.Api.Repository;
 using HRConnect.Api.Services;
@@ -39,12 +40,20 @@ Configuration.Setup()
             audit.UifEmployerAmount = entity.UifEmployerAmount;
             audit.EmployerSdlContribution = entity.EmployerSdlContribution;
           })
+      
+        .Map<MedicalAidDeduction, AuditLogs>((madEntity, audit) =>
+          {
+            //audit.MedicalAidDeductionId = madEntity.MedicalAidDeductionId;
+            
+          })  
         .AuditEntityAction<AuditLogs>((e, entry, audit) =>
         {
           audit.AuditedAt = DateTime.UtcNow;
           audit.AuditAction = entry.Action;
           audit.TabelName = entry.Name;
-        })));
+        })
+           
+      ));
 
 ExcelPackage.License.SetNonCommercialPersonal("YourName");
 

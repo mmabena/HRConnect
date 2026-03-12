@@ -24,9 +24,11 @@
     //FK
     [ForeignKey(nameof(MedicalOption))]
     public int MedicalOptionId { get; set; }
+    public string OptionName { get; set; }
     //FK
     [ForeignKey(nameof(MedicalOptionCategory))]
     public int MedicalCategoryId { get; set; }
+    public string OptionCategory { get; set; }
     // Number of Deps
     public int PrincipalCount { get; set; }
     public int AdultCount { get; set; }

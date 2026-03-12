@@ -1,10 +1,9 @@
 ﻿namespace HRConnect.Api.Services;
 
-using DTOs.Employee;
 using DTOs.Payroll.PayrollDeduction.MedicalAidDeduction;
-using HRConnect.Api.Models;
 using Interfaces;
 using Models.PayrollDeduction;
+using Utils.MedicalAidDeduction;
 
 /// <summary>
 /// Service implementation for managing medical aid deductions.
@@ -45,10 +44,9 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
         return await _medicalAidDeductionRepository.GetAllMedicalAidDeductionsAsync();
     }
 
-    public async Task<MedicalAidDeductionDto> AddNewMedicalAidDeductions(
-        string employeeId,
-        int medicalOptionId,
-        CreateMedicalAidDeductionRequestDto request)
+    public async Task<MedicalAidDeductionDto> AddNewMedicalAidDeductions(string employeeId,
+      int medicalOptionId,
+      CreateMedicalDeductionDto request)
     {
         // Get employee details
         var employee = await _employeeService.GetEmployeeByIdAsync(employeeId);
@@ -59,11 +57,132 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
 
         // Get medical option details to ensure it exists and get category info
         var medicalOption = await _medicalOptionRepository.GetMedicalOptionByIdAsync(medicalOptionId);
+        
+        //get category
+        var category =
+          await _medicalOptionRepository.GetCategoryByIdAsync(medicalOption.MedicalOptionCategoryId);
+        
+        // Get Premium Ratings
+        decimal? principalPremium = null;
+        decimal? adultPremium = null;
+        decimal? spousePremium = null;
+        decimal? childPremium = null;
+        decimal? child2Premium = null;
+        decimal? totalPrincipalPremium = null; //principal member contribution
+        decimal? totalAdultPremium = null;
+        decimal? totalChildPremium = null;
+        
+        switch (category.MedicalOptionCategoryName)
+        {
+            case "Choice":
+              if (medicalOption.MedicalOptionName.ToString().Contains("Network"))
+              {
+                // Get the base premium rates
+                //Principal adult, child and child2 (free - applicable from variant 1 -3 )
+                principalPremium = medicalOption.MonthlyRiskContributionPrincipal;
+                adultPremium = medicalOption.MonthlyRiskContributionAdult;
+                childPremium = medicalOption.MonthlyRiskContributionChild;
+                child2Premium = medicalOption.MonthlyRiskContributionChild2;
+              
+                if (char.IsDigit(medicalOption.MedicalOptionName[^1]))
+                {
+                  childPremium = medicalOption.MonthlyRiskContributionChild;
+                  child2Premium = medicalOption.MonthlyRiskContributionChild2 ?? 0;
+                }
+                else
+                {
+                  //else if variant 4+, then consider child2+ == child1
+                  childPremium = medicalOption.MonthlyRiskContributionChild;
+                  child2Premium = childPremium;
+                }
+              }
+              else if (medicalOption.MedicalOptionName.ToString().Contains("First"))
+              {
+                //No Principal and Child2
+                principalPremium = 0;
+                adultPremium = medicalOption.MonthlyRiskContributionAdult;
+                childPremium = medicalOption.MonthlyRiskContributionChild;
+                child2Premium = 0;
+              }
+              break;
+            
+            case "Essential":
+              // MSA + Risk + Principal
+              principalPremium = Math.Abs((decimal)medicalOption.MonthlyMsaContributionPrincipal +
+                                          (decimal)medicalOption.MonthlyRiskContributionPrincipal);
+              adultPremium = Math.Abs((decimal)medicalOption.MonthlyMsaContributionAdult +
+                                      (decimal)medicalOption.MonthlyRiskContributionAdult);
+              childPremium = Math.Abs((decimal)medicalOption.MonthlyMsaContributionChild +
+                                      (decimal)medicalOption.MonthlyRiskContributionChild);
+              child2Premium = 0;
+              break;
+            
+            case "Vital":
+              //Risk only and No Principal
+              principalPremium = 0;
+              adultPremium = medicalOption.MonthlyRiskContributionAdult;
+              childPremium = medicalOption.MonthlyRiskContributionChild;
+              child2Premium = 0;
+              break;
+            
+            case "Double":
+              //MSA + Risk | No Principal and Child2
+              principalPremium = 0;
+              adultPremium = Math.Abs((decimal)medicalOption.MonthlyMsaContributionAdult +
+                                      (decimal)medicalOption.MonthlyRiskContributionAdult);
+              childPremium = Math.Abs((decimal)medicalOption.MonthlyMsaContributionChild +
+                                      (decimal)medicalOption.MonthlyRiskContributionChild);
+              break;
+            
+            case "Alliance":
+              //MAS + Risk | No Principal and Child2
+              principalPremium = 0;
+              adultPremium = Math.Abs((decimal)medicalOption.MonthlyMsaContributionAdult +
+                                      (decimal)medicalOption.MonthlyRiskContributionAdult);
+              childPremium = Math.Abs((decimal)medicalOption.MonthlyMsaContributionChild +
+                                      (decimal)medicalOption.MonthlyRiskContributionChild);
+              child2Premium = 0;
+              break;
+            
+            default:
+              throw new ArgumentException(
+                $"Invalid medical option category: {category.MedicalOptionCategoryName}");
+        }
+        
         if (medicalOption == null)
         {
             throw new KeyNotFoundException($"Medical option with ID {medicalOptionId} not found");
         }
 
+        //calculate Estimated Deductions (this will be for the special case of Network Choice)
+        if (category.MedicalOptionCategoryName == "Choice" &&
+            medicalOption.MedicalOptionName.ToString().Contains("Network"))
+        {
+          //check variant | if 1 - 3 -> child2+ == free else charged
+          if (medicalOption.MedicalOptionName.ToString().Last() >= '1' &&
+              medicalOption.MedicalOptionName.ToString().Last() <= '3')
+          {
+            //apply the free child2+ condition
+            if (request.ChildrenCount > 1)
+            {
+              totalChildPremium = childPremium;  
+            }
+            else if(request.ChildrenCount == 0)
+            {
+              totalChildPremium = 0;
+            }
+          }
+          else
+          {
+            // Variant lies between 4 and 5
+            totalChildPremium = Math.Abs((decimal)childPremium * request.ChildrenCount);
+          }
+        }
+        
+        // Getting estimated Contributions
+        // Need to consider skipping Network choice
+        
+        
         // Create the deduction entity
         var deduction = new MedicalAidDeduction
         {
@@ -76,9 +195,8 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
 
             // Medical option details
             MedicalOptionId = medicalOptionId,
-            MedicalCategoryId = request.MedicalCategoryId > 0
-                ? request.MedicalCategoryId
-                : medicalOption.MedicalOptionCategoryId,
+            OptionName = medicalOption.MedicalOptionName,
+            MedicalCategoryId = request.MedicalCategoryId,
 
             // Dependent counts from request
             PrincipalCount = request.PrincipalCount,
@@ -92,11 +210,12 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
             TotalDeductionAmount = request.TotalDeductionAmount,
 
             // Effective date (default to now if not specified)
-            EffectiveDate = request.EffectiveDate ?? DateTime.UtcNow,
+            EffectiveDate = MedicalAidDeductionUtil.EffectDateBeforeMidMonth(request.EmployeeStartDate) ? request.EmployeeStartDate : DateTime.Now.AddMonths(1).AddDays( -(1 - request.EffectiveDate.Day) ),
 
             // Set as active by default
-            IsActive = true,
-            CreatedDate = DateTime.UtcNow
+            IsActive = MedicalAidDeductionUtil.EffectDateBeforeMidMonth(request.EmployeeStartDate) ? true : false,
+            CreatedDate = DateTime.Now,
+            UpdatedDate = DateTime.Now
         };
 
         // Save to repository

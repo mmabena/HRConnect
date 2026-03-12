@@ -28,7 +28,7 @@
     Task<MedicalAidDeductionDto> AddNewMedicalAidDeductions(
         string employeeId,
         int medicalOptionId,
-        CreateMedicalAidDeductionRequestDto request);
+        CreateMedicalDeductionDto request);
 
     /// <summary>
     /// Update a medical aid deduction by employee ID.

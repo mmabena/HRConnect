@@ -76,7 +76,7 @@ public class MedicalAidDeductionController : ControllerBase
     [Authorize(Roles = "SuperUser")]
     public async Task<IActionResult> CreateNewEmployeeMedicalAidDeduction(
         [FromRoute] string id,
-        [FromBody] CreateMedicalAidDeductionRequestDto request)
+        [FromBody] CreateMedicalDeductionDto request)
     {
         if (request == null)
         {
