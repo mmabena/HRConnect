@@ -1,6 +1,7 @@
 ﻿namespace HRConnect.Api.Controllers
 {
   using HRConnect.Api.DTOs.Employee.Pension;
+  using HRConnect.Api.Interfaces;
   using HRConnect.Api.Interfaces.Pension;
   using Microsoft.AspNetCore.Authorization;
   using Microsoft.AspNetCore.Mvc;

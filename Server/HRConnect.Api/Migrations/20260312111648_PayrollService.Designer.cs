@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRConnect.Api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20260311131159_PayrollService")]
+    [Migration("20260312111648_PayrollService")]
     partial class PayrollService
     {
         /// <inheritdoc />
@@ -142,6 +142,9 @@ namespace HRConnect.Api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("PensionOptionId")
+                        .HasColumnType("int");
+
                     b.Property<string>("PhysicalAddress")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -179,6 +182,8 @@ namespace HRConnect.Api.Migrations
                     b.HasKey("EmployeeId");
 
                     b.HasIndex("CareerManagerID");
+
+                    b.HasIndex("PensionOptionId");
 
                     b.HasIndex("PositionId");
 
@@ -484,6 +489,57 @@ namespace HRConnect.Api.Migrations
                     b.ToTable("TestEntities");
                 });
 
+            modelBuilder.Entity("HRConnect.Api.Models.Pension.EmployeePensionEnrollment", b =>
+                {
+                    b.Property<int>("EmployeePensionEnrollmentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EmployeePensionEnrollmentId"));
+
+                    b.Property<DateOnly>("EffectiveDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("EmployeeId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("PayrollRunId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PensionOptionId")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date");
+
+                    b.HasKey("EmployeePensionEnrollmentId");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.HasIndex("PayrollRunId");
+
+                    b.HasIndex("PensionOptionId");
+
+                    b.ToTable("EmployeePensionEnrollments");
+                });
+
+            modelBuilder.Entity("HRConnect.Api.Models.PensionOption", b =>
+                {
+                    b.Property<int>("PensionOptionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PensionOptionId"));
+
+                    b.Property<decimal>("ContributionPercentage")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("PensionOptionId");
+
+                    b.ToTable("PensionOptions");
+                });
+
             modelBuilder.Entity("HRConnect.Api.Models.Position", b =>
                 {
                     b.Property<int>("PositionId")
@@ -761,15 +817,19 @@ namespace HRConnect.Api.Migrations
                 {
                     b.HasBaseType("HRConnect.Api.Models.Payroll.PayrollRecord");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly>("CreatedDate")
+                        .HasColumnType("date");
 
-                    b.Property<DateTime>("DateJoinedCompany")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly>("DateJoinedCompany")
+                        .HasColumnType("date");
 
                     b.Property<string>("EmailAddress")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("EmployeePensionDeductionId")
+                        .HasColumnType("int")
+                        .HasColumnName("EmployeePensionDeductionId");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -795,6 +855,9 @@ namespace HRConnect.Api.Migrations
                     b.Property<decimal>("PensionContribution")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int>("PensionOptionId")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("PensionableSalary")
                         .HasColumnType("decimal(18,2)");
 
@@ -809,6 +872,8 @@ namespace HRConnect.Api.Migrations
                     b.Property<decimal>("VoluntaryContribution")
                         .HasColumnType("decimal(18,2)");
 
+                    b.HasIndex("PensionOptionId");
+
                     b.ToTable("PensionDeductions", (string)null);
                 });
 
@@ -819,6 +884,11 @@ namespace HRConnect.Api.Migrations
                         .HasForeignKey("CareerManagerID")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("HRConnect.Api.Models.PensionOption", "PensionOption")
+                        .WithMany("Employee")
+                        .HasForeignKey("PensionOptionId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("HRConnect.Api.Models.Position", "Position")
                         .WithMany("Employees")
                         .HasForeignKey("PositionId")
@@ -826,6 +896,8 @@ namespace HRConnect.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("CareerManager");
+
+                    b.Navigation("PensionOption");
 
                     b.Navigation("Position");
                 });
@@ -874,6 +946,32 @@ namespace HRConnect.Api.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("HRConnect.Api.Models.Pension.EmployeePensionEnrollment", b =>
+                {
+                    b.HasOne("HRConnect.Api.Models.Employee", "Employee")
+                        .WithMany("EmployeePensionEnrollment")
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HRConnect.Api.Models.Payroll.PayrollRun", null)
+                        .WithMany()
+                        .HasForeignKey("PayrollRunId")
+                        .HasPrincipalKey("PayrollRunId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HRConnect.Api.Models.PensionOption", "PensionOption")
+                        .WithMany("EmployeePensionEnrollment")
+                        .HasForeignKey("PensionOptionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Employee");
+
+                    b.Navigation("PensionOption");
+                });
+
             modelBuilder.Entity("HRConnect.Api.Models.Position", b =>
                 {
                     b.HasOne("HRConnect.Api.Models.JobGrade", "JobGrade")
@@ -909,10 +1007,18 @@ namespace HRConnect.Api.Migrations
                         .HasForeignKey("HRConnect.Api.Models.PayrollDeduction.PensionDeduction", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("HRConnect.Api.Models.PensionOption", null)
+                        .WithMany("PensionDeduction")
+                        .HasForeignKey("PensionOptionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.Employee", b =>
                 {
+                    b.Navigation("EmployeePensionEnrollment");
+
                     b.Navigation("Subordinates");
                 });
 
@@ -939,6 +1045,15 @@ namespace HRConnect.Api.Migrations
             modelBuilder.Entity("HRConnect.Api.Models.Payroll.PayrollRun", b =>
                 {
                     b.Navigation("Records");
+                });
+
+            modelBuilder.Entity("HRConnect.Api.Models.PensionOption", b =>
+                {
+                    b.Navigation("Employee");
+
+                    b.Navigation("EmployeePensionEnrollment");
+
+                    b.Navigation("PensionDeduction");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.Position", b =>

@@ -1,6 +1,7 @@
 namespace HRConnect.Api.Models.Payroll
 {
   using System.Text.Json.Serialization;
+  using HRConnect.Api.Models.Pension;
 
   public class PayrollRun
   {
@@ -14,5 +15,6 @@ namespace HRConnect.Api.Models.Payroll
     public bool IsLocked { get; set; }
     public DateTime? FinalisedDate { get; set; }
     public ICollection<PayrollRecord> Records { get; set; } = new List<PayrollRecord>();
+    //public ICollection<EmployeePensionEnrollment> EmployeePensionEnrollment { get; set; } = [];
   }
 }

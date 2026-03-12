@@ -3,6 +3,6 @@
   public class EmployeePensionEnrollmentAddDto
   {
     public string EmployeeId { get; set; } = string.Empty;
-    public DateOnly? EffectiveDate { get; set; }
+    public DateOnly EffectiveDate { get; set; }
   }
 }

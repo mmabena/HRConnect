@@ -84,7 +84,7 @@ namespace HRConnect.Api.Utils.Payroll
         if (payperiod == null)
         {
           // throw new InvalidDataException("No payroll period found");
-          await _context.ChangeTracker.Clear();
+          _context.ChangeTracker.Clear(); // Cleared the await as it is a void function
           payperiod = await RolloverPayrollPeriod(null);
         }
         // var currentPayRun = payperiod.Runs.OrderByDescending(r => r.PayrollRunId == runId).FirstOrDefault();

@@ -9,8 +9,7 @@
     {
       return new EmployeePensionEnrollment
       {
-        EmployeeId = employeePensionEnrollmentDto.EmployeeId,
-        EffectiveDate = (DateOnly)employeePensionEnrollmentDto.EffectiveDate,
+        EmployeeId = employeePensionEnrollmentDto.EmployeeId
       };
     }
 

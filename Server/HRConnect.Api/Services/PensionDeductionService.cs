@@ -8,7 +8,7 @@
   using HRConnect.Api.Interfaces.Pension;
   using HRConnect.Api.Mappers.Payroll.Pension;
   using HRConnect.Api.Models;
-  using HRConnect.Api.Models.PayrollContribution;
+  using HRConnect.Api.Models.PayrollDeduction;
   using HRConnect.Api.Models.Pension;
   using HRConnect.Api.Utils.Pension.ValidationHelpers;
   using Microsoft.EntityFrameworkCore;
@@ -72,7 +72,7 @@
         employeePensionDeduction.PensionOptionId = pensionDeductionUpdateDto.PensionOptionId ?? employeePensionDeduction.PensionOptionId;
         employeePensionDeduction.VoluntaryContribution = pensionDeductionUpdateDto.VoluntaryContribution
           ?? employeePensionDeduction.VoluntaryContribution;
-        employeePensionDeduction.PayrollRunId = pensionDeductionUpdateDto.PayrollRunId ?? employeePensionDeduction.PayrollRunId;
+        //employeePensionDeduction.PayrollRunId = pensionDeductionUpdateDto.PayrollRunId ?? employeePensionDeduction.PayrollRunId;
         employeePensionDeduction.CreatedDate = pensionDeductionUpdateDto.CreatedDate ?? employeePensionDeduction.CreatedDate;
         employeePensionDeduction.IsActive = pensionDeductionUpdateDto.IsActive ?? employeePensionDeduction.IsActive;
 
@@ -115,7 +115,7 @@
     private async Task<EmployeePensionEnrollment> GetEmployeePensionEnrollmentAsync(string employeeId)
     {
       EmployeePensionEnrollment? employeePensionEnrollment = await _employeePensionEnrollmentRepository.GetByEmployeeIdAsync(employeeId);
-      return employeePensionEnrollment ?? throw new NotFoundException("Employee is enrolled into any pension option");
+      return employeePensionEnrollment ?? throw new NotFoundException("Employee isn't enrolled into any pension option");
     }
 
     private async Task<PensionDeduction?> CreateNewPensionDeductionEntry(PensionDeductionAddDto pensionDeductionAddDto)

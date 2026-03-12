@@ -2,7 +2,7 @@ namespace HRConnect.Api.Models
 {
   using System.ComponentModel.DataAnnotations;
   using System.ComponentModel.DataAnnotations.Schema;
-  using HRConnect.Api.Models.PayrollContribution;
+  using HRConnect.Api.Models.PayrollDeduction;
   using HRConnect.Api.Models.Pension;
 
   public enum Gender
@@ -88,6 +88,6 @@ namespace HRConnect.Api.Models
     public ICollection<Employee>? Subordinates { get; set; }
     public PensionOption? PensionOption { get; set; }
     public ICollection<EmployeePensionEnrollment> EmployeePensionEnrollment { get; set; } = [];
-    public ICollection<PensionDeduction> PensionDeduction { get; set; } = [];
+    //public ICollection<PensionDeduction> PensionDeduction { get; set; } = [];
   }
 }

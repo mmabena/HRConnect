@@ -1,6 +1,6 @@
 ﻿namespace HRConnect.Api.Interfaces
 {
-  using HRConnect.Api.Models.PayrollContribution;
+  using HRConnect.Api.Models.PayrollDeduction;
 
   public interface IPensionDeductionRepository
   {

@@ -19,14 +19,13 @@ namespace HRConnect.Api.Repository
       var runId = payrollRun.PayrollRunId;
 
       //Get all pension record from current run
-      var pensionRecords = await _context.Set<PensionDeduction>()
+      /*var pensionRecords = await _context.Set<PensionDeduction>()
         .Where(r => r.PayrollRunId == runId)
-      .ToListAsync();
+      .ToListAsync();*/
       var medicalAidRecords = await _context.Set<MedicalAidDeduction>()
         .Where(r => r.PayrollRunId == runId)
       .ToListAsync();
-      payrollRun.Records = pensionRecords.Cast<PayrollRecord>()
-                          .Concat(medicalAidRecords.Cast<PayrollRecord>()).ToList();
+      payrollRun.Records = medicalAidRecords.Cast<PayrollRecord>().ToList();
       return payrollRun;
     }
     public async Task<IEnumerable<PayrollRun>> GetAllPayruns()
