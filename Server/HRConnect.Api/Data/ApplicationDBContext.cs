@@ -17,19 +17,19 @@ namespace HRConnect.Api.Data
     {
       base.OnModelCreating(modelBuilder);
 
-      //Employee to pension option
-      _ = modelBuilder.Entity<Employee>()
-        .HasOne(e => e.PensionFund)
-        .WithMany(pf => pf.Employees)
-        .HasForeignKey(e => e.PensionFundId)
-        .OnDelete(DeleteBehavior.Restrict);
+      // PensionFund -> Employee relationship
+     _ = modelBuilder.Entity<PensionFund>()
+          .HasOne(pf => pf.Employee)
+          .WithMany(e => e.PensionFunds)
+          .HasForeignKey(pf => pf.EmployeeId)
+          .OnDelete(DeleteBehavior.Restrict);
 
-      _ = modelBuilder.Entity<Employee>()
-        .HasOne(e => e.PensionOption)
-        .WithMany(po => po.Employees)
-        .HasForeignKey(e => e.PensionOptionId)
-        .OnDelete(DeleteBehavior.Restrict);
-
+      // Employee -> PensionOption relationship
+     _ = modelBuilder.Entity<Employee>()
+          .HasOne(e => e.PensionOption)
+          .WithMany(po => po.Employees)
+          .HasForeignKey(e => e.PensionOptionId)
+          .OnDelete(DeleteBehavior.Restrict);
     }
 
   }

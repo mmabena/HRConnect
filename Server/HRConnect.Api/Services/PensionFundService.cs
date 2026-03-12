@@ -111,7 +111,6 @@
       }
 
       employee.PensionOptionId = option.PensionOptionId;
-      employee.PensionFundId = fundRecord.PensionFundId;
 
       decimal salary = employee.MonthlySalary ?? 0m;
       decimal contributionAmount = salary * (option.ContributionPercentage / 100);

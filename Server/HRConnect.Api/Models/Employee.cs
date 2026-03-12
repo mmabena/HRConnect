@@ -93,9 +93,7 @@
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     // Foreign keys
-    public int? PensionFundId { get; set; }       // made nullable
-    public PensionFund? PensionFund { get; set; }
-
+    public ICollection<PensionFund>? PensionFunds { get; set; }
     public int? PensionOptionId { get; set; }     // made nullable
     public PensionOption? PensionOption { get; set; }
 
