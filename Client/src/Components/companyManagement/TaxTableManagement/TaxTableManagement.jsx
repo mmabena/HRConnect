@@ -126,11 +126,11 @@ function TaxTableManagement({ currentUser }) {
         <div className="heading-container">
           Comapany Management
           <div className="icon">
-            <img
+            {/* <img
               src="/images/notifications.png"
               alt="Notification Icon"
               className="heading-icon"
-            />
+            /> */}
             <div className="utility-box large-box">{currentDate}</div>
             <div className="utility-box small-box">{currentTime}</div>
           </div>
