@@ -5,7 +5,7 @@ import ForgotPassword from "./Components/ForgotPassword/ForgotPassword";
 import AddEmployee from "./Components/EmployeeManagement/AddEmployee";
 import EditEmployee from "./Components/EmployeeManagement/EditEmployee";
 import AddCompany from "./addCompany";
-import EditCompany from "./Components/companyManagement/editCompany";
+import EditCompany from "./Components/CompanyManagement/editCompany";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
@@ -13,17 +13,20 @@ import "./Components/MenuBar/MenuBar.css";
 import AddEmployeeModal from "./Components/AddEmployeeModal";
 import UserManagement from "./Components/UserManagement";
 import ViewPositionManagement from "./Components/ViewPositionManagement";
-import TaxTableUpload from "./Components/companyManagement/TaxTableManagement/TaxTableUpload";
-import EditPositionManagement from "./Components/companyManagement/PositionManagement/EditPositionManagement";
-import AddPositionManagement from "./Components/companyManagement/PositionManagement/AddPositionManagment";
+import EditPositionManagement from "./Components/CompanyManagement/PositionManagement/EditPositionManagement";
+import AddPositionManagement from "./Components/CompanyManagement/PositionManagement/AddPositionManagment";
+import PositionManagement from "./Pages/CompanyManagement/PositionManagement/PositionManagement";
+import ChangePositionManagement from "./Components/CompanyManagement/PositionManagement/ChangePositionManagement";
 import CompanyManagement from "./companyManagement";
 import CompanyContribution from "./Components/CompanyContribution/CompanyContribution";
 import Profile from "./Components/MyProfile";
 import CompensationPlanning from "./Components/CompensationPlanning";
-import TaxTableManagement from "./Components/companyManagement/TaxTableManagement/TaxTableManagement";
+import TaxTableManagement from "./Components/CompanyManagement/TaxTableManagement/TaxTableManagement";
 import ChangePassword from "./Components/ChangePassword";
-import MenuBar from "./Components/MenuBar/MenuBar";
+import TaxTableUpload from "./Components/CompanyManagement/TaxTableManagement/TaxTableUpload.jsx";
 import EmployeeList from "./Pages/EmployeeManagement/EmployeeList";
+import MenuBar from "./Components/MenuBar/MenuBar";
+import ManageUserPositions from "./Pages/CompanyManagement/PositionManagement/ManageUserPosition.jsx";
 import PositionManagement from "./Pages/CompanyManagement/PositionManagement/PositionManagement";
 import ProjectionCalculator from "./Pages/PayrollTools/ProjectionCalculator";
 import PersonalInformation from "./Components/PersonalInformation.jsx";
@@ -41,6 +44,7 @@ function App() {
   });
   const navigate = useNavigate();
 
+  //Load user from localStorage on refresh
   useEffect(() => {
     const fetchUserData = async () => {
       const token = localStorage.getItem("token");

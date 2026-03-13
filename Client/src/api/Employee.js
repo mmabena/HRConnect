@@ -46,7 +46,7 @@ export const addEmployee = async (employee) => {
   }
 };
 
-export const editEmployee = async (employeeNumber, employee) => {
+export const editEmployee = async (employeeId, employee) => {
   try {
     const response = await api.put(
       `${API_BASE}/edit/${employeeNumber}`,

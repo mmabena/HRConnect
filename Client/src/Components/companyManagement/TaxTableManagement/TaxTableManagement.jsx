@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import api from "../../../api/api.js";
 import "../../../styles/global.css";
-import TaxTableUpload from "./TaxTableUpload.jsx";
-import NavBar from "../../NavBar.jsx";
+import TaxTableUpload from "./TaxTableUpload";
 
 function TaxTableManagement({ currentUser }) {
   const [activeTable, setActiveTable] = useState(null);
@@ -10,8 +9,6 @@ function TaxTableManagement({ currentUser }) {
   const [previousTables, setPreviousTables] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showUploadPopup, setShowUploadPopup] = useState(false);
-  const [currentTime, setCurrentTime] = useState("");
-  const [currentDate, setCurrentDate] = useState("");
 
   const fetchTaxTables = useCallback(async () => {
     try {

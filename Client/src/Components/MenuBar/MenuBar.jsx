@@ -50,6 +50,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   };
 
   const isEmployeeManagementPage =
+   location.pathname.startsWith("/employeeList") ||
     location.pathname.startsWith("/addEmployee") ||
     location.pathname.startsWith("/employeeList") ||
     location.pathname.startsWith("/editEmployee");
