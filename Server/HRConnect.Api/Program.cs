@@ -163,14 +163,12 @@ builder.Services.AddQuartzHostedService(q =>
   q.WaitForJobsToComplete = true;
 });
 
-//Register payroll stuff
 builder.Services.AddScoped<IPayrollPeriodRepository, PayrollPeriodRepository>();
 builder.Services.AddScoped<IPayrollRunRepository, PayrollRunRepository>();
 builder.Services.AddScoped<IPayrollRunService, PayrollRunService>();
 builder.Services.AddScoped<IPayrollPeriodService, PayrollPeriodService>();
 builder.Services.AddScoped<PayrollRolloverJob>();//for Quartz
 builder.Services.AddScoped<PayrollInit>();
-
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();

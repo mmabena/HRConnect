@@ -1,6 +1,5 @@
 namespace HRConnect.Api.Data
 {
-  using System.Reflection;
   using HRConnect.Api.Models;
   using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Models.PayrollDeduction;
@@ -24,7 +23,6 @@ namespace HRConnect.Api.Data
     public DbSet<StatutoryContributionType> StatutoryContributionTypes { get; set; }
     public DbSet<PayrollPeriod> PayrollPeriods { get; set; }
     public DbSet<PayrollRun> PayrollRuns { get; set; }
-    // public DbSet<PayrollRecord> PayrollRecords { get; set; }
     public DbSet<PensionDeduction> PensionDeductions { get; set; }
     public DbSet<MedicalAidDeduction> MedicalAidDeductions { get; set; }
     public DbSet<TestEntity> TestEntities { get; set; }
@@ -102,8 +100,6 @@ namespace HRConnect.Api.Data
         .HasColumnType("decimal(18,4)")
         .HasDefaultValue(0.01m);
 
-      // modelBuilder.Ignore<PayrollRecord>();
-
       modelBuilder.Entity<PayrollPeriod>().HasMany(p => p.Runs)
       .WithOne(r => r.Period)
       .HasForeignKey(p => p.PeriodId);
@@ -115,29 +111,18 @@ namespace HRConnect.Api.Data
       modelBuilder.Entity<PensionDeduction>().ToTable("PensionDeductions");
       modelBuilder.Entity<MedicalAidDeduction>().ToTable("MedicalAidDeductions");
 
-
-
-      //Declare PayrollRunId as an alternative Key that can be used instead of Id
-      // modelBuilder.Entity<PayrollRun>().HasAlternateKey(r => r.PayrollRunId);
-      ///////
-      /// 
-
-
-      //Testing that any other table can have runID FK
-      // modelBuilder.Entity<TestEntity>().HasOne<PayrollRun>()
-      // .WithMany()
-      // .HasForeignKey(t => t.PayrollRunId);
       modelBuilder.Entity<PayrollRun>(b =>
         {
           b.HasKey(r => r.PayrollRunId);
           b.Property(r => r.PayrollRunId).ValueGeneratedOnAdd();//Identity
-          // b.HasCheckConstraint("CK_PayrollRun_PayRunNumber",
+          // b.HasCheckConstraint("CK_PayrollRun_PayrollRunNumber",
           //                "[PayRunNumber] BETWEEN 1 AND 12");
 
           b.HasMany(r => r.Records)
        .WithOne(r => r.PayrollRun)
        .HasForeignKey(r => r.PayrollRunId);
         });
+
       // Medical Aid Deduction Delete Nehavior
       modelBuilder.Entity<MedicalAidDeduction>()
         .HasOne(m => m.MedicalOption)
@@ -150,19 +135,8 @@ namespace HRConnect.Api.Data
         .WithMany()
         .HasForeignKey(m => m.MedicalCategoryId)
         .OnDelete(DeleteBehavior.NoAction);
-
-      //EF needs to know the derived classes as well
-      // modelBuilder.Entity<PensionDeduction>()
-      // .HasKey(p => p.PensionDeductionID);
-      // modelBuilder.Entity<MedicalAidDeduction>()
-      // .HasKey(m => m.MedicalAidDeductionId);
-
-      // modelBuilder.Entity<PayrollRecord>()
-      // .HasDiscriminator<string>("PayrollRecordType")
-      // .HasValue<PensionDeduction>("Pension")
-      // .HasValue<MedicalAidDeduction>("MedicalAid");
-
     }
+
     //Override 'SaveChangesAsync' for Payroll Records to enforce locked records on a payroll run 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
@@ -186,23 +160,23 @@ namespace HRConnect.Api.Data
       }
 
       // //Do the same locking for entities to prevent deletion
-      // modifiedRecords = ChangeTracker.Entries()
-      //      .Where(e => e.State == EntityState.Deleted &&
-      //      (
-      //      e.Entity is PayrollPeriod ||
-      //      e.Entity is PayrollRun ||
-      //      e.Entity is PayrollRecord
-      //      ));
+      modifiedRecords = ChangeTracker.Entries()
+           .Where(e => e.State == EntityState.Deleted &&
+           (
+           e.Entity is PayrollPeriod ||
+           e.Entity is PayrollRun ||
+           e.Entity is PayrollRecord
+           ));
 
-      // foreach (var e in modifiedRecords)
-      // {
-      //   //Any locked entity should be under a Hard Lock. Don't allow any changes
-      //   var prevLockState = (bool)e.OriginalValues["IsLocked"]!;
-      //   if (prevLockState)
-      //   {
-      //     throw new InvalidOperationException("Record/Run under Hard Lock. Cannot be modified");
-      //   }
-      // }
+      foreach (var e in modifiedRecords)
+      {
+        //Any locked entity should be under a Hard Lock. Don't allow any deletions
+        var prevLockState = (bool)e.OriginalValues["IsLocked"]!;
+        if (prevLockState)
+        {
+          throw new InvalidOperationException("Record/Run under Hard Lock. Cannot be modified");
+        }
+      }
       return await base.SaveChangesAsync(cancellationToken);
     }
   }

@@ -9,9 +9,11 @@ namespace HRConnect.Api.Utils.Payroll
   {
 
     /// <summary>
-    /// Get the current tax month 
-    /// 4 -> April. The first month of our financial period
-    /// 3-> March. The last month of our financial period
+    /// Gets and calculate the current year's financial period
+    /// <returns>
+    ///(<c>start</c>, <c><end/c>) represent the start and end of each financial year respectively. 
+    /// Current a finacial year should start on 1st of April and on 31st March
+    /// <returns>
     /// <summary>
     public static (DateTime start, DateTime end) GetCurrectFinancialPeriod()
     {
@@ -24,7 +26,7 @@ namespace HRConnect.Api.Utils.Payroll
       }
       else
       {
-        // Jan -> March: Previoud financial year
+        // Jan -> March: Previous financial year
         startYear = today.Year - 1;
       }
       //1st of April
@@ -34,71 +36,90 @@ namespace HRConnect.Api.Utils.Payroll
       return (start, end);
     }
 
-    private static PropertyInfo[] GetAllPublicPropertiesFromRecords(Type t)
+    /// <summary >
+    /// Helper function to get the current payroll run number based on current date
+    /// <para name="currentDate">The date used to find the desired run <param> 
+    /// <summary >
+    public static int SetPayrunNumber()
     {
-      return t.GetProperties(BindingFlags.Public |
-                             BindingFlags.Instance |
-                             BindingFlags.FlattenHierarchy);
+      return ((DateTime.Now.Month + 8) % 12) + 1;
     }
     /// <summary>
-    /// Write an Excel workbook containing every record in <paramref name="run"/>.
+    /// Utility method to get the public properties of any instance of Type t and then flatten the hierarchy 
     /// </summary>
-    public static async Task<string> WriteExcelAsync(PayrollRun run)
+    /// <param name="t">An instance of the PayrollRecord type</param>
+    /// <returns></returns>
+    private static PropertyInfo[] GetAllPublicPropertiesFromRecords(Type t)
     {
-      //Enable to noncommercial lisence
+      if (t != typeof(PayrollRecord))
+        return [];
+      return t.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
+    }
+
+    /// <summary>
+    /// Write an Excel workbook containing every record in <paramref name="run"/>.
+    /// Each payroll record type is given it's own worksheet within the spreadsheet 
+    /// </summary>
+    public static async Task WriteExcelAsync(PayrollRun run)
+    {
       ExcelPackage.License.SetNonCommercialPersonal("YourName"); //already in program cs so probably remove?
-
-      var reportsFolder = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "Reports"));
-
-      string destinationFolder = Path.Combine(reportsFolder, run.PayrollRunNumber.ToString(CultureInfo.InvariantCulture));//, ;
-      Directory.CreateDirectory(destinationFolder);
-      string filePath = Path.Combine(destinationFolder, $"PayrollRun_{run.PayrollRunNumber}.xlsx");
-
-      using var package = new ExcelPackage();
-
-      // Group records by concrete type
-      // (PensionDeductions, MedicalAidDeductions)
-      var recordsByType = run.Records.GroupBy(r => r.GetType().Name);
-
-      foreach (var group in recordsByType)
+      try
       {
-        string sheetName = group.Key;
-        var worksheet = package.Workbook.Worksheets.Add(sheetName);
 
-        // Get all public properties for this type
-        var propsList = GetAllPublicPropertiesFromRecords(group.First().GetType())
-        .Where(p => p.Name != "PayrollRun")
-        .ToList();
-        // make sure the shadow properties are copied too
-        propsList.Insert(1, typeof(PayrollRecord).GetProperty("EmployeeId",
-                       BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy)!);
+        var reportsFolder = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "Reports"));
 
-        var props = propsList.ToArray();
-        worksheet.Cells[1, 1].Value = "PayrollRunNumber";
-        // Write header row
-        for (int col = 0; col < props.Length; col++)
-          worksheet.Cells[1, col + 2].Value = props[col].Name;
+        string destinationFolder = Path.Combine(reportsFolder, run.PayrollRunNumber.ToString(CultureInfo.InvariantCulture));//, ;
+        _ = Directory.CreateDirectory(destinationFolder);
+        string filePath = Path.Combine(destinationFolder, $"PayrollRun_{run.PayrollRunNumber}.xlsx");
 
-        // Write data rows
-        int row = 2;
-        foreach (var record in group)
+        using var package = new ExcelPackage();
+
+        // Group records by concrete type
+        // (PensionDeductions, MedicalAidDeductions)
+        var recordsByType = run.Records.GroupBy(r => r.GetType().Name);
+
+        foreach (var group in recordsByType)
         {
-          worksheet.Cells[row, 1].Value = run.PayrollRunNumber;
+          string sheetName = group.Key;
+          var worksheet = package.Workbook.Worksheets.Add(sheetName);
 
+          // Get all public properties for this type
+          var propsList = GetAllPublicPropertiesFromRecords(group.First().GetType())
+          .Where(p => p.Name != "PayrollRun")
+          .ToList();
+          // make sure the shadow properties are copied too
+          propsList.Insert(1, typeof(PayrollRecord).GetProperty("EmployeeId",
+                         BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy)!);
+
+          var props = propsList.ToArray();
+          worksheet.Cells[1, 1].Value = "Payroll Run Number";
+          // Write headings into the top row
           for (int col = 0; col < props.Length; col++)
+            worksheet.Cells[1, col + 2].Value = props[col].Name;
+
+          // Write data into the excel rows
+          int row = 2;
+          foreach (var record in group)
           {
-            var value = props[col].GetValue(record);
-            worksheet.Cells[row, col + 1].Value = value;
+            worksheet.Cells[row, 1].Value = run.PayrollRunNumber;
+            Console.WriteLine($"?????????????????????? PAYROLL RUN NUMBER {run.PayrollRunNumber}");
+
+            for (int col = 0; col < props.Length; col++)
+            {
+              var value = props[col].GetValue(record);
+              worksheet.Cells[row, col + 2].Value = value;
+            }
+            row++;
           }
-          row++;
+          worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
         }
-
-        worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
+        await package.SaveAsAsync(new FileInfo(filePath));
+        Console.WriteLine($"Payroll Excel report generated: {filePath}");
       }
-
-      await package.SaveAsAsync(new FileInfo(filePath));
-      Console.WriteLine($"Payroll Excel report generated: {filePath}");
-      return filePath;
+      catch (Exception ex)
+      {
+        Console.WriteLine($"FAILED TO WRITE TO PATH DIRECTORY \n{ex}");
+      }
     }
   }
 }

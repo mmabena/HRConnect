@@ -16,9 +16,9 @@ namespace HRConnect.Api.Services
       _payrollPeriodService = payrollPeriodService;
     }
 
-    public async Task<PayrollRunDto?> GetPayrunByIdAsync(int id)
+    public async Task<PayrollRunDto?> GetPayrunByRunNumberAsync(int id)
     {
-      var payrun = await _payrollRunRepo.GetPayrunByIdAsync(id);
+      var payrun = await _payrollRunRepo.GetPayrunByRunNumberAsync(id);
       if (payrun == null)
         return null;
       return payrun.ToPayrollRunDto();
@@ -54,9 +54,9 @@ namespace HRConnect.Api.Services
     {
       var payrun = await _payrollRunRepo.GetCurrentRunAsync();
 
-      if (payrun == null)
-        return null;
-      return payrun;
+      // if (payrun == null)
+      // return null;
+      return payrun!;
     }
 
     public async Task AddRecordToCurrentRunAsync(PayrollRecord payrollRecord, string employeeId)

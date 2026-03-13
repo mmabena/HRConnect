@@ -34,7 +34,7 @@ namespace HRConnect.Api.Repository
     {
       return await _context.PayrollRuns.ToListAsync();
     }
-    public async Task<PayrollRun?> GetPayrunByIdAsync(int id)
+    public async Task<PayrollRun?> GetPayrunByRunNumberAsync(int id)
     {
       var payrun = await _context.PayrollRuns.Where(r => !r.IsLocked).FirstOrDefaultAsync(p => p.PayrollRunNumber == id);
       return payrun;
