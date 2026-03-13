@@ -1,9 +1,10 @@
 namespace HRConnect.Api.Utils.Payroll
 {
+  using global::Quartz;
   using HRConnect.Api.Data;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models.Payroll;
-  using Quartz;
+  //using Quartz;
 
   // Prevent multiple of these jobs from running concurrently
   [DisallowConcurrentExecution]

@@ -81,7 +81,8 @@ namespace HRConnect.Api.Migrations
                     EmployeeId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     StartDate = table.Column<DateOnly>(type: "date", nullable: false),
                     EffectiveDate = table.Column<DateOnly>(type: "date", nullable: false),
-                    PayrollRunId = table.Column<int>(type: "int", nullable: false)
+                    PayrollRunId = table.Column<int>(type: "int", nullable: false),
+                    IsLocked = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {

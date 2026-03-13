@@ -26,5 +26,6 @@ namespace HRConnect.Api.Interfaces
     Task<Employee?> GetEmployeeByTaxNumberAsync(string taxNumber, string employeeId);
     Task<Employee?> GetEmployeeByContactNumberAsync(string contactNumber);
     Task<Employee?> GetEmployeeByContactNumberAsync(string contactNumber, string EmployeeId);
+    Task<List<Employee>> GetAllEmployeeWithAPensionOption();
   }
 }

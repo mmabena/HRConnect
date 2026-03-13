@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRConnect.Api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20260312111648_PayrollService")]
+    [Migration("20260313083813_PayrollService")]
     partial class PayrollService
     {
         /// <inheritdoc />
@@ -503,6 +503,9 @@ namespace HRConnect.Api.Migrations
                     b.Property<string>("EmployeeId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("IsLocked")
+                        .HasColumnType("bit");
 
                     b.Property<int>("PayrollRunId")
                         .HasColumnType("int");

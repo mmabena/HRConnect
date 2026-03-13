@@ -9,18 +9,23 @@
   using HRConnect.Api.Mappers;
   using HRConnect.Api.Models;
   using HRConnect.Api.Models.Payroll;
-  using HRConnect.Api.Models.PayrollDeduction;
+  //using HRConnect.Api.Models.PayrollDeduction;
   using HRConnect.Api.Models.Pension;
   using HRConnect.Api.Utils.Pension.ValidationHelpers;
+  using HRConnect.Api.Utils.Quartz.Pension;
+  using Quartz;
+  //using HRConnect.Api.Utils.Quartz;
+
   //using Microsoft.EntityFrameworkCore;
 
   public class EmployeePensionEnrollmentService(IEmployeePensionEnrollmentRepository employeePensionEnrollmentRepository,
-    IEmployeeRepository employeeRepository, IPayrollRunRepository payrollRunRepository,
+    IEmployeeRepository employeeRepository, IPayrollRunRepository payrollRunRepository, ISchedulerFactory scheduler,
     ApplicationDBContext context) : IEmployeePensionEnrollmentService
   {
     private readonly IEmployeePensionEnrollmentRepository _employeePensionEnrollmentRepository = employeePensionEnrollmentRepository;
     private readonly IEmployeeRepository _employeeRepository = employeeRepository;
     private readonly IPayrollRunRepository _payrollRunRepository = payrollRunRepository;
+    private readonly ISchedulerFactory _schedulerFactory = scheduler;
     private readonly ApplicationDBContext _context = context;
 
     public async Task<EmployeePensionEnrollmentDto> AddEmployeePensionEnrollmentAsync(EmployeePensionEnrollmentAddDto employeePensionEnrollmentDto)
@@ -35,24 +40,43 @@
         throw new InvalidOperationException("Employee does not have a pension option assigned");
       }
 
+      EmployeePensionEnrollment? existingEmployeePensionEnrollment = await _employeePensionEnrollmentRepository.GetByEmployeeIdAsync(employeePensionEnrollmentDto.EmployeeId);
+      if (existingEmployeePensionEnrollment != null)
+      {
+        throw new InvalidOperationException("Employee pension enrollment already exists for this employee");
+      }
+
       employeePensionEnrollment.PensionOptionId = existingEmployee.PensionOptionId.Value;
       employeePensionEnrollment.StartDate = existingEmployee.StartDate;
       PayrollRun? currentPayRollRun = await _payrollRunRepository.GetCurrentRunAsync() ?? throw new NotFoundException("Current payroll run not found");
       employeePensionEnrollment.PayrollRunId = currentPayRollRun.PayrollRunId;
+      employeePensionEnrollment.IsLocked = false;
 
       EmployeePensionEnrollment addedEmployeePensionEnrollment;
       DateOnly today = DateOnly.FromDateTime(DateTime.Today);
-      if (today.Day > 15)
+      if (today.Day > 15 || (employeePensionEnrollmentDto.EffectiveDate.Day > 15))
       {
         DateOnly firstDayNextMonth = new DateOnly(today.Year, today.Month, 1).AddMonths(1);
         employeePensionEnrollment.EffectiveDate = firstDayNextMonth;
-        //Qaurtz schedule
-      }
-      else if (employeePensionEnrollment.EffectiveDate.Day > 15)
-      {
-        DateOnly firstDayNextMonth = new DateOnly(today.Year, today.Month, 1).AddMonths(1);
-        employeePensionEnrollment.EffectiveDate = firstDayNextMonth;
-        //Qaurtz schedule
+        //Qaurtz reschedule
+        IJobDetail job = JobBuilder.Create<EmployeePensionEnrollmentJob>()
+          .WithIdentity($"pensionenrollmentjob_{existingEmployee.EmployeeId}")
+          .UsingJobData("EmployeeId", existingEmployee.EmployeeId)
+          .Build();
+
+        ITrigger trigger = TriggerBuilder.Create()
+          //.StartAt(employeePensionEnrollment.EffectiveDate.ToDateTime(TimeOnly.MinValue))
+          .StartAt(DateBuilder.FutureDate(40, IntervalUnit.Second))
+          .Build();
+
+        IScheduler schedulerInstance = await _schedulerFactory.GetScheduler();
+        _ = await schedulerInstance.ScheduleJob(job, trigger);
+
+        EmployeePensionEnrollmentDto responseEmployeePensionEnrollmentDto = employeePensionEnrollment.ToEmployeePensionEnrollmentDto();
+        responseEmployeePensionEnrollmentDto.WarningMessage =
+          "Employee pension enrollment has been scheduled for the next month as the effective date falls after the 15th of the month.";
+
+        return responseEmployeePensionEnrollmentDto;
       }
       else
       {

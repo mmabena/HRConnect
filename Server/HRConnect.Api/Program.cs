@@ -20,6 +20,7 @@ using Audit.Core;
 using Audit.EntityFramework;
 using Quartz;
 using HRConnect.Api.Interfaces.Pension;
+using HRConnect.Api.Utils.Quartz.Pension;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -150,6 +151,17 @@ builder.Services.AddQuartz(q =>
   // * -> for any/every month 
   // ? -> for all days of the week
 
+  JobKey pensionEnrollJobKey = new("EmployeePensionEnrollmentJob");
+
+  q.AddJob<EmployeePensionRollOverJob>(opts => 
+  opts.WithIdentity(pensionEnrollJobKey)
+      .StoreDurably());
+
+  q.AddTrigger(opts => opts
+    .ForJob(pensionEnrollJobKey)
+    .WithIdentity("EmployeePensionRollOverJob-Trigger")
+    .WithCronSchedule("0 0/1 * * * ?", x => x.WithMisfireHandlingInstructionFireAndProceed()));
+
   //Adding persistence to quartz to be able to be run in the back
   q.UsePersistentStore(options =>
   {
@@ -163,6 +175,9 @@ builder.Services.AddQuartzHostedService(q =>
 {
   q.WaitForJobsToComplete = true;
 });
+
+builder.Services.AddSingleton(provider =>
+  provider.GetRequiredService<ISchedulerFactory>().GetScheduler().GetAwaiter().GetResult());
 
 //Register payroll stuff
 builder.Services.AddScoped<IPayrollPeriodRepository, PayrollPeriodRepository>();

@@ -7,5 +7,6 @@
     public DateOnly? StartDate { get; set; }
     public DateOnly? EffectiveDate { get; set; }
     public int PayrollRunId { get; set; }
+    public string? WarningMessage { get; set; }
   }
 }
