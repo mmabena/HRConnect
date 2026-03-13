@@ -109,7 +109,7 @@ namespace HRConnect.Api.Services
       var resetPin = await _passwordResetRepo.CreatePinAsync(user.UserId, email, pin);
 
       var emailSubject = "Password Reset PIN";
-      var emailBody = $"Your password reset PIN is: {pin}\n\nThis PIN is valid for 1 minute only.";
+      var emailBody = $"Your password reset PIN is: {pin}\n\nThis PIN is valid for 3 minute only.";
       await _emailService.SendEmailAsync(email, emailSubject, emailBody);
 
       return (pin, resetPin.ExpiresAt);

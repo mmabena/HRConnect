@@ -36,11 +36,13 @@ namespace HRConnect.Api.Services
   public class EmployeeService : IEmployeeService
   {
     private readonly IEmployeeRepository _employeeRepo;
+    private readonly IPositionRepository _positionRepo;
     private readonly IEmailService _emailService;
-    public EmployeeService(IEmployeeRepository employeeRepo, IEmailService emailService)
+    public EmployeeService(IEmployeeRepository employeeRepo, IEmailService emailService, IPositionRepository positionRepo)
     {
       _employeeRepo = employeeRepo;
       _emailService = emailService;
+      _positionRepo = positionRepo;
     }
     /// <summary>
     /// Retrieves all employees from the repository.
@@ -56,9 +58,9 @@ namespace HRConnect.Api.Services
     /// </summary>
     /// <param name="EmployeeId">The employee identifier.</param>
     /// <returns>The employee if found; otherwise null.</returns>
-    public async Task<EmployeeDto?> GetEmployeeByIdAsync(string EmployeeId)
+    public async Task<EmployeeDto?> GetEmployeeByIdAsync(string employeeId)
     {
-      var employee = await _employeeRepo.GetEmployeeByIdAsync(EmployeeId);
+      var employee = await _employeeRepo.GetEmployeeByIdAsync(employeeId);
       return employee?.ToEmployeeDto();
     }
     /// <summary>
@@ -82,7 +84,15 @@ namespace HRConnect.Api.Services
       // Ensure Title and Gender combination is valid
       ValidateTitleAndGender(employeeRequestDto);
       employeeRequestDto.EmployeeId = await GenerateUniqueEmpId(employeeRequestDto.Surname);
+
+      var position = await _positionRepo.GetPositionByIdAsync(employeeRequestDto.PositionId);
+      if (position == null)
+        throw new ValidationException($"Position with ID {employeeRequestDto.PositionId} does not exist.");
+
       var new_employee = employeeRequestDto.ToEmployeeFromCreateDTO();
+
+      new_employee.PositionId = position.PositionId;
+      new_employee.Position = position;
 
       using var transaction = await _employeeRepo.BeginTransactionAsync();
       try
@@ -107,9 +117,9 @@ namespace HRConnect.Api.Services
     /// <param name="EmployeeId">The employee identifier.</param>
     /// <param name="employeeDto">Updated employee data.</param>
     /// <returns>The updated employee or null if not found.</returns>
-    public async Task<EmployeeDto?> UpdateEmployeeAsync(string EmployeeId, UpdateEmployeeRequestDto employeeDto)
+    public async Task<EmployeeDto?> UpdateEmployeeAsync(string employeeId, UpdateEmployeeRequestDto employeeDto)
     {
-      var existingEmployee = await _employeeRepo.GetEmployeeByIdAsync(EmployeeId);
+      var existingEmployee = await _employeeRepo.GetEmployeeByIdAsync(employeeId);
       if (existingEmployee == null)
         throw new NotFoundException("Employee not found");
 
@@ -117,9 +127,16 @@ namespace HRConnect.Api.Services
       ValidateCommonFields(employeeDto);
       ValidateUpdate(employeeDto);
       //Check for duplicate entries
-      await CheckDuplicateOnUpdate(EmployeeId, employeeDto);
+      await CheckDuplicateOnUpdate(employeeId, employeeDto);
 
-      await ValidateCareerManagerAsync(EmployeeId, employeeDto.CareerManagerID);
+      var position = await _positionRepo.GetPositionByIdAsync(employeeDto.PositionId);
+      if (position == null)
+        throw new ValidationException($"Position with ID {employeeDto.PositionId} does not exist.");
+
+      existingEmployee.PositionId = position.PositionId;
+      existingEmployee.Position = position;
+
+      await ValidateCareerManagerAsync(employeeId, employeeDto.CareerManagerID);
 
       existingEmployee.Title = employeeDto.Title;
       existingEmployee.Name = employeeDto.Name;
@@ -132,6 +149,9 @@ namespace HRConnect.Api.Services
       existingEmployee.PositionId = employeeDto.PositionId;
       existingEmployee.MonthlySalary = employeeDto.MonthlySalary;
       existingEmployee.CareerManagerID = employeeDto.CareerManagerID;
+      existingEmployee.ProfileImage = employeeDto.ProfileImage;
+      existingEmployee.HasDisability = employeeDto.HasDisability;
+      existingEmployee.DisabilityDescription = employeeDto.DisabilityDescription;
       existingEmployee.UpdatedAt = DateTime.UtcNow;
 
       var updatedEmployee = await _employeeRepo.UpdateEmployeeAsync(existingEmployee);
@@ -142,9 +162,9 @@ namespace HRConnect.Api.Services
     /// </summary>
     /// <param name="EmployeeId">The employee identifier.</param>
     /// <returns>True if deletion successful.</returns>
-    public async Task<bool> DeleteEmployeeAsync(string EmployeeId)
+    public async Task<bool> DeleteEmployeeAsync(string employeeId)
     {
-      var existingEmployee = await _employeeRepo.GetEmployeeByIdAsync(EmployeeId);
+      var existingEmployee = await _employeeRepo.GetEmployeeByIdAsync(employeeId);
 
       if (existingEmployee == null)
         throw new NotFoundException("Employee not found");
@@ -155,7 +175,7 @@ namespace HRConnect.Api.Services
       {
         throw new ArgumentException("Employee can only be deleted in the same month they started.");
       }
-      return await _employeeRepo.DeleteEmployeeAsync(EmployeeId);
+      return await _employeeRepo.DeleteEmployeeAsync(employeeId);
     }
     /// <summary>
     /// Generates a unique Employee ID based on surname prefix and existing IDs.
@@ -224,6 +244,11 @@ namespace HRConnect.Api.Services
 
       employeeRequestDto.Gender = employeeInfo.Gender;
       employeeRequestDto.DateOfBirth = employeeInfo.DateOfBirth;
+
+      if (employeeInfo.IsSouthAfricanCitizen)
+      {
+        employeeRequestDto.Nationality = "South African";
+      }
     }
     /// <summary>
     /// Ensures the employee meets the minimum age requirement based on employment status.
@@ -234,16 +259,7 @@ namespace HRConnect.Api.Services
 
     private static void EnsureEmployeeMeetsAgePolicy(DateOnly dateOfBirth, EmploymentStatus employmentStatus)
     {
-      if (dateOfBirth > DateOnly.FromDateTime(DateTime.UtcNow))
-        throw new ValidationException("Date of birth cannot be in the future");
-
-      int age = AgeCalculator.CalculateAge(dateOfBirth);
-
-      // Example policy: contracts can start at 16, others 18
-      int minimumAge = employmentStatus == EmploymentStatus.Contract ? 16 : 18;
-
-      if (age < minimumAge)
-        throw new ValidationException($"Employee must be at least {minimumAge} years old.");
+      EmployeeValidationHelpers.ValidateDateOfBirth(dateOfBirth, employmentStatus);
     }
     /// <summary>
     /// Validates that the employee title matches the provided gender.
@@ -252,16 +268,7 @@ namespace HRConnect.Api.Services
     /// <returns>Validation error if title and gender are not logically valid</returns>
     private static void ValidateTitleAndGender(CreateEmployeeRequestDto employeeRequestDto)
     {
-      if (employeeRequestDto.Title == Title.Mr)
-      {
-        if (employeeRequestDto.Gender != Gender.Male)
-          throw new ValidationException("Title 'Mr' must have gender 'Male'");
-      }
-      else if (employeeRequestDto.Title == Title.Mrs || employeeRequestDto.Title == Title.Ms)
-      {
-        if (employeeRequestDto.Gender != Gender.Female)
-          throw new ValidationException("Title 'Mrs' or 'Ms' must have gender 'Female'");
-      }
+      EmployeeValidationHelpers.ValidateTitleGenderCombo(employeeRequestDto.Title, employeeRequestDto.Gender);
     }
     /// <summary>
     /// Checks for duplicate employee records during creation.
@@ -270,18 +277,7 @@ namespace HRConnect.Api.Services
     /// <returns>Error message if duplicate record is found</returns>
     private async Task CheckDuplicates(CreateEmployeeRequestDto employeeRequestDto)
     {
-      var existing = await _employeeRepo.GetEmployeeByEmailAsync(employeeRequestDto.Email);
-      if (existing != null)
-        throw new BusinessRuleException("Email is already in use");
-
-      if (!string.IsNullOrWhiteSpace(employeeRequestDto.TaxNumber) && await _employeeRepo.GetEmployeeByTaxNumberAsync(employeeRequestDto.TaxNumber) != null)
-        throw new BusinessRuleException("An employee with the same tax number already exists");
-
-      if (!string.IsNullOrWhiteSpace(employeeRequestDto.IdNumber) && await _employeeRepo.GetEmployeeByIdNumberAsync(employeeRequestDto.IdNumber) != null)
-        throw new BusinessRuleException("An employee with the same ID number already exists");
-
-      if (await _employeeRepo.GetEmployeeByContactNumberAsync(employeeRequestDto.ContactNumber) != null)
-        throw new BusinessRuleException("An employee with the same contact number already exists");
+      await EmployeeValidationHelpers.ValidateNoDuplicatesOnCreateAsync(_employeeRepo, employeeRequestDto);
     }
     /// <summary>
     /// Checks for duplicate employee records during update.
@@ -291,21 +287,7 @@ namespace HRConnect.Api.Services
     /// <returns>Error message if duplicate record is found</returns>
     private async Task CheckDuplicateOnUpdate(string employeeId, UpdateEmployeeRequestDto employeeRequestDto)
     {
-      if (!string.IsNullOrWhiteSpace(employeeRequestDto.Email) &&
-  await _employeeRepo.GetEmployeeByEmailAsync(employeeRequestDto.Email, employeeId) != null)
-        throw new BusinessRuleException("Another employee with the same email already exists");
-
-      if (!string.IsNullOrWhiteSpace(employeeRequestDto.IdNumber) &&
-          await _employeeRepo.GetEmployeeByIdNumberAsync(employeeRequestDto.IdNumber, employeeId) != null)
-        throw new BusinessRuleException("Another employee with the same Id Number already exists");
-
-      if (!string.IsNullOrWhiteSpace(employeeRequestDto.PassportNumber) &&
-          await _employeeRepo.GetEmployeeByPassportAsync(employeeRequestDto.PassportNumber, employeeId) != null)
-        throw new BusinessRuleException("Another employee with the same passport number already exists");
-
-      if (!string.IsNullOrWhiteSpace(employeeRequestDto.ContactNumber) &&
-          await _employeeRepo.GetEmployeeByContactNumberAsync(employeeRequestDto.ContactNumber, employeeId) != null)
-        throw new BusinessRuleException("Another employee with the same contact number already exists");
+      await EmployeeValidationHelpers.ValidateNoDuplicatesOnUpdateAsync(_employeeRepo, employeeId, employeeRequestDto);
     }
     /// <summary>
     /// Validates common employee input fields for both create and update operations.
@@ -314,85 +296,20 @@ namespace HRConnect.Api.Services
     /// <returns>Validation error if input fields are invalid</returns>
     private static void ValidateCommonFields(EmployeeBaseRequestDto employeeRequestDto)
     {
-      var allowedExtensions = new[] { ".png", ".jpg", ".jpeg" };
-      bool isIdNumberProvided = !string.IsNullOrWhiteSpace(employeeRequestDto.IdNumber);
-      bool isPassportProvided = !string.IsNullOrWhiteSpace(employeeRequestDto.PassportNumber);
-      if (!isIdNumberProvided && !isPassportProvided)
-        throw new ValidationException("Either National ID or Passport is required");
-
-      if (isIdNumberProvided && isPassportProvided)
-        throw new ValidationException("You cannot enter both ID Number and Passport Number");
-
-      if (!string.IsNullOrWhiteSpace(employeeRequestDto.IdNumber) && employeeRequestDto.IdNumber.Length != 13)
-        throw new ValidationException("ID Number must be 13 digits long");
-
-      if (string.IsNullOrWhiteSpace(employeeRequestDto.Name))
-        throw new ValidationException("Employee name is required");
-
-      if (employeeRequestDto.Name.Length > 50)
-        throw new ValidationException("Employee name must not exceed 50 characters");
-
-      if (string.IsNullOrWhiteSpace(employeeRequestDto.Surname))
-        throw new ValidationException("Employee surname is required");
-
-      if (employeeRequestDto.Surname.Length > 100)
-        throw new ValidationException("Employee surname must not exceed 100 characters");
-
-      if (employeeRequestDto.HasDisability && string.IsNullOrWhiteSpace(employeeRequestDto.DisabilityDescription))
-        throw new ValidationException("Disability description is required if HasDisability is true.");
-
-      if (!employeeRequestDto.HasDisability && !string.IsNullOrWhiteSpace(employeeRequestDto.DisabilityDescription))
-        throw new ValidationException("Disability description must be empty if HasDisability is false.");
-
-      if (string.IsNullOrWhiteSpace(employeeRequestDto.ContactNumber))
-        throw new ValidationException("Employee contact number is required");
-
-      if (employeeRequestDto.ContactNumber.Length != 10)
-        throw new ValidationException("Contact number must be 10 digits long");
-
-      if (!Enum.IsDefined<Title>(employeeRequestDto.Title))
-        throw new ValidationException("Employee Title is invalid");
-
-      if (employeeRequestDto.ContactNumber.Length != 10)
-        throw new ValidationException("Contact number must be 10 digits long");
-
-      if (string.IsNullOrWhiteSpace(employeeRequestDto.Email) || !employeeRequestDto.Email.EndsWith("@singular.co.za", StringComparison.OrdinalIgnoreCase))
-        throw new ValidationException("Email must end with '@singular.co.za'");
-
-      if (string.IsNullOrWhiteSpace(employeeRequestDto.PhysicalAddress))
-        throw new ValidationException("Employee physical address is required");
-
-      if (string.IsNullOrWhiteSpace(employeeRequestDto.City))
-        throw new ValidationException("Employee City is required");
-
-      CityZipValidator.ValidateCityAndZip(
-          employeeRequestDto.City,
-          employeeRequestDto.ZipCode
-      );
-
-      if (!Enum.IsDefined<Branch>(employeeRequestDto.Branch))
-        throw new ValidationException("Branch must either be 'Johannesburg', 'Cape Town' or 'UK'");
-
-      if (!Enum.IsDefined<EmploymentStatus>(employeeRequestDto.EmploymentStatus))
-        throw new ValidationException("Employment status must either be 'Permanent', 'Fixed-Term' or 'Contract'");
-
-      if (employeeRequestDto.MonthlySalary <= 0)
-        throw new ValidationException("Monthly salary must be greater than 0");
-
-      if (employeeRequestDto.MonthlySalary >= 100000)
-        throw new ValidationException("Monthly salary must not exceed 100 000");
-
+      EmployeeValidationHelpers.ValidateRequiredString(employeeRequestDto.Name, "Employee name", 50);
+      EmployeeValidationHelpers.ValidateRequiredString(employeeRequestDto.Surname, "Employee surname", 100);
+      EmployeeValidationHelpers.ValidateEmail(employeeRequestDto.Email);
+      EmployeeValidationHelpers.ValidateNumericString(employeeRequestDto.ContactNumber, "Contact number", 10);
+      EmployeeValidationHelpers.ValidateEnum(employeeRequestDto.Title, "Title");
+      EmployeeValidationHelpers.ValidateEnum(employeeRequestDto.Branch, "Branch");
+      EmployeeValidationHelpers.ValidateEnum(employeeRequestDto.EmploymentStatus, "Employment status");
+      EmployeeValidationHelpers.ValidateSalary(employeeRequestDto.MonthlySalary);
+      EmployeeValidationHelpers.ValidateImageFile(employeeRequestDto.ProfileImage);
+      EmployeeValidationHelpers.ValidateDisabilityFields(employeeRequestDto.HasDisability, employeeRequestDto.DisabilityDescription);
+      EmployeeValidationHelpers.ValidateNationality(employeeRequestDto.IdNumber, employeeRequestDto.PassportNumber, employeeRequestDto.Nationality);
+      EmployeeValidationHelpers.ValidateCityZip(employeeRequestDto.City, employeeRequestDto.ZipCode);
       if (employeeRequestDto.PositionId <= 0)
         throw new ValidationException("Position ID must be greater than 0");
-
-
-      var extension = Path.GetExtension(employeeRequestDto.ProfileImage);
-
-      if (string.IsNullOrWhiteSpace(extension) ||
-          !allowedExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
-      {
-        throw new ValidationException("Employee picture must be a valid image file (.png, .jpg, .jpeg, .gif, .bmp, .webp)");
-      }
     }
     /// <summary>
     /// Performs additional validation rules specific to employee creation.
@@ -401,42 +318,13 @@ namespace HRConnect.Api.Services
     /// <returns>Validation error if create rules are not satisfied</returns>
     private static void ValidateCreate(CreateEmployeeRequestDto employeeRequestDto)
     {
-      var now = DateTime.UtcNow;
-      bool isIdNumberProvided = !string.IsNullOrWhiteSpace(employeeRequestDto.IdNumber);
-      bool isPassportProvided = !string.IsNullOrWhiteSpace(employeeRequestDto.PassportNumber);
-
-      if (employeeRequestDto.StartDate == default)
-        throw new ValidationException("Start date is required");
-
-      if (employeeRequestDto.StartDate.Month != now.Month || employeeRequestDto.StartDate.Year != now.Year)
+      EmployeeValidationHelpers.ValidateStartDate(employeeRequestDto.StartDate);
+      EmployeeValidationHelpers.ValidateTaxNumber(employeeRequestDto.TaxNumber);
+      if (!string.IsNullOrWhiteSpace(employeeRequestDto.PassportNumber) && string.IsNullOrWhiteSpace(employeeRequestDto.IdNumber))
       {
-        throw new ValidationException(
-            "Start date must be within the current month."
-        );
+        EnsureEmployeeMeetsAgePolicy(employeeRequestDto.DateOfBirth, employeeRequestDto.EmploymentStatus);
+        EmployeeValidationHelpers.ValidateGender(employeeRequestDto.Gender);
       }
-
-      if (isPassportProvided && !isIdNumberProvided)
-      {
-        if (employeeRequestDto.DateOfBirth == default)
-          throw new ValidationException("Date of Birth is required if ID Number is not provided");
-
-        int age = AgeCalculator.CalculateAge(employeeRequestDto.DateOfBirth);
-        if (age < 18)
-          throw new ValidationException("Employee must be at least 18 years old.");
-
-        if (!employeeRequestDto.Gender.HasValue)
-          throw new ValidationException("Gender is required when using Passport");
-
-        if (!Enum.IsDefined(employeeRequestDto.Gender.Value))
-          throw new ValidationException("Gender must be either Male or Female");
-
-      }
-      if (!string.IsNullOrWhiteSpace(employeeRequestDto.TaxNumber) &&
-          employeeRequestDto.TaxNumber.Length != 10)
-      {
-        throw new ValidationException("Tax Number must be 10 digits long");
-      }
-
     }
     // <summary>
     /// Performs additional validation rules specific to employee updates.
@@ -445,54 +333,14 @@ namespace HRConnect.Api.Services
     /// <returns>Validation error if update rules are not satisfied</returns>
     private static void ValidateUpdate(UpdateEmployeeRequestDto employeeRequestDto)
     {
-      if (employeeRequestDto.MonthlySalary <= 0)
-        throw new ValidationException("Monthly salary must be greater than 0");
-
-      if (employeeRequestDto.MonthlySalary >= 100000)
-        throw new ValidationException("Monthly salary must not exceed 100 000");
+      EmployeeValidationHelpers.ValidateSalary(employeeRequestDto.MonthlySalary);
+    }
+    private async Task ValidateCareerManagerAsync(string employeeId, string? careerManagerId)
+    {
+      await EmployeeValidationHelpers.ValidateCareerManagerAsync(_employeeRepo, employeeId, careerManagerId);
     }
 
-    /// <summary>
-    /// Checks for duplicate records when updating an employee.
-    /// </summary>
-    /// <param name="EmployeeId">The employee identifier</param>
-    /// <param name="employeeRequestDto">The employee update request DTO</param>
-    /// <returns>Error message if duplicate is found</returns>
-    private async Task CheckForDuplicatesonUpdate(string employeeId, UpdateEmployeeRequestDto employeeRequestDto)
-    {
-      var existingEmployee = await _employeeRepo.GetEmployeeByIdAsync(employeeId);
-
-      if (existingEmployee == null)
-        throw new NotFoundException("Employee not found");
-
-      if (await _employeeRepo.GetEmployeeByEmailAsync(employeeRequestDto.Email, employeeId) != null)
-        throw new BusinessRuleException("Another employee with the same email already exists");
-
-      if (!string.IsNullOrWhiteSpace(employeeRequestDto.IdNumber) && await _employeeRepo.GetEmployeeByIdNumberAsync(employeeRequestDto.IdNumber, employeeId) != null)
-        throw new BusinessRuleException("Another employee with the same ID number already exists");
-
-      if (!string.IsNullOrWhiteSpace(employeeRequestDto.PassportNumber) && await _employeeRepo.GetEmployeeByPassportAsync(employeeRequestDto.PassportNumber, employeeId) != null)
-        throw new BusinessRuleException("Another employee with the same passport number already exists");
-
-      if (await _employeeRepo.GetEmployeeByContactNumberAsync(employeeRequestDto.ContactNumber, employeeId) != null)
-        throw new BusinessRuleException("Another employee with the same contact number already exists");
-    }
-    private async Task ValidateCareerManagerAsync(string employeeId, string? CareerMangerId)
-    {
-      if (string.IsNullOrWhiteSpace(CareerMangerId))
-        return;
-
-      if (CareerMangerId == employeeId)
-        throw new BusinessRuleException("Employee cannot be their own Career Manager");
-
-      var manager = await _employeeRepo.GetEmployeeByIdAsync(CareerMangerId);
-
-            if (manager == null)
-                throw new BusinessRuleException("Career Manager must be an existing Employee");
-                
-        }
-
-    public async Task<EmployeeDto?> GetEmployeeByEmailAsync(string employeeEmail)
+     public async Task<EmployeeDto?> GetEmployeeByEmailAsync(string employeeEmail)
     {
       Employee? employee = await _employeeRepo.GetEmployeeByEmailAsync(employeeEmail);
       return employee?.ToEmployeeDto();

@@ -10,6 +10,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 import "./Components/MenuBar/MenuBar.css";
+import AddEmployeeModal from "./Components/AddEmployeeModal";
 import UserManagement from "./Components/UserManagement";
 import ViewPositionManagement from "./Components/ViewPositionManagement";
 import TaxTableUpload from "./Components/companyManagement/TaxTableManagement/TaxTableUpload";
@@ -23,26 +24,57 @@ import TaxTableManagement from "./Components/companyManagement/TaxTableManagemen
 import ChangePassword from "./Components/ChangePassword";
 import MenuBar from "./Components/MenuBar/MenuBar";
 import EmployeeList from "./Pages/EmployeeManagement/EmployeeList";
-import PositionManagement from "./Pages/CompanyManagement/PositionManagement/PositionManagement"; 
+import PositionManagement from "./Pages/CompanyManagement/PositionManagement/PositionManagement";
 import ProjectionCalculator from "./Pages/PayrollTools/ProjectionCalculator";
+import PersonalInformation from "./Components/PersonalInformation.jsx";
+import api from "../src/api/api.js";
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    const token = localStorage.getItem("token");
+    const storedUser = localStorage.getItem("currentUser");
+    return !!token && !!storedUser;
+  });
+  const [currentUser, setCurrentUser] = useState(() => {
+    const storedUser = localStorage.getItem("currentUser");
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("currentUser");
+    const fetchUserData = async () => {
+      const token = localStorage.getItem("token");
+      const storedUser = localStorage.getItem("currentUser");
 
-    if (storedUser) {
+      if (!token || !storedUser) return;
+
       try {
         const parsedUser = JSON.parse(storedUser);
-        setCurrentUser(parsedUser);
-        setIsLoggedIn(true);
-      } catch {
-        localStorage.removeItem("currentUser");
+        const email = parsedUser.email;
+
+        const empResp = await api.get(`/employee/email/${email}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const employee = empResp.data;
+
+        const mergedUser = {
+          ...parsedUser,
+          username: `${employee.name} ${employee.surname}`,
+          jobTitle: employee.positionTitle,
+          employmentStatus: employee.employmentStatus,
+          dateOfBirth: employee.dateOfBirth,
+          profileImage: employee.profileImage,
+        };
+
+        setCurrentUser(mergedUser);
+        localStorage.setItem("currentUser", JSON.stringify(mergedUser));
+      } catch (error) {
+        console.error("Failed to fetch employee:", error);
       }
-    }
+    };
+
+    fetchUserData();
   }, []);
 
   const handleForgotPasswordClick = () => {
@@ -61,14 +93,43 @@ function App() {
   };
 
   // FIXED: Use backend user object directly
- const handleLoginSuccess = (userWithToken) => {
-  setCurrentUser(userWithToken);
+  const handleLoginSuccess = async (backendUserData) => {
+    try {
+      const token = localStorage.getItem("token");
 
-   localStorage.setItem("currentUser", JSON.stringify(userWithToken));
-   console.log("App currentUser:", userWithToken);
-  setIsLoggedIn(true);
-  navigate("/dashboard");
-};
+      let employee = null;
+
+      try {
+        const empResp = await api.get("/employee", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        employee = empResp.data.find(
+          (emp) => emp.email === backendUserData.email,
+        );
+      } catch (err) {
+        console.warn("Employee endpoint not accessible for this role");
+      }
+
+      const mergedUser = {
+        ...backendUserData,
+        username: employee
+          ? `${employee.name} ${employee.surname}`
+          : backendUserData.email,
+        jobTitle: employee?.positionTitle || "NormalUser",
+        employmentStatus: employee?.employmentStatus,
+        dateOfBirth: employee?.dateOfBirth,
+      };
+
+      setCurrentUser(mergedUser);
+      localStorage.setItem("currentUser", JSON.stringify(mergedUser));
+      setIsLoggedIn(true);
+
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Login error:", error);
+    }
+  };
 
   if (!isLoggedIn) {
     return (
@@ -92,45 +153,71 @@ function App() {
     );
   }
 
+  // console.log("App currentUser:", currentUser);
 
- console.log("App currentUser:", currentUser);
-
- return (
- <div className="App">
- <MenuBar currentUser={currentUser} onLogout={handleLogout} />
- <div>
- <ToastContainer position="top-right" autoClose={3000} />
- <Routes>
-      <Route path="/dashboard" element={<div>Welcome to Dashboard</div>} />
-      <Route path="/addEmployee" element={<AddEmployee />} />
-      <Route path="/editEmployee" element={<EditEmployee />} />
-      <Route path="/editEmployee/:employeeNumber" element={<EditEmployee />} />
-      <Route path="/addCompany" element={<AddCompany />} />
-      <Route path="/companyManagement" element={<CompanyManagement/>} />
-      <Route path="/editCompany/:id" element={<EditCompany />} />
-      <Route path="/employeeList" element={<EmployeeList />} />
-      <Route path="/company-contribution" element={<CompanyContribution />} />
-      <Route path="/userManagement" element={<UserManagement />} /> 
-      <Route path="/taxTableManagement" element={<TaxTableManagement />} />
-      <Route path="/taxTableUpload" element={<TaxTableUpload />} />
-      <Route path="/positionManagement" element={<PositionManagement />} />
-      <Route path="/addPositionManagement" element={<AddPositionManagement />} />
-      <Route path="/editPositionManagement/:id" element={<EditPositionManagement />} />
-      <Route path="/viewPositionManagement/:id" element={<ViewPositionManagement />} />
-      <Route path="/profile" element={<Profile currentUser={currentUser} />}/>
-      <Route path="/company-contribution" element={<CompanyContribution />} />
-      <Route path="/compensationPlanning" element={<CompensationPlanning />} />
-      <Route path="/change-password" element={<ChangePassword currentUser={currentUser}/>} />
-      <Route 
-      path="/profile"
-        element={<Profile currentUser={currentUser} />}
-      />
-      <Route path="/projection-calculator" element={<ProjectionCalculator />} />
-  </Routes>
-
-</div>
- </div>
-);
+  return (
+    <div className="App">
+      <MenuBar currentUser={currentUser} onLogout={handleLogout} />
+      <div>
+        <ToastContainer position="top-right" autoClose={3000} />
+        <Routes>
+          <Route path="/dashboard" element={<div>Welcome to Dashboard</div>} />
+          <Route path="/addEmployee" element={<AddEmployee />} />
+          <Route path="/addEmployeeModal" element={<AddEmployeeModal />} />
+          <Route path="/editEmployee" element={<EditEmployee />} />
+          <Route
+            path="/editEmployee/:employeeNumber"
+            element={<EditEmployee />}
+          />
+          <Route path="/addCompany" element={<AddCompany />} />
+          <Route path="/companyManagement" element={<CompanyManagement />} />
+          <Route path="/editCompany/:id" element={<EditCompany />} />
+          <Route path="/employeeList" element={<EmployeeList />} />
+          <Route
+            path="/company-contribution"
+            element={<CompanyContribution />}
+          />
+          <Route path="/userManagement" element={<UserManagement />} />
+          <Route path="/taxTableManagement" element={<TaxTableManagement />} />
+          <Route path="/taxTableUpload" element={<TaxTableUpload />} />
+          <Route path="/positionManagement" element={<PositionManagement />} />
+          <Route
+            path="/addPositionManagement"
+            element={<AddPositionManagement />}
+          />
+          <Route
+            path="/editPositionManagement/:id"
+            element={<EditPositionManagement />}
+          />
+          <Route
+            path="/viewPositionManagement/:id"
+            element={<ViewPositionManagement />}
+          />
+          <Route
+            path="/company-contribution"
+            element={<CompanyContribution />}
+          />
+          <Route
+            path="/compensationPlanning"
+            element={<CompensationPlanning />}
+          />
+          <Route
+            path="/change-password"
+            element={<ChangePassword currentUser={currentUser} />}
+          />
+          <Route
+            path="/profile"
+            element={<Profile currentUser={currentUser} />}
+          />
+          <Route
+            path="/projection-calculator"
+            element={<ProjectionCalculator />}
+          />
+          <Route path="/personal" element={<PersonalInformation />} />
+        </Routes>
+      </div>
+    </div>
+  );
 }
 
 export default App;

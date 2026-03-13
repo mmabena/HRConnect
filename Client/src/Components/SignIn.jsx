@@ -67,7 +67,7 @@ const SignIn = ({ onForgotPasswordClick, onLoginSuccess }) => {
 
       <div className="auth-content">
         <div className="column left-column">
-          <div className="left-inner-column" style={{ marginLeft: '50px' }}>
+          <div className="left-inner-column">
             <div className="adjusted-content">
               <div className="welcome-text">Welcome!</div>
               <div className="log-details">

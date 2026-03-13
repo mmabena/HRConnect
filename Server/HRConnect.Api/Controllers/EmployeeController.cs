@@ -4,13 +4,13 @@ namespace HRConnect.Api.Controllers
   using System.Linq;
   using System.Threading.Tasks;
   using HRConnect.Api.Mappers;
+  using HRConnect.Api.Models;
   using Microsoft.AspNetCore.Mvc;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.DTOs.Employee;
   using Microsoft.AspNetCore.Authorization;
   [Route("api/employee")]
   [ApiController]
-
   public class EmployeeController : ControllerBase
   {
     private readonly IEmployeeService _employeeService;
@@ -67,7 +67,7 @@ namespace HRConnect.Api.Controllers
     public async Task<IActionResult> CreateEmployee([FromBody] CreateEmployeeRequestDto employeeDto)
     {
       var employee = await _employeeService.CreateEmployeeAsync(employeeDto);
-      return CreatedAtAction(nameof(GetEmployeeById), new { EmployeeId = employee.EmployeeId }, employee);
+      return CreatedAtAction(nameof(GetEmployeeById), new { employeeId = employee.EmployeeId }, employee);
     }
     /// <summary>
     /// Updates an existing employee (SuperUser only).

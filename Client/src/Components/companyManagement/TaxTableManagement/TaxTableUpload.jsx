@@ -33,6 +33,8 @@ function TaxTableUpload({ onClose, onUploadSuccess, existingYears = [] }) {
   const [file, setFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
+  const [yearError, setYearError] = useState("");
+  const [fileError, setFileError] = useState("");
 
   const financialYears = useMemo(() => {
     return generateFinancialYears(existingYears);
@@ -44,13 +46,13 @@ function TaxTableUpload({ onClose, onUploadSuccess, existingYears = [] }) {
 
     const ext = selected.name.split(".").pop().toLowerCase();
     if (!["xls", "xlsx"].includes(ext)) {
-      toast.error("Only Excel files (.xls, .xlsx) are allowed.");
+      setYearError("Only Excel files (.xls, .xlsx) are allowed.");
       fileInputRef.current.value = "";
       return;
     }
 
     if (!year) {
-      toast.warning("Please select a financial year before uploading.");
+      setYearError("Please select a financial year before uploading.");
       fileInputRef.current.value = "";
       return;
     }
@@ -58,14 +60,14 @@ function TaxTableUpload({ onClose, onUploadSuccess, existingYears = [] }) {
     const startYear = parseInt(year.split("-")[0], 10);
 
     if (existingYears.includes(startYear)) {
-      toast.error("A tax table for this year already exists.");
+      setYearError("A tax table for this year already exists.");
       fileInputRef.current.value = "";
       return;
     }
 
     const currentYear = new Date().getFullYear();
     if (startYear > currentYear + 1) {
-      toast.error("Cannot upload a tax table beyond next year.");
+      setYearError("Cannot upload a tax table beyond next year.");
       fileInputRef.current.value = "";
       return;
     }
@@ -93,7 +95,7 @@ function TaxTableUpload({ onClose, onUploadSuccess, existingYears = [] }) {
       onUploadSuccess?.();
     } catch (err) {
       console.error("Upload failed:", err);
-      toast.error(err.response?.data || err.message || "Upload failed.");
+     setYearError(err.response?.data || err.message || "Upload failed.");
     } finally {
       setIsUploading(false);
     }
@@ -102,7 +104,6 @@ function TaxTableUpload({ onClose, onUploadSuccess, existingYears = [] }) {
   return (
     <div className="tax-table-popup-container">
       <div className="tax-table-frame">
-        <div className="tax-table-content-centered">
 
           <button className="x-btn" onClick={onClose}>✕</button>
 
@@ -115,20 +116,31 @@ function TaxTableUpload({ onClose, onUploadSuccess, existingYears = [] }) {
             <h1 className="upload-title">Upload Tax Table</h1>
             <p className="file-type-text">Only Excel files (.xls, .xlsx) are supported</p>
 
-            <div className="gender-select-wrapper"> 
+            <div className="select-wrapper"> 
               <select
-                className="tax-name-input"
-                value={year}
-                onChange={(e) => setYear(e.target.value)}
+                    className={`tax-name-input ${yearError ? "error" : ""}`}
+                    value={year}
+                    onChange={(e) => {
+                      setYear(e.target.value);
+                      setYearError(""); // clear inline error
+                    }}
               >
+               
                 <option value="" disabled>Please select the year</option>
                 {financialYears.map((yr) => (
-                  <option key={yr.value} value={yr.value} disabled={yr.disabled}>
+                  <option
+                        key={yr.value}
+                        value={yr.value}
+                        disabled={yr.disabled}
+                        className={yr.disabled ? "disabled-year" : ""}
+                      >
                     {yr.label} {yr.disabled ? "(Unavailable)" : ""}
                   </option>
                 ))}
               </select>
-
+              {yearError && (
+                  <div className="inline-error">{yearError}</div>
+                )}
               <img
                 className="dropdown-arrow"
                 src="/images/arrow_drop_down_circle.png"
@@ -136,9 +148,9 @@ function TaxTableUpload({ onClose, onUploadSuccess, existingYears = [] }) {
               />
             </div>
           </div>
-
-          <div className="upload-section">
-            <div className="dashed-box">
+                 <div className="space"></div> 
+          <div className="dashed-box">
+            <div className="upload-section">
               <p className="drop-files-text">Drop files here</p>
               <p className="or-text">or</p>
 
@@ -162,8 +174,6 @@ function TaxTableUpload({ onClose, onUploadSuccess, existingYears = [] }) {
               )}
             </div>
           </div>
-
-        </div>
       </div>
     </div>
   );
