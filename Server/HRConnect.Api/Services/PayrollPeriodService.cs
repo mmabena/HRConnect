@@ -54,10 +54,8 @@ namespace HRConnect.Api.Services
     }
     public async Task<PayrollPeriod?> GetCurrentActivePayrollPeriod()
     {
-      // The repository does not have GetCurrentActivePayrollPeriod.
-      // Use an existing method, e.g., GetActivePeriod, with DateTime.Now.
-      //return await _payrollPeriodRepository.GetActivePeriod(DateTime.Now);
-      throw new NotImplementedException("GetCurrentActivePayrollPeriod is not implemented in the repository. Consider using GetActivePeriod with DateTime.Now instead.");
+      // return await _payrollPeriodRepository.GetCurrentActivePayrollPeriod();
+      throw new NotImplementedException();
     }
   }
 }

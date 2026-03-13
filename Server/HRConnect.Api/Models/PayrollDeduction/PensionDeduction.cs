@@ -2,7 +2,6 @@ namespace HRConnect.Api.Models.PayrollDeduction
 {
   using System.ComponentModel.DataAnnotations.Schema;
   using HRConnect.Api.Models.Payroll;
-
   public class PensionDeduction : PayrollRecord
   {
     [Column("EmployeePensionDeductionId")]

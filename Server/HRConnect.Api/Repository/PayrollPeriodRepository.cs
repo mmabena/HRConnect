@@ -6,7 +6,6 @@ namespace HRConnect.Api.Repository
   using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Interfaces;
   using Microsoft.EntityFrameworkCore;
-  using Quartz.Xml.JobSchedulingData20;
 
   public class PayrollPeriodRepository : IPayrollPeriodRepository
   {
