@@ -4,6 +4,10 @@ namespace HRConnect.Api.Utils.Payroll
   using HRConnect.Api.Data;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models.Payroll;
+  using HRConnect.Api.Models.Pension;
+  using HRConnect.Api.Repository;
+  using HRConnect.Api.Services;
+
   //using Quartz;
 
   // Prevent multiple of these jobs from running concurrently
@@ -12,12 +16,15 @@ namespace HRConnect.Api.Utils.Payroll
   {
     private readonly IPayrollPeriodService _payrollPeriodService;
     private readonly IPayrollRunRepository _payrollRunRepo;
+    private readonly IEmployeePensionEnrollmentRepository _employeePensionEnrollmentRepository;
     private readonly ApplicationDBContext _context;
     private static readonly int MAX_RUNS = 10;
-    public PayrollRolloverJob(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService, ApplicationDBContext context)
+    public PayrollRolloverJob(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService,
+      IEmployeePensionEnrollmentRepository employeePensionEnrollmentRepository, ApplicationDBContext context)
     {
       _payrollRunRepo = payrollRunRepo;
       _payrollPeriodService = payrollPeriodService;
+      _employeePensionEnrollmentRepository = employeePensionEnrollmentRepository;
       _context = context;
     }
     public async Task<PayrollPeriod> RolloverPayrollPeriod(PayrollPeriod? oldPeriod)
@@ -75,6 +82,7 @@ namespace HRConnect.Api.Utils.Payroll
 
     public async Task Execute(IJobExecutionContext context)
     {
+      await LockEmployeePensionEnrollmentsAsync();
       DateTime currentDate = DateTime.Now;
       int runId = ((currentDate.Month + 8) % 12) + 1;
       try
@@ -194,6 +202,27 @@ namespace HRConnect.Api.Utils.Payroll
         Console.WriteLine($"Something else i guess. \n{ex}");
         var jobException = new JobExecutionException();
         throw jobException;
+      }
+    }
+
+    private async Task LockEmployeePensionEnrollmentsAsync()
+    {
+      PayrollRun? currentPayRollRun = await _payrollRunRepo.GetCurrentRunAsync() ?? throw new NotFoundException("Current payroll run not found");
+      List<EmployeePensionEnrollment> employeePensionEnrollments = await _employeePensionEnrollmentRepository
+        .GetByPayRollRunIdAsync(currentPayRollRun.PayrollRunId);
+
+      foreach (EmployeePensionEnrollment enrollment in employeePensionEnrollments.Where(x => !x.IsLocked))
+      {
+        enrollment.IsLocked = true;
+      }
+
+      try
+      {
+        await _employeePensionEnrollmentRepository.LockEmployeePensionEnrollmentsAsync(employeePensionEnrollments);
+      }
+      catch (Exception ex)
+      {
+        Console.WriteLine($"Error locking employee pension enrollments: {ex}");
       }
     }
   }
