@@ -38,8 +38,8 @@ namespace HRConnect.Api.Models
         [Required]
         public string Surname { get; set; } = string.Empty;
         [StringLength(13)]
-        public string IdNumber { get; set; } = string.Empty;
-        public string PassportNumber { get; set; } = string.Empty;
+        public string? IdNumber { get; set; } = string.Empty;
+        public string? PassportNumber { get; set; } = string.Empty;
         public string Nationality { get; set; } = string.Empty;
         [Required]
         public Gender Gender { get; set; }
@@ -77,7 +77,7 @@ namespace HRConnect.Api.Models
         [ForeignKey(nameof(CareerManagerID))]
         public Employee? CareerManager { get; set; }
         [Required]
-        public string ProfileImage { get; set; } = string.Empty;
+        public string? ProfileImage { get; set; } = string.Empty;
         // ProfileImage
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;

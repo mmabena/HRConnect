@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import NavBar from "../../../Components/NavBar.jsx";
 
 import CompanyManagementNavBar from "../../../Components/CompanyManagement/companyManagementNavBar";
 import AddPositionManagement from "../../../Components/CompanyManagement/PositionManagement/AddPositionManagment";

@@ -1,8 +1,7 @@
 namespace HRConnect.Api.Mappers.Payroll
 {
   using HRConnect.Api.DTOs.Payroll;
- using HRConnect.Api.Models.Payroll;
-
+  using HRConnect.Api.Models.Payroll;
   public static class PayrollRunMapper
   {
     public static PayrollRunDto ToPayrollRunDto(this PayrollRun runModel)

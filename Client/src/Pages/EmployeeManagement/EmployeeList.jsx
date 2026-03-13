@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { fetchAllEmployees } from "../../api/Employee";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import AddEmployee from "./../../Components/EmployeeManagement/AddEmployee";
-import "../../Components/MenuBar/MenuBar.css";
+import AddEmployeeModal from "../../../src/Components/AddEmployeeModal";
+import "../../Components/MenuBar/MenuBar";
 
 const EmployeeList = () => {
   const tabs = ["All staff", "Johannesburg", "Cape Town", "UK(London)"];
@@ -135,20 +135,6 @@ const EmployeeList = () => {
       <div className="wrapper-container">
         <div className="singular-staff-heading-container">
           Singular Staff
-          <div className="icon-wrapper">
-            <img
-              src="/images/notifications.png"
-              alt="Notification Icon"
-              className="heading-icon"
-            />
-            <img
-              src="/images/Settings.png"
-              alt="Settings Icon"
-              className="heading-icon"
-            />
-            <div className="utility-box large-box">{currentDate}</div>
-            <div className="utility-box small-box">{currentTime}</div>
-          </div>
         </div>
 
         <div className="employee-list-heading-row">
@@ -389,9 +375,12 @@ const EmployeeList = () => {
         </div>
       </div>
       {showAddModal && (
-        <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <AddEmployee closeModal={() => setShowAddModal(false)} />
+        <div
+          className="add-employee-overlay"
+          onClick={() => setShowAddModal(false)}
+        >
+          <div onClick={(e) => e.stopPropagation()}>
+            <AddEmployeeModal closeModal={() => setShowAddModal(false)} />
           </div>
         </div>
       )}

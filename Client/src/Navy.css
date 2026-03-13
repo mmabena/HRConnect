@@ -453,7 +453,7 @@
       #E7EAEB,
       #D6D6D9,
       #C4C4C5);
-  color: black;
+  color: rgba(0, 0, 0, 0.411);
   box-sizing: border-box;
   text-align: center;
   overflow: hidden;
@@ -691,7 +691,6 @@ body,
   box-sizing: border-box;
   gap: 5px;
   margin-top: 10px;
-
 }
 
 .input-icon-mail {
@@ -1254,13 +1253,14 @@ body {
 .password-input-group {
   display: flex;
   align-items: center;
-  width: 386px !important;
+  width: 324px;
   height: 33px;
   padding: 5px;
   border-bottom: 1.5px solid var(--Calm-Blue, #006088);
-  border-radius: 5px;
   box-sizing: border-box;
   gap: 5px;
+  margin-top: 10px;
+
   position: relative;
   left: 32px;
   margin-bottom: 27px;
@@ -2033,7 +2033,6 @@ text-align: left;
 .password-input-group input {
   width: 100%;
   padding: 10px 40px 10px 10px;
-  border: 2px solid #ddd;
   border-radius: 6px;
   font-size: 14px;
 }

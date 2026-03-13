@@ -1,45 +1,27 @@
-import React, { useState, useEffect } from "react";
-import { useLocation, useParams } from "react-router-dom";
-import "../../Components/EditEmployee.css";
-import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
+import "../Components/EditEmployee.css";
+import api from "../api/api.js";
+import { toast } from "react-toastify";
 import {
-  editEmployee,
-  formatDateForDisplay,
   fetchAllEmployees,
   showConfirmationToast,
-  GetEmployeeByEmployeeNumberAsync,
+  editEmployee,
   formatDateToYYYYMMDD,
-} from "../../api/Employee";
+  formatDateForDisplay,
+} from "../api/Employee.js";
+import axios from "axios";
 
-import { toast } from "react-toastify";
-/// </summary>
-/// MOCK Super user Role
-/// </summary>
-
-const getCurrentUserRole = () => {
-  return "superuser";
-};
-
-const EditEmployee = () => {
+const PersonalInformation = () => {
   const location = useLocation();
   const readOnly = location.state?.readOnly || false;
-  const { employeeId } = useParams();
-  const [activeTab, setActiveTab] = useState("Personal");
-  const [isEditable, setIsEditable] = useState(false);
-  const [userRole, setUserRole] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
+  const [activeTab, setActiveTab] = useState("Personal");
+  const [isEditable, setIsEditable] = useState(false);
   const [formErrors, setFormErrors] = useState({});
-  //const positionTitle = positions.find(p => p.positionId === employeeData.jobTitle)?.positionTitle || "";
-  /// </summary>
-  /// Track original Employee number and DOB loaded from DB
-  /// </summary>
-  const [originalEmployeeId, setOriginalEmployeeId] = useState("");
   const [allEmployees, setAllEmployees] = useState([]);
-  const [originalIdNumber, setOriginalIdNumber] = useState("");
-  const [originalDateOfBirth, setOriginalDateOfBirth] = useState("");
-  const [originalTaxNumber, setOriginalTaxNumber] = useState("");
   const branches = ["Johannesburg", "CapeTown", "UK"];
   const titles = ["Mr", "Mrs", "Ms", "Dr", "Prof"];
   const employmentStatuses = ["Permanent", "FixedTerm", "Contract"];
@@ -69,15 +51,9 @@ const EditEmployee = () => {
     profileImage: "",
   });
 
-  const getInitials = (name, surname) => {
-    let initials = "";
-
-    if (name) initials += name.charAt(0).toUpperCase();
-
-    if (surname) initials += surname.charAt(0).toUpperCase();
-
-    return initials;
-  };
+  const [originalIdNumber, setOriginalIdNumber] = useState("");
+  const [originalDateOfBirth, setOriginalDateOfBirth] = useState("");
+  const [originalTaxNumber, setOriginalTaxNumber] = useState("");
 
   useEffect(() => {
     const loadEmployees = async () => {
@@ -88,108 +64,73 @@ const EditEmployee = () => {
     loadEmployees();
   }, []);
 
-  /// </summary>
-  /// Load user role and employee data when component mounts or location.state changes - set loading true at the start for all cases
-  /// </summary>
+  const getInitials = (name, surname) => {
+    let initials = "";
+    if (name) initials += name.charAt(0).toUpperCase();
+    if (surname) initials += surname.charAt(0).toUpperCase();
+    return initials;
+  };
+
   useEffect(() => {
-    setLoading(true);
-
-    const role = getCurrentUserRole();
-    setUserRole(role);
-
-    const loadEmployeeIfNeeded = async () => {
-      if (!location.state && employeeId) {
-        try {
-          const employee = await GetEmployeeByEmployeeNumberAsync(employeeId);
-          console.log("Fetched employee:", employee);
-          console.log("Employee object keys:", Object.keys(employee));
-
-          const transformed = {
-            employeeId: employee.employeeId || "",
-            name: employee.name || "",
-            surname: employee.surname || "",
-            title: employee.title || "",
-            branch: employee.branch || "",
-            dateOfBirth: employee.dateOfBirth
-              ? formatDateForDisplay(employee.dateOfBirth)
-              : "",
-            idNumber: employee.idNumber || employee.passportNumber || "",
-            nationality: employee.nationality || "",
-            gender: employee.gender || "",
-            contactNumber: employee.contactNumber || "",
-            email: employee.email || "",
-            physicalAddress: employee.physicalAddress || "",
-            city: employee.city || "",
-            monthlySalary: employee.monthlySalary || "",
-            zipCode: employee.zipCode || "",
-            disability: employee.hasDisability || false,
-            disabilityType: employee.disabilityDescription || "N/A",
-            jobTitle: employee.positionTitle || "",
-            positionId: employee.positionId || 0,
-            employeeStatus: employee.employmentStatus || "",
-            reportsTo: employee.careerManagerID || "",
-            startDate: employee.startDate || "",
-            profileImage: employee.profileImage || "",
-            initials: getInitials(employee.name, employee.surname),
-          };
-
-          setEmployeeData(transformed);
-          setOriginalEmployeeId(employee.employeeId);
-          setOriginalTaxNumber(employee.taxNumber);
-          setOriginalDateOfBirth(employee.dateOfBirth);
-          setOriginalIdNumber(employee.idNumber);
-        } catch (error) {
-          console.error("Failed to load employee", error);
-          toast.error("Could not load employee data.");
-        } finally {
+    const fetchEmployee = async () => {
+      try {
+        const currentUserRaw = localStorage.getItem("currentUser");
+        if (!currentUserRaw) {
+          toast.error("User not logged in");
           setLoading(false);
+          return;
         }
-      } else if (location.state) {
-        const employee = location.state;
+        const currentUser = JSON.parse(currentUserRaw);
 
+        if (!currentUser.email) {
+          toast.error("User email missing");
+          setLoading(false);
+          return;
+        }
+
+        const response = await api.get(`/employee/email/${currentUser.email}`);
+        const emp = response.data;
+
+        // Transform to match your form
         const transformed = {
-          employeeId: employee.employeeId || "",
-          name: employee.name || "",
-          surname: employee.surname || "",
-          title: employee.title || "",
-          dateOfBirth: employee.dateOfBirth
-            ? formatDateForDisplay(employee.dateOfBirth)
+          employeeId: emp.employeeId || "",
+          name: emp.name || "",
+          surname: emp.surname || "",
+          title: emp.title || "",
+          branch: emp.branch || "",
+          dateOfBirth: emp.dateOfBirth
+            ? formatDateForDisplay(emp.dateOfBirth)
             : "",
-          idNumber: employee.idNumber || employee.passportNumber || "",
-          nationality: employee.nationality || "",
-          gender: employee.gender || "",
-          contactNumber: employee.contactNumber || "",
-          email: employee.email || "",
-          physicalAddress: employee.physicalAddress || "",
-          city: employee.city || "",
-          passportNumber: employee.passportNumber || "",
-          monthlySalary: employee.monthlySalary || "",
-          branch: employee.branch || "",
-          zipCode: employee.zipCode || "",
-          disability: employee.hasDisability || false,
-          disabilityType: employee.disabilityDescription || "N/A",
-          jobTitle: employee.positionTitle || "",
-          positionId: employee.positionId || 0,
-          employeeStatus: employee.employmentStatus || "",
-          reportsTo: employee.careerManagerID || "",
-          startDate: employee.startDate || "",
-          profileImage: employee.profileImage || "",
+          idNumber: emp.idNumber || emp.passportNumber || "",
+          nationality: emp.nationality || "",
+          gender: emp.gender || "",
+          contactNumber: emp.contactNumber || "",
+          email: emp.email || "",
+          physicalAddress: emp.physicalAddress || "",
+          city: emp.city || "",
+          monthlySalary: emp.monthlySalary || "",
+          zipCode: emp.zipCode || "",
+          disability: emp.hasDisability || false,
+          disabilityType: emp.disabilityDescription || "N/A",
+          jobTitle: emp.positionTitle || "",
+          positionId: emp.positionId || 0,
+          employeeStatus: emp.employmentStatus || "",
+          reportsTo: emp.careerManagerID || "",
+          startDate: emp.startDate || "",
+          profileImage: emp.profileImage || "",
+          initials: getInitials(emp.name, emp.surname),
         };
-
         setEmployeeData(transformed);
-        setOriginalEmployeeId(employee.employeeId ?? "");
-        setOriginalDateOfBirth(employee.dateOfBirth ?? "");
-        setOriginalIdNumber(employee.idNumber ?? "");
-        setOriginalTaxNumber(employee.taxNumber ?? "");
+      } catch (error) {
+        console.error("Failed to fetch employee", error);
+        toast.error("Failed to load employee data");
+      } finally {
         setLoading(false);
       }
     };
 
-    loadEmployeeIfNeeded();
-  }, [location.state, employeeId]);
-  useEffect(() => {
-    console.log("Current employee data being viewed/edited:", employeeData);
-  }, [employeeData]);
+    fetchEmployee();
+  }, []);
 
   const handleFileChange = async (
     e,
@@ -198,7 +139,12 @@ const EditEmployee = () => {
     setErrorMessage,
   ) => {
     const file = e.target.files[0];
-    if (file && (file.type === "image/jpeg" || file.type === "image/jpg"|| file.type ==="image/png")) {
+    if (
+      file &&
+      (file.type === "image/jpeg" ||
+        file.type === "image/jpg" ||
+        file.type === "image/png")
+    ) {
       try {
         setUploading(true);
         setErrorMessage("");
@@ -231,43 +177,41 @@ const EditEmployee = () => {
     await handleFileChange(e, setEmployeeData, setUploading, setUploadError);
   };
 
-  /// </summary>
-  /// Disability validation & styling logic
-  /// </summary>
-  useEffect(() => {
-    if (employeeData.disability) {
-      if (
-        !employeeData.disabilityType ||
-        employeeData.disabilityType === "N/A"
-      ) {
-        setFormErrors((prev) => ({
-          ...prev,
-          disabilityType:
-            "Disability Type is required when Disability is 'Yes'.",
-        }));
-      } else {
-        setFormErrors((prev) => {
-          const { disabilityType, ...rest } = prev;
-          return rest;
-        });
-      }
-    } else {
-      setFormErrors((prev) => {
-        const { disabilityType, ...rest } = prev;
-        return rest;
-      });
-      if (employeeData.disabilityType !== "N/A") {
-        setEmployeeData((prev) => ({
-          ...prev,
-          disabilityType: "N/A",
-        }));
-      }
-    }
-  }, [employeeData.disability, employeeData.disabilityType]);
+  const handleInputChange = (e) => {
+    const { id, value, type, checked } = e.target;
 
-  if (userRole !== "superuser") {
-    return <div>Access Denied. Only super users can access this page.</div>;
-  }
+    if (["dateOfBirth", "idNumber"].includes(id)) {
+      return;
+    }
+
+    setEmployeeData((prevData) => {
+      const updatedData = {
+        ...prevData,
+        [id]: type === "checkbox" ? checked : value,
+      };
+
+      if (id === "disability") {
+        updatedData.disability = value === "yes";
+        if (value !== "yes") {
+          updatedData.disabilityType = "N/A";
+        }
+      }
+
+      return updatedData;
+    });
+
+    if (formErrors[id]) {
+      setFormErrors((prev) => {
+        const updated = { ...prev };
+        delete updated[id];
+        return updated;
+      });
+    }
+
+    if (loading) {
+      return <div className="emp-loading">Loading employee...</div>;
+    }
+  };
 
   const handleEditSaveClick = async () => {
     if (uploading) {
@@ -330,9 +274,7 @@ const EditEmployee = () => {
       setIsEditable(false);
       return;
     }
-    /// </summary>
-    /// Prevent saving if validation errors exist
-    /// </summary>
+
     if (!validateEmployee()) {
       toast.error("Please correct the highlighted fields.");
       return;
@@ -445,41 +387,8 @@ const EditEmployee = () => {
     }
   };
 
-  const handleInputChange = (e) => {
-    const { id, value, type, checked } = e.target;
-
-    if (["dateOfBirth", "idNumber"].includes(id)) {
-      return;
-    }
-
-    setEmployeeData((prevData) => {
-      const updatedData = {
-        ...prevData,
-        [id]: type === "checkbox" ? checked : value,
-      };
-
-      if (id === "disability") {
-        updatedData.disability = value === "yes";
-        if (value !== "yes") {
-          updatedData.disabilityType = "N/A";
-        }
-      }
-
-      return updatedData;
-    });
-
-    if (formErrors[id]) {
-      setFormErrors((prev) => {
-        const updated = { ...prev };
-        delete updated[id];
-        return updated;
-      });
-    }
-
-    if (loading) {
-      return <div className="emp-loading">Loading employee...</div>;
-    }
-  };
+  if (loading) return <div>Loading employee profile...</div>;
+  if (!employeeData) return <div>No employee data found</div>;
 
   return (
     <div className="emp-menu-background">
@@ -828,4 +737,4 @@ const EditEmployee = () => {
   );
 };
 
-export default EditEmployee;
+export default PersonalInformation;

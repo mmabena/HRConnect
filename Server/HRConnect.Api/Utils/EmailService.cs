@@ -19,7 +19,7 @@ namespace HRConnect.Api.Utils
     {
       string apiKey = configuration["SendGrid:ApiKey"];
       _client = new SendGridClient(apiKey);
-      _fromEmail = configuration["SendGrid:FromEmail"] ?? "rebaoneseilane@gmail.com";
+      _fromEmail = configuration["SendGrid:FromEmail"] ?? "ochimerema@gmail.com";
       _fromName = configuration["SendGrid:FromName"] ?? "HRConnect";
     }
 
