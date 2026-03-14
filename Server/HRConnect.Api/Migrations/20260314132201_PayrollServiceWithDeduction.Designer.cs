@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRConnect.Api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20260312115336_PayrollServiceWithDeduction")]
+    [Migration("20260314132201_PayrollServiceWithDeduction")]
     partial class PayrollServiceWithDeduction
     {
         /// <inheritdoc />
@@ -461,27 +461,10 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("PeriodId");
 
-                    b.ToTable("PayrollRuns");
-                });
-
-            modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction.TestEntity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("PayrollRunId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("TestEntities");
+                    b.ToTable("PayrollRuns", t =>
+                        {
+                            t.HasCheckConstraint("CK_PayrollRun_PayrollRunNumber", "[PayrollRunNumber] BETWEEN 1 AND 12");
+                        });
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.Position", b =>
@@ -768,6 +751,14 @@ namespace HRConnect.Api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("OptionCategory")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OptionName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("PrincipalCount")
                         .HasColumnType("int");
 
@@ -788,7 +779,7 @@ namespace HRConnect.Api.Migrations
                         .HasColumnType("decimal(15, 2)");
 
                     b.Property<decimal?>("TotalDependentsPremium")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(15, 2)");
 
                     b.HasIndex("MedicalCategoryId");
 
@@ -810,6 +801,10 @@ namespace HRConnect.Api.Migrations
                     b.Property<string>("EmailAddress")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("EmployeePensionDeductionId")
+                        .HasColumnType("int")
+                        .HasColumnName("EmployeePensionDeductionId");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -834,6 +829,9 @@ namespace HRConnect.Api.Migrations
 
                     b.Property<decimal>("PensionContribution")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("PensionOptionId")
+                        .HasColumnType("int");
 
                     b.Property<decimal>("PensionableSalary")
                         .HasColumnType("decimal(18,2)");

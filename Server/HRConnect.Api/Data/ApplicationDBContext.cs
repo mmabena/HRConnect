@@ -4,6 +4,8 @@ namespace HRConnect.Api.Data
   using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Models.PayrollDeduction;
   using Microsoft.EntityFrameworkCore;
+  using AppAny.Quartz.EntityFrameworkCore.Migrations;
+  using AppAny.Quartz.EntityFrameworkCore.Migrations.SqlServer;
 
   public class ApplicationDBContext(DbContextOptions dbContextOptions) : DbContext(dbContextOptions)
   {
@@ -25,10 +27,15 @@ namespace HRConnect.Api.Data
     public DbSet<PayrollRun> PayrollRuns { get; set; }
     public DbSet<PensionDeduction> PensionDeductions { get; set; }
     public DbSet<MedicalAidDeduction> MedicalAidDeductions { get; set; }
-    public DbSet<TestEntity> TestEntities { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
       base.OnModelCreating(modelBuilder);
+      // Creating namespace for Quartz migrations 
+      modelBuilder.AddQuartz(builder =>
+      {
+        builder.UseSqlServer(schema: "quartz", prefix: "QRTZ_");
+      });
 
       // Employee relationships
       modelBuilder.Entity<Employee>()
@@ -115,8 +122,8 @@ namespace HRConnect.Api.Data
         {
           b.HasKey(r => r.PayrollRunId);
           b.Property(r => r.PayrollRunId).ValueGeneratedOnAdd();//Identity
-          // b.HasCheckConstraint("CK_PayrollRun_PayrollRunNumber",
-          //                "[PayRunNumber] BETWEEN 1 AND 12");
+          b.HasCheckConstraint("CK_PayrollRun_PayrollRunNumber",
+                         "[PayrollRunNumber] BETWEEN 1 AND 12");//Enforce payroll run number to be cyclic (1-12)
 
           b.HasMany(r => r.Records)
        .WithOne(r => r.PayrollRun)

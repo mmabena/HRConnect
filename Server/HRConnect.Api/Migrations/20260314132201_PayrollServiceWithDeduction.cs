@@ -31,20 +31,6 @@ namespace HRConnect.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "TestEntities",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PayrollRunId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TestEntities", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "PayrollRuns",
                 columns: table => new
                 {
@@ -60,6 +46,7 @@ namespace HRConnect.Api.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PayrollRuns", x => x.PayrollRunId);
+                    table.CheckConstraint("CK_PayrollRun_PayrollRunNumber", "[PayrollRunNumber] BETWEEN 1 AND 12");
                     table.ForeignKey(
                         name: "FK_PayrollRuns_PayrollPeriods_PeriodId",
                         column: x => x.PeriodId,
@@ -81,9 +68,10 @@ namespace HRConnect.Api.Migrations
                     Surname = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Branch = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     MedicalOptionId = table.Column<int>(type: "int", nullable: false),
+                    OptionName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     MedicalOptionCategoryId = table.Column<int>(type: "int", nullable: false),
                     EmployeeStartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    TotalDependentsPremium = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    TotalDependentsPremium = table.Column<decimal>(type: "decimal(15,2)", nullable: true),
                     EffectiveDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     FinalisedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -97,6 +85,7 @@ namespace HRConnect.Api.Migrations
                     TotalDeductionAmount = table.Column<decimal>(type: "decimal(15,2)", nullable: false),
                     Salary = table.Column<decimal>(type: "decimal(15,2)", nullable: false),
                     MedicalCategoryId = table.Column<int>(type: "int", nullable: false),
+                    OptionCategory = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
@@ -128,6 +117,7 @@ namespace HRConnect.Api.Migrations
                     PayrollRunId = table.Column<int>(type: "int", nullable: false),
                     IsLocked = table.Column<bool>(type: "bit", nullable: false),
                     EmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    EmployeePensionDeductionId = table.Column<int>(type: "int", nullable: false),
                     PeriodId = table.Column<int>(type: "int", nullable: false),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -135,6 +125,7 @@ namespace HRConnect.Api.Migrations
                     IDNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Passport = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     TaxNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PensionOptionId = table.Column<int>(type: "int", nullable: false),
                     PensionableSalary = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     PendsionCategoryPercentage = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     PensionContribution = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
@@ -189,9 +180,6 @@ namespace HRConnect.Api.Migrations
 
             migrationBuilder.DropTable(
                 name: "PensionDeductions");
-
-            migrationBuilder.DropTable(
-                name: "TestEntities");
 
             migrationBuilder.DropTable(
                 name: "PayrollRuns");

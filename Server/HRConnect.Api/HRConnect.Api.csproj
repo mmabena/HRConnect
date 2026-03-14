@@ -10,6 +10,8 @@
 
   <ItemGroup>
     <PackageReference Include="Amusoft.Templates" Version="1.3.0" />
+    <PackageReference Include="AppAny.Quartz.EntityFrameworkCore.Migrations" Version="0.5.1" />
+    <PackageReference Include="AppAny.Quartz.EntityFrameworkCore.Migrations.SqlServer" Version="0.5.1" />
     <PackageReference Include="Audit.EntityFramework.Core" Version="32.0.0" />
     <PackageReference Include="Audit.NET" Version="32.0.0" />
     <PackageReference Include="Audit.NET.SqlServer" Version="32.0.0" />
