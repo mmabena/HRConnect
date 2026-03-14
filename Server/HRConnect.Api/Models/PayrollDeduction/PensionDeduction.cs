@@ -2,10 +2,10 @@ namespace HRConnect.Api.Models.PayrollDeduction
 {
   using System.ComponentModel.DataAnnotations.Schema;
   using HRConnect.Api.Models.Payroll;
-
   public class PensionDeduction : PayrollRecord
   {
-    public int PensionDeductionId { get; set; }
+    [Column("EmployeePensionDeductionId")]
+    public int EmployeePensionDeductionId { get; set; }
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
     public DateOnly DateJoinedCompany { get; set; }
@@ -24,11 +24,12 @@ namespace HRConnect.Api.Models.PayrollDeduction
     public string EmailAddress { get; set; } = string.Empty;
     public string PhyscialAddress { get; set; } = string.Empty;
     //public int PayrollRunId { get; set; }
+    //public string EmployeeId { get; set; }
     public DateOnly CreatedDate { get; set; }
     public bool IsActive { get; set; }
 
-    public Employee Employee { get; set; }
-    public PensionOption PensionOption { get; set; }
+    //public Employee Employee { get; set; }
+    //public PensionOption PensionOption { get; set; }
     //public PayrollRun PayrollRun { get; set; }
   }
 }

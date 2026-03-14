@@ -12,7 +12,7 @@ namespace HRConnect.Api.Interfaces
     Task<PayrollRun?> GetRunByDateAsync(DateTime dateTime);
     Task<PayrollRun> GetCurrentRunAsync();
     Task UpdateRunAsync(PayrollRun payrollRun);
-    Task AddRecordToCurrentRunAsync(PayrollRecord payrollRecord);
-    Task<PayrollRun> GetAllPayRecordsFromPayRunAsync(int payrollRunId);
+    Task AddRecordToCurrentRunAsync(PayrollRecord payrollRecord, string employeeId);
+    Task<PayrollRun> GetAllPayRecordsFromPayRunAsync(int payrollRunNumber);
   }
 }

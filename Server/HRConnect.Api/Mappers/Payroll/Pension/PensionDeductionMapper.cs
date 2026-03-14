@@ -1,7 +1,7 @@
 ﻿namespace HRConnect.Api.Mappers.Payroll.Pension
 {
   using HRConnect.Api.DTOs.Payroll.Pension;
-  using HRConnect.Api.Models.PayrollContribution;
+  using HRConnect.Api.Models.PayrollDeduction;
 
   public static class PensionDeductionMapper
   {
@@ -19,7 +19,7 @@
         PensionOptionId = pensionDeduction.PensionOptionId,
         PendsionCategoryPercentage = pensionDeduction.PendsionCategoryPercentage,
         PensionContribution = pensionDeduction.PensionContribution,
-        VoluntaryContribution = pensionDeduction.PensionDeductionId,
+        VoluntaryContribution = pensionDeduction.VoluntaryContribution,
         EmailAddress = pensionDeduction.EmailAddress,
         PhyscialAddress = pensionDeduction.PhyscialAddress,
         PayrollRunId = pensionDeduction.PayrollRunId,

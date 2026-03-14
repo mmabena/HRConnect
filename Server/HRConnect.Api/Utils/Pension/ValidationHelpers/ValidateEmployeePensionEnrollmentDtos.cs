@@ -17,10 +17,13 @@
         throw new ValidationException("Employee ID is a required field and is not valid");
       }
 
-      if (employeePensionEnrollmentAddDto.EffectiveDate is null)
+      DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+
+      if (employeePensionEnrollmentAddDto.EffectiveDate < today)
       {
-        throw new ValidationException("Effective date must be beginning of next month");
+        throw new ValidationException("Effective date must be today or in the future");
       }
+
     }
 
     public static void ValidateUpdateDto(EmployeePensionEnrollmentUpdateDto employeePensionEnrollmentUpdateDto)

@@ -20,6 +20,7 @@ using Audit.Core;
 using Audit.EntityFramework;
 using Quartz;
 using HRConnect.Api.Interfaces.Pension;
+using HRConnect.Api.Utils.Quartz.Pension;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -139,7 +140,7 @@ builder.Services.AddQuartz(q =>
   q.AddTrigger(opts => opts
   .ForJob(jobKey)
   .WithIdentity("PayrollRollover-Trigger")
-  .WithCronSchedule("1 0/1 * * * ?", x =>
+  .WithCronSchedule("0/40 * * * * ?", x =>
   x.WithMisfireHandlingInstructionFireAndProceed())); //when a job misfire happens. 
                                                       // Properly re-execute it and proceed as usual
 
@@ -149,6 +150,17 @@ builder.Services.AddQuartz(q =>
   // 1 -> first day of the year
   // * -> for any/every month 
   // ? -> for all days of the week
+
+  JobKey pensionEnrollJobKey = new("EmployeePensionEnrollmentJob");
+
+  q.AddJob<EmployeePensionRollOverJob>(opts => 
+  opts.WithIdentity(pensionEnrollJobKey)
+      .StoreDurably());
+
+  q.AddTrigger(opts => opts
+    .ForJob(pensionEnrollJobKey)
+    .WithIdentity("EmployeePensionRollOverJob-Trigger")
+    .WithCronSchedule("0 0/1 * * * ?", x => x.WithMisfireHandlingInstructionFireAndProceed()));
 
   //Adding persistence to quartz to be able to be run in the back
   q.UsePersistentStore(options =>
@@ -163,6 +175,9 @@ builder.Services.AddQuartzHostedService(q =>
 {
   q.WaitForJobsToComplete = true;
 });
+
+builder.Services.AddSingleton(provider =>
+  provider.GetRequiredService<ISchedulerFactory>().GetScheduler().GetAwaiter().GetResult());
 
 //Register payroll stuff
 builder.Services.AddScoped<IPayrollPeriodRepository, PayrollPeriodRepository>();
@@ -202,6 +217,9 @@ builder.Services.AddScoped<IEmployeePensionEnrollmentService, EmployeePensionEnr
 builder.Services.AddScoped<IPensionDeductionRepository, PensionDeductionRepository>();
 builder.Services.AddScoped<IPensionDeductionService, PensionDeductionService>();
 
+builder.Services.AddScoped<IMedicalAidEligibilityService, MedicalAidEligibilityService>();
+builder.Services.AddScoped<IMedicalAidDeductionRepository, MedicalAidDeductionRepository>();
+builder.Services.AddScoped<IMedicalAidDeductionService, MedicalAidDeductionService>();
 builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowReact",

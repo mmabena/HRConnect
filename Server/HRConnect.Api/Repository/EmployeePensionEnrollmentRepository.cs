@@ -51,6 +51,12 @@
       return await _context.EmployeePensionEnrollments.Where(epe => epe.PayrollRunId == payrollRunId).ToListAsync();
     }
 
+    public async Task LockEmployeePensionEnrollmentsAsync(List<EmployeePensionEnrollment> employeePensionEnrollments)
+    {
+      _context.EmployeePensionEnrollments.UpdateRange(employeePensionEnrollments);
+      _ = await _context.SaveChangesAsync();
+    }
+
     public async Task<EmployeePensionEnrollment> UpdateAsync(EmployeePensionEnrollment employeePensionEnrollment)
     {
       _ = _context.EmployeePensionEnrollments.Update(employeePensionEnrollment);

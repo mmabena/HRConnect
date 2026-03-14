@@ -1,9 +1,14 @@
 namespace HRConnect.Api.Utils.Payroll
 {
+  using global::Quartz;
   using HRConnect.Api.Data;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models.Payroll;
-  using Quartz;
+  using HRConnect.Api.Models.Pension;
+  using HRConnect.Api.Repository;
+  using HRConnect.Api.Services;
+
+  //using Quartz;
 
   // Prevent multiple of these jobs from running concurrently
   [DisallowConcurrentExecution]
@@ -11,12 +16,15 @@ namespace HRConnect.Api.Utils.Payroll
   {
     private readonly IPayrollPeriodService _payrollPeriodService;
     private readonly IPayrollRunRepository _payrollRunRepo;
+    private readonly IEmployeePensionEnrollmentRepository _employeePensionEnrollmentRepository;
     private readonly ApplicationDBContext _context;
-    private static readonly int MAX_RUNS = 3;
-    public PayrollRolloverJob(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService, ApplicationDBContext context)
+    private static readonly int MAX_RUNS = 10;
+    public PayrollRolloverJob(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService,
+      IEmployeePensionEnrollmentRepository employeePensionEnrollmentRepository, ApplicationDBContext context)
     {
       _payrollRunRepo = payrollRunRepo;
       _payrollPeriodService = payrollPeriodService;
+      _employeePensionEnrollmentRepository = employeePensionEnrollmentRepository;
       _context = context;
     }
     public async Task<PayrollPeriod> RolloverPayrollPeriod(PayrollPeriod? oldPeriod)
@@ -41,7 +49,7 @@ namespace HRConnect.Api.Utils.Payroll
 
       var newPayrun = new PayrollRun
       {
-        PayrollRunId = 1,//should be current financial month
+        PayrollRunNumber = 1,//should be current financial month
         PeriodId = newPeriod.PayrollPeriodId
       };
       newPeriod.Runs.Add(newPayrun);
@@ -53,14 +61,14 @@ namespace HRConnect.Api.Utils.Payroll
     public async Task RolloverPayrollRun(PayrollPeriod payrollPeriod, int runId)
     {
       // Defensive: ensure no duplicate
-      if (payrollPeriod.Runs.Any(r => r.PayrollRunId == runId))
+      if (payrollPeriod.Runs.Any(r => r.PayrollRunNumber == runId))
         throw new InvalidOperationException($"Run {runId} already exists for this period.");
 
       Console.WriteLine($"====>Existing Run has RUNID {runId} <====");
       PayrollRun newRun = new PayrollRun
       {
         PeriodId = payrollPeriod.PayrollPeriodId,
-        PayrollRunId = runId,
+        PayrollRunNumber = runId,
         IsLocked = false,
         // Period = payrollPeriod,
         PeriodDate = DateTime.Now,
@@ -74,6 +82,7 @@ namespace HRConnect.Api.Utils.Payroll
 
     public async Task Execute(IJobExecutionContext context)
     {
+      await LockEmployeePensionEnrollmentsAsync();
       DateTime currentDate = DateTime.Now;
       int runId = ((currentDate.Month + 8) % 12) + 1;
       try
@@ -84,13 +93,12 @@ namespace HRConnect.Api.Utils.Payroll
         if (payperiod == null)
         {
           // throw new InvalidDataException("No payroll period found");
-          await _context.ChangeTracker.Clear();
           payperiod = await RolloverPayrollPeriod(null);
         }
         // var currentPayRun = payperiod.Runs.OrderByDescending(r => r.PayrollRunId == runId).FirstOrDefault();
 
-        var currentPayRun = payperiod.Runs.Where(r => !r.IsLocked).OrderByDescending(r => r.PayrollRunId).FirstOrDefault();
-        int nextRun = currentPayRun == null ? 1 : currentPayRun.PayrollRunId + 1; //In production remove this
+        var currentPayRun = payperiod.Runs.Where(r => !r.IsLocked).OrderByDescending(r => r.PayrollRunNumber).FirstOrDefault();
+        int nextRun = currentPayRun == null ? 1 : currentPayRun.PayrollRunNumber + 1; //In production remove this
         Console.WriteLine("=============A JOB Start==========");
         if (currentPayRun == null)
         {
@@ -102,7 +110,7 @@ namespace HRConnect.Api.Utils.Payroll
         //Finalise and lock a run isnt't finalised and still running
         if (!currentPayRun.IsFinalised && !currentPayRun.IsLocked)
         {
-          Console.WriteLine("Trying to finalise payroll run for month: " + currentPayRun.PayrollRunId);
+          Console.WriteLine("Trying to finalise payroll run for month: " + currentPayRun.PayrollRunNumber);
           currentPayRun.IsFinalised = true;
           currentPayRun.IsLocked = true;
           currentPayRun.FinalisedDate = DateTime.Now;
@@ -113,7 +121,11 @@ namespace HRConnect.Api.Utils.Payroll
           }
           //update the current run to implement lock
           await _payrollRunRepo.UpdateRunAsync(currentPayRun);
-          Console.WriteLine($"LOCKED PAYRUN WITH ID {currentPayRun.PayrollRunId}");
+          //Archive should happen here
+          if (currentPayRun.Records.Count > 0)
+            await PayrollUtil.WriteExcelAsync(currentPayRun);
+
+          Console.WriteLine($"LOCKED PAYRUN WITH ID {currentPayRun.PayrollRunNumber}");
         }
 
         Console.WriteLine($"NEXT RUN========{nextRun}");
@@ -192,57 +204,26 @@ namespace HRConnect.Api.Utils.Payroll
         throw jobException;
       }
     }
+
+    private async Task LockEmployeePensionEnrollmentsAsync()
+    {
+      PayrollRun? currentPayRollRun = await _payrollRunRepo.GetCurrentRunAsync() ?? throw new NotFoundException("Current payroll run not found");
+      List<EmployeePensionEnrollment> employeePensionEnrollments = await _employeePensionEnrollmentRepository
+        .GetByPayRollRunIdAsync(currentPayRollRun.PayrollRunId);
+
+      foreach (EmployeePensionEnrollment enrollment in employeePensionEnrollments.Where(x => !x.IsLocked))
+      {
+        enrollment.IsLocked = true;
+      }
+
+      try
+      {
+        await _employeePensionEnrollmentRepository.LockEmployeePensionEnrollmentsAsync(employeePensionEnrollments);
+      }
+      catch (Exception ex)
+      {
+        Console.WriteLine($"Error locking employee pension enrollments: {ex}");
+      }
+    }
   }
 }
-// public async Task Execute(IJobExecutionContext context)
-// {
-//   DateTime currentDate = DateTime.Now;
-//   int runId = ((currentDate.Month + 8) % 12) + 1;
-
-//   try
-//   {
-//     var payperiod = await _payrollPeriodService.GetLastPeriodAsync();
-
-//     // if there is no period at all, create the first one
-//     if (payperiod == null)
-//     {
-//       Console.WriteLine("No period found, creating initial period");
-//       payperiod = await RolloverPayrollPeriod(null);     // overload returns new period
-//     }
-
-//     // find the current (unlocked) run in that period
-//     var currentPayRun = payperiod.Runs
-//                                 .Where(r => !r.IsLocked)
-//                                 .OrderByDescending(r => r.PayrollRunId)
-//                                 .FirstOrDefault();
-
-//     int nextRun = currentPayRun == null ? 1 : currentPayRun.PayrollRunId + 1;
-
-//     Console.WriteLine("=============A JOB Start==========");
-
-//     if (currentPayRun == null)
-//     {
-//       Console.WriteLine("-----THIS CURRENT PAY IS EMPTY-----");
-//       await RolloverPayrollRun(payperiod, nextRun);      // period is guaranteed to exist
-//       return;
-//     }
-
-//     // …finalise/lock existing run as before…
-
-//     if (nextRun > MAX_RUNS)
-//     {
-//       Console.WriteLine("----->ROLLING OVER PERIOD<-----");
-//       // create the new period first; capture the returned object
-//       payperiod = await RolloverPayrollPeriod(payperiod);
-//       // first run has already been created inside RolloverPayrollPeriod;
-//       // if you still need to add another run do it against `payperiod`
-//     }
-//     else
-//     {
-//       Console.WriteLine("----->ROLLING OVER RUN<-----");
-//       await RolloverPayrollRun(payperiod, nextRun);
-//     }
-//   }
-//   catch (InvalidOperationException ex) { … }
-//   catch (Exception ex) { … }
-// }

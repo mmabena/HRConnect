@@ -4,7 +4,7 @@
   using System.Threading.Tasks;
   using HRConnect.Api.Data;
   using HRConnect.Api.Interfaces;
-  using HRConnect.Api.Models.PayrollContribution;
+  using HRConnect.Api.Models.PayrollDeduction;
   using Microsoft.EntityFrameworkCore;
 
   public class PensionDeductionRepository(ApplicationDBContext context) : IPensionDeductionRepository

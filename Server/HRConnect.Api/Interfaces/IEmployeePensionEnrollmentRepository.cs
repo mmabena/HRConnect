@@ -9,6 +9,7 @@
     Task<EmployeePensionEnrollment?> GetByEmployeeIdAsync(string employeeId);
     Task<List<EmployeePensionEnrollment>> GetByPayRollRunIdAsync(int payrollRunId);
     Task<EmployeePensionEnrollment> UpdateAsync(EmployeePensionEnrollment employeePensionEnrollment);
+    Task LockEmployeePensionEnrollmentsAsync(List<EmployeePensionEnrollment> employeePensionEnrollments);
     Task<bool> DeleteAsync(EmployeePensionEnrollment employeePensionEnrollment);
   }
 }

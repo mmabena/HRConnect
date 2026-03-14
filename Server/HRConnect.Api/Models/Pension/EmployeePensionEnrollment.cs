@@ -10,9 +10,10 @@
     public DateOnly StartDate { get; set; }
     public DateOnly EffectiveDate { get; set; }
     public int PayrollRunId { get; set; }
+    public bool IsLocked { get; set; }
 
     public PensionOption PensionOption { get; set; }
     public Employee Employee { get; set; }
-    public PayrollRun? PayrollRun { get; set; }
+    //public PayrollRun PayrollRun { get; set; }
   }
 }
