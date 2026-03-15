@@ -5,6 +5,7 @@
 
   public static class ValidatePensionDeductionDtos
   {
+    private static readonly decimal MAX_PENSIONCONTRIBUTION_PERCENTAGE = (decimal)27.5 / 100;
     public static void ValidateAddDto(PensionDeductionAddDto pensionDeductionAddDto)
     {
       if (string.IsNullOrWhiteSpace(pensionDeductionAddDto.EmployeeId))
@@ -47,6 +48,16 @@
       if (pensionDeductionUpdateDto.PayrollRunId is not null and (not < 1 or > 12))
       {
         throw new ValidationException("Payroll run ID is invalid");
+      }
+    }
+
+    public static void ValidateVoluntaryContribution(decimal voluntaryContribution, decimal employeeMonthSalary, decimal pensionOptionPercentage)
+    {
+      float voluntaryContributionPercentage = (float)Math.Round(voluntaryContribution / employeeMonthSalary, 2);
+
+      if ((voluntaryContributionPercentage + (float)pensionOptionPercentage) > (float)MAX_PENSIONCONTRIBUTION_PERCENTAGE)
+      {
+        throw new ValidationException("Voluntary Contribution + Monthly Salary Contribution cannot exceed 27.5% of salary");
       }
     }
   }

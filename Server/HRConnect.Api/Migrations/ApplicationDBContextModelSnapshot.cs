@@ -504,6 +504,9 @@ namespace HRConnect.Api.Migrations
                     b.Property<bool>("IsLocked")
                         .HasColumnType("bit");
 
+                    b.Property<bool?>("IsVoluntaryContributionPermament")
+                        .HasColumnType("bit");
+
                     b.Property<int>("PayrollRunId")
                         .HasColumnType("int");
 
@@ -512,6 +515,9 @@ namespace HRConnect.Api.Migrations
 
                     b.Property<DateOnly>("StartDate")
                         .HasColumnType("date");
+
+                    b.Property<decimal?>("VoltunaryContribution")
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("EmployeePensionEnrollmentId");
 

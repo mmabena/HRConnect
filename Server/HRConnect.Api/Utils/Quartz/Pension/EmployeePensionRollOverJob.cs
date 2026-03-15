@@ -21,16 +21,37 @@
 
       foreach (Employee employee in employeesWithPensionOption)
       {
-        EmployeePensionEnrollment employeePensionEnrollment = new()
+        EmployeePensionEnrollment? employeeExisitingPensionEnrollment = await _employeePensionEnrollmentRepository.GetByEmployeeIdAsync(employee.EmployeeId);
+        if (employeeExisitingPensionEnrollment != null &&
+          (employeeExisitingPensionEnrollment.VoluntaryContribution > decimal.Zero) &&
+          (employeeExisitingPensionEnrollment.IsVoluntaryContributionPermament == true))
         {
-          EmployeeId = employee.EmployeeId,
-          PayrollRunId = currentPayRollRun.PayrollRunId,
-          PensionOptionId = employee.PensionOptionId.Value,
-          EffectiveDate = DateOnly.FromDateTime(DateTime.Now),
-          IsLocked = false,
-        };
+          EmployeePensionEnrollment employeePensionEnrollment = new()
+          {
+            EmployeeId = employee.EmployeeId,
+            PayrollRunId = currentPayRollRun.PayrollRunId,
+            PensionOptionId = employee.PensionOptionId.Value,
+            EffectiveDate = DateOnly.FromDateTime(DateTime.Now),
+            VoluntaryContribution = employeeExisitingPensionEnrollment.VoluntaryContribution,
+            IsVoluntaryContributionPermament = employeeExisitingPensionEnrollment.IsVoluntaryContributionPermament,
+            IsLocked = false,
+          };
 
-        _ = await _employeePensionEnrollmentRepository.AddAsync(employeePensionEnrollment);
+          _ = await _employeePensionEnrollmentRepository.AddAsync(employeePensionEnrollment);
+        }
+        else
+        {
+          EmployeePensionEnrollment employeePensionEnrollment = new()
+          {
+            EmployeeId = employee.EmployeeId,
+            PayrollRunId = currentPayRollRun.PayrollRunId,
+            PensionOptionId = employee.PensionOptionId.Value,
+            EffectiveDate = DateOnly.FromDateTime(DateTime.Now),
+            IsLocked = false,
+          };
+
+          _ = await _employeePensionEnrollmentRepository.AddAsync(employeePensionEnrollment);
+        }
       }
     }
   }

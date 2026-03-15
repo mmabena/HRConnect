@@ -9,7 +9,9 @@
     {
       return new EmployeePensionEnrollment
       {
-        EmployeeId = employeePensionEnrollmentDto.EmployeeId
+        EmployeeId = employeePensionEnrollmentDto.EmployeeId,
+        VoltunaryContribution = employeePensionEnrollmentDto.VoltunaryContribution,
+        IsVoluntaryContributionPermament = employeePensionEnrollmentDto.IsVoluntaryContributionPermament,
       };
     }
 
@@ -21,6 +23,8 @@
         EmployeeId = employeePensionEnrollment.EmployeeId,
         StartDate = employeePensionEnrollment.StartDate,
         EffectiveDate = employeePensionEnrollment.EffectiveDate,
+        VoltunaryContribution = employeePensionEnrollment.VoltunaryContribution,
+        IsVoluntaryContributionPermament = employeePensionEnrollment.IsVoluntaryContributionPermament,
         PayrollRunId = employeePensionEnrollment.PayrollRunId
       };
     }

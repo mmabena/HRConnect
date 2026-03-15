@@ -238,7 +238,8 @@ namespace HRConnect.Api.Data
             (
             e.Entity is PayrollPeriod ||
             e.Entity is PayrollRun ||
-            e.Entity is PayrollRecord
+            e.Entity is PayrollRecord ||
+            e.Entity is EmployeePensionEnrollment
             ));
 
       foreach (var e in modifiedRecords)

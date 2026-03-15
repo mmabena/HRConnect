@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRConnect.Api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20260313104816_PayrollService")]
+    [Migration("20260314172058_PayrollService")]
     partial class PayrollService
     {
         /// <inheritdoc />
@@ -507,6 +507,9 @@ namespace HRConnect.Api.Migrations
                     b.Property<bool>("IsLocked")
                         .HasColumnType("bit");
 
+                    b.Property<bool?>("IsVoluntaryContributionPermament")
+                        .HasColumnType("bit");
+
                     b.Property<int>("PayrollRunId")
                         .HasColumnType("int");
 
@@ -515,6 +518,9 @@ namespace HRConnect.Api.Migrations
 
                     b.Property<DateOnly>("StartDate")
                         .HasColumnType("date");
+
+                    b.Property<decimal?>("VoltunaryContribution")
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("EmployeePensionEnrollmentId");
 

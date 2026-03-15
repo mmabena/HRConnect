@@ -89,7 +89,7 @@
       return (pensionContribution > MAX_MONTHLYCONTRIBUTION) ? MAX_MONTHLYCONTRIBUTION : pensionContribution;
     }
 
-    private static void ValidateVoluntaryContribution(decimal voluntaryContribution, decimal employeeMonthSalary, decimal pensionOptionPercentage)
+    /*private static void ValidateVoluntaryContribution(decimal voluntaryContribution, decimal employeeMonthSalary, decimal pensionOptionPercentage)
     {
       float voluntaryContributionPercentage = (float)Math.Round(voluntaryContribution / employeeMonthSalary, 2);
 
@@ -97,7 +97,7 @@
       {
         throw new ValidationException("Voluntary Contribution + Monthly Salary Contribution cannot exceed 27.5% of salary");
       }
-    }
+    }*/
 
     private async Task<Employee> GetEmployeeInformationAsync(string employeeId)
     {
@@ -124,7 +124,8 @@
       Employee existingEmployee = await GetEmployeeInformationAsync(pensionDeductionAddDto.EmployeeId);
       EmployeePensionEnrollment existEmployeesPensionEnrollment = await GetEmployeePensionEnrollmentAsync(pensionDeductionAddDto.EmployeeId);
       decimal pensionOptionPercentage = await GetEmployeePensionOptionPercentageAsync((int)existingEmployee.PensionOptionId);
-      ValidateVoluntaryContribution((decimal)pensionDeductionAddDto.VoluntaryContribution, existingEmployee.MonthlySalary, pensionOptionPercentage);
+      ValidatePensionDeductionDtos.ValidateVoluntaryContribution((decimal)pensionDeductionAddDto.VoluntaryContribution, existingEmployee.MonthlySalary, pensionOptionPercentage);
+      //ValidateVoluntaryContribution((decimal)pensionDeductionAddDto.VoluntaryContribution, existingEmployee.MonthlySalary, pensionOptionPercentage);
 
 
       if (existingEmployee != null)
