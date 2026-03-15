@@ -5,9 +5,9 @@ namespace HRConnect.Api.Utils.Payroll
   using System.IO;
   using System.Globalization;
   using System.Reflection;
+
   public class PayrollUtil
   {
-
     /// <summary>
     /// Gets and calculate the current year's financial period
     /// <returns>
@@ -51,8 +51,6 @@ namespace HRConnect.Api.Utils.Payroll
     /// <returns></returns>
     private static PropertyInfo[] GetAllPublicPropertiesFromRecords(Type t)
     {
-      if (t != typeof(PayrollRecord))
-        return [];
       return t.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
     }
 
@@ -60,13 +58,14 @@ namespace HRConnect.Api.Utils.Payroll
     /// Write an Excel workbook containing every record in <paramref name="run"/>.
     /// Each payroll record type is given it's own worksheet within the spreadsheet 
     /// </summary>
-    public static async Task WriteExcelAsync(PayrollRun run)
+    ///<remarks>Please ensure your DateTime type are assigned a value if ever marked as
+    ///nullable</remarks>
+    public static async Task WriteExcelAsync(PayrollRun run, string rootPath)
     {
       ExcelPackage.License.SetNonCommercialPersonal("YourName"); //already in program cs so probably remove?
       try
       {
-
-        var reportsFolder = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "Reports"));
+        string reportsFolder = Path.Combine(rootPath, "Reports");
 
         string destinationFolder = Path.Combine(reportsFolder, run.PayrollRunNumber.ToString(CultureInfo.InvariantCulture));//, ;
         _ = Directory.CreateDirectory(destinationFolder);
@@ -92,6 +91,7 @@ namespace HRConnect.Api.Utils.Payroll
                          BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy)!);
 
           var props = propsList.ToArray();
+
           worksheet.Cells[1, 1].Value = "Payroll Run Number";
           // Write headings into the top row
           for (int col = 0; col < props.Length; col++)
@@ -102,12 +102,18 @@ namespace HRConnect.Api.Utils.Payroll
           foreach (var record in group)
           {
             worksheet.Cells[row, 1].Value = run.PayrollRunNumber;
-            Console.WriteLine($"?????????????????????? PAYROLL RUN NUMBER {run.PayrollRunNumber}");
 
             for (int col = 0; col < props.Length; col++)
             {
               var value = props[col].GetValue(record);
-              worksheet.Cells[row, col + 2].Value = value;
+              var cell = worksheet.Cells[row, col + 2];
+              //For DateTime type accordingly 
+              if (value is DateTime dt)
+              {
+                value = dt;
+                cell.Style.Numberformat.Format = "yyyy-mm-dd";
+              }
+              cell.Value = value;
             }
             row++;
           }

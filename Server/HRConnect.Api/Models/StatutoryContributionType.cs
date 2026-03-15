@@ -13,8 +13,8 @@ namespace HRConnect.Api.Models
     public decimal EmployerRate { get; set; }         //0.01 (1%)
     [Precision(18, 4)]
     public decimal? CapAmount { get; set; }
-    public DateTime EffectiveFrom { get; set; } = DateTime.UtcNow;
-    public DateTime? EffectiveTo { get; set; } = DateTime.UtcNow;
+    public DateTime EffectiveFrom { get; set; } = DateTime.Now;
+    public DateTime? EffectiveTo { get; set; } = DateTime.Now;
     public bool IsActive { get; set; }
   }
 }

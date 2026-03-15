@@ -5,6 +5,7 @@ namespace HRConnect.Api.Services
   using HRConnect.Api.Mappers.Payroll;
   using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.DTOs.Payroll;
+
   public class PayrollPeriodService : IPayrollPeriodService
   {
     private readonly IPayrollPeriodRepository _payrollPeriodRepository;
@@ -51,10 +52,9 @@ namespace HRConnect.Api.Services
     {
       return await _payrollPeriodRepository.GetLastPeriodAsync();
     }
-    public async Task<PayrollPeriod?> GetCurrentActivePayrollPeriod()
+    public async Task<PayrollPeriod?> GetPeriodByDate(DateTime dateTime)
     {
-      // return await _payrollPeriodRepository.GetCurrentActivePayrollPeriod();
-      throw new NotImplementedException();
+      return await _payrollPeriodRepository.GetPeriodByDate(dateTime);
     }
   }
 }

@@ -11,6 +11,5 @@ namespace HRConnect.Api.Interfaces
     Task<PayrollPeriodDto> CreatePeriodAsync(PayrollPeriod payrollPeriod);
     Task UpdateAsync(PayrollPeriod payrollPeriod);
     Task<PayrollPeriod?> GetLastPeriodAsync();
-    Task<PayrollPeriod?> GetCurrentActivePayrollPeriod();
   }
 }

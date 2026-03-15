@@ -122,14 +122,17 @@ namespace HRConnect.Api.Data
         {
           b.HasKey(r => r.PayrollRunId);
           b.Property(r => r.PayrollRunId).ValueGeneratedOnAdd();//Identity
-          b.HasCheckConstraint("CK_PayrollRun_PayrollRunNumber",
-                         "[PayrollRunNumber] BETWEEN 1 AND 12");//Enforce payroll run number to be cyclic (1-12)
-
+                                                                // b.HasCheckConstraint("CK_PayrollRun_PayrollRunNumber",
+                                                                // "[PayrollRunNumber] BETWEEN 1 AND 12");//Enforce payroll run number to be cyclic (1-12)
           b.HasMany(r => r.Records)
        .WithOne(r => r.PayrollRun)
        .HasForeignKey(r => r.PayrollRunId);
         });
 
+      //Prevent overwrites and possible race conditions
+      modelBuilder.Entity<PayrollRun>().Property(p => p.IsLocked).IsConcurrencyToken();
+      modelBuilder.Entity<PayrollPeriod>().Property(p => p.IsLocked).IsConcurrencyToken();
+      modelBuilder.Entity<PayrollRecord>().Property(p => p.IsLocked).IsConcurrencyToken();
       // Medical Aid Deduction Delete Nehavior
       modelBuilder.Entity<MedicalAidDeduction>()
         .HasOne(m => m.MedicalOption)
@@ -149,7 +152,7 @@ namespace HRConnect.Api.Data
     {
       //Intercept all instances of saving any changes to db
       var modifiedRecords = ChangeTracker.Entries()
-            .Where(e => e.State == EntityState.Modified &&
+            .Where(e => (e.State == EntityState.Modified || e.State == EntityState.Deleted) &&
             (
             e.Entity is PayrollPeriod ||
             e.Entity is PayrollRun ||
@@ -167,23 +170,23 @@ namespace HRConnect.Api.Data
       }
 
       // //Do the same locking for entities to prevent deletion
-      modifiedRecords = ChangeTracker.Entries()
-           .Where(e => e.State == EntityState.Deleted &&
-           (
-           e.Entity is PayrollPeriod ||
-           e.Entity is PayrollRun ||
-           e.Entity is PayrollRecord
-           ));
-
-      foreach (var e in modifiedRecords)
-      {
-        //Any locked entity should be under a Hard Lock. Don't allow any deletions
-        var prevLockState = (bool)e.OriginalValues["IsLocked"]!;
-        if (prevLockState)
-        {
-          throw new InvalidOperationException("Record/Run under Hard Lock. Cannot be modified");
-        }
-      }
+      // modifiedRecords = ChangeTracker.Entries()
+      //      .Where(e => e.State == EntityState.Deleted &&
+      //      (
+      //      e.Entity is PayrollPeriod ||
+      //      e.Entity is PayrollRun ||
+      //      e.Entity is PayrollRecord
+      //      ));
+      //
+      // foreach (var e in modifiedRecords)
+      // {
+      //   //Any locked entity should be under a Hard Lock. Don't allow any deletions
+      //   var prevLockState = (bool)e.OriginalValues["IsLocked"]!;
+      //   if (prevLockState)
+      //   {
+      //     throw new InvalidOperationException("Record/Run under Hard Lock. Cannot be modified");
+      //   }
+      // }
       return await base.SaveChangesAsync(cancellationToken);
     }
   }

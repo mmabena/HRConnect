@@ -12,6 +12,6 @@ namespace HRConnect.Api.Interfaces
     Task UpdateAsync(PayrollPeriod payrollPeriod);
     Task<PayrollPeriod?> GetLastPeriodAsync();
     Task<PayrollPeriod?> GetLastPeriodForRollOver();
-
+    Task<PayrollPeriod?> GetPeriodByDate(DateTime dateTime);
   }
 }

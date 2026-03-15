@@ -39,7 +39,7 @@ Audit.Core.Configuration.Setup()
           })
         .AuditEntityAction<AuditLogs>((e, entry, audit) =>
         {
-          audit.AuditedAt = DateTime.UtcNow;
+          audit.AuditedAt = DateTime.Now;
           audit.AuditAction = entry.Action;
           audit.TabelName = entry.Name;
         })));

@@ -8,13 +8,15 @@ namespace HRConnect.Api.Utils.Payroll
   [DisallowConcurrentExecution]
   public class PayrollRolloverJob : IJob
   {
+    private readonly IWebHostEnvironment _env;
     private readonly IPayrollPeriodService _payrollPeriodService;
     private readonly IPayrollRunRepository _payrollRunRepo;
     private static readonly int MAX_RUNS = 10;
-    public PayrollRolloverJob(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService)
+    public PayrollRolloverJob(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService, IWebHostEnvironment env)
     {
       _payrollRunRepo = payrollRunRepo;
       _payrollPeriodService = payrollPeriodService;
+      _env = env;
     }
     /// <summary>
     /// Rolls over to a new period <see cref="PayrollPeriod"/> and creates and new valid payroll run <seealso cref="PayrollRun"/>  
@@ -102,10 +104,10 @@ namespace HRConnect.Api.Utils.Payroll
             record.IsLocked = true;
           }
           //update the current run to implement lock
-          await _payrollRunRepo.UpdateRunAsync(currentPayRun);
+          await _payrollRunRepo.UpdateRun(currentPayRun);
 
           if (currentPayRun.Records.Count > 0)
-            await PayrollUtil.WriteExcelAsync(currentPayRun);
+            await PayrollUtil.WriteExcelAsync(currentPayRun, _env.ContentRootPath);
         }
 
         if (nextRun > MAX_RUNS)

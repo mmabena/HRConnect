@@ -7,10 +7,12 @@ namespace HRConnect.Api.Utils.Payroll
   {
     private readonly IPayrollPeriodService _payrollPeriodService;
     private readonly IPayrollRunRepository _payrollRunRepo;
-    public PayrollInit(IPayrollPeriodService payrollPeriodService, IPayrollRunRepository payrollRunRepository)
+    private readonly IPayrollRunService _payrollRunService;
+    public PayrollInit(IPayrollPeriodService payrollPeriodService, IPayrollRunRepository payrollRunRepository, IPayrollRunService payrollRunService)
     {
       _payrollPeriodService = payrollPeriodService;
       _payrollRunRepo = payrollRunRepository;
+      _payrollRunService = payrollRunService;
     }
 
     /// <summary>
@@ -25,7 +27,7 @@ namespace HRConnect.Api.Utils.Payroll
     public async Task InitialisePayrollPeriod()
     {
       var payperiod = await _payrollPeriodService.GetLastPeriodAsync(); // in production remove this
-
+      await _payrollRunService.LockAllOlderPayrollRuns();
       if (payperiod == null)
       {
         payperiod = new PayrollPeriod();
