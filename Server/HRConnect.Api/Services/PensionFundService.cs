@@ -10,7 +10,7 @@
       IPensionFundRepository fundRepo,
       IPensionOptionRepository optionRepo,
       IEmployeePensionRepository employeeRepo
-  ) : IPensionFundService
+  ) // : IPensionFundService
   {
 
     // Pension Funds
@@ -85,11 +85,12 @@
     }
 
     // Employee Pension Selection
+    /*
     public async Task<ServiceResult> RecordEmployeePensionSelectionAsync(
         string employeeId,
         int pensionOptionId,
         CancellationToken cancellationToken)
-    {
+    { 
       Employee? employee = await employeeRepo.GetEmployeeByIdAsync(employeeId, cancellationToken);
       PensionOption? option = await optionRepo.GetPensionOptionByIdAsync(pensionOptionId, cancellationToken);
 
@@ -130,6 +131,6 @@
       await fundRepo.SaveChangesAsync(cancellationToken);
 
       return ServiceResult.Success("Pension option selected and employee updated.");
-    }
+      */
   }
 }
