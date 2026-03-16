@@ -1,11 +1,11 @@
 namespace HRConnect.Api.Repository
 {
-  using Data;
-  using DTOs.Payroll;
-  using Interfaces;
-  using Mappers.Payroll;
+  using HRConnect.Api.DTOs.Payroll;
+  using HRConnect.Api.Mappers.Payroll;
+  using HRConnect.Api.Data;
+  using HRConnect.Api.Models.Payroll;
+  using HRConnect.Api.Interfaces;
   using Microsoft.EntityFrameworkCore;
-  using Models.Payroll;
 
   public class PayrollPeriodRepository : IPayrollPeriodRepository
   {
@@ -23,13 +23,18 @@ namespace HRConnect.Api.Repository
     }
     /*Active period depends on the financial year. April-March*/
 
+    public async Task<PayrollPeriod?> GetPeriodByDate(DateTime dateTime)
+    {
+      return await _context.PayrollPeriods.FirstOrDefaultAsync(
+         p => p.StartDate <= dateTime &&
+         p.EndDate >= dateTime);
+    }
     public async Task<PayrollPeriod?> GetActivePeriod(DateTime dateTime)
     {
       return await _context.PayrollPeriods.FirstOrDefaultAsync(
          p => p.StartDate <= dateTime &&
          p.EndDate >= dateTime);
     }
-    // Get The Last Period
     public async Task<PayrollPeriodDto> CreatePeriodAsync(PayrollPeriod payrollPeriod)
     {
       await _context.PayrollPeriods.AddAsync(payrollPeriod);
@@ -54,10 +59,9 @@ namespace HRConnect.Api.Repository
       .FirstOrDefaultAsync();
     }
 
-    //This can be replaced
-    public async Task<PayrollPeriod?> GetCurrentActivePayrollPeriod()
+    public async Task<PayrollPeriod?> GetLastPeriodForRollOver()
     {
-      return await _context.PayrollPeriods.Include(p => p.Runs).Where(p => !p.IsLocked)
+      return await _context.PayrollPeriods.Include(p => p.Runs).AsNoTracking().Where(p => !p.IsLocked)
       .FirstOrDefaultAsync();
     }
   }

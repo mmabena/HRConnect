@@ -1,87 +1,84 @@
 namespace HRConnect.Api.Controllers
 {
-  using Data;
-  using Interfaces;
+  using HRConnect.Api.Interfaces;
   using Microsoft.AspNetCore.Mvc;
-  using Models.PayrollDeduction;
-
+  using HRConnect.Api.DTOs.Payroll.PayrollDeduction.MedicalAidDeduction;
   [Route("api/payroll")]
   [ApiController]
   public class PayrollController : ControllerBase
   {
     private readonly IPayrollPeriodService _payrollPeriodService;
     private readonly IPayrollRunService _payrollRunService;
-    private readonly ApplicationDBContext _context;
-    public PayrollController(IPayrollPeriodService payrollPeriodService, IPayrollRunService payrollRunService
-    , ApplicationDBContext context)
+    private readonly IMedicalAidDeductionService _medicalAidDeductionService;
+    public PayrollController(IPayrollPeriodService payrollPeriodService, IPayrollRunService payrollRunService, IMedicalAidDeductionService medicalAidDeductionService)
     {
       _payrollPeriodService = payrollPeriodService;
       _payrollRunService = payrollRunService;
-      _context = context;
+      _medicalAidDeductionService = medicalAidDeductionService;
     }
-    [HttpGet]
+    [HttpGet("period")]
     public async Task<IActionResult> GetAllPeriods()
     {
       var periods = await _payrollPeriodService.GetAllPeriodsAsync();
       return Ok(periods);
     }
 
-    [HttpGet("{payrollRunId}")]
-    public async Task<IActionResult> GetPayrollRunById(int payrollRunId)
+    [HttpGet("period/payrun/{payrollRunNumber}")]
+    public async Task<IActionResult> GetPayrollRunById(int payrollRunNumber)
     {
-      var payrollRun = await _payrollRunService.GetPayrunByIdAsync(payrollRunId);
+      var payrollRun = await _payrollRunService.GetPayrunByRunNumberAsync(payrollRunNumber);
+      if (payrollRun == null)
+        return NotFound();
       return Ok(payrollRun);
     }
-    [HttpPost("{employeeId}")]
-    public async Task<IActionResult> AddRecordToCurrentRun(string employeeId)
+
+    [HttpGet("period/payrun/active")]
+    public async Task<IActionResult> GetCurrentlyActiveRun()
     {
-      var currentRun = await _payrollRunService.GetCurrentRunAsync();
-      if (currentRun == null)
-        return NotFound("No active payroll run found.");
-      // Create a new payroll record for the employee
-      var payrollRecord = new MedicalAidDeduction
-      {
-        EmployeeId = employeeId,
-        ChildPremium = 200m
-      };
-      await _payrollRunService.AddRecordToCurrentRunAsync(payrollRecord);
-      return Ok("Payroll record added to current run.");
+      var payrollRun = await _payrollRunService.GetCurrentRunAsync();
+      if (payrollRun == null)
+        return NotFound();
+      return Ok(payrollRun);
     }
-    [HttpGet("records/{payrollRunId})")]
-    public async Task<IActionResult> GetAllRecordsFromPayrunById(int payrollRunId)
+
+    [HttpGet("records/{payrollRunNumber})")]
+    public async Task<IActionResult> GetAllRecordsFromPayrunById(int payrollRunNumber)
     {
-      var payrollRun = await _payrollRunService.GetAllPayRecordsFromPayRunAsync(payrollRunId);
+      var payrollRun = await _payrollRunService.GetAllPayRecordsFromPayRunAsync(payrollRunNumber);
 
       return Ok(payrollRun);
     }
 
-    //Testing an entity that isn't a record can use PayrollRunId as a FK
-    [HttpPost("testentity/{name}")]
-    public async Task<IActionResult> AddTestEntityToCurrentRun(string name)
+    [HttpGet("employee/{id}")]
+    public async Task<IActionResult> GetEmployeeMedicalAidDeductionById([FromRoute] string id)
     {
-      var currentRun = await _payrollRunService.GetCurrentRunAsync();
-      if (currentRun == null)
-        return NotFound("No active payroll run found.");
-
-      Console.WriteLine($">>><<<><>>><><><CURRENT RUN PAYRUN ID=={currentRun.PayrollRunId}");
-      var testEntity = new TestEntity
+      var deduction = await _medicalAidDeductionService.GetMedicalAidDeductionsByEmployeeIdAsync(id);
+      return Ok(deduction);
+    }
+    [HttpPost("create/employee/{id}")]
+    public async Task<IActionResult> CreateNewEmployeeMedicalAidDeduction(
+     [FromRoute] string id,
+     [FromBody] CreateMedicalAidDeductionRequestDto request)
+    {
+      if (request == null)
       {
-        Name = name,
-        PayrollRunId = currentRun.PayrollRunId
-      };
-
-      // Assuming you have a repository method to add a TestEntity
-      // await _testEntityRepository.AddTestEntityAsync(testEntity);
-      try
-      {
-        await _context.TestEntities.AddAsync(testEntity);
-        await _context.SaveChangesAsync();
+        return BadRequest("Request body is required with selected medical option details");
       }
-      catch (Exception ex)
+
+      if (request.MedicalOptionId <= 0)
       {
-        Console.WriteLine($">>>>>>>>FAILED TO USE FK FOR TEST\n {ex}");
+        return BadRequest("Valid MedicalOptionId is required");
       }
-      return Ok("Test entity added to current run.");
+
+      var deduction = await _medicalAidDeductionService.AddNewMedicalAidDeductions(
+          id,
+          request.MedicalOptionId,
+          request);
+      Console.WriteLine($"~~~~~~~~~~~~~~~~~~~~~~~~~~~~PAYROLL RUN RECORD ADD");
+      return Ok(deduction); /*CreatedAtAction(
+          nameof(GetEmployeeMedicalAidDeductionById),
+          new { id = deduction.EmployeeId },
+          deduction);*/
     }
   }
 }

@@ -40,12 +40,6 @@ Configuration.Setup()
             audit.UifEmployerAmount = entity.UifEmployerAmount;
             audit.EmployerSdlContribution = entity.EmployerSdlContribution;
           })
-      
-        .Map<MedicalAidDeduction, AuditLogs>((madEntity, audit) =>
-          {
-            //audit.MedicalAidDeductionId = madEntity.MedicalAidDeductionId;
-            
-          })  
         .AuditEntityAction<AuditLogs>((e, entry, audit) =>
         {
           audit.AuditedAt = DateTime.UtcNow;

@@ -1,8 +1,8 @@
 namespace HRConnect.Api.Interfaces
 {
-  using DTOs.Payroll;
-  using Models.Payroll;
-
+  using System.Threading.Tasks;
+  using HRConnect.Api.Models.Payroll;
+  using HRConnect.Api.DTOs.Payroll;
   public interface IPayrollPeriodService
   {
     Task<IEnumerable<PayrollPeriodDto>> GetAllPeriodsAsync();
@@ -11,6 +11,5 @@ namespace HRConnect.Api.Interfaces
     Task<PayrollPeriodDto> CreatePeriodAsync(PayrollPeriod payrollPeriod);
     Task UpdateAsync(PayrollPeriod payrollPeriod);
     Task<PayrollPeriod?> GetLastPeriodAsync();
-    Task<PayrollPeriod?> GetCurrentActivePayrollPeriod();
   }
 }

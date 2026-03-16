@@ -10,8 +10,8 @@
       return new MedicalAidDeduction
       {
         MedicalAidDeductionId = dto.MedicalAidDeductionId,
-        PayrollRunId = dto.PayrollRunId,
-        EmployeeId = dto.EmployeeId,
+        //PayrollRunId = dto.PayrollRunId,
+        //EmployeeId = dto.EmployeeId,
         Name = dto.Name,
         Surname = dto.Surname,
         Branch = dto.Branch,

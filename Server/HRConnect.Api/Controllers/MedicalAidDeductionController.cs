@@ -76,7 +76,7 @@ public class MedicalAidDeductionController : ControllerBase
     [Authorize(Roles = "SuperUser")]
     public async Task<IActionResult> CreateNewEmployeeMedicalAidDeduction(
         [FromRoute] string id,
-        [FromBody] CreateMedicalDeductionDto request)
+        [FromBody] CreateMedicalAidDeductionRequestDto request)
     {
         if (request == null)
         {
@@ -85,7 +85,7 @@ public class MedicalAidDeductionController : ControllerBase
 
         if (request.MedicalOptionId <= 0)
         {
-            return BadRequest("Valid MedicalOptionId is required");
+            return BadRequest("MedicalOptionId is required");
         }
 
         var deduction = await _medicalAidDeductionService.AddNewMedicalAidDeductions(
@@ -93,9 +93,10 @@ public class MedicalAidDeductionController : ControllerBase
             request.MedicalOptionId,
             request);
 
-        return CreatedAtAction(
-            nameof(GetEmployeeMedicalAidDeductionById),
-            new { id = deduction.EmployeeId },
-            deduction);
+        return Ok(deduction);
+        /*CreatedAtAction(
+          nameof(GetEmployeeMedicalAidDeductionById),
+          new {id = deduction.EmployeeId},
+          deduction);*/
     }
 }

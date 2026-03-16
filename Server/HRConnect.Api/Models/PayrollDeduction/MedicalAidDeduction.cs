@@ -28,7 +28,7 @@
     //FK
     [ForeignKey(nameof(MedicalOptionCategory))]
     public int MedicalCategoryId { get; set; }
-    public string OptionCategory { get; set; }
+    public string OptionCategoryName { get; set; }
     // Number of Deps
     public int PrincipalCount { get; set; }
     public int AdultCount { get; set; }
@@ -43,6 +43,8 @@
     public decimal TotalDeductionAmount { get; set; }
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow; // setting the default date to use UTC (Ask??)
     public bool IsActive { get; set; }
+
+    public DateTime UpdatedDate { get; set; }
 
     public MedicalOption MedicalOption { get; set; }
     //public Employee Employee { get; set; }

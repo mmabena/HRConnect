@@ -46,7 +46,7 @@
     /// Headers: Authorization: Bearer {token}
     /// </example>
     [HttpGet("categories")]
-    [Authorize(Roles = "SuperUser")]
+    //[Authorize(Roles = "SuperUser")]
     public async Task<IActionResult> GetGroupedMedicalOptions()
     {
       //With middleware global exception handling, we can remove the try catch block and

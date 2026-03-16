@@ -60,6 +60,7 @@ public class MedicalAidEligibilityService : IMedicalAidEligibilityService
 
         var eligibleOptions = new List<ResponseEligibileOptionsDto>();
 
+
         foreach (var group in groupedOptions)
         {
             foreach (var option in group)
@@ -68,7 +69,13 @@ public class MedicalAidEligibilityService : IMedicalAidEligibilityService
                 if (IsEmployeeEligibleForOption(employee, option))
                 {
                     var responseDto = MapToResponseDto(employee, option, request, totalDependents);
-                    eligibleOptions.Add(responseDto);
+                    //check if total contribution is greater than salary
+                    if (employee.MonthlySalary >= responseDto.EstimatedTotalMonthlyPremium)
+                    {
+                      eligibleOptions.Add(responseDto);
+                    }
+                    //else do not add
+
                 }
             }
         }
@@ -158,7 +165,7 @@ public class MedicalAidEligibilityService : IMedicalAidEligibilityService
     /// </summary>
     private static decimal CalculatePrincipalPremium(MedicalOption option)
     {
-        return option.TotalMonthlyContributionsPrincipal ?? 0m;
+        return option.TotalMonthlyContributionsPrincipal ?? option.TotalMonthlyContributionsAdult ;
     }
 
     /// <summary>
@@ -180,6 +187,11 @@ public class MedicalAidEligibilityService : IMedicalAidEligibilityService
         if (numberOfChildren <= 0) return 0m;
 
         decimal childContribution = option.TotalMonthlyContributionsChild;
+        if (option.MedicalOptionName.Contains("Network") &&
+            (option.MedicalOptionName[^1] > 0 && option.MedicalOptionName[^1] < 4))
+        {
+          return childContribution;
+        }
         return childContribution * numberOfChildren;
     }
 }

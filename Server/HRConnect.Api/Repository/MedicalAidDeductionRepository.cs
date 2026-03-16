@@ -26,6 +26,7 @@
       string employeeId)
     {
       return await _context.MedicalAidDeductions
+        .Include(p => p.PayrollRun)
         .Where(o => o.EmployeeId == employeeId) 
         .ToListAsync();
     }
