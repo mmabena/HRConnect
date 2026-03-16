@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef  } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import "./EditEmployee.css";
 import {
@@ -33,6 +33,7 @@ const EditEmployee = () => {
   const [isEditable, setIsEditable] = useState(false);
   const role = useUserRole();
   const [loading, setLoading] = useState(true);
+  const fileInputRef = useRef(null);
   //const positionTitle = positions.find(p => p.positionId === employeeData.jobTitle)?.positionTitle || "";
   /// </summary>
   /// Track original Employee number and DOB loaded from DB
@@ -242,7 +243,7 @@ const EditEmployee = () => {
       <div className="emp-edit-employee-top-container">
         <div
           className="emp-photo-block"
-          onClick={() => document.getElementById("emp-photo-input").click()}
+          onClick={() => fileInputRef.current?.click()}
         >
           <img
             src={employee.profileImage || "/default-profile.png"}
@@ -254,9 +255,9 @@ const EditEmployee = () => {
         </div>
         <input
           type="file"
-          name="emp-photo-input"
           className="emp-photo-input"
           onChange={onFileChange}
+          ref={fileInputRef}
         />
 
         <div className="emp-photo-text-container">
