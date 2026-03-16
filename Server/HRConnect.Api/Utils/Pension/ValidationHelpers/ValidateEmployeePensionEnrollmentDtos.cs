@@ -18,12 +18,12 @@
         throw new ValidationException("Employee ID is a required field and is not valid");
       }
 
-      if (employeePensionEnrollmentAddDto.VoltunaryContribution is not null and < 0)
+      if (employeePensionEnrollmentAddDto.VoluntaryContribution is not null and < 0)
       {
         throw new ValidationException("Voluntary contribution cannot be less lower than zero");
       }
 
-      if (employeePensionEnrollmentAddDto.VoltunaryContribution is not null
+      if (employeePensionEnrollmentAddDto.VoluntaryContribution is not null
         && employeePensionEnrollmentAddDto.IsVoluntaryContributionPermament is null)
       {
         throw new ValidationException("Voluntary contribution has to be permament or once-off");
@@ -59,10 +59,10 @@
         throw new ValidationException("Effective date must be beginning of next month");
       }
 
-      if (employeePensionEnrollmentUpdateDto.PayrollRunId is not null and (not < 1 or > 12))
+      /*if (employeePensionEnrollmentUpdateDto.PayrollRunId is not null and (not < 1 or > 12))
       {
         throw new ValidationException("Payroll run ID is invalid");
-      }
+      }*/
     }
     public static void ValidateVoluntaryContribution(decimal voluntaryContribution, decimal employeeMonthSalary, decimal pensionOptionPercentage)
     {

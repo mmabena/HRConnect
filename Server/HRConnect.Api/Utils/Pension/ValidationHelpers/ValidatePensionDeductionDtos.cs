@@ -44,11 +44,6 @@
       {
         throw new ValidationException("Effective date must be beginning of next month");
       }
-
-      if (pensionDeductionUpdateDto.PayrollRunId is not null and (not < 1 or > 12))
-      {
-        throw new ValidationException("Payroll run ID is invalid");
-      }
     }
 
     public static void ValidateVoluntaryContribution(decimal voluntaryContribution, decimal employeeMonthSalary, decimal pensionOptionPercentage)

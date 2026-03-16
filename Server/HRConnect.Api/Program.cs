@@ -140,7 +140,7 @@ builder.Services.AddQuartz(q =>
   q.AddTrigger(opts => opts
   .ForJob(jobKey)
   .WithIdentity("PayrollRollover-Trigger")
-  .WithCronSchedule("0 0/5 * * * ?", x =>
+  .WithCronSchedule("0 0/2 * * * ?", x =>
   x.WithMisfireHandlingInstructionFireAndProceed())); //when a job misfire happens. 
                                                       // Properly re-execute it and proceed as usual
 
@@ -160,7 +160,7 @@ builder.Services.AddQuartz(q =>
   q.AddTrigger(opts => opts
     .ForJob(pensionEnrollJobKey)
     .WithIdentity("EmployeePensionRollOverJob-Trigger")
-    .WithCronSchedule("0/30 0/5 * * * ?", x => x.WithMisfireHandlingInstructionFireAndProceed()));
+    .WithCronSchedule("0/30 0/2 * * * ?", x => x.WithMisfireHandlingInstructionFireAndProceed()));
 
   //Adding persistence to quartz to be able to be run in the back
   q.UsePersistentStore(options =>
