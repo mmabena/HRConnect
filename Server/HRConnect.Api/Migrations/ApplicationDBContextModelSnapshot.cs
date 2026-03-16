@@ -932,6 +932,7 @@ namespace HRConnect.Api.Migrations
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsLocked")
+                        .IsConcurrencyToken()
                         .HasColumnType("bit");
 
                     b.Property<DateTime>("StartDate")
@@ -956,6 +957,7 @@ namespace HRConnect.Api.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsLocked")
+                        .IsConcurrencyToken()
                         .HasColumnType("bit");
 
                     b.Property<int>("PayrollRunId")
@@ -985,6 +987,7 @@ namespace HRConnect.Api.Migrations
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsLocked")
+                        .IsConcurrencyToken()
                         .HasColumnType("bit");
 
                     b.Property<int>("PayrollRunNumber")
@@ -1000,10 +1003,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("PeriodId");
 
-                    b.ToTable("PayrollRuns", t =>
-                        {
-                            t.HasCheckConstraint("CK_PayrollRun_PayrollRunNumber", "[PayrollRunNumber] BETWEEN 1 AND 12");
-                        });
+                    b.ToTable("PayrollRuns");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.Position", b =>
