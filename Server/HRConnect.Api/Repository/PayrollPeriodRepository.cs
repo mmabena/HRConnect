@@ -23,13 +23,18 @@ namespace HRConnect.Api.Repository
     }
     /*Active period depends on the financial year. April-March*/
 
+    public async Task<PayrollPeriod?> GetPeriodByDate(DateTime dateTime)
+    {
+      return await _context.PayrollPeriods.FirstOrDefaultAsync(
+         p => p.StartDate <= dateTime &&
+         p.EndDate >= dateTime);
+    }
     public async Task<PayrollPeriod?> GetActivePeriod(DateTime dateTime)
     {
       return await _context.PayrollPeriods.FirstOrDefaultAsync(
          p => p.StartDate <= dateTime &&
          p.EndDate >= dateTime);
     }
-    // Get The Last Period
     public async Task<PayrollPeriodDto> CreatePeriodAsync(PayrollPeriod payrollPeriod)
     {
       await _context.PayrollPeriods.AddAsync(payrollPeriod);

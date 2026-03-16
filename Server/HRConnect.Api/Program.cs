@@ -41,7 +41,7 @@ Audit.Core.Configuration.Setup()
           })
         .AuditEntityAction<AuditLogs>((e, entry, audit) =>
         {
-          audit.AuditedAt = DateTime.UtcNow;
+          audit.AuditedAt = DateTime.Now;
           audit.AuditAction = entry.Action;
           audit.TabelName = entry.Name;
         })));
@@ -82,7 +82,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
     {
-      options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+      options.UseSqlServer(builder.Configuration.GetConnectionString("DBeaverConnection"));
       options.AddInterceptors(new AuditSaveChangesInterceptor());
     });
 
@@ -165,7 +165,11 @@ builder.Services.AddQuartz(q =>
   //Adding persistence to quartz to be able to be run in the back
   q.UsePersistentStore(options =>
   {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!);
+    options.UseSqlServer(options =>
+        {
+          options.ConnectionString = builder.Configuration.GetConnectionString("DBeaverConnection")!;
+          options.TablePrefix = "quartz.QRTZ_";
+        });
     options.UseSerializer<Quartz.Simpl.SystemTextJsonObjectSerializer>();
     options.UseProperties = true;
   });
@@ -186,7 +190,6 @@ builder.Services.AddScoped<IPayrollRunService, PayrollRunService>();
 builder.Services.AddScoped<IPayrollPeriodService, PayrollPeriodService>();
 builder.Services.AddScoped<PayrollRolloverJob>();//for Quartz
 builder.Services.AddScoped<PayrollInit>();
-
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();

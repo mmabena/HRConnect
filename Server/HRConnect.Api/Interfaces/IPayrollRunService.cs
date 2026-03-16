@@ -5,14 +5,16 @@ namespace HRConnect.Api.Interfaces
 
   public interface IPayrollRunService
   {
-    Task<PayrollRunDto?> GetPayrunByIdAsync(int id);
+    Task<PayrollRunDto?> GetPayrunByRunNumberAsync(int id);
     Task<IEnumerable<PayrollRunDto>> GetAllPayruns();
     /// CONSIDER CHANGING THE RETURN TYPE OF THIS TASK
-    Task<PayrollRunDto> CreatePayrollRunAsync(PayrollRun payrollRun);
-    Task<PayrollRun?> GetRunByDateAsync(DateTime dateTime);
+    Task<PayrollRun> CreatePayrollRunAsync(PayrollRun payrollRun);
+    Task<PayrollRunDto?> GetRunByDateAsync(DateTime dateTime);
     Task<PayrollRun> GetCurrentRunAsync();
     Task UpdateRunAsync(PayrollRun payrollRun);
     Task AddRecordToCurrentRunAsync(PayrollRecord payrollRecord, string employeeId);
+    [Obsolete("All PayrollRecord's should be queried using their respective Repository or Service calls")]
     Task<PayrollRun> GetAllPayRecordsFromPayRunAsync(int payrollRunNumber);
+    Task LockAllOlderPayrollRuns();
   }
 }

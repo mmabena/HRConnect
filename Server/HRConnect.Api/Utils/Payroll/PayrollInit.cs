@@ -7,64 +7,50 @@ namespace HRConnect.Api.Utils.Payroll
   {
     private readonly IPayrollPeriodService _payrollPeriodService;
     private readonly IPayrollRunRepository _payrollRunRepo;
-    public PayrollInit(IPayrollPeriodService payrollPeriodService, IPayrollRunRepository payrollRunRepository)
+    private readonly IPayrollRunService _payrollRunService;
+    public PayrollInit(IPayrollPeriodService payrollPeriodService, IPayrollRunRepository payrollRunRepository, IPayrollRunService payrollRunService)
     {
       _payrollPeriodService = payrollPeriodService;
       _payrollRunRepo = payrollRunRepository;
+      _payrollRunService = payrollRunService;
     }
 
-
-    /// <summary >
-    /// Helper function to get the current payroll run number based on current date
-    /// <para name="currentDate">The date used to find the desired run <param> 
-    /// <summary >
-    public int GetPayrunNumber(DateTime currentDate)
-    {
-      return ((currentDate.Month + 8) % 12) + 1;
-    }
-
+    /// <summary>
+    /// Intitialies a valid active payroll period <see cref="PayrollPeriod"/> 
+    /// and adds new unlocked payroll run <see cref="PayrollRun"/> 
+    /// to the period's collection
+    /// </summary>
+    /// <remarks>
+    /// This method is called in the applications entry point. Since only 1 payroll period and run 
+    /// can be active at a time, let the application handle this automatically. No user input is required of allowed
+    /// </remark>
     public async Task InitialisePayrollPeriod()
     {
-
-      // var payperiod = await _payrollPeriodService.GetActivePeriod(DateTime.Now);
       var payperiod = await _payrollPeriodService.GetLastPeriodAsync(); // in production remove this
+      await _payrollRunService.LockAllOlderPayrollRuns();
       if (payperiod == null)
       {
         payperiod = new PayrollPeriod();
         await _payrollPeriodService.CreatePeriodAsync(payperiod);
-        // payperiod = new PayrollPeriod
-        // {
-        //   PayrollPeriodId = Guid.NewGuid(),
-        //   StartDate = start,
-        //   EndDate = end,
-        //   IsLocked = false,
-        //   IsClosed = false,
-        //   Runs = new List<PayrollRun>()
-        // };
-        // //create the period after saving the run
-        // Console.WriteLine($"=======>CREATED A PAYROLL PERIOD<=======");
-        // await _payrollPeriodService.CreatePeriodAsync(payperiod);
       }
-      int run = 1;//GetPayrunNumber(DateTime.Now);
+
+      int runNumber = PayrollUtil.SetPayrunNumber();
       //Do the same thing for the period
-      var runExists = await _payrollRunRepo.GetPayrunByIdAsync(run);
+      var runExists = await _payrollRunRepo.GetPayrunByRunNumberAsync(runNumber);
+
       if (runExists == null)
       {
         PayrollRun newRun = new PayrollRun
         {
           PeriodId = payperiod.PayrollPeriodId,
-          PayrollRunNumber = run,//GetPayrunNumber(DateTime.Now),
+          PayrollRunNumber = runNumber,
           IsLocked = false,
           Period = payperiod,
           PeriodDate = DateTime.Now,
           Records = new List<PayrollRecord>()
         };
         payperiod.Runs.Add(newRun);
-
-        // await _payrollPeriodService.UpdateAsync(payperiod);
         await _payrollRunRepo.CreatePayrollRunAsync(newRun);
-
-        Console.WriteLine($"=======>CREATED A PAYROLL RUN<=======");
       }
 
     }

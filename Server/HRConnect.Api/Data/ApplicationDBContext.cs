@@ -1,6 +1,5 @@
 namespace HRConnect.Api.Data
 {
-  using System.Reflection;
   using HRConnect.Api.Models;
   using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Models.PayrollDeduction;
@@ -8,6 +7,8 @@ namespace HRConnect.Api.Data
   using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Models.PayrollDeduction;
   using Microsoft.EntityFrameworkCore;
+  using AppAny.Quartz.EntityFrameworkCore.Migrations;
+  using AppAny.Quartz.EntityFrameworkCore.Migrations.SqlServer;
 
   public class ApplicationDBContext(DbContextOptions dbContextOptions) : DbContext(dbContextOptions)
   {
@@ -32,11 +33,15 @@ namespace HRConnect.Api.Data
     public DbSet<EmployeePensionEnrollment> EmployeePensionEnrollments { get; set; }
     public DbSet<PensionDeduction> PensionDeductions { get; set; }
     public DbSet<MedicalAidDeduction> MedicalAidDeductions { get; set; }
-    //public DbSet<LunchDeduction> LunchDeductions { get; set; }
-    public DbSet<TestEntity> TestEntities { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
       base.OnModelCreating(modelBuilder);
+      // Creating namespace for Quartz migrations 
+      modelBuilder.AddQuartz(builder =>
+      {
+        builder.UseSqlServer(schema: "quartz", prefix: "QRTZ_");
+      });
 
       // Employee relationships
       modelBuilder.Entity<Employee>()
@@ -108,10 +113,6 @@ namespace HRConnect.Api.Data
         .HasColumnType("decimal(18,4)")
         .HasDefaultValue(0.01m);
 
-
-      /*                                                                       Payroll run*/
-      // modelBuilder.Ignore<PayrollRecord>();
-
       modelBuilder.Entity<PayrollPeriod>().HasMany(p => p.Runs)
       .WithOne(r => r.Period)
       .HasForeignKey(p => p.PeriodId);
@@ -123,32 +124,21 @@ namespace HRConnect.Api.Data
       modelBuilder.Entity<PensionDeduction>().ToTable("PensionDeductions");
       modelBuilder.Entity<MedicalAidDeduction>().ToTable("MedicalAidDeductions");
 
-
-      //Declare PayrollRunId as an alternative Key that can be used instead of Id
-      modelBuilder.Entity<PayrollRun>().HasAlternateKey(r => r.PayrollRunId);
-      
-
-      //Relationship to payroll run
-      modelBuilder.Entity<PayrollRun>().HasMany(p => p.Records)
-      .WithOne(r => r.PayrollRun)
-      .HasForeignKey(r => r.PayrollRunId)
-      .HasPrincipalKey(p => p.PayrollRunId);
-
-      //Testing that any other table can have runID FK
-      // modelBuilder.Entity<TestEntity>().HasOne<PayrollRun>()
-      // .WithMany()
-      // .HasForeignKey(t => t.PayrollRunId);
       modelBuilder.Entity<PayrollRun>(b =>
         {
           b.HasKey(r => r.PayrollRunId);
           b.Property(r => r.PayrollRunId).ValueGeneratedOnAdd();//Identity
-          // b.HasCheckConstraint("CK_PayrollRun_PayRunNumber",
-          //                "[PayRunNumber] BETWEEN 1 AND 12");
-
+                                                                // b.HasCheckConstraint("CK_PayrollRun_PayrollRunNumber",
+                                                                // "[PayrollRunNumber] BETWEEN 1 AND 12");//Enforce payroll run number to be cyclic (1-12)
           b.HasMany(r => r.Records)
        .WithOne(r => r.PayrollRun)
        .HasForeignKey(r => r.PayrollRunId);
         });
+
+      //Prevent overwrites and possible race conditions
+      modelBuilder.Entity<PayrollRun>().Property(p => p.IsLocked).IsConcurrencyToken();
+      modelBuilder.Entity<PayrollPeriod>().Property(p => p.IsLocked).IsConcurrencyToken();
+      modelBuilder.Entity<PayrollRecord>().Property(p => p.IsLocked).IsConcurrencyToken();
       // Medical Aid Deduction Delete Nehavior
       modelBuilder.Entity<MedicalAidDeduction>()
         .HasOne(m => m.MedicalOption)
@@ -234,7 +224,7 @@ namespace HRConnect.Api.Data
     {
       //Intercept all instances of saving any changes to db
       var modifiedRecords = ChangeTracker.Entries()
-            .Where(e => e.State == EntityState.Modified &&
+            .Where(e => (e.State == EntityState.Modified || e.State == EntityState.Deleted) &&
             (
             e.Entity is PayrollPeriod ||
             e.Entity is PayrollRun ||
@@ -260,10 +250,10 @@ namespace HRConnect.Api.Data
       //      e.Entity is PayrollRun ||
       //      e.Entity is PayrollRecord
       //      ));
-
+      //
       // foreach (var e in modifiedRecords)
       // {
-      //   //Any locked entity should be under a Hard Lock. Don't allow any changes
+      //   //Any locked entity should be under a Hard Lock. Don't allow any deletions
       //   var prevLockState = (bool)e.OriginalValues["IsLocked"]!;
       //   if (prevLockState)
       //   {
