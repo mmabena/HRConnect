@@ -6,6 +6,7 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using Resend;
 using HRConnect.Api.Interfaces;
+using HRConnect.Api.Middleware;
 using HRConnect.Api.Repositories;
 using HRConnect.Api.Services;
 using HRConnect.Api.Repository;
@@ -15,10 +16,10 @@ using HRConnect.Api.Middleware;
 using HRConnect.Api.Services;
 using HRConnect.Api.Utils;
 using OfficeOpenXml;
-using Resend;
 using HRConnect.Api.Interfaces.PensionProjection;
 using Audit.Core;
 using Audit.EntityFramework;
+using Quartz;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,7 +27,7 @@ var builder = WebApplication.CreateBuilder(args);
 Audit.Core.Configuration.Setup()
   .UseEntityFramework(config => config
       .AuditTypeExplicitMapper(map => map
-        .Map<PayrollDeduction, AuditPayrollDeductions>((entity, audit) =>
+        .Map<StatutoryContribution, AuditLogs>((entity, audit) =>
           {
             audit.EmployeeId = entity.EmployeeId;
             audit.IdNumber = entity.IdNumber;
@@ -37,7 +38,7 @@ Audit.Core.Configuration.Setup()
             audit.UifEmployerAmount = entity.UifEmployerAmount;
             audit.EmployerSdlContribution = entity.EmployerSdlContribution;
           })
-        .AuditEntityAction<AuditPayrollDeductions>((e, entry, audit) =>
+        .AuditEntityAction<AuditLogs>((e, entry, audit) =>
         {
           audit.AuditedAt = DateTime.UtcNow;
           audit.AuditAction = entry.Action;
@@ -126,7 +127,34 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorizationBuilder()
     .AddPolicy("SuperUserOnly", policy => policy.RequireRole("SuperUser"))
-    .AddPolicy("NormalUserOnly", policy => policy.RequireRole("NormalUser"));
+    .AddPolicy("NormalUserOnly", policy => policy.RequireRole("NormalUser"))
+    .AddPolicy("SuperOrNormalUser", policy => policy.RequireRole("SuperUser", "NormalUser"));
+
+builder.Services.AddQuartz(q =>
+{
+  var jobKey = new JobKey("PayrollRolloverJob");
+
+  //Add a service for to run as a background job 
+  q.AddJob<PayrollRolloverJob>(opts => opts.WithIdentity(jobKey));
+
+  //Triggers that will need to be fired to run background job
+  // using Cron Schedule
+  // Second, Minute, Hour, Day of The Month, Month, Day of The Week
+  q.AddTrigger(opts => opts
+  .ForJob(jobKey)
+  .WithIdentity("PayrollRolloverTrigger")
+  .WithCronSchedule("0 0 0 1 * ?"));
+  // 0 -> 0 seconds
+  // 0 -> 0 minutes
+  // 0 -> 0 hours
+  // 1 -> first day of the year
+  // * -> for any/every month 
+  // ? -> for all days of the week
+});
+builder.Services.AddQuartzHostedService(q =>
+{
+  q.WaitForJobsToComplete = true;
+});
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
@@ -147,9 +175,12 @@ builder.Services.AddScoped<IOccupationalLevelRepository, OccupationalLevelReposi
 builder.Services.AddScoped<IOccupationalLevelService, OccupationalLevelService>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.Services.AuthService>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
-builder.Services.AddScoped<IPayrollDeductionsRepository, PayrollDeductionsRepository>();
-builder.Services.AddScoped<IPayrollDeductionsService, PayrollDeductionsService>();
+builder.Services.AddScoped<IStatutoryContributionRepository, StatutoryContributionRepository>();
+builder.Services.AddScoped<IStatutoryContributionService, StatutoryContributionService>();
 builder.Services.AddTransient<IPensionProjectionService, PensionProjectionService>();
+builder.Services.AddScoped<IMedicalOptionRepository, MedicalOptionRepository>();
+builder.Services.AddScoped<HRConnect.Api.Interfaces.IMedicalOptionService,
+  HRConnect.Api.Services.MedicalOptionService>();
 builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowReact",
@@ -173,6 +204,8 @@ if (app.Environment.IsDevelopment())
 
 // app.UseHttpsRedirection();
 app.UseCors("AllowReact");
+// Adding Global Exception Handler
+app.UseGlobalExceptionHandler();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseMiddleware<ExceptionMiddleware>();

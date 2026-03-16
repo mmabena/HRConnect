@@ -5,7 +5,7 @@ import AddEmployeeModal from "../../Components/EmployeeManagement/AddEmployeeMod
 
 import useEmployees from "../../hooks/useEmployees";
 import useEmployeeFilter from "../../hooks/useEmployeeFilter";
-import usePagination from "../../hooks/usePagination";
+import useEmpPagination from "../../hooks/useEmpPagination";
 import useDropdown from "../../hooks/useDropdown";
 import useInitialColors from "../../hooks/useInitialColors";
 
@@ -47,7 +47,7 @@ const EmployeeList = () => {
     indexOfFirstItem,
     indexOfLastItem,
     currentItems,
-  } = usePagination(filteredEmployees);
+  } = useEmpPagination(filteredEmployees);
 
   /// </summary>
   ///colors for the initial circles

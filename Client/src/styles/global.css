@@ -6,8 +6,10 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@300;400;500;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=League+Spartan:wght@100..900&display=swap');
 
 /* ==================== GLOBAL VARIABLES & RESETS ==================== */
+
 
 :root {
   --primary-color: #355867;
@@ -19,6 +21,8 @@
   --teal: #01A19A;
   --baby-blue: #C7D9E5;
   --success-color: #AFBF74;
+  --add-buttton: #638549;
+  --BG: linear-gradient(180deg, #EEEEF1 0%, #EFF1F3 16.19%, #E7EAEB 50.25%, #D6D6D9 79.77%, #C4C4C5 100% );
   --background-light: #EEEEF1;
   --background-light-alt: #EFF1F3;
   --background-light-alt-2: #E7EAEB;
@@ -54,6 +58,36 @@ body {
   font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
 }
 
+.button-wrapper
+{
+  display: flex;
+  width: 1451px;
+  height: 74px;
+  padding: 15px 0;
+  justify-content: flex-end;
+  align-items: flex-end;
+  gap: 45px;
+
+}
+
+.add-button {
+  background-color: var(--add-buttton);
+  color: white;
+  border: none;
+  padding: 10px 50px;
+  border-radius: 10px;
+  text-align: center;
+  font-family: "Anek Bangla";
+  font-size: 16px;
+  font-weight: 500;
+  line-height: normal;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  white-space: nowrap; /* Prevent text wrapping */
+}
+
+
 /* ==================== BUTTONS ==================== */
 
 /* Primary Button - Standard action button */
@@ -62,7 +96,7 @@ body {
   font-family: 'Instrument Sans', sans-serif;
   width: 360px;
   height: 37px;
-  background-color: var(--accent-blue);
+  background-color: var(--primary-color);
   border: none;
   border-radius: var(--border-radius-medium);
   padding: 0 39px;
@@ -719,7 +753,11 @@ body {
   z-index: 1;
 }
 
+<<<<<<< HEAD
+/* Menu Background */
+=======
 /* Edit Employee Background */
+>>>>>>> feature/HRC003
 .menu-background {
   position: fixed;
   top: 0;
@@ -824,67 +862,7 @@ body {
 .visible {
   display: block;
 }
-/*======================css for tax table====================*/
-.card-container {
-  background: #f5f7f8;
-  padding: 20px;
-  margin-bottom: 30px;
-  border-radius: 10px;
-}
 
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
-}
-
-.upload-btn {
-  background: #6c8e5a;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.status-row {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 15px;
-}
-
-.status-badge.active {
-  background: #d4e4d0;
-  color: #3d6b2f;
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 14px;
-}
-
-.custom-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.custom-table th {
-  background: #3f5f6b;
-  color: white;
-  text-align: left;
-  padding: 10px;
-}
-
-.custom-table td {
-  padding: 10px;
-  border-bottom: 1px solid #ddd;
-}
-
-.link-btn {
-  background: none;
-  border: none;
-  color: #2c6e91;
-  cursor: pointer;
-}
 /* ==================== Modal css ==================== */
 .modal-overlay {
   position: fixed;

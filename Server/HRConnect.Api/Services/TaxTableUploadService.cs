@@ -175,18 +175,26 @@ namespace HRConnect.Api.Services
       await _deductionRepository.AddTaxDeductionsAsync(deductions);
 
       // Financial-year logic
-      var effectiveFrom = new DateTime(taxYear, 3, 1);
+      var effectiveFrom = new DateTime(taxYear, 3, 1, 0, 0, 0, DateTimeKind.Utc);
       var previousExpiry = new DateTime(taxYear, 2, 28);
 
-      // Expire currently active table (if exists)
-      var activeUploads = await _repository.GetActiveTaxTableUploadsAsync();
-      var currentActive = activeUploads
-          .Where(x => x.EffectiveTo == null)
-          .OrderByDescending(x => x.EffectiveFrom)
-          .FirstOrDefault();
+      var today = DateTime.UtcNow.Date;
 
-      if (currentActive != null)
-        currentActive.EffectiveTo = previousExpiry;
+      // Only expire current table if the new one is already effective
+      if (effectiveFrom <= today)
+      {
+        var activeUploads = await _repository.GetActiveTaxTableUploadsAsync();
+
+        var currentActive = activeUploads
+            .Where(x => x.EffectiveTo == null)
+            .OrderByDescending(x => x.EffectiveFrom)
+            .FirstOrDefault();
+
+        if (currentActive != null)
+        {
+          currentActive.EffectiveTo = effectiveFrom.AddDays(-1);
+        }
+      }
 
       var newUpload = new TaxTableUpload
       {

@@ -196,12 +196,10 @@ const ForgotPassword = ({ onBackToLogin }) => {
                         className="toggle-visibility-btn"
                         onClick={() => setShowPassword(!showPassword)}
                         type="button"
-                        style={{ background: 'none', border: 'none', cursor: 'pointer' }}
                       >
                         <img
-                          src={showPassword ? '/images/eye-open.svg' : '/images/eye-closed.svg'}
+                          src={showPassword ? '/images/visibility_on.png' : '/images/visibility_off.svg'}
                           alt="toggle"
-                          style={{ height: '20px', width: '20px' }}
                         />
                       </button>
                     </div>

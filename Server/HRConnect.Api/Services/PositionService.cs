@@ -21,10 +21,14 @@ namespace HRConnect.Api.Services
     public class PositionService : IPositionService
     {
         private readonly IPositionRepository _positionRepo;
+        private readonly IJobGradeRepository _jobGradeRepo;
+        private readonly IOccupationalLevelRepository _occupationalLevelRepo;
 
-        public PositionService(IPositionRepository positionRepo)
+        public PositionService(IPositionRepository positionRepo, IJobGradeRepository jobGradeRepo, IOccupationalLevelRepository occupationalLevelRepo)
         {
             _positionRepo = positionRepo;
+            _jobGradeRepo = jobGradeRepo;
+            _occupationalLevelRepo = occupationalLevelRepo;
         }
 
         // ----------------------
@@ -106,10 +110,10 @@ namespace HRConnect.Api.Services
 
             ValidateUpdateDto(updatePositionDto);
 
-
             if (updatePositionDto.JobGradeId > 0)
             {
-                var jobGrade = await _positionRepo.GetPositionByIdAsync(updatePositionDto.JobGradeId);
+                var jobGrade = await _jobGradeRepo.GetJobGradeByIdAsync(updatePositionDto.JobGradeId);
+
                 if (jobGrade == null)
                     throw new KeyNotFoundException($"JobGrade with ID {updatePositionDto.JobGradeId} not found.");
 
@@ -122,7 +126,7 @@ namespace HRConnect.Api.Services
 
             if (updatePositionDto.OccupationalLevelId > 0)
             {
-                var occupationalLevel = await _positionRepo.GetPositionByIdAsync(updatePositionDto.OccupationalLevelId);
+                var occupationalLevel = await _occupationalLevelRepo.GetOccupationalLevelByIdAsync(updatePositionDto.OccupationalLevelId);
                 if (occupationalLevel == null)
                     throw new KeyNotFoundException($"OccupationalLevel with ID {updatePositionDto.OccupationalLevelId} not found.");
 

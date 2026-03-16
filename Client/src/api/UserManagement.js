@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:5037/api";
+const BASE_URL = "http://localhost:5147/api";
 
 export const fetchUsersAndRoles = async () => {
   const token = localStorage.getItem("token");

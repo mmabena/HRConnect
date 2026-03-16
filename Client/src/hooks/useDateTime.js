@@ -1,35 +1,32 @@
-import { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 
-/**
- * Custom React hook that retrieves and formats the current
- * date and time when the component using it mounts.
- *
- * @returns {Object} An object containing:
- * - currentTime: formatted current time (e.g., "3:45 PM")
- * - currentDate: formatted current date (e.g., "Mar 12, 2026")
- */
 const useDateTime = () => {
-  const [currentTime, setCurrentTime] = useState("");
+      const [currentTime, setCurrentTime] = useState("");
   const [currentDate, setCurrentDate] = useState("");
-/**
-   * Runs once when the component mounts.
-   * Retrieves the current system date and time
-   * and formats them for display.
-   */
+
+  // -------------------
+  // Date & Time
+  // -------------------
   useEffect(() => {
-    const now = new Date();
-
-    const timeOptions = { hour: "numeric", minute: "2-digit", hour12: true };
-    const formattedTime = now.toLocaleTimeString("en-US", timeOptions);
-
-    const dateOptions = { year: "numeric", month: "short", day: "numeric" };
-    const formattedDate = now.toLocaleDateString("en-US", dateOptions);
-
-    setCurrentTime(formattedTime);
-    setCurrentDate(formattedDate);
+    const updateDateTime = () => {
+      const now = new Date();
+      const month = now.toLocaleDateString("en-ZA", { month: "short" });
+      const day = now.toLocaleDateString("en-ZA", { day: "2-digit" });
+      const year = now.toLocaleDateString("en-ZA", { year: "numeric" });
+      const time = now.toLocaleTimeString("en-ZA", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
+      setCurrentDate(`${month}. ${day}, ${year}`);
+      setCurrentTime(time);
+    };
+    updateDateTime();
+    const intervalId = setInterval(updateDateTime, 60000);
+    return () => clearInterval(intervalId);
   }, []);
 
-  return { currentTime, currentDate };
+  return { currentDate, currentTime };
 };
 
 export default useDateTime;

@@ -18,6 +18,7 @@ const PositionManagement = () => {
   const pageOptions = [10, 15, 20, 25];
   const navTabs = [
     "Tax Table Management",
+    "Upload TAX Tables",
     "Company Details",
     "Leave Management",
     "Position Management",
@@ -63,7 +64,7 @@ const PositionManagement = () => {
   };
 
   return (
-    <div className="menu-background custom-scrollbar">
+    <div className="edit-employee-background custom-scrollbar">
       <CompanyManagementHeader title={activeTab} />
 
   <div className="nav-bar-with-button">

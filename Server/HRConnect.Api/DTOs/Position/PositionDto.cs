@@ -1,20 +1,19 @@
 namespace HRConnect.Api.DTOs.Position
 {
-  using HRConnect.Api.DTOs;
   using HRConnect.Api.DTOs.JobGrade;
   using HRConnect.Api.DTOs.OccupationalLevel;
 
   public class PositionDto
   {
-    public int PositionId  { get; set; }
-    public string PositionTitle { get; set; }
+    public int PositionId { get; set; }
+    public string? PositionTitle { get; set; }
     public int JobGradeId { get; set; }
     public int OccupationalLevelId { get; set; }
     public DateTime CreatedDate { get; set; }
     public DateTime? UpdatedDate { get; set; }
     public bool IsActive { get; set; }
 
-    public JobGradeDto JobGrade { get; set; }
-    public OccupationalLevelDto OccupationalLevel { get; set; }
+    public JobGradeDto? JobGrade { get; set; }
+    public OccupationalLevelDto? OccupationalLevel { get; set; }
   }
 }
