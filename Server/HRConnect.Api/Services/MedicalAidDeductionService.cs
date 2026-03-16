@@ -3,7 +3,6 @@
 using DTOs.MedicalOption;
 using DTOs.Payroll.PayrollDeduction.MedicalAidDeduction;
 using Interfaces;
-using Models;
 using Models.PayrollDeduction;
 using Utils.MedicalAidDeduction;
 
@@ -91,7 +90,8 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
         
         switch (category.MedicalOptionCategoryName)
         {
-            case "Choice":
+            case "Network Choice":
+            case "First Choice":  
               if (medicalOption.MedicalOptionName.ToString().Contains("Network"))
               {
                 // Get the base premium rates
@@ -170,12 +170,12 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
           throw new KeyNotFoundException($"Medical option with ID {medicalOptionId} not found");
 
         //calculate Estimated Deductions (this will be for the special case of Network Choice)
-        if (category.MedicalOptionCategoryName == "Choice" &&
+        if (category.MedicalOptionCategoryName == "Network Choice" &&
             medicalOption.MedicalOptionName.ToString().Contains("Network"))
         {
           //check variant | if 1 - 3 -> child2+ == free else charged
-          if (medicalOption.MedicalOptionName.ToString().Last() >= '1' &&
-              medicalOption.MedicalOptionName.ToString().Last() <= '3')
+          if (medicalOption.MedicalOptionName.Last() >= 1 &&
+              medicalOption.MedicalOptionName.Last() <= 3)
           {
             //apply the free child2+ condition
             if (request.ChildrenCount > 0)

@@ -50,7 +50,7 @@ public class MedicalAidDeductionController : ControllerBase
     /// <param name="id">Employee ID</param>
     /// <param name="request">Dependent counts (principals, adults, children)</param>
     /// <returns>List of eligible medical options with calculated premiums</returns>
-    [HttpPost("employee/{id}/eligible-options")]
+    [HttpGet("employee/{id}/eligible-options")]
     [Authorize(Roles = "SuperUser")]
     public async Task<IActionResult> GetEligibleMedicalOptions(
         [FromRoute] string id,

@@ -10,7 +10,7 @@
     public int MedicalAidDeductionId { get; set; }
     //FK
     //[ForeignKey(nameof(PayrollRun))]
-    //public int PayrollRunId { get; set; }
+    //public int PayrollRunNumber { get; set; }
     //FK
     //[ForeignKey(nameof(Employee))]
     //public string EmployeeId { get; set; }
