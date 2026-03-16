@@ -1,32 +1,29 @@
-using System.Text;
-using Audit.Core;
-using Audit.EntityFramework;
 using HRConnect.Api.Data;
-using HRConnect.Api.Interfaces;
-using HRConnect.Api.Interfaces.PensionProjection;
-using HRConnect.Api.Middleware;
-using HRConnect.Api.Models;
-using HRConnect.Api.Models.PayrollDeduction;
-using HRConnect.Api.Repositories;
-using HRConnect.Api.Repository;
-using HRConnect.Api.Services;
-using HRConnect.Api.Utils;
-using HRConnect.Api.Utils.Payroll;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using OfficeOpenXml;
-using Quartz;
-using Quartz.Simpl;
-using Configuration = Audit.Core.Configuration;
+using System.Text;
 // using Resend;
+using HRConnect.Api.Interfaces;
+using HRConnect.Api.Middleware;
+using HRConnect.Api.Repositories;
+using HRConnect.Api.Services;
+using HRConnect.Api.Repository;
+using Microsoft.AspNetCore.Identity;
+using HRConnect.Api.Models;
+using HRConnect.Api.Utils;
+using HRConnect.Api.Utils.Payroll;
+using OfficeOpenXml;
+using HRConnect.Api.Interfaces.PensionProjection;
+using Audit.Core;
+using Audit.EntityFramework;
+using Quartz;
 
 var builder = WebApplication.CreateBuilder(args);
 
 //Audit configuration for custom audit capturing
-Configuration.Setup()
+Audit.Core.Configuration.Setup()
   .UseEntityFramework(config => config
       .AuditTypeExplicitMapper(map => map
         .Map<StatutoryContribution, AuditLogs>((entity, audit) =>
@@ -42,12 +39,10 @@ Configuration.Setup()
           })
         .AuditEntityAction<AuditLogs>((e, entry, audit) =>
         {
-          audit.AuditedAt = DateTime.UtcNow;
+          audit.AuditedAt = DateTime.Now;
           audit.AuditAction = entry.Action;
           audit.TabelName = entry.Name;
-        })
-           
-      ));
+        })));
 
 ExcelPackage.License.SetNonCommercialPersonal("YourName");
 
@@ -143,7 +138,7 @@ builder.Services.AddQuartz(q =>
   q.AddTrigger(opts => opts
   .ForJob(jobKey)
   .WithIdentity("PayrollRollover-Trigger")
-  .WithCronSchedule("1 0/1 * * * ?", x =>
+  .WithCronSchedule("0/10 * * * * ?", x =>
   x.WithMisfireHandlingInstructionFireAndProceed())); //when a job misfire happens. 
                                                       // Properly re-execute it and proceed as usual
 
@@ -157,8 +152,12 @@ builder.Services.AddQuartz(q =>
   //Adding persistence to quartz to be able to be run in the back
   q.UsePersistentStore(options =>
   {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("SecondaryConnection")!);
-    options.UseSerializer<SystemTextJsonObjectSerializer>();
+    options.UseSqlServer(options =>
+        {
+          options.ConnectionString = builder.Configuration.GetConnectionString("SecondaryConnection")!;
+          options.TablePrefix = "quartz.QRTZ_";
+        });
+    options.UseSerializer<Quartz.Simpl.SystemTextJsonObjectSerializer>();
     options.UseProperties = true;
   });
 });
@@ -168,19 +167,17 @@ builder.Services.AddQuartzHostedService(q =>
   q.WaitForJobsToComplete = true;
 });
 
-//Register payroll stuff
 builder.Services.AddScoped<IPayrollPeriodRepository, PayrollPeriodRepository>();
 builder.Services.AddScoped<IPayrollRunRepository, PayrollRunRepository>();
 builder.Services.AddScoped<IPayrollRunService, PayrollRunService>();
 builder.Services.AddScoped<IPayrollPeriodService, PayrollPeriodService>();
 builder.Services.AddScoped<PayrollRolloverJob>();//for Quartz
 builder.Services.AddScoped<PayrollInit>();
-
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
-builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<HRConnect.Api.Interfaces.IUserService, HRConnect.Api.Services.UserService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ITaxTableUploadService, TaxTableUploadService>();
 builder.Services.AddScoped<ITaxTableUploadRepository, TaxTableUploadRepository>();
@@ -193,13 +190,14 @@ builder.Services.AddScoped<IJobGradeRepository, JobGradeRepository>();
 builder.Services.AddScoped<IJobGradeService, JobGradeService>();
 builder.Services.AddScoped<IOccupationalLevelRepository, OccupationalLevelRepository>();
 builder.Services.AddScoped<IOccupationalLevelService, OccupationalLevelService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.Services.AuthService>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IStatutoryContributionRepository, StatutoryContributionRepository>();
 builder.Services.AddScoped<IStatutoryContributionService, StatutoryContributionService>();
 builder.Services.AddTransient<IPensionProjectionService, PensionProjectionService>();
 builder.Services.AddScoped<IMedicalOptionRepository, MedicalOptionRepository>();
-builder.Services.AddScoped<IMedicalOptionService, MedicalOptionService>();
+builder.Services.AddScoped<HRConnect.Api.Interfaces.IMedicalOptionService,
+  HRConnect.Api.Services.MedicalOptionService>();
 builder.Services.AddScoped<IMedicalAidEligibilityService, MedicalAidEligibilityService>();
 builder.Services.AddScoped<IMedicalAidDeductionRepository, MedicalAidDeductionRepository>();
 builder.Services.AddScoped<IMedicalAidDeductionService, MedicalAidDeductionService>();

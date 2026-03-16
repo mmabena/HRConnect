@@ -1,4 +1,4 @@
-﻿namespace HRConnect.Api.DTOs
+namespace HRConnect.Api.DTOs
 {
   public class ResponseEligibileOptionsDto
   {

@@ -1,4 +1,4 @@
-﻿namespace HRConnect.Api.Interfaces
+namespace HRConnect.Api.Interfaces
 {
   using DTOs.Payroll.PayrollDeduction.MedicalAidDeduction;
   using Models.PayrollDeduction;

@@ -27,7 +27,7 @@ namespace HRConnect.Api.Utils.Payroll
     public async Task InitialisePayrollPeriod()
     {
       var payperiod = await _payrollPeriodService.GetLastPeriodAsync(); // in production remove this
-      //await _payrollRunService.LockAllOlderPayrollRuns();
+      await _payrollRunService.LockAllOlderPayrollRuns();
       if (payperiod == null)
       {
         payperiod = new PayrollPeriod();

@@ -1,4 +1,4 @@
-﻿namespace HRConnect.Api.Mappers
+namespace HRConnect.Api.Mappers
 {
   using DTOs.Payroll.PayrollDeduction.MedicalAidDeduction;
   using Models.PayrollDeduction;
@@ -9,9 +9,9 @@
     {
       return new MedicalAidDeduction
       {
-        MedicalAidDeductionId = dto.MedicalAidDeductionId,
-        //PayrollRunId = dto.PayrollRunId,
-        //EmployeeId = dto.EmployeeId,
+        Id = dto.MedicalAidDeductionId,
+        PayrollRunId = dto.PayrollRunId,
+        EmployeeId = dto.EmployeeId,
         Name = dto.Name,
         Surname = dto.Surname,
         Branch = dto.Branch,

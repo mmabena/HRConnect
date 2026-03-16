@@ -1,7 +1,9 @@
-﻿namespace HRConnect.Api.Services;
+namespace HRConnect.Api.Services;
 
 using DTOs.MedicalOption;
+using DTOs.Employee;
 using DTOs.Payroll.PayrollDeduction.MedicalAidDeduction;
+using HRConnect.Api.Models;
 using Interfaces;
 using Models.PayrollDeduction;
 using Utils.MedicalAidDeduction;
@@ -11,41 +13,42 @@ using Utils.MedicalAidDeduction;
 /// </summary>
 public class MedicalAidDeductionService : IMedicalAidDeductionService
 {
-    private readonly IMedicalAidDeductionRepository _medicalAidDeductionRepository;
-    private readonly IMedicalOptionRepository _medicalOptionRepository;
-    private readonly IEmployeeService _employeeService;
-    private readonly IPayrollRunService _payrollRunService;
+  private readonly IMedicalAidDeductionRepository _medicalAidDeductionRepository;
+  private readonly IMedicalOptionRepository _medicalOptionRepository;
+  private readonly IPayrollRunService _payrollRunService;
+  private readonly IEmployeeService _employeeService;
 
-    public MedicalAidDeductionService(
-        IMedicalAidDeductionRepository medicalAidDeductionRepository,
-        IMedicalOptionRepository medicalOptionRepository,
-        IEmployeeService employeeService, IPayrollRunService payrollRunService)
+  public MedicalAidDeductionService(
+      IMedicalAidDeductionRepository medicalAidDeductionRepository,
+      IMedicalOptionRepository medicalOptionRepository,
+      IEmployeeService employeeService, IPayrollRunService payrollRunService)
+  {
+    _medicalAidDeductionRepository = medicalAidDeductionRepository;
+    _medicalOptionRepository = medicalOptionRepository;
+    _employeeService = employeeService;
+    _payrollRunService = payrollRunService;
+
+  }
+
+  public async Task<MedicalAidDeductionDto> GetMedicalAidDeductionsByEmployeeIdAsync(string employeeId)
+  {
+    var employeeDeductions = await _medicalAidDeductionRepository
+        .GetMedicalAidDeductionsByEmployeeIdAsync(employeeId);
+
+    if (employeeDeductions == null || employeeDeductions.Count == 0)
     {
-        _medicalAidDeductionRepository = medicalAidDeductionRepository;
-        _medicalOptionRepository = medicalOptionRepository;
-        _employeeService = employeeService;
-        _payrollRunService = payrollRunService;
+      throw new KeyNotFoundException($"No medical aid deductions found for employee {employeeId}");
     }
 
-    public async Task<MedicalAidDeductionDto> GetMedicalAidDeductionsByEmployeeIdAsync(string employeeId)
-    {
-        var employeeDeductions = await _medicalAidDeductionRepository
-            .GetMedicalAidDeductionsByEmployeeIdAsync(employeeId);
+    // Return the first/most recent deduction
+    var deduction = employeeDeductions.First();
+    return MapToDto(deduction);
+  }
 
-        if (employeeDeductions == null || employeeDeductions.Count == 0)
-        {
-            throw new KeyNotFoundException($"No medical aid deductions found for employee {employeeId}");
-        }
-
-        // Return the first/most recent deduction
-        var deduction = employeeDeductions.First();
-        return MapToDto(deduction);
-    }
-
-    public async Task<IReadOnlyList<MedicalAidDeduction>> GetAllMedicalAidDeductions()
-    {
-        return await _medicalAidDeductionRepository.GetAllMedicalAidDeductionsAsync();
-    }
+  public async Task<IReadOnlyList<MedicalAidDeduction>> GetAllMedicalAidDeductions()
+  {
+    return await _medicalAidDeductionRepository.GetAllMedicalAidDeductionsAsync();
+  }
 
     public async Task<MedicalAidDeductionDto> AddNewMedicalAidDeductions(string employeeId,
       int medicalOptionId,
@@ -73,11 +76,11 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
 
         // Get medical option details to ensure it exists and get category info
         var medicalOption = await _medicalOptionRepository.GetMedicalOptionByIdAsync(medicalOptionId);
-        
+
         //get category information
         var category =
           await _medicalOptionRepository.GetCategoryByIdAsync(medicalOption.MedicalOptionCategoryId);
-        
+
         // Get Category Premium Ratings
         decimal? principalPremium = null;
         decimal? adultPremium = null;
@@ -87,11 +90,11 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
         decimal? totalPrincipalPremium = null; //principal member contribution
         decimal? totalAdultPremium = null;
         decimal? totalChildPremium = null;
-        
+
         switch (category.MedicalOptionCategoryName)
         {
             case "Network Choice":
-            case "First Choice":  
+            case "First Choice":
               if (medicalOption.MedicalOptionName.ToString().Contains("Network"))
               {
                 // Get the base premium rates
@@ -100,7 +103,7 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
                 adultPremium = medicalOption.MonthlyRiskContributionAdult;
                 childPremium = medicalOption.MonthlyRiskContributionChild;
                 child2Premium = medicalOption.MonthlyRiskContributionChild2;
-              
+
                 if (char.IsDigit(medicalOption.MedicalOptionName[^1]))
                 {
                   childPremium = medicalOption.MonthlyRiskContributionChild;
@@ -122,7 +125,7 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
                 child2Premium = 0;
               }
               break;
-            
+
             case "Essential":
               // MSA + Risk + Principal
               principalPremium = Math.Abs((decimal)medicalOption.MonthlyMsaContributionPrincipal +
@@ -133,7 +136,7 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
                                       (decimal)medicalOption.MonthlyRiskContributionChild);
               child2Premium = 0;
               break;
-            
+
             case "Vital":
               //Risk only and No Principal
               principalPremium = 0;
@@ -141,7 +144,7 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
               childPremium = medicalOption.MonthlyRiskContributionChild;
               child2Premium = 0;
               break;
-            
+
             case "Double":
               //MSA + Risk | No Principal and Child2
               principalPremium = 0;
@@ -150,7 +153,7 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
               childPremium = Math.Abs((decimal)medicalOption.MonthlyMsaContributionChild +
                                       (decimal)medicalOption.MonthlyRiskContributionChild);
               break;
-            
+
             case "Alliance":
               //MAS + Risk | No Principal and Child2
               principalPremium = 0;
@@ -160,7 +163,7 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
                                       (decimal)medicalOption.MonthlyRiskContributionChild);
               child2Premium = 0;
               break;
-            
+
             default:
               throw new ArgumentException(
                 $"Invalid medical option category: {category.MedicalOptionCategoryName}");
@@ -180,7 +183,7 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
             //apply the free child2+ condition
             if (request.ChildrenCount > 0)
             {
-              totalChildPremium = childPremium;  
+              totalChildPremium = childPremium;
             }
             else if(request.ChildrenCount == 0)
             {
@@ -193,7 +196,7 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
             totalChildPremium = Math.Abs((decimal)childPremium * request.ChildrenCount);
           }
         }
-        
+
         // Getting estimated Contributions
         // Need to consider skipping Network choice
         decimal principalPremiumEstimate = CalculatePrincipalPremium(medicalOption);
@@ -207,15 +210,15 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
         if (employee.MonthlySalary < totalPremiumEstimate)
           throw new ArgumentException("Total Premium estimate exceeds monthly salary");
 
-        // Create the deduction entity
-        var deduction = new MedicalAidDeduction
-        {
-            // Employee details from employee service
-            Name = employee.Name,
-            Surname = employee.Surname,
-            Branch = employee.Branch.ToString(),
-            Salary = employee.MonthlySalary,
-            EmployeeStartDate = employee.StartDate.ToDateTime(TimeOnly.MinValue),
+    // Create the deduction entity
+    var deduction = new MedicalAidDeduction
+    {
+      // Employee details from employee service
+      Name = employee.Name,
+      Surname = employee.Surname,
+      Branch = employee.Branch.ToString(),
+      Salary = employee.MonthlySalary,
+      EmployeeStartDate = employee.StartDate.ToDateTime(TimeOnly.MinValue),
 
             // Medical option details
             MedicalOptionId = medicalOptionId,
@@ -223,10 +226,10 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
             MedicalCategoryId = category.MedicalOptionCategoryId,
             OptionCategoryName = category.MedicalOptionCategoryName,
 
-            // Dependent counts from request
-            PrincipalCount = request.PrincipalCount,
-            AdultCount = request.AdultCount,
-            ChildrenCount = request.ChildrenCount,
+      // Dependent counts from request
+      PrincipalCount = request.PrincipalCount,
+      AdultCount = request.AdultCount,
+      ChildrenCount = request.ChildrenCount,
 
             // Premium amounts from request (already calculated by client from eligible options)
             PrincipalPremium = principalPremiumEstimate,
@@ -243,17 +246,18 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
             UpdatedDate = DateTime.Now
         };
 
-        // Save to repository
-        await _payrollRunService.AddRecordToCurrentRunAsync(deduction, employee.EmployeeId);
-        await _medicalAidDeductionRepository.AddNewMedicalAidDeductionsAsync(deduction);
+    // Save to repository
 
-        return MapToDto(deduction);
-    }
+    await _payrollRunService.AddRecordToCurrentRunAsync(deduction, employee.EmployeeId);
+    await _medicalAidDeductionRepository.AddNewMedicalAidDeductionsAsync(deduction);
 
-    public async Task<MedicalAidDeductionDto> UpdateDeductionByEmpId(string employeeId)
-    {
-        throw new NotImplementedException();
-    }
+    return MapToDto(deduction);
+  }
+
+  public async Task<MedicalAidDeductionDto> UpdateDeductionByEmpId(string employeeId)
+  {
+    throw new NotImplementedException();
+  }
 
     /// <summary>
     /// Maps a MedicalAidDeduction entity to a MedicalAidDeductionDto.
@@ -262,8 +266,8 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
     {
         return new MedicalAidDeductionDto
         {
-            //MedicalAidDeductionId = deduction.MedicalAidDeductionId,
-            //EmployeeId = deduction.EmployeeId ?? string.Empty,
+            MedicalAidDeductionId = request.Id,
+            EmployeeId = request.EmployeeId ?? string.Empty,
             Name = request.Name,
             Surname = request.Surname,
             Branch = request.Branch,

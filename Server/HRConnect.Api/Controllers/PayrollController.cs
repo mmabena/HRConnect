@@ -75,10 +75,10 @@ namespace HRConnect.Api.Controllers
           request.MedicalOptionId,
           request);
       Console.WriteLine($"~~~~~~~~~~~~~~~~~~~~~~~~~~~~PAYROLL RUN RECORD ADD");
-      return Ok(deduction); /*CreatedAtAction(
+      return CreatedAtAction(
           nameof(GetEmployeeMedicalAidDeductionById),
           new { id = deduction.EmployeeId },
-          deduction);*/
+          deduction);
     }
   }
 }

@@ -1,4 +1,4 @@
-﻿namespace HRConnect.Api.Repository
+namespace HRConnect.Api.Repository
 {
   using Data;
   using Interfaces;
@@ -27,14 +27,14 @@
     {
       return await _context.MedicalAidDeductions
         .Include(p => p.PayrollRun)
-        .Where(o => o.EmployeeId == employeeId) 
+        .Where(o => o.EmployeeId == employeeId)
         .ToListAsync();
     }
 
     public async Task<IReadOnlyList<MedicalAidDeduction>> GetAllMedicalAidDeductionsAsync()
     {
       return await _context.MedicalAidDeductions
-        .Where(ma => ma.MedicalAidDeductionId != 0 || ma.MedicalAidDeductionId != null)//It can be trimmed down to omit IDs
+        .Where(ma => ma.Id != 0 || ma.Id != null)//It can be trimmed down to omit IDs
         .ToListAsync();
     }
 

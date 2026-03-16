@@ -1,11 +1,17 @@
 namespace HRConnect.Api.Services
 {
+  using System;
+  using System.Collections.Generic;
+  using System.Linq;
+  using System.Threading.Tasks;
+  using HRConnect.Api.DTOs.Employee;
+  using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Models;
+  using HRConnect.Api.Utils;
   using System.Globalization;
-  using DTOs.Employee;
-  using Interfaces;
-  using Mappers;
-  using Models;
-  using Utils;
+  using HRConnect.Api.Mappers;
+  using System.Data.Common;
+  using System.Runtime.InteropServices;
 
   //Inline Custom Exceptions for better error handling and clarity
   public class ValidationException : Exception
@@ -83,7 +89,7 @@ namespace HRConnect.Api.Services
       {
         var createdEmployee = await _employeeRepo.CreateEmployeeAsync(new_employee);
         // Send welcome email notification
-        await SendWelcomeEmail(createdEmployee);
+        // await SendWelcomeEmail(createdEmployee);
         await transaction.CommitAsync();
         return createdEmployee.ToEmployeeDto();
       }
