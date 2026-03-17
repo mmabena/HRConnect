@@ -54,6 +54,7 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
       int medicalOptionId,
       CreateMedicalAidDeductionRequestDto request)
     {
+      
         // Get employee details
         var employee = await _employeeService.GetEmployeeByIdAsync(employeeId);
         if (employee == null)
@@ -68,11 +69,12 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
 
 
         // Check if there is a medical aid deduction against employee (need to refine it further through including active payroll run)
+
         // temp implementation
         var existingDedcutions =
          await _medicalAidDeductionRepository.GetMedicalAidDeductionsByEmployeeIdAsync(employeeId);
 
-        //if (existingDeductions != null && existingDeductions.Any(d => d.IsActive) throw new ArgumentException("Employee has an existing medical aid deduction");
+        if ((existingDedcutions != null  || existingDedcutions.Count > 0 )&& existingDedcutions.Any(d => d.IsActive)) throw new ArgumentException("Employee has an existing medical aid deduction");
 
         // Get medical option details to ensure it exists and get category info
         var medicalOption = await _medicalOptionRepository.GetMedicalOptionByIdAsync(medicalOptionId);
@@ -249,6 +251,7 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
     // Save to repository
 
     await _payrollRunService.AddRecordToCurrentRunAsync(deduction, employee.EmployeeId);
+
     await _medicalAidDeductionRepository.AddNewMedicalAidDeductionsAsync(deduction);
 
     return MapToDto(deduction);

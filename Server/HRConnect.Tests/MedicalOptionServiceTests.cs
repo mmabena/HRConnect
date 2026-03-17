@@ -1069,6 +1069,482 @@
         Assert.Contains("already exists in category", exception.Message);
     }
 
+    [Fact]
+    public async Task CreateBulkOptionsByExistingCategoryIdWithMultipleCategoriesShouldPass()
+    {
+        // Arrange
+        var categoryId1 = 1;
+        var categoryId2 = 2;
+        var bulkInsertDto = new List<CreateMedicalOptionVariantsDto>
+        {
+            new()
+            {
+                MedicalOptionName = "Essential Plus",
+                MedicalOptionCategoryId = categoryId1,
+                SalaryBracketMin = 0,
+                SalaryBracketMax = 15000,
+                MonthlyRiskContributionAdult = 500,
+                MonthlyRiskContributionChild = 300,
+                TotalMonthlyContributionsAdult = 500,
+                TotalMonthlyContributionsChild = 300
+            },
+            new()
+            {
+                MedicalOptionName = "Vital Plus",
+                MedicalOptionCategoryId = categoryId2,
+                SalaryBracketMin = 0,
+                SalaryBracketMax = 15000,
+                MonthlyRiskContributionAdult = 500,
+                MonthlyRiskContributionChild = 300,
+                TotalMonthlyContributionsAdult = 500,
+                TotalMonthlyContributionsChild = 300
+            }
+        };
+
+        var categoryInfo1 = new List<MedicalOptionCategory>
+        {
+            new()
+            {
+                MedicalOptionCategoryId = categoryId1,
+                MedicalOptionCategoryName = "Essential"
+            }
+        };
+
+        var categoryInfo2 = new List<MedicalOptionCategory>
+        {
+            new()
+            {
+                MedicalOptionCategoryId = categoryId2,
+                MedicalOptionCategoryName = "Vital"
+            }
+        };
+
+        var existingOptions = new List<MedicalOptionDto>();
+        var testDate = new DateTime(2024, 11, 15);
+
+        _mockRepository.Setup(r => r.GetCategoryById(categoryId1))
+            .ReturnsAsync(categoryInfo1);
+
+        _mockRepository.Setup(r => r.GetCategoryById(categoryId2))
+            .ReturnsAsync(categoryInfo2);
+
+        _mockRepository.Setup(r => r.GetAllOptionsUnderCategoryAsync(categoryId1))
+            .ReturnsAsync(existingOptions);
+
+        _mockRepository.Setup(r => r.GetAllOptionsUnderCategoryAsync(categoryId2))
+            .ReturnsAsync(existingOptions);
+
+        // Act
+        var result = await _service.CreateBulkOptionsByExistingCategoryId(categoryId1, bulkInsertDto, testDate);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(2, result.Count);
+    }
+
+    [Fact]
+    public async Task CreateBulkOptionsByExistingCategoryIdWithInvalidCategoryShouldThrowValidationException()
+    {
+        // Arrange
+        var categoryId = 1;
+        var bulkInsertDto = new List<CreateMedicalOptionVariantsDto>
+        {
+            new()
+            {
+                MedicalOptionName = "Essential Plus",
+                MedicalOptionCategoryId = categoryId,
+                SalaryBracketMin = 0,
+                SalaryBracketMax = 15000,
+                MonthlyRiskContributionAdult = 500,
+                MonthlyRiskContributionChild = 300,
+                TotalMonthlyContributionsAdult = 500,
+                TotalMonthlyContributionsChild = 300
+            }
+        };
+
+        var existingOptions = new List<MedicalOptionDto>();
+        var testDate = new DateTime(2024, 11, 15);
+
+        _mockRepository.Setup(r => r.GetCategoryById(categoryId))
+            .ReturnsAsync((MedicalOptionCategory)null);
+
+        _mockRepository.Setup(r => r.GetAllOptionsUnderCategoryAsync(categoryId))
+            .ReturnsAsync(existingOptions);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ValidationException>(
+            () => _service.CreateBulkOptionsByExistingCategoryId(categoryId, bulkInsertDto, testDate));
+        Assert.Contains("Invalid category", exception.Message);
+    }
+
+    #endregion
+
+    #region Theory Tests - Bulk Update Scenarios
+
+    [Theory]
+    [InlineData(1, "Essential", 0, 15000, 1000, 500, 300, true)]    // Essential category with valid data
+    [InlineData(1, "Vital", 0, 15000, 0, 400, 250, true)]             // Vital category - no principal
+    [InlineData(1, "Double", 0, null, 0, 700, 450, true)]              // Double category with null max
+    [InlineData(1, "Alliance", 0, null, 0, 600, 350, true)]           // Alliance category
+    [InlineData(1, "Choice", 0, 20000, 800, 400, 200, true)]           // Network Choice category
+    public async Task BulkUpdateWithDifferentCategoriesTheory(
+        int categoryId,
+        string categoryName,
+        decimal salaryMin,
+        decimal? salaryMax,
+        decimal principalContribution,
+        decimal adultContribution,
+        decimal childContribution,
+        bool shouldSucceed)
+    {
+        // Arrange
+        var bulkUpdateDto = new List<UpdateMedicalOptionVariantsDto>
+        {
+            new()
+            {
+                MedicalOptionId = 1,
+                SalaryBracketMin = salaryMin,
+                SalaryBracketMax = salaryMax,
+                MonthlyRiskContributionPrincipal = principalContribution > 0 ? principalContribution : null,
+                MonthlyRiskContributionAdult = adultContribution,
+                MonthlyRiskContributionChild = childContribution,
+                TotalMonthlyContributionsPrincipal = principalContribution > 0 ? principalContribution : null,
+                TotalMonthlyContributionsAdult = adultContribution,
+                TotalMonthlyContributionsChild = childContribution
+            }
+        };
+
+        var dbData = new List<MedicalOptionDto>
+        {
+            new()
+            {
+                MedicalOptionId = 1,
+                MedicalOptionName = $"{categoryName} Plan",
+                MedicalOptionCategoryId = categoryId,
+                SalaryBracketMin = salaryMin,
+                SalaryBracketMax = salaryMax,
+                MonthlyRiskContributionPrincipal = principalContribution > 0 ? principalContribution : null,
+                MonthlyRiskContributionAdult = adultContribution,
+                MonthlyRiskContributionChild = childContribution,
+                TotalMonthlyContributionsPrincipal = principalContribution > 0 ? principalContribution : null,
+                TotalMonthlyContributionsAdult = adultContribution,
+                TotalMonthlyContributionsChild = childContribution
+            }
+        };
+
+        var testDate = new DateTime(2024, 11, 15);
+
+        _mockRepository.Setup(r => r.GetCategoryByIdAsync(categoryId))
+            .ReturnsAsync(new MedicalOptionCategory
+            {
+                MedicalOptionCategoryId = categoryId,
+                MedicalOptionCategoryName = categoryName
+            });
+
+        _mockRepository.Setup(r => r.GetAllOptionsUnderCategoryAsync(categoryId))
+            .ReturnsAsync(dbData);
+
+        _mockRepository.Setup(r => r.BulkUpdateByCategoryIdAsync(categoryId, bulkUpdateDto))
+            .ReturnsAsync(dbData);
+
+        // Act
+        var result = await _service.BulkUpdateMedicalOptionsByCategoryAsync(categoryId, bulkUpdateDto, testDate);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Single(result);
+    }
+
+    #endregion
+
+    #region Theory Tests - Salary Bracket Validation
+
+    [Theory]
+    [InlineData(0, 10000, 0, 10000, true)]      // Exact match
+    [InlineData(0, 10000, 5000, 15000, false)]  // Overlap - should fail for restricted
+    [InlineData(0, 10000, 10001, 20000, true)]  // Contiguous
+    [InlineData(0, 10000, 11000, 20000, false)] // Gap - should fail
+    public async Task BulkUpdateSalaryBracketValidationTheory(
+        decimal existingMin,
+        decimal existingMax,
+        decimal newMin,
+        decimal newMax,
+        bool shouldSucceed)
+    {
+        // Arrange
+        var categoryId = 1;
+        var bulkUpdateDto = new List<UpdateMedicalOptionVariantsDto>
+        {
+            new()
+            {
+                MedicalOptionId = 1,
+                SalaryBracketMin = newMin,
+                SalaryBracketMax = newMax,
+                MonthlyRiskContributionAdult = 500,
+                TotalMonthlyContributionsAdult = 500
+            }
+        };
+
+        var dbData = new List<MedicalOptionDto>
+        {
+            new()
+            {
+                MedicalOptionId = 1,
+                MedicalOptionName = "Test Plan",
+                MedicalOptionCategoryId = categoryId,
+                SalaryBracketMin = existingMin,
+                SalaryBracketMax = existingMax,
+                MonthlyRiskContributionAdult = 500,
+                TotalMonthlyContributionsAdult = 500
+            }
+        };
+
+        var testDate = new DateTime(2024, 11, 15);
+
+        _mockRepository.Setup(r => r.GetCategoryByIdAsync(categoryId))
+            .ReturnsAsync(new MedicalOptionCategory
+            {
+                MedicalOptionCategoryId = categoryId,
+                MedicalOptionCategoryName = "Essential"
+            });
+
+        _mockRepository.Setup(r => r.GetAllOptionsUnderCategoryAsync(categoryId))
+            .ReturnsAsync(dbData);
+
+        if (shouldSucceed)
+        {
+            _mockRepository.Setup(r => r.BulkUpdateByCategoryIdAsync(categoryId, bulkUpdateDto))
+                .ReturnsAsync(dbData);
+
+            // Act
+            var result = await _service.BulkUpdateMedicalOptionsByCategoryAsync(categoryId, bulkUpdateDto, testDate);
+
+            // Assert
+            Assert.NotNull(result);
+        }
+        else
+        {
+            // Act & Assert - expect validation exception
+            await Assert.ThrowsAsync<ValidationException>(
+                () => _service.BulkUpdateMedicalOptionsByCategoryAsync(categoryId, bulkUpdateDto, testDate));
+        }
+    }
+
+    #endregion
+
+    #region Theory Tests - Create Bulk Options Scenarios
+
+    [Theory]
+    [InlineData("Essential Plus", "Essential", 0, 15000, true)]     // Valid Essential option
+    [InlineData("Vital Plus", "Vital", 0, 15000, true)]             // Valid Vital option
+    [InlineData("Double Plus", "Double", 0, null, true)]            // Valid Double option with null max
+    [InlineData("Invalid Name", "Essential", 0, 15000, false)]      // Name doesn't match category
+    [InlineData("Essential Plus", "Essential", 1000, 15000, false)]  // Non-zero min for new option
+    public async Task CreateBulkOptionsTheoryTest(
+        string optionName,
+        string categoryName,
+        decimal salaryMin,
+        decimal? salaryMax,
+        bool shouldSucceed)
+    {
+        // Arrange
+        var categoryId = 1;
+        var bulkInsertDto = new List<CreateMedicalOptionVariantsDto>
+        {
+            new()
+            {
+                MedicalOptionName = optionName,
+                MedicalOptionCategoryId = categoryId,
+                SalaryBracketMin = salaryMin,
+                SalaryBracketMax = salaryMax,
+                MonthlyRiskContributionAdult = 500,
+                MonthlyRiskContributionChild = 300,
+                TotalMonthlyContributionsAdult = 500,
+                TotalMonthlyContributionsChild = 300
+            }
+        };
+
+        var categoryInfo = new List<MedicalOptionCategory>
+        {
+            new()
+            {
+                MedicalOptionCategoryId = categoryId,
+                MedicalOptionCategoryName = categoryName
+            }
+        };
+
+        var existingOptions = new List<MedicalOptionDto>();
+        var testDate = new DateTime(2024, 11, 15);
+
+        _mockRepository.Setup(r => r.GetCategoryById(categoryId))
+            .ReturnsAsync(categoryInfo);
+
+        _mockRepository.Setup(r => r.GetAllOptionsUnderCategoryAsync(categoryId))
+            .ReturnsAsync(existingOptions);
+
+        if (shouldSucceed)
+        {
+            _mockRepository.Setup(r => r.CreateBulkOptionsByExistingCategoryId(categoryId, bulkInsertDto))
+                .ReturnsAsync(bulkInsertDto);
+
+            // Act
+            var result = await _service.CreateBulkOptionsByExistingCategoryId(categoryId, bulkInsertDto, testDate);
+
+            // Assert
+            Assert.NotNull(result);
+        }
+        else
+        {
+            // Act & Assert
+            await Assert.ThrowsAsync<ValidationException>(
+                () => _service.CreateBulkOptionsByExistingCategoryId(categoryId, bulkInsertDto, testDate));
+        }
+    }
+
+    #endregion
+
+    #region Theory Tests - Update Period Validation
+
+    [Theory]
+    [InlineData(2024, 11, 15, true)]   // November - valid
+    [InlineData(2024, 12, 15, true)]   // December - valid
+    [InlineData(2024, 1, 15, false)]   // January - invalid
+    [InlineData(2024, 6, 15, false)]   // June - invalid
+    public async Task UpdatePeriodValidationTheory(int year, int month, int day, bool shouldSucceed)
+    {
+        // Arrange
+        var categoryId = 1;
+        var bulkUpdateDto = new List<UpdateMedicalOptionVariantsDto>
+        {
+            new()
+            {
+                MedicalOptionId = 1,
+                SalaryBracketMin = 0,
+                SalaryBracketMax = 15000,
+                MonthlyRiskContributionAdult = 500,
+                TotalMonthlyContributionsAdult = 500
+            }
+        };
+
+        var dbData = new List<MedicalOptionDto>
+        {
+            new()
+            {
+                MedicalOptionId = 1,
+                MedicalOptionName = "Test Plan",
+                MedicalOptionCategoryId = categoryId,
+                MonthlyRiskContributionAdult = 500,
+                TotalMonthlyContributionsAdult = 500
+            }
+        };
+
+        var testDate = new DateTime(year, month, day);
+
+        _mockRepository.Setup(r => r.GetCategoryByIdAsync(categoryId))
+            .ReturnsAsync(new MedicalOptionCategory
+            {
+                MedicalOptionCategoryId = categoryId,
+                MedicalOptionCategoryName = "Essential"
+            });
+
+        _mockRepository.Setup(r => r.GetAllOptionsUnderCategoryAsync(categoryId))
+            .ReturnsAsync(dbData);
+
+        if (shouldSucceed)
+        {
+            _mockRepository.Setup(r => r.BulkUpdateByCategoryIdAsync(categoryId, bulkUpdateDto))
+                .ReturnsAsync(dbData);
+
+            // Act
+            var result = await _service.BulkUpdateMedicalOptionsByCategoryAsync(categoryId, bulkUpdateDto, testDate);
+
+            // Assert
+            Assert.NotNull(result);
+        }
+        else
+        {
+            // Act & Assert
+            await Assert.ThrowsAsync<ValidationException>(
+                () => _service.BulkUpdateMedicalOptionsByCategoryAsync(categoryId, bulkUpdateDto, testDate));
+        }
+    }
+
+    #endregion
+
+    #region Theory Tests - Contribution Value Validation
+
+    [Theory]
+    [InlineData(500, 300, 150, true)]    // Valid positive values
+    [InlineData(0, 0, 0, true)]          // Zero values allowed
+    [InlineData(-100, 300, 150, false)]  // Negative value - should fail
+    public async Task ContributionValueValidationTheory(
+        decimal riskAdult,
+        decimal riskChild,
+        decimal msaAdult,
+        bool shouldSucceed)
+    {
+        // Arrange
+        var categoryId = 1;
+        var bulkUpdateDto = new List<UpdateMedicalOptionVariantsDto>
+        {
+            new()
+            {
+                MedicalOptionId = 1,
+                SalaryBracketMin = 0,
+                SalaryBracketMax = 15000,
+                MonthlyRiskContributionAdult = riskAdult,
+                MonthlyRiskContributionChild = riskChild,
+                MonthlyMsaContributionAdult = msaAdult,
+                TotalMonthlyContributionsAdult = riskAdult + msaAdult,
+                TotalMonthlyContributionsChild = riskChild
+            }
+        };
+
+        var dbData = new List<MedicalOptionDto>
+        {
+            new()
+            {
+                MedicalOptionId = 1,
+                MedicalOptionName = "Test Plan",
+                MedicalOptionCategoryId = categoryId,
+                MonthlyRiskContributionAdult = 500,
+                TotalMonthlyContributionsAdult = 500
+            }
+        };
+
+        var testDate = new DateTime(2024, 11, 15);
+
+        _mockRepository.Setup(r => r.GetCategoryByIdAsync(categoryId))
+            .ReturnsAsync(new MedicalOptionCategory
+            {
+                MedicalOptionCategoryId = categoryId,
+                MedicalOptionCategoryName = "Essential"
+            });
+
+        _mockRepository.Setup(r => r.GetAllOptionsUnderCategoryAsync(categoryId))
+            .ReturnsAsync(dbData);
+
+        if (shouldSucceed)
+        {
+            _mockRepository.Setup(r => r.BulkUpdateByCategoryIdAsync(categoryId, bulkUpdateDto))
+                .ReturnsAsync(dbData);
+
+            // Act
+            var result = await _service.BulkUpdateMedicalOptionsByCategoryAsync(categoryId, bulkUpdateDto, testDate);
+
+            // Assert
+            Assert.NotNull(result);
+        }
+        else
+        {
+            // Act & Assert
+            await Assert.ThrowsAsync<ValidationException>(
+                () => _service.BulkUpdateMedicalOptionsByCategoryAsync(categoryId, bulkUpdateDto, testDate));
+        }
+    }
+
+    #endregion
+
     #endregion
   }
 }

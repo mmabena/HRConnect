@@ -26,8 +26,9 @@ namespace HRConnect.Api.Repository
       string employeeId)
     {
       return await _context.MedicalAidDeductions
-        .Include(p => p.PayrollRun)
-        .Where(o => o.EmployeeId == employeeId)
+        .AsNoTracking() // Prevents change tracking overhead
+        .Where(d => d.EmployeeId == employeeId)
+        .OrderByDescending(d => d.CreatedDate)
         .ToListAsync();
     }
 
