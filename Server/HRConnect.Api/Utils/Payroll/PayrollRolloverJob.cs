@@ -21,8 +21,7 @@ namespace HRConnect.Api.Utils.Payroll
     private readonly ApplicationDBContext _context;
     private static readonly int MAX_RUNS = 10;
     public PayrollRolloverJob(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService,
-      IEmployeePensionEnrollmentRepository employeePensionEnrollmentRepository, ApplicationDBContext context)
-    public PayrollRolloverJob(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService, IWebHostEnvironment env)
+      IEmployeePensionEnrollmentRepository employeePensionEnrollmentRepository, ApplicationDBContext context, IWebHostEnvironment env)
     {
       _payrollRunRepo = payrollRunRepo;
       _payrollPeriodService = payrollPeriodService;
@@ -167,5 +166,6 @@ namespace HRConnect.Api.Utils.Payroll
         Console.WriteLine($"Error locking employee pension enrollments: {ex}");
       }
     }
+
   }
 }

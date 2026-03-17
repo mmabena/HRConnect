@@ -8,6 +8,7 @@
     Task<List<EmployeePensionEnrollmentDto>> GetAllEmployeePensionEnrollementsAsync();
     Task<EmployeePensionEnrollmentDto?> GetEmployeePensionEnrollementByIdAsync(string employeeId);
     Task<List<EmployeePensionEnrollmentDto>> GetPensionEnrollementsByPayRollRunIdAsync(int payrollRunId);
+    Task<List<EmployeePensionEnrollmentDto>> GetPensionEnrollementsNotLocked();
     Task<EmployeePensionEnrollmentDto> UpdateEmployeePensionEnrollementAsync(EmployeePensionEnrollmentUpdateDto employeePensionEnrollmentUpdateDto);
     Task<bool> DeleteEmployeePensionEnrollementAsync();
   }

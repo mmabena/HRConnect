@@ -1,26 +1,27 @@
-using HRConnect.Api.Data;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 using System.Text;
-// using Resend;
-using HRConnect.Api.Interfaces;
-using HRConnect.Api.Middleware;
-using HRConnect.Api.Repositories;
-using HRConnect.Api.Services;
-using HRConnect.Api.Repository;
-using Microsoft.AspNetCore.Identity;
-using HRConnect.Api.Models;
-using HRConnect.Api.Utils;
-using HRConnect.Api.Utils.Payroll;
-using OfficeOpenXml;
-using HRConnect.Api.Interfaces.PensionProjection;
 using Audit.Core;
 using Audit.EntityFramework;
-using Quartz;
+using HRConnect.Api.Data;
+// using Resend;
+using HRConnect.Api.Interfaces;
 using HRConnect.Api.Interfaces.Pension;
+using HRConnect.Api.Interfaces.PensionProjection;
+using HRConnect.Api.Middleware;
+using HRConnect.Api.Models;
+using HRConnect.Api.Repositories;
+using HRConnect.Api.Repository;
+using HRConnect.Api.Services;
+using HRConnect.Api.Utils;
+using HRConnect.Api.Utils.Payroll;
 using HRConnect.Api.Utils.Quartz.Pension;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using OfficeOpenXml;
+using Quartz;
+using Quartz.Impl;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -82,7 +83,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
     {
-      options.UseSqlServer(builder.Configuration.GetConnectionString("DBeaverConnection"));
+      options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
       options.AddInterceptors(new AuditSaveChangesInterceptor());
     });
 
@@ -140,7 +141,7 @@ builder.Services.AddQuartz(q =>
   q.AddTrigger(opts => opts
   .ForJob(jobKey)
   .WithIdentity("PayrollRollover-Trigger")
-  .WithCronSchedule("0 0/2 * * * ?", x =>
+  .WithCronSchedule("0/10 * * * * ?", x =>
   x.WithMisfireHandlingInstructionFireAndProceed())); //when a job misfire happens. 
                                                       // Properly re-execute it and proceed as usual
 
@@ -160,14 +161,25 @@ builder.Services.AddQuartz(q =>
   q.AddTrigger(opts => opts
     .ForJob(pensionEnrollJobKey)
     .WithIdentity("EmployeePensionRollOverJob-Trigger")
-    .WithCronSchedule("0/30 0/2 * * * ?", x => x.WithMisfireHandlingInstructionFireAndProceed()));
+    .WithCronSchedule("0/15 * * * * ?", x => x.WithMisfireHandlingInstructionFireAndProceed()));
+
+  JobKey pensionDeductionJobKey = new("PensionDeductionJob");
+
+  q.AddJob<PensionDeductionJob>(opts =>
+    opts.WithIdentity(pensionDeductionJobKey)
+        .StoreDurably());
+
+  q.AddTrigger(opts => opts
+    .ForJob(pensionDeductionJobKey)
+    .WithIdentity("PensionDeductionJob-Trigger")
+    .WithCronSchedule("0/20 * * * * ?", x => x.WithMisfireHandlingInstructionFireAndProceed()));
 
   //Adding persistence to quartz to be able to be run in the back
   q.UsePersistentStore(options =>
   {
     options.UseSqlServer(options =>
         {
-          options.ConnectionString = builder.Configuration.GetConnectionString("DBeaverConnection")!;
+          options.ConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
           options.TablePrefix = "quartz.QRTZ_";
         });
     options.UseSerializer<Quartz.Simpl.SystemTextJsonObjectSerializer>();
@@ -234,6 +246,15 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+/*app.Lifetime.ApplicationStarted.Register(async () =>
+{
+  IScheduler scheduler = await new StdSchedulerFactory().GetScheduler();
+
+  _ = await scheduler.UnscheduleJob(new TriggerKey("EmployeePensionRollOverJob-Trigger"));
+  _ = await scheduler.UnscheduleJob(new TriggerKey("PensionDeductionJob-Trigger"));
+  _ = await scheduler.UnscheduleJob(new TriggerKey("PayrollRollover-Trigger"));
+});*/
 
 using (var scope = app.Services.CreateScope())
 {

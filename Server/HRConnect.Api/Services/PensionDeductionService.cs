@@ -8,6 +8,7 @@
   using HRConnect.Api.Interfaces.Pension;
   using HRConnect.Api.Mappers.Payroll.Pension;
   using HRConnect.Api.Models;
+  using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Models.PayrollDeduction;
   using HRConnect.Api.Models.Pension;
   using HRConnect.Api.Utils.Pension.ValidationHelpers;
@@ -15,11 +16,12 @@
 
   public class PensionDeductionService(IPensionDeductionRepository pensionDeductionRepository,
     IEmployeeRepository employeeRepository, IEmployeePensionEnrollmentRepository employeePensionEnrollmentRepository,
-    ApplicationDBContext context) : IPensionDeductionService
+    IPayrollRunRepository payrollRunRepository, ApplicationDBContext context) : IPensionDeductionService
   {
     private readonly IPensionDeductionRepository _pensionDeductionRepository = pensionDeductionRepository;
     private readonly IEmployeeRepository _employeeRepository = employeeRepository;
     private readonly IEmployeePensionEnrollmentRepository _employeePensionEnrollmentRepository = employeePensionEnrollmentRepository;
+    private readonly IPayrollRunRepository _payrollRunRepository = payrollRunRepository;
     private readonly ApplicationDBContext _context = context;
     private static readonly decimal MAX_PENSIONCONTRIBUTION_PERCENTAGE = (decimal)27.5 / 100;
     private static readonly decimal MAX_MONTHLYCONTRIBUTION = 29166.66M;
@@ -64,19 +66,28 @@
     public async Task<PensionDeductionDto?> UpdateEmployeePensionDeductionAsync(PensionDeductionUpdateDto pensionDeductionUpdateDto)
     {
       ValidatePensionDeductionDtos.ValidateUpdateDto(pensionDeductionUpdateDto);
+      Employee existingEmployee = await GetEmployeeInformationAsync(pensionDeductionUpdateDto.EmployeeId);
       PensionDeduction? employeePensionDeduction = await _pensionDeductionRepository
-        .GetByEmployeeIdAsync(pensionDeductionUpdateDto.EmployeeId);
+        .GetByEmployeeIdAndIsNotLockedAsync(pensionDeductionUpdateDto.EmployeeId);
+
+      decimal pensionOptionPercentage = await
+        GetEmployeePensionOptionPercentageAsync(pensionDeductionUpdateDto.PensionOptionId ?? (int)existingEmployee.PensionOptionId);
+      ValidatePensionDeductionDtos.ValidateVoluntaryContribution((decimal)pensionDeductionUpdateDto.VoluntaryContribution, existingEmployee.MonthlySalary, pensionOptionPercentage);
 
       if (employeePensionDeduction != null)
       {
         employeePensionDeduction.PensionOptionId = pensionDeductionUpdateDto.PensionOptionId ?? employeePensionDeduction.PensionOptionId;
         employeePensionDeduction.VoluntaryContribution = pensionDeductionUpdateDto.VoluntaryContribution
           ?? employeePensionDeduction.VoluntaryContribution;
-        //employeePensionDeduction.PayrollRunId = pensionDeductionUpdateDto.PayrollRunId ?? employeePensionDeduction.PayrollRunId;
+        decimal updatedPensionOptionPercentage = pensionDeductionUpdateDto.PensionOptionId.HasValue ?
+          await GetEmployeePensionOptionPercentageAsync((int)pensionDeductionUpdateDto.PensionOptionId)
+          : employeePensionDeduction.PendsionCategoryPercentage;
+        employeePensionDeduction.PensionContribution = ValidPensionContribution(existingEmployee.MonthlySalary * updatedPensionOptionPercentage);
         employeePensionDeduction.CreatedDate = pensionDeductionUpdateDto.CreatedDate ?? employeePensionDeduction.CreatedDate;
         employeePensionDeduction.IsActive = pensionDeductionUpdateDto.IsActive ?? employeePensionDeduction.IsActive;
 
         PensionDeduction pensionDeduction = await _pensionDeductionRepository.UpdateAsync(employeePensionDeduction);
+        await HandlePensionOptionChange(employeePensionDeduction.EmployeeId, employeePensionDeduction.PensionOptionId, employeePensionDeduction.VoluntaryContribution);
         return pensionDeduction.ToPensionDeductionDTO();
       }
       else
@@ -125,11 +136,11 @@
       EmployeePensionEnrollment existEmployeesPensionEnrollment = await GetEmployeePensionEnrollmentAsync(pensionDeductionAddDto.EmployeeId);
       decimal pensionOptionPercentage = await GetEmployeePensionOptionPercentageAsync((int)existingEmployee.PensionOptionId);
       ValidatePensionDeductionDtos.ValidateVoluntaryContribution((decimal)pensionDeductionAddDto.VoluntaryContribution, existingEmployee.MonthlySalary, pensionOptionPercentage);
-      //ValidateVoluntaryContribution((decimal)pensionDeductionAddDto.VoluntaryContribution, existingEmployee.MonthlySalary, pensionOptionPercentage);
-
 
       if (existingEmployee != null)
       {
+        PayrollRun? currentPayrollRunId = await _payrollRunRepository.GetCurrentRunAsync();
+
         PensionDeduction employeesPensionDeduction = new()
         {
           EmployeeId = existingEmployee.EmployeeId,
@@ -146,7 +157,7 @@
           VoluntaryContribution = (decimal)pensionDeductionAddDto.VoluntaryContribution,
           EmailAddress = existingEmployee.Email,
           PhyscialAddress = existingEmployee.PhysicalAddress,
-          PayrollRunId = 1,
+          PayrollRunId = currentPayrollRunId.PayrollRunId,
           CreatedDate = existEmployeesPensionEnrollment.EffectiveDate,
           IsActive = true
         };
@@ -156,6 +167,27 @@
       else
       {
         return null;
+      }
+    }
+
+    private async Task HandlePensionOptionChange(string employeeId, int newPensionOptionId, decimal voluntaryContribution)
+    {
+      Employee employeeNeedingAnUpdate = _employeeRepository.GetEmployeeByIdAsync(employeeId).Result ?? throw new NotFoundException("Employee not found");
+      employeeNeedingAnUpdate.PensionOptionId = newPensionOptionId;
+      Employee? updatedEmployee = await _employeeRepository.UpdateEmployeeAsync(employeeNeedingAnUpdate);
+      if (updatedEmployee != null && updatedEmployee.PensionOptionId != newPensionOptionId)
+      {
+        throw new InvalidOperationException("Failed to update employee's pension option");
+      }
+
+      EmployeePensionEnrollment? employeePensionEnrollment = await _employeePensionEnrollmentRepository.GetByEmployeeIdAndIsNotLockedAsync(employeeId)
+        ?? throw new NotFoundException("Employee pension enrollment not found"); ;
+      employeePensionEnrollment.PensionOptionId = newPensionOptionId;
+      employeePensionEnrollment.VoluntaryContribution = voluntaryContribution;
+      EmployeePensionEnrollment? updatedEmployeePensionEnrollment = await _employeePensionEnrollmentRepository.UpdateAsync(employeePensionEnrollment);
+      if (updatedEmployeePensionEnrollment != null && updatedEmployeePensionEnrollment.PensionOptionId != newPensionOptionId)
+      {
+        throw new InvalidOperationException("Failed to update employee's pension enrollment");
       }
     }
   }

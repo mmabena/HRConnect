@@ -38,6 +38,12 @@
       return await _context.EmployeePensionEnrollments.ToListAsync();
     }
 
+    public Task<EmployeePensionEnrollment?> GetByEmployeeIdAndIsNotLockedAsync(string employeeId)
+    {
+      return _context.EmployeePensionEnrollments
+        .FirstOrDefaultAsync(epe => epe.EmployeeId == employeeId && !epe.IsLocked);
+    }
+
     public async Task<EmployeePensionEnrollment?> GetByEmployeeIdAsync(string employeeId)
     {
       EmployeePensionEnrollment? existEmployeesPensionEnrollment = await _context.EmployeePensionEnrollments
@@ -46,9 +52,24 @@
       return existEmployeesPensionEnrollment ?? null;
     }
 
+    public async Task<EmployeePensionEnrollment?> GetByEmployeeIdLastEntityAsync(string employeeId)
+    {
+      EmployeePensionEnrollment? existEmployeesPensionEnrollment = await _context.EmployeePensionEnrollments
+        .Where(epe => epe.EmployeeId == employeeId)
+        .OrderByDescending(epe => epe.EffectiveDate)
+        .FirstOrDefaultAsync();
+
+      return existEmployeesPensionEnrollment ?? null;
+    }
+
     public async Task<List<EmployeePensionEnrollment>> GetByPayRollRunIdAsync(int payrollRunId)
     {
       return await _context.EmployeePensionEnrollments.Where(epe => epe.PayrollRunId == payrollRunId).ToListAsync();
+    }
+
+    public async Task<List<EmployeePensionEnrollment>> GetEmployeePensionEnrollmentsNotLocked()
+    {
+      return await _context.EmployeePensionEnrollments.Where(epe => !epe.IsLocked).ToListAsync();
     }
 
     public async Task LockEmployeePensionEnrollmentsAsync(List<EmployeePensionEnrollment> employeePensionEnrollments)

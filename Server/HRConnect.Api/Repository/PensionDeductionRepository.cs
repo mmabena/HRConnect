@@ -27,6 +27,14 @@
       return await _context.PensionDeductions.ToListAsync();
     }
 
+    public async Task<PensionDeduction?> GetByEmployeeIdAndIsNotLockedAsync(string employeeId)
+    {
+      PensionDeduction? existingPensionDeduction = await _context.PensionDeductions
+        .FirstOrDefaultAsync(pd => pd.EmployeeId == employeeId && !pd.IsLocked);
+
+      return existingPensionDeduction;
+    }
+
     public async Task<PensionDeduction?> GetByEmployeeIdAsync(string employeeId)
     {
       PensionDeduction? existingPensionDeduction = await _context.PensionDeductions

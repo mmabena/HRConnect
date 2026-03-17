@@ -50,7 +50,7 @@
     {
       float voluntaryContributionPercentage = (float)Math.Round(voluntaryContribution / employeeMonthSalary, 2);
 
-      if ((voluntaryContributionPercentage + (float)pensionOptionPercentage) > (float)MAX_PENSIONCONTRIBUTION_PERCENTAGE)
+      if ((voluntaryContributionPercentage + ((float)pensionOptionPercentage / 100)) > (float)MAX_PENSIONCONTRIBUTION_PERCENTAGE)
       {
         throw new ValidationException("Voluntary Contribution + Monthly Salary Contribution cannot exceed 27.5% of salary");
       }

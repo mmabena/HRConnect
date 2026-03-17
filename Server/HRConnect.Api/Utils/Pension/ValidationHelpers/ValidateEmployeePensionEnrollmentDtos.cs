@@ -23,7 +23,7 @@
         throw new ValidationException("Voluntary contribution cannot be less lower than zero");
       }
 
-      if (employeePensionEnrollmentAddDto.VoluntaryContribution is not null
+      if (employeePensionEnrollmentAddDto.VoluntaryContribution != null && employeePensionEnrollmentAddDto.VoluntaryContribution > decimal.Zero
         && employeePensionEnrollmentAddDto.IsVoluntaryContributionPermament is null)
       {
         throw new ValidationException("Voluntary contribution has to be permament or once-off");
@@ -51,12 +51,28 @@
       }
 
       DateOnly today = DateOnly.FromDateTime(DateTime.Now);
-      DateOnly nextMonth = today.AddMonths(1);
-      if (employeePensionEnrollmentUpdateDto.EffectiveDate is not null &&
-        ((employeePensionEnrollmentUpdateDto.EffectiveDate.Value.Month != nextMonth.Month) ||
-        (employeePensionEnrollmentUpdateDto.EffectiveDate.Value.Year != nextMonth.Year)))
+      //DateOnly nextMonth = today.AddMonths(1);
+      DateOnly firstDayNextMonth = new DateOnly(today.Year, today.Month, 1).AddMonths(1);
+      if (today.Day > 25 && employeePensionEnrollmentUpdateDto.EffectiveDate != null &&
+        employeePensionEnrollmentUpdateDto.EffectiveDate != firstDayNextMonth)
       {
         throw new ValidationException("Effective date must be beginning of next month");
+      }
+
+      if (employeePensionEnrollmentUpdateDto.EffectiveDate < today)
+      {
+        throw new ValidationException("Effective date must be today or in the future");
+      }
+
+      if (employeePensionEnrollmentUpdateDto.VoluntaryContribution is not null and < decimal.Zero)
+      {
+        throw new ValidationException("Voluntary contribution cannot be less lower than zero");
+      }
+
+      if (employeePensionEnrollmentUpdateDto.VoluntaryContribution != null && employeePensionEnrollmentUpdateDto.VoluntaryContribution > decimal.Zero
+        && employeePensionEnrollmentUpdateDto.IsVoluntaryContributionPermament is null)
+      {
+        throw new ValidationException("Voluntary contribution has to be permament or once-off");
       }
 
       /*if (employeePensionEnrollmentUpdateDto.PayrollRunId is not null and (not < 1 or > 12))
@@ -68,7 +84,7 @@
     {
       float voluntaryContributionPercentage = (float)Math.Round(voluntaryContribution / employeeMonthSalary, 2);
 
-      if ((voluntaryContributionPercentage + (float)pensionOptionPercentage) > (float)MAX_PENSIONCONTRIBUTION_PERCENTAGE)
+      if ((voluntaryContributionPercentage + ((float)pensionOptionPercentage / 100)) > (float)MAX_PENSIONCONTRIBUTION_PERCENTAGE)
       {
         throw new ValidationException("Voluntary Contribution + Monthly Salary Contribution cannot exceed 27.5% of salary");
       }
