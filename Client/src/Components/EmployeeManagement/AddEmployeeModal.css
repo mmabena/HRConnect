@@ -53,12 +53,14 @@
 
 
 .emp-center-frame {
-  width: 61.8vw;
-  max-height: 98vh;
+  grid-template-rows: repeat(1,minmax(0,1fr));
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  width: 1186px;
+  max-height: 843px;
+  margin-left:375px;
   height: 100%;
   border-radius: 10px;
   display: grid;
-  grid-template-columns: 1fr 1fr;
   background: linear-gradient(135deg,
       #EEEEF1,
       #EFF1F3,
@@ -72,13 +74,16 @@
 
 
 .emp-left-frame {
-  width: 100%;
-  height: 100%;
-  padding: 50px;
   display: flex;
+  padding-top: 50px;
   flex-direction: column;
-  position: relative;
-  margin-top: -90px;
+  align-items: center;
+  gap: 20px;
+  align-self: stretch;
+  grid-row: 1 / span 1;
+  grid-column: 1 / span 1;
+  justify-self: stretch;
+
 }
 
 .emp-left-frame-centered {
@@ -204,15 +209,16 @@
 }
 
 .emp-new-employee-title {
+  color: var(--text-primary);
+  text-align: center;
+  font-size: 30px;
+  font-style: normal;
+  font-weight: 700;
   width: 360px;
   height: 26px;
   font-family: 'Inter', sans-serif;
-  font-weight: 700;
-  font-size: 36px;
   line-height: 26px;
   letter-spacing: 0;
-  color: #002D40;
-  text-align: left;
   display: flex;
   align-items: left;
   justify-content: left;
@@ -237,30 +243,109 @@
   transform: translateX(-25px);
 }
 
-
-
 .emp-personal-details-heading {
-  font-family: 'Instrument Sans', sans-serif;
-  font-weight: 700;
+  position: relative;
+  color: var(--accent-blue);
+  font-family: "Instrument Sans";
   font-size: 14px;
-  line-height: 26px;
-  letter-spacing: 0;
-  margin: 0 auto 20px auto;
-  color: #006088;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  margin-top: -40px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 26px; 
+  left: 2%;
 }
+
 
 .emp-name-surname-container {
   display: flex;
   flex-direction: column;
- width: 100%;
+  width: 100%;
   max-width: 360px;
-  gap: 15px;
+  gap: 23px;
   border-radius: 5px;
 
+}
+
+.date-wrapper {
+  display: inline;
+  right: 6px;
+}
+
+.date-label {
+  position: absolute;
+  font-size: 16px;
+  font-family: 'Anek Bangla';
+  left: 10px;   /* adjust to align with DD/MM/YYYY */
+  top: 40%;
+  transform: translateY(-50%);
+  color: var(--text-primary);
+  pointer-events: none; /* ensures clicks go to the input */
+}
+
+
+select {
+  accent-color: var(--primary-color);
+}
+
+option:checked {
+  background: var(--primary-color);
+  color: white;
+}
+
+
+.emp-input-image-wrapper{
+  position: relative;
+  width: 100%;
+  display: block;
+  height: 33px;
+  padding: 0 5px 5px 5px;
+  align-items: flex-start;
+  gap: 5px;
+  border-radius: 5px;
+  border-bottom: 1.5px solid var(--accent-blue);
+  background-color: transparent;
+}
+
+.emp-input-wrapper{
+  position: relative;
+  width: 100%;
+  display: block;
+  height: 33px;
+  padding: 0 5px 5px 5px;
+  align-items: flex-start;
+  gap: 5px;
+  border-radius: 5px;
+  border-bottom: 1.5px solid var(--accent-blue);
+  background-color: transparent;
+}
+
+.emp-name-input[type="date"]::-webkit-calendar-picker-indicator {
+  text-transform: uppercase;
+  color: #898989; /* text color */
+  opacity: 0;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+/* DATE PLACEHOLDER (browser controlled but can influence color) */
+.emp-name-input[type="date"]::-webkit-datetime-edit {
+  color: #898989 ;
+  text-transform: uppercase;
+}
+
+.emp-name-input[type="date"]
+{
+  text-align: right;
+  padding-right: 18%;
+}
+
+.custom-calendar-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
 }
 
 .emp-name-input,
@@ -268,35 +353,64 @@
   width: 100%;
   height: 33px;
   border: none;
-  color: #006088;
-  border-bottom: 1.5px solid #006088;
+  color: var(--text-primary);
+  /* border-bottom: 1.5px solid #006088; */
   padding-left: 5px;
   padding-right: 5px;
   padding-bottom: 5px;
-  font-size: 14px;
+  font-size: 16px;
   outline: none;
   box-sizing: border-box;
-  border-radius: 0;
+  border-radius: 5px;
   background-color: transparent;
-  font-family: sans-serif;
+  font-family: 'Anek Bangla';
 
 }
+
+.hidden-file-input {
+  display: none;
+}
+
+.upload-label {
+  position: relative;
+  right: 36%;
+  font-family: 'Anek Bangla';
+  font-size: 16px;
+  color: var(--text-primary);
+  height: 33px;
+  border: none;
+  outline: none;
+  box-sizing: border-box;
+  border-radius: 5px;
+
+}
+
+.upload-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
 
 .emp-name-input-col{
     width: 100%;
     height: 33px;
     border: none;
-    color: #006088;
+    color: var(--text-primary);
     border-bottom: 1.5px solid #006088;
     padding-left: 5px;
     padding-right: 5px;
     padding-bottom: 5px;
-    font-size: 14px;
+    font-size: 16px;
     outline: none;
     box-sizing: border-box;
     border-radius: 0;
     background-color: transparent;
-    font-family: 'Instrument Sans', sans-serif
+    font-family:  'Anek Bangla', sans-serif
 }
 
 
@@ -360,7 +474,7 @@
   color: #006088;
   padding-right: 5px;
   padding-bottom: 5px;
-  font-size: 14px;
+  font-size: 16px;
   outline: none;
   box-sizing: border-box;
   background-color: transparent;
@@ -381,7 +495,7 @@
   padding-left: 5px;
   padding-right: 30px;
   padding-bottom: 5px;
-  font-size: 14px;
+  font-size: 16px;
   outline: none;
   box-sizing: border-box;
   background-color: transparent;
@@ -404,14 +518,12 @@
 }
 
 .emp-input-label {
-  font-size: 14px;
+  font-size: 16px;
   color: #002D40;
   font-weight: 400;
   display: block;
   margin-bottom: 5px;
 }
-
-
 
 .emp-grey-text::placeholder {
   color: #3D3D3D;
@@ -424,11 +536,9 @@
 
 }
 
-
-
 .emp-bottom-line-container {
   width: 360px;
-  border-bottom: 1.5px solid #006088;
+  border-bottom: 1.5px solid var(--accent-blue);
   padding-bottom: 5px;
 }
 
@@ -436,7 +546,7 @@
   font-family: 'Instrument Sans', sans-serif;
   width: 360px;
   height: 37px;
-  background-color: #006088;
+  background-color: var(--primary-color);
   border: none;
   border-radius: 10px;
   padding: 0 39px;
@@ -445,7 +555,7 @@
   align-items: center;
   gap: 10px;
   color: white;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s ease;
@@ -453,7 +563,7 @@
 }
 
 .emp-save-button:hover {
-  background-color: #004d6b;
+  background-color: var(--primary-light);
 }
 
 .emp-menu-background {
@@ -488,7 +598,7 @@
   left: 375px;
   width: 20px;
   height: 20px;
-  background-color: #002D40;
+  background-color: var(--text-primary);
   z-index: 0;
   pointer-events: none;
 }
@@ -499,7 +609,7 @@
   left: 375px;
   width: 20px;
   height: 20px;
-  background-color: #002D40;
+  background-color: var(--text-primary);
   z-index: 0;
   pointer-events: none;
 }
@@ -533,15 +643,15 @@
   position: relative;
 }
 
-.file-placeholder {
+/* .file-placeholder {
   position: absolute;
   left: 5px;
   top: 50%;
   transform: translateY(-50%);
   color: #006088;
-  font-size: 14px;
+  font-size: 16px;
   pointer-events: none;
-}
+} */
 
 .emp-toast-confirm-btn {
   padding: 6px 12px;
@@ -555,9 +665,11 @@
 
 .emp-form-grid {
   display: flex;
+  height: 600px;
+  width: 360px;
   flex-direction: column;
-  gap: 18px;
-  width: 100%;
+  align-items: flex-start;
+  gap: 17px;
 }
 
 .emp-input-wrapper.full-width {
@@ -567,11 +679,6 @@
   gap: 2px;
 }
 
-.emp-input-wrapper {
-  width: 100%;
-  display: block;
-  color: #006088;
-}
 
 .emp-input-wrapper input,
 .emp-input-wrapper select {
@@ -581,7 +688,7 @@
 
 .emp-name-input::placeholder {
   color: #9ca3af;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .date-input-wrapper {
@@ -597,25 +704,34 @@
   padding: 0 4px;
 }
 
+
 .emp-two-col {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 15px;
   width: 100%;
-  color: #006088;
+  color: var(--text-primary);
 }
 
 .emp-name-input-col::placeholder {
-  color: #006088;
+  color: var(--text-primary);
 }
 
 .emp-name-input::placeholder {
-  color: #006088;
+  color: var(--text-primary);
 }
 
 .emp-full-width {
   width: 100%;
 }
+
+.emp-disability-wrapper{
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+gap: 12px;
+}
+
 
 .emp-disability-group {
   display: flex;
@@ -623,28 +739,54 @@
   gap: 8px;
 }
 
-.emp-disability-row {
+
+.emp-disability-row { 
+  height: 24px;
+  width: 20px;
+  color: var(--text-primary);
+  font-family: "Anek Bangla";
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 150%; /* 24px */
+  letter-spacing: 0.15px;
   display: flex;
   align-items: center;
   gap: 18px;
-  width: 100%;
+}
+
+input[type="radio" i] {
+    accent-color: var(--primary-color) !important;
+    cursor: pointer;
+    appearance: auto;
+    box-sizing: border-box;
+    margin: 3px 3px 0px 5px;
+    padding: initial;
+    border: initial;
 }
 
 .emp-disability-label {
-  font-size: 14px;
-  color: #002D40;
-  font-weight: 500;
+  position: relative;
+  font-family: "Anek Bangla";
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 150%; /* 24px */
+  letter-spacing: 0.15px;
+  color: var(--text-primary);
   white-space: nowrap;
+  left: 10px;
 }
 
 .emp-disability-input {
   flex: 1;
   height: 33px;
   border: none;
-  border-bottom: 1.5px solid #006088;
+  border-radius: 5px;
+  border-bottom: 1.5px solid var(--accent-blue);
   padding-left: 5px;
   padding-bottom: 5px;
-  font-size: 14px;
+  font-size: 16px;
   background: transparent;
   outline: none;
 }
@@ -692,3 +834,4 @@
   margin-top: 2px;
   display: block;
 }
+

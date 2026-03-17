@@ -15,7 +15,7 @@ import {
   showConfirmationToast,
   convertDDMMYYYYtoISO,
   GetEmployeeByEmployeeNumberAsync,
-} from "../../api/Employee";
+} from "../../Employee";
 
 /// </summary>
 /// MOCK super user role

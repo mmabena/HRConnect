@@ -1,16 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import "../Components/AddEmployeeModal.css";
-import axios from "axios";
+import "./AddEmployeeModal.css";
+import { addEmployee } from "../../Employee";
 
-import {
-  addEmployee,
-  validateRequiredFields,
-  handleFileChange,
-  fetchAllEmployees,
-  populateFromIdNumber,
-} from "../../src/api/Employee.js";
+import useEmployeeForm from "../../hooks/useEmployeeForm";
+import useEmployeeData from "../../hooks/useEmployeeData";
+import useEmployeeValidation from "../../hooks/useEmployeeValidation";
+import useImageUpload from "../../hooks/useImageUpload";
+import useUserRole from "../../hooks/useUserRole";
 
 /// </summary>
 /// MOCK super user role
@@ -20,213 +18,132 @@ const getCurrentUserRole = () => "superuser";
 
 const AddEmployeeModal = ({ closeModal }) => {
   const navigate = useNavigate();
-  const [userRole, setUserRole] = useState(null);
-  const [formErrors, setFormErrors] = useState({});
-  const [positions, setPositions] = useState([]);
-  const [uploading, setUploading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const role = useUserRole();
+  const { positions, allEmployees, loading: dataLoading } = useEmployeeData();
+  const { validateEmployee } = useEmployeeValidation();
+  const { uploadImage, uploading } = useImageUpload();
   const [loading, setLoading] = useState(false);
-  const [allEmployees, setAllEmployees] = useState([]);
   const titles = ["Mr", "Mrs", "Ms", "Dr", "Prof"];
   const genders = ["Male", "Female"];
   const branches = ["Johannesburg", "CapeTown", "UK"];
   const employmentStatuses = ["Permanent", "FixedTerm", "Contract"];
-  const [employee, setEmployee] = useState({
-    title: "",
-    name: "",
-    surname: "",
-    idType: "id",
-    idNumber: "",
-    passportNumber: "",
-    nationality: "",
-    gender: "",
-    contactNumber: "",
-    taxNumber: "",
-    email: "",
-    physicalAddress: "",
-    city: "",
-    zipCode: "",
-    startDate: "",
-    branch: "",
-    monthlySalary: "",
-    jobTitle: "",
-    employeeStatus: "",
-    reportsTo: "",
-    disability: false,
-    disabilityType: "",
-    documentPath: "",
-  });
+  const { employee, setEmployee, formErrors, setFormErrors, onInputChange } =
+    useEmployeeForm({
+      title: "",
+      name: "",
+      surname: "",
+      idType: "id",
+      idNumber: "",
+      passportNumber: "",
+      nationality: "",
+      gender: "",
+      dateOfBirth: "",
+      contactNumber: "",
+      taxNumber: "",
+      email: "",
+      physicalAddress: "",
+      city: "",
+      zipCode: "",
+      startDate: "",
+      branch: "",
+      monthlySalary: "",
+      jobTitle: "",
+      employeeStatus: "",
+      reportsTo: "",
+      disability: false,
+      disabilityType: "",
+      profileImage: "",
+    });
 
-  useEffect(() => {
-    setUserRole(getCurrentUserRole());
-    const fetchData = async () => {
-      try {
-        const employeesData = await fetchAllEmployees();
-        setAllEmployees(employeesData);
+  const fileInputRef = useRef(null);
+  const handleImageClick = () => {
+    fileInputRef.current.click();
+  };
+  const [fileName, setFileName] = useState("Profile Picture");
 
-        const positionsRes = await axios.get(
-          "http://localhost:5147/api/positions",
-        );
-        setPositions(positionsRes.data);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchData();
-  }, []);
-
-  if (userRole !== "superuser") {
+  if (role !== "superuser") {
     return <div>Access Denied. Only super users can access this page.</div>;
   }
 
-  const onInputChange = (e) => {
-    const { name, value } = e.target;
+  const onFileChange = async (e) => {
+    const file = e.target.files[0];
 
-    setFormErrors((prev) => ({ ...prev, [name]: null }));
+    if (!file) return;
 
-    // Handle disability
-    if (name === "disability") {
+    setFileName(file.name);
+
+    const url = await uploadImage(file);
+
+    if (url) {
       setEmployee((prev) => ({
         ...prev,
-        disability: value === "yes",
-        disabilityType: value === "no" ? "" : prev.disabilityType,
+        profileImage: url,
       }));
-      return;
     }
-
-    // Numeric validation
-    if (
-      ["contactNumber", "zipCode", "monthlySalary", "taxNumber"].includes(name)
-    ) {
-      // allow empty string
-      const regex = name === "contactNumber" ? /^[\d+-]*$/ : /^\d*$/;
-      if (value === "" || regex.test(value)) {
-        setFormErrors((prev) => ({ ...prev, [name]: null }));
-        setEmployee((prev) => ({ ...prev, [name]: value }));
-      } else {
-        setFormErrors((prev) => ({ ...prev, [name]: "Invalid characters" }));
-      }
-      return;
-    }
-
-    // ID type change
-    if (name === "idType") {
-      setEmployee((prev) => ({
-        ...prev,
-        idType: value,
-        idNumber: "",
-        dateOfBirth: "",
-        nationality: value === "id" ? "" : "Non-South African",
-        gender: "",
-      }));
-      return;
-    }
-
-    // ID number -> derive DOB/gender/nationality for SA IDs
-    if (name === "idNumber" && employee.idType === "id") {
-      setEmployee((prev) => {
-        const derived = populateFromIdNumber(value);
-        return {
-          ...prev,
-          idNumber: value,
-          dateOfBirth: derived.dateOfBirth || "",
-          gender: derived.gender || "",
-          nationality: derived.nationality || "",
-          citizenship: derived.citizenship || "",
-        };
-      });
-      return;
-    }
-
-    setEmployee((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const onFileChange = (e) =>
-    handleFileChange(e, setEmployee, setUploading, setErrorMessage);
-
-  const formatDateForBackend = (dateStr) => {
-    if (!dateStr) return null;
-    const d = new Date(dateStr);
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
-    return `${yyyy}-${mm}-${dd}`;
   };
 
   const handleSave = async () => {
+    const errors = validateEmployee(employee);
+    setFormErrors(errors);
+
+    console.error(errors);
+
+    if (Object.keys(errors).length > 0) return;
+
     try {
       setLoading(true);
 
-      const { errors: requiredErrors, isValid } =
-        validateRequiredFields(employee);
-
-      setFormErrors(requiredErrors);
-
-      if (!isValid) {
-        setLoading(false);
-        return;
-      }
-
       const payload = {
-        employeeId: "",
-        title: employee.title || null,
-        name: employee.name || null,
-        surname: employee.surname || null,
-        nationality: employee.nationality || null,
-        gender: employee.gender
-          ? employee.gender.charAt(0).toUpperCase() + employee.gender.slice(1)
-          : null,
+        title: employee.title,
+        name: employee.name,
+        surname: employee.surname,
+        nationality: employee.nationality,
+        gender: employee.gender,
         contactNumber: employee.contactNumber,
-        taxNumber: employee.taxNumber || null,
-        email: employee.email || null,
-        physicalAddress: employee.physicalAddress || null,
-        city: employee.city || null,
-        zipCode: employee.zipCode || null,
-        hasDisability: employee.disability || false,
-        disabilityDescription: employee.disabilityType || null,
-        dateOfBirth: employee.dateOfBirth || null,
-        startDate: employee.startDate || null,
-        branch: employee.branch || null,
+        taxNumber: employee.taxNumber,
+        email: employee.email,
+        physicalAddress: employee.physicalAddress,
+        city: employee.city,
+        zipCode: employee.zipCode,
+        hasDisability: employee.disability,
+        disabilityDescription: employee.disabilityType,
+        dateOfBirth: employee.dateOfBirth,
+        startDate: employee.startDate,
+        branch: employee.branch,
         monthlySalary: employee.monthlySalary
           ? parseFloat(employee.monthlySalary)
           : 0,
-
         positionId: employee.jobTitle ? parseInt(employee.jobTitle) : null,
-
-        employmentStatus: employee.employeeStatus || null,
-        careerManagerID: employee.reportsTo || null,
-
-        profileImage: employee.documentPath || null,
+        employmentStatus: employee.employeeStatus,
+        careerManagerID: employee.reportsTo,
+        profileImage: employee.profileImage,
       };
 
       if (employee.idType === "id") {
         payload.idNumber = employee.idNumber;
       } else {
-        payload.passportNumber = employee.idNumber;
+        payload.passportNumber = employee.passportNumber;
       }
-
-      console.log("Payload:", payload);
 
       await addEmployee(payload);
 
       toast.success("Employee created successfully!");
       closeModal();
     } catch (error) {
-      console.error("Error saving employee:", error);
-
-      // Optionally, if the API returns validation errors
-      if (error.response?.data?.errors) {
-        setFormErrors((prevErrors) => ({
-          ...prevErrors,
-          ...error.response.data.errors,
-        }));
+      if (error.response && error.response.data?.errors) {
+        setFormErrors(error.response.data.errors);
       } else {
         toast.error("Failed to create employee.");
       }
+
+      console.error("Add employee error response data:", error.response?.data);
+      console.error("Add employee error status:", error.response?.status);
     } finally {
       setLoading(false);
     }
   };
+
+  if (dataLoading) return <div>Loading...</div>;
 
   return (
     <div className="emp-center-frame">
@@ -241,16 +158,14 @@ const AddEmployeeModal = ({ closeModal }) => {
           </div>
         </div>
 
-        <div className="emp-personal-details-container">
-          <div className="emp-personal-details-heading">
-            <span>Personal</span> <span>Details</span>
-          </div>
-        </div>
-
         <div className="emp-name-surname-container">
           <div className="emp-form-grid">
+            <div className="emp-personal-details-heading">
+              <span>Personal</span> <span>Details</span>
+            </div>
+
             {/* Title */}
-            <div className="emp-full-width dropdown-wrapper">
+            <div className="emp-full-width dropdown-wrapper emp-input-wrapper">
               <select
                 className={`emp-name-input ${formErrors.title ? "emp-error-input" : ""}`}
                 value={employee.title}
@@ -305,7 +220,7 @@ const AddEmployeeModal = ({ closeModal }) => {
               </div>
             </div>
 
-            {/* ID Type | ID Number */}
+            {/* ID Type | ID / Passport Number */}
             <div className="emp-two-col">
               <div className="emp-input-wrapper dropdown-wrapper">
                 <select
@@ -318,17 +233,26 @@ const AddEmployeeModal = ({ closeModal }) => {
                   <option value="passport">Passport Number</option>
                 </select>
                 <img
-                src="/images/arrow_drop_down_circle.png"
-                alt="Dropdown icon"
-                className="dropdown-icon"
-              />
+                  src="/images/arrow_drop_down_circle.png"
+                  alt="Dropdown icon"
+                  className="dropdown-icon"
+                />
               </div>
+
               <div className="emp-input-wrapper">
                 <input
                   type="text"
                   className={`emp-name-input-col ${formErrors.idNumber ? "emp-error-input" : ""}`}
-                  name="idNumber"
-                  value={employee.idNumber}
+                  name={
+                    employee.idType === "passport"
+                      ? "passportNumber"
+                      : "idNumber"
+                  } // dynamic name
+                  value={
+                    employee.idType === "passport"
+                      ? employee.passportNumber
+                      : employee.idNumber
+                  }
                   onChange={onInputChange}
                   placeholder={
                     employee.idType === "passport"
@@ -336,16 +260,22 @@ const AddEmployeeModal = ({ closeModal }) => {
                       : "ID Number"
                   }
                 />
-                {formErrors.idNumber && (
+                {formErrors.idNumber && employee.idType === "id" && (
                   <span className="emp-error-message">
                     {formErrors.idNumber}
                   </span>
                 )}
+                {formErrors.passportNumber &&
+                  employee.idType === "passport" && (
+                    <span className="emp-error-message">
+                      {formErrors.passportNumber}
+                    </span>
+                  )}
               </div>
             </div>
 
             {/* Nationality */}
-            <div className="emp-full-width">
+            <div className="emp-full-width emp-input-wrapper">
               <input
                 type="text"
                 placeholder="Nationality"
@@ -363,22 +293,30 @@ const AddEmployeeModal = ({ closeModal }) => {
             </div>
 
             {/* DOB | Gender */}
+
             <div className="emp-two-col">
               <div className="emp-input-wrapper">
-                <input
-                  className="emp-name-input-col"
-                  type="date"
-                  placeholder="Date of Birth"
-                  name="dateOfBirth"
-                  value={employee.dateOfBirth}
-                  onChange={onInputChange}
-                  disabled={employee.idType === "id"}
-                />
-                {formErrors.dateOfBirth && (
-                  <span className="emp-error-message">
-                    {formErrors.dateOfBirth}
-                  </span>
-                )}
+                <div className="date-wrapper">
+                  <label className="date-label">DOB</label>
+                  <input
+                    type="date"
+                    name="dateOfBirth"
+                    value={employee.dateOfBirth}
+                    onChange={onInputChange}
+                    className={`emp-name-input-col emp-name-input ${formErrors.dateOfBirth ? "emp-error-input" : ""}`}
+                    disabled={employee.idType === "id"}
+                  />
+                  {formErrors.dateOfBirth && (
+                    <span className="emp-error-message">
+                      {formErrors.dateOfBirth}
+                    </span>
+                  )}
+                  <img
+                    src="/images/calendar-range.svg"
+                    alt="Dropdown icon"
+                    className="dropdown-icon"
+                  />
+                </div>
               </div>
               <div className="emp-input-wrapper dropdown-wrapper">
                 <select
@@ -399,18 +337,18 @@ const AddEmployeeModal = ({ closeModal }) => {
                   <span className="emp-error-message">{formErrors.gender}</span>
                 )}
                 <img
-                src="/images/arrow_drop_down_circle.png"
-                alt="Dropdown icon"
-                className="dropdown-icon"
-              />
+                  src="/images/arrow_drop_down_circle.png"
+                  alt="Dropdown icon"
+                  className="dropdown-icon"
+                />
               </div>
             </div>
 
             {/* Disability (radio buttons) */}
-           <div className="emp-two-col">
-          <div className="emp-disability-row">    
-                <span className="emp-disability-label">Disability:</span>
- 
+            <div className="emp-disability-wrapper">
+            <span className="emp-disability-label">Disability:</span>
+      
+              <div className="emp-disability-row">
                 <label className="emp-radio-option">
                   <input
                     type="radio"
@@ -432,22 +370,30 @@ const AddEmployeeModal = ({ closeModal }) => {
                   />
                   No
                 </label>
+                
 
                 {employee.disability && (
                   <input
                     type="text"
                     name="disabilityType"
-                    placeholder="Describe disability"
+                    className={`emp-disability-input ${formErrors.disabilityType ? "emp-error-input" : ""}`}
+                    placeholder="Enter disability"
                     value={employee.disabilityType}
                     onChange={onInputChange}
-                    className="emp-disability-input"
                   />
                 )}
+                
+                
               </div>
+            {formErrors.disabilityType && (
+                <span className="emp-error-message">
+                  {formErrors.disabilityType}
+                </span>
+              )}
             </div>
 
             {/* Contact Number */}
-            <div className="emp-full-width">
+            <div className="emp-full-width emp-input-wrapper">
               <input
                 type="text"
                 placeholder="Contact Number"
@@ -464,7 +410,7 @@ const AddEmployeeModal = ({ closeModal }) => {
             </div>
 
             {/* Email */}
-            <div className="emp-full-width">
+            <div className="emp-full-width emp-input-wrapper">
               <input
                 type="email"
                 placeholder="Email Address"
@@ -535,25 +481,33 @@ const AddEmployeeModal = ({ closeModal }) => {
           <div className="emp-right-frame-content">
             <div className="emp-name-surname-container">
               <div className="emp-personal-details-container"></div>
-              <div className="emp-form-group">
+              <div className="emp-form-group emp-input-wrapper">
                 {/* Start Date */}
-                <input
-                  type="date"
-                  className={`emp-name-input ${formErrors.startDate ? "emp-error-input" : ""}`}
-                  placeholder="Employee Start Date"
-                  value={employee.startDate}
-                  onChange={onInputChange}
-                  name="startDate"
-                />
+                <div className="date-wrapper">
+                  <label className="date-label">Start Date</label>
 
-                {formErrors.startDate && (
-                  <span className="emp-error-message">
-                    {formErrors.startDate}
-                  </span>
-                )}
+                  <input
+                    type="date"
+                    id="startDate"
+                    name="startDate"
+                    value={employee.startDate}
+                    onChange={onInputChange}
+                    className={`emp-name-input ${formErrors.startDate ? "emp-error-input" : ""}`}
+                  />
+                  {formErrors.startDate && (
+                    <span className="emp-error-message">
+                      {formErrors.startDate}
+                    </span>
+                  )}
+                  <img
+                    src="/images/calendar-range.svg"
+                    alt="Dropdown icon"
+                    className="dropdown-icon"
+                  />
+                </div>
               </div>
               {/* Branch */}
-              <div className="emp-full-width dropdown-wrapper">
+              <div className="emp-full-width dropdown-wrapper emp-input-wrapper">
                 <select
                   className={`emp-name-input ${formErrors.branch ? "emp-error-input" : ""}`}
                   value={employee.branch}
@@ -595,7 +549,7 @@ const AddEmployeeModal = ({ closeModal }) => {
                 )}
               </div>
               {/* Tax Number */}
-              <div className="emp-full-width">
+              <div className="emp-full-width emp-input-wrapper">
                 <input
                   type="text"
                   placeholder="Tax Number"
@@ -612,7 +566,7 @@ const AddEmployeeModal = ({ closeModal }) => {
                 )}
               </div>
               {/* Job Title */}
-              <div className="emp-full-width dropdown-wrapper">
+              <div className="emp-full-width dropdown-wrapper emp-input-wrapper">
                 <select
                   name="jobTitle"
                   value={employee.jobTitle}
@@ -633,13 +587,13 @@ const AddEmployeeModal = ({ closeModal }) => {
                   </span>
                 )}
                 <img
-                src="/images/arrow_drop_down_circle.png"
-                alt="Dropdown icon"
-                className="dropdown-icon"
-              />
+                  src="/images/arrow_drop_down_circle.png"
+                  alt="Dropdown icon"
+                  className="dropdown-icon"
+                />
               </div>
               {/* Employment Status */}
-              <div className="emp-full-width dropdown-wrapper">
+              <div className="emp-full-width dropdown-wrapper emp-input-wrapper">
                 <select
                   className={`emp-name-input ${formErrors.employeeStatus ? "emp-error-input" : ""}`}
                   value={employee.employeeStatus}
@@ -659,13 +613,13 @@ const AddEmployeeModal = ({ closeModal }) => {
                   </span>
                 )}
                 <img
-                src="/images/arrow_drop_down_circle.png"
-                alt="Dropdown icon"
-                className="dropdown-icon"
-              />
+                  src="/images/arrow_drop_down_circle.png"
+                  alt="Dropdown icon"
+                  className="dropdown-icon"
+                />
               </div>
               {/* Career Manager */}
-              <div className="emp-full-width dropdown-wrapper">
+              <div className="emp-full-width dropdown-wrapper emp-input-wrapper">
                 <select
                   name="reportsTo"
                   value={employee.reportsTo}
@@ -686,29 +640,38 @@ const AddEmployeeModal = ({ closeModal }) => {
                   </span>
                 )}
                 <img
-                src="/images/arrow_drop_down_circle.png"
-                alt="Dropdown icon"
-                className="dropdown-icon"
-              />
+                  src="/images/arrow_drop_down_circle.png"
+                  alt="Dropdown icon"
+                  className="dropdown-icon"
+                />
               </div>
 
-              <div className="emp-full-width dropdown-wrapper">
+              <div className="emp-input-wrapper">
+                <span className="upload-label">
+                  {uploading ? "Uploading..." : fileName}
+                </span>
+
                 <input
                   type="file"
-                  className={`emp-name-input ${formErrors.documentPath ? "emp-error-input" : ""}`}
+                  ref={fileInputRef}
+                  className={`emp-name-input hidden-file-input ${formErrors.startDate ? "emp-error-input" : ""}`}
                   onChange={onFileChange}
-                  name="documentPath"
+                  name="profileImage"
+                  accept="image/*"
                 />
-                {formErrors.documentPath && (
+
+                <img
+                  src="/images/arrow_upload_ready.png"
+                  alt="Upload profile"
+                  className="upload-icon"
+                  onClick={handleImageClick}
+                />
+
+                {formErrors.profileImage && (
                   <span className="emp-error-message">
-                    {formErrors.documentPath}
+                    {formErrors.profileImage}
                   </span>
                 )}
-                <img
-                src="/images/arrow_upload_ready.png"
-                alt="Dropdown icon"
-                className="dropdown-icon"
-              />
               </div>
 
               {/* Save Button */}
@@ -730,7 +693,7 @@ const AddEmployeeModal = ({ closeModal }) => {
                   </span>
                   <br />
                   <span className="emp-align-left">
-                    Copyright © 2025 Singular Systems. All rights reserved.
+                    Copyright © 2026 Singular Systems. All rights reserved.
                   </span>
                 </p>
               </div>

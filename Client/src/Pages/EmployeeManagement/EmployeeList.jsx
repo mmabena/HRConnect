@@ -1,167 +1,103 @@
 import React, { useState, useEffect } from "react";
-import { fetchAllEmployees } from "../../api/Employee";
+import { fetchAllEmployees } from "../../Employee";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import AddEmployeeModal from "../../../src/Components/AddEmployeeModal";
-import "../../Components/MenuBar/MenuBar";
+import AddEmployeeModal from "../../Components/EmployeeManagement/AddEmployeeModal";
+
+import useEmployees from "../../hooks/useEmployees";
+import useEmployeeFilter from "../../hooks/useEmployeeFilter";
+import useEmpPagination from "../../hooks/useEmpPagination";
+import useDropdown from "../../hooks/useDropdown";
+import useInitialColors from "../../hooks/useInitialColors";
+
+
+import "../../MenuBar.css";
+import "./EmployeeList.css";
 
 const EmployeeList = () => {
-  const tabs = ["All staff", "Johannesburg", "Cape Town", "UK(London)"];
-  const [selectedTab, setSelectedTab] = useState("All staff");
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [currentTime, setCurrentTime] = useState("");
-  const [currentDate, setCurrentDate] = useState("");
-  const [employees, setEmployees] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const tabs = [
+    { label: "All staff", value: "All" },
+    { label: "Johannesburg", value: "Johannesburg" },
+    { label: "Cape Town", value: "CapeTown" },
+    { label: "UK(London)", value: "UK" },
+  ];
+
+  const [selectedTab, setSelectedTab] = useState("All");
   const location = useLocation();
   const navigate = useNavigate();
+  const [showAddModal, setShowAddModal] = useState(false);
+  const { employees, loading, error } = useEmployees(location.key);
+  const [searchQuery, setSearchQuery] = useState("");
+  
+
+  const filteredEmployees = useEmployeeFilter(
+    employees,
+    selectedTab,
+    searchQuery
+  );
 
   /// </summary>
   /// Pagination states
   /// </summary>
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-
-  const [activePage, setActivePage] = useState(1);
+  const {
+    activePage,
+    setActivePage,
+    itemsPerPage,
+    setItemsPerPage,
+    totalPages,
+    indexOfFirstItem,
+    indexOfLastItem,
+    currentItems,
+  } = useEmpPagination(filteredEmployees);
 
   /// </summary>
   ///colors for the initial circles
   /// </summary>
-  const COLORS = ["#006088", "#01A19A", "#AFBF74", "#002D40"];
 
-  /// </summary>
-  /// Array to recycle colors after array ends
-  /// </summary>
-  const getInitialColorByIndex = (index) => COLORS[index % COLORS.length];
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const { dropdownOpen, toggleDropdown, closeDropdown } = useDropdown();
 
-  const handleDropdownToggle = () => {
-    setDropdownOpen(!dropdownOpen);
-  };
+  const { COLORS } = useInitialColors();
 
   const handleItemsPerPageChange = (option) => {
     setItemsPerPage(option);
-    setDropdownOpen(false);
+    closeDropdown();
     setActivePage(1);
   };
 
-  /// </summary>
-  /// code for the date and time in the correct format
-  /// </summary>
-  useEffect(() => {
-    const now = new Date();
-
-    const timeOptions = { hour: "numeric", minute: "2-digit", hour12: true };
-    const formattedTime = now.toLocaleTimeString("en-US", timeOptions);
-
-    const dateOptions = { year: "numeric", month: "short", day: "numeric" };
-    const formattedDate = now.toLocaleDateString("en-US", dateOptions);
-
-    setCurrentTime(formattedTime);
-    setCurrentDate(formattedDate);
-  }, []);
-
-  /// </summary>
-  ///loading employees on page load
-  /// </summary>
-  useEffect(() => {
-    const loadEmployees = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const data = await fetchAllEmployees();
-        setEmployees(data);
-        console.log("Employee fetched:", data);
-      } catch (err) {
-        setError("Failed to load employees.");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadEmployees();
-    /// </summary>
-    /// Re-run every time the route changes
-    /// </summary>
-  }, [location.key]);
-
-  /// </summary>
-  /// Filter by selected tab (location) and search query
-  /// </summary>
-  const filteredEmployees = employees.filter((emp) => {
-    if (selectedTab !== "All staff") {
-      const empDepartment = (emp.branch || "")
-        .toLowerCase()
-        .replace(/\s+/g, "");
-      const selected = selectedTab.toLowerCase().replace(/\s+/g, "");
-      if (empDepartment !== selected) {
-        return false;
-      }
-    }
-
-    const search = searchQuery.toLowerCase();
-    if (!search) return true;
-
-    const fullName = `${emp.name} ${emp.surname}`.toLowerCase();
-    const jobTitle = emp.positionTitle?.toLowerCase() || "";
-    const email = emp.email?.toLowerCase() || "";
-    const id = emp.employeeId?.toString() || "";
-
-    return (
-      fullName.includes(search) ||
-      jobTitle.includes(search) ||
-      email.includes(search) ||
-      id.includes(search)
-    );
-  });
-
-  /// </summary>
-  /// logic for pagination
-  /// </summary>
-  const totalPages = Math.ceil(filteredEmployees.length / itemsPerPage);
-  const indexOfFirstItem = (activePage - 1) * itemsPerPage;
-  const indexOfLastItem = indexOfFirstItem + itemsPerPage;
-  const currentEmployees = filteredEmployees.slice(
-    indexOfFirstItem,
-    indexOfLastItem,
-  );
-  const handleAddEmployeeClick = () => setShowAddModal(true);
+  const handleAddEmployeeClick = () => {
+  setShowAddModal(true);
+};
 
   return (
     <div className="menu-background">
       <div className="menu-bar"></div>
 
       <div className="wrapper-container">
-        <div className="singular-staff-heading-container">
-          Singular Staff
-        </div>
+        <div className="singular-staff-heading-container">Singular Staff</div>
 
         <div className="employee-list-heading-row">
           {tabs.map((tab) => (
             <div
-              key={tab}
+              key={tab.value}
               className={`heading-item ${
-                selectedTab === tab ? "selected" : ""
+                selectedTab === tab.value ? "selected" : ""
               }`}
               onClick={() => {
-                setSelectedTab(tab); /// </summary>
-                setActivePage(1); /// reset page on tab change
-              }} /// </summary>
-              style={{ cursor: "pointer" }}
+                setSelectedTab(tab.value); 
+                setActivePage(1); 
+              }} 
             >
-              {tab}
+              {tab.label}
             </div>
           ))}
           <div className="right-controls">
             <div className="heading-item filter-search-wrapper">
               <span className="filter-label">Filter</span>
               <div className="search-bar-container">
-                {/* <img
-                src="/images/Leading-icon.png"
-                alt="Left Icon"
-                className="search-icon"
-              /> */}
+                <img
+                  src="/images/menu.svg"
+                  alt="Left Icon"
+                  className="search-icon"
+                />
                 <div className="input-wrapper">
                   <input
                     type="text"
@@ -177,7 +113,7 @@ const EmployeeList = () => {
                   />
                 </div>
                 <img
-                  src="/images/Trailing-Elements.png"
+                  src="/images/search.svg"
                   alt="Right Icon"
                   className="search-icon"
                 />
@@ -193,57 +129,35 @@ const EmployeeList = () => {
         </div>
 
         <div className="content-container">
-          <div className="table-grid">
-            <div className="table-header">Employee ID</div>
+          <div className="employee-table-grid">
+            <div className="table-header">Employee Code</div>
             <div className="table-header">Name & Surname</div>
             <div className="table-header">Job Title</div>
             <div className="table-header">Contact Number</div>
             <div className="table-header">Email</div>
             <div className="table-header">Employment Status</div>
             <div className="table-header">Branch</div>
-            <div className="table-header">Action</div>
+            <div className="table-header-action">Action</div>
 
-            {loading && (
-              <div
-                className="loading-row"
-                style={{ gridColumn: "span 8", textAlign: "center" }}
-              >
-                Loading employees...
-              </div>
-            )}
+            {loading && <div className="loading-row">Loading employees...</div>}
 
-            {error && (
-              <div
-                className="error-row"
-                style={{
-                  gridColumn: "span 8",
-                  textAlign: "center",
-                  color: "red",
-                }}
-              >
-                {error}
-              </div>
-            )}
+            {error && <div className="error-row">{error}</div>}
 
-            {!loading && !error && currentEmployees.length === 0 && (
-              <div
-                className="no-data-row"
-                style={{ gridColumn: "span 8", textAlign: "center" }}
-              >
-                No employees found.
-              </div>
+            {!loading && !error && currentItems.length === 0 && (
+              <div className="no-data-row">No employees found.</div>
             )}
 
             {!loading &&
               !error &&
-              currentEmployees.map((emp, index) => (
+              currentItems.map((emp, index) => (
                 <React.Fragment key={emp.employeeId}>
                   <div className="table-cell">{emp.employeeId}</div>
 
                   <div className="table-cell name-surname-cell">
                     <div
-                      className="initials-circle"
-                      style={{ backgroundColor: getInitialColorByIndex(index) }}
+                      className={`initials-circle ${
+                        COLORS[index % COLORS.length]
+                      }`}
                     >
                       {(
                         emp.initials ||
@@ -286,7 +200,7 @@ const EmployeeList = () => {
             of {filteredEmployees.length}
           </span>
 
-          <div className="per-page-box" onClick={handleDropdownToggle}>
+          <div className="per-page-box" onClick={toggleDropdown}>
             <span className="per-page-number">{itemsPerPage}</span>
             <img
               src="/images/arrow_drop_down_circle.png"
