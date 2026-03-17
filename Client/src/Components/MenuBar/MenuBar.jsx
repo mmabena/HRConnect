@@ -684,11 +684,18 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
       </div>
 
       <div className="menu-footer">
+        <div className="menu-icon-wrapper">
+        <img
+          src="/images/bell.svg"
+          alt="Bell icon"
+          className="menu-icon"
+        />
         <img
           src="/images/setitngs_icon.png"
           alt="Settings icon"
           className="menu-icon"
         />
+        </div>
 
         {/* Container for user details */}
         <div className="user-details-container">
