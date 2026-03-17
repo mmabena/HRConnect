@@ -58,6 +58,7 @@ export const editEmployee = async (employeeNumber, employee) => {
     return response.data || {};
   } catch (error) {
     if (error.response) {
+      console.log("update", error);
       console.error("Edit employee error response data:", error.response.data);
       console.error("Edit employee error status:", error.response.status);
     } else {
