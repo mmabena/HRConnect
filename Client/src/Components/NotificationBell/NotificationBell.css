@@ -1,74 +1,64 @@
-.notification-bell-wrapper {
+.notification-container {
   position: relative;
-  display: inline-block;
-  cursor: pointer;
-  right: 255px;
-  bottom: 1px;
-  margin-left: auto;
+  top: 3px;
 }
 
-/* Make icon white */
-.cm-notification-icon {
-  width: 24px;
-  height: 24px;
-  filter: brightness(0) invert(1); /* turns icon white */
-  
-}
-
-/* Red notification dot */
-.notification-dot {
+.notification-popup {
   position: absolute;
-  top: -4px;
-  right: -4px;
-  width: 12px;
-  height: 12px;
-  background-color: #fd1c03;
-  border-radius: 50%;
-}
-
-/* Modal now opens to the RIGHT of the menu bar */
-.notification-modal {
-  position: absolute;
-  bottom: 30px;   /* 👈 places modal above the bell */
-  left: 40px;
+  left: 0;
+  bottom: 50px;
   width: 250px;
-  max-height: 400px;
-  background: rgb(255, 253, 253);
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  overflow-y: auto;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 10px;
   z-index: 1000;
 }
 
-/* Header */
-.modal-header {
-  display: flex;
-  justify-content: center;
-  font-family: 'Anek Bangla';
-  font-size: 18px;
-  padding: 10px;
-  font-weight: 500;
-  color: #002D40;
-  border-bottom: 1px solid #ccc;
-}
-
-/* Notification list */
-.modal-list {
-  list-style: none;
-  margin: 0;
-  padding: 10px;
-  color: black;
-}
-
-/* Each notification */
-.modal-list li {
-  padding: 8px 6px;
+.notification-item {
+  padding: 8px;
   border-bottom: 1px solid #eee;
-  font-size: 14px;
+  cursor: pointer;
 }
 
-/* Hover effect (nice UX) */
-.modal-list li:hover {
-  background-color: #f5f5f5;
+.notification-item:hover {
+  background: #f5f5f5;
+}
+
+.bell-wrapper {
+  position: relative;
+  cursor: pointer;
+}
+
+.title{
+  color: black;
+  margin-bottom: 10px;
+  font-family: 'Anek Bangla';
+  font-size: 16px;
+}
+
+/* 🔴 Badge */
+.notification-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: red;
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  border-radius: 50%;
+  padding: 4px 6px;
+  min-width: 18px;
+  text-align: center;
+}
+
+/* Optional styling */
+.notification-item.unread {
+  font-weight: bold;
+}
+
+.notification-item.read {
+  opacity: 0.6;
+  color: black;
+  font-family: 'Anek Bangla';
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import CompanyManagementHeader from "../../../Components/CompanyManagement/companyManagementHeader";
+import CompanyManagementHeader from "../../../Components/companyManagement/companyManagementHeader.jsx";
 import { useNavigate } from "react-router-dom";
 import NavBar from "../../../Components/NavBar.jsx";
 

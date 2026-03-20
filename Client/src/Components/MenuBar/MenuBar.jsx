@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import api from "../../../src/api/api.js";
+import NotificationBell from "../NotificationBell/NotificationBell.jsx";
 
 const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   const [reportOpen, setReportOpen] = useState(false);
@@ -684,12 +685,8 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
       </div>
 
       <div className="menu-footer">
-        <div className="menu-icon-wrapper">
-        <img
-          src="/images/bell.svg"
-          alt="Bell icon"
-          className="menu-icon"
-        />
+        <div className="menu-icon-wrapper">  
+           <NotificationBell role={role} />
         <img
           src="/images/setitngs_icon.png"
           alt="Settings icon"

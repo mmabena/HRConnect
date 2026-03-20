@@ -162,6 +162,12 @@
   object-fit: contain;
 }
 
+.menu-icon-wrapper{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .user-details-container {
   display: flex;
   align-items: center;

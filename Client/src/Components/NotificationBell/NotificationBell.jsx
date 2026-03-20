@@ -1,46 +1,91 @@
-// NotificationBell.jsx
-import React, { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./NotificationBell.css";
 
-export default function NotificationBell({ currentUser, notifications = [] }) {
-  const [isOpen, setIsOpen] = useState(false);
+const NotificationBell = ({ role }) => {
+  const [showPopup, setShowPopup] = useState(false);
+  const popupRef = useRef();
 
-  // Safe check for currentUser
-  const role = currentUser?.role?.toLowerCase();
-    
-  // Filter notifications for this user's role
-  const roleNotifications = notifications.filter(
-    (n) => n.role.toLowerCase() === role
-  );
+  // ✅ Notifications with read status
+  const [notifications, setNotifications] = useState([]);
 
-  const toggleModal = () => setIsOpen((prev) => !prev);
+  useEffect(() => {
+    const roleNotifications = {
+      superuser: [
+        { id: 14, message: "System update required", read: false },
+      ],
+      normaluser: [
+        { id: 16, message: "Payslip available", read: false },
+        { id: 5, message: "Leave approved", read: true },
+      ],
+    };
+
+    setNotifications(roleNotifications[role] || []);
+  }, [role]);
+
+  // ✅ Count unread
+  const unreadCount = notifications.filter(n => !n.read).length;
+
+  // ✅ Click outside close
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (popupRef.current && !popupRef.current.contains(e.target)) {
+        setShowPopup(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // ✅ Mark all as read when opened (optional)
+  const handleToggle = () => {
+    setShowPopup(prev => !prev);
+
+    if (!showPopup) {
+      setNotifications(prev =>
+        prev.map(n => ({ ...n, read: true }))
+      );
+    }
+  };
 
   return (
-    <div className="notification-bell-wrapper">
-      <img
-        src="/images/icon.png"
-        alt="Notifications"
-        className="cm-notification-icon"
-        onClick={toggleModal}
-      />
-      {roleNotifications.length > 0 && <span className="notification-dot" />}
+    <div className="notification-container" ref={popupRef}>
+      <div className="bell-wrapper" onClick={handleToggle}>
+        <img
+          src="/images/bell.svg"
+          alt="Bell icon"
+          className="menu-icon"
+        />
 
-      {isOpen && (
-        <div className="notification-modal">
-          <div className="modal-header">
-            <h3>Notifications</h3>
-          </div>
-          <ul className="modal-list">
-            {roleNotifications.length > 0 ? (
-              roleNotifications.map((n, idx) => (
-                <li key={idx}>{n.message}</li>
-              ))
-            ) : (
-              <li>No notifications</li>
-            )}
-          </ul>
+        {/* ✅ BADGE */}
+        {unreadCount > 0 && (
+          <span className="notification-badge">
+            {unreadCount}
+          </span>
+        )}
+      </div>
+
+      {showPopup && (
+        <div className="notification-popup">
+          <h4 className="title">Notifications</h4>
+
+          {notifications.length > 0 ? (
+            notifications.map((note) => (
+              <div
+                key={note.id}
+                className={`notification-item ${note.read ? "read" : "unread"}`}
+              >
+                {note.message}
+              </div>
+            ))
+          ) : (
+            <div className="notification-item">No notifications</div>
+          )}
         </div>
       )}
     </div>
   );
-}
+};
+
+export default NotificationBell;
