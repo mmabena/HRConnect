@@ -163,9 +163,10 @@
 }
 
 .menu-icon-wrapper{
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 10px;
+  position: relative;
 }
 
 .user-details-container {
@@ -2487,4 +2488,33 @@ input:checked + .slider:before {
 
 .logout {
   color: #d9534f;
+}
+
+
+/*==================== notification ===================== */
+
+
+.notification-badge {
+  position: absolute;
+  top: -5px;   /* adjust to align vertically */
+  right: -5px; /* adjust to align horizontally */
+  background-color: #ff3b30; /* red badge */
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 5px;
+  border-radius: 50%;
+  min-width: 16px;
+  text-align: center;
+  line-height: 1;
+}
+
+.notification-badge.unread {
+  animation: pulse 1.2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
 }

@@ -27,6 +27,7 @@ import EmployeeList from "./Pages/EmployeeManagement/EmployeeList";
 import PositionManagement from "./Pages/CompanyManagement/PositionManagement/PositionManagement";
 import ProjectionCalculator from "./Pages/PayrollTools/ProjectionCalculator";
 import PersonalInformation from "./Components/PersonalInformation.jsx";
+import NotificationPage from "./Pages/NotificationPage/NotificationPage.jsx";
 import api from "../src/api/api.js";
 
 function App() {
@@ -214,6 +215,7 @@ function App() {
             element={<ProjectionCalculator />}
           />
           <Route path="/personal" element={<PersonalInformation />} />
+          <Route path="/notifications" element={<NotificationPage />} />
         </Routes>
       </div>
     </div>

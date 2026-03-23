@@ -2,8 +2,7 @@ import "./MenuBar.css";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-import api from "../../../src/api/api.js";
-import NotificationBell from "../NotificationBell/NotificationBell.jsx";
+import api from "../../../src/api/api.js";    
 
 const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   const [reportOpen, setReportOpen] = useState(false);
@@ -18,6 +17,10 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   const [manualAdminToggle, setManualAdminToggle] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [activeIndex, setActiveIndex] = useState(null);
+
+  const [notifications, setNotifications] = useState([]);
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   //displaying user initials
   const displayName = currentUser?.username || currentUser?.email || "User";
@@ -106,8 +109,11 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
               if (response.status === 200) {
                 const employementStatus = response.data.employmentStatus;
                 const employeeAge = response.data.dateOfBirth;
-                
-                if (employementStatus === "Permanent" && calculateAge(employeeAge) < 65) {
+
+                if (
+                  employementStatus === "Permanent" &&
+                  calculateAge(employeeAge) < 65
+                ) {
                   setCanProjectPension(true);
                   console.log("Employee date of birth:", employeeAge);
                   console.log("Employment status:", employementStatus);
@@ -211,9 +217,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   };
 
   const menuPaths = {
-    0: [
-      "/personal",
-    ],
+    0: ["/personal"],
     1: [
       "/employeeList",
       "/addEmployee",
@@ -685,13 +689,33 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
       </div>
 
       <div className="menu-footer">
-        <div className="menu-icon-wrapper">  
-           <NotificationBell role={role} />
-        <img
-          src="/images/setitngs_icon.png"
-          alt="Settings icon"
-          className="menu-icon"
-        />
+        <div className="menu-icon-wrapper">
+          <div className="menu-icon-wrapper">
+            <img
+              src="/images/bell.svg"
+              alt="Bell icon"
+              className="menu-icon"
+              onClick={() => {
+                navigate("/notifications", { state: { role: role } });
+              }}
+            />
+
+            {/* Dynamic unread badge */}
+            {unreadCount > 0 && (
+              <span
+                className="notification-badge"
+                data-count={unreadCount > 99 ? "99+" : unreadCount}
+              >
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
+            )}
+          </div>
+
+          <img
+            src="/images/setitngs_icon.png"
+            alt="Settings icon"
+            className="menu-icon"
+          />
         </div>
 
         {/* Container for user details */}
