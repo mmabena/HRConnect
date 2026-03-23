@@ -32,7 +32,6 @@ namespace HRConnect.Api.Services
     public async Task<PayrollRun> CreatePayrollRunAsync(PayrollRun payrollRun)
     {
       DateTime currentMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
-      Console.WriteLine($"Creating payroll run for month: {currentMonth}");
       //maps current financial month to 1-12
       payrollRun.IsLocked = false;
       payrollRun.IsFinalised = false;

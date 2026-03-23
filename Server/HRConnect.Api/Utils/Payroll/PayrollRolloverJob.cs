@@ -11,12 +11,17 @@ namespace HRConnect.Api.Utils.Payroll
     private readonly IWebHostEnvironment _env;
     private readonly IPayrollPeriodService _payrollPeriodService;
     private readonly IPayrollRunRepository _payrollRunRepo;
-    private static readonly int MAX_RUNS = 10;
-    public PayrollRolloverJob(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService, IWebHostEnvironment env)
+    private static readonly int MAX_RUNS = 12;
+
+    //This makes mocking and testing time a lot easier
+    private readonly Func<DateTime> _now;
+    public PayrollRolloverJob(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService,
+        IWebHostEnvironment env, Func<DateTime> now = null)
     {
       _payrollRunRepo = payrollRunRepo;
       _payrollPeriodService = payrollPeriodService;
       _env = env;
+      _now = now ?? (() => DateTime.Now);
     }
     /// <summary>
     /// Rolls over to a new period <see cref="PayrollPeriod"/> and creates and new valid payroll run <seealso cref="PayrollRun"/>  
