@@ -17,5 +17,8 @@
     Task<IReadOnlyList<ResponseEligibileOptionsDto>> GetEligibleMedicalOptionsForEmployeeAsync(
         string employeeId,
         RequestEligibileOptionsDto request);
+
+    Task<bool> isEligibleAsync(string employeeId,
+      int medicalOptionId, int principalCount, int adultCount, int childCount);
   }
 }

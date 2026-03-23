@@ -1,7 +1,7 @@
 ﻿namespace HRConnect.Api.Mappers
 {
-  using HRConnect.Api.DTOs.MedicalOption;
-  using HRConnect.Api.Models;
+  using DTOs.MedicalOption;
+  using Models;
 
   /// <summary>
   /// Provides extension methods for mapping between MedicalOption domain entities 
@@ -222,6 +222,35 @@
       {
         // Omitting Id for security reasons
         MedicalOptionCategoryName = dto.MedicalOptionCategoryName
+      };
+    }
+    
+    // Mapping a Medical Option Dto to an Entity
+    /// <summary>
+    /// Maps a MedicalOptionDto to a MedicalOption entity
+    /// </summary>
+    /// <param name="dto">The MedicalOptionDto to map</param>
+    /// <returns>The mapped MedicalOption entity</returns>
+    public static MedicalOption ToMedicalOption(this MedicalOptionDto dto)
+    {
+      return new MedicalOption
+      {
+        MedicalOptionId = dto.MedicalOptionId,
+        MedicalOptionName = dto.MedicalOptionName,
+        MedicalOptionCategoryId = dto.MedicalOptionCategoryId,
+        SalaryBracketMin = dto.SalaryBracketMin,
+        SalaryBracketMax = dto.SalaryBracketMax,
+        MonthlyRiskContributionPrincipal = dto.MonthlyRiskContributionPrincipal,
+        MonthlyRiskContributionAdult = dto.MonthlyRiskContributionAdult,
+        MonthlyRiskContributionChild = dto.MonthlyRiskContributionChild,
+        MonthlyRiskContributionChild2 = dto.MonthlyRiskContributionChild2,
+        MonthlyMsaContributionPrincipal = dto.MonthlyMsaContributionPrincipal,
+        MonthlyMsaContributionAdult = dto.MonthlyMsaContributionAdult,
+        MonthlyMsaContributionChild = dto.MonthlyMsaContributionChild,
+        TotalMonthlyContributionsPrincipal = dto.TotalMonthlyContributionsPrincipal,
+        TotalMonthlyContributionsAdult = dto.TotalMonthlyContributionsAdult,
+        TotalMonthlyContributionsChild = dto.TotalMonthlyContributionsChild,
+        TotalMonthlyContributionsChild2 = dto.TotalMonthlyContributionsChild2
       };
     }
   }

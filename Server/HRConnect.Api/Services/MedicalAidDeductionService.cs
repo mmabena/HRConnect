@@ -1,9 +1,7 @@
 namespace HRConnect.Api.Services;
 
 using DTOs.MedicalOption;
-using DTOs.Employee;
 using DTOs.Payroll.PayrollDeduction.MedicalAidDeduction;
-using HRConnect.Api.Models;
 using Interfaces;
 using Models.PayrollDeduction;
 using Utils.MedicalAidDeduction;
@@ -17,16 +15,19 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
   private readonly IMedicalOptionRepository _medicalOptionRepository;
   private readonly IPayrollRunService _payrollRunService;
   private readonly IEmployeeService _employeeService;
+  private readonly IMedicalAidEligibilityService _medicalAidEligibilityService;
 
   public MedicalAidDeductionService(
       IMedicalAidDeductionRepository medicalAidDeductionRepository,
       IMedicalOptionRepository medicalOptionRepository,
-      IEmployeeService employeeService, IPayrollRunService payrollRunService)
+      IEmployeeService employeeService, IPayrollRunService payrollRunService, 
+      IMedicalAidEligibilityService medicalAidEligibilityService)
   {
     _medicalAidDeductionRepository = medicalAidDeductionRepository;
     _medicalOptionRepository = medicalOptionRepository;
     _employeeService = employeeService;
     _payrollRunService = payrollRunService;
+    _medicalAidEligibilityService = medicalAidEligibilityService;
 
   }
 
@@ -71,10 +72,10 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
         // Check if there is a medical aid deduction against employee (need to refine it further through including active payroll run)
 
         // temp implementation
-        var existingDedcutions =
-         await _medicalAidDeductionRepository.GetMedicalAidDeductionsByEmployeeIdAsync(employeeId);
+        //var existingDedcutions =
+        // await _medicalAidDeductionRepository.GetMedicalAidDeductionsByEmployeeIdAsync(employeeId);
 
-        if ((existingDedcutions != null  || existingDedcutions.Count > 0 )&& existingDedcutions.Any(d => d.IsActive)) throw new ArgumentException("Employee has an existing medical aid deduction");
+        //if ((existingDedcutions != null  || existingDedcutions.Count > 0 )&& existingDedcutions.Any(d => d.IsActive)) throw new ArgumentException("Employee has an existing medical aid deduction");
 
         // Get medical option details to ensure it exists and get category info
         var medicalOption = await _medicalOptionRepository.GetMedicalOptionByIdAsync(medicalOptionId);
@@ -212,6 +213,15 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
         if (employee.MonthlySalary < totalPremiumEstimate)
           throw new ArgumentException("Total Premium estimate exceeds monthly salary");
 
+    // Check if employee is eligible (Reinforcing the API to prevent bypass)
+    var isEligible = await _medicalAidEligibilityService.isEligibleAsync(employeeId,
+      medicalOptionId, request.PrincipalCount, request.AdultCount, request.ChildrenCount);
+    
+    if (!isEligible)
+    {
+      throw new ArgumentException("Employee is not eligible for this medical option");
+    }
+    
     // Create the deduction entity
     var deduction = new MedicalAidDeduction
     {
@@ -322,7 +332,7 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
 
       decimal childContribution = option.TotalMonthlyContributionsChild;
       if (option.MedicalOptionName.Contains("Network") &&
-          (option.MedicalOptionName[^1] > 0 && option.MedicalOptionName[^1] < 4))
+          (int.TryParse(option.MedicalOptionName[^1].ToString(), out int index) && index > 0 && index < 4))
       {
         return childContribution;
       }

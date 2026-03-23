@@ -1,7 +1,8 @@
 namespace HRConnect.Api.Utils.Payroll
 {
-  using HRConnect.Api.Interfaces;
-  using HRConnect.Api.Models.Payroll;
+  using Interfaces;
+  using Models.Payroll;
+  using Models.PayrollDeduction;
   using Quartz;
 
   // Prevent multiple of these jobs from running concurrently
@@ -102,6 +103,10 @@ namespace HRConnect.Api.Utils.Payroll
           foreach (var record in currentPayRun.Records)
           {
             record.IsLocked = true;
+            if (record is MedicalAidDeduction variable)
+            {
+              variable.IsActive = false;
+            }
           }
           //update the current run to implement lock
           await _payrollRunRepo.UpdateRun(currentPayRun);
@@ -118,6 +123,8 @@ namespace HRConnect.Api.Utils.Payroll
         {
           await RolloverPayrollRun(payperiod, nextRun);
         }
+
+        Task.WhenAll();
       }
       catch (InvalidOperationException ex)
       {
@@ -129,6 +136,7 @@ namespace HRConnect.Api.Utils.Payroll
       {
         var jobException = new JobExecutionException(ex);
         throw jobException;
+
       }
     }
   }

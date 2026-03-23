@@ -2,8 +2,8 @@
 
 using DTOs;
 using DTOs.Employee;
-using DTOs.MedicalOption;
 using Interfaces;
+using Mappers;
 using Models;
 
 /// <summary>
@@ -81,6 +81,39 @@ public class MedicalAidEligibilityService : IMedicalAidEligibilityService
         }
 
         return eligibleOptions.AsReadOnly();
+    }
+
+    public async Task<bool> isEligibleAsync(string employeeId,
+      int medicalOptionId, int principalCount, int adultCount, int childCount){
+      //get emp info
+      var empData = await _employeeService.GetEmployeeByIdAsync(employeeId);
+      
+      if (empData == null) throw new ArgumentException("Employee not found");
+      
+      // else get salary bracket, and query eligibity Service
+      var queryMedicalOption =
+        await _medicalOptionRepository.GetMedicalOptionByIdAsync(medicalOptionId);
+      
+      //check medical option
+      if (queryMedicalOption == null) throw new ArgumentException("Medical option not found");
+      
+      //check if employee is eligible
+      var medicalOption = queryMedicalOption.ToMedicalOption();
+      
+      decimal salary = empData.MonthlySalary;
+      
+      decimal principalTotal = CalculatePrincipalPremium(medicalOption);
+      decimal adultTotal = CalculateAdultPremium(medicalOption,adultCount);
+      decimal childTotal = CalculateChildPremium(medicalOption,childCount);
+      
+      // 2 ways to validate, first check they belong in that salary bracket
+      if (salary < medicalOption.SalaryBracketMin || salary > medicalOption.SalaryBracketMax) return false;
+      
+      // check if total contribution is greater than salary
+      decimal totalContribution = principalTotal + adultTotal + childTotal;
+      if (totalContribution > salary) return false;
+      
+      return true;
     }
 
     /// <summary>
@@ -187,8 +220,8 @@ public class MedicalAidEligibilityService : IMedicalAidEligibilityService
         if (numberOfChildren <= 0) return 0m;
 
         decimal childContribution = option.TotalMonthlyContributionsChild;
-        if (option.MedicalOptionName.Contains("Network") &&
-            (option.MedicalOptionName[^1] > 0 && option.MedicalOptionName[^1] < 4))
+        if (option.MedicalOptionName.ToString().Contains("Network") &&
+            (int.TryParse(option.MedicalOptionName[^1].ToString(),out int indexVar) && indexVar > 0 && indexVar < 4))
         {
           return childContribution;
         }
