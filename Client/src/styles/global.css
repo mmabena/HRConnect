@@ -15,8 +15,11 @@
   --primary-color: #355867;
   --primary-dark: #001a25;
   --primary-light: #004d6b;
+  --white: #fff;
   --accent-blue: #006088;
   --accent-blue-dark: #004d6b;
+  --teal: #01A19A;
+  --baby-blue: #C7D9E5;
   --success-color: #AFBF74;
   --add-buttton: #638549;
   --BG: linear-gradient(180deg, #EEEEF1 0%, #EFF1F3 16.19%, #E7EAEB 50.25%, #D6D6D9 79.77%, #C4C4C5 100% );
@@ -31,7 +34,7 @@
   --border-color: #cccccc;
   --error-color: #d32f2f;
   --warning-color: #f57c00;
-  --success-text-color: #2e7d32;
+  --success-text-color: #638549;
   --border-radius-small: 5px;
   --border-radius-medium: 10px;
   --transition-default: 0.2s ease;
@@ -238,6 +241,22 @@ body {
 
 .sign-in-button:hover {
   background-color: var(--accent-blue-dark);
+}
+
+.loading-row{
+  grid-column: span 8;
+  text-align: center;
+}
+
+.error-row{
+  grid-column: span 8;
+  text-align: center;
+  color: var(--error-color);
+}
+
+.no-data-row{
+  grid-column: span 8;
+  text-align: center;
 }
 
 /* ==================== FORMS & INPUT FIELDS ==================== */
@@ -734,11 +753,7 @@ body {
   z-index: 1;
 }
 
-<<<<<<< HEAD
 /* Menu Background */
-=======
-/* Edit Employee Background */
->>>>>>> feature/HRC003
 .menu-background {
   position: fixed;
   top: 0;

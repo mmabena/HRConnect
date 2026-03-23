@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import "../Components/EditEmployee.css";
+import "../Components/EmployeeManagement/EditEmployee.css";
 import api from "../api/api.js";
 import { toast } from "react-toastify";
 import {
@@ -527,7 +527,7 @@ const PersonalInformation = () => {
                 <input
                   className="emp-field-input"
                   id={id}
-                  value={employeeData[id] || ""}
+                  value={employeeData[id] || ""}   
                   readOnly
                 />
               </div>
@@ -663,7 +663,7 @@ const PersonalInformation = () => {
                 id="monthlySalary"
                 value={employeeData.monthlySalary || ""}
                 onChange={handleInputChange}
-                readOnly={!isEditable}
+                readOnly
               />
               <div className="emp-error-text">{formErrors.monthlySalary}</div>
             </div>

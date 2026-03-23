@@ -526,7 +526,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
           )}
 
           {/* Document Management */}
-          {permissions.isAdmin && (
+          {/* {permissions.isAdmin && (
             <li>
               <div className="menu-item-wrapper">
                 <img
@@ -537,7 +537,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                 <span className="menu-heading">Document Management</span>
               </div>
             </li>
-          )}
+          )} */}
 
           {/* Admin tools (SuperUser only) */}
           {permissions.isAdmin && (
