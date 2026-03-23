@@ -80,12 +80,15 @@ namespace HRConnect.Api.Utils.Payroll
     {
       DateTime currentDate = DateTime.Now;
       int runId = ((currentDate.Month + 8) % 12) + 1;
-      if (currentDate.Date !=
-    new DateTime(currentDate.Year, currentDate.Month,
-    DateTime.DaysInMonth(currentDate.Year, currentDate.Month)))
-      {
-        return;
-      }
+
+      //   if (currentDate.Date !=
+      // new DateTime(currentDate.Year, currentDate.Month,
+      // DateTime.DaysInMonth(currentDate.Year, currentDate.Month)))
+      //   {
+      //     Console.WriteLine("Safe Guard Doing It's Job");
+      //     return;
+      //   }
+
       try
       {
         var payperiod = await _payrollPeriodService.GetLastPeriodAsync();
@@ -96,7 +99,7 @@ namespace HRConnect.Api.Utils.Payroll
         }
 
         var currentPayRun = payperiod.Runs.Where(r => !r.IsLocked).OrderByDescending(r => r.PayrollRunNumber).FirstOrDefault();
-        int nextRun = currentPayRun == null ? 1 : currentPayRun.PayrollRunNumber + 1; //In production remove this
+        int nextRun = currentPayRun == null ? 1 : currentPayRun.PayrollRunNumber + 1;
 
         if (currentPayRun == null)
         {

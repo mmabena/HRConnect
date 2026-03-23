@@ -32,10 +32,10 @@ namespace HRConnect.Api.Data
     {
       base.OnModelCreating(modelBuilder);
       // Creating namespace for Quartz migrations 
-      modelBuilder.AddQuartz(builder =>
-      {
-        builder.UseSqlServer(schema: "quartz", prefix: "QRTZ_");
-      });
+      // modelBuilder.AddQuartz(builder =>
+      // {
+      //   builder.UseSqlServer(schema: "quartz", prefix: "QRTZ_");
+      // });
 
       // Employee relationships
       modelBuilder.Entity<Employee>()

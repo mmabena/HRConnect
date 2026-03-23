@@ -5,7 +5,7 @@ namespace HRConnect.Api.Models.PayrollDeduction
 
   public class MedicalAidDeduction : PayrollRecord
   {
-    // [Key]
+    [Column("MedicalAidDeductionId")]
     public int MedicalAidDeductionId { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Surname { get; set; } = string.Empty;

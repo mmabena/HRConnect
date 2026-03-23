@@ -1,8 +1,22 @@
 namespace HRConnect.Api.Services
 {
   using HRConnect.Api.Interfaces;
+  using OfficeOpenXml;
+  using System.IO;
+  using System.Globalization;
+  using System.Reflection;
+  using HRConnect.Api.Models.Payroll;
   public class ReportsService : IReportsService
   {
+    /// <summary>
+    /// Utility method to get the public properties of any instance of Type t and then flatten the hierarchy 
+    /// </summary>
+    /// <param name="t">An instance of the PayrollRecord type</param>
+    /// <returns></returns>
+    private static PropertyInfo[] GetAllPublicPropertiesFromRecords(Type t)
+    {
+      return t.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
+    }
     /// <summary>
     /// Write an Excel workbook containing every record in <paramref name="run"/>.
     /// Each payroll record type is given it's own worksheet within the spreadsheet 

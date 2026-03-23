@@ -44,15 +44,7 @@ namespace HRConnect.Api.Utils.Payroll
     {
       return ((DateTime.Now.Month + 8) % 12) + 1;
     }
-    /// <summary>
-    /// Utility method to get the public properties of any instance of Type t and then flatten the hierarchy 
-    /// </summary>
-    /// <param name="t">An instance of the PayrollRecord type</param>
-    /// <returns></returns>
-    private static PropertyInfo[] GetAllPublicPropertiesFromRecords(Type t)
-    {
-      return t.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy);
-    }
+
 
 
   }

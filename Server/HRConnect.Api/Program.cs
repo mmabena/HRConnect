@@ -19,6 +19,7 @@ using HRConnect.Api.Interfaces.PensionProjection;
 using Audit.Core;
 using Audit.EntityFramework;
 using Quartz;
+using System.Data.Common;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -125,6 +126,8 @@ builder.Services.AddAuthorizationBuilder()
 
 builder.Services.AddQuartz(q =>
 {
+  //Adding quartz into it's own namespace
+
   var jobKey = new JobKey("PayrollRolloverJob");
 
   //Add a service for to run as a background job 
@@ -145,7 +148,7 @@ builder.Services.AddQuartz(q =>
   // 0 -> 0 seconds
   // 0 -> 0 minutes
   // 0 -> 0 hours
-  // 1 -> first day of the year
+  // 1 -> first day of the month 
   // * -> for any/every month 
   // ? -> for all days of the week
 
@@ -171,7 +174,7 @@ builder.Services.AddScoped<IPayrollPeriodRepository, PayrollPeriodRepository>();
 builder.Services.AddScoped<IPayrollRunRepository, PayrollRunRepository>();
 builder.Services.AddScoped<IPayrollRunService, PayrollRunService>();
 builder.Services.AddScoped<IPayrollPeriodService, PayrollPeriodService>();
-builder.Services.AddScoped<IReportsService, ReportsServices>();
+builder.Services.AddScoped<IReportsService, ReportsService>();
 builder.Services.AddScoped<PayrollRolloverJob>();//for Quartz
 builder.Services.AddScoped<PayrollInit>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
