@@ -4,7 +4,7 @@ import "../../../styles/global.css";
 import TaxTableUpload from "./TaxTableUpload.jsx";
 import NavBar from "../../NavBar.jsx";
 
-function TaxTableManagement({ currentUser }) {
+function TaxTableManagement() {
   const [activeTable, setActiveTable] = useState(null);
   const [futureTable, setFutureTable] = useState(null);
   const [previousTables, setPreviousTables] = useState([]);
@@ -131,8 +131,8 @@ function TaxTableManagement({ currentUser }) {
               alt="Notification Icon"
               className="heading-icon"
             /> */}
-            <div className="utility-box large-box">{currentDate}</div>
-            <div className="utility-box small-box">{currentTime}</div>
+             {/* <div className="utility-box large-box">{currentDate}</div> */}
+             {/* <div className="utility-box small-box">{currentTime}</div> */}
           </div>
         </div>
       </div>

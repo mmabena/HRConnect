@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import "./NotificationBell.css";
+import { useNavigate } from "react-router-dom";
 
 const NotificationBell = ({ role }) => {
   const [showPopup, setShowPopup] = useState(false);
   const popupRef = useRef();
+  const navigate = useNavigate();
 
   // ✅ Notifications with read status
   const [notifications, setNotifications] = useState([]);
@@ -11,11 +13,32 @@ const NotificationBell = ({ role }) => {
   useEffect(() => {
     const roleNotifications = {
       superuser: [
-        { id: 14, message: "System update required", read: false },
+        {
+          message: "System update required",
+          read: false,
+          type: "system",
+        },
+        {
+          message: "New leave request submitted",
+          read: false,
+          type: "leave",
+          route: "/leaveManagement",
+        },
       ],
+
       normaluser: [
-        { id: 16, message: "Payslip available", read: false },
-        { id: 5, message: "Leave approved", read: true },
+        {
+          message: "Payslip available",
+          read: false,
+          type: "payslip",
+          route: "/payslips",
+        },
+        {
+          message: "Leave approved",
+          read: true,
+          type: "leave",
+          route: "/leave-balance",
+        },
       ],
     };
 
@@ -23,7 +46,7 @@ const NotificationBell = ({ role }) => {
   }, [role]);
 
   // ✅ Count unread
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   // ✅ Click outside close
   useEffect(() => {
@@ -34,35 +57,39 @@ const NotificationBell = ({ role }) => {
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () =>
-      document.removeEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // ✅ Mark all as read when opened (optional)
   const handleToggle = () => {
-    setShowPopup(prev => !prev);
+    setShowPopup((prev) => !prev);
 
     if (!showPopup) {
-      setNotifications(prev =>
-        prev.map(n => ({ ...n, read: true }))
-      );
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    }
+  };
+
+  const handleNotificationClick = (note) => {
+    // mark as read
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === note.id ? { ...n, read: true } : n)),
+    );
+
+    // redirect if route exists
+    if (note.route) {
+      navigate(note.route);
+      setShowPopup(false);
     }
   };
 
   return (
     <div className="notification-container" ref={popupRef}>
       <div className="bell-wrapper" onClick={handleToggle}>
-        <img
-          src="/images/bell.svg"
-          alt="Bell icon"
-          className="menu-icon"
-        />
+        <img src="/images/bell.svg" alt="Bell icon" className="menu-icon" />
 
         {/* ✅ BADGE */}
         {unreadCount > 0 && (
-          <span className="notification-badge">
-            {unreadCount}
-          </span>
+          <span className="notification-badge">{unreadCount}</span>
         )}
       </div>
 
@@ -75,6 +102,7 @@ const NotificationBell = ({ role }) => {
               <div
                 key={note.id}
                 className={`notification-item ${note.read ? "read" : "unread"}`}
+                onClick={() => handleNotificationClick(note)}
               >
                 {note.message}
               </div>

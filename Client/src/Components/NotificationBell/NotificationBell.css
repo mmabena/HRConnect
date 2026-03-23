@@ -55,10 +55,19 @@
 /* Optional styling */
 .notification-item.unread {
   font-weight: bold;
+  color: black;
 }
 
 .notification-item.read {
   opacity: 0.6;
   color: black;
   font-family: 'Anek Bangla';
+}
+
+.notification-item {
+  cursor: pointer;
+}
+
+.notification-item:hover {
+  background: #f0f4ff;
 }

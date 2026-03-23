@@ -527,7 +527,7 @@ const PersonalInformation = () => {
                 <input
                   className="emp-field-input"
                   id={id}
-                  value={employeeData[id] || ""}
+                  value={employeeData[id] || ""}   
                   readOnly
                 />
               </div>
@@ -663,7 +663,7 @@ const PersonalInformation = () => {
                 id="monthlySalary"
                 value={employeeData.monthlySalary || ""}
                 onChange={handleInputChange}
-                readOnly={!isEditable}
+                readOnly
               />
               <div className="emp-error-text">{formErrors.monthlySalary}</div>
             </div>
