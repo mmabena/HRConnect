@@ -8,7 +8,7 @@ import {
   showConfirmationToast,
   GetEmployeeByEmployeeNumberAsync,
   formatDateToYYYYMMDD,
-} from "../../Employee";
+} from "../../api/Employee";
 
 import useEmployeeData from "../../hooks/useEmployeeData";
 import useEmployeeForm from "../../hooks/useEmployeeForm";

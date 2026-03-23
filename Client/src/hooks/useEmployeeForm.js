@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { populateFromIdNumber } from "../Employee";
+import { populateFromIdNumber } from "../api/Employee";
 
 /**
  * Custom React hook that manages employee form state,

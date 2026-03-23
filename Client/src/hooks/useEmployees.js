@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { fetchAllEmployees } from "../Employee";
+import { fetchAllEmployees } from "../api/Employee";
 /**
  * Custom React hook to fetch and manage the state of all employees.
  *
