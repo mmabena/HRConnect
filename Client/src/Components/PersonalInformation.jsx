@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import "../Components/EditEmployee.css";
+import "../Components/EmployeeManagement/EditEmployee.css";
 import api from "../api/api.js";
 import { toast } from "react-toastify";
 import {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
-import { fetchAllEmployees } from "../Employee";
+import { fetchAllEmployees } from "../api/Employee";
+import api from "../api/api";
 
 /**
  * Custom React hook responsible for retrieving employee
@@ -26,12 +26,12 @@ const useEmployeeData = () => {
       try {
 
         const employees = await fetchAllEmployees();
-        const positionsRes = await axios.get(
-          "http://localhost:5147/api/positions"
-        );
+        const positionsRes = await api.get("/positions");
 
         setAllEmployees(employees);
         setPositions(positionsRes.data);
+        console.log("Employees:", employees);
+        console.log("Positions:", positionsRes.data);
 
       } catch (err) {
         console.error(err);
@@ -41,6 +41,7 @@ const useEmployeeData = () => {
     };
 
     fetchData();
+    
 
   }, []);
 

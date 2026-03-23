@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { fetchAllEmployees } from "../../Employee";
+import { fetchAllEmployees } from "../../api/Employee";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import AddEmployeeModal from "../../Components/EmployeeManagement/AddEmployeeModal";
 
@@ -10,7 +10,7 @@ import useDropdown from "../../hooks/useDropdown";
 import useInitialColors from "../../hooks/useInitialColors";
 
 
-import "../../MenuBar.css";
+import "../../Components/MenuBar/MenuBar.css";
 import "./EmployeeList.css";
 
 const EmployeeList = () => {

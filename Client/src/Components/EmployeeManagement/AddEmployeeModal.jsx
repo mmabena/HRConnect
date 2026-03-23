@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "./AddEmployeeModal.css";
-import { addEmployee } from "../../Employee";
+import { addEmployee } from "../../api/Employee";
 
 import useEmployeeForm from "../../hooks/useEmployeeForm";
 import useEmployeeData from "../../hooks/useEmployeeData";
@@ -424,7 +424,7 @@ const AddEmployeeModal = ({ closeModal }) => {
               )}
             </div>
             {/* Home Address */}
-            <div className="emp-input-wrapper full-width">
+            <div className="emp-full-width emp-input-wrapper">
               <input
                 type="text"
                 placeholder="Home Address"
@@ -531,7 +531,7 @@ const AddEmployeeModal = ({ closeModal }) => {
                 />
               </div>
               {/* Monthly Salary */}
-              <div className="emp-input-wrapper full-width">
+              <div className="emp-full-width emp-input-wrapper">
                 <input
                   type="number"
                   min="0"
