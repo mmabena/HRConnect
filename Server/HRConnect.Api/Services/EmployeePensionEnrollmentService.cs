@@ -33,7 +33,7 @@
     private readonly IPensionDeductionRepository _pensionDeductionRepository = pensionDeductionRepository;
     private readonly ISchedulerFactory _schedulerFactory = scheduler;
     private readonly ApplicationDBContext _context = context;
-    private static readonly decimal MAX_PENSIONCONTRIBUTION_PERCENTAGE = (decimal)27.5 / 100;
+    //private static readonly decimal MAX_PENSIONCONTRIBUTION_PERCENTAGE = (decimal)27.5 / 100;
     private static readonly decimal MAX_MONTHLYCONTRIBUTION = 29166.66M;
 
     public async Task<EmployeePensionEnrollmentDto> AddEmployeePensionEnrollmentAsync(EmployeePensionEnrollmentAddDto employeePensionEnrollmentDto)
@@ -59,7 +59,7 @@
       ValidateEmployeePensionEnrollmentDtos.ValidateVoluntaryContribution((decimal)employeePensionEnrollmentDto.VoluntaryContribution, existingEmployee.MonthlySalary, pensionOptionPercentage);
       employeePensionEnrollment.StartDate = existingEmployee.StartDate;
       PayrollRun? currentPayRollRun = await _payrollRunRepository.GetCurrentRunAsync() ?? throw new NotFoundException("Current payroll run not found");
-      employeePensionEnrollment.VoluntaryContribution = employeePensionEnrollmentDto.VoluntaryContribution ?? decimal.Zero;
+      employeePensionEnrollment.VoluntaryContribution = (decimal)employeePensionEnrollmentDto.VoluntaryContribution;
       employeePensionEnrollment.IsVoluntaryContributionPermament = (employeePensionEnrollmentDto.VoluntaryContribution > decimal.Zero) ?
         employeePensionEnrollmentDto.IsVoluntaryContributionPermament : null;
       employeePensionEnrollment.PayrollRunId = currentPayRollRun.PayrollRunId;
@@ -69,17 +69,18 @@
       DateOnly today = DateOnly.FromDateTime(DateTime.Today);
       if (today.Day > 15 || (employeePensionEnrollmentDto.EffectiveDate.Day > 15))
       {
-        DateOnly firstDayNextMonth = new DateOnly(today.Year, today.Month, 1).AddMonths(1);
+        DateOnly firstDayNextMonth = new DateOnly(existingEmployee.StartDate.Year, existingEmployee.StartDate.Month, 1).AddMonths(1);
         employeePensionEnrollment.EffectiveDate = firstDayNextMonth;
         //Qaurtz reschedule
+        string serializedEmployeePensionEnrollmentAddDto = JsonSerializer.Serialize(employeePensionEnrollment);
         IJobDetail job = JobBuilder.Create<EmployeePensionEnrollmentJob>()
           .WithIdentity($"pensionenrollmentjob_{existingEmployee.EmployeeId}")
-          .UsingJobData("EmployeeId", existingEmployee.EmployeeId)
+          .UsingJobData("PensionEnrollment", serializedEmployeePensionEnrollmentAddDto)
           .Build();
 
         ITrigger trigger = TriggerBuilder.Create()
           //.StartAt(employeePensionEnrollment.EffectiveDate.ToDateTime(TimeOnly.MinValue))
-          .StartAt(DateBuilder.FutureDate(40, IntervalUnit.Second))
+          .StartAt(DateBuilder.FutureDate(15, IntervalUnit.Second))
           .Build();
 
         IScheduler schedulerInstance = await _schedulerFactory.GetScheduler();
@@ -243,7 +244,7 @@
             PensionableSalary = existingEmployee.MonthlySalary,
             PensionOptionId = (int)existingEmployee.PensionOptionId,
             PendsionCategoryPercentage = pensionOptionPercentage,
-            PensionContribution = ValidPensionContribution(existingEmployee.MonthlySalary * pensionOptionPercentage),
+            PensionContribution = ValidPensionContribution(Math.Round(existingEmployee.MonthlySalary * (pensionOptionPercentage / 100))),
             VoluntaryContribution = employeePensionEnrollment.VoluntaryContribution,
             EmailAddress = existingEmployee.Email,
             PhyscialAddress = existingEmployee.PhysicalAddress,

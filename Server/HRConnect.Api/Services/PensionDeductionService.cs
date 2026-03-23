@@ -23,7 +23,7 @@
     private readonly IEmployeePensionEnrollmentRepository _employeePensionEnrollmentRepository = employeePensionEnrollmentRepository;
     private readonly IPayrollRunRepository _payrollRunRepository = payrollRunRepository;
     private readonly ApplicationDBContext _context = context;
-    private static readonly decimal MAX_PENSIONCONTRIBUTION_PERCENTAGE = (decimal)27.5 / 100;
+    //private static readonly decimal MAX_PENSIONCONTRIBUTION_PERCENTAGE = (decimal)27.5 / 100;
     private static readonly decimal MAX_MONTHLYCONTRIBUTION = 29166.66M;
     public async Task<PensionDeductionDto?> AddPensionDeductionAsync(PensionDeductionAddDto pensionDeductionAddDto)
     {
@@ -82,7 +82,7 @@
         decimal updatedPensionOptionPercentage = pensionDeductionUpdateDto.PensionOptionId.HasValue ?
           await GetEmployeePensionOptionPercentageAsync((int)pensionDeductionUpdateDto.PensionOptionId)
           : employeePensionDeduction.PendsionCategoryPercentage;
-        employeePensionDeduction.PensionContribution = ValidPensionContribution(existingEmployee.MonthlySalary * updatedPensionOptionPercentage);
+        employeePensionDeduction.PensionContribution = ValidPensionContribution(Math.Round(existingEmployee.MonthlySalary * (updatedPensionOptionPercentage / 100)));
         employeePensionDeduction.CreatedDate = pensionDeductionUpdateDto.CreatedDate ?? employeePensionDeduction.CreatedDate;
         employeePensionDeduction.IsActive = pensionDeductionUpdateDto.IsActive ?? employeePensionDeduction.IsActive;
 
@@ -153,7 +153,7 @@
           PensionableSalary = existingEmployee.MonthlySalary,
           PensionOptionId = (int)existingEmployee.PensionOptionId,
           PendsionCategoryPercentage = pensionOptionPercentage,
-          PensionContribution = ValidPensionContribution(existingEmployee.MonthlySalary * pensionOptionPercentage),
+          PensionContribution = ValidPensionContribution(Math.Round(existingEmployee.MonthlySalary * (pensionOptionPercentage / 100))),
           VoluntaryContribution = (decimal)pensionDeductionAddDto.VoluntaryContribution,
           EmailAddress = existingEmployee.Email,
           PhyscialAddress = existingEmployee.PhysicalAddress,

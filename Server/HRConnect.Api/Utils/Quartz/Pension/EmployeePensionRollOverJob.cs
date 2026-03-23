@@ -21,7 +21,8 @@
 
       foreach (Employee employee in employeesWithPensionOption)
       {
-        EmployeePensionEnrollment? employeeExisitingPensionEnrollment = await _employeePensionEnrollmentRepository.GetByEmployeeIdLastEntityAsync(employee.EmployeeId);
+        EmployeePensionEnrollment? employeeExisitingPensionEnrollment = await _employeePensionEnrollmentRepository.
+          GetByEmployeeIdAndLastRunIdAsync(employee.EmployeeId);
         if (employeeExisitingPensionEnrollment != null &&
           (employeeExisitingPensionEnrollment.VoluntaryContribution > decimal.Zero) &&
           employeeExisitingPensionEnrollment.IsVoluntaryContributionPermament != null &&
@@ -38,6 +39,11 @@
             IsVoluntaryContributionPermament = employeeExisitingPensionEnrollment.IsVoluntaryContributionPermament,
             IsLocked = false,
           };
+
+          if (employeeExisitingPensionEnrollment.PayrollRunId == employeePensionEnrollment.PayrollRunId)
+          {
+            continue;
+          }
 
           _ = await _employeePensionEnrollmentRepository.AddAsync(employeePensionEnrollment);
         }

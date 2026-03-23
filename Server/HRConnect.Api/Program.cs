@@ -141,7 +141,7 @@ builder.Services.AddQuartz(q =>
   q.AddTrigger(opts => opts
   .ForJob(jobKey)
   .WithIdentity("PayrollRollover-Trigger")
-  .WithCronSchedule("0/10 * * * * ?", x =>
+  .WithCronSchedule("0 0/3 * * * ?", x =>
   x.WithMisfireHandlingInstructionFireAndProceed())); //when a job misfire happens. 
                                                       // Properly re-execute it and proceed as usual
 
@@ -161,7 +161,7 @@ builder.Services.AddQuartz(q =>
   q.AddTrigger(opts => opts
     .ForJob(pensionEnrollJobKey)
     .WithIdentity("EmployeePensionRollOverJob-Trigger")
-    .WithCronSchedule("0/15 * * * * ?", x => x.WithMisfireHandlingInstructionFireAndProceed()));
+    .WithCronSchedule("0 0 0 12 12 ? 2026", x => x.WithMisfireHandlingInstructionFireAndProceed()));
 
   JobKey pensionDeductionJobKey = new("PensionDeductionJob");
 
@@ -172,7 +172,7 @@ builder.Services.AddQuartz(q =>
   q.AddTrigger(opts => opts
     .ForJob(pensionDeductionJobKey)
     .WithIdentity("PensionDeductionJob-Trigger")
-    .WithCronSchedule("0/20 * * * * ?", x => x.WithMisfireHandlingInstructionFireAndProceed()));
+    .WithCronSchedule("0 0 0 12 12 ? 2026", x => x.WithMisfireHandlingInstructionFireAndProceed()));
 
   //Adding persistence to quartz to be able to be run in the back
   q.UsePersistentStore(options =>
@@ -247,14 +247,6 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-/*app.Lifetime.ApplicationStarted.Register(async () =>
-{
-  IScheduler scheduler = await new StdSchedulerFactory().GetScheduler();
-
-  _ = await scheduler.UnscheduleJob(new TriggerKey("EmployeePensionRollOverJob-Trigger"));
-  _ = await scheduler.UnscheduleJob(new TriggerKey("PensionDeductionJob-Trigger"));
-  _ = await scheduler.UnscheduleJob(new TriggerKey("PayrollRollover-Trigger"));
-});*/
 
 using (var scope = app.Services.CreateScope())
 {

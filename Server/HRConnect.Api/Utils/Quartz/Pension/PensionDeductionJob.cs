@@ -9,6 +9,7 @@
   using HRConnect.Api.Models.Pension;
   using Microsoft.EntityFrameworkCore;
 
+  [DisallowConcurrentExecution]
   public class PensionDeductionJob(IPensionDeductionRepository pensionDeductionRepository, 
     IEmployeePensionEnrollmentRepository employeePensionEnrollmentRepository, IEmployeeRepository employeeRepository,
     ApplicationDBContext context) : IJob
@@ -20,41 +21,8 @@
 
     public async Task Execute(IJobExecutionContext context)
     {
-      List<EmployeePensionEnrollment> employeePensionEnrollments = await _employeePensionEnrollmentRepository.GetEmployeePensionEnrollmentsNotLocked();
-
-      foreach (EmployeePensionEnrollment enrollment in employeePensionEnrollments)
-      {
-        Employee? employee = await _employeeRepository.GetEmployeeByIdAsync(enrollment.EmployeeId);
-        if (employee != null)
-        {
-          decimal pensionCategoryPercentage = await _context.PensionOptions
-          .Where(po => po.PensionOptionId == employee.PensionOptionId)
-          .Select(po => po.ContributionPercentage).FirstOrDefaultAsync();
-
-          PensionDeduction pensionDeduction = new()
-          {
-            EmployeeId = enrollment.EmployeeId,
-            FirstName = employee.Name,
-            LastName = employee.Surname,
-            DateJoinedCompany = employee.StartDate,
-            IDNumber = employee.IdNumber,
-            Passport = employee.PassportNumber,
-            TaxNumber = employee.TaxNumber,
-            PensionableSalary = employee.MonthlySalary,
-            PensionOptionId = enrollment.PensionOptionId,
-            PendsionCategoryPercentage = pensionCategoryPercentage,
-            PensionContribution = Math.Round(employee.MonthlySalary * (pensionCategoryPercentage / 100)),
-            VoluntaryContribution = enrollment.VoluntaryContribution,
-            EmailAddress = employee.Email,
-            PhyscialAddress = employee.PhysicalAddress,
-            CreatedDate = DateOnly.FromDateTime(DateTime.Now),
-            PayrollRunId = enrollment.PayrollRunId,
-            IsActive = true
-          };
-
-          _ = await _pensionDeductionRepository.AddAsync(pensionDeduction);
-        }
-      }
+      Console.Write(":-) GOOD LUCK DELETING THIS QUARTZ METHOD ;-)");
+      await Task.CompletedTask;
     }
 
 

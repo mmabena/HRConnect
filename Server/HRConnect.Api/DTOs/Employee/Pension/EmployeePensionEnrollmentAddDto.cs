@@ -6,6 +6,6 @@
     public string EmployeeId { get; set; } = string.Empty;
     public DateOnly EffectiveDate { get; set; }
     public decimal? VoluntaryContribution { get; set; } = decimal.Zero;
-    public bool? IsVoluntaryContributionPermament { get; set; } = false;
+    public bool? IsVoluntaryContributionPermament { get; set; }
   }
 }

@@ -7,7 +7,7 @@
     Task<EmployeePensionEnrollment> AddAsync(EmployeePensionEnrollment employeePensionEnrollment);
     Task<List<EmployeePensionEnrollment>> GetAllAsync();
     Task<EmployeePensionEnrollment?> GetByEmployeeIdAsync(string employeeId);
-    Task<EmployeePensionEnrollment?> GetByEmployeeIdLastEntityAsync(string employeeId);
+    Task<EmployeePensionEnrollment?> GetByEmployeeIdAndLastRunIdAsync(string employeeId);
     Task<EmployeePensionEnrollment?> GetByEmployeeIdAndIsNotLockedAsync(string employeeId);
     Task<List<EmployeePensionEnrollment>> GetByPayRollRunIdAsync(int payrollRunId);
     Task<List<EmployeePensionEnrollment>> GetEmployeePensionEnrollmentsNotLocked();

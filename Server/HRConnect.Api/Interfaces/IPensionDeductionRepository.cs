@@ -9,6 +9,7 @@
     Task<PensionDeduction?> GetByEmployeeIdAsync(string employeeId);
     Task<PensionDeduction?> GetByEmployeeIdAndIsNotLockedAsync(string employeeId);
     Task<List<PensionDeduction>> GetByPayRollRunIdAsync(int payrollRunId);
+    Task<PensionDeduction?> GetByEmployeeIdAndLastRunIdAsync(string employeeId, int payRollRunId);
     Task<PensionDeduction> UpdateAsync(PensionDeduction pensionDeduction);
     Task<bool> DeleteAsync();
   }

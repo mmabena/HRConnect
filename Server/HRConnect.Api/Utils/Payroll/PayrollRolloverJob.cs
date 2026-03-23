@@ -3,10 +3,13 @@ namespace HRConnect.Api.Utils.Payroll
   using global::Quartz;
   using HRConnect.Api.Data;
   using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Models;
   using HRConnect.Api.Models.Payroll;
+  using HRConnect.Api.Models.PayrollDeduction;
   using HRConnect.Api.Models.Pension;
   using HRConnect.Api.Repository;
   using HRConnect.Api.Services;
+  using Microsoft.EntityFrameworkCore;
 
   //using Quartz;
 
@@ -17,16 +20,24 @@ namespace HRConnect.Api.Utils.Payroll
     private readonly IWebHostEnvironment _env;
     private readonly IPayrollPeriodService _payrollPeriodService;
     private readonly IPayrollRunRepository _payrollRunRepo;
+    private readonly IEmployeeRepository _employeeRepository;
     private readonly IEmployeePensionEnrollmentRepository _employeePensionEnrollmentRepository;
+    private readonly IPensionDeductionRepository _pensionDeductionRepository;
+    private readonly IPayrollRunService _payrollRunService;
     private readonly ApplicationDBContext _context;
     private static readonly int MAX_RUNS = 10;
     public PayrollRolloverJob(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService,
-      IEmployeePensionEnrollmentRepository employeePensionEnrollmentRepository, ApplicationDBContext context, IWebHostEnvironment env)
+      IEmployeePensionEnrollmentRepository employeePensionEnrollmentRepository, IEmployeeRepository employeeRepository,
+      IPensionDeductionRepository pensionDeductionRepository, ApplicationDBContext context, IPayrollRunService payrollRunService
+      , IWebHostEnvironment env)
     {
       _payrollRunRepo = payrollRunRepo;
       _payrollPeriodService = payrollPeriodService;
       _env = env;
       _employeePensionEnrollmentRepository = employeePensionEnrollmentRepository;
+      _employeeRepository = employeeRepository;
+      _pensionDeductionRepository = pensionDeductionRepository;
+      _payrollRunService = payrollRunService;
       _context = context;
     }
     /// <summary>
@@ -115,6 +126,11 @@ namespace HRConnect.Api.Utils.Payroll
           foreach (var record in currentPayRun.Records)
           {
             record.IsLocked = true;
+
+            if (record is PensionDeduction pensionDeduction)
+            {
+              pensionDeduction.IsActive = false;
+            }
           }
           //update the current run to implement lock
           await _payrollRunRepo.UpdateRun(currentPayRun);
@@ -144,6 +160,9 @@ namespace HRConnect.Api.Utils.Payroll
         var jobException = new JobExecutionException(ex);
         throw jobException;
       }
+
+      await RollOverEmloyeePensionEnrollmentAsync();
+      await PensionDeductionRollover();
     }
 
     private async Task LockEmployeePensionEnrollmentsAsync()
@@ -164,6 +183,103 @@ namespace HRConnect.Api.Utils.Payroll
       catch (Exception ex)
       {
         Console.WriteLine($"Error locking employee pension enrollments: {ex}");
+      }
+    }
+
+    private async Task RollOverEmloyeePensionEnrollmentAsync()
+    {
+      PayrollRun? currentPayRollRun = await _payrollRunRepo.GetCurrentRunAsync() ?? throw new NotFoundException("Current payroll run not found");
+      List<Employee> employeesWithPensionOption = await _employeeRepository.GetAllEmployeeWithAPensionOption();
+
+      foreach (Employee employee in employeesWithPensionOption)
+      {
+        EmployeePensionEnrollment? employeeExisitingPensionEnrollment = await _employeePensionEnrollmentRepository.
+          GetByEmployeeIdAndLastRunIdAsync(employee.EmployeeId);
+        if (employeeExisitingPensionEnrollment != null &&
+          (employeeExisitingPensionEnrollment.VoluntaryContribution > decimal.Zero) &&
+          employeeExisitingPensionEnrollment.IsVoluntaryContributionPermament != null &&
+          employeeExisitingPensionEnrollment.IsVoluntaryContributionPermament == true)
+        {
+          EmployeePensionEnrollment employeePensionEnrollment = new()
+          {
+            EmployeeId = employee.EmployeeId,
+            PayrollRunId = currentPayRollRun.PayrollRunId,
+            PensionOptionId = (int)employee.PensionOptionId,
+            StartDate = employee.StartDate,
+            EffectiveDate = DateOnly.FromDateTime(DateTime.Now),
+            VoluntaryContribution = (bool)employeeExisitingPensionEnrollment.IsVoluntaryContributionPermament ?
+              employeeExisitingPensionEnrollment.VoluntaryContribution : 0.00M,
+            IsVoluntaryContributionPermament = employeeExisitingPensionEnrollment.IsVoluntaryContributionPermament,
+            IsLocked = false,
+          };
+
+          if (employeeExisitingPensionEnrollment.PayrollRunId == employeePensionEnrollment.PayrollRunId)
+          {
+            continue;
+          }
+
+          _ = await _employeePensionEnrollmentRepository.AddAsync(employeePensionEnrollment);
+        }
+        else
+        {
+          EmployeePensionEnrollment employeePensionEnrollment = new()
+          {
+            EmployeeId = employee.EmployeeId,
+            PayrollRunId = currentPayRollRun.PayrollRunId,
+            PensionOptionId = (int)employee.PensionOptionId,
+            StartDate = employee.StartDate,
+            EffectiveDate = DateOnly.FromDateTime(DateTime.Now),
+            IsLocked = false,
+          };
+
+          _ = await _employeePensionEnrollmentRepository.AddAsync(employeePensionEnrollment);
+        }
+      }
+    }
+
+    private async Task PensionDeductionRollover()
+    {
+      List<EmployeePensionEnrollment> employeePensionEnrollments = await _employeePensionEnrollmentRepository.GetEmployeePensionEnrollmentsNotLocked();
+
+      foreach (EmployeePensionEnrollment enrollment in employeePensionEnrollments)
+      {
+        Employee? employee = await _employeeRepository.GetEmployeeByIdAsync(enrollment.EmployeeId);
+        if (employee != null)
+        {
+          decimal pensionCategoryPercentage = await _context.PensionOptions
+          .Where(po => po.PensionOptionId == employee.PensionOptionId)
+          .Select(po => po.ContributionPercentage).FirstOrDefaultAsync();
+
+          PensionDeduction pensionDeduction = new()
+          {
+            EmployeeId = enrollment.EmployeeId,
+            FirstName = employee.Name,
+            LastName = employee.Surname,
+            DateJoinedCompany = employee.StartDate,
+            IDNumber = employee.IdNumber,
+            Passport = employee.PassportNumber,
+            TaxNumber = employee.TaxNumber,
+            PensionableSalary = employee.MonthlySalary,
+            PensionOptionId = enrollment.PensionOptionId,
+            PendsionCategoryPercentage = pensionCategoryPercentage,
+            PensionContribution = Math.Round(employee.MonthlySalary * (pensionCategoryPercentage / 100)),
+            VoluntaryContribution = enrollment.VoluntaryContribution,
+            EmailAddress = employee.Email,
+            PhyscialAddress = employee.PhysicalAddress,
+            CreatedDate = DateOnly.FromDateTime(DateTime.Now),
+            PayrollRunId = enrollment.PayrollRunId,
+            IsActive = true
+          };
+
+          PensionDeduction? existingEmployeePensionDeduction = await _pensionDeductionRepository
+            .GetByEmployeeIdAndLastRunIdAsync(pensionDeduction.EmployeeId, pensionDeduction.PayrollRunId);
+
+          if (existingEmployeePensionDeduction == null)
+          {
+            await _payrollRunService.AddRecordToCurrentRunAsync(pensionDeduction, enrollment.EmployeeId);
+            _ = await _pensionDeductionRepository.AddAsync(pensionDeduction);
+          }
+        }
       }
     }
 

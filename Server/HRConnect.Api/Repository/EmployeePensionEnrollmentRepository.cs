@@ -52,14 +52,14 @@
       return existEmployeesPensionEnrollment ?? null;
     }
 
-    public async Task<EmployeePensionEnrollment?> GetByEmployeeIdLastEntityAsync(string employeeId)
+    public async Task<EmployeePensionEnrollment?> GetByEmployeeIdAndLastRunIdAsync(string employeeId)
     {
-      EmployeePensionEnrollment? existEmployeesPensionEnrollment = await _context.EmployeePensionEnrollments
+      EmployeePensionEnrollment? employeeLatestPensionEnrollment = await _context.EmployeePensionEnrollments
         .Where(epe => epe.EmployeeId == employeeId)
         .OrderByDescending(epe => epe.EffectiveDate)
         .FirstOrDefaultAsync();
 
-      return existEmployeesPensionEnrollment ?? null;
+      return employeeLatestPensionEnrollment ?? null;
     }
 
     public async Task<List<EmployeePensionEnrollment>> GetByPayRollRunIdAsync(int payrollRunId)

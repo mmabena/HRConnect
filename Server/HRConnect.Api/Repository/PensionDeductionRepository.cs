@@ -5,6 +5,7 @@
   using HRConnect.Api.Data;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models.PayrollDeduction;
+  using HRConnect.Api.Models.Pension;
   using Microsoft.EntityFrameworkCore;
 
   public class PensionDeductionRepository(ApplicationDBContext context) : IPensionDeductionRepository
@@ -35,6 +36,14 @@
       return existingPensionDeduction;
     }
 
+    public async Task<PensionDeduction?> GetByEmployeeIdAndLastRunIdAsync(string employeeId, int payRollRunId)
+    {
+      PensionDeduction? existingPensionDeduction = await _context.PensionDeductions
+        .FirstOrDefaultAsync(pd => pd.EmployeeId == employeeId && pd.PayrollRunId == payRollRunId && !pd.IsLocked);
+
+      return existingPensionDeduction;
+    }
+
     public async Task<PensionDeduction?> GetByEmployeeIdAsync(string employeeId)
     {
       PensionDeduction? existingPensionDeduction = await _context.PensionDeductions
@@ -47,6 +56,8 @@
     {
       return await _context.PensionDeductions.Where(pd => pd.PayrollRunId == payrollRunId).ToListAsync();
     }
+
+
 
     public async Task<PensionDeduction> UpdateAsync(PensionDeduction pensionDeduction)
     {

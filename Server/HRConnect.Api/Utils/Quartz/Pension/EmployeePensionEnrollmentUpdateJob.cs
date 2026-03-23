@@ -13,6 +13,7 @@
   using HRConnect.Api.Services;
   using Microsoft.EntityFrameworkCore;
 
+  [DisallowConcurrentExecution]
   public class EmployeePensionEnrollmentUpdateJob(IEmployeeRepository employeeRepository,
     IEmployeePensionEnrollmentRepository employeePensionEnrollmentRepository, IPensionDeductionRepository pensionDeductionRepository,
     ApplicationDBContext context) : IJob
