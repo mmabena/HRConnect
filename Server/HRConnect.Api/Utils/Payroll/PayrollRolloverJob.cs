@@ -11,15 +11,17 @@ namespace HRConnect.Api.Utils.Payroll
     private readonly IWebHostEnvironment _env;
     private readonly IPayrollPeriodService _payrollPeriodService;
     private readonly IPayrollRunRepository _payrollRunRepo;
+    private readonly IReportsService _reportsService;
     private static readonly int MAX_RUNS = 12;
 
     //This makes mocking and testing time a lot easier
     private readonly Func<DateTime> _now;
     public PayrollRolloverJob(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService,
-        IWebHostEnvironment env, Func<DateTime> now = null)
+        IWebHostEnvironment env, IReportsService reportsService, Func<DateTime> now = null)
     {
       _payrollRunRepo = payrollRunRepo;
       _payrollPeriodService = payrollPeriodService;
+      _reportsService = reportsService;
       _env = env;
       _now = now ?? (() => DateTime.Now);
     }
@@ -78,6 +80,12 @@ namespace HRConnect.Api.Utils.Payroll
     {
       DateTime currentDate = DateTime.Now;
       int runId = ((currentDate.Month + 8) % 12) + 1;
+      if (currentDate.Date !=
+    new DateTime(currentDate.Year, currentDate.Month,
+    DateTime.DaysInMonth(currentDate.Year, currentDate.Month)))
+      {
+        return;
+      }
       try
       {
         var payperiod = await _payrollPeriodService.GetLastPeriodAsync();
@@ -112,7 +120,8 @@ namespace HRConnect.Api.Utils.Payroll
           await _payrollRunRepo.UpdateRun(currentPayRun);
 
           if (currentPayRun.Records.Count > 0)
-            await PayrollUtil.WriteExcelAsync(currentPayRun, _env.ContentRootPath);
+            await _reportsService.WriteExcelAsync(currentPayRun);
+
         }
 
         if (nextRun > MAX_RUNS)

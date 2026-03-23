@@ -80,7 +80,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
     {
-      options.UseSqlServer(builder.Configuration.GetConnectionString("DBeaverConnection"));
+      options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
       options.AddInterceptors(new AuditSaveChangesInterceptor());
     });
 
@@ -154,7 +154,7 @@ builder.Services.AddQuartz(q =>
   {
     options.UseSqlServer(options =>
         {
-          options.ConnectionString = builder.Configuration.GetConnectionString("DBeaverConnection")!;
+          options.ConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
           options.TablePrefix = "quartz.QRTZ_";
         });
     options.UseSerializer<Quartz.Simpl.SystemTextJsonObjectSerializer>();
@@ -171,6 +171,7 @@ builder.Services.AddScoped<IPayrollPeriodRepository, PayrollPeriodRepository>();
 builder.Services.AddScoped<IPayrollRunRepository, PayrollRunRepository>();
 builder.Services.AddScoped<IPayrollRunService, PayrollRunService>();
 builder.Services.AddScoped<IPayrollPeriodService, PayrollPeriodService>();
+builder.Services.AddScoped<IReportsService, ReportsServices>();
 builder.Services.AddScoped<PayrollRolloverJob>();//for Quartz
 builder.Services.AddScoped<PayrollInit>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
