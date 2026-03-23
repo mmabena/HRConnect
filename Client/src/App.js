@@ -15,7 +15,7 @@ import UserManagement from "./Components/UserManagement";
 import ViewPositionManagement from "./Components/ViewPositionManagement";
 import EditPositionManagement from "./Components/CompanyManagement/PositionManagement/EditPositionManagement";
 import AddPositionManagement from "./Components/CompanyManagement/PositionManagement/AddPositionManagment";
-import PositionManagement from "./Pages/CompanyManagement/PositionManagement/PositionManagement";
+
 import ChangePositionManagement from "./Components/CompanyManagement/PositionManagement/ChangePositionManagement";
 import CompanyManagement from "./companyManagement";
 import CompanyContribution from "./Components/CompanyContribution/CompanyContribution";
@@ -26,6 +26,7 @@ import ChangePassword from "./Components/ChangePassword";
 import TaxTableUpload from "./Components/CompanyManagement/TaxTableManagement/TaxTableUpload.jsx";
 import EmployeeList from "./Pages/EmployeeManagement/EmployeeList";
 import MenuBar from "./Components/MenuBar/MenuBar";
+
 import ManageUserPositions from "./Pages/CompanyManagement/PositionManagement/ManageUserPosition.jsx";
 import PositionManagement from "./Pages/CompanyManagement/PositionManagement/PositionManagement";
 import ProjectionCalculator from "./Pages/PayrollTools/ProjectionCalculator";
@@ -197,6 +198,9 @@ function App() {
             path="/viewPositionManagement/:id"
             element={<ViewPositionManagement />}
           />
+            <Route path="/changePositionManagement" element={<ChangePositionManagement />} />
+          <Route path="/manageUserPosition" element={<ManageUserPositions />} />
+          
           <Route
             path="/company-contribution"
             element={<CompanyContribution />}

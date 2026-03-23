@@ -447,6 +447,7 @@ margin:10px;
   font-size: 14px;
   font-weight: 500;
   color: black;
+  background-color: transparent;
   font-family: 'Instrument Sans', sans-serif;
   text-align: left;
 }
@@ -476,6 +477,7 @@ margin:10px;
   display: flex;
   padding: 0.5rem 0.5rem;
   font-size: 14px;
+  color: black;
   border-radius: 5px;
   background-color: transparent;
   cursor: text;
@@ -655,6 +657,7 @@ margin-left: -32px;
 /* Form spacing */
 .pm-form {
   width: 100%;
+  color:black;
   margin-top:30px;
  padding-left:100px;
   display: flex;

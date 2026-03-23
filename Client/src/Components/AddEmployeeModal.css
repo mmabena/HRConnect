@@ -588,14 +588,7 @@
   position: relative;
 }
 
-.date-input-wrapper label {
-  position: absolute;
-  top: -8px;
-  left: 10px;
-  background: white;
-  font-size: 12px;
-  padding: 0 4px;
-}
+
 
 .emp-two-col {
   display: grid;

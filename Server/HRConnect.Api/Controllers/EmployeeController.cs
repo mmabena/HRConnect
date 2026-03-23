@@ -83,8 +83,23 @@ namespace HRConnect.Api.Controllers
       if (updatedEmployee == null)
         return NotFound();
 
-            return Ok("Employee deleted successfully.");
-        }
-
+      return Ok(updatedEmployee);
     }
+    /// <summary>
+    /// Deletes a employee from the database (SuperUser only).
+    /// </summary>
+    /// <param name="EmployeeId">The employee ID</param>
+    /// <returns>success message if employee is deleted successfully, NotFound if employee does not exist</returns>
+    [HttpDelete("{EmployeeId}")]
+    [Authorize(Roles = "SuperUser")]
+    public async Task<IActionResult> DeleteEmployee(string EmployeeId)
+    {
+      var deletedEmployee = await _employeeService.DeleteEmployeeAsync(EmployeeId);
+      if (!deletedEmployee)
+        return NotFound();
+
+      return Ok("Employee deleted successfully.");
+    }
+
+  }
 }

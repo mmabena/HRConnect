@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import api from "../../../api/api.js";
 import "../../../styles/global.css";
-import TaxTableUpload from "./TaxTableUpload";
+import TaxTableUpload from "./TaxTableUpload.jsx";
+import NavBar from "../../NavBar.jsx";
 
 function TaxTableManagement({ currentUser }) {
   const [activeTable, setActiveTable] = useState(null);
@@ -9,6 +10,8 @@ function TaxTableManagement({ currentUser }) {
   const [previousTables, setPreviousTables] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showUploadPopup, setShowUploadPopup] = useState(false);
+  const [currentTime, setCurrentTime] = useState("");
+  const [currentDate, setCurrentDate] = useState("");
 
   const fetchTaxTables = useCallback(async () => {
     try {
@@ -123,11 +126,11 @@ function TaxTableManagement({ currentUser }) {
         <div className="heading-container">
           Comapany Management
           <div className="icon">
-            <img
+            {/* <img
               src="/images/notifications.png"
               alt="Notification Icon"
               className="heading-icon"
-            />
+            /> */}
             <div className="utility-box large-box">{currentDate}</div>
             <div className="utility-box small-box">{currentTime}</div>
           </div>
