@@ -303,22 +303,6 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                   <li>
                     <span
                       className="menu-subitem"
-                      onClick={() => handleSubmenuClick("/addEmployee")}
-                    >
-                      Add New Employee
-                    </span>
-                  </li>
-                  <li>
-                    <span
-                      className="menu-subitem"
-                      onClick={() => handleSubmenuClick("/editEmployee")}
-                    >
-                      Edit Employee
-                    </span>
-                  </li>
-                  <li>
-                    <span
-                      className="menu-subitem"
                       onClick={() => handleSubmenuClick("/terminateemployee")}
                     >
                       Terminate Employee
