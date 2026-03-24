@@ -1451,6 +1451,9 @@ namespace HRConnect.Api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<decimal>("TotalPensionContribution")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<decimal>("VoluntaryContribution")
                         .HasColumnType("decimal(18,2)");
 

@@ -78,6 +78,7 @@
       pensionDeduction.VoluntaryContribution = voluntaryContribution ?? pensionDeduction.VoluntaryContribution;
       pensionDeduction.PensionContribution = ValidPensionContribution(
         Math.Round(pensionDeduction.PensionableSalary * (pensionOptionPercentage / 100), 2));
+      pensionDeduction.TotalPensionContribution = ValidPensionContribution(pensionDeduction.PensionContribution + pensionDeduction.VoluntaryContribution);
       PensionDeduction? updatedPensionDeduction = await _pensionDeductionRepository.UpdateAsync(pensionDeduction);
       if (updatedPensionDeduction != null && updatedPensionDeduction.PensionOptionId != newPensionOptionId)
       {

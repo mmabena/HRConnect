@@ -20,6 +20,7 @@
         PendsionCategoryPercentage = pensionDeduction.PendsionCategoryPercentage,
         PensionContribution = pensionDeduction.PensionContribution,
         VoluntaryContribution = pensionDeduction.VoluntaryContribution,
+        TotalContribution = pensionDeduction.TotalPensionContribution,
         EmailAddress = pensionDeduction.EmailAddress,
         PhyscialAddress = pensionDeduction.PhyscialAddress,
         PayrollRunId = pensionDeduction.PayrollRunId,

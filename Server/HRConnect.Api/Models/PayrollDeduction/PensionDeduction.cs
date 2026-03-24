@@ -23,6 +23,7 @@ namespace HRConnect.Api.Models.PayrollDeduction
     public decimal PensionContribution { get; set; }
     [Column(TypeName = "decimal(18,2)")]
     public decimal VoluntaryContribution { get; set; }
+    public decimal TotalPensionContribution { get; set; }
     public string EmailAddress { get; set; } = string.Empty;
     public string PhyscialAddress { get; set; } = string.Empty;
     //public int PayrollRunId { get; set; }

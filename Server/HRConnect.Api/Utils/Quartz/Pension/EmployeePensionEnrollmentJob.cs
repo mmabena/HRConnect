@@ -101,6 +101,9 @@
             PendsionCategoryPercentage = pensionOptionPercentage,
             PensionContribution = ValidPensionContribution(Math.Round(existingEmployee.MonthlySalary * (pensionOptionPercentage / 100))),
             VoluntaryContribution = employeePensionEnrollment.VoluntaryContribution,
+            TotalPensionContribution =
+              ValidPensionContribution(Math.Round(existingEmployee.MonthlySalary * (pensionOptionPercentage / 100)) +
+              employeePensionEnrollment.VoluntaryContribution),
             EmailAddress = existingEmployee.Email,
             PhyscialAddress = existingEmployee.PhysicalAddress,
             PayrollRunId = currentPayrollRunId.PayrollRunId,

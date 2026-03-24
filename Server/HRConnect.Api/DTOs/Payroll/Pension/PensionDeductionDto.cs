@@ -14,6 +14,7 @@
     public decimal PendsionCategoryPercentage { get; set; }
     public decimal PensionContribution { get; set; }
     public decimal? VoluntaryContribution { get; set; }
+    public decimal TotalContribution { get; set; }
     public string EmailAddress { get; set; } = string.Empty;
     public string PhyscialAddress { get; set; } = string.Empty;
     public int PayrollRunId { get; set; }

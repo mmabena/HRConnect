@@ -5,7 +5,6 @@
   using System.Threading.Tasks;
   using HRConnect.Api.Data;
   using HRConnect.Api.DTOs.Employee.Pension;
-  using HRConnect.Api.DTOs.Payroll.Pension;
   //using HRConnect.Api.DTOs.Payroll.Pension;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Interfaces.Pension;
@@ -25,12 +24,13 @@
 
   public class EmployeePensionEnrollmentService(IEmployeePensionEnrollmentRepository employeePensionEnrollmentRepository,
     IEmployeeRepository employeeRepository, IPayrollRunRepository payrollRunRepository, IPensionDeductionRepository pensionDeductionRepository,
-    ISchedulerFactory scheduler, ApplicationDBContext context) : IEmployeePensionEnrollmentService
+    IPayrollRunService payrollRunService, ISchedulerFactory scheduler, ApplicationDBContext context) : IEmployeePensionEnrollmentService
   {
     private readonly IEmployeePensionEnrollmentRepository _employeePensionEnrollmentRepository = employeePensionEnrollmentRepository;
     private readonly IEmployeeRepository _employeeRepository = employeeRepository;
     private readonly IPayrollRunRepository _payrollRunRepository = payrollRunRepository;
     private readonly IPensionDeductionRepository _pensionDeductionRepository = pensionDeductionRepository;
+    private readonly IPayrollRunService _payrollRunService = payrollRunService;
     private readonly ISchedulerFactory _schedulerFactory = scheduler;
     private readonly ApplicationDBContext _context = context;
     //private static readonly decimal MAX_PENSIONCONTRIBUTION_PERCENTAGE = (decimal)27.5 / 100;
@@ -246,6 +246,8 @@
             PendsionCategoryPercentage = pensionOptionPercentage,
             PensionContribution = ValidPensionContribution(Math.Round(existingEmployee.MonthlySalary * (pensionOptionPercentage / 100))),
             VoluntaryContribution = employeePensionEnrollment.VoluntaryContribution,
+            TotalPensionContribution =
+            ValidPensionContribution(Math.Round(existingEmployee.MonthlySalary * (pensionOptionPercentage / 100)) + employeePensionEnrollment.VoluntaryContribution),
             EmailAddress = existingEmployee.Email,
             PhyscialAddress = existingEmployee.PhysicalAddress,
             PayrollRunId = currentPayrollRunId.PayrollRunId,
@@ -293,6 +295,78 @@
     private static decimal ValidPensionContribution(decimal pensionContribution)
     {
       return (pensionContribution > MAX_MONTHLYCONTRIBUTION) ? MAX_MONTHLYCONTRIBUTION : pensionContribution;
+    }
+
+    public async Task LockEmployeePensionEnrollmentsAsync()
+    {
+      PayrollRun? currentPayRollRun = await _payrollRunRepository.GetCurrentRunAsync() ?? throw new NotFoundException("Current payroll run not found");
+      List<EmployeePensionEnrollment> employeePensionEnrollments = await _employeePensionEnrollmentRepository
+        .GetByPayRollRunIdAsync(currentPayRollRun.PayrollRunId);
+
+      foreach (EmployeePensionEnrollment enrollment in employeePensionEnrollments.Where(x => !x.IsLocked))
+      {
+        enrollment.IsLocked = true;
+      }
+
+      try
+      {
+        await _employeePensionEnrollmentRepository.LockEmployeePensionEnrollmentsAsync(employeePensionEnrollments);
+      }
+      catch (Exception ex)
+      {
+        Console.WriteLine($"Error locking employee pension enrollments: {ex}");
+      }
+    }
+
+    public async Task RollOverEmloyeePensionEnrollmentAsync()
+    {
+      PayrollRun? currentPayRollRun = await _payrollRunRepository.GetCurrentRunAsync() ?? throw new NotFoundException("Current payroll run not found");
+      List<Employee> employeesWithPensionOption = await _employeeRepository.GetAllEmployeeWithAPensionOption();
+
+      foreach (Employee employee in employeesWithPensionOption)
+      {
+        EmployeePensionEnrollment? employeeExisitingPensionEnrollment = await _employeePensionEnrollmentRepository.
+          GetByEmployeeIdAndLastRunIdAsync(employee.EmployeeId);
+        if (employeeExisitingPensionEnrollment != null &&
+          (employeeExisitingPensionEnrollment.VoluntaryContribution > decimal.Zero) &&
+          employeeExisitingPensionEnrollment.IsVoluntaryContributionPermament != null &&
+          employeeExisitingPensionEnrollment.IsVoluntaryContributionPermament == true)
+        {
+          EmployeePensionEnrollment employeePensionEnrollment = new()
+          {
+            EmployeeId = employee.EmployeeId,
+            PayrollRunId = currentPayRollRun.PayrollRunId,
+            PensionOptionId = (int)employee.PensionOptionId,
+            StartDate = employee.StartDate,
+            EffectiveDate = DateOnly.FromDateTime(DateTime.Now),
+            VoluntaryContribution = (bool)employeeExisitingPensionEnrollment.IsVoluntaryContributionPermament ?
+              employeeExisitingPensionEnrollment.VoluntaryContribution : 0.00M,
+            IsVoluntaryContributionPermament = employeeExisitingPensionEnrollment.IsVoluntaryContributionPermament,
+            IsLocked = false,
+          };
+
+          if (employeeExisitingPensionEnrollment.PayrollRunId == employeePensionEnrollment.PayrollRunId)
+          {
+            continue;
+          }
+
+          _ = await _employeePensionEnrollmentRepository.AddAsync(employeePensionEnrollment);
+        }
+        else
+        {
+          EmployeePensionEnrollment employeePensionEnrollment = new()
+          {
+            EmployeeId = employee.EmployeeId,
+            PayrollRunId = currentPayRollRun.PayrollRunId,
+            PensionOptionId = (int)employee.PensionOptionId,
+            StartDate = employee.StartDate,
+            EffectiveDate = DateOnly.FromDateTime(DateTime.Now),
+            IsLocked = false,
+          };
+
+          _ = await _employeePensionEnrollmentRepository.AddAsync(employeePensionEnrollment);
+        }
+      }
     }
   }
 }

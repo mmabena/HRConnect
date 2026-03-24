@@ -21,7 +21,6 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using OfficeOpenXml;
 using Quartz;
-using Quartz.Impl;
 
 var builder = WebApplication.CreateBuilder(args);
 

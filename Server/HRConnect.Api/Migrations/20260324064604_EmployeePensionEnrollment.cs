@@ -31,6 +31,13 @@ namespace HRConnect.Api.Migrations
                 oldClrType: typeof(DateTime),
                 oldType: "datetime2");
 
+            migrationBuilder.AddColumn<decimal>(
+                name: "TotalPensionContribution",
+                table: "PensionDeductions",
+                type: "decimal(18,2)",
+                nullable: false,
+                defaultValue: 0m);
+
             migrationBuilder.AddColumn<int>(
                 name: "PensionOptionId",
                 table: "Employees",
@@ -154,6 +161,10 @@ namespace HRConnect.Api.Migrations
             migrationBuilder.DropIndex(
                 name: "IX_Employees_PensionOptionId",
                 table: "Employees");
+
+            migrationBuilder.DropColumn(
+                name: "TotalPensionContribution",
+                table: "PensionDeductions");
 
             migrationBuilder.DropColumn(
                 name: "PensionOptionId",

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRConnect.Api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20260316095514_EmployeePensionEnrollment")]
+    [Migration("20260324064604_EmployeePensionEnrollment")]
     partial class EmployeePensionEnrollment
     {
         /// <inheritdoc />
@@ -1453,6 +1453,9 @@ namespace HRConnect.Api.Migrations
                     b.Property<string>("TaxNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("TotalPensionContribution")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("VoluntaryContribution")
                         .HasColumnType("decimal(18,2)");
