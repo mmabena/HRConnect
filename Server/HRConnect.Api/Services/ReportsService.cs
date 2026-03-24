@@ -8,6 +8,12 @@ namespace HRConnect.Api.Services
   using HRConnect.Api.Models.Payroll;
   public class ReportsService : IReportsService
   {
+
+    private readonly IWebHostEnvironment _env;
+    public ReportsService(IWebHostEnvironment env)
+    {
+      _env = env;
+    }
     /// <summary>
     /// Utility method to get the public properties of any instance of Type t and then flatten the hierarchy 
     /// </summary>
@@ -26,10 +32,10 @@ namespace HRConnect.Api.Services
     public async Task WriteExcelAsync(PayrollRun run)
     {
       ExcelPackage.License.SetNonCommercialPersonal("YourName"); //already in program cs so probably remove?
+
       try
       {
-        string reportsFolder = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory,
-        ".. ", "..", "Reports"));
+        string reportsFolder = Path.Combine(_env.ContentRootPath, "Reports");
 
         string destinationFolder = Path.Combine(reportsFolder, run.PayrollRunNumber.ToString(CultureInfo.InvariantCulture));//, ;
         _ = Directory.CreateDirectory(destinationFolder);
@@ -43,6 +49,7 @@ namespace HRConnect.Api.Services
 
         foreach (var group in recordsByType)
         {
+          Console.Write($"%%%%%%RECORDS FOUND IN RUNS {group.GetType().Name}");
           string sheetName = group.Key;
           var worksheet = package.Workbook.Worksheets.Add(sheetName);
 
@@ -74,7 +81,12 @@ namespace HRConnect.Api.Services
               //For DateTime type accordingly 
               if (value is DateTime dt)
               {
-                value = dt;
+                value = dt.ToLocalTime();
+                cell.Style.Numberformat.Format = "yyyy-mm-dd HH:mm:ss";
+              }
+              if (value is DateOnly dateOnly)
+              {
+                value = dateOnly;
                 cell.Style.Numberformat.Format = "yyyy-mm-dd";
               }
               cell.Value = value;
@@ -83,8 +95,9 @@ namespace HRConnect.Api.Services
           }
           worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
         }
+
         await package.SaveAsAsync(new FileInfo(filePath));
-        Console.WriteLine($"Payroll Excel report generated: {filePath}");
+        Console.WriteLine($"===============>Payroll Excel report generated: {filePath}");
       }
       catch (Exception ex)
       {

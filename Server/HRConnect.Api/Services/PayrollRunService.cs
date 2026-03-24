@@ -69,7 +69,6 @@ namespace HRConnect.Api.Services
       Console.WriteLine($"!!!!!-+++++++++--------Adding record to current run with ID {currentPayRun.PayrollRunNumber}");
       payrollRecord.PayrollRun = currentPayRun; //shoule have current payrollRunNumber
       payrollRecord.EmployeeId = employeeId;
-      Console.WriteLine($"!!!!!-+++++++++-------- record ID {payrollRecord.PayrollRun.PayrollRunNumber}");
       currentPayRun.Records.Add(payrollRecord);
       //save changes to db
       await _payrollRunRepo.UpdateRun(currentPayRun);

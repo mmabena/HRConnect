@@ -126,22 +126,20 @@ builder.Services.AddAuthorizationBuilder()
 
 builder.Services.AddQuartz(q =>
 {
-  //Adding quartz into it's own namespace
-
-  var jobKey = new JobKey("PayrollRolloverJob");
+  var RolloverJobKey = new JobKey("PayrollRolloverJob");
 
   //Add a service for to run as a background job 
   q.AddJob<PayrollRolloverJob>(opts =>
-  opts.WithIdentity(jobKey)
+  opts.WithIdentity(RolloverJobKey)
   .StoreDurably());
 
   //Triggers that will need to be fired to run background job
   // using Cron Schedule
   // Second, Minute, Hour, Day of The Month, Month, Day of The Week
   q.AddTrigger(opts => opts
-  .ForJob(jobKey)
+  .ForJob(RolloverJobKey)
   .WithIdentity("PayrollRollover-Trigger")
-  .WithCronSchedule("0/10 * * * * ?", x =>
+  .WithCronSchedule("10 * * * * ?", x =>
   x.WithMisfireHandlingInstructionFireAndProceed())); //when a job misfire happens. 
                                                       // Properly re-execute it and proceed as usual
 
@@ -153,15 +151,15 @@ builder.Services.AddQuartz(q =>
   // ? -> for all days of the week
 
   //Adding persistence to quartz to be able to be run in the back
-  q.UsePersistentStore(options =>
+  q.UsePersistentStore(store =>
   {
-    options.UseSqlServer(options =>
+    store.UseSqlServer(options =>
         {
           options.ConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
           options.TablePrefix = "quartz.QRTZ_";
         });
-    options.UseSerializer<Quartz.Simpl.SystemTextJsonObjectSerializer>();
-    options.UseProperties = true;
+    store.UseSerializer<Quartz.Simpl.SystemTextJsonObjectSerializer>();
+    store.UseProperties = true;
   });
 });
 

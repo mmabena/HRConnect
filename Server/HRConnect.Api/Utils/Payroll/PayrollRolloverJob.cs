@@ -8,7 +8,6 @@ namespace HRConnect.Api.Utils.Payroll
   [DisallowConcurrentExecution]
   public class PayrollRolloverJob : IJob
   {
-    private readonly IWebHostEnvironment _env;
     private readonly IPayrollPeriodService _payrollPeriodService;
     private readonly IPayrollRunRepository _payrollRunRepo;
     private readonly IReportsService _reportsService;
@@ -17,12 +16,11 @@ namespace HRConnect.Api.Utils.Payroll
     //This makes mocking and testing time a lot easier
     private readonly Func<DateTime> _now;
     public PayrollRolloverJob(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService,
-        IWebHostEnvironment env, IReportsService reportsService, Func<DateTime> now = null)
+        IReportsService reportsService, Func<DateTime> now = null)
     {
       _payrollRunRepo = payrollRunRepo;
       _payrollPeriodService = payrollPeriodService;
       _reportsService = reportsService;
-      _env = env;
       _now = now ?? (() => DateTime.Now);
     }
     /// <summary>
@@ -121,6 +119,8 @@ namespace HRConnect.Api.Utils.Payroll
           }
           //update the current run to implement lock
           await _payrollRunRepo.UpdateRun(currentPayRun);
+
+          Console.WriteLine($"!!!!!+++++++++Records count {currentPayRun.Records.Count}");
 
           if (currentPayRun.Records.Count > 0)
             await _reportsService.WriteExcelAsync(currentPayRun);

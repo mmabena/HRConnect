@@ -13,10 +13,13 @@ namespace HRConnect.Api.Services
     private readonly IEmployeeRepository _employeeRepo;
     private readonly StatutoryContributionsCalculator _deductionsCalculator;
     private readonly IStatutoryContributionRepository _statutoryContributionRepo;
-    public StatutoryContributionService(IEmployeeRepository employeeRepo, IStatutoryContributionRepository payrollContributionsRepo)
+    private readonly IPayrollRunService _payrollRunService;
+    public StatutoryContributionService(IEmployeeRepository employeeRepo, IStatutoryContributionRepository payrollContributionsRepo,
+    IPayrollRunService payrollRunService)
     {
       _employeeRepo = employeeRepo;
       _statutoryContributionRepo = payrollContributionsRepo;
+      _payrollRunService = payrollRunService;
       _deductionsCalculator = new StatutoryContributionsCalculator();
     }
 
@@ -45,6 +48,7 @@ namespace HRConnect.Api.Services
       using (var scope = AuditScope.Create("StatutoryContribution:Insert",
             () => new { employeeId }, EventCreationPolicy.InsertOnEnd))
       {
+        Console.WriteLine($"=============Creating A new UIF Deduction");
         try
         {
           Employee? employee = await _employeeRepo.GetEmployeeByIdAsync(employeeId);
@@ -61,10 +65,10 @@ namespace HRConnect.Api.Services
             UifEmployeeAmount = employeeAmount,
             UifEmployerAmount = employerAmount,
             EmployerSdlContribution = sdlDeduction,
-            CurrentMonth = new DateOnly(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day)
-
+            CurrentMonth = new DateOnly(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day)
           };
 
+          await _payrollRunService.AddRecordToCurrentRunAsync(deductions, employee.EmployeeId);
           var newDeduction = await _statutoryContributionRepo.AddDeductionsAsync(deductions);
           decimal projectedSalary = newDeduction.MonthlySalary - newDeduction.UifEmployeeAmount;
 
