@@ -17,6 +17,7 @@ namespace HRConnect.Api.Mappers
         Branch = dto.Branch,
         Salary = dto.Salary,
         EmployeeStartDate = dto.EmployeeStartDate,
+        TerminationDate = dto.TerminationDate,
         EffectiveDate = dto.EffectiveDate,
         MedicalOptionId = dto.MedicalOptionId, // TODO: Use Name in place - There an endpoint to get option by Name is required
         MedicalCategoryId = dto.MedicalCategoryId, // Use Name in place - There an endpoint to get option category by Name is required
@@ -28,7 +29,8 @@ namespace HRConnect.Api.Mappers
         ChildPremium = dto.ChildPremium,
         TotalDeductionAmount = dto.TotalDeductionAmount,
         CreatedDate = dto.CreatedDate,
-        IsActive = dto.IsActive
+        IsActive = dto.IsActive,
+        TerminationReason = dto.TerminationReason
       };
     }
   }

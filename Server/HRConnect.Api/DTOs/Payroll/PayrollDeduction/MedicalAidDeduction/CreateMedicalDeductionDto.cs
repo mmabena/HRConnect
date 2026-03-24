@@ -18,6 +18,7 @@
     public decimal Salary { get; set; }
     public DateTime EmployeeStartDate { get; set; }
     public DateTime EffectiveDate { get; set; } // This is the Medical Start Date
+    public DateTime? TerminationDate { get; set; }
     //FK
 
     public int MedicalOptionId { get; set; }

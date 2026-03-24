@@ -99,4 +99,13 @@ public class MedicalAidDeductionController : ControllerBase
           new {id = deduction.EmployeeId},
           deduction);*/
     }
+
+    [HttpPut("update/{id}/employee-deductions")]
+    [Authorize(Roles = "SuperUser")]
+    public async Task<IActionResult> UpdateEmployeeActiveMedicalAidDeductions([FromRoute] string id
+      , [FromBody] UpdateMedicalAidDeductionRequestDto request)
+    {
+      var update = await _medicalAidDeductionService.UpdateDeductionsByEmpIdAsync(id, request);
+      return Ok(update);
+    }
 }

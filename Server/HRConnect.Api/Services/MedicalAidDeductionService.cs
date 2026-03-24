@@ -16,19 +16,21 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
   private readonly IPayrollRunService _payrollRunService;
   private readonly IEmployeeService _employeeService;
   private readonly IMedicalAidEligibilityService _medicalAidEligibilityService;
+  private readonly IServiceScopeFactory _serviceScopeFactory;
 
   public MedicalAidDeductionService(
       IMedicalAidDeductionRepository medicalAidDeductionRepository,
       IMedicalOptionRepository medicalOptionRepository,
       IEmployeeService employeeService, IPayrollRunService payrollRunService, 
-      IMedicalAidEligibilityService medicalAidEligibilityService)
+      IMedicalAidEligibilityService medicalAidEligibilityService,
+      IServiceScopeFactory serviceScopeFactory)
   {
     _medicalAidDeductionRepository = medicalAidDeductionRepository;
     _medicalOptionRepository = medicalOptionRepository;
     _employeeService = employeeService;
     _payrollRunService = payrollRunService;
     _medicalAidEligibilityService = medicalAidEligibilityService;
-
+    _serviceScopeFactory = serviceScopeFactory;
   }
 
   public async Task<MedicalAidDeductionDto> GetMedicalAidDeductionsByEmployeeIdAsync(string employeeId)
@@ -204,9 +206,9 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
         // Need to consider skipping Network choice
         decimal principalPremiumEstimate = CalculatePrincipalPremium(medicalOption);
         decimal spousePremiumEstimate =
-          CalculateAdultPremium(medicalOption, request.AdultCount, request);
+          CalculateAdultPremium(medicalOption, request.AdultCount);
         decimal childPremiumEstimate =
-          CalculateChildPremium(medicalOption, request.ChildrenCount, request); // cater for network choice
+          CalculateChildPremium(medicalOption, request.ChildrenCount); // cater for network choice
         decimal totalPremiumEstimate = CalculateTotalPremium(principalPremiumEstimate,
           spousePremiumEstimate, childPremiumEstimate);
 
@@ -232,30 +234,30 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
       Salary = employee.MonthlySalary,
       EmployeeStartDate = employee.StartDate.ToDateTime(TimeOnly.MinValue),
 
-            // Medical option details
-            MedicalOptionId = medicalOptionId,
-            OptionName = medicalOption.MedicalOptionName,
-            MedicalCategoryId = category.MedicalOptionCategoryId,
-            OptionCategoryName = category.MedicalOptionCategoryName,
+      // Medical option details
+      MedicalOptionId = medicalOptionId,
+      OptionName = medicalOption.MedicalOptionName,
+      MedicalCategoryId = category.MedicalOptionCategoryId,
+      OptionCategoryName = category.MedicalOptionCategoryName,
 
       // Dependent counts from request
       PrincipalCount = request.PrincipalCount,
       AdultCount = request.AdultCount,
       ChildrenCount = request.ChildrenCount,
 
-            // Premium amounts from request (already calculated by client from eligible options)
-            PrincipalPremium = principalPremiumEstimate,
-            SpousePremium = spousePremiumEstimate,
-            ChildPremium = childPremiumEstimate, // cater for network choice
-            TotalDeductionAmount = totalPremiumEstimate,
+      // Premium amounts from request (already calculated by client from eligible options)
+      PrincipalPremium = principalPremiumEstimate,
+      SpousePremium = spousePremiumEstimate,
+      ChildPremium = childPremiumEstimate, // cater for network choice
+      TotalDeductionAmount = totalPremiumEstimate,
 
-            // Effective date (default to now if not specified)
-            EffectiveDate = GetEffectiveDate(employee.StartDate.ToDateTime(TimeOnly.MinValue)),
+      // Effective date (default to now if not specified)
+      EffectiveDate = GetEffectiveDate(employee.StartDate.ToDateTime(TimeOnly.MinValue)),
 
-            // Set as active by default
-            IsActive = MedicalAidDeductionUtil.EffectDateBeforeMidMonth(employee.StartDate.ToDateTime(TimeOnly.MinValue)),
-            CreatedDate = DateTime.Now,
-            UpdatedDate = DateTime.Now
+      // Set as active by default
+      IsActive = MedicalAidDeductionUtil.EffectDateBeforeMidMonth(employee.StartDate.ToDateTime(TimeOnly.MinValue)),
+      CreatedDate = DateTime.Now.ToLocalTime(),
+      UpdatedDate = DateTime.Now.ToLocalTime()
         };
 
     // Save to repository
@@ -267,11 +269,134 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
     return MapToDto(deduction);
   }
 
-  public async Task<MedicalAidDeductionDto> UpdateDeductionByEmpId(string employeeId)
+  public async Task<MedicalAidDeductionDto> UpdateDeductionsByEmpIdAsync(string employeeId,
+    UpdateMedicalAidDeductionRequestDto updatePayload)
   {
-    throw new NotImplementedException();
-  }
+    // First validate requestPayload
+    if(updatePayload == null) 
+      throw new ArgumentNullException(nameof(updatePayload), "Update request cannot be empty");
 
+    if (updatePayload.MedicalOptionId == null || updatePayload.MedicalOptionId <= 0)
+      throw new ArgumentException(
+        "Medical option ID must be a valid positive integer, and cannot be null");
+    
+    if (updatePayload.MedicalCategoryId == null || updatePayload.MedicalCategoryId <= 0)
+      throw new ArgumentException(
+        "Medical category ID must be a valid positive integer, and cannot be null");
+    if (updatePayload.OptionName.ToString().Trim().Length < 0)
+      throw new ArgumentException("Option name cannot be empty");
+
+    if (updatePayload.OptionCategory.ToString().Trim().Length < 0)
+      throw new ArgumentException("Option category cannot be empty");
+    
+    if (updatePayload.PrincipalCount < 0 || updatePayload.AdultCount < 0 || updatePayload.ChildrenCount < 0)
+      throw new ArgumentException(
+        "Principal count, adult count, and children count must be non-negative");
+    
+    if (updatePayload.PrincipalCount > 1)
+      throw new ArgumentException("Principal count cannot exceed 1");
+    
+    // Create separate scopes for parallel operations
+    using var payrollRunScope = _serviceScopeFactory.CreateScope();
+    using var employeeScope = _serviceScopeFactory.CreateScope();
+    using var medicalAidDeductionScope = _serviceScopeFactory.CreateScope();
+    using var medicalOptionScope = _serviceScopeFactory.CreateScope();
+
+    
+    // Attach required service methods to scoped services
+    var payrollRunService =
+      payrollRunScope.ServiceProvider.GetRequiredService<IPayrollRunService>();
+    
+    var employeeService = employeeScope.ServiceProvider.GetRequiredService<IEmployeeService>();
+    
+    var medicalAidDeductionsRepository = medicalAidDeductionScope.ServiceProvider
+      .GetRequiredService<IMedicalAidDeductionRepository>();
+    
+    var medicalOptionService =
+      medicalOptionScope.ServiceProvider.GetRequiredService<IMedicalOptionService>();
+
+    
+    // Call the desired methods, to execute in parallel
+    // Note : goal -> Get Medical Option and confirm if there is an active deduction on employee
+    var payrollTask = payrollRunService.GetCurrentRunAsync();
+    var employeeTask = employeeService.GetEmployeeByIdAsync(employeeId);
+    var medicalAidDeductionTask =
+      medicalAidDeductionsRepository.GetMedicalAidDeductionsByEmployeeIdAsync(employeeId);
+    var medicalOptionTask =
+      medicalOptionService.GetMedicalOptionByIdAsync(updatePayload.MedicalOptionId);
+    var medicalOptionCategoryTask =
+      medicalOptionService.GetCategoryById(updatePayload.MedicalCategoryId);
+    
+    // Create a task to wait for all tasks to complete
+    await Task.WhenAll(payrollTask, employeeTask, medicalAidDeductionTask, medicalOptionTask,
+      medicalOptionCategoryTask);
+    
+    // Access data from service calls
+    var currentRunId = payrollTask.Result.PayrollRunId;
+    var employeeData = employeeTask.Result;
+    var medicalAidDeductionsData = medicalAidDeductionTask.Result;
+    var medicalOptionData = medicalOptionTask.Result;
+    var medicalOptionCategoryData = medicalOptionCategoryTask.Result;
+    
+    
+    
+    if(employeeData == null) throw new ArgumentException("Employee not found");
+    if(medicalOptionData == null) throw new ArgumentException("Medical option not found");
+    if (medicalOptionCategoryData == null || medicalOptionCategoryData.Count == 0)
+      throw new ArgumentException("Medical option category not found");
+    if (medicalAidDeductionsData == null)
+      throw new ArgumentException("Active medical aid deduction not found");
+
+
+    
+    //perform calculations
+    
+    decimal principalPremium = CalculatePrincipalPremium(medicalOptionData);
+    decimal spousePremium = CalculateAdultPremium(medicalOptionData, updatePayload.AdultCount);
+    decimal childPremium = CalculateChildPremium(medicalOptionData, updatePayload.ChildrenCount);
+    decimal totalDeductionAmount = CalculateTotalPremium(principalPremium,spousePremium,childPremium);
+    
+    //create entity
+
+    var updateEntity = new MedicalAidDeduction
+    {
+      // Employee details from employee service
+      Name = employeeData.Name,
+      Surname = employeeData.Surname,
+      Branch = employeeData.Branch.ToString(),
+      Salary = employeeData.MonthlySalary,
+      EmployeeStartDate = employeeData.StartDate.ToDateTime(TimeOnly.MinValue),
+
+      // Medical option details
+      MedicalOptionId = updatePayload.MedicalOptionId,
+      OptionName = medicalOptionData.MedicalOptionName,
+      MedicalCategoryId = medicalOptionData.MedicalOptionCategoryId,
+      OptionCategoryName = medicalOptionCategoryData.Select(c => c.MedicalOptionCategoryName).ToString(),
+
+      // Dependent counts from request
+      PrincipalCount = updatePayload.PrincipalCount,
+      AdultCount = updatePayload.AdultCount,
+      ChildrenCount = updatePayload.ChildrenCount,
+
+      // Premium amounts from request (already calculated by client from eligible options)
+      PrincipalPremium = principalPremium,
+      SpousePremium = spousePremium,
+      ChildPremium = childPremium, // cater for network choice
+      TotalDeductionAmount = totalDeductionAmount,
+      // Effective date (default to now if not specified)
+      EffectiveDate = GetEffectiveDate(employeeData.StartDate.ToDateTime(TimeOnly.MinValue)),
+
+      // Set as active by default
+      UpdatedDate = DateTime.Now.ToLocalTime()
+    };
+    
+    //Update
+    await medicalAidDeductionsRepository.UpdateDeductionsByEmpIdAsync(employeeId, currentRunId,
+      updateEntity);
+
+    return MapToDto(updateEntity);
+  }
+    //TODO :  Move to Mappers
     /// <summary>
     /// Maps a MedicalAidDeduction entity to a MedicalAidDeductionDto.
     /// </summary>
@@ -315,7 +440,7 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
     /// <summary>
     /// Calculates the adult premium based on number of adults and per-adult contribution.
     /// </summary>
-    private static decimal CalculateAdultPremium(MedicalOptionDto? option, int numberOfAdults,CreateMedicalAidDeductionRequestDto request)
+    private static decimal CalculateAdultPremium(MedicalOptionDto? option, int numberOfAdults)
     {
       if (numberOfAdults <= 0) return 0m;
 
@@ -326,7 +451,7 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
     /// <summary>
     /// Calculates the child premium based on number of children and per-child contribution.
     /// </summary>
-    private static decimal CalculateChildPremium(MedicalOptionDto? option, int numberOfChildren, CreateMedicalAidDeductionRequestDto request)
+    private static decimal CalculateChildPremium(MedicalOptionDto? option, int numberOfChildren)
     {
       if (numberOfChildren <= 0) return 0m;
 

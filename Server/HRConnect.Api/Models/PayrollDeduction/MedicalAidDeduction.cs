@@ -7,7 +7,7 @@ namespace HRConnect.Api.Models.PayrollDeduction
   {
     //[Key]
     [Column("MedicalAidDeductionId")]
-    public int MedicalAidDeductionId { get; set; }
+    public int MedicalAidDeductionId { get; set; } // to comment out
     //FK
     //[ForeignKey(nameof(PayrollRun))]
     //public int PayrollRunNumber { get; set; }
@@ -23,7 +23,7 @@ namespace HRConnect.Api.Models.PayrollDeduction
     // This is the Medical Start Date
     public DateTime EffectiveDate { get; set; } 
     // this is the end date of the medical aid (caters for the event when the member changes plans or terminates their medical aid)
-    //public DateTime? TerminationDate { get; set; }
+    public DateTime? TerminationDate { get; set; }
     //FK
     [ForeignKey(nameof(MedicalOption))]
     public int MedicalOptionId { get; set; }
@@ -44,10 +44,11 @@ namespace HRConnect.Api.Models.PayrollDeduction
     public decimal? ChildPremium { get; set; }
     [Column(TypeName = "decimal(15, 2)")]
     public decimal TotalDeductionAmount { get; set; }
-    public DateTime CreatedDate { get; set; } = DateTime.UtcNow; // setting the default date to use UTC (Ask??)
+    public DateTime CreatedDate { get; set; } // setting the default date to use UTC (Ask??)
     public bool IsActive { get; set; }
 
     public DateTime UpdatedDate { get; set; }
+    public string? TerminationReason { get; set; } = string.Empty;// Reason for termination (Moving to another premium?, moving to another medical aid provider, etc.)
 
     public MedicalOption MedicalOption { get; set; }
     //public Employee Employee { get; set; }

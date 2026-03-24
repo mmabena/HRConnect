@@ -26,16 +26,18 @@ namespace HRConnect.Api.Repository
       string employeeId)
     {
       return await _context.MedicalAidDeductions
-        .AsNoTracking() // Prevents change tracking overhead
-        .Where(d => d.EmployeeId == employeeId)
-        .OrderByDescending(d => d.CreatedDate)
+        .AsNoTracking()
+        .Include(p => p.PayrollRun)
+        .Where(p => p.EmployeeId == employeeId && p.PayrollRun.PayrollRunId != null && p.PayrollRun.IsFinalised == false && p.PayrollRun.IsLocked == false)
         .ToListAsync();
     }
 
     public async Task<IReadOnlyList<MedicalAidDeduction>> GetAllMedicalAidDeductionsAsync()
     {
       return await _context.MedicalAidDeductions
-        .Where(ma => ma.Id != 0 || ma.Id != null)//It can be trimmed down to omit IDs
+        .AsNoTracking()
+        .Include(p => p.PayrollRun)
+        .Where(p => p.Id != null && p.PayrollRun.PayrollRunId != null && p.PayrollRun.IsFinalised == true && p.PayrollRun.IsLocked == true)
         .ToListAsync();
     }
 
@@ -45,18 +47,23 @@ namespace HRConnect.Api.Repository
       await _context.SaveChangesAsync();
     }
 
-    public async Task UpdateDeductionByEmpIdAsync(string employeeId, MedicalAidDeduction deduction)
+    public async Task UpdateDeductionsByEmpIdAsync(string employeeId, int payrollRunId,
+      MedicalAidDeduction updatePayloadDeduction)
     {
       var existingDeduction = await _context.MedicalAidDeductions
-        .FirstOrDefaultAsync(d => d.EmployeeId == employeeId);
+        .AsNoTracking()
+        .Include(p => p.PayrollRun)
+        .ThenInclude(q => q.IsFinalised == false && q.IsLocked == false && q.PayrollRunId != null)
+        .Where(q => q.EmployeeId == employeeId && q.PayrollRunId == payrollRunId && q.PayrollRun.IsFinalised == false && q.PayrollRun.IsLocked == false)
+        .ToListAsync();
 
       if (existingDeduction == null)
       {
-        throw new KeyNotFoundException($"No medical aid deduction found for employee {employeeId}");
+        throw new KeyNotFoundException($"No medical aid deduction found for employee {employeeId} on the active payroll run");
       }
 
       // Update the existing deduction with new values
-      _context.Entry(existingDeduction).CurrentValues.SetValues(deduction);
+      _context.Entry(existingDeduction).CurrentValues.SetValues(updatePayloadDeduction);
       await _context.SaveChangesAsync();
     }
   }

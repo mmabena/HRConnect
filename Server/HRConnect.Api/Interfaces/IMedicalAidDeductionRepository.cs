@@ -7,7 +7,7 @@ namespace HRConnect.Api.Interfaces
     Task<List<MedicalAidDeduction>> GetMedicalAidDeductionsByEmployeeIdAsync(string employeeId);
     Task<IReadOnlyList<MedicalAidDeduction>> GetAllMedicalAidDeductionsAsync();
     Task AddNewMedicalAidDeductionsAsync(MedicalAidDeduction deduction);
-    Task UpdateDeductionByEmpIdAsync(string employeeId, MedicalAidDeduction deduction);
+    Task UpdateDeductionsByEmpIdAsync(string employeeId, int payrollRunId, MedicalAidDeduction updatePayloadDeduction);
   }
 }
 

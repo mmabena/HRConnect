@@ -13,6 +13,7 @@ namespace HRConnect.Api.DTOs.Payroll.PayrollDeduction.MedicalAidDeduction
     public decimal Salary { get; set; }
     public DateTime EmployeeStartDate { get; set; }
     public DateTime EffectiveDate { get; set; } // This is the Medical Start Date
+    public DateTime? TerminationDate { get; set; }
     //FK
     public int MedicalOptionId { get; set; }
     //FK
@@ -29,5 +30,8 @@ namespace HRConnect.Api.DTOs.Payroll.PayrollDeduction.MedicalAidDeduction
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow; // setting the default date to use UTC
     public bool IsActive { get; set; }
     public DateTime UpdatedDate { get; set; }
+
+    public string? TerminationReason { get; set; }
+    
   }
 }
