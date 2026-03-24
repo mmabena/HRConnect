@@ -260,7 +260,7 @@ const EditPositionManagement = ({ id, isOpen, onClose, onOpenChangeModal })  => 
             />
           </div>
 
-<div className="pm-input-group-edit date-input-wrapper">
+<div className="pm-input-group-edit ">
   <label className="title-placeholder-edit">
     Effective Date
   </label>
