@@ -47,7 +47,7 @@ namespace HRConnect.Tests
             var context = GetInMemoryDb();
 
             context.LeaveTypes.Add(
-    new LeaveType { Id = 1, Name = "Annual", Code = "AL", Description = "Annual Leave", IsActive = true });
+            new LeaveType { Id = 1, Name = "Annual", Code = "AL", Description = "Annual Leave", IsActive = true });
 
             await context.SaveChangesAsync();
 
@@ -64,7 +64,7 @@ namespace HRConnect.Tests
             var context = GetInMemoryDb();
             var service = new LeaveTypeManagementService(context);
 
-            await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            await Assert.ThrowsAsync<KeyNotFoundException>(() =>
                 service.GetLeaveTypeByIdAsync(99));
         }
 

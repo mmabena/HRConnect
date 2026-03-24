@@ -11,13 +11,16 @@ namespace HRConnect.Api.Services
     {
         private readonly ApplicationDBContext _context;
         private readonly IEmailService _emailService;
+        private readonly IConfiguration _configuration;
 
         public LeaveApplicationService(
             ApplicationDBContext context,
-            IEmailService emailService)
+            IEmailService emailService,
+            IConfiguration configuration)
         {
             _context = context;
             _emailService = emailService;
+            _configuration = configuration;
         }
         /// <summary>
         /// Processes a leave application request by validating the employee, leave type, and requested dates, checking the employee's leave balance,
@@ -197,22 +200,12 @@ namespace HRConnect.Api.Services
 
             var decision = approved ? "APPROVED" : "REJECTED";
 
-            var emailBody = $"""
-<h2>Leave Application Update</h2>
-
-<p>Hello {employee.Name},</p>
-
-<p>Your leave request has been <strong>{decision}</strong>.</p>
-{(approved ? "" : $"<p><strong>Reason:</strong> {application.RejectionReason}</p>")}
-
-<p><strong>Leave Type:</strong> {leaveType.Name}</p>
-<p><strong>Dates:</strong> {application.StartDate} to {application.EndDate}</p>
-<p><strong>Days:</strong> {application.DaysRequested}</p>
-
-<br/>
-
-<p>Regards,<br/>HRConnect</p>
-""";
+            var emailBody = EmailTemplates.GenerateDecisionEmailHtml(
+            employee,
+            leaveType,
+            application,
+            approved
+        );
 
             await _emailService.SendEmailAsync(
                 employee.Email,
@@ -238,41 +231,30 @@ namespace HRConnect.Api.Services
             if (application.ApprovalToken == Guid.Empty)
             {
                 application.ApprovalToken = Guid.NewGuid();
-                application.TokenExpiry = DateTime.UtcNow.AddHours(48); // 48 hour approval window
+                application.TokenExpiry = DateTime.UtcNow.AddHours(48); 
                 await _context.SaveChangesAsync();
             }
+            var baseUrl = _configuration["AppSettings:BaseUrl"];
+
             var approveLink =
-                $"http://localhost:5147/api/LeaveApplication/{application.Id}/approve?token={application.ApprovalToken}";
+                $"{baseUrl}/api/LeaveApplication/{application.Id}/approve?token={application.ApprovalToken}";
 
             var rejectLink =
-                $"http://localhost:5147/api/LeaveApplication/{application.Id}/reject?token={application.ApprovalToken}";
+                $"{baseUrl}/api/LeaveApplication/{application.Id}/reject?token={application.ApprovalToken}";
 
-            var emailBody = $"""
-<h2>Leave Approval Required</h2>
-
-<p><strong>Employee:</strong> {employee.Name} {employee.Surname}</p>
-<p><strong>Leave Type:</strong> {leaveType.Name}</p>
-<p><strong>Dates:</strong> {application.StartDate} to {application.EndDate}</p>
-<p><strong>Days Requested:</strong> {application.DaysRequested}</p>
-
-<br/>
-
-<a href="{approveLink}" style="background-color:green;color:white;padding:10px;text-decoration:none;">
-Approve Leave
-</a>
-
-&nbsp;&nbsp;
-
-<a href="{rejectLink}" style="background-color:red;color:white;padding:10px;text-decoration:none;">
-Reject Leave
-</a>
-""";
+            var emailBody = EmailTemplates.GenerateApprovalEmailHtml(
+            employee,
+            leaveType,
+            application,
+            approveLink,
+            rejectLink
+        );
 
             var manager = await _context.Employees
-     .FirstOrDefaultAsync(e => e.Email == employee.CareerManagerID);
+     .FirstOrDefaultAsync(e => e.EmployeeId == employee.CareerManagerID);
 
             if (manager == null)
-                throw new InvalidOperationException("Manager not found.");
+                throw new InvalidOperationException($"Manager not found for employee {employee.EmployeeId}");
 
             await _emailService.SendEmailAsync(
                 manager.Email,
@@ -280,75 +262,6 @@ Reject Leave
                 emailBody
             );
         }
-        /// <summary>
-        /// Generates the HTML content for the leave approval email sent to the manager, 
-        /// including details about the employee, leave type, requested dates, and action links for approving or rejecting the leave application,
-        /// </summary>
-        /// <param name="employee"></param>
-        /// <param name="leaveType"></param>
-        /// <param name="application"></param>
-        /// <param name="approveLink"></param>
-        /// <param name="rejectLink"></param>
-        /// <returns></returns>
-        private string GenerateApprovalEmailHtml(
-    Employee employee,
-    LeaveType leaveType,
-    LeaveApplication application,
-    string approveLink,
-    string rejectLink)
-        {
-            return $"""
-<html>
-<body style="font-family: Arial; background:#f4f6f8; padding:20px;">
 
-<div style="max-width:600px;background:white;padding:30px;border-radius:8px">
-
-<h2>Leave Approval Required</h2>
-
-<p><strong>Employee:</strong> {employee.Name} {employee.Surname}</p>
-
-<p><strong>Leave Type:</strong> {leaveType.Name}</p>
-
-<p><strong>Dates:</strong> {application.StartDate} → {application.EndDate}</p>
-
-<p><strong>Days Requested:</strong> {application.DaysRequested}</p>
-
-<br>
-
-<a href="{approveLink}"
-style="
-background:#2ecc71;
-color:white;
-padding:12px 25px;
-text-decoration:none;
-border-radius:6px;
-margin-right:10px;
-font-weight:bold;">
-Approve
-</a>
-
-<a href="{rejectLink}"
-style="
-background:#e74c3c;
-color:white;
-padding:12px 25px;
-text-decoration:none;
-border-radius:6px;
-font-weight:bold;">
-Reject
-</a>
-
-<br><br>
-
-<p style="color:#888;font-size:12px">
-HRConnect Leave Management System
-</p>
-
-</div>
-
-</body>
-</html>
-""";
-        }
     }
 }

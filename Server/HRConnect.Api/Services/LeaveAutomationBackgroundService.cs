@@ -68,13 +68,13 @@ namespace HRConnect.Api.Services
                 try
                 {
                     using var scope = _scopeFactory.CreateScope();
-                    var service = scope.ServiceProvider
-                        .GetRequiredService<IEmployeeEntitlementService>();
+                    var leaveProcessingService = scope.ServiceProvider
+                        .GetRequiredService<ILeaveProcessingService>();
 
                     _runningCheck(_logger, null);
 
-                    await service.ProcessCarryOverNotificationAsync();
-                    await service.ProcessAnnualResetAsync();
+                    await leaveProcessingService.ProcessCarryOverNotificationAsync();
+                    await leaveProcessingService.ProcessAnnualResetAsync();
                 }
                 catch (Exception ex)
                 {

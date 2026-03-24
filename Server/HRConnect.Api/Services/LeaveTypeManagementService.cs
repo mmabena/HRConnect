@@ -3,11 +3,11 @@ namespace HRConnect.Api.Services
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Threading.Tasks;
     using HRConnect.Api.DTOs;
     using HRConnect.Api.Models;
     using HRConnect.Api.Data;
     using Microsoft.EntityFrameworkCore;
+    using System.Threading.Tasks;
     using HRConnect.Api.Interfaces;
 
     public class LeaveTypeManagementService : ILeaveTypeManagementService
@@ -45,7 +45,7 @@ namespace HRConnect.Api.Services
                 .FirstOrDefaultAsync(l => l.Id == id);
 
             if (leaveType == null)
-                throw new InvalidOperationException("Leave type not found.");
+                throw new KeyNotFoundException("Leave type not found.");
 
             return MapToResponse(leaveType);
         }
@@ -103,19 +103,17 @@ namespace HRConnect.Api.Services
             await _context.LeaveTypes.AddAsync(leaveType);
             await _context.SaveChangesAsync();
 
-            foreach (var rule in request.Rules)
+            var rules = request.Rules.Select(rule => new LeaveEntitlementRule
             {
-                await _context.LeaveEntitlementRules.AddAsync(new LeaveEntitlementRule
-                {
-                    LeaveTypeId = leaveType.Id,
-                    JobGradeId = rule.JobGradeId,
-                    MinYearsService = rule.MinYearsService,
-                    MaxYearsService = rule.MaxYearsService,
-                    DaysAllocated = rule.DaysAllocated,
-                    IsActive = true
-                });
-            }
+                LeaveTypeId = leaveType.Id,
+                JobGradeId = rule.JobGradeId,
+                MinYearsService = rule.MinYearsService,
+                MaxYearsService = rule.MaxYearsService,
+                DaysAllocated = rule.DaysAllocated,
+                IsActive = true
+            }).ToList();
 
+            await _context.LeaveEntitlementRules.AddRangeAsync(rules);
             await _context.SaveChangesAsync();
 
             return await GetLeaveTypeByIdAsync(leaveType.Id);
@@ -166,19 +164,17 @@ namespace HRConnect.Api.Services
 
             _context.LeaveEntitlementRules.RemoveRange(leaveType.EntitlementRules);
 
-            foreach (var rule in request.Rules)
+            var rules = request.Rules.Select(rule => new LeaveEntitlementRule
             {
-                await _context.LeaveEntitlementRules.AddAsync(new LeaveEntitlementRule
-                {
-                    LeaveTypeId = leaveType.Id,
-                    JobGradeId = rule.JobGradeId,
-                    MinYearsService = rule.MinYearsService,
-                    MaxYearsService = rule.MaxYearsService,
-                    DaysAllocated = rule.DaysAllocated,
-                    IsActive = true
-                });
-            }
+                LeaveTypeId = leaveType.Id,
+                JobGradeId = rule.JobGradeId,
+                MinYearsService = rule.MinYearsService,
+                MaxYearsService = rule.MaxYearsService,
+                DaysAllocated = rule.DaysAllocated,
+                IsActive = true
+            }).ToList();
 
+            await _context.LeaveEntitlementRules.AddRangeAsync(rules);
             await _context.SaveChangesAsync();
 
             return await GetLeaveTypeByIdAsync(leaveType.Id);

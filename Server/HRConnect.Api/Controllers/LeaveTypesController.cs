@@ -1,15 +1,10 @@
 namespace HRConnect.Api.Controllers
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
-    using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Mvc;
-    using Microsoft.Extensions.Logging;
+    using Microsoft.AspNetCore.Authorization;
     using HRConnect.Api.DTOs;
     using HRConnect.Api.Interfaces;
-    using Microsoft.AspNetCore.Authorization;
 
     [ApiController]
     [Route("api/leave-types")]
@@ -51,8 +46,11 @@ namespace HRConnect.Api.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<IActionResult> Create(CreateLeaveTypeRequest request)
-            => Ok(await _service.CreateLeaveTypeAsync(request));
+        public async Task<IActionResult> Create([FromBody] CreateLeaveTypeRequest request)
+        {
+            var result = await _service.CreateLeaveTypeAsync(request);
+            return CreatedAtAction(nameof(Get), new { id = result.Id }, result);
+        }
         /// <summary>
         /// Handles the HTTP PUT request to update an existing leave type,
         /// by accepting the leave type ID as a route parameter and an UpdateLeaveTypeRequest DTO in the request body, 
@@ -65,7 +63,8 @@ namespace HRConnect.Api.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, UpdateLeaveTypeRequest request)
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateLeaveTypeRequest request)
             => Ok(await _service.UpdateLeaveTypeAsync(id, request));
+        
     }
 }

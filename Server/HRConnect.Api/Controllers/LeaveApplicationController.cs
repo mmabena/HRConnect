@@ -1,8 +1,6 @@
 namespace HRConnect.Api.Controllers
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Mvc;
     using HRConnect.Api.DTOs;
@@ -28,7 +26,7 @@ namespace HRConnect.Api.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<IActionResult> ApplyForLeave(CreateApplicationRequest request)
+        public async Task<IActionResult> ApplyForLeave([FromBody] CreateApplicationRequest request)
         {
             var result = await _service.ApplyForLeaveAsync(request);
             return Ok(result);
@@ -41,7 +39,7 @@ namespace HRConnect.Api.Controllers
         /// <param name="id"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        [HttpGet("{id}/approve")]
+        [HttpPost("{id}/approve")]
         public async Task<IActionResult> ApproveLeave(int id, [FromQuery] Guid token)
         {
             await _service.ApproveLeaveAsync(id, token);
@@ -63,15 +61,33 @@ namespace HRConnect.Api.Controllers
         [HttpPost("{id}/reject")]
         public async Task<IActionResult> RejectLeave(
             int id,
-            [FromQuery] Guid token,
-            [FromBody] RejectLeaveRequest request)
+            [FromQuery] Guid token)
         {
-            await _service.RejectLeaveAsync(id, token, request.Reason);
+            await _service.RejectLeaveAsync(id, token, "Rejected by manager");
 
             return Ok(new
             {
                 message = "Leave rejected successfully."
             });
+        }
+        [HttpGet("{id}/approve")]
+        public async Task<IActionResult> ApproveFromEmail(
+    int id,
+    [FromQuery] Guid token)
+        {
+            // Internally call the POST logic
+            await _service.ApproveLeaveAsync(id, token);
+
+            return Content("Leave approved successfully.");
+        }
+        [HttpGet("{id}/reject")]
+        public async Task<IActionResult> RejectFromEmail(
+    int id,
+    [FromQuery] Guid token)
+        {
+            await _service.RejectLeaveAsync(id, token, "Rejected by manager");
+
+            return Content("Leave rejected successfully.");
         }
     }
 }

@@ -10,11 +10,17 @@ namespace HRConnect.Api.Controllers
     [Authorize(Roles = "SuperUser")]
     public class EmployeeController : ControllerBase
     {
-        private readonly IEmployeeEntitlementService _employeeService;
+        private readonly IEmployeeService _employeeService;
+        private readonly ILeaveRuleService _leaveRuleService;
+        private readonly ILeaveBalanceService _leaveBalanceService;
 
-        public EmployeeController(IEmployeeEntitlementService employeeService)
+        public EmployeeController(IEmployeeService employeeService,
+            ILeaveRuleService leaveRuleService,
+            ILeaveBalanceService leaveBalanceService)
         {
             _employeeService = employeeService;
+            _leaveRuleService = leaveRuleService;
+            _leaveBalanceService = leaveBalanceService;
         }
         [HttpPost]
         public async Task<ActionResult<EmployeeResponse>> Create(
@@ -51,23 +57,11 @@ namespace HRConnect.Api.Controllers
 
             return Ok(updated);
         }
-        /// <summary>
-        /// Updates the leave entitlement rule for employees based on the provided UpdateLeaveRuleRequest DTO,
-        /// which includes the employee's ID and the new leave entitlement rule details.
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpPut("update-rule")]
-        public async Task<IActionResult> UpdateRule(UpdateLeaveRuleRequest request)
-        {
-            await _employeeService.UpdateLeaveEntitlementRuleAsync(request);
-            return Ok("Rule updated and employees recalculated.");
-        }
         [HttpPut("update-used-days")]
         public async Task<IActionResult> UpdateTakenDays(
         [FromBody] UpdateTakenDaysRequest request)
         {
-            await _employeeService.UpdateTakenDaysAsync(request);
+            await _leaveBalanceService.UpdateTakenDaysAsync(request);
             return Ok("Used days updated successfully.");
         }
         /// <summary>
@@ -83,7 +77,7 @@ namespace HRConnect.Api.Controllers
             string employeeId,
             DateOnly projectionDate)
         {
-            var result = await _employeeService.ProjectAnnualLeaveAsync(
+            var result = await _leaveBalanceService.ProjectAnnualLeaveAsync(
                 employeeId,
                 projectionDate);
 

@@ -92,12 +92,16 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.Services.AuthService>();
 
-//Mpho Mosia - Leave Type Services
-builder.Services.AddScoped<IEmployeeEntitlementService, EmployeeEntitlementService>();
-builder.Services.AddHostedService<LeaveAutomationBackgroundService>();
-builder.Services.AddScoped<IEmployeeEntitlementService, EmployeeEntitlementService>();
+// Mpho Mosia - Leave Services 
+builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+builder.Services.AddScoped<ILeaveBalanceService, LeaveBalanceService>();
+builder.Services.AddScoped<ILeaveProcessingService, LeaveProcessingService>();
+builder.Services.AddScoped<ILeaveRuleService, LeaveRuleService>();
+
 builder.Services.AddScoped<ILeaveTypeManagementService, LeaveTypeManagementService>();
 builder.Services.AddScoped<ILeaveApplicationService, LeaveApplicationService>();
+
+builder.Services.AddHostedService<LeaveAutomationBackgroundService>();
 
 builder.Services.AddCors(options =>
 {
