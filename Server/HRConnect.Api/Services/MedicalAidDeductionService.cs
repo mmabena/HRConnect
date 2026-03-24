@@ -250,7 +250,7 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
             TotalDeductionAmount = totalPremiumEstimate,
 
             // Effective date (default to now if not specified)
-            EffectiveDate = MedicalAidDeductionUtil.EffectDateBeforeMidMonth(employee.StartDate.ToDateTime(TimeOnly.MinValue)) ? employee.StartDate.ToDateTime(TimeOnly.MinValue) : DateTime.Now.AddMonths(1).AddDays( -(1 - employee.StartDate.ToDateTime(TimeOnly.MinValue).Day) ),
+            EffectiveDate = GetEffectiveDate(employee.StartDate.ToDateTime(TimeOnly.MinValue)),
 
             // Set as active by default
             IsActive = MedicalAidDeductionUtil.EffectDateBeforeMidMonth(employee.StartDate.ToDateTime(TimeOnly.MinValue)),
@@ -343,5 +343,20 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
       decimal childPremium)
     {
       return Math.Abs(principalPremium + adultPremium + childPremium);
+    }
+
+    /// <summary>
+    /// Get Effective date based on date supplied.
+    /// </summary>
+    /// <remarks>
+    /// In accordance to the business rules, if the date is before mid-month, the effective date is the start date of the employee
+    /// Else the effective date is the 1st of the following month within the current year.
+    /// </remarks>
+    /// 
+    private static DateTime GetEffectiveDate(DateTime date)
+    {
+      return date.Day <= 15
+        ? date
+        : new DateTime(DateTime.Now.Year, DateTime.Now.AddMonths(1).Month, 1);
     }
 }

@@ -23,7 +23,7 @@ namespace HRConnect.Api.Models.PayrollDeduction
     // This is the Medical Start Date
     public DateTime EffectiveDate { get; set; } 
     // this is the end date of the medical aid (caters for the event when the member changes plans or terminates their medical aid)
-    public DateTime? TerminationDate { get; set; }
+    //public DateTime? TerminationDate { get; set; }
     //FK
     [ForeignKey(nameof(MedicalOption))]
     public int MedicalOptionId { get; set; }
