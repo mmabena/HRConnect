@@ -32,15 +32,13 @@
       if (employeePensionEnrollmentUpdateDto != null)
       {
         EmployeePensionEnrollment? employeePensionEnrollment = await _employeePensionEnrollmentRepository.
-        GetByEmployeeIdAsync(employeePensionEnrollmentUpdateDto.EmployeeId);
+        GetByEmployeeIdAndLastRunIdAsync(employeePensionEnrollmentUpdateDto.EmployeeId);
 
         int oldPensionOptionId = (int)(employeePensionEnrollment?.PensionOptionId);
         if (employeePensionEnrollment != null)
         {
           employeePensionEnrollment.PensionOptionId = employeePensionEnrollmentUpdateDto.PensionOptionId
           ?? employeePensionEnrollment.PensionOptionId;
-          employeePensionEnrollment.EffectiveDate = employeePensionEnrollmentUpdateDto.EffectiveDate
-            ?? employeePensionEnrollment.EffectiveDate;
           employeePensionEnrollment.VoluntaryContribution = employeePensionEnrollmentUpdateDto.VoluntaryContribution
             ?? employeePensionEnrollment.VoluntaryContribution;
           employeePensionEnrollment.IsVoluntaryContributionPermament = employeePensionEnrollmentUpdateDto.IsVoluntaryContributionPermament

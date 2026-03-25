@@ -5,7 +5,6 @@ using HRConnect.Api.Data;
 // using Resend;
 using HRConnect.Api.Interfaces;
 using HRConnect.Api.Interfaces.Pension;
-using HRConnect.Api.Interfaces.PensionProjection;
 using HRConnect.Api.Middleware;
 using HRConnect.Api.Models;
 using HRConnect.Api.Repositories;
@@ -227,9 +226,9 @@ builder.Services.AddScoped<IMedicalOptionRepository, MedicalOptionRepository>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IMedicalOptionService,
   HRConnect.Api.Services.MedicalOptionService>();
 builder.Services.AddScoped<IEmployeePensionEnrollmentRepository, EmployeePensionEnrollmentRepository>();
-builder.Services.AddScoped<IEmployeePensionEnrollmentService, EmployeePensionEnrollmentService>();
+builder.Services.AddTransient<IEmployeePensionEnrollmentService, EmployeePensionEnrollmentService>();
 builder.Services.AddScoped<IPensionDeductionRepository, PensionDeductionRepository>();
-builder.Services.AddScoped<IPensionDeductionService, PensionDeductionService>();
+builder.Services.AddTransient<IPensionDeductionService, PensionDeductionService>();
 
 builder.Services.AddScoped<IMedicalAidEligibilityService, MedicalAidEligibilityService>();
 builder.Services.AddScoped<IMedicalAidDeductionRepository, MedicalAidDeductionRepository>();

@@ -9,7 +9,6 @@
     Task<PensionDeductionDto?> GetEmployeePensionDeductionByIdAsync(string employeeId);
     Task<List<PensionDeductionDto>> GetPensionDeductionsByPayRollRunIdAsync(int payrollRunId);
     Task<PensionDeductionDto?> UpdateEmployeePensionDeductionAsync(PensionDeductionUpdateDto pensionDeductionUpdateDto);
-    Task<bool> DeleteEmployeePensionDeductionAsync();
     Task PensionDeductionRollover();
   }
 }

@@ -133,6 +133,7 @@ namespace HRConnect.Api.Services
       existingEmployee.MonthlySalary = employeeDto.MonthlySalary;
       existingEmployee.CareerManagerID = employeeDto.CareerManagerID;
       existingEmployee.UpdatedAt = DateTime.UtcNow;
+      existingEmployee.IsActive = employeeDto.IsActive;
 
       var updatedEmployee = await _employeeRepo.UpdateEmployeeAsync(existingEmployee);
       return updatedEmployee?.ToEmployeeDto();

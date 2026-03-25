@@ -2,7 +2,7 @@ namespace HRConnect.Api.Services
 {
   using System.Globalization;
   using HRConnect.Api.DTOs.Employee.Pension;
-  using HRConnect.Api.Interfaces.PensionProjection;
+  using HRConnect.Api.Interfaces.Pension;
   using HRConnect.Api.Models;
   using HRConnect.Api.Utils;
 

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace HRConnect.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class EmployeePensionEnrollment : Migration
+    public partial class EmployeePensionEnrollmentRelations : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -14,6 +14,16 @@ namespace HRConnect.Api.Migrations
             migrationBuilder.DropCheckConstraint(
                 name: "CK_PayrollRun_PayrollRunNumber",
                 table: "PayrollRuns");
+
+            migrationBuilder.RenameColumn(
+                name: "IDNumber",
+                table: "PensionDeductions",
+                newName: "IdNumber");
+
+            migrationBuilder.RenameColumn(
+                name: "PhyscialAddress",
+                table: "PensionDeductions",
+                newName: "PhysicalAddress");
 
             migrationBuilder.AlterColumn<DateOnly>(
                 name: "DateJoinedCompany",
@@ -37,6 +47,13 @@ namespace HRConnect.Api.Migrations
                 type: "decimal(18,2)",
                 nullable: false,
                 defaultValue: 0m);
+
+            migrationBuilder.AddColumn<bool>(
+                name: "IsActive",
+                table: "Employees",
+                type: "bit",
+                nullable: false,
+                defaultValue: false);
 
             migrationBuilder.AddColumn<int>(
                 name: "PensionOptionId",
@@ -167,8 +184,22 @@ namespace HRConnect.Api.Migrations
                 table: "PensionDeductions");
 
             migrationBuilder.DropColumn(
+                name: "IsActive",
+                table: "Employees");
+
+            migrationBuilder.DropColumn(
                 name: "PensionOptionId",
                 table: "Employees");
+
+            migrationBuilder.RenameColumn(
+                name: "IdNumber",
+                table: "PensionDeductions",
+                newName: "IDNumber");
+
+            migrationBuilder.RenameColumn(
+                name: "PhysicalAddress",
+                table: "PensionDeductions",
+                newName: "PhyscialAddress");
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "DateJoinedCompany",

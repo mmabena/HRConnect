@@ -9,10 +9,11 @@
     {
       return new PensionDeductionDto
       {
+        EmployeeId = pensionDeduction.EmployeeId,
         FirstName = pensionDeduction.FirstName,
         LastName = pensionDeduction.LastName,
         DateJoinedCompany = pensionDeduction.DateJoinedCompany,
-        IDNumber = pensionDeduction.IDNumber,
+        IDNumber = pensionDeduction.IdNumber,
         Passport = pensionDeduction.Passport,
         TaxNumber = pensionDeduction.TaxNumber,
         PensionableSalary = pensionDeduction.PensionableSalary,
@@ -22,7 +23,7 @@
         VoluntaryContribution = pensionDeduction.VoluntaryContribution,
         TotalContribution = pensionDeduction.TotalPensionContribution,
         EmailAddress = pensionDeduction.EmailAddress,
-        PhyscialAddress = pensionDeduction.PhyscialAddress,
+        PhyscialAddress = pensionDeduction.PhysicalAddress,
         PayrollRunId = pensionDeduction.PayrollRunId,
         CreatedDate = pensionDeduction.CreatedDate,
         IsActive = pensionDeduction.IsActive,

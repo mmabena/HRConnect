@@ -1,7 +1,7 @@
 namespace HRConnect.Api.Controllers
 {
   using HRConnect.Api.DTOs.Employee.Pension;
-  using HRConnect.Api.Interfaces.PensionProjection;
+  using HRConnect.Api.Interfaces.Pension;
   using Microsoft.AspNetCore.Mvc;
 
   [Route("api/pension")]

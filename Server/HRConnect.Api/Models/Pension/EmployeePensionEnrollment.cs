@@ -17,6 +17,5 @@
 
     public PensionOption PensionOption { get; set; }
     public Employee Employee { get; set; }
-    //public PayrollRun PayrollRun { get; set; }
   }
 }

@@ -23,16 +23,17 @@ namespace HRConnect.Api.Utils.Payroll
     private readonly IPayrollRunRepository _payrollRunRepo;
     private readonly IEmployeePensionEnrollmentService _employeePensionEnrollmentService;
     private readonly IPensionDeductionService _pensionDeductionService;
+    private readonly IServiceProvider _serviceProvider;
     private static readonly int MAX_RUNS = 10;
-    public PayrollRolloverJob(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService,
+    public PayrollRolloverJob(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService, IServiceProvider serviceProvider,
       IEmployeePensionEnrollmentService employeePensionEnrollmentService, IPensionDeductionService pensionDeductionService,
       IWebHostEnvironment env)
     {
       _payrollRunRepo = payrollRunRepo;
       _payrollPeriodService = payrollPeriodService;
       _env = env;
+      _serviceProvider = serviceProvider;
       _employeePensionEnrollmentService = employeePensionEnrollmentService;
-      _pensionDeductionService = pensionDeductionService;
       _pensionDeductionService = pensionDeductionService;
     }
     /// <summary>
@@ -156,12 +157,28 @@ namespace HRConnect.Api.Utils.Payroll
         throw jobException;
       }
 
-      //await _employeePensionEnrollmentService.RollOverEmloyeePensionEnrollmentAsync();
+      //
       //await _pensionDeductionService.PensionDeductionRollover();
-      await Task.WhenAll(
+      /*await Task.WhenAll(
         _employeePensionEnrollmentService.RollOverEmloyeePensionEnrollmentAsync(),
         _pensionDeductionService.PensionDeductionRollover()
-      );
+      );*/
+      await _employeePensionEnrollmentService.RollOverEmloyeePensionEnrollmentAsync();
+      await RolloverPayrollDeductions();
+    }
+
+    private async Task RolloverPayrollDeductions()
+    {
+      using IServiceScope pensionDeductionServiceScope = _serviceProvider.CreateScope();
+
+      IPensionDeductionService pensionDeductionService = pensionDeductionServiceScope.ServiceProvider.GetRequiredService<IPensionDeductionService>();
+
+      var tasks = new[]
+      {
+        pensionDeductionService.PensionDeductionRollover()
+      };
+
+      await Task.WhenAll(tasks);
     }
   }
 }

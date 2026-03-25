@@ -11,6 +11,5 @@
     Task<List<PensionDeduction>> GetByPayRollRunIdAsync(int payrollRunId);
     Task<PensionDeduction?> GetByEmployeeIdAndLastRunIdAsync(string employeeId, int payRollRunId);
     Task<PensionDeduction> UpdateAsync(PensionDeduction pensionDeduction);
-    Task<bool> DeleteAsync();
   }
 }

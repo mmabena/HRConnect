@@ -176,48 +176,11 @@ namespace HRConnect.Api.Data
         .OnDelete(DeleteBehavior.Cascade)
         .IsRequired();
 
-
-      /*modelBuilder.Entity<PensionDeduction>()
-        .HasOne(e => e.Employee)
-        .WithMany(pd => pd.PensionDeduction)
-        .HasForeignKey(e => e.EmployeeId)
-        .OnDelete(DeleteBehavior.Cascade);
-
-      modelBuilder.Entity<PensionDeduction>()
-        .HasOne(po => po.PensionOption)
-        .WithMany(pd => pd.PensionDeduction)
-        .HasForeignKey(po => po.PensionOptionId)
-        .OnDelete(DeleteBehavior.Cascade);*/
-
-      /*modelBuilder.Entity<PayrollRun>()
-        .HasMany(epe => epe.EmployeePensionEnrollment)
-        .WithOne(pr => pr.PayrollRun)
-        .HasForeignKey(pr => pr.PayrollRunId)
-        .IsRequired();
-
-      modelBuilder.Entity<PayrollRun>()
-        .HasMany(pd => pd.PensionDeduction)
-        .WithOne(pr => pr.PayrollRun)
-        .HasForeignKey(pr => pr.PayrollRunId)
-        .IsRequired();*/
-
-      /*modelBuilder.Entity<PayrollRecord>()
-        .UseTpcMappingStrategy();
-
-      /*modelBuilder.Entity<PayrollRecord>()
-        .ToTable("PayrollRecords");
-
-      modelBuilder.Entity<PensionDeduction>()
-        .ToTable("PensionDeductions")
-        .HasKey(pd => pd.PensionDeductionId);
-
-      modelBuilder.Entity<LunchDeduction>()
-        .ToTable("LunchDeductions")
-        .HasKey(ld => ld.LunchDeductionId);*/
       modelBuilder.Entity<EmployeePensionEnrollment>().HasOne<PayrollRun>()
       .WithMany()
       .HasForeignKey(t => t.PayrollRunId)
       .HasPrincipalKey(p => p.PayrollRunId);
+
     }
     //Override 'SaveChangesAsync' for Payroll Records to enforce locked records on a payroll run 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

@@ -1,6 +1,5 @@
 ﻿namespace HRConnect.Api.DTOs.Employee.Pension
 {
-
   public class EmployeePensionEnrollmentDto
   {
     public int PensionOptionId { get; set; }

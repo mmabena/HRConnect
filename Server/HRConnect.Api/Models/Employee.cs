@@ -84,6 +84,7 @@ namespace HRConnect.Api.Models
     public int? PensionOptionId { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public bool IsActive { get; set; } = true;
     // Allow reverse navigation
     public ICollection<Employee>? Subordinates { get; set; }
     public PensionOption? PensionOption { get; set; }

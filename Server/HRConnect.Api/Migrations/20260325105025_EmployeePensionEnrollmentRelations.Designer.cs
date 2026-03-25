@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRConnect.Api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20260324064604_EmployeePensionEnrollment")]
-    partial class EmployeePensionEnrollment
+    [Migration("20260325105025_EmployeePensionEnrollmentRelations")]
+    partial class EmployeePensionEnrollmentRelations
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -674,6 +674,9 @@ namespace HRConnect.Api.Migrations
                         .IsRequired()
                         .HasMaxLength(13)
                         .HasColumnType("nvarchar(13)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
                     b.Property<decimal>("MonthlySalary")
                         .HasColumnType("decimal(18,2)");
@@ -1417,7 +1420,7 @@ namespace HRConnect.Api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("IDNumber")
+                    b.Property<string>("IdNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -1446,7 +1449,7 @@ namespace HRConnect.Api.Migrations
                     b.Property<int>("PeriodId")
                         .HasColumnType("int");
 
-                    b.Property<string>("PhyscialAddress")
+                    b.Property<string>("PhysicalAddress")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

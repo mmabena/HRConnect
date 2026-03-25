@@ -24,9 +24,11 @@
     private readonly ApplicationDBContext _context = context;
     private static readonly decimal MAX_MONTHLYCONTRIBUTION = 29166.66M;
 
+    ///<summary>
+    ///Schedule quartz job
+    ///</summary>
     public async Task Execute(IJobExecutionContext context)
     {
-      //string? employeeId = context.JobDetail.JobDataMap.GetString("EmployeeId");
       string jsonFromscheudleJob = context.MergedJobDataMap.GetString("PensionEnrollment");
       EmployeePensionEnrollment? employeePensionEnrollment = JsonSerializer.Deserialize<EmployeePensionEnrollment>(jsonFromscheudleJob);
       if (employeePensionEnrollment != null)
@@ -63,10 +65,6 @@
             _ = await _employeePensionEnrollmentRepository.AddAsync(employeePensionEnroll);
             await HandlePensionEnrollment(employeePensionEnroll);
           }
-          else
-          {
-
-          }
         }
         else
         {
@@ -75,6 +73,10 @@
       }
     }
 
+    ///<summary>
+    ///Add pension enrollment
+    ///</summary>
+    ///<param name="employeePensionEnrollment">Employee Pension Enrollment</param>
     private async Task HandlePensionEnrollment(EmployeePensionEnrollment employeePensionEnrollment)
     {
       Employee existingEmployee = await _employeeRepository.GetEmployeeByIdAsync(employeePensionEnrollment.EmployeeId)
@@ -93,7 +95,7 @@
             FirstName = existingEmployee.Name,
             LastName = existingEmployee.Surname,
             DateJoinedCompany = existingEmployee.StartDate,
-            IDNumber = existingEmployee.IdNumber,
+            IdNumber = existingEmployee.IdNumber,
             Passport = existingEmployee.PassportNumber,
             TaxNumber = existingEmployee.TaxNumber,
             PensionableSalary = existingEmployee.MonthlySalary,
@@ -105,7 +107,7 @@
               ValidPensionContribution(Math.Round(existingEmployee.MonthlySalary * (pensionOptionPercentage / 100)) +
               employeePensionEnrollment.VoluntaryContribution),
             EmailAddress = existingEmployee.Email,
-            PhyscialAddress = existingEmployee.PhysicalAddress,
+            PhysicalAddress = existingEmployee.PhysicalAddress,
             PayrollRunId = currentPayrollRunId.PayrollRunId,
             CreatedDate = employeePensionEnrollment.EffectiveDate,
             IsActive = true
@@ -118,19 +120,30 @@
           {
             _ = await _pensionDeductionRepository.AddAsync(employeesPensionDeduction);
           }
-          else
-          {
-
-          }
         }
       }
     }
+    ///<summary>
+    ///Auxiliary method to get employee pension option percentage
+    ///</summary>
+    ///<param name="pensionOptionId">Pension Option Id</param>
+    ///<returns>
+    ///Pension option percentage
+    ///</returns
     private async Task<decimal> GetEmployeePensionOptionPercentageAsync(int pensionOptionId)
     {
       decimal? employeePensionOption = await _context.PensionOptions.Where(po => po.PensionOptionId == pensionOptionId)
         .Select(po => po.ContributionPercentage).FirstOrDefaultAsync();
       return employeePensionOption ?? throw new NotFoundException("Pension option not found");
     }
+
+    ///<summary>
+    ///Auxiliary method to validate pension contribution amount
+    ///</summary>
+    ///<param name="pensionDeductionAddDto">Pension's Deduction Add Request Data Transfer Object</param>
+    ///<returns>
+    ///Pension contribution amount that is not exceeding the maximum monthly contribution limit
+    ///</returns
     private static decimal ValidPensionContribution(decimal pensionContribution)
     {
       return (pensionContribution > MAX_MONTHLYCONTRIBUTION) ? MAX_MONTHLYCONTRIBUTION : pensionContribution;

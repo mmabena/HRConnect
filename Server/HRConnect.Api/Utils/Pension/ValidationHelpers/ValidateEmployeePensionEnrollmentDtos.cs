@@ -52,7 +52,7 @@
 
       DateOnly today = DateOnly.FromDateTime(DateTime.Now);
       //DateOnly nextMonth = today.AddMonths(1);
-      DateOnly firstDayNextMonth = new DateOnly(today.Year, today.Month, 1).AddMonths(1);
+      /*DateOnly firstDayNextMonth = new DateOnly(today.Year, today.Month, 1).AddMonths(1);
       if (today.Day > 25 && employeePensionEnrollmentUpdateDto.EffectiveDate != null &&
         employeePensionEnrollmentUpdateDto.EffectiveDate != firstDayNextMonth)
       {
@@ -62,7 +62,7 @@
       if (employeePensionEnrollmentUpdateDto.EffectiveDate < today)
       {
         throw new ValidationException("Effective date must be today or in the future");
-      }
+      }*/
 
       if (employeePensionEnrollmentUpdateDto.VoluntaryContribution is not null and < decimal.Zero)
       {
