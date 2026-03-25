@@ -211,8 +211,8 @@ const ManageUserPositions = ({ title }) => {
 
       if (!emp) return null;
 
-      const updatedEmp = {
-        ...emp,
+      const updatedEmp =(emp.employeeId, {
+         employeeId: emp.employeeId,
         positionId: Number(selectedPosition),
 
         // Required fields fallback
@@ -240,7 +240,7 @@ const ManageUserPositions = ({ title }) => {
         employmentStatus: emp.employmentStatus || "Permanent",
         careerManagerID: emp.careerManagerID || "",
         profileImage: emp.profileImage || "",
-      };
+      });
 
       return editEmployee(emp.employeeId, updatedEmp);
     }).filter(Boolean);
@@ -400,7 +400,11 @@ const ManageUserPositions = ({ title }) => {
 
                   <td>{employee.branch || "N/A"}</td>
                   <td>{positionMap[employee.positionId] || "N/A"}</td>
-                <td>{positionMap[selectedPosition] || "-"}</td>
+                  <td>
+            {selectedEmployees[employee.employeeId]
+              ? positionMap[selectedPosition] || "-"
+              : "-"}
+          </td>
                 </tr>
               ))
             )}
