@@ -49,7 +49,7 @@ export const addEmployee = async (employee) => {
 export const editEmployee = async (employeeId, employee) => {
   try {
     const response = await api.put(
-      `${API_BASE}/edit/${employeeId}`,
+      `${API_BASE}/${employeeId}`,
       employee,
       {
         headers: { "Content-Type": "application/json" },

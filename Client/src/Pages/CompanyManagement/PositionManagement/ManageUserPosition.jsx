@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import CompanyManagementNavBar from "../../../Components/CompanyManagement/companyManagementNavBar";
 import { useNavigate, useLocation } from "react-router-dom";
-import { editEmployee } from "../../../api/Employee";
+import { editEmployee, fetchAllEmployees } from "../../../api/Employee";
 import api from "../../../api/api";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
@@ -189,83 +189,101 @@ const ManageUserPositions = ({ title }) => {
   // Save Changes (Update Position)
   // ----------------------------
   const handleSave = async () => {
-    const selectedIds = Object.keys(selectedEmployees).filter(
-      (id) => selectedEmployees[id],
-    );
+  const selectedIds = Object.keys(selectedEmployees).filter(
+    (id) => selectedEmployees[id]
+  );
 
-    if (!selectedIds.length) {
-      toast.error("Please select at least one employee.");
-      return;
-    }
+  if (!selectedIds.length) {
+    toast.error("Please select at least one employee.");
+    return;
+  }
 
-    if (!selectedPosition) {
-      toast.error("Please select a position.");
-      return;
-    }
+  if (!selectedPosition) {
+    toast.error("Please select a position.");
+    return;
+  }
 
-    try {
-      const updatePromises = selectedIds
-        .map((employeeId) => {
-          const emp = employees.find(
-            (e) => e.employeeId.toString() === employeeId,
+  try {
+    const updatePromises = selectedIds.map((employeeId) => {
+      const emp = employees.find(
+        (e) => e.employeeId.toString() === employeeId
+      );
+
+      if (!emp) return null;
+
+      const updatedEmp = {
+        ...emp,
+        positionId: Number(selectedPosition),
+
+        // Required fields fallback
+        nationality: emp.nationality || "Not specified",
+        title: emp.title || "Mr/Ms",
+        name: emp.name || "",
+        surname: emp.surname || "",
+        idNumber: emp.idNumber || "",
+        passportNumber: emp.passportNumber || "",
+        gender: emp.gender || "Male",
+        contactNumber: emp.contactNumber || "",
+        taxNumber: emp.taxNumber || "",
+        email: emp.email || "",
+        physicalAddress: emp.physicalAddress || "",
+        city: emp.city || "",
+        zipCode: emp.zipCode || "",
+        hasDisability: emp.hasDisability || false,
+        disabilityDescription: emp.disabilityDescription || "",
+        dateOfBirth:
+          emp.dateOfBirth || new Date().toISOString().split("T")[0],
+        startDate:
+          emp.startDate || new Date().toISOString().split("T")[0],
+        branch: emp.branch || "",
+        monthlySalary: emp.monthlySalary || 0,
+        employmentStatus: emp.employmentStatus || "Permanent",
+        careerManagerID: emp.careerManagerID || "",
+        profileImage: emp.profileImage || "",
+      };
+
+      return editEmployee(emp.employeeId, updatedEmp);
+    }).filter(Boolean);
+
+    await Promise.all(updatePromises);
+
+    toast.success("Positions updated successfully.");
+
+    //KEY FIX: Update UI immediately WITHOUT refetch
+    setEmployees((prev) =>
+      prev.map((emp) => {
+        if (selectedIds.includes(emp.employeeId.toString())) {
+          const newPosition = positions.find(
+            (p) => p.positionId === Number(selectedPosition)
           );
-          if (!emp) return null;
 
-          //Send full employee object with updated positionId
-          const updatedEmp = {
+          return {
             ...emp,
             positionId: Number(selectedPosition),
-            nationality: emp.nationality || "Not specified", // required field
-            title: emp.title || "Mr/Ms", // fill if missing
-            name: emp.name || "",
-            surname: emp.surname || "",
-            idNumber: emp.idNumber || "",
-            passportNumber: emp.passportNumber || "",
-            gender: emp.gender || "Male",
-            contactNumber: emp.contactNumber || "",
-            taxNumber: emp.taxNumber || "",
-            email: emp.email || "",
-            physicalAddress: emp.physicalAddress || "",
-            city: emp.city || "",
-            zipCode: emp.zipCode || "",
-            hasDisability: emp.hasDisability || false,
-            disabilityDescription: emp.disabilityDescription || "",
-            dateOfBirth:
-              emp.dateOfBirth || new Date().toISOString().split("T")[0],
-            startDate: emp.startDate || new Date().toISOString().split("T")[0],
-            branch: emp.branch || "",
-            monthlySalary: emp.monthlySalary || 0,
-            employmentStatus: emp.employmentStatus || "Permanent",
-            careerManagerID: emp.careerManagerID || "",
-            profileImage: emp.profileImage || "",
+
+            //THIS is what makes UI update instantly
+            position: newPosition
+              ? {
+                  ...newPosition,
+                }
+              : emp.position,
           };
+        }
+        return emp;
+      })
+    );
 
-          return editEmployee(emp.employeeId, updatedEmp);
-        })
-        .filter(Boolean);
+    setSelectedEmployees({});
+    setSelectedPosition("");
 
-      await Promise.all(updatePromises);
-
-      toast.success("Positions updated successfully.");
-
-      setEmployees((prev) =>
-        prev.map((emp) =>
-          selectedIds.includes(emp.employeeId.toString())
-            ? { ...emp, positionId: Number(selectedPosition) }
-            : emp,
-        ),
-      );
-
-      setSelectedEmployees({});
-    } catch (error) {
-      console.error(
-        "Failed to update positions:",
-        error.response || error.message,
-      );
-      toast.error("Failed to save changes. Check console for details.");
-    }
-  };
-
+  } catch (error) {
+    console.error(
+      "Failed to update positions:",
+      error.response || error.message
+    );
+    toast.error("Failed to save changes.");
+  }
+};
   if (loading) return <h3>Loading...</h3>;
   if (!hasAccess) return <h2>Access Denied. SuperUser only.</h2>;
 
