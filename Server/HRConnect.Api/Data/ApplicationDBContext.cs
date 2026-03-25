@@ -27,6 +27,7 @@ namespace HRConnect.Api.Data
     public DbSet<PayrollRun> PayrollRuns { get; set; }
     public DbSet<PensionDeduction> PensionDeductions { get; set; }
     public DbSet<MedicalAidDeduction> MedicalAidDeductions { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

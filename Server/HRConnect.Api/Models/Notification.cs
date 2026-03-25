@@ -1,6 +1,5 @@
 namespace HRConnect.Api.Models
 {
-  using System.Collections.Generic;
   using System.ComponentModel.DataAnnotations;
   public enum NotificationSeverity
   {
@@ -16,6 +15,7 @@ namespace HRConnect.Api.Models
     public bool IsRead { get; set; }
     public string Type { get; set; } = string.Empty;
     public NotificationSeverity Severity { get; set; }
+    public DateTime ExecutedDate { get; set; }
     public DateTime? ExpirationDate { get; set; }
     public DateTime CreatedAt { get; set; }
   }

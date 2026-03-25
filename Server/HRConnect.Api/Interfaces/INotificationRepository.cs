@@ -1,10 +1,13 @@
 namespace HRConnect.Api.Interfaces
 {
   using HRConnect.Api.Models;
-
+  using HRConnect.Api.DTOs.Notification;
   public interface INotificationRepository
   {
-    Task AddNotification(Notification noti);
-    Task<bool> ExistsAsync(string type, DateTime dateTime);
+    // Task <NotificationDto> CreateNotification
+    Task AddNotificationAsync(Notification notification);
+    Task<bool> ExistsAsync(string type, DateTime executionDate, DateTime dateTime);
+    Task<bool> MarkAsReadAsync(int id);
+    Task<IEnumerable<NotificationDto>> GetAllUnreadAsync();
   }
 }
