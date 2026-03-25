@@ -144,6 +144,9 @@ namespace HRConnect.Api.Data
         .WithMany()
         .HasForeignKey(m => m.MedicalCategoryId)
         .OnDelete(DeleteBehavior.NoAction);
+
+      modelBuilder.Entity<Notification>().Property(n => n.Severity)
+        .HasConversion<string>();
     }
 
     //Override 'SaveChangesAsync' for Payroll Records to enforce locked records on a payroll run 
