@@ -87,7 +87,7 @@ namespace HRConnect.Api.Services
               if (value is DateOnly dateOnly)
               {
                 value = dateOnly;
-                cell.Style.Numberformat.Format = "yyyy-mm-dd";
+                cell.Style.Numberformat.Format = "yyyy-mm-dd HH:mm:ss";
               }
               cell.Value = value;
             }
