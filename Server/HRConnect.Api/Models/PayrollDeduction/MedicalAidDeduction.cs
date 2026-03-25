@@ -6,8 +6,8 @@ namespace HRConnect.Api.Models.PayrollDeduction
   public class MedicalAidDeduction : PayrollRecord
   {
     //[Key]
-    [Column("MedicalAidDeductionId")]
-    public int MedicalAidDeductionId { get; set; } // to comment out
+    //[Column("MedicalAidDeductionId")]
+    //public int MedicalAidDeductionId { get; set; } // to comment out
     //FK
     //[ForeignKey(nameof(PayrollRun))]
     //public int PayrollRunNumber { get; set; }

@@ -15,5 +15,4 @@ public class UpdateMedicalAidDeductionRequestDto
   public int ChildrenCount { get; set; }
   
   public DateTime UpdatedDate { get; set; } = DateTime.Now.ToLocalTime();
-
 }

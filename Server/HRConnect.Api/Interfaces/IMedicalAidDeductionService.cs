@@ -33,7 +33,15 @@ namespace HRConnect.Api.Interfaces
     /// <summary>
     /// Update a medical aid deduction by employee ID.
     /// </summary>
-    Task<MedicalAidDeductionDto> UpdateDeductionsByEmpIdAsync(string employeeId,
+    Task<UpdateMedicalAidDeductionResponseDto> UpdateDeductionsByEmpIdAsync(string employeeId,
       UpdateMedicalAidDeductionRequestDto updatePayload);
+
+    /// <summary>
+    /// Terminate medical aid deductions by employee id
+    /// </summary>
+    Task<TerminateMedicalAidDeductionResponseDto> TerminateDeductionsByEmpIdAsync(string employeeId,
+    TerminateMedicalAidDeductionRequestDto terminationRequest);
+
+
   }
 }

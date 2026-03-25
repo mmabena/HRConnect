@@ -269,9 +269,11 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
     return MapToDto(deduction);
   }
 
-  public async Task<MedicalAidDeductionDto> UpdateDeductionsByEmpIdAsync(string employeeId,
+  public async Task<UpdateMedicalAidDeductionResponseDto> UpdateDeductionsByEmpIdAsync(
+    string employeeId,
     UpdateMedicalAidDeductionRequestDto updatePayload)
   {
+    
     // First validate requestPayload
     if(updatePayload == null) 
       throw new ArgumentNullException(nameof(updatePayload), "Update request cannot be empty");
@@ -295,7 +297,7 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
     
     if (updatePayload.PrincipalCount > 1)
       throw new ArgumentException("Principal count cannot exceed 1");
-    
+    /*
     // Create separate scopes for parallel operations
     using var payrollRunScope = _serviceScopeFactory.CreateScope();
     using var employeeScope = _serviceScopeFactory.CreateScope();
@@ -391,12 +393,219 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
     };
     
     //Update
-    await medicalAidDeductionsRepository.UpdateDeductionsByEmpIdAsync(employeeId, currentRunId,
+    //await medicalAidDeductionsRepository.UpdateDeductionsByEmpIdAsync(employeeId, currentRunId, updateEntity);
+    await _medicalAidDeductionRepository.UpdateDeductionsByEmpIdAsync(employeeId, currentRunId,
+      updateEntity);
+    return MapToDto(updateEntity);*/
+
+    // Separate scopes => separate DbContext instances per parallel branch
+      using var payrollRunScope = _serviceScopeFactory.CreateScope();
+      using var employeeScope = _serviceScopeFactory.CreateScope();
+      using var medicalAidDeductionScope = _serviceScopeFactory.CreateScope();
+      using var medicalOptionScope = _serviceScopeFactory.CreateScope();
+      // Split Medical Options queries into seperate scopes/context
+      using var medicalOptionCategoryScope = _serviceScopeFactory.CreateScope();
+    
+      var payrollRunService = payrollRunScope.ServiceProvider.GetRequiredService<IPayrollRunService>();
+      var employeeService = employeeScope.ServiceProvider.GetRequiredService<IEmployeeService>();
+      var medicalAidDeductionsRepository =
+        medicalAidDeductionScope.ServiceProvider.GetRequiredService<IMedicalAidDeductionRepository>();
+      var medicalOptionService = medicalOptionScope.ServiceProvider.GetRequiredService<IMedicalOptionService>();
+      var medicalOptionCategoryService =
+        medicalOptionCategoryScope.ServiceProvider.GetRequiredService<IMedicalOptionService>();   
+      
+      var payrollTask = payrollRunService.GetCurrentRunAsync();
+      var employeeTask = employeeService.GetEmployeeByIdAsync(employeeId);
+      var medicalAidDeductionTask =
+        medicalAidDeductionsRepository.GetMedicalAidDeductionsByEmployeeIdAsync(employeeId);
+      var medicalOptionTask = medicalOptionService.GetMedicalOptionByIdAsync(updatePayload.MedicalOptionId);
+      var medicalOptionCategoryTask = medicalOptionCategoryService.GetCategoryById(updatePayload.MedicalCategoryId);
+    
+      await Task.WhenAll(
+        payrollTask,
+        employeeTask,
+        medicalAidDeductionTask,
+        medicalOptionTask,
+        medicalOptionCategoryTask);
+    
+      var currentRun = await payrollTask;
+      var employeeData = await employeeTask;
+      var medicalAidDeductionsData = await medicalAidDeductionTask;
+      var medicalOptionData = await medicalOptionTask;
+      var medicalOptionCategoryData = await medicalOptionCategoryTask;
+    
+      if (currentRun == null)
+        throw new InvalidOperationException("No active payroll run found.");
+    
+      if (employeeData == null)
+        throw new ArgumentException("Employee not found.");
+    
+      if (medicalOptionData == null)
+        throw new ArgumentException("Medical option not found.");
+    
+      if (medicalOptionCategoryData == null || medicalOptionCategoryData.Count == 0)
+        throw new ArgumentException("Medical option category not found.");
+    
+      if (medicalOptionData.MedicalOptionCategoryId != updatePayload.MedicalCategoryId)
+        throw new ArgumentException(
+          "The selected medical option does not belong to the provided medical category.");
+    
+      if (medicalAidDeductionsData == null || medicalAidDeductionsData.Count == 0)
+        throw new ArgumentException("Active medical aid deduction not found.");
+    
+      var activeDeductionForCurrentRun = medicalAidDeductionsData
+        .FirstOrDefault(d => d.PayrollRunId == currentRun.PayrollRunId);
+    
+      if (activeDeductionForCurrentRun == null)
+        throw new ArgumentException("No active medical aid deduction found for the current payroll run.");
+    
+      decimal principalPremium = CalculatePrincipalPremium(medicalOptionData);
+      decimal spousePremium = CalculateAdultPremium(medicalOptionData, updatePayload.AdultCount);
+      decimal childPremium = CalculateChildPremium(medicalOptionData, updatePayload.ChildrenCount);
+      decimal totalDeductionAmount = CalculateTotalPremium(principalPremium, spousePremium, childPremium);
+    
+      // Check if Total Sum is not greater than salary
+      if (totalDeductionAmount > employeeData.MonthlySalary)
+        throw new InvalidOperationException(
+          "Update failed : Total Premium contributions must not exceed salary amount");
+      
+    var optionCategoryName = medicalOptionCategoryData[0].MedicalOptionCategoryName;
+
+    var updateEntity = new MedicalAidDeduction
+    {
+      // preserve identity and immutable audit fields from existing record
+      Id = activeDeductionForCurrentRun.Id,
+      EmployeeId = activeDeductionForCurrentRun.EmployeeId,
+      PayrollRunId = activeDeductionForCurrentRun.PayrollRunId,
+      CreatedDate = activeDeductionForCurrentRun.CreatedDate,
+      IsActive = activeDeductionForCurrentRun.IsActive,
+      EffectiveDate = activeDeductionForCurrentRun.EffectiveDate,
+      TerminationDate = activeDeductionForCurrentRun.TerminationDate,
+      TerminationReason = activeDeductionForCurrentRun.TerminationReason,
+
+      // refresh snapshot fields
+      Name = employeeData.Name,
+      Surname = employeeData.Surname,
+      Branch = employeeData.Branch.ToString(),
+      Salary = employeeData.MonthlySalary,
+      EmployeeStartDate = employeeData.StartDate.ToDateTime(TimeOnly.MinValue),
+
+      // option + category
+      MedicalOptionId = medicalOptionData.MedicalOptionId,
+      OptionName = medicalOptionData.MedicalOptionName,
+      MedicalCategoryId = medicalOptionData.MedicalOptionCategoryId,
+      OptionCategoryName = optionCategoryName,
+
+      // dependent counts
+      PrincipalCount = updatePayload.PrincipalCount,
+      AdultCount = updatePayload.AdultCount,
+      ChildrenCount = updatePayload.ChildrenCount,
+
+      // premiums
+      PrincipalPremium = principalPremium,
+      SpousePremium = spousePremium,
+      ChildPremium = childPremium,
+      TotalDeductionAmount = totalDeductionAmount,
+
+      UpdatedDate = DateTime.Now.ToLocalTime()
+    };
+
+    await medicalAidDeductionsRepository.UpdateDeductionsByEmpIdAsync(
+      employeeId,
+      currentRun.PayrollRunId,
       updateEntity);
 
-    return MapToDto(updateEntity);
+    return ToUpdateMedicalAidDeductionResponseDto(updateEntity);
+
   }
-    //TODO :  Move to Mappers
+
+  public async Task<TerminateMedicalAidDeductionResponseDto> TerminateDeductionsByEmpIdAsync(string employeeId,
+    TerminateMedicalAidDeductionRequestDto terminationRequest)
+  {
+    if (string.IsNullOrWhiteSpace(employeeId))
+      throw new ArgumentException("Employee ID is required.", nameof(employeeId));
+    
+    ArgumentNullException.ThrowIfNull(terminationRequest);
+
+    if (terminationRequest.MedicalOptionId <= 0)
+      throw new ArgumentException("Medical Option ID must be greater than 0 and positive.");
+    
+    if (string.IsNullOrWhiteSpace(terminationRequest.TerminationReason))
+        throw new ArgumentException("Termination reason is required");
+
+    var deductionEntity =
+      await _medicalAidDeductionRepository.GetActiveMedicalAidDeductionByEmpIdAsync(employeeId);
+
+    if (deductionEntity == null)
+      throw new KeyNotFoundException(
+        $"No active medical aid deduction found for employee '{employeeId}'.");
+    if (deductionEntity.MedicalOptionId != terminationRequest.MedicalOptionId)
+      throw new ArgumentException(
+        $"Active deduction option ({deductionEntity.MedicalOptionId}) does not match request option" +
+        $" ({terminationRequest.MedicalOptionId}).");
+    
+    // Snapshot values before reset
+    var terminationResponse = new TerminateMedicalAidDeductionResponseDto
+    {
+      Id = deductionEntity.Id,
+      EmployeeId = deductionEntity.EmployeeId,
+      MedicalOptionId = deductionEntity.MedicalOptionId,
+      OptionName = deductionEntity.OptionName,
+      // before termination
+      PreviousPrincipalCount = deductionEntity.PrincipalCount,
+      PreviousAdultCount = deductionEntity.AdultCount,
+      PreviousChildrenCount = deductionEntity.ChildrenCount,
+
+      PreviousPrincipalPremium = deductionEntity.PrincipalPremium,
+      PreviousSpousePremium = deductionEntity.SpousePremium,
+      PreviousChildrenPremium = deductionEntity.ChildPremium,
+      PreviousTotalDeductionAmount = deductionEntity.TotalDeductionAmount
+    };
+    
+    // aftertermination response build up
+    var now = DateTime.Now.ToLocalTime();
+    var endOfMonth = new DateTime(
+      now.Year,
+      now.Month,
+      DateTime.DaysInMonth(now.Year, now.Month),
+      23, 59, 59,
+      now.Kind);
+    
+    //Soft terminate and reset contributions
+    deductionEntity.TerminationDate = endOfMonth;
+    deductionEntity.TerminationReason = terminationRequest.TerminationReason.Trim();
+    deductionEntity.IsActive = false;
+
+    deductionEntity.PrincipalCount = 0;
+    deductionEntity.AdultCount = 0;
+    deductionEntity.ChildrenCount = 0;
+
+    deductionEntity.PrincipalPremium = 0m;
+    deductionEntity.SpousePremium = 0m;
+    deductionEntity.ChildPremium = 0m;
+    deductionEntity.TotalDeductionAmount = 0m;
+    
+    deductionEntity.UpdatedDate = now;
+
+    await _medicalAidDeductionRepository.TerminateMedicalAidDeductionAsync(deductionEntity);
+
+    terminationResponse.PrincipalCount = deductionEntity.PrincipalCount;
+    terminationResponse.AdultCount = deductionEntity.AdultCount;
+    terminationResponse.ChildrenCount = deductionEntity.ChildrenCount;
+    terminationResponse.PrincipalPremium = deductionEntity.PrincipalPremium;
+    terminationResponse.SpousePremium = deductionEntity.SpousePremium;
+    terminationResponse.ChildPremium = deductionEntity.ChildPremium;
+    terminationResponse.TotalDeductionAmount = deductionEntity.TotalDeductionAmount;
+    terminationResponse.TerminationDate = deductionEntity.TerminationDate!.Value;
+    terminationResponse.TerminationReason = deductionEntity.TerminationReason;
+    terminationResponse.IsActive = deductionEntity.IsActive;
+    terminationResponse.UpdatedDate = deductionEntity.UpdatedDate;
+
+    return terminationResponse;
+
+  }
+
+  //TODO :  Move to Mappers
     /// <summary>
     /// Maps a MedicalAidDeduction entity to a MedicalAidDeductionDto.
     /// </summary>
@@ -404,7 +613,7 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
     {
         return new MedicalAidDeductionDto
         {
-            MedicalAidDeductionId = request.Id,
+            PayrollRunId = request.Id,
             EmployeeId = request.EmployeeId ?? string.Empty,
             Name = request.Name,
             Surname = request.Surname,
@@ -425,6 +634,38 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
             IsActive = request.IsActive,
             UpdatedDate = request.UpdatedDate
         };
+    }
+    
+    private static UpdateMedicalAidDeductionResponseDto ToUpdateMedicalAidDeductionResponseDto(MedicalAidDeduction response)
+    {
+      return new UpdateMedicalAidDeductionResponseDto
+      {
+        Id = response.Id,
+        PayrollRunId = response.Id,
+        EmployeeId = response.EmployeeId ?? string.Empty,
+        Name = response.Name,
+        Surname = response.Surname,
+        Branch = response.Branch,
+        Salary = response.Salary,
+        EmployeeStartDate = response.EmployeeStartDate,
+        EffectiveDate = response.EffectiveDate,
+        MedicalOptionId = response.MedicalOptionId,
+        OptionName = response.OptionName,
+        MedicalCategoryId = response.MedicalCategoryId,
+        OptionCategoryName = response.OptionCategoryName,
+        PrincipalCount = response.PrincipalCount,
+        AdultCount = response.AdultCount,
+        ChildrenCount = response.ChildrenCount,
+        PrincipalPremium = response.PrincipalPremium,
+        SpousePremium = response.SpousePremium,
+        ChildPremium = response.ChildPremium,
+        TotalDeductionAmount = response.TotalDeductionAmount,
+        CreatedDate = response.CreatedDate,
+        IsActive = response.IsActive,
+        UpdatedDate = response.UpdatedDate,
+        TerminationDate = response.TerminationDate,
+        TerminationReason = response.TerminationReason,
+      };
     }
 
     //private methods

@@ -100,12 +100,23 @@ public class MedicalAidDeductionController : ControllerBase
           deduction);*/
     }
 
-    [HttpPut("update/{id}/employee-deductions")]
+    [HttpPut("employee/{id}/update-deductions")]
     [Authorize(Roles = "SuperUser")]
     public async Task<IActionResult> UpdateEmployeeActiveMedicalAidDeductions([FromRoute] string id
       , [FromBody] UpdateMedicalAidDeductionRequestDto request)
     {
       var update = await _medicalAidDeductionService.UpdateDeductionsByEmpIdAsync(id, request);
       return Ok(update);
+    }
+
+    [HttpPatch("employee/{id}/terminate-deductions")]
+    [Authorize(Roles = "SuperUser")]
+    public async Task<IActionResult> TerminateEmployeeMedicalAidDeductionByEmpId(
+      [FromRoute] string id, [FromBody] TerminateMedicalAidDeductionRequestDto terminationRequest)
+    {
+      var response =
+        await _medicalAidDeductionService.TerminateDeductionsByEmpIdAsync(id, terminationRequest);
+
+      return Ok(response);
     }
 }
