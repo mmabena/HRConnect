@@ -66,6 +66,31 @@
   background-color: #758155;
 }
 
+.emp-field-dropdown {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.emp-field-dropdown select {
+  width: 100%;
+  padding-right: 35px;
+  -webkit-appearance: none; 
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.emp-field-dropdown .empdropdown-icon {
+  position: absolute;
+  right: 10px;
+  pointer-events: none;
+  width: 20px;
+  height: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
 .emp-edit-employee-form-container {
   position: absolute;
   top: 180px;
@@ -172,6 +197,7 @@
   width: 100%;
   min-height: 70px;
   box-sizing: border-box;
+  position: relative;
 }
 
 .emp-error-text {
@@ -196,10 +222,8 @@
   margin: 0;
   padding-left: 10px;
   height: 30px;
-  /* fixed height for label to help layout */
   display: flex;
   align-items: center;
-  /* vertical center the label text */
   user-select: none;
 }
 

@@ -27,7 +27,7 @@ api.interceptors.response.use(
 
 export const addEmployee = async (employee) => {
   try {
-    const response = await api.post(`${API_BASE}/add`, employee, {
+    const response = await api.post(`${API_BASE}`, employee, {
       headers: { "Content-Type": "application/json" },
     });
 
@@ -46,10 +46,10 @@ export const addEmployee = async (employee) => {
   }
 };
 
-export const editEmployee = async (employeeNumber, employee) => {
+export const editEmployee = async (employeeId, employee) => {
   try {
     const response = await api.put(
-      `${API_BASE}/edit/${employeeNumber}`,
+      `${API_BASE}/${employeeId}`,
       employee,
       {
         headers: { "Content-Type": "application/json" },
@@ -281,7 +281,7 @@ export const validateRequiredFields = (employee) => {
     "employeeStatus",
     "reportsTo",
     "email",
-    "documentPath",
+    "profileImage",
   ];
 
   const errors = {};
@@ -327,7 +327,7 @@ export const handleFileChange = async (
       );
 
       const imageUrl = response.data.secure_url;
-      setEmployee((prev) => ({ ...prev, documentPath: imageUrl }));
+      setEmployee((prev) => ({ ...prev, profileImage: imageUrl }));
       setUploading(false);
     } catch (error) {
       console.error("Error uploading image:", error);
@@ -336,7 +336,7 @@ export const handleFileChange = async (
     }
   } else {
     setErrorMessage("Only .jpg, .jpeg or .png images are allowed.");
-    setEmployee((prev) => ({ ...prev, documentPath: "" }));
+    setEmployee((prev) => ({ ...prev, profileImage: "" }));
   }
 };
 

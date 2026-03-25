@@ -63,6 +63,12 @@ namespace HRConnect.Api.Services
       var employee = await _employeeRepo.GetEmployeeByIdAsync(employeeId);
       return employee?.ToEmployeeDto();
     }
+
+    public async Task<EmployeeDto?> GetEmployeeByEmailAsync(string employeeEmail)
+    {
+      Employee? employee= await _employeeRepo.GetEmployeeByEmailAsync(employeeEmail); 
+      return employee?.ToEmployeeDto();
+    }
     /// <summary>
     /// Creates a new employee after validating input, checking duplicates,
     /// generating a unique Employee ID, auto generate DOB and Gender if ID is provided and sending a welcome email.
@@ -124,10 +130,16 @@ namespace HRConnect.Api.Services
         throw new NotFoundException("Employee not found");
 
       // Validate input fields
+
       ValidateCommonFields(employeeDto);
       ValidateUpdate(employeeDto);
       //Check for duplicate entries
       await CheckDuplicateOnUpdate(employeeId, employeeDto);
+      // Ensure Title and Gender combination is valid
+      ValidateTitleAndGender(employeeDto);
+
+      // Ensure Title and Gender combination is valid
+      ValidateTitleAndGender(employeeDto);
 
       var position = await _positionRepo.GetPositionByIdAsync(employeeDto.PositionId);
       if (position == null)
@@ -266,7 +278,7 @@ namespace HRConnect.Api.Services
     /// </summary>
     /// <param name="employeeRequestDto">The employee creation request DTO</param>
     /// <returns>Validation error if title and gender are not logically valid</returns>
-    private static void ValidateTitleAndGender(CreateEmployeeRequestDto employeeRequestDto)
+    private static void ValidateTitleAndGender(EmployeeBaseRequestDto employeeRequestDto)
     {
       EmployeeValidationHelpers.ValidateTitleGenderCombo(employeeRequestDto.Title, employeeRequestDto.Gender);
     }
@@ -339,11 +351,6 @@ namespace HRConnect.Api.Services
     {
       await EmployeeValidationHelpers.ValidateCareerManagerAsync(_employeeRepo, employeeId, careerManagerId);
     }
-
-     public async Task<EmployeeDto?> GetEmployeeByEmailAsync(string employeeEmail)
-    {
-      Employee? employee = await _employeeRepo.GetEmployeeByEmailAsync(employeeEmail);
-      return employee?.ToEmployeeDto();
-    }
+    
   }
 }

@@ -2,9 +2,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import NavBar from "../../../Components/NavBar.jsx";
 
-import AddPositionManagement from "../../../Components/companyManagement/PositionManagement/AddPositionManagment";
-import EditPositionManagement from "../../../Components/companyManagement/PositionManagement/EditPositionManagement";
-import ChangePositionManagement from "../../../Components/companyManagement/PositionManagement/ChangePositionManagement";
+import CompanyManagementNavBar from "../../../Components/CompanyManagement/companyManagementNavBar";
+import AddPositionManagement from "../../../Components/CompanyManagement/PositionManagement/AddPositionManagment";
+import EditPositionManagement from "../../../Components/CompanyManagement/PositionManagement/EditPositionManagement";
+import ChangePositionManagement from "../../../Components/CompanyManagement/PositionManagement/ChangePositionManagement";
 
 import usePositions from "../../../hooks/usePositions";
 import usePagination from "../../../hooks/usePagination";
@@ -44,6 +45,14 @@ const PositionManagement = ({ title }) => {
 
   const pageOptions = [10, 15, 20, 25];
 
+  const navTabs = [
+    "Tax Table Management",
+    "Company Details",
+    "Leave Management",
+    "Position Management",
+    "Manage Companies",
+    "Salary Budgets",
+  ];
 
 
   const tabWidths = [168, 133, 122, 134, 154, 125, 120];

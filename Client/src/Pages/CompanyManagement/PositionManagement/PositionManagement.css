@@ -132,6 +132,7 @@
   background-color: #fff; /* optional, for contrast */
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
+
 .positions-table {
   table-layout: fixed; /* forces columns to obey widths */
   width: 95%;
@@ -145,6 +146,7 @@
   border-radius: 15px; /* rounded corners for the container */
   overflow: hidden; /* ensures corners clip content */
 }
+
 .positions-table th,
 .positions-table td {
   padding: 20px 10px;
@@ -447,7 +449,6 @@
   font-family: "Instrument Sans", sans-serif;
   text-align: left;
 }
-
 
 .title-placeholder-add.inside-input {
   position: absolute;

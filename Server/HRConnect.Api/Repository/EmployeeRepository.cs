@@ -205,10 +205,10 @@ namespace HRConnect.Api.Repository
     /// <param name="contactNumber">The employee contact number</param>
     /// <param name="EmployeeId">The employee identifier to exclude</param>
     /// <returns>The employee object if found, null otherwise</returns>
-    public async Task<Employee?> GetEmployeeByContactNumberAsync(string contactNumber, string EmployeeId)
+    public async Task<Employee?> GetEmployeeByContactNumberAsync(string contactNumber, string employeeId)
     {
       return await _context.Employees
-          .FirstOrDefaultAsync(e => e.ContactNumber == contactNumber && e.EmployeeId != EmployeeId);
+          .FirstOrDefaultAsync(e => e.ContactNumber == contactNumber && e.EmployeeId != employeeId);
     }
   }
 }

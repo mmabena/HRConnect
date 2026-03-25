@@ -10,14 +10,15 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 import "./Components/MenuBar/MenuBar.css";
-import AddEmployeeModal from "./Components/AddEmployeeModal";
+import EmployeeList from "./Pages/EmployeeManagement/EmployeeList";
+import AddEmployeeModal from "./Components/EmployeeManagement/AddEmployeeModal";
 import UserManagement from "./Components/UserManagement";
 import ViewPositionManagement from "./Components/ViewPositionManagement";
 import TaxTableUpload from "./Components/companyManagement/TaxTableManagement/TaxTableUpload.jsx";
-import EditPositionManagement from "./Components/companyManagement/PositionManagement/EditPositionManagement.jsx";
-import AddPositionManagement from "./Components/companyManagement/PositionManagement/AddPositionManagment.jsx";
+import EditPositionManagement from "./Components/CompanyManagement/PositionManagement/EditPositionManagement.jsx";
+import AddPositionManagement from "./Components/CompanyManagement/PositionManagement/AddPositionManagment.jsx";
 import PositionManagement from "./Pages/CompanyManagement/PositionManagement/PositionManagement";
-import ChangePositionManagement from "./Components/companyManagement/PositionManagement/ChangePositionManagement.jsx";
+import ChangePositionManagement from "./Components/CompanyManagement/PositionManagement/ChangePositionManagement.jsx";
 import CompanyManagement from "./companyManagement";
 import CompanyContribution from "./Components/CompanyContribution/CompanyContribution";
 import Profile from "./Components/MyProfile";
@@ -25,7 +26,6 @@ import CompensationPlanning from "./Components/CompensationPlanning";
 import TaxTableManagement from "./Components/companyManagement/TaxTableManagement/TaxTableManagement.jsx";
 import ChangePassword from "./Components/ChangePassword";
 import MenuBar from "./Components/MenuBar/MenuBar";
-import EmployeeList from "./Pages/EmployeeManagement/EmployeeList";
 import ManageUserPositions from "./Pages/CompanyManagement/PositionManagement/ManageUserPositions.jsx";
 import ProjectionCalculator from "./Pages/PayrollTools/ProjectionCalculator";
 import PersonalInformation from "./Components/PersonalInformation.jsx";
@@ -44,6 +44,7 @@ function App() {
   });
   const navigate = useNavigate();
 
+  //Load user from localStorage on refresh
   useEffect(() => {
     const fetchUserData = async () => {
       const token = localStorage.getItem("token");

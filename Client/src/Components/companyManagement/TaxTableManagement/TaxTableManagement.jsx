@@ -125,6 +125,15 @@ function TaxTableManagement() {
       <div className="wrap-container">
         <div className="heading-container">
           Comapany Management
+          {/* <div className="icon">
+            <img
+              src="/images/notifications.png"
+              alt="Notification Icon"
+              className="heading-icon"
+            />
+            <div className="utility-box large-box">{currentDate}</div>
+            <div className="utility-box small-box">{currentTime}</div>
+          </div> */}
         </div>
       </div>
       <div className="navbar-with-button">

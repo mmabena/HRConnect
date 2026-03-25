@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CompanyManagementNavBar from "./companyManagementNavBar";
 import PositionManagement from "./PositionManagement";
-import CompanyManagementHeader from "./CompanyManagement/companyManagementHeader";
+import CompanyManagementHeader from "./companyManagement/CompanyManagementHeader";
 import CompanyManagementUI from "./CompanyManagement/companyManagementUI";
 const navTabs = [
   "Tax Table Management",
