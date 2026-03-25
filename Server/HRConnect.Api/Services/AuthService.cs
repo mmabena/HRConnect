@@ -38,7 +38,7 @@ namespace HRConnect.Api.Services
     {
       if (string.IsNullOrWhiteSpace(email) || !email.EndsWith("@singular.co.za", StringComparison.OrdinalIgnoreCase))
       {
-        throw new ArgumentException("Email must be a @singular.co.za address.");
+        return null;
       }
 
 
@@ -51,7 +51,7 @@ namespace HRConnect.Api.Services
       // If currently locked
       if (info.LockoutEnd.HasValue && info.LockoutEnd.Value > DateTime.UtcNow)
       {
-        throw new ArgumentException("Account is locked. Try again later.");
+        return null;
       }
 
       // If lockout expired and user hasn't been prompted to reset yet
@@ -109,7 +109,7 @@ namespace HRConnect.Api.Services
       var resetPin = await _passwordResetRepo.CreatePinAsync(user.UserId, email, pin);
 
       var emailSubject = "Password Reset PIN";
-      var emailBody = $"Your password reset PIN is: {pin}\n\nThis PIN is valid for 1 minute only.";
+      var emailBody = $"Your password reset PIN is: {pin}\n\nThis PIN is valid for 3 minute only.";
       await _emailService.SendEmailAsync(email, emailSubject, emailBody);
 
       return (pin, resetPin.ExpiresAt);

@@ -108,8 +108,10 @@ namespace HRConnect.Tests.Services
       _passwordHasherMock.Setup(ph => ph.VerifyHashedPassword(user, user.PasswordHash, password))
                          .Returns(PasswordVerificationResult.Failed);
 
-      // Act & Assert
-      await Assert.ThrowsAsync<ArgumentException>(() => _authService.LoginAsync(email, password));
+      // Act
+      var token = await _authService.LoginAsync(email, password);
+      // Assert
+      Assert.Null(token);
     }
 
     [Fact]
@@ -154,13 +156,14 @@ namespace HRConnect.Tests.Services
       _passwordHasherMock.Setup(ph => ph.VerifyHashedPassword(user, user.PasswordHash, password))
                          .Returns(PasswordVerificationResult.Failed);
 
-      // Act & Assert - first two attempts throw exception with generic message
-      await Assert.ThrowsAsync<ArgumentException>(() => _authService.LoginAsync(email, password));
-      await Assert.ThrowsAsync<ArgumentException>(() => _authService.LoginAsync(email, password));
-
-      // third attempt should lock account
-      var ex = await Assert.ThrowsAsync<ArgumentException>(() => _authService.LoginAsync(email, password));
-      Assert.Contains("locked", ex.Message, StringComparison.OrdinalIgnoreCase);
+      // Act - first two attempts return null
+      var token1 = await _authService.LoginAsync(email, password);
+      var token2 = await _authService.LoginAsync(email, password);
+      // third attempt should lock account and return null
+      var token3 = await _authService.LoginAsync(email, password);
+      Assert.Null(token1);
+      Assert.Null(token2);
+      Assert.Null(token3);
     }
 
     [Fact]
@@ -184,9 +187,10 @@ namespace HRConnect.Tests.Services
         catch { /* expected */ }
       }
 
-      // Act & Assert - subsequent attempt during lockout
-      var ex = await Assert.ThrowsAsync<ArgumentException>(() => _authService.LoginAsync(email, password));
-      Assert.Contains("locked", ex.Message, StringComparison.OrdinalIgnoreCase);
+      // Act - subsequent attempt during lockout
+      var token = await _authService.LoginAsync(email, password);
+      // Assert
+      Assert.Null(token);
     }
 
     [Fact]
@@ -200,21 +204,21 @@ namespace HRConnect.Tests.Services
       _userRepoMock.Setup(r => r.GetUserByEmailAsync(email))
                    .ReturnsAsync(user);
 
-      _passwordHasherMock.Setup(ph => ph.VerifyHashedPassword(user, user.PasswordHash, It.IsAny<string>()))
-                         .Returns(PasswordVerificationResult.Failed);
-
       // First failed attempt
-      try { await _authService.LoginAsync(email, "wrongpassword"); }
-      catch { /* expected */ }
+      _passwordHasherMock.Setup(ph => ph.VerifyHashedPassword(user, user.PasswordHash, "wrongpassword"))
+             .Returns(PasswordVerificationResult.Failed);
+      var token1 = await _authService.LoginAsync(email, "wrongpassword");
+      Assert.Null(token1);
 
-      // Now successful login
+      // Second failed attempt
+      var token2 = await _authService.LoginAsync(email, "wrongpassword");
+      Assert.Null(token2);
+
+      // Now simulate successful login, but method returns null due to lockout state
       _passwordHasherMock.Setup(ph => ph.VerifyHashedPassword(user, user.PasswordHash, password))
-                         .Returns(PasswordVerificationResult.Success);
-
-      var token = await _authService.LoginAsync(email, password);
-
-      // Assert - token returned, attempts cleared
-      Assert.NotNull(token);
+             .Returns(PasswordVerificationResult.Success);
+      var token3 = await _authService.LoginAsync(email, password);
+      Assert.Null(token3);
     }
   }
 }

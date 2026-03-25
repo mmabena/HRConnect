@@ -20,7 +20,7 @@ namespace HRConnect.Api.Repository
         UserId = userId,
         Email = email,
         Pin = pin,
-        ExpiresAt = DateTime.UtcNow.AddMinutes(1),
+        ExpiresAt = DateTime.UtcNow.AddMinutes(3),
         IsUsed = false,
         CreatedAt = DateTime.UtcNow
       };

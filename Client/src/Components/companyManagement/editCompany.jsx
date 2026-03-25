@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getCompanyById, updateCompany } from '../Services/companyService';
-import '../../MenuBar.css';
+import "../MenuBar/MenuBar.css";
 
 
 const CmInputField = ({ id, value, onChange, placeholder, isTextArea = false, inputClassName = '', error }) => {
@@ -337,7 +337,7 @@ function EditCompany() {
   const defaultTaxCalculationOptions = ['A - Average', 'B - Standard', 'C - Custom'];
 
   return (
-    <div className="edit-employee-background custom-scrollbar"> 
+    <div className="menu-background custom-scrollbar"> 
       <CompanyManagementHeader />
       <CompanyManagementNavBar
         tabs={navTabs}
