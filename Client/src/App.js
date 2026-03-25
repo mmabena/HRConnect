@@ -16,6 +16,8 @@ import ViewPositionManagement from "./Components/ViewPositionManagement";
 import TaxTableUpload from "./Components/companyManagement/TaxTableManagement/TaxTableUpload.jsx";
 import EditPositionManagement from "./Components/companyManagement/PositionManagement/EditPositionManagement.jsx";
 import AddPositionManagement from "./Components/companyManagement/PositionManagement/AddPositionManagment.jsx";
+import PositionManagement from "./Pages/CompanyManagement/PositionManagement/PositionManagement";
+import ChangePositionManagement from "./Components/companyManagement/PositionManagement/ChangePositionManagement.jsx";
 import CompanyManagement from "./companyManagement";
 import CompanyContribution from "./Components/CompanyContribution/CompanyContribution";
 import Profile from "./Components/MyProfile";
@@ -24,7 +26,7 @@ import TaxTableManagement from "./Components/companyManagement/TaxTableManagemen
 import ChangePassword from "./Components/ChangePassword";
 import MenuBar from "./Components/MenuBar/MenuBar";
 import EmployeeList from "./Pages/EmployeeManagement/EmployeeList";
-import PositionManagement from "./Pages/CompanyManagement/PositionManagement/PositionManagement";
+import ManageUserPositions from "./Pages/CompanyManagement/PositionManagement/ManageUserPositions.jsx";
 import ProjectionCalculator from "./Pages/PayrollTools/ProjectionCalculator";
 import PersonalInformation from "./Components/PersonalInformation.jsx";
 import NotificationPage from "./Pages/NotificationPage/NotificationPage.jsx";
@@ -203,7 +205,7 @@ function App() {
             element={<CompensationPlanning />}
           />
           <Route
-            path="/change-password"
+            path="/changePassword"
             element={<ChangePassword currentUser={currentUser} />}
           />
           <Route
@@ -214,6 +216,8 @@ function App() {
             path="/projection-calculator"
             element={<ProjectionCalculator />}
           />
+          <Route path="/changeposition" element={<ChangePositionManagement />} />
+          <Route path="/manageUserPosition" element={<ManageUserPositions/>} />
           <Route path="/personal" element={<PersonalInformation />} />
           <Route path="/notifications" element={<NotificationPage />} />
         </Routes>

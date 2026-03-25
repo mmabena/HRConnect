@@ -46,7 +46,7 @@ function TaxTableUpload({ onClose, onUploadSuccess, existingYears = [] }) {
 
     const ext = selected.name.split(".").pop().toLowerCase();
     if (!["xls", "xlsx"].includes(ext)) {
-      setYearError("Only Excel files (.xls, .xlsx) are allowed.");
+      setYearError("Only Excel files (.xls, .xlsx) are supported.");
       fileInputRef.current.value = "";
       return;
     }
