@@ -8,7 +8,8 @@ namespace HRConnect.Api.DTOs.Payroll
     public PayrollPeriod? Period { get; set; }
     public DateTime PeriodDate { get; set; }
     public bool IsFinalised { get; set; }
-    public DateTime FinalisedDate { get; set; }
+    public int PayrollRunNumber { get; set; }
+    public DateTime? FinalisedDate { get; set; }
     public ICollection<PayrollRecord>? Records { get; set; }
   }
 }

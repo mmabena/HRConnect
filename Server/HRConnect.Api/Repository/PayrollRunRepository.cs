@@ -49,10 +49,21 @@ namespace HRConnect.Api.Repository
       return payrollRun;
     }
     /*Get the current payrun using the provided date*/
-    public async Task<PayrollRun?> GetRunByDateAsync(DateTime dateTime)
+    public async Task<PayrollRun?> GetRunByDateAsync(int payrollRunNumber, DateTime startDate, DateTime endDate)
     {
-      return await _context.PayrollRuns.FirstOrDefaultAsync(
-             p => p.PeriodDate == dateTime);
+      var run = await _context.PayrollRuns.Include(r => r.Period).Where(r =>
+          (r.PayrollRunNumber == payrollRunNumber) &&
+          (r.Period.StartDate >= startDate) &&
+          (r.Period.StartDate <= endDate))
+        .Include(r => r.Records)//I do not know if this is necessary 
+        .FirstOrDefaultAsync();
+
+
+      if (run == null)
+      {
+        return null;
+      }
+      return run;
     }
     /*Get the current payrun using the date and time when this is called*/
     public async Task<PayrollRun?> GetCurrentRunAsync()

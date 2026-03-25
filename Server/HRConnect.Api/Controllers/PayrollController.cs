@@ -2,6 +2,7 @@ namespace HRConnect.Api.Controllers
 {
   using HRConnect.Api.Interfaces;
   using Microsoft.AspNetCore.Mvc;
+  using HRConnect.Api.DTOs.Payroll;
   using HRConnect.Api.DTOs.Payroll.PayrollDeduction.MedicalAidDeduction;
   [Route("api/payroll")]
   [ApiController]
@@ -44,9 +45,19 @@ namespace HRConnect.Api.Controllers
     [HttpGet("records/{payrollRunNumber})")]
     public async Task<IActionResult> GetAllRecordsFromPayrunById(int payrollRunNumber)
     {
-      var payrollRun = await _payrollRunService.GetAllPayRecordsFromPayRunAsync(payrollRunNumber);
-
+      var payrollRun = await _payrollRunService.GetAllPayRecordsFromPayRunAsync(payrollRunNumber)!;
+      if (payrollRun == null)
+        return NotFound();
       return Ok(payrollRun);
+    }
+    [HttpGet("runs/byDate/")]
+    public async Task<IActionResult> GetPayRunByDateRange([FromQuery] PayrollRunRequestDto dto)
+    {
+      var payrollRunDto = await _payrollRunService.RequestRunByDateAsync(dto);
+      if (payrollRunDto == null)
+        return NotFound();
+      return Ok(payrollRunDto);
+
     }
 
     [HttpGet("employee/{id}")]

@@ -9,7 +9,7 @@ namespace HRConnect.Api.Models.Payroll
     public int PayrollRunNumber { get; set; }
     public int PeriodId { get; set; }
     [JsonIgnore]
-    public PayrollPeriod? Period { get; set; }
+    public PayrollPeriod Period { get; set; } = null!;
     public DateTime PeriodDate { get; set; }
     public bool IsFinalised { get; set; }
     public bool IsLocked { get; set; }

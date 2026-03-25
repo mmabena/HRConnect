@@ -3,6 +3,7 @@ namespace HRConnect.Api.Repository
   using HRConnect.Api.Interfaces.Notification;
   using HRConnect.Api.Models;
   using HRConnect.Api.Data;
+  using HRConnect.Api.Mappers.Notification;
   using HRConnect.Api.DTOs.Notification;
   using Microsoft.EntityFrameworkCore;
 
@@ -50,7 +51,7 @@ namespace HRConnect.Api.Repository
       (n.DueDate == null || n.DueDate > DateTime.Now))
       .OrderByDescending(n => n.CreatedAt).ToListAsync();
       // throw new NotImplementedException();
-      return notifications.Select(n => n.ToNotificationDto());
+      return notifications.Select(n => n.ToNotificationDto()).ToList();
     }
   }
 }

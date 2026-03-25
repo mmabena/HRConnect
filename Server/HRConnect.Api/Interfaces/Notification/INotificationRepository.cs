@@ -9,6 +9,6 @@ namespace HRConnect.Api.Interfaces.Notification
     Task<Notification?> ExistsAsync(NotificationType type, DateTime? dueDate, DateTime dateTime);
     Task<bool> MarkAsReadAsync(int id);
     //May not be necessary for production
-    Task<IEnumerable<NotificationDto>> GetAllUnreadAsync();
+    Task<IEnumerable<NotificationDto>> GetAllUnreadAsync(string? employeeId);
   }
 }

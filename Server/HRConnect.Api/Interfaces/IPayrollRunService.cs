@@ -9,7 +9,7 @@ namespace HRConnect.Api.Interfaces
     Task<IEnumerable<PayrollRunDto>> GetAllPayruns();
     /// CONSIDER CHANGING THE RETURN TYPE OF THIS TASK
     Task<PayrollRun> CreatePayrollRunAsync(PayrollRun payrollRun);
-    Task<PayrollRunDto?> GetRunByDateAsync(DateTime dateTime);
+    Task<PayrollRunDto?> RequestRunByDateAsync(PayrollRunRequestDto dto);
     Task<PayrollRun> GetCurrentRunAsync();
     Task UpdateRunAsync(PayrollRun payrollRun);
     Task AddRecordToCurrentRunAsync(PayrollRecord payrollRecord, string employeeId);

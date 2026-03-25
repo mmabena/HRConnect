@@ -40,9 +40,14 @@ namespace HRConnect.Api.Services
       await _payrollRunRepo.CreatePayrollRunAsync(payrollRun);
       return payrollRun;
     }
-    public Task<PayrollRunDto?> GetRunByDateAsync(DateTime dateTime)
+    public async Task<PayrollRunDto?> RequestRunByDateAsync(PayrollRunRequestDto dto)
     {
-      throw new NotImplementedException();
+      var requestedRun = await _payrollRunRepo.GetRunByDateAsync(dto.PayrollRunNumber, dto.StartDate, dto.EndDate);
+      if (requestedRun == null)
+      {
+        return null;
+      }
+      return requestedRun.ToPayrollRunDto();
     }
     public async Task<PayrollRun> GetCurrentRunAsync()
     {
