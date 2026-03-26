@@ -5,6 +5,8 @@ namespace HRConnect.Api.Utils.Payroll
   using Models.PayrollDeduction;
   using Quartz;
 
+  //using Quartz;
+
   // Prevent multiple of these jobs from running concurrently
   [DisallowConcurrentExecution]
   public class PayrollRolloverJob : IJob
@@ -12,15 +14,23 @@ namespace HRConnect.Api.Utils.Payroll
     private readonly IWebHostEnvironment _env;
     private readonly IPayrollPeriodService _payrollPeriodService;
     private readonly IPayrollRunRepository _payrollRunRepo;
+    private readonly IEmployeePensionEnrollmentService _employeePensionEnrollmentService;
+    private readonly IPensionDeductionService _pensionDeductionService;
+    private readonly IServiceProvider _serviceProvider;
     private static readonly int MAX_RUNS = 10;
-    public PayrollRolloverJob(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService, IWebHostEnvironment env)
+    public PayrollRolloverJob(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService, IServiceProvider serviceProvider,
+      IEmployeePensionEnrollmentService employeePensionEnrollmentService, IPensionDeductionService pensionDeductionService,
+      IWebHostEnvironment env)
     {
       _payrollRunRepo = payrollRunRepo;
       _payrollPeriodService = payrollPeriodService;
       _env = env;
+      _serviceProvider = serviceProvider;
+      _employeePensionEnrollmentService = employeePensionEnrollmentService;
+      _pensionDeductionService = pensionDeductionService;
     }
     /// <summary>
-    /// Rolls over to a new period <see cref="PayrollPeriod"/> and creates and new valid payroll run <seealso cref="PayrollRun"/>
+    /// Rolls over to a new period <see cref="PayrollPeriod"/> and creates and new valid payroll run <seealso cref="PayrollRun"/>  
     /// </summary>
     /// <param name="oldPeriod"></param>
     /// <returns>A new valid pauyroll period with atleast 1 payroll run</returns>
@@ -68,10 +78,12 @@ namespace HRConnect.Api.Utils.Payroll
 
       payrollPeriod.Runs.Add(newRun);
       await _payrollRunRepo.CreatePayrollRunAsync(newRun);
+      Console.WriteLine($"ADDED RUN TO PERIOD\n{payrollPeriod.Runs.Count}");
     }
 
     public async Task Execute(IJobExecutionContext context)
     {
+      await _employeePensionEnrollmentService.LockEmployeePensionEnrollmentsAsync();
       DateTime currentDate = DateTime.Now;
       int runId = ((currentDate.Month + 8) % 12) + 1;
       try
@@ -103,9 +115,10 @@ namespace HRConnect.Api.Utils.Payroll
           foreach (var record in currentPayRun.Records)
           {
             record.IsLocked = true;
-            if (record is MedicalAidDeduction variable)
+
+            if (record is PensionDeduction pensionDeduction)
             {
-              variable.IsActive = false;
+              pensionDeduction.IsActive = false;
             }
           }
           //update the current run to implement lock
@@ -115,6 +128,7 @@ namespace HRConnect.Api.Utils.Payroll
             await PayrollUtil.WriteExcelAsync(currentPayRun, _env.ContentRootPath);
         }
 
+        Console.WriteLine($"NEXT RUN========{nextRun}");
         if (nextRun > MAX_RUNS)
         {
           payperiod = await RolloverPayrollPeriod(payperiod);
@@ -123,8 +137,6 @@ namespace HRConnect.Api.Utils.Payroll
         {
           await RolloverPayrollRun(payperiod, nextRun);
         }
-
-        Task.WhenAll();
       }
       catch (InvalidOperationException ex)
       {
@@ -136,8 +148,30 @@ namespace HRConnect.Api.Utils.Payroll
       {
         var jobException = new JobExecutionException(ex);
         throw jobException;
-
       }
+
+      //
+      //await _pensionDeductionService.PensionDeductionRollover();
+      /*await Task.WhenAll(
+        _employeePensionEnrollmentService.RollOverEmloyeePensionEnrollmentAsync(),
+        _pensionDeductionService.PensionDeductionRollover()
+      );*/
+      await _employeePensionEnrollmentService.RollOverEmloyeePensionEnrollmentAsync();
+      await RolloverPayrollDeductions();
+    }
+
+    private async Task RolloverPayrollDeductions()
+    {
+      using IServiceScope pensionDeductionServiceScope = _serviceProvider.CreateScope();
+
+      IPensionDeductionService pensionDeductionService = pensionDeductionServiceScope.ServiceProvider.GetRequiredService<IPensionDeductionService>();
+
+      var tasks = new[]
+      {
+        pensionDeductionService.PensionDeductionRollover()
+      };
+
+      await Task.WhenAll(tasks);
     }
   }
 }

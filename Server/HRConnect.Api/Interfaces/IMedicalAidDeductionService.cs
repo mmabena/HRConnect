@@ -42,6 +42,10 @@ namespace HRConnect.Api.Interfaces
     Task<TerminateMedicalAidDeductionResponseDto> TerminateDeductionsByEmpIdAsync(string employeeId,
     TerminateMedicalAidDeductionRequestDto terminationRequest);
 
+    /// <summary>
+    /// Roll over medical aid deductions to the next period.
+    /// </summary>
+    Task RollOverMedicalAidDeductions();
 
   }
 }

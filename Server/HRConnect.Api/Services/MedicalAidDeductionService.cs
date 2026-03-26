@@ -605,6 +605,13 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
 
   }
 
+  public async Task RollOverMedicalAidDeductions()
+  {
+    // get all deductions from the previous run
+    
+    throw new NotImplementedException();
+  }
+
   //TODO :  Move to Mappers
     /// <summary>
     /// Maps a MedicalAidDeduction entity to a MedicalAidDeductionDto.
