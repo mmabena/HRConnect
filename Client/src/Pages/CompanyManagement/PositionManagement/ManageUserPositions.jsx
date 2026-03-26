@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import CompanyManagementNavBar from "../../../Components/CompanyManagement/companyManagementNavBar";
+import CompanyManagementNavBar from "../../../Components/companyManagement/companyManagementNavBar";
 import { useNavigate, useLocation } from "react-router-dom";
 import { editEmployee } from "../../../api/Employee";
 import api from "../../../api/api";

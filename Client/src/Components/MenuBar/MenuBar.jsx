@@ -2,7 +2,8 @@ import "./MenuBar.css";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-import api from "../../../src/api/api.js";    
+import api from "../../../src/api/api.js";
+import { fetchNotifications } from "../../Pages/NotificationPage/notificationsApi.js";
 
 const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   const [reportOpen, setReportOpen] = useState(false);
@@ -19,8 +20,39 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   const [activeIndex, setActiveIndex] = useState(null);
 
   const [notifications, setNotifications] = useState([]);
+  const [bellCount, setBellCount] = useState(0);
+ // FIX: Access the role directly from the currentUser object
+  const role = currentUser?.role?.toLowerCase();
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+
+useEffect(() => {
+  let cancelled = false;
+
+  const loadNotifications = async () => {
+    try {
+      if (!role) return;
+
+      const data = await fetchNotifications(role);
+
+      if (!cancelled) {
+        setNotifications(data);
+        setBellCount(data.filter((n) => !n.read).length);
+      }
+    } catch (err) {
+      console.error("Failed to load notifications:", err);
+      if (!cancelled) setBellCount(0);
+    }
+  };
+
+  loadNotifications();
+
+  return () => {
+    cancelled = true;
+  };
+}, [role]);
+
+
+
 
   //displaying user initials
   const displayName = currentUser?.username || currentUser?.email || "User";
@@ -45,8 +77,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
     toggleFunction(); // keeps your existing toggle working
   };
 
-  // FIX: Access the role directly from the currentUser object
-  const role = currentUser?.role?.toLowerCase();
+ 
 
   const permissions = {
     isAdmin: ["admin", "superuser"].includes(role),
@@ -54,7 +85,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   };
 
   const isEmployeeManagementPage =
-   location.pathname.startsWith("/employeeList") ||
+    location.pathname.startsWith("/employeeList") ||
     location.pathname.startsWith("/addEmployee") ||
     location.pathname.startsWith("/employeeList") ||
     location.pathname.startsWith("/editEmployee");
@@ -684,12 +715,12 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
             />
 
             {/* Dynamic unread badge */}
-            {unreadCount > 0 && (
+            {bellCount > 0 && (
               <span
                 className="notification-badge"
-                data-count={unreadCount > 99 ? "99+" : unreadCount}
+                data-count={bellCount > 99 ? "99+" : bellCount}
               >
-                {unreadCount > 99 ? "99+" : unreadCount}
+                {bellCount > 99 ? "99+" : bellCount}
               </span>
             )}
           </div>
