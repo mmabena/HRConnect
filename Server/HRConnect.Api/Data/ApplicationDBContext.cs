@@ -32,7 +32,7 @@ namespace HRConnect.Api.Data
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
       base.OnModelCreating(modelBuilder);
-      // Creating namespace for Quartz migrations 
+      // Creating namespace for Quartz migrations separate from HRConnect.dbo 
       modelBuilder.AddQuartz(builder =>
       {
         builder.UseSqlServer(schema: "quartz", prefix: "QRTZ_");
@@ -49,7 +49,6 @@ namespace HRConnect.Api.Data
           .WithMany(e => e.Subordinates)
           .HasForeignKey(e => e.CareerManagerID)
           .OnDelete(DeleteBehavior.Restrict);
-
       // Position - OccupationalLevel
       modelBuilder.Entity<Position>()
           .HasOne(p => p.OccupationalLevels)
@@ -133,6 +132,7 @@ namespace HRConnect.Api.Data
       modelBuilder.Entity<PayrollRun>().Property(p => p.IsLocked).IsConcurrencyToken();
       modelBuilder.Entity<PayrollPeriod>().Property(p => p.IsLocked).IsConcurrencyToken();
       modelBuilder.Entity<PayrollRecord>().Property(p => p.IsLocked).IsConcurrencyToken();
+
       // Medical Aid Deduction Delete Nehavior
       modelBuilder.Entity<MedicalAidDeduction>()
         .HasOne(m => m.MedicalOption)
@@ -146,11 +146,14 @@ namespace HRConnect.Api.Data
         .HasForeignKey(m => m.MedicalCategoryId)
         .OnDelete(DeleteBehavior.NoAction);
 
+      //Notificatin configuration
       modelBuilder.Entity<Notification>().Property(n => n.Severity)
         .HasConversion<string>();
+
+      modelBuilder.Entity<Notification>().Property(n => n.Type)
+      .HasConversion<string>();
     }
 
-    //Override 'SaveChangesAsync' for Payroll Records to enforce locked records on a payroll run 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
       //Intercept all instances of saving any changes to db

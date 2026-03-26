@@ -28,18 +28,25 @@ namespace HRConnect.Api.Services
       var payruns = await _payrollRunRepo.GetAllPayruns();
       return payruns.Select(p => p.ToPayrollRunDto()).ToList();
     }
-    /// CONSIDER CHANGING THE RETURN TYPE OF THIS TASK
-    public async Task<PayrollRun> CreatePayrollRunAsync(PayrollRun payrollRun)
-    {
-      DateTime currentMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
-      //maps current financial month to 1-12
-      payrollRun.IsLocked = false;
-      payrollRun.IsFinalised = false;
-      payrollRun.PeriodDate = currentMonth;
 
-      await _payrollRunRepo.CreatePayrollRunAsync(payrollRun);
-      return payrollRun;
-    }
+    // public async Task<PayrollRun> CreatePayrollRunAsync(PayrollRun payrollRun)
+    // {
+    //   DateTime currentMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day);
+    //   //maps current financial month to 1-12
+    //   payrollRun.IsLocked = false;
+    //   payrollRun.IsFinalised = false;
+    //   payrollRun.PeriodDate = currentMonth;
+
+    //   await _payrollRunRepo.CreatePayrollRunAsync(payrollRun);
+    //   return payrollRun;
+    // }
+
+    /// <summary>
+    ///  Service method used to query and/or get payroll run 'Payroll Run Number', 
+    /// 'StartDate' and 'EndDate' packaged in a <see cref="PayrollRunRequestDto"/>
+    /// </summary>
+    /// <param name="dto">Request DTO with  necessary parameters to request a payroll run</param>
+    /// <returns>PayrollRun as a DTO</returns>
     public async Task<PayrollRunDto?> RequestRunByDateAsync(PayrollRunRequestDto dto)
     {
       var requestedRun = await _payrollRunRepo.GetRunByDateAsync(dto.PayrollRunNumber, dto.StartDate, dto.EndDate);
@@ -49,19 +56,26 @@ namespace HRConnect.Api.Services
       }
       return requestedRun.ToPayrollRunDto();
     }
+
     public async Task<PayrollRun> GetCurrentRunAsync()
     {
       var payrun = await _payrollRunRepo.GetCurrentRunAsync();
 
       return payrun!;
     }
-
+    /// <summary>
+    /// This service method adds a payroll record type to the current active payroll run's 'Records' collections.
+    ///  All records added the collection are automatically locked. 
+    /// </summary>
+    /// <param name="payrollRecord">Payroll Record derived type being added 
+    /// to the current payroll run  </param>
+    /// <param name="employeeId">EmployeeId as a foreign for adding record for particular record</param>
+    /// <returns>Successfully Completed Task</returns>
+    /// <exception cref="InvalidDataException">Invalid Type Expected 'PayrollRecord'
+    /// </exception>
     public async Task AddRecordToCurrentRunAsync(PayrollRecord payrollRecord, string employeeId)
     {
-      // var currentRun = await _payrollRunRepo.GetCurrentRunAsync();
-      // if (currentRun == null)
-      //   return;
-      // currentRun.Records!.Add(payrollRecord); //records may be null
+
       var payperiod = await _payrollPeriodService.GetLastPeriodAsync();
       if (payperiod == null)
         throw new InvalidDataException("No payroll period found or it is locked");
@@ -71,11 +85,10 @@ namespace HRConnect.Api.Services
       if (currentPayRun == null)
         throw new InvalidDataException("No current payroll run found or it is locked");
 
-      Console.WriteLine($"!!!!!-+++++++++--------Adding record to current run with ID {currentPayRun.PayrollRunNumber}");
-      payrollRecord.PayrollRun = currentPayRun; //shoule have current payrollRunNumber
+      payrollRecord.PayrollRun = currentPayRun;
       payrollRecord.EmployeeId = employeeId;
       currentPayRun.Records.Add(payrollRecord);
-      //save changes to db
+
       await _payrollRunRepo.UpdateRun(currentPayRun);
     }
     public async Task UpdateRunAsync(PayrollRun payrollRun)
@@ -100,11 +113,9 @@ namespace HRConnect.Api.Services
 
     public async Task LockAllOlderPayrollRuns()
     {
-      int found = 0;
       PayrollRun? expiredRun;// = await _payrollRunRepo.IsExpiredPayRunUnlocked();
       while ((expiredRun = await _payrollRunRepo.IsExpiredPayRunUnlocked()) != null)
       {
-        Console.WriteLine($"NUMBER OF OPEN EXPIRED RURNS {found++}");
         expiredRun.IsLocked = true;
         expiredRun.FinalisedDate = DateTime.Now;
         expiredRun.IsFinalised = false;

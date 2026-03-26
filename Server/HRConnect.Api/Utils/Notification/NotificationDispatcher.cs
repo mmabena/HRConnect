@@ -5,22 +5,22 @@ namespace HRConnect.Api.Utils.Notification
 
   public class NotificationDispatcher : INotificationDispatcher
   {
-    private readonly IEnumerable<INotificationDeliveryChannel> _deliveryChannels;
-    public NotificationDispatcher(IEnumerable<INotificationDeliveryChannel> deliveryChannels)
+    private readonly IEnumerable<INotificationDeliveryStrategy> _deliveryStrategies;
+    public NotificationDispatcher(IEnumerable<INotificationDeliveryStrategy> deliveryStrategies)
     {
-      _deliveryChannels = deliveryChannels;
+      _deliveryStrategies = deliveryStrategies;
     }
     public async Task DispatchNotificationAsync(Notification notification)
     {
-      foreach (var channel in _deliveryChannels)
+      foreach (var strategy in _deliveryStrategies)
       {
         try
         {
-          await channel.SendAsync(notification);
+          await strategy.SendAsync(notification);
         }
         catch (Exception ex)
         {
-          Console.WriteLine($"Failed To Send Notifaction Through Channel {channel.Name}");
+          Console.WriteLine($"Failed To Send Notifaction Through Channel {strategy.Name}");
           Console.WriteLine($"{ex.Message}");
         }
       }

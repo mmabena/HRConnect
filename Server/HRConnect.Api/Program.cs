@@ -173,7 +173,7 @@ builder.Services.AddScoped<IPayrollRunRepository, PayrollRunRepository>();
 builder.Services.AddScoped<IPayrollRunService, PayrollRunService>();
 builder.Services.AddScoped<IPayrollPeriodService, PayrollPeriodService>();
 builder.Services.AddScoped<IReportsService, ReportsService>();
-builder.Services.AddScoped<PayrollRolloverJob>();//for Quartz
+builder.Services.AddScoped<PayrollRolloverJob>();
 builder.Services.AddScoped<PayrollInit>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
@@ -219,7 +219,7 @@ using (var scope = app.Services.CreateScope())
 {
   var initialiser = scope.ServiceProvider.GetRequiredService<PayrollInit>();
 
-  //initialise a payperiod and payrun
+  //initialise a payperiod and payrun on app start up
   await initialiser.InitialisePayrollPeriod();
 }
 

@@ -44,8 +44,5 @@ namespace HRConnect.Api.Utils.Payroll
     {
       return ((DateTime.Now.Month + 8) % 12) + 1;
     }
-
-
-
   }
 }

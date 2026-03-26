@@ -6,8 +6,6 @@ namespace HRConnect.Api.Models
   using HRConnect.Api.Models.Payroll;
   public class StatutoryContribution : PayrollRecord
   {
-    // public int Id { get; set; }
-    // public string EmployeeId { get; set; } = string.Empty;
     public string IdNumber { get; set; } = string.Empty;
     public string PassportNumber { get; set; } = string.Empty;
     [Precision(18, 2)]

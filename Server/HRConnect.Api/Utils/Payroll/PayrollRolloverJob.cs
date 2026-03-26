@@ -5,7 +5,22 @@ namespace HRConnect.Api.Utils.Payroll
   using Quartz;
 
   // Prevent multiple of these jobs from running concurrently
+
+  /// <summary>
+  /// Payroll Rollover Job class to handle the locking, rolling over and 
+  /// payroll run report generation for the current payroll run 
+  /// </summary>
+  ///<para> 
+  /// When a rollover occurs, all records in the current payroll run are locked and frozen. 
+  /// This prevents modifications and deletions. On the last payroll run (March 31st the 12 fiscal month) the payroll period automatically rolls over and 
+  /// starts the new fiscal year with an empty payroll run with run number 1. On every payroll run roll over, a new fincial report is generated. The report
+  /// captures all payroll records in the current run and sorts them into different
+  /// excel sheets per type (MedicalAidDeductions, PensionDeduction and  StatutoryContributions have their respective worksheets)
+  ///</para>   
+
+  // Prevent multiple of these jobs from running concurrently
   [DisallowConcurrentExecution]
+
   public class PayrollRolloverJob : IJob
   {
     private readonly IPayrollPeriodService _payrollPeriodService;
@@ -16,7 +31,9 @@ namespace HRConnect.Api.Utils.Payroll
     //This makes mocking and testing time a lot easier
     private readonly Func<DateTime> _now;
     public PayrollRolloverJob(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService,
-        IReportsService reportsService, Func<DateTime> now = null)
+        IReportsService reportsService, Func<DateTime> now = null
+
+        )
     {
       _payrollRunRepo = payrollRunRepo;
       _payrollPeriodService = payrollPeriodService;
@@ -24,10 +41,10 @@ namespace HRConnect.Api.Utils.Payroll
       _now = now ?? (() => DateTime.Now);
     }
     /// <summary>
-    /// Rolls over to a new period <see cref="PayrollPeriod"/> and creates and new valid payroll run <seealso cref="PayrollRun"/>  
+    /// Rolls over to a new period <see cref="PayrollPeriod"/> and creates and new valid payroll run <see cref="PayrollRun"/>  
     /// </summary>
     /// <param name="oldPeriod"></param>
-    /// <returns>A new valid pauyroll period with atleast 1 payroll run</returns>
+    /// <returns>A new valid payroll period with atleast 1 payroll run</returns>
     public async Task<PayrollPeriod> RolloverPayrollPeriod(PayrollPeriod? oldPeriod)
     {
       if (oldPeriod != null)
@@ -59,13 +76,12 @@ namespace HRConnect.Api.Utils.Payroll
 
     public async Task RolloverPayrollRun(PayrollPeriod payrollPeriod, int runId)
     {
-      Console.WriteLine($"====>Existing Run has RUNID {runId} <====");
       PayrollRun newRun = new PayrollRun
       {
         PeriodId = payrollPeriod.PayrollPeriodId,
         PayrollRunNumber = runId,
         IsLocked = false,
-        // Period = payrollPeriod,
+        Period = payrollPeriod,
         PeriodDate = DateTime.Now,
         Records = new List<PayrollRecord>()
       };
@@ -102,13 +118,12 @@ namespace HRConnect.Api.Utils.Payroll
         if (currentPayRun == null)
         {
           await RolloverPayrollRun(payperiod, nextRun);
-          return; //avoiding null dereference warnings
+          return;
         }
 
-        //Finalise and lock a run isnt't finalised and still running
+        //Finalise and lock a run if it isn't finalised and is still running
         if (!currentPayRun.IsFinalised && !currentPayRun.IsLocked)
         {
-          Console.WriteLine("Trying to finalise payroll run for month: " + currentPayRun.PayrollRunNumber);
           currentPayRun.IsFinalised = true;
           currentPayRun.IsLocked = true;
           currentPayRun.FinalisedDate = DateTime.Now;
@@ -120,11 +135,8 @@ namespace HRConnect.Api.Utils.Payroll
           //update the current run to implement lock
           await _payrollRunRepo.UpdateRun(currentPayRun);
 
-          Console.WriteLine($"!!!!!+++++++++Records count {currentPayRun.Records.Count}");
-
           if (currentPayRun.Records.Count > 0)
             await _reportsService.WriteExcelAsync(currentPayRun);
-
         }
 
         if (nextRun > MAX_RUNS)

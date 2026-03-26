@@ -8,7 +8,7 @@ namespace HRConnect.Api.Interfaces.Notification
   /// <remarks>Producers should not worry about how notifications would be 
   /// delivered. This will be handled by <see cref="NotificationDeliverer"/>
   /// </remarks>
-  public interface INotificationProducer
+  public interface INotificationFactory
   {
     /// <summary>
     /// Produces and publishes the notifications to while preventing duplicating notifications

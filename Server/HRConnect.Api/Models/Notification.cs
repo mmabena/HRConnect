@@ -22,12 +22,8 @@ namespace HRConnect.Api.Models
     public NotificationSeverity Severity { get; set; }
     //This will also determine if a user is a superuer
     public string EmployeeId { get; set; } = string.Empty;
-    public DateTime? DueDate { get; set; }//Event-sensitive notifications rely 
-                                          // on this date for persistence
-                                          //Idk how to use this right now
+    public DateTime? DueDate { get; set; }
 
-    // public DateTime? ScheduledFor { get; set; }
-    // public DateTime? ExpirationDate { get; set; }
     public DateTime CreatedAt { get; set; }
     public string DeliveryChannel { get; set; } = string.Empty;//"Email", "InApp" etc
   }
