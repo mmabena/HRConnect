@@ -143,7 +143,7 @@ const ViewPositionManagement = () => {
                 <p>
                   Privacy Policy &nbsp; | &nbsp; Terms & Conditions
                 </p>
-                <p>Copyright © 2025 Singular Systems. All rights reserved.</p>
+                <p>Copyright © 2026 Singular Systems. All rights reserved.</p>
               </div>
             </form>
           </div>

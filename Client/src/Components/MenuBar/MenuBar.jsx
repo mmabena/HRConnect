@@ -21,43 +21,13 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
 
   const [notifications, setNotifications] = useState([]);
   const [bellCount, setBellCount] = useState(0);
- // FIX: Access the role directly from the currentUser object
+  // FIX: Access the role directly from the currentUser object
   const role = currentUser?.role?.toLowerCase();
 
-
-useEffect(() => {
-  let cancelled = false;
-
-  const loadNotifications = async () => {
-    try {
-      if (!role) return;
-
-      const data = await fetchNotifications(role);
-
-      if (!cancelled) {
-        setNotifications(data);
-        setBellCount(data.filter((n) => !n.read).length);
-      }
-    } catch (err) {
-      console.error("Failed to load notifications:", err);
-      if (!cancelled) setBellCount(0);
-    }
-  };
-
-  loadNotifications();
-
-  return () => {
-    cancelled = true;
-  };
-}, [role]);
-
-
-
-
-  //displaying user initials
   const displayName = currentUser?.username || currentUser?.email || "User";
   const [canProjectPension, setCanProjectPension] = useState(false);
 
+  //displaying user initials
   const initials = displayName
     .split(" ")
     .map((name) => name.charAt(0))
@@ -77,8 +47,6 @@ useEffect(() => {
     toggleFunction(); // keeps your existing toggle working
   };
 
- 
-
   const permissions = {
     isAdmin: ["admin", "superuser"].includes(role),
     isNormalUser: role === "normaluser",
@@ -93,6 +61,33 @@ useEffect(() => {
   const isUserManagementPage = location.pathname.startsWith("/userManagement");
 
   const baseUrl = process.env.REACT_APP_API_BASE_URL;
+  
+  // This loads all notifications from the database
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadNotifications = async () => {
+      try {
+        if (!role) return;
+
+        const data = await fetchNotifications(role);
+
+        if (!cancelled) {
+          setNotifications(data);
+          setBellCount(data.filter((n) => !n.read).length);
+        }
+      } catch (err) {
+        console.error("Failed to load notifications:", err);
+        if (!cancelled) setBellCount(0);
+      }
+    };
+
+    loadNotifications();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [role]);
 
   useEffect(() => {
     console.log("MenuBar user role:", role);

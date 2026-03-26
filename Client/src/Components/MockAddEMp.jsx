@@ -1017,7 +1017,7 @@ const AddEmployeeModal = ({ closeModal }) => {
                   </span>
                   <br />
                   <span className="align-left">
-                    Copyright © 2025 Singular Systems. All rights reserved.
+                    Copyright © 2026 Singular Systems. All rights reserved.
                   </span>
                 </p>
               </div>

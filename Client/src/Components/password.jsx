@@ -253,7 +253,7 @@ const handleRequestResetLink = async () => {
           <div className="footer-text">
             Privacy Policy | Terms & Conditions
             <br />
-            Copyright © 2025 Singular Systems. All rights reserved.
+            Copyright © 2026 Singular Systems. All rights reserved.
           </div>
         </div>
       </div>
