@@ -30,16 +30,6 @@
       {
         throw new ValidationException("Voluntary contribution is not valid");
       }
-
-      /*DateOnly today = DateOnly.FromDateTime(DateTime.Now);
-      DateOnly nextMonth = new DateOnly(today.Year, today.Month, 1).AddMonths(1);
-
-      if (pensionDeductionUpdateDto.CreatedDate is not null &&
-        ((pensionDeductionUpdateDto.CreatedDate.Value.Month != nextMonth.Month) ||
-        (pensionDeductionUpdateDto.CreatedDate.Value.Year != nextMonth.Year)))
-      {
-        throw new ValidationException("Effective date must be beginning of next month");
-      }*/
     }
 
     public static void ValidateVoluntaryContribution(decimal voluntaryContribution, decimal employeeMonthSalary, decimal pensionOptionPercentage)

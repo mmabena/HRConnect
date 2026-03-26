@@ -60,7 +60,8 @@ namespace HRConnect.Tests
         EmploymentStatus = EmploymentStatus.Permanent,
         CareerManagerID = managerId,
         StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
-        ProfileImage = "profile.jpg"
+        ProfileImage = "profile.jpg",
+        PensionOptionId = 1,
       };
 
       var createdEmployee = employeeDto.ToEmployeeFromCreateDTO();
@@ -126,7 +127,8 @@ namespace HRConnect.Tests
         MonthlySalary = 30000,
         EmploymentStatus = EmploymentStatus.Permanent,
         CareerManagerID = "Manager Name",
-        ProfileImage = "profile.jpg"
+        ProfileImage = "profile.jpg",
+        PensionOptionId = 1,
       };
 
       _employeeRepoMock.Setup(r => r.GetEmployeeByEmailAsync(employeeDto.Email))
@@ -159,7 +161,8 @@ namespace HRConnect.Tests
         MonthlySalary = 20000,
         EmploymentStatus = EmploymentStatus.Permanent,
         CareerManagerID = "",
-        ProfileImage = "profile.jpg"
+        ProfileImage = "profile.jpg",
+        PensionOptionId = 1,
       };
 
       await Assert.ThrowsAsync<HRConnect.Api.Services.ValidationException>(() =>
@@ -193,7 +196,8 @@ namespace HRConnect.Tests
         PositionId = 2,
         EmploymentStatus = EmploymentStatus.Permanent,
         CareerManagerID = newManager.EmployeeId,
-        ProfileImage = "updated.jpg"
+        ProfileImage = "updated.jpg",
+        PensionOptionId = 1
       };
 
       var existingEmployee = new Employee

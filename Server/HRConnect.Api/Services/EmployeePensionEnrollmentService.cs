@@ -12,6 +12,7 @@
   using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Models.PayrollDeduction;
   using HRConnect.Api.Models.Pension;
+  using HRConnect.Api.Utils;
   using HRConnect.Api.Utils.Pension.ValidationHelpers;
   using HRConnect.Api.Utils.Quartz.Pension;
   using Microsoft.EntityFrameworkCore;
@@ -191,7 +192,7 @@
 
           ITrigger trigger = TriggerBuilder.Create()
             //.StartAt(employeePensionEnrollment.EffectiveDate.ToDateTime(TimeOnly.MinValue))
-            .StartAt(DateBuilder.FutureDate(40, IntervalUnit.Second))
+            .StartAt(DateBuilder.FutureDate(10, IntervalUnit.Second))
             .Build();
 
           IScheduler schedulerInstance = await _schedulerFactory.GetScheduler();
@@ -338,7 +339,7 @@
     ///<summary>
     ///Validation pension contribution
     ///</summary>
-    ///<param name="pensionContribution">Pension's contribution</param>
+    ///<param name="pensionContribution">Employee's monthly pension contribution</param>
     ///<returns>
     ///Pension contribution that is not above capped the  maximum allowed monthly
     ///</returns>
@@ -381,7 +382,8 @@
 
       foreach (Employee employee in employeesWithPensionOption)
       {
-        if (!employee.IsActive)
+        int employeeAge = CalculateAge.UsingDOB(employee.DateOfBirth);
+        if (!employee.IsActive && (employeeAge >= 65))
         {
           continue;
         }
@@ -424,6 +426,12 @@
             EffectiveDate = DateOnly.FromDateTime(DateTime.Now),
             IsLocked = false,
           };
+
+          if (employeeExisitingPensionEnrollment != null &&
+            (employeeExisitingPensionEnrollment.PayrollRunId == employeePensionEnrollment.PayrollRunId))
+          {
+            continue;
+          }
 
           _ = await _employeePensionEnrollmentRepository.AddAsync(employeePensionEnrollment);
         }

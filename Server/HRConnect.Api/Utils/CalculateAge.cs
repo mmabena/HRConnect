@@ -25,5 +25,17 @@ namespace HRConnect.Api.Utils
 
       return age;
     }
+
+    ///<summary>
+    ///Calculate age using date of birth (DateOnly)
+    ///</summary>
+    ///<param name="DOB">Date of Birth</param>
+    ///<returns>
+    ///Current age
+    ///</returns>
+    public static int UsingDOB(DateOnly dob)
+    {
+      return UsingDOB(dob.ToDateTime(TimeOnly.MinValue));
+    }
   }
 }

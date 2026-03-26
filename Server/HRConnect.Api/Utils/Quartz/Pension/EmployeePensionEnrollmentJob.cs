@@ -25,7 +25,7 @@
     private static readonly decimal MAX_MONTHLYCONTRIBUTION = 29166.66M;
 
     ///<summary>
-    ///Schedule quartz job
+    ///Scheduled quartz job to enroll employee to pension based on their pension option with their calculated pension deduction 
     ///</summary>
     public async Task Execute(IJobExecutionContext context)
     {
@@ -74,7 +74,7 @@
     }
 
     ///<summary>
-    ///Add pension enrollment
+    ///Add pension enrollment with its deduction
     ///</summary>
     ///<param name="employeePensionEnrollment">Employee Pension Enrollment</param>
     private async Task HandlePensionEnrollment(EmployeePensionEnrollment employeePensionEnrollment)
@@ -123,6 +123,7 @@
         }
       }
     }
+
     ///<summary>
     ///Auxiliary method to get employee pension option percentage
     ///</summary>
@@ -140,7 +141,7 @@
     ///<summary>
     ///Auxiliary method to validate pension contribution amount
     ///</summary>
-    ///<param name="pensionDeductionAddDto">Pension's Deduction Add Request Data Transfer Object</param>
+    ///<param name="pensionDeductionAddDto">Employee's monthly pension contribution</param>
     ///<returns>
     ///Pension contribution amount that is not exceeding the maximum monthly contribution limit
     ///</returns

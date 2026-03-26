@@ -131,6 +131,7 @@
     ///<summary>
     ///Validate pension contribution 
     ///</summary>
+    ///<param name="pensionContribution">Employee's monthly pension contribution</param>
     ///<returns>
     ///Pension contribution that is not above the maximum allowed monthly contribution limit
     ///</returns

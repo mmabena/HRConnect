@@ -9,7 +9,6 @@
   using HRConnect.Api.Models;
   using HRConnect.Api.Models.PayrollDeduction;
   using HRConnect.Api.Models.Pension;
-  using HRConnect.Api.Repository;
   using HRConnect.Api.Services;
   using Microsoft.EntityFrameworkCore;
 
@@ -58,6 +57,12 @@
       }
     }
 
+    ///<summary>
+    ///Auxiliary method to handle the pension enrollment change for an employee. The pension deductions are updated as well
+    ///</summary>
+    ///<param name="employeeId">Pension Option Id</param>
+    ///<param name="newPensionOptionId">Employee's new Pension Option Id</param>
+    ///<param name="voluntaryContribution">Employee's voluntary contribution</param>
     private async Task HandlePensionOptionChange(string employeeId, int newPensionOptionId, decimal? voluntaryContribution)
     {
       Employee employeeNeedingAnUpdate = _employeeRepository.GetEmployeeByIdAsync(employeeId).Result ?? throw new NotFoundException("Employee not found");
@@ -84,6 +89,13 @@
       }
     }
 
+    ///<summary>
+    ///Auxiliary method to get employee pension option percentage
+    ///</summary>
+    ///<param name="pensionOptionId">Pension Option Id</param>
+    ///<returns>
+    ///Pension option percentage
+    ///</returns
     private async Task<decimal> GetEmployeePensionOptionPercentageAsync(int pensionOptionId)
     {
       decimal? employeePensionOption = await _context.PensionOptions.Where(po => po.PensionOptionId == pensionOptionId)
@@ -91,6 +103,13 @@
       return employeePensionOption ?? throw new NotFoundException("Pension option not found");
     }
 
+    ///<summary>
+    ///Auxiliary method to validate that the pension contribution does not exceed the maximum allowed amount
+    ///</summary>
+    ///<param name="pensionContribution">Employee's monthly pension contribution</param>
+    ///<returns>
+    ///Pension contribution amount that is not exceeding the maximum monthly contribution limit
+    ///</returns
     private static decimal ValidPensionContribution(decimal pensionContribution)
     {
       return (pensionContribution > MAX_MONTHLYCONTRIBUTION) ? MAX_MONTHLYCONTRIBUTION : pensionContribution;
