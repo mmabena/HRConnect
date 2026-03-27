@@ -24,7 +24,7 @@
     private static readonly decimal MAX_MONTHLYCONTRIBUTION = 29166.66M;
     public async Task Execute(IJobExecutionContext context)
     {
-      string jsonFromScheduleJob = context.MergedJobDataMap.GetString("UpdatedEnrollment");
+      string jsonFromScheduleJob = context.MergedJobDataMap.GetString("UpdatedEnrollment")!;
       EmployeePensionEnrollmentUpdateDto? employeePensionEnrollmentUpdateDto =
         JsonSerializer.Deserialize<EmployeePensionEnrollmentUpdateDto>(jsonFromScheduleJob);
 

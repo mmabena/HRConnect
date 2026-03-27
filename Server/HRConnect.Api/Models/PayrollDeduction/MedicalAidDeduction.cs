@@ -41,5 +41,12 @@ namespace HRConnect.Api.Models.PayrollDeduction
     public DateTime CreatedDate { get; set; } = DateTime.Now; // setting the default date to use UTC (Ask??)
     public MedicalOption? MedicalOption { get; set; }
     public MedicalOptionCategory? MedicalOptionCategory { get; set; }
+    // this is the end date of the medical aid (caters for the event when the member changes plans or terminates their medical aid)
+    public DateTime? TerminationDate { get; set; }
+    public string OptionCategoryName { get; set; } = string.Empty;
+
+    public DateTime UpdatedDate { get; set; }
+    public string? TerminationReason { get; set; } = string.Empty;// Reason for termination (Moving to another premium?, moving to another medical aid provider, etc.)
+
   }
 }

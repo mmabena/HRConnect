@@ -15,7 +15,7 @@
     public int PayrollRunId { get; set; }
     public bool IsLocked { get; set; }
 
-    public PensionOption PensionOption { get; set; }
-    public Employee Employee { get; set; }
+    public PensionOption? PensionOption { get; set; }
+    public Employee? Employee { get; set; }
   }
 }
