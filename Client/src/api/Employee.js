@@ -27,7 +27,7 @@ api.interceptors.response.use(
 
 export const addEmployee = async (employee) => {
   try {
-    const response = await api.post(`${API_BASE}/add`, employee, {
+    const response = await api.post(`${API_BASE}`, employee, {
       headers: { "Content-Type": "application/json" },
     });
 

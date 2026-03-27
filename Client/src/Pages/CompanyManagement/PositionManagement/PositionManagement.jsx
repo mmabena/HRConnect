@@ -23,9 +23,6 @@ const PositionManagement = ({ title }) => {
 
   const {
     currentPage,
-    setCurrentPage,
-    itemsPerPage,
-    setItemsPerPage,
     totalPages,
     currentItems: currentPositions,
     handlePrev,
@@ -63,11 +60,8 @@ const PositionManagement = ({ title }) => {
   const closeChangeModal = () => setChangeModalData(null);
 
   // Destructure modal data for readability
-  const {
-    currentPosition,
-    linkedEmployeesCount,
-    attemptedTitle,
-  } = changeModalData || {};
+  const { currentPosition, linkedEmployeesCount, attemptedTitle } =
+    changeModalData || {};
 
   // -------------------
   // Loading & Access
@@ -78,7 +72,6 @@ const PositionManagement = ({ title }) => {
   return (
     <header className="cmn-header-main-frame">
       <div className="menu-background custom-scrollbar">
-        
         {/* Header */}
         <div className="cmn-header-left-section">
           <h1 className="cmn-logo-text">{title || "Company Management"}</h1>
@@ -141,7 +134,9 @@ const PositionManagement = ({ title }) => {
                     <td>{position.positionTitle}</td>
                     <td>{position.jobGrade?.name || "N/A"}</td>
 
-                    <td title={position.occupationalLevel?.description || "N/A"}>
+                    <td
+                      title={position.occupationalLevel?.description || "N/A"}
+                    >
                       {position.occupationalLevel?.description || "N/A"}
                     </td>
 
@@ -152,7 +147,7 @@ const PositionManagement = ({ title }) => {
                           day: "numeric",
                           month: "long",
                           year: "numeric",
-                        }
+                        },
                       )}
                     </td>
 
@@ -178,43 +173,7 @@ const PositionManagement = ({ title }) => {
 
         {/* Pagination */}
         <div className="pagination-wrapper">
-          <div className="pagination-left">
-            <div
-              className="per-page-box"
-              onClick={() => setShowPageOptions(!showPageOptions)}
-            >
-              <span className="per-page-number">{itemsPerPage}</span>
-
-              <img
-                src="/images/arrow_drop_down_circle.png"
-                alt="Dropdown"
-                className="dropdown-icon"
-              />
-
-              {showPageOptions && (
-                <ul className="per-page-dropdown">
-                  {pageOptions.map((option) => (
-                    <li
-                      key={option}
-                      className="per-page-option"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setItemsPerPage(option);
-                        setCurrentPage(1);
-                        setShowPageOptions(false);
-                      }}
-                    >
-                      {option}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-
-            <span className="per-page-label">Per page</span>
-          </div>
-
-          <div className="pagination-right">
+          <div className="position-pagination-right">
             <img
               src="/images/arrow_drop_down_circle.png"
               alt="Previous"
@@ -226,20 +185,35 @@ const PositionManagement = ({ title }) => {
                 opacity: currentPage > 1 ? 1 : 0.4,
               }}
             />
+            <div className="position-page-numbers">
+              {Array.from({ length: 10 }, (_, i) => {
+                const startPage = Math.floor((currentPage - 1) / 10) * 10;
+                const pageNumber = startPage + i + 1;
 
-            <div className="page-numbers">
-              {Array.from({ length: totalPages }, (_, i) => (
-                <button
-                  key={i + 1}
-                  className={`page-number ${
-                    currentPage === i + 1 ? "active-page" : ""
-                  }`}
-                  onClick={() => handlePageClick(i + 1)}
-                  aria-label={`Go to page ${i + 1}`}
-                >
-                  {i + 1}
-                </button>
-              ))}
+                if (pageNumber > totalPages) {
+                  return (
+                    <button
+                      key={`empty-${i}`}
+                      className="page-number placeholder"
+                      disabled
+                    >
+                      {/* empty placeholder */}
+                    </button>
+                  );
+                }
+
+                return (
+                  <button
+                    key={pageNumber}
+                    className={`page-number ${
+                      currentPage === pageNumber ? "active-page" : ""
+                    }`}
+                    onClick={() => handlePageClick(pageNumber)}
+                  >
+                    {pageNumber}
+                  </button>
+                );
+              })}
             </div>
 
             <img

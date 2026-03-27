@@ -8,8 +8,21 @@
   margin-top: -25px;     /* small space below input */
   text-align: left;        /* align text to the left */
 }
+.position-page-numbers {
+  display: flex;
+   align-items: center;
+  gap: 6px;
+}
 
-
+.position-page-number {
+  font-family: 'Anek Bangla';
+  font-size: 16px;
+  font-weight: 700;
+  color: #0075A6;
+    width: 35px;
+  height: 35px;
+  cursor: pointer;
+}
 /* Dropdown icon styling */
 .apm-dropdown-icon {
   position: absolute;
@@ -463,6 +476,13 @@ margin:10px;
 
 
 }
+.position-pagination-right {
+  display: flex;
+  align-items: center;
+  margin-left:510px;
+  gap: 10px;
+}
+
 
 .hidden-date-picker {
   position: absolute;

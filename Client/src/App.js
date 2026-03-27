@@ -27,7 +27,7 @@ import ChangePassword from "./Components/ChangePassword";
 import TaxTableUpload from "./Components/CompanyManagement/TaxTableManagement/TaxTableUpload.jsx";
 import MenuBar from "./Components/MenuBar/MenuBar";
 
-import ManageUserPositions from "./Pages/CompanyManagement/PositionManagement/ManageUserPosition.jsx";
+import ManageUserPositions from "./Pages/CompanyManagement/PositionManagement/ManageUserPositions.jsx";
 import PositionManagement from "./Pages/CompanyManagement/PositionManagement/PositionManagement";
 import ProjectionCalculator from "./Pages/PayrollTools/ProjectionCalculator";
 import PersonalInformation from "./Components/PersonalInformation.jsx";

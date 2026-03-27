@@ -6,6 +6,10 @@ import api from "../../../api/api";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
 
+import usePositions from "../../../hooks/usePositions";
+import usePagination from "../../../hooks/usePagination";
+import useDateTime from "../../../hooks/useDateTime";
+
 const ManageUserPositions = ({ title }) => {
   const [employees, setEmployees] = useState([]);
   const [positions, setPositions] = useState([]);
@@ -189,101 +193,97 @@ const ManageUserPositions = ({ title }) => {
   // Save Changes (Update Position)
   // ----------------------------
   const handleSave = async () => {
-  const selectedIds = Object.keys(selectedEmployees).filter(
-    (id) => selectedEmployees[id]
-  );
+    const selectedIds = Object.keys(selectedEmployees).filter(
+      (id) => selectedEmployees[id],
+    );
 
-  if (!selectedIds.length) {
-    toast.error("Please select at least one employee.");
-    return;
-  }
+    if (!selectedIds.length) {
+      toast.error("Please select at least one employee.");
+      return;
+    }
 
-  if (!selectedPosition) {
-    toast.error("Please select a position.");
-    return;
-  }
+    if (!selectedPosition) {
+      toast.error("Please select a position.");
+      return;
+    }
 
-  try {
-    const updatePromises = selectedIds.map((employeeId) => {
-      const emp = employees.find(
-        (e) => e.employeeId.toString() === employeeId
-      );
-
-      if (!emp) return null;
-
-      const updatedEmp =(emp.employeeId, {
-         employeeId: emp.employeeId,
-        positionId: Number(selectedPosition),
-
-        // Required fields fallback
-        nationality: emp.nationality || "Not specified",
-        title: emp.title || "Mr/Ms",
-        name: emp.name || "",
-        surname: emp.surname || "",
-        idNumber: emp.idNumber || "",
-        passportNumber: emp.passportNumber || "",
-        gender: emp.gender || "Male",
-        contactNumber: emp.contactNumber || "",
-        taxNumber: emp.taxNumber || "",
-        email: emp.email || "",
-        physicalAddress: emp.physicalAddress || "",
-        city: emp.city || "",
-        zipCode: emp.zipCode || "",
-        hasDisability: emp.hasDisability || false,
-        disabilityDescription: emp.disabilityDescription || "",
-        dateOfBirth:
-          emp.dateOfBirth || new Date().toISOString().split("T")[0],
-        startDate:
-          emp.startDate || new Date().toISOString().split("T")[0],
-        branch: emp.branch || "",
-        monthlySalary: emp.monthlySalary || 0,
-        employmentStatus: emp.employmentStatus || "Permanent",
-        careerManagerID: emp.careerManagerID || "",
-        profileImage: emp.profileImage || "",
-      });
-
-      return editEmployee(emp.employeeId, updatedEmp);
-    }).filter(Boolean);
-
-    await Promise.all(updatePromises);
-
-    toast.success("Positions updated successfully.");
-
-    //KEY FIX: Update UI immediately WITHOUT refetch
-    setEmployees((prev) =>
-      prev.map((emp) => {
-        if (selectedIds.includes(emp.employeeId.toString())) {
-          const newPosition = positions.find(
-            (p) => p.positionId === Number(selectedPosition)
+    try {
+      const updatePromises = selectedIds
+        .map((employeeId) => {
+          const emp = employees.find(
+            (e) => e.employeeId.toString() === employeeId,
           );
 
-          return {
-            ...emp,
+          if (!emp) return null;
+
+          const updatedEmp = {
+            employeeId: emp.employeeId,
             positionId: Number(selectedPosition),
-
-            //THIS is what makes UI update instantly
-            position: newPosition
-              ? {
-                  ...newPosition,
-                }
-              : emp.position,
+            title: emp.title,
+            name: emp.name,
+            surname: emp.surname,
+            idNumber: emp.idNumber,
+            passportNumber: emp.passportNumber,
+            gender: emp.gender,
+            contactNumber: emp.contactNumber,
+            taxNumber: emp.taxNumber,
+            email: emp.email,
+            city: emp.city,
+            zipCode: emp.zipCode,
+            branch: emp.branch,
+            monthlySalary: emp.monthlySalary,
+            employmentStatus: emp.employmentStatus,
+            careerManagerID: emp.careerManagerID,
+            profileImage: emp.profileImage,
+            hasDisability: emp.hasDisability,
+            disabilityDescription: emp.disabilityDescription,
+            dateOfBirth: emp.dateOfBirth,
+            startDate: emp.startDate,
+            nationality: emp.nationality,
           };
-        }
-        return emp;
-      })
-    );
 
-    setSelectedEmployees({});
-    setSelectedPosition("");
+          return editEmployee(emp.employeeId, updatedEmp);
+        })
+        .filter(Boolean);
 
-  } catch (error) {
-    console.error(
-      "Failed to update positions:",
-      error.response || error.message
-    );
-    toast.error("Failed to save changes.");
-  }
-};
+      await Promise.all(updatePromises);
+
+      toast.success("Positions updated successfully.");
+
+      //KEY FIX: Update UI immediately WITHOUT refetch
+      setEmployees((prev) =>
+        prev.map((emp) => {
+          if (selectedIds.includes(emp.employeeId.toString())) {
+            const newPosition = positions.find(
+              (p) => p.positionId === Number(selectedPosition),
+            );
+
+            return {
+              ...emp,
+              positionId: Number(selectedPosition),
+
+              //THIS is what makes UI update instantly
+              position: newPosition
+                ? {
+                    ...newPosition,
+                  }
+                : emp.position,
+            };
+          }
+          return emp;
+        }),
+      );
+
+      setSelectedEmployees({});
+      setSelectedPosition("");
+    } catch (error) {
+      console.error(
+        "Failed to update positions:",
+        error.response || error.message,
+      );
+      toast.error("Failed to save changes.");
+    }
+  };
   if (loading) return <h3>Loading...</h3>;
   if (!hasAccess) return <h2>Access Denied. SuperUser only.</h2>;
 
@@ -347,7 +347,7 @@ const ManageUserPositions = ({ title }) => {
         </div>
 
         {/* Employee Table */}
-           <div className="manage-positions"></div>
+        <div className="manage-positions"></div>
         <table className="positions-table">
           <thead>
             <tr>
@@ -376,9 +376,7 @@ const ManageUserPositions = ({ title }) => {
           <tbody>
             {currentEmployees.length === 0 ? (
               <tr>
-                <td >
-                  No users found.
-                </td>
+                <td>No users found.</td>
               </tr>
             ) : (
               currentEmployees.map((employee) => (
@@ -400,11 +398,12 @@ const ManageUserPositions = ({ title }) => {
 
                   <td>{employee.branch || "N/A"}</td>
                   <td>{positionMap[employee.positionId] || "N/A"}</td>
+
                   <td>
-            {selectedEmployees[employee.employeeId]
-              ? positionMap[selectedPosition] || "-"
-              : "-"}
-          </td>
+                    {selectedEmployees[employee.employeeId]
+                      ? positionMap[selectedPosition] || "-"
+                      : positionMap[employee.positionId] || "N/A"}
+                  </td>
                 </tr>
               ))
             )}
@@ -412,52 +411,84 @@ const ManageUserPositions = ({ title }) => {
         </table>
 
         {/* Pagination */}
-{/* Pagination */}
-{employees.length > itemsPerPage && (
-  <div className="pagination-placeholder">
-    <div className="pagination-wrapper">
-      <div className="pagination-right">
-        <img
-          src="/images/arrow_drop_down_circle.png"
-          alt="Previous"
-          className="pagination-arrow prev"
-          onClick={handlePrev}
-          style={{
-            transform: "rotate(90deg)",
-            cursor: currentPage > 1 ? "pointer" : "not-allowed",
-            opacity: currentPage > 1 ? 1 : 0.4,
-          }}
-        />
-
-        <div className="page-numbers">
-          {Array.from({ length: totalPages }, (_, i) => (
-            <button
-              key={i + 1}
-              className={`page-number ${
-                currentPage === i + 1 ? "active-page" : ""
-              }`}
-              onClick={() => handlePageClick(i + 1)}
+        {/* Pagination */}
+        {employees.length > itemsPerPage && (
+          <div className="pagination-placeholder">
+            <div className="pagination-wrapper">
+              <div
+              className="per-page-box"
+              onClick={() => setShowPageOptions(!showPageOptions)}
             >
-              {i + 1}
-            </button>
-          ))}
-        </div>
+              <span className="per-page-number">{itemsPerPage}</span>
 
-        <img
-          src="/images/arrow_drop_down_circle.png"
-          alt="Next"
-          className="pagination-arrow next"
-          onClick={handleNext}
-          style={{
-            transform: "rotate(-90deg)",
-            cursor: currentPage < totalPages ? "pointer" : "not-allowed",
-            opacity: currentPage < totalPages ? 1 : 0.4,
-          }}
-        />
-      </div>
-    </div>
-  </div>
-)}
+              <img
+                src="/images/arrow_drop_down_circle.png"
+                alt="Dropdown"
+                className="dropdown-icon"
+              />
+
+              {showPageOptions && (
+                <ul className="per-page-dropdown">
+                  {pageOptions.map((option) => (
+                    <li
+                      key={option}
+                      className="per-page-option"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setItemsPerPage(option);
+                        setCurrentPage(1);
+                        setShowPageOptions(false);
+                      }}
+                    >
+                      {option}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          <div className="pagination-right">
+            <img
+              src="/images/arrow_drop_down_circle.png"
+              alt="Previous"
+              className="pagination-arrow-prev"
+              onClick={handlePrev}
+              style={{
+                transform: "rotate(90deg)",
+                cursor: currentPage > 1 ? "pointer" : "not-allowed",
+                opacity: currentPage > 1 ? 1 : 0.4,
+              }}
+            />
+
+                <div className="page-numbers">
+              {Array.from({ length: totalPages }, (_, i) => (
+                <button
+                  key={i + 1}
+                  className={`page-number ${
+                    currentPage === i + 1 ? "active-page" : ""
+                  }`}
+                  onClick={() => handlePageClick(i + 1)}
+                  aria-label={`Go to page ${i + 1}`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+            </div>
+
+                 <img
+              src="/images/arrow_drop_down_circle.png"
+              alt="Next"
+              className="pagination-arrow next"
+              onClick={handleNext}
+              style={{
+                transform: "rotate(-90deg)",
+                cursor: currentPage < totalPages ? "pointer" : "not-allowed",
+                opacity: currentPage < totalPages ? 1 : 0.4,
+              }}
+            />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </header>
   );
