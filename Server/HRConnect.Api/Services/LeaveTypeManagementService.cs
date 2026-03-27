@@ -32,6 +32,54 @@ namespace HRConnect.Api.Services
 
             return leaveTypes.Select(MapToResponse).ToList();
         }
+        public async Task<List<EmployeeWithLeaveDto>> GetAllEmployeesWithLeaveAsync()
+        {
+            return await _context.Employees
+                .Include(e => e.Position)
+                .Include(e => e.LeaveBalances)
+                    .ThenInclude(lb => lb.LeaveType)
+                .Select(e => new EmployeeWithLeaveDto
+                {
+                    EmployeeId = e.EmployeeId,
+                    FullName = e.Name + " " + e.Surname,
+                    Email = e.Email,
+                    Position = e.Position.PositionTitle,
+                    LeaveBalances = e.LeaveBalances.Select(lb => new LeaveBalanceSummary
+                    {
+                        LeaveType = lb.LeaveType.Name,
+                        AccruedDays = lb.AccruedDays,
+                        TakenDays = lb.TakenDays,
+                        AvailableDays = lb.AvailableDays
+                    }).ToList()
+                })
+                .ToListAsync();
+        }
+        public async Task<EmployeeWithLeaveDto?> GetEmployeeWithLeaveByIdAsync(string employeeId)
+        {
+            var e = await _context.Employees
+                .Include(x => x.Position)
+                .Include(x => x.LeaveBalances)
+                    .ThenInclude(lb => lb.LeaveType)
+                .FirstOrDefaultAsync(x => x.EmployeeId == employeeId);
+
+            if (e == null)
+                return null;
+
+            return new EmployeeWithLeaveDto
+            {
+                EmployeeId = e.EmployeeId,
+                FullName = e.Name + " " + e.Surname,
+                Email = e.Email,
+                Position = e.Position.PositionTitle,
+                LeaveBalances = e.LeaveBalances.Select(lb => new LeaveBalanceSummary
+                {
+                    LeaveType = lb.LeaveType.Name,
+                    AccruedDays = lb.AccruedDays,
+                    TakenDays = lb.TakenDays,
+                    AvailableDays = lb.AvailableDays
+                }).ToList()
+            };
+        }
         /// <summary>
         /// Retrieves a specific leave type by its unique identifier from the database, including its associated entitlement rules,
         /// maps the data to a LeaveTypeResponse DTO, and returns it to the caller, allowing for the display or further processing of the specific leave type information in the application,

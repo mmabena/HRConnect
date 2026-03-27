@@ -70,6 +70,7 @@ namespace HRConnect.Api.Controllers
                 message = "Leave rejected successfully."
             });
         }
+        
         [HttpGet("{id}/approve")]
         public async Task<IActionResult> ApproveFromEmail(
     int id,
@@ -88,6 +89,18 @@ namespace HRConnect.Api.Controllers
             await _service.RejectLeaveAsync(id, token, "Rejected by manager");
 
             return Content("Leave rejected successfully.");
+        }
+        [HttpPost("{id}/approve-internal")]
+        public async Task<IActionResult> ApproveInternal(int id)
+        {
+            await _service.ApproveLeaveInternalAsync(id);
+            return Ok("Approved internally");
+        }
+        [HttpPost("{id}/reject-internal")]
+        public async Task<IActionResult> RejectInternal(int id, [FromBody] string reason)
+        {
+            await _service.RejectLeaveInternalAsync(id, reason);
+            return Ok("Rejected internally");
         }
     }
 }

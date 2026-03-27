@@ -67,5 +67,14 @@ namespace HRConnect.Api.DTOs
         public decimal ProjectedAvailableDays { get; set; }
         public int DaysWorked { get; set; }
     }
+    public class EmployeeWithLeaveDto
+    {
+        public string EmployeeId { get; set; } = string.Empty;
+        public string FullName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Position { get; set; } = string.Empty;
+
+        public List<LeaveBalanceSummary> LeaveBalances { get; set; } = new();
+    }
 
 }

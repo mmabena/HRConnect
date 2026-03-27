@@ -121,10 +121,54 @@ namespace HRConnect.Api.Services
 
             application.Status = LeaveApplication.LeaveApplicationStatus.Approved;
             application.DecisionDate = DateTime.UtcNow;
-            application.DecisionBy = "Manager";
+            var employee = await _context.Employees
+                .FirstAsync(e => e.EmployeeId == application.EmployeeId);
+
+            var manager = await _context.Employees
+                .FirstOrDefaultAsync(e => e.EmployeeId == employee.CareerManagerID);
+
+            application.DecisionBy = manager != null
+                ? $"{manager.Name} {manager.Surname}"
+                : "Admin";
 
             await _context.SaveChangesAsync();
 
+            await SendEmployeeDecisionEmail(application, true);
+        }
+        public async Task ApproveLeaveInternalAsync(int applicationId)
+        {
+            var application = await _context.LeaveApplications
+                .FirstOrDefaultAsync(a => a.Id == applicationId);
+
+            if (application == null)
+                throw new InvalidOperationException("Leave application not found");
+
+            if (application.Status != LeaveApplication.LeaveApplicationStatus.Pending)
+                throw new InvalidOperationException("Only pending applications can be approved");
+
+            var balance = await _context.EmployeeLeaveBalances
+                .FirstAsync(b => b.EmployeeId == application.EmployeeId &&
+                                 b.LeaveTypeId == application.LeaveTypeId);
+
+            balance.TakenDays += application.DaysRequested;
+            balance.AvailableDays -= application.DaysRequested;
+
+            //GET MANAGER NAME
+            var employee = await _context.Employees
+                .FirstAsync(e => e.EmployeeId == application.EmployeeId);
+
+            var manager = await _context.Employees
+                .FirstOrDefaultAsync(e => e.EmployeeId == employee.CareerManagerID);
+
+            application.Status = LeaveApplication.LeaveApplicationStatus.Approved;
+            application.DecisionDate = DateTime.UtcNow;
+            application.DecisionBy = manager != null
+                ? $"{manager.Name} {manager.Surname}"
+                : "Admin";
+
+            await _context.SaveChangesAsync();
+
+            // ALWAYS SEND EMAIL
             await SendEmployeeDecisionEmail(application, true);
         }
         /// <summary>
@@ -155,11 +199,49 @@ namespace HRConnect.Api.Services
 
             application.Status = LeaveApplication.LeaveApplicationStatus.Rejected;
             application.DecisionDate = DateTime.UtcNow;
-            application.DecisionBy = "Manager";
+            var employee = await _context.Employees
+            .FirstAsync(e => e.EmployeeId == application.EmployeeId);
+
+            var manager = await _context.Employees
+                .FirstOrDefaultAsync(e => e.EmployeeId == employee.CareerManagerID);
+
+            application.DecisionBy = manager != null
+                ? $"{manager.Name} {manager.Surname}"
+                : "Admin";
             application.RejectionReason = reason;
 
             await _context.SaveChangesAsync();
 
+            await SendEmployeeDecisionEmail(application, false);
+        }
+        public async Task RejectLeaveInternalAsync(int applicationId, string? reason)
+        {
+            var application = await _context.LeaveApplications
+                .FirstOrDefaultAsync(a => a.Id == applicationId);
+
+            if (application == null)
+                throw new InvalidOperationException("Leave application not found");
+
+            if (application.Status != LeaveApplication.LeaveApplicationStatus.Pending)
+                throw new InvalidOperationException("Only pending applications can be rejected");
+
+            var employee = await _context.Employees
+                .FirstAsync(e => e.EmployeeId == application.EmployeeId);
+
+            var manager = await _context.Employees
+                .FirstOrDefaultAsync(e => e.EmployeeId == employee.CareerManagerID);
+
+            application.Status = LeaveApplication.LeaveApplicationStatus.Rejected;
+            application.DecisionDate = DateTime.UtcNow;
+            application.DecisionBy = manager != null
+                ? $"{manager.Name} {manager.Surname}"
+                : "Admin";
+
+            application.RejectionReason = reason;
+
+            await _context.SaveChangesAsync();
+
+            // 🔥 ALWAYS SEND EMAIL
             await SendEmployeeDecisionEmail(application, false);
         }
         /// <summary>
@@ -231,7 +313,7 @@ namespace HRConnect.Api.Services
             if (application.ApprovalToken == Guid.Empty)
             {
                 application.ApprovalToken = Guid.NewGuid();
-                application.TokenExpiry = DateTime.UtcNow.AddHours(48); 
+                application.TokenExpiry = DateTime.UtcNow.AddHours(48);
                 await _context.SaveChangesAsync();
             }
             var baseUrl = _configuration["AppSettings:BaseUrl"];
