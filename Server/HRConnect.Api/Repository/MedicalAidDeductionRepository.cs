@@ -127,5 +127,18 @@ namespace HRConnect.Api.Repository
       _context.MedicalAidDeductions.Update(terminateDeduction);
       await _context.SaveChangesAsync();
     }
+
+    public async Task<List<MedicalAidDeduction>> GetAllRecordsFromPreviousRun(int previousRunNumber)
+    {
+      return await _context.MedicalAidDeductions
+        .Include(d => d.PayrollRun)
+        .Where(d =>
+          !d.IsActive &&
+          d.TerminationDate == null &&
+          d.PayrollRun != null && d.PayrollRunId == previousRunNumber &&
+          d.PayrollRun.IsFinalised &&
+          d.PayrollRun.IsLocked)
+        .ToListAsync();
+    }
   }
 }

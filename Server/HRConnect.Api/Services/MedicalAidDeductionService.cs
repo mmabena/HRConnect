@@ -605,6 +605,11 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
 
   }
 
+  public async Task<List<MedicalAidDeduction>> GetAllRecordsFromPreviousRunAsync(int previousRunNumber)
+  {
+    return await _medicalAidDeductionRepository.GetAllRecordsFromPreviousRun(previousRunNumber);
+  }
+
   public async Task RollOverMedicalAidDeductions()
   {
     // get all deductions from the previous run

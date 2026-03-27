@@ -15,6 +15,8 @@ namespace HRConnect.Api.Interfaces
 
     Task TerminateMedicalAidDeductionAsync(MedicalAidDeduction terminateDeduction);
 
+    Task<List<MedicalAidDeduction>> GetAllRecordsFromPreviousRun(int previousRunNumber);
+
   }
 }
 

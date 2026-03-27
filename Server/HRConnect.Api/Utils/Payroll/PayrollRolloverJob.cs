@@ -14,20 +14,20 @@ namespace HRConnect.Api.Utils.Payroll
     private readonly IWebHostEnvironment _env;
     private readonly IPayrollPeriodService _payrollPeriodService;
     private readonly IPayrollRunRepository _payrollRunRepo;
-    private readonly IEmployeePensionEnrollmentService _employeePensionEnrollmentService;
-    private readonly IPensionDeductionService _pensionDeductionService;
+    //private readonly IEmployeePensionEnrollmentService _employeePensionEnrollmentService;
+    //private readonly IPensionDeductionService _pensionDeductionService;
     private readonly IServiceProvider _serviceProvider;
     private static readonly int MAX_RUNS = 10;
-    public PayrollRolloverJob(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService, IServiceProvider serviceProvider,
-      IEmployeePensionEnrollmentService employeePensionEnrollmentService, IPensionDeductionService pensionDeductionService,
+    public PayrollRolloverJob(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService, IServiceProvider serviceProvider/*,
+      IEmployeePensionEnrollmentService employeePensionEnrollmentService, IPensionDeductionService pensionDeductionService*/,
       IWebHostEnvironment env)
     {
       _payrollRunRepo = payrollRunRepo;
       _payrollPeriodService = payrollPeriodService;
       _env = env;
       _serviceProvider = serviceProvider;
-      _employeePensionEnrollmentService = employeePensionEnrollmentService;
-      _pensionDeductionService = pensionDeductionService;
+      //_employeePensionEnrollmentService = employeePensionEnrollmentService;
+      //_pensionDeductionService = pensionDeductionService;
     }
     /// <summary>
     /// Rolls over to a new period <see cref="PayrollPeriod"/> and creates and new valid payroll run <seealso cref="PayrollRun"/>  
@@ -83,7 +83,7 @@ namespace HRConnect.Api.Utils.Payroll
 
     public async Task Execute(IJobExecutionContext context)
     {
-      await _employeePensionEnrollmentService.LockEmployeePensionEnrollmentsAsync();
+      //await _employeePensionEnrollmentService.LockEmployeePensionEnrollmentsAsync();
       DateTime currentDate = DateTime.Now;
       int runId = ((currentDate.Month + 8) % 12) + 1;
       try
@@ -156,7 +156,8 @@ namespace HRConnect.Api.Utils.Payroll
         _employeePensionEnrollmentService.RollOverEmloyeePensionEnrollmentAsync(),
         _pensionDeductionService.PensionDeductionRollover()
       );*/
-      await _employeePensionEnrollmentService.RollOverEmloyeePensionEnrollmentAsync();
+
+      //await _employeePensionEnrollmentService.RollOverEmloyeePensionEnrollmentAsync();
       await RolloverPayrollDeductions();
     }
 
@@ -164,14 +165,14 @@ namespace HRConnect.Api.Utils.Payroll
     {
       using IServiceScope pensionDeductionServiceScope = _serviceProvider.CreateScope();
 
-      IPensionDeductionService pensionDeductionService = pensionDeductionServiceScope.ServiceProvider.GetRequiredService<IPensionDeductionService>();
+      //IPensionDeductionService pensionDeductionService = pensionDeductionServiceScope.ServiceProvider.GetRequiredService<IPensionDeductionService>();
 
-      var tasks = new[]
+//      var tasks = new[]
       {
-        pensionDeductionService.PensionDeductionRollover()
+        //pensionDeductionService.PensionDeductionRollover()
       };
 
-      await Task.WhenAll(tasks);
+      //await Task.WhenAll(tasks);
     }
   }
 }
