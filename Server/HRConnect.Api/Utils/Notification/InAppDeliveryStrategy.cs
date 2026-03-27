@@ -2,10 +2,9 @@ namespace HRConnect.Api.Utils.Notification
 {
   using HRConnect.Api.Interfaces.Notification;
   using HRConnect.Api.Models;
-  public class InAppDeliveryStrategy : INotificationDeliveryStrategy
-  {
+  public class InAppDeliveryStrategy : INotificationDeliveryStrategy {
     public string Name => "In-App";
-    public async Task SendAsync(Notification notification)
+    public async Task SendNotificationAsync(Notification notification)
     {
       //In App notifications are sent via api.
       //No Action is required, frontend should fetch the created notification 

@@ -16,7 +16,7 @@ namespace HRConnect.Api.Utils.Notification
       {
         try
         {
-          await strategy.SendAsync(notification);
+          await strategy.SendNotificationAsync(notification);
         }
         catch (Exception ex)
         {

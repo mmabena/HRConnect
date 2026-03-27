@@ -4,6 +4,6 @@ namespace HRConnect.Api.Interfaces.Notification
   public interface INotificationDeliveryStrategy
   {
     string Name { get; }
-    Task SendAsync(Notification notification);
+    Task SendNotificationAsync(Notification notification);
   }
 }
