@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getCompany, deleteCompany, getCompanyById } from './Components/Services/companyService.js';
-import CompanyManagementUI from './Components/companyManagement/companyManagementUI.jsx';
+import CompanyManagementUI from './Components/CompanyManagement/companyManagementUI.jsx';
 
 function CompanyManagement() {
   const navigate = useNavigate();

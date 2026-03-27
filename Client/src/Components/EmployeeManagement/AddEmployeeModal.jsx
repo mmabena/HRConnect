@@ -9,6 +9,7 @@ import useEmployeeData from "../../hooks/useEmployeeData";
 import useEmployeeValidation from "../../hooks/useEmployeeValidation";
 import useImageUpload from "../../hooks/useImageUpload";
 import useUserRole from "../../hooks/useUserRole";
+import { UserRoundPlus, X } from "lucide-react";
 
 /// </summary>
 /// MOCK super user role
@@ -146,22 +147,74 @@ const AddEmployeeModal = ({ closeModal }) => {
   if (dataLoading) return <div>Loading...</div>;
 
   return (
+      
+  
     <div className="emp-center-frame">
+    
       <div className="emp-left-frame">
         <div className="emp-left-frame-centered">
           <div className="emp-headings-container">
-            <div className="emp-center-logo">
-              <span className="emp-center-logo-text-bold">singular</span>
-              <span className="emp-center-logo-text-light">express</span>
-            </div>
-            <h1 className="emp-new-employee-title">New Employee</h1>
-          </div>
+            <div className="emp-left-icon-wrapper">
+            <UserRoundPlus size={24}/>
+           </div>
+              <span className="emp-title-wrapper emp-center-logo-text">New Employee</span>
+              <div className="emp-right-icon-wrapper">
+            <X size={24}/>
+           </div>
         </div>
+        <div className="emp-wizard-container">
+          <div className="emp-wizard-frame">
+            <div className="emp-step-wrapper">
+            <div className = "emp-step-active">1</div>
+            <span className="emp-wizard-step">Personal Details</span>
+            </div>
+            
+            <div className="emp-line-step"></div>
+            
+            <div className="emp-step-wrapper">
+            <div className="emp-step-inactive">2</div>
+              <span className="emp-wizard-step">Banking Details</span>
+            </div>
+           
+            <div className="emp-line-step"></div>
+              <div className="emp-step-wrapper">
+            <div className="emp-step-inactive">3</div>
+              <span className="emp-wizard-step">Leave</span>
+            </div>
+
+            <div className="emp-line-step"></div>
+
+             <div className="emp-step-wrapper">
+            <div className="emp-step-inactive">4</div>
+              <span className="emp-wizard-step">Pension</span>
+            </div>
+
+            <div className="emp-line-step"></div>
+
+             <div className="emp-step-wrapper">
+            <div className="emp-step-inactive">5</div>
+              <span className="emp-wizard-step">Medical Aid</span>
+            </div>
+            <div className="emp-line-step"></div>
+
+             <div className="emp-step-wrapper">
+            <div className="emp-step-inactive">6</div>
+              <span className="emp-wizard-step">Preview</span>
+            </div>
+          </div>
+
+        </div>
+        </div>
+
+        
 
         <div className="emp-name-surname-container">
           <div className="emp-form-grid">
             <div className="emp-personal-details-heading">
-              <span>Personal</span> <span>Details</span>
+              <span>Personal Details</span>
+            </div>
+            <div className="emp-personal-details-sub">
+              <span>Employee identity information</span>
             </div>
 
             {/* Title */}
@@ -194,7 +247,7 @@ const AddEmployeeModal = ({ closeModal }) => {
                 <input
                   type="text"
                   placeholder="First Name"
-                  className={`emp-name-input-col ${formErrors.name ? "emp-error-input" : ""}`}
+                  className={`emp-name-input  ${formErrors.name ? "emp-error-input" : ""}`}
                   name="name"
                   value={employee.name}
                   onChange={onInputChange}
@@ -207,7 +260,7 @@ const AddEmployeeModal = ({ closeModal }) => {
                 <input
                   type="text"
                   placeholder="Last Name"
-                  className={`emp-name-input-col ${formErrors.surname ? "emp-error-input" : ""}`}
+                  className={`emp-name-input  ${formErrors.surname ? "emp-error-input" : ""}`}
                   name="surname"
                   value={employee.surname}
                   onChange={onInputChange}
@@ -224,7 +277,7 @@ const AddEmployeeModal = ({ closeModal }) => {
             <div className="emp-two-col">
               <div className="emp-input-wrapper dropdown-wrapper">
                 <select
-                  className={`emp-name-input-col ${formErrors.idType ? "emp-error-input" : ""}`}
+                  className={`emp-name-input  ${formErrors.idType ? "emp-error-input" : ""}`}
                   name="idType"
                   value={employee.idType}
                   onChange={onInputChange}
@@ -242,7 +295,7 @@ const AddEmployeeModal = ({ closeModal }) => {
               <div className="emp-input-wrapper">
                 <input
                   type="text"
-                  className={`emp-name-input-col ${formErrors.idNumber ? "emp-error-input" : ""}`}
+                  className={`emp-name-input  ${formErrors.idNumber ? "emp-error-input" : ""}`}
                   name={
                     employee.idType === "passport"
                       ? "passportNumber"
@@ -303,7 +356,7 @@ const AddEmployeeModal = ({ closeModal }) => {
                     name="dateOfBirth"
                     value={employee.dateOfBirth}
                     onChange={onInputChange}
-                    className={`emp-name-input-col emp-name-input ${formErrors.dateOfBirth ? "emp-error-input" : ""}`}
+                    className={`emp-name-input ${formErrors.dateOfBirth ? "emp-error-input" : ""}`}
                     disabled={employee.idType === "id"}
                   />
                   {formErrors.dateOfBirth && (
@@ -321,7 +374,7 @@ const AddEmployeeModal = ({ closeModal }) => {
               <div className="emp-input-wrapper dropdown-wrapper">
                 <select
                   name="gender"
-                  className="emp-name-input-col"
+                  className="emp-name-input"
                   value={employee.gender}
                   onChange={onInputChange}
                   disabled={employee.idType === "id"}
@@ -446,7 +499,7 @@ const AddEmployeeModal = ({ closeModal }) => {
                 <input
                   type="text"
                   placeholder="City"
-                  className={`emp-name-input-col ${formErrors.city ? "emp-error-input" : ""}`}
+                  className={`emp-name-input ${formErrors.city ? "emp-error-input" : ""}`}
                   name="city"
                   value={employee.city}
                   onChange={onInputChange}
@@ -460,7 +513,7 @@ const AddEmployeeModal = ({ closeModal }) => {
                   type="text"
                   placeholder="Postal Code"
                   name="zipCode"
-                  className={`emp-name-input-col ${formErrors.zipCode ? "emp-error-input" : ""}`}
+                  className={`emp-name-input ${formErrors.zipCode ? "emp-error-input" : ""}`}
                   value={employee.zipCode}
                   onChange={onInputChange}
                 />
@@ -492,7 +545,7 @@ const AddEmployeeModal = ({ closeModal }) => {
                     name="startDate"
                     value={employee.startDate}
                     onChange={onInputChange}
-                    className={`emp-name-input ${formErrors.startDate ? "emp-error-input" : ""}`}
+                    className={`emp-start-date ${formErrors.startDate ? "emp-error-input" : ""}`}
                   />
                   {formErrors.startDate && (
                     <span className="emp-error-message">
@@ -683,10 +736,10 @@ const AddEmployeeModal = ({ closeModal }) => {
                 onClick={handleSave}
                 disabled={loading}
               >
-                {loading ? "Saving..." : "Save"}
+                {loading ? "Saving..." : "Next"}
               </button>
 
-              <div className="emp-right-frame-bottom">
+              {/* <div className="emp-right-frame-bottom">
                 <p className="emp-right-frame-bottom-text">
                   <span className="emp-align-right">
                     Privacy Policy | Terms & Conditions
@@ -696,7 +749,7 @@ const AddEmployeeModal = ({ closeModal }) => {
                     Copyright © 2026 Singular Systems. All rights reserved.
                   </span>
                 </p>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
