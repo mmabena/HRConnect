@@ -113,7 +113,7 @@ namespace HRConnect.Api.Services
 
     public async Task LockAllOlderPayrollRuns()
     {
-      PayrollRun? expiredRun;// = await _payrollRunRepo.IsExpiredPayRunUnlocked();
+      PayrollRun? expiredRun;
       while ((expiredRun = await _payrollRunRepo.IsExpiredPayRunUnlocked()) != null)
       {
         expiredRun.IsLocked = true;

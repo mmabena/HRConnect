@@ -1,10 +1,12 @@
 namespace HRConnect.Api.Utils.Payroll
 {
+  using global::Quartz;
   using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Interfaces.Pension;
   using HRConnect.Api.Models.Payroll;
-  using Quartz;
-
-  // Prevent multiple of these jobs from running concurrently
+  using HRConnect.Api.Models.PayrollDeduction;
+  using HRConnect.Api.Models.Pension;
+  using HRConnect.Api.Services;
 
   /// <summary>
   /// Payroll Rollover Job class to handle the locking, rolling over and 
@@ -25,20 +27,25 @@ namespace HRConnect.Api.Utils.Payroll
   {
     private readonly IPayrollPeriodService _payrollPeriodService;
     private readonly IPayrollRunRepository _payrollRunRepo;
+    private readonly IEmployeePensionEnrollmentService _employeePensionEnrollmentService;
+    private readonly IPensionDeductionService _pensionDeductionService;
+    private readonly IServiceProvider _serviceProvider;
     private readonly IReportsService _reportsService;
     private static readonly int MAX_RUNS = 12;
 
-    //This makes mocking and testing time a lot easier
+    //This makes mocking and using testing time-related edge cases a lot easier
     private readonly Func<DateTime> _now;
-    public PayrollRolloverJob(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService,
-        IReportsService reportsService, Func<DateTime> now = null
-
-        )
+    public PayrollRolloverJob(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService, IServiceProvider serviceProvider,
+      IEmployeePensionEnrollmentService employeePensionEnrollmentService, IPensionDeductionService pensionDeductionService,
+      IReportsService reportsService, Func<DateTime> now = null)
     {
       _payrollRunRepo = payrollRunRepo;
       _payrollPeriodService = payrollPeriodService;
       _reportsService = reportsService;
       _now = now ?? (() => DateTime.Now);
+      _serviceProvider = serviceProvider;
+      _employeePensionEnrollmentService = employeePensionEnrollmentService;
+      _pensionDeductionService = pensionDeductionService;
     }
     /// <summary>
     /// Rolls over to a new period <see cref="PayrollPeriod"/> and creates and new valid payroll run <see cref="PayrollRun"/>  
@@ -60,7 +67,7 @@ namespace HRConnect.Api.Utils.Payroll
         EndDate = (oldPeriod?.EndDate ?? DateTime.Now).AddYears(1)
       };
 
-      await _payrollPeriodService.CreatePeriodAsync(newPeriod);
+      _ = await _payrollPeriodService.CreatePeriodAsync(newPeriod);
       var newPayrun = new PayrollRun
       {
         PayrollRunNumber = 1,//PayrollUtil.SetPayrunNumber(),
@@ -70,7 +77,7 @@ namespace HRConnect.Api.Utils.Payroll
       };
       newPeriod.Runs.Add(newPayrun);
 
-      await _payrollRunRepo.CreatePayrollRunAsync(newPayrun);
+      _ = await _payrollRunRepo.CreatePayrollRunAsync(newPayrun);
       return newPeriod;
     }
 
@@ -88,10 +95,12 @@ namespace HRConnect.Api.Utils.Payroll
 
       payrollPeriod.Runs.Add(newRun);
       await _payrollRunRepo.CreatePayrollRunAsync(newRun);
+      Console.WriteLine($"ADDED RUN TO PERIOD\n{payrollPeriod.Runs.Count}");
     }
 
     public async Task Execute(IJobExecutionContext context)
     {
+      await _employeePensionEnrollmentService.LockEmployeePensionEnrollmentsAsync();
       DateTime currentDate = DateTime.Now;
       int runId = ((currentDate.Month + 8) % 12) + 1;
 
@@ -131,6 +140,20 @@ namespace HRConnect.Api.Utils.Payroll
           foreach (var record in currentPayRun.Records)
           {
             record.IsLocked = true;
+
+            //By default every other record that should not be marked as inactive
+            // and  is only locked and reported
+            switch (record)
+            {
+              case PensionDeduction p:
+                p.IsActive = false;
+                break;
+              case MedicalAidDeduction m:
+                m.IsActive = false;
+                break;
+              default:
+                continue;
+            }
           }
           //update the current run to implement lock
           await _payrollRunRepo.UpdateRun(currentPayRun);
@@ -159,6 +182,23 @@ namespace HRConnect.Api.Utils.Payroll
         var jobException = new JobExecutionException(ex);
         throw jobException;
       }
+
+      await _employeePensionEnrollmentService.RollOverEmloyeePensionEnrollmentAsync();
+      await RolloverPayrollDeductions();
+    }
+
+    private async Task RolloverPayrollDeductions()
+    {
+      using IServiceScope pensionDeductionServiceScope = _serviceProvider.CreateScope();
+
+      IPensionDeductionService pensionDeductionService = pensionDeductionServiceScope.ServiceProvider.GetRequiredService<IPensionDeductionService>();
+
+      var tasks = new[]
+      {
+        pensionDeductionService.PensionDeductionRollover()
+      };
+
+      await Task.WhenAll(tasks);
     }
   }
 }

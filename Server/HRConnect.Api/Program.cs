@@ -1,23 +1,24 @@
-using HRConnect.Api.Data;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 using System.Text;
-// using Resend;
-using HRConnect.Api.Interfaces;
-using HRConnect.Api.Middleware;
-using HRConnect.Api.Repositories;
-using HRConnect.Api.Services;
-using HRConnect.Api.Repository;
-using Microsoft.AspNetCore.Identity;
-using HRConnect.Api.Models;
-using HRConnect.Api.Utils;
-using HRConnect.Api.Utils.Payroll;
-using OfficeOpenXml;
-using HRConnect.Api.Interfaces.PensionProjection;
 using Audit.Core;
 using Audit.EntityFramework;
+using HRConnect.Api.Data;
+// using Resend;
+using HRConnect.Api.Interfaces;
+using HRConnect.Api.Interfaces.Pension;
+using HRConnect.Api.Middleware;
+using HRConnect.Api.Models;
+using HRConnect.Api.Repositories;
+using HRConnect.Api.Repository;
+using HRConnect.Api.Services;
+using HRConnect.Api.Utils;
+using HRConnect.Api.Utils.Payroll;
+using HRConnect.Api.Utils.Quartz.Pension;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using OfficeOpenXml;
 using Quartz;
 using System.Data.Common;
 
@@ -81,7 +82,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
     {
-      options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+      options.UseSqlServer(builder.Configuration.GetConnectionString("DBeaverConnection"));
       options.AddInterceptors(new AuditSaveChangesInterceptor());
     });
 
@@ -168,6 +169,10 @@ builder.Services.AddQuartzHostedService(q =>
   q.WaitForJobsToComplete = true;
 });
 
+builder.Services.AddSingleton(provider =>
+  provider.GetRequiredService<ISchedulerFactory>().GetScheduler().GetAwaiter().GetResult());
+
+//Register payroll stuff
 builder.Services.AddScoped<IPayrollPeriodRepository, PayrollPeriodRepository>();
 builder.Services.AddScoped<IPayrollRunRepository, PayrollRunRepository>();
 builder.Services.AddScoped<IPayrollRunService, PayrollRunService>();
@@ -200,6 +205,11 @@ builder.Services.AddTransient<IPensionProjectionService, PensionProjectionServic
 builder.Services.AddScoped<IMedicalOptionRepository, MedicalOptionRepository>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IMedicalOptionService,
   HRConnect.Api.Services.MedicalOptionService>();
+builder.Services.AddScoped<IEmployeePensionEnrollmentRepository, EmployeePensionEnrollmentRepository>();
+builder.Services.AddTransient<IEmployeePensionEnrollmentService, EmployeePensionEnrollmentService>();
+builder.Services.AddScoped<IPensionDeductionRepository, PensionDeductionRepository>();
+builder.Services.AddTransient<IPensionDeductionService, PensionDeductionService>();
+
 builder.Services.AddScoped<IMedicalAidEligibilityService, MedicalAidEligibilityService>();
 builder.Services.AddScoped<IMedicalAidDeductionRepository, MedicalAidDeductionRepository>();
 builder.Services.AddScoped<IMedicalAidDeductionService, MedicalAidDeductionService>();
@@ -214,6 +224,7 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
 
 using (var scope = app.Services.CreateScope())
 {

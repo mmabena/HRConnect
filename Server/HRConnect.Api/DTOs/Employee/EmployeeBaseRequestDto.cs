@@ -20,7 +20,8 @@ namespace HRConnect.Api.DTOs.Employee
         public string ZipCode { get; set; } = string.Empty;
         public bool HasDisability { get; set; }
         public string? DisabilityDescription { get; set; }
-        public DateOnly DateOfBirth { get; set; }
+    public int PensionOptionId { get; set; }
+    public DateOnly DateOfBirth { get; set; }
         public DateOnly StartDate { get; set; }
         public Branch Branch { get; set; }
         public decimal MonthlySalary { get; set; }
@@ -28,5 +29,7 @@ namespace HRConnect.Api.DTOs.Employee
         public EmploymentStatus EmploymentStatus { get; set; }
         public string? CareerManagerID { get; set; } = string.Empty;
         public string ProfileImage { get; set; } = string.Empty;
-    }
+    
+    public bool IsActive { get; set; } = true;
+  }
 }

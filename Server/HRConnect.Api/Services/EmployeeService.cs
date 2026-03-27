@@ -89,7 +89,7 @@ namespace HRConnect.Api.Services
       {
         var createdEmployee = await _employeeRepo.CreateEmployeeAsync(new_employee);
         // Send welcome email notification
-        // await SendWelcomeEmail(createdEmployee);
+        await SendWelcomeEmail(createdEmployee);
         await transaction.CommitAsync();
         return createdEmployee.ToEmployeeDto();
       }
@@ -133,6 +133,7 @@ namespace HRConnect.Api.Services
       existingEmployee.MonthlySalary = employeeDto.MonthlySalary;
       existingEmployee.CareerManagerID = employeeDto.CareerManagerID;
       existingEmployee.UpdatedAt = DateTime.UtcNow;
+      existingEmployee.IsActive = employeeDto.IsActive;
 
       var updatedEmployee = await _employeeRepo.UpdateEmployeeAsync(existingEmployee);
       return updatedEmployee?.ToEmployeeDto();
@@ -385,6 +386,10 @@ namespace HRConnect.Api.Services
       if (employeeRequestDto.PositionId <= 0)
         throw new ValidationException("Position ID must be greater than 0");
 
+      if ((employeeRequestDto.EmploymentStatus == EmploymentStatus.Permanent) && (employeeRequestDto.PensionOptionId <= 0))
+      {
+        throw new BusinessRuleException("Permanent employees must be linked to an active Pension Plan");
+      }
 
       var extension = Path.GetExtension(employeeRequestDto.ProfileImage);
 

@@ -3,6 +3,9 @@ namespace HRConnect.Api.Data
   using HRConnect.Api.Models;
   using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Models.PayrollDeduction;
+  using HRConnect.Api.Models.Pension;
+  using HRConnect.Api.Models.Payroll;
+  using HRConnect.Api.Models.PayrollDeduction;
   using Microsoft.EntityFrameworkCore;
   using AppAny.Quartz.EntityFrameworkCore.Migrations;
   using AppAny.Quartz.EntityFrameworkCore.Migrations.SqlServer;
@@ -25,6 +28,8 @@ namespace HRConnect.Api.Data
     public DbSet<StatutoryContributionType> StatutoryContributionTypes { get; set; }
     public DbSet<PayrollPeriod> PayrollPeriods { get; set; }
     public DbSet<PayrollRun> PayrollRuns { get; set; }
+    public DbSet<PensionOption> PensionOptions { get; set; }
+    public DbSet<EmployeePensionEnrollment> EmployeePensionEnrollments { get; set; }
     public DbSet<PensionDeduction> PensionDeductions { get; set; }
     public DbSet<MedicalAidDeduction> MedicalAidDeductions { get; set; }
     public DbSet<Notification> Notifications { get; set; }
@@ -128,7 +133,9 @@ namespace HRConnect.Api.Data
        .HasForeignKey(r => r.PayrollRunId);
         });
 
-      //Prevent overwrites and possible race conditions
+      // Prevent overwrites and possible race conditions
+      // Concurrency tokens are used to make sure that the new entry matches the row being referenced
+      // exatcly
       modelBuilder.Entity<PayrollRun>().Property(p => p.IsLocked).IsConcurrencyToken();
       modelBuilder.Entity<PayrollPeriod>().Property(p => p.IsLocked).IsConcurrencyToken();
       modelBuilder.Entity<PayrollRecord>().Property(p => p.IsLocked).IsConcurrencyToken();
@@ -146,14 +153,41 @@ namespace HRConnect.Api.Data
         .HasForeignKey(m => m.MedicalCategoryId)
         .OnDelete(DeleteBehavior.NoAction);
 
-      //Notificatin configuration
+      modelBuilder.Entity<PensionOption>()
+        .HasMany(e => e.Employee)
+        .WithOne(po => po.PensionOption)
+        .HasForeignKey(po => po.PensionOptionId)
+        .OnDelete(DeleteBehavior.SetNull);
+
+      modelBuilder.Entity<Employee>()
+        .HasMany(epe => epe.EmployeePensionEnrollment)
+        .WithOne(e => e.Employee)
+        .HasForeignKey(e => e.EmployeeId)
+        .OnDelete(DeleteBehavior.Cascade)
+        .IsRequired();
+
+      modelBuilder.Entity<PensionOption>()
+        .HasMany(epe => epe.EmployeePensionEnrollment)
+        .WithOne(po => po.PensionOption)
+        .HasForeignKey(po => po.PensionOptionId)
+        .OnDelete(DeleteBehavior.Cascade)
+        .IsRequired();
+
+      modelBuilder.Entity<EmployeePensionEnrollment>().HasOne<PayrollRun>()
+      .WithMany()
+      .HasForeignKey(t => t.PayrollRunId)
+      .HasPrincipalKey(p => p.PayrollRunId);
+
+      //Notifaction Configurations
       modelBuilder.Entity<Notification>().Property(n => n.Severity)
-        .HasConversion<string>();
+          .HasConversion<string>();
 
       modelBuilder.Entity<Notification>().Property(n => n.Type)
       .HasConversion<string>();
+
     }
 
+    //Override 'SaveChangesAsync' for Payroll Records to enforce locked records on a payroll run 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
       //Intercept all instances of saving any changes to db
@@ -162,7 +196,8 @@ namespace HRConnect.Api.Data
             (
             e.Entity is PayrollPeriod ||
             e.Entity is PayrollRun ||
-            e.Entity is PayrollRecord
+            e.Entity is PayrollRecord ||
+            e.Entity is EmployeePensionEnrollment
             ));
 
       foreach (var e in modifiedRecords)
@@ -174,7 +209,6 @@ namespace HRConnect.Api.Data
           throw new InvalidOperationException("Record/Run under Hard Lock. Cannot be modified");
         }
       }
-
       return await base.SaveChangesAsync(cancellationToken);
     }
   }

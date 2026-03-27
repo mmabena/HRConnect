@@ -23,10 +23,10 @@ namespace HRConnect.Api.Utils.Payroll
     /// <remarks>
     /// This method is called in the applications entry point. Since only 1 payroll period and run 
     /// can be active at a time, let the application handle this automatically. No user input is required or allowed
-    /// </remark>
+    /// </remarks>
     public async Task InitialisePayrollPeriod()
     {
-      var payperiod = await _payrollPeriodService.GetLastPeriodAsync(); // in production remove this
+      var payperiod = await _payrollPeriodService.GetLastPeriodAsync();
       await _payrollRunService.LockAllOlderPayrollRuns();
       if (payperiod == null)
       {

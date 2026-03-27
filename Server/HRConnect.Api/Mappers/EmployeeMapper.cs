@@ -36,7 +36,8 @@ namespace HRConnect.Api.Mappers
                 CareerManagerID = employeeModel.CareerManagerID,
                 ProfileImage = employeeModel.ProfileImage,
                 CreatedAt = employeeModel.CreatedAt,
-                UpdatedAt = employeeModel.UpdatedAt
+                UpdatedAt = employeeModel.UpdatedAt,
+                IsActive = employeeModel.IsActive,
             };
         }
         public static Employee ToEmployeeFromCreateDTO(this CreateEmployeeRequestDto employeeRequestDto)
@@ -65,7 +66,9 @@ namespace HRConnect.Api.Mappers
                 PositionId = employeeRequestDto.PositionId,
                 EmploymentStatus = employeeRequestDto.EmploymentStatus,
                 CareerManagerID = employeeRequestDto.CareerManagerID,
-                ProfileImage = employeeRequestDto.ProfileImage
+                ProfileImage = employeeRequestDto.ProfileImage,
+                PensionOptionId = employeeRequestDto.PensionOptionId,
+                IsActive = true
             };
         }
     }
