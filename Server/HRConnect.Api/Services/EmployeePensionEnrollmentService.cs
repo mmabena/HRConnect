@@ -14,7 +14,7 @@
   using HRConnect.Api.Models.Pension;
   using HRConnect.Api.Utils;
   using HRConnect.Api.Utils.Pension.ValidationHelpers;
-  using HRConnect.Api.Utils.Quartz.Pension;
+  using HRConnect.Api.Utils.Jobs.Pension;
   using Microsoft.EntityFrameworkCore;
   using Quartz;
 
@@ -307,7 +307,7 @@
         throw new InvalidOperationException("Failed to update employee's pension option");
       }
 
-      PensionDeduction pensionDeduction = _pensionDeductionRepository.GetByEmployeeIdAndIsNotLockedAsync(employeeId).Result 
+      PensionDeduction pensionDeduction = _pensionDeductionRepository.GetByEmployeeIdAndIsNotLockedAsync(employeeId).Result
         ?? throw new NotFoundException("Pension deduction for employee not found");
       pensionDeduction.PensionOptionId = newPensionOptionId;
       decimal pensionOptionPercentage = await GetEmployeePensionOptionPercentageAsync(newPensionOptionId);

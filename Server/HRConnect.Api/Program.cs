@@ -11,8 +11,8 @@ using HRConnect.Api.Repositories;
 using HRConnect.Api.Repository;
 using HRConnect.Api.Services;
 using HRConnect.Api.Utils;
+using HRConnect.Api.Utils.Jobs.Payroll;
 using HRConnect.Api.Utils.Payroll;
-using HRConnect.Api.Utils.Quartz.Pension;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -20,7 +20,6 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using OfficeOpenXml;
 using Quartz;
-using System.Data.Common;
 
 var builder = WebApplication.CreateBuilder(args);
 

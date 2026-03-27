@@ -91,6 +91,28 @@ namespace HRConnect.Api.Services
 
       await _payrollRunRepo.UpdateRun(currentPayRun);
     }
+
+    public async Task AddRecordsCollectionToRunAsync(IList<PayrollRecord> recordsCollection, string employeeId)
+    {
+      var payperiod = await _payrollPeriodService.GetLastPeriodAsync();
+      if (payperiod == null)
+        throw new InvalidDataException("No payroll period found or it is locked");
+
+      var currentPayRun = payperiod.Runs.Where(r => !r.IsLocked).OrderByDescending(r => r.PayrollRunNumber).FirstOrDefault();
+
+      if (currentPayRun == null)
+        throw new InvalidDataException("No current payroll run found or it is locked");
+
+      foreach (var record in recordsCollection
+      )
+      {
+        record.PayrollRun = currentPayRun;
+        record.EmployeeId = employeeId;
+        currentPayRun.Records.Add(record);
+      }
+      // currentPayRun.Records.List<PayrollRecord>.AddRange(recordsCollection);
+      await _payrollRunRepo.UpdateRun(currentPayRun);
+    }
     public async Task UpdateRunAsync(PayrollRun payrollRun)
     {
       await _payrollRunRepo.UpdateRun(payrollRun);

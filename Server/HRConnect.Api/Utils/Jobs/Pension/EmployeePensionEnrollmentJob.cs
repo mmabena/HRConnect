@@ -1,8 +1,8 @@
-﻿namespace HRConnect.Api.Utils.Quartz.Pension
+﻿namespace HRConnect.Api.Utils.Jobs.Pension
 {
   using System.Text.Json;
   using System.Threading.Tasks;
-  using global::Quartz;
+  using Quartz;
   using HRConnect.Api.Data;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
@@ -29,7 +29,7 @@
     ///</summary>
     public async Task Execute(IJobExecutionContext context)
     {
-      string jsonFromscheudleJob = context.MergedJobDataMap.GetString("PensionEnrollment");
+      string jsonFromscheudleJob = context.MergedJobDataMap.GetString("PensionEnrollment")!;
       EmployeePensionEnrollment? employeePensionEnrollment = JsonSerializer.Deserialize<EmployeePensionEnrollment>(jsonFromscheudleJob);
       if (employeePensionEnrollment != null)
       {
@@ -83,7 +83,7 @@
         ?? throw new NotFoundException("Employee not found");
       if (existingEmployee != null)
       {
-        decimal pensionOptionPercentage = await GetEmployeePensionOptionPercentageAsync((int)existingEmployee.PensionOptionId);
+        decimal pensionOptionPercentage = await GetEmployeePensionOptionPercentageAsync((int)existingEmployee.PensionOptionId!);
         PayrollRun? currentPayrollRunId = await _payrollRunRepository.GetCurrentRunAsync();
         PensionDeduction? existingPensionDeduction = await _pensionDeductionRepository
           .GetByEmployeeIdAndIsNotLockedAsync(employeePensionEnrollment.EmployeeId);
