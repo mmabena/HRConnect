@@ -48,6 +48,8 @@ namespace HRConnect.Api.Interfaces
     /// Roll over medical aid deductions to the next period.
     /// </summary>
     Task RollOverMedicalAidDeductions();
+    
+    Task SaveChangesAsync();
 
   }
 }

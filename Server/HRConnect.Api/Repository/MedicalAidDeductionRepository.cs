@@ -134,11 +134,15 @@ namespace HRConnect.Api.Repository
         .Include(d => d.PayrollRun)
         .Where(d =>
           !d.IsActive &&
-          d.TerminationDate == null &&
           d.PayrollRun != null && d.PayrollRunId == previousRunNumber &&
           d.PayrollRun.IsFinalised &&
           d.PayrollRun.IsLocked)
         .ToListAsync();
+    }
+
+    public async Task SaveChangesAsync()
+    {
+      await _context.SaveChangesAsync();
     }
   }
 }

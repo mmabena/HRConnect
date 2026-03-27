@@ -82,7 +82,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
     {
-      options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+      options.UseSqlServer(builder.Configuration.GetConnectionString("TertiaryConnection"));
       options.AddInterceptors(new AuditSaveChangesInterceptor());
     });
 
@@ -140,7 +140,7 @@ builder.Services.AddQuartz(q =>
   q.AddTrigger(opts => opts
   .ForJob(jobKey)
   .WithIdentity("PayrollRollover-Trigger")
-  .WithCronSchedule("0 0/10 * * * ?", x =>
+  .WithCronSchedule("* 0/1 * * * ?", x =>
   x.WithMisfireHandlingInstructionFireAndProceed())); //when a job misfire happens. 
                                                       // Properly re-execute it and proceed as usual
 
@@ -156,7 +156,7 @@ builder.Services.AddQuartz(q =>
   {
     options.UseSqlServer(options =>
         {
-          options.ConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
+          options.ConnectionString = builder.Configuration.GetConnectionString("TertiaryConnection")!;
           options.TablePrefix = "quartz.QRTZ_";
         });
     options.UseSerializer<SystemTextJsonObjectSerializer>();

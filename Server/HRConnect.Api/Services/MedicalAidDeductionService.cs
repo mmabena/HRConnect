@@ -3,6 +3,7 @@ namespace HRConnect.Api.Services;
 using DTOs.MedicalOption;
 using DTOs.Payroll.PayrollDeduction.MedicalAidDeduction;
 using Interfaces;
+using Models.Payroll;
 using Models.PayrollDeduction;
 using Utils.MedicalAidDeduction;
 
@@ -612,9 +613,58 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
 
   public async Task RollOverMedicalAidDeductions()
   {
-    // get all deductions from the previous run
+    int currentMonth = DateTime.Now.Month;
+    int currentYear = DateTime.Now.Year;
     
-    throw new NotImplementedException();
+    // get all deductions from the previous run
+    var currentRun = await _payrollRunService.GetCurrentRunAsync();
+    if (currentRun == null)
+      throw new InvalidDataException("No current payroll run found");
+    
+    var previousPayRunNumber = currentRun.PayrollRunId -1;
+
+    var previousDeductions =
+      await _medicalAidDeductionRepository.GetAllRecordsFromPreviousRun(previousPayRunNumber);
+
+    if (previousDeductions.Count == 0 || previousDeductions == null)
+      throw new InvalidDataException("No previous Medical Aid Deductions found on the previous Run");
+    
+    //TODO :  Roll over the deductions
+    var filteredPreviousDeductions = previousDeductions
+      .Where(p => (p.TerminationDate == null ||
+                  (p.TerminationDate.Value.Month >= currentMonth &&
+                   p.TerminationDate.Value.Year >= currentYear)) &&
+                  !p.IsActive
+                  )
+      .OrderBy(p => p.Id)
+      
+      //.Update(p => p.PayrollRunId = currentRun.PayrollRunId)
+      .ToList();
+                  
+    //TODO :  Update the current run
+    var recordsToRollover = new List<PayrollRecord>();
+    var employeeIds = new List<string>();
+
+
+    
+    foreach (var filteredPreviousDeduction in filteredPreviousDeductions)
+    {
+      recordsToRollover.Add(filteredPreviousDeduction);
+      //employeeIds.Add(filteredPreviousDeduction.EmployeeId);
+    }
+    
+    await _payrollRunService.AddRecordsCollectionToRunAsync(recordsToRollover);
+    
+    //get record count
+    //int recordAddedCount = await _payrollRunService.AddBulkRecordsToCurrentRunAsync(recordsToRollover, employeeIds);
+    //Console.WriteLine($"Successfully added {recordAddedCount} records to payroll run");
+    
+    await SaveChangesAsync();
+  }
+
+  public async Task SaveChangesAsync()
+  {
+    await _medicalAidDeductionRepository.SaveChangesAsync();
   }
 
   //TODO :  Move to Mappers

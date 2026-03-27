@@ -120,12 +120,18 @@ namespace HRConnect.Api.Utils.Payroll
             {
               pensionDeduction.IsActive = false;
             }
+
+            if (record is MedicalAidDeduction medicalAidDeduction)
+            {
+              medicalAidDeduction.IsActive = false;
+            }
           }
           //update the current run to implement lock
           await _payrollRunRepo.UpdateRun(currentPayRun);
 
           if (currentPayRun.Records.Count > 0)
             await PayrollUtil.WriteExcelAsync(currentPayRun, _env.ContentRootPath);
+          await RolloverPayrollDeductions();
         }
 
         Console.WriteLine($"NEXT RUN========{nextRun}");
@@ -137,6 +143,8 @@ namespace HRConnect.Api.Utils.Payroll
         {
           await RolloverPayrollRun(payperiod, nextRun);
         }
+        
+        await RolloverPayrollDeductions();
       }
       catch (InvalidOperationException ex)
       {
@@ -158,21 +166,25 @@ namespace HRConnect.Api.Utils.Payroll
       );*/
 
       //await _employeePensionEnrollmentService.RollOverEmloyeePensionEnrollmentAsync();
-      await RolloverPayrollDeductions();
+    
     }
 
     private async Task RolloverPayrollDeductions()
     {
+      // Create Scope services using the Service Provider Interface
       using IServiceScope pensionDeductionServiceScope = _serviceProvider.CreateScope();
-
+      using IServiceScope medicalAidDeductionServiceScope = _serviceProvider.CreateScope();
+      
+      
       //IPensionDeductionService pensionDeductionService = pensionDeductionServiceScope.ServiceProvider.GetRequiredService<IPensionDeductionService>();
-
-//      var tasks = new[]
+      IMedicalAidDeductionService medicalAidDeductionService = medicalAidDeductionServiceScope.ServiceProvider.GetRequiredService<IMedicalAidDeductionService>();
+      var tasks = new[]
       {
-        //pensionDeductionService.PensionDeductionRollover()
+        //pensionDeductionService.PensionDeductionRollover(),
+        medicalAidDeductionService.RollOverMedicalAidDeductions()
       };
 
-      //await Task.WhenAll(tasks);
+      await Task.WhenAll(tasks);
     }
   }
 }
