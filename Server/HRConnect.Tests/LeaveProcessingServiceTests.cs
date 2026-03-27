@@ -206,7 +206,7 @@ namespace HRConnect.Tests
             var employee = new Employee
             {
                 EmployeeId = Guid.NewGuid().ToString(),
-                Email = "test@test.com"
+                Email = "test@singular.co.za"
             };
 
             db.Employees.Add(employee);

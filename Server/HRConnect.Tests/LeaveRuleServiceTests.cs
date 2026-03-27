@@ -54,7 +54,7 @@ namespace HRConnect.Tests
             {
                 EmployeeId = Guid.NewGuid().ToString(),
                 PositionId = 1,
-                Email = "test@test.com",
+                Email = "test@singular.co.za",
                 Name = "Test",
                 Surname = "User",
                 StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-2))

@@ -160,3 +160,4 @@ GeneratedClients/
 # User Secrets (CRITICAL FOR SENDGRID)
 ######################################
 secrets.json
+

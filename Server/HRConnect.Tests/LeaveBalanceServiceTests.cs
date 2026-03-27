@@ -11,6 +11,8 @@ namespace HRConnect.Tests
     using Xunit;
     using HRConnect.Api.Interfaces;
     using HRConnect.Api.Utils;
+    using HRConnect.Api.DTOs.Employee;
+    using HRConnect.Api.Repository;
 
     public class LeaveBalanceServiceTests
     {
@@ -39,9 +41,19 @@ namespace HRConnect.Tests
             => new LeaveProcessingService(context, new FakeEmailService(), CreateLeaveBalanceService(context));
 
         private static EmployeeService CreateEmployeeService(ApplicationDBContext context)
-            => new EmployeeService(context, new FakeEmailService(),
+        {
+            var employeeRepo = new EmployeeRepository(context);
+            var positionRepo = new PositionRepository(context);
+
+            return new EmployeeService(
+                context,
+                employeeRepo,
+                new FakeEmailService(),
+                positionRepo,
                 CreateLeaveBalanceService(context),
-                CreateLeaveProcessingService(context));
+                CreateLeaveProcessingService(context)
+            );
+        }
 
         // ---------------- BASIC TEST ----------------
 
@@ -51,7 +63,10 @@ namespace HRConnect.Tests
             var context = GetDb();
 
             context.JobGrades.Add(new JobGrade { JobGradeId = 1, Name = "G1" });
-            context.Positions.Add(new Position { PositionId = 1, JobGradeId = 1 });
+            context.Positions.AddRange(
+      new Position { PositionId = 1, JobGradeId = 1, OccupationalLevelId = 1 },
+      new Position { PositionId = 2, JobGradeId = 1, OccupationalLevelId = 1 }
+            );
 
             var employee = new Employee
             {
@@ -99,7 +114,10 @@ namespace HRConnect.Tests
             var context = GetDb();
 
             context.JobGrades.Add(new JobGrade { JobGradeId = 1, Name = "G1" });
-            context.Positions.Add(new Position { PositionId = 1, JobGradeId = 1 });
+            context.Positions.AddRange(
+                new Position { PositionId = 1, JobGradeId = 1, OccupationalLevelId = 1 },
+                new Position { PositionId = 2, JobGradeId = 1, OccupationalLevelId = 1 }
+            );
 
             var employee = new Employee
             {
@@ -151,16 +169,23 @@ namespace HRConnect.Tests
                 new JobGrade { JobGradeId = 1, Name = "G1" },
                 new JobGrade { JobGradeId = 2, Name = "G2" });
 
+            context.OccupationalLevels.Add(new OccupationalLevel { OccupationalLevelId = 1, Description = "Level 1" });
+
             context.Positions.AddRange(
-                new Position { PositionId = 1, JobGradeId = 1 },
-                new Position { PositionId = 2, JobGradeId = 2 });
+                new Position { PositionId = 1, JobGradeId = 1, OccupationalLevelId = 1 },
+                new Position { PositionId = 2, JobGradeId = 2, OccupationalLevelId = 1 });
 
             var employee = new Employee
             {
                 EmployeeId = Guid.NewGuid().ToString(),
                 PositionId = 1,
                 Gender = Gender.Male,
-                StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1))
+                StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
+                Email = "test@singular.co.za",
+                Name = "Test",
+                Surname = "User",
+                ContactNumber = "0123456789",
+                Nationality = "South African"
             };
 
             context.Employees.Add(employee);
@@ -203,7 +228,24 @@ namespace HRConnect.Tests
             balance.TakenDays = 5;
             await context.SaveChangesAsync();
 
-            await employeeService.UpdateEmployeePositionAsync(employee.EmployeeId, 2);
+            await employeeService.UpdateEmployeeAsync(employee.EmployeeId, new UpdateEmployeeRequestDto
+            {
+                Title = Title.Mr,
+                Gender = Gender.Male,
+                Name = "Test",
+                Surname = "User",
+                Email = "test@singular.co.za",
+                ContactNumber = "0123456789",
+                City = "Johannesburg",
+                ZipCode = "2000",
+                IdNumber = "0305055400089",
+                Nationality = "South African",
+                Branch = Branch.Johannesburg,
+                MonthlySalary = 10000,
+                PositionId = 2,
+                EmploymentStatus = EmploymentStatus.Permanent,
+                ProfileImage = "img.jpg"
+            });
 
             Assert.Equal(5, context.EmployeeLeaveBalances.First().TakenDays);
         }
@@ -216,7 +258,11 @@ namespace HRConnect.Tests
             var context = GetDb();
 
             context.JobGrades.Add(new JobGrade { JobGradeId = 1, Name = "G1" });
-            context.Positions.Add(new Position { PositionId = 1, JobGradeId = 1 });
+            context.OccupationalLevels.Add(new OccupationalLevel { OccupationalLevelId = 1, Description = "Level 1" });
+            context.Positions.AddRange(
+                new Position { PositionId = 1, JobGradeId = 1, OccupationalLevelId = 1 },
+                new Position { PositionId = 2, JobGradeId = 1, OccupationalLevelId = 1 }
+            );
 
             var employee = new Employee
             {

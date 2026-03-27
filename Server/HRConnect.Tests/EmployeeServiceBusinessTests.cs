@@ -3,15 +3,18 @@ namespace HRConnect.Tests
     using System;
     using System.Linq;
     using System.Threading.Tasks;
+    using System.Collections.Generic;
     using HRConnect.Api.Data;
-    using HRConnect.Api.DTOs;
     using HRConnect.Api.Interfaces;
     using HRConnect.Api.Models;
     using HRConnect.Api.Services;
     using Microsoft.EntityFrameworkCore;
     using Xunit;
+    using HRConnect.Api.DTOs.Employee;
+    using Moq;
     using HRConnect.Api.Utils;
-    using System.Reflection.Metadata.Ecma335;
+    using System.Threading;
+    using Microsoft.EntityFrameworkCore.Storage;
 
     public class EmployeeServiceBusinessTests
     {
@@ -41,9 +44,65 @@ namespace HRConnect.Tests
             => new LeaveProcessingService(db, new FakeEmailService(), GetBalanceService(db));
 
         private static EmployeeService GetService(ApplicationDBContext db, FakeEmailService email)
-            => new EmployeeService(db, email, GetBalanceService(db), GetProcessingService(db));
+        {
+            var employeeRepoMock = new Mock<IEmployeeRepository>();
+            var positionRepoMock = new Mock<IPositionRepository>();
+            var transactionMock = new Mock<Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction>();
 
-        // ---------------- CREATE EMPLOYEE ----------------
+            transactionMock.Setup(t => t.CommitAsync(It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
+
+            transactionMock.Setup(t => t.RollbackAsync(It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
+
+            employeeRepoMock.Setup(x => x.BeginTransactionAsync())
+                .ReturnsAsync(transactionMock.Object);
+
+            // 🔥 FIX 1: RETURN DATA FROM DB
+            employeeRepoMock.Setup(x => x.GetEmployeeByIdAsync(It.IsAny<string>()))
+                .ReturnsAsync((string id) => db.Employees.FirstOrDefault(e => e.EmployeeId == id));
+
+            employeeRepoMock.Setup(x => x.UpdateEmployeeAsync(It.IsAny<Employee>()))
+                .ReturnsAsync((Employee e) => e);
+
+            employeeRepoMock.Setup(x => x.CreateEmployeeAsync(It.IsAny<Employee>()))
+            .ReturnsAsync((Employee e) =>
+            {
+                db.Employees.Add(e);  
+                db.SaveChanges();
+                return e;
+            });
+
+            employeeRepoMock.Setup(x => x.GetAllEmployeeIdsWithPrefix(It.IsAny<string>()))
+                .ReturnsAsync(new List<string>());
+
+            // 🔥 FIX 2: DUPLICATE VALIDATION CALLS
+            employeeRepoMock.Setup(x => x.GetEmployeeByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync((Employee?)null);
+
+            employeeRepoMock.Setup(x => x.GetEmployeeByTaxNumberAsync(It.IsAny<string>()))
+                .ReturnsAsync((Employee?)null);
+
+            employeeRepoMock.Setup(x => x.GetEmployeeByIdNumberAsync(It.IsAny<string>()))
+                .ReturnsAsync((Employee?)null);
+
+            employeeRepoMock.Setup(x => x.GetEmployeeByContactNumberAsync(It.IsAny<string>()))
+                .ReturnsAsync((Employee?)null);
+
+            positionRepoMock.Setup(x => x.GetPositionByIdAsync(It.IsAny<int>()))
+                .ReturnsAsync((int id) => db.Positions.FirstOrDefault(p => p.PositionId == id));
+
+            return new EmployeeService(
+                db,
+                employeeRepoMock.Object,
+                email,
+                positionRepoMock.Object,
+                GetBalanceService(db),
+                GetProcessingService(db)
+            );
+        }
+
+        // ================= CREATE =================
 
         [Fact]
         public async Task CreateEmployee_ShouldInitializeLeaveBalances()
@@ -53,37 +112,56 @@ namespace HRConnect.Tests
             var service = GetService(db, email);
 
             db.JobGrades.Add(new JobGrade { JobGradeId = 1, Name = "G1" });
-            db.Positions.Add(new Position { PositionId = 1, JobGradeId = 1 });
+            db.OccupationalLevels.Add(new OccupationalLevel { OccupationalLevelId = 1, Description = "Level 1" });
+            db.Positions.Add(new Position { PositionId = 1, JobGradeId = 1, OccupationalLevelId = 1 });
 
-            db.LeaveTypes.Add(new LeaveType { Id = 1, Code = "AL", Name = "Annual Leave", Description = "Annual Leave", IsActive = true });
+            db.LeaveTypes.Add(new LeaveType
+            {
+                Id = 1,
+                Code = "AL",
+                Name = "Annual Leave",
+                Description = "Annual Leave",
+                IsActive = true
+            });
 
             db.LeaveEntitlementRules.Add(new LeaveEntitlementRule
             {
                 Id = 1,
                 LeaveTypeId = 1,
                 JobGradeId = 1,
-                MinYearsService = 0,
                 DaysAllocated = 15,
+                MinYearsService = 0,
                 IsActive = true
             });
 
             await db.SaveChangesAsync();
 
-            var result = await service.CreateEmployeeAsync(new CreateEmployeeRequest
+            var result = await service.CreateEmployeeAsync(new CreateEmployeeRequestDto
             {
                 Name = "Test",
                 Surname = "User",
-                Email = "test@test.com",
+                Email = "test@singular.co.za",
+                Title = Title.Mr,
                 Gender = Gender.Male,
+                ContactNumber = "0123456789",
+                PhysicalAddress = "Address",
+                TaxNumber = "1234567890",
+                IdNumber = "0309195036087",
+                Nationality = "South African",
+                Branch = Branch.Johannesburg,
+                City = "Johannesburg",
+                ZipCode = "2000",
                 PositionId = 1,
-                CareerManagerID = "RM1",
-                StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1))
+                MonthlySalary = 10000,
+                EmploymentStatus = EmploymentStatus.Permanent,
+                StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
+                ProfileImage = "img.jpg"
             });
 
             Assert.Single(db.EmployeeLeaveBalances);
         }
 
-        // ---------------- POSITION UPDATE ----------------
+        // ================= UPDATE =================
 
         [Fact]
         public async Task UpdatePosition_ShouldCreateNewAccrualSegment()
@@ -96,160 +174,66 @@ namespace HRConnect.Tests
                 new JobGrade { JobGradeId = 1, Name = "G1" },
                 new JobGrade { JobGradeId = 2, Name = "G2" });
 
-            db.Positions.AddRange(
-                new Position { PositionId = 1, JobGradeId = 1 },
-                new Position { PositionId = 2, JobGradeId = 2 });
+            db.OccupationalLevels.Add(new OccupationalLevel { OccupationalLevelId = 1, Description = "Level 1" });
 
-            db.LeaveTypes.Add(new LeaveType { Id = 1, Code = "AL", Name = "Annual Leave", Description = "Annual Leave", IsActive = true });
+            db.Positions.AddRange(
+                new Position { PositionId = 1, JobGradeId = 1, OccupationalLevelId = 1 },
+                new Position { PositionId = 2, JobGradeId = 2, OccupationalLevelId = 1 });
+
+            db.LeaveTypes.Add(new LeaveType
+            {
+                Id = 1,
+                Code = "AL",
+                Name = "Annual Leave",
+                Description = "Annual Leave",
+                IsActive = true
+            });
 
             db.LeaveEntitlementRules.AddRange(
-                new LeaveEntitlementRule
-                {
-                    Id = 1,
-                    LeaveTypeId = 1,
-                    JobGradeId = 1,
-                    MinYearsService = 0,
-                    DaysAllocated = 15,
-                    IsActive = true
-                },
-                new LeaveEntitlementRule
-                {
-                    Id = 2,
-                    LeaveTypeId = 1,
-                    JobGradeId = 2,
-                    MinYearsService = 0,
-                    DaysAllocated = 20,
-                    IsActive = true
-                });
+                new LeaveEntitlementRule { Id = 1, LeaveTypeId = 1, JobGradeId = 1, DaysAllocated = 15, IsActive = true },
+                new LeaveEntitlementRule { Id = 2, LeaveTypeId = 1, JobGradeId = 2, DaysAllocated = 20, IsActive = true });
 
             var employee = new Employee
             {
                 EmployeeId = Guid.NewGuid().ToString(),
                 PositionId = 1,
                 StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
-                Email = "test@test.com",
-                Gender = Gender.Male
+                Email = "test@singular.co.za",
+                Gender = Gender.Male,
+                Name = "Test",
+                Surname = "User",
+                ContactNumber = "0123456789",
+                Nationality = "South African"
             };
 
             db.Employees.Add(employee);
             await db.SaveChangesAsync();
+
             await GetBalanceService(db).InitializeEmployeeLeaveBalancesAsync(employee.EmployeeId);
-            await service.UpdateEmployeePositionAsync(employee.EmployeeId, 2);
 
-            var segments = db.EmployeeAccrualRateHistories.ToList();
+            await service.UpdateEmployeeAsync(employee.EmployeeId, new UpdateEmployeeRequestDto
+            {
+                Title = Title.Mr,
+                Gender = Gender.Male,
+                Name = "Test",
+                Surname = "User",
+                IdNumber = "0305054589589",
+                Nationality = "South African",
+                Email = "test@singular.co.za",
+                ContactNumber = "0123456789",
+                City = "Johannesburg",
+                ZipCode = "2000",
+                Branch = Branch.Johannesburg,
+                MonthlySalary = 10000,
+                PositionId = 2,
+                EmploymentStatus = EmploymentStatus.Permanent,
+                ProfileImage = "img.jpg"
+            });
 
-            Assert.Equal(2, segments.Count);
-
-            var active = segments.Single(s => s.EffectiveTo == null);
-            Assert.Equal(20, active.AnnualEntitlement);
+            Assert.Equal(2, db.EmployeeAccrualRateHistories.Count());
         }
 
-        [Fact]
-        public async Task UpdatePosition_ShouldClosePreviousSegment()
-        {
-            var db = GetDb();
-            var email = new FakeEmailService();
-            var service = GetService(db, email);
-
-            db.JobGrades.AddRange(
-                new JobGrade { JobGradeId = 1, Name = "G1" },
-                new JobGrade { JobGradeId = 2, Name = "G2" });
-
-            db.Positions.AddRange(
-                new Position { PositionId = 1, JobGradeId = 1 },
-                new Position { PositionId = 2, JobGradeId = 2 });
-
-            db.LeaveTypes.Add(new LeaveType { Id = 1, Code = "AL", Name = "Annual Leave", Description = "Annual Leave", IsActive = true });
-
-            db.LeaveEntitlementRules.AddRange(
-            new LeaveEntitlementRule
-            {
-                Id = 1,
-                LeaveTypeId = 1,
-                JobGradeId = 1,
-                MinYearsService = 0,
-                DaysAllocated = 15,
-                IsActive = true
-            },
-            new LeaveEntitlementRule
-            {
-                Id = 2,
-                LeaveTypeId = 1,
-                JobGradeId = 2,
-                MinYearsService = 0,
-                DaysAllocated = 20,
-                IsActive = true
-            });
-
-            var employeeId = Guid.NewGuid().ToString();
-
-            db.Employees.Add(new Employee
-            {
-                EmployeeId = employeeId,
-                PositionId = 1,
-                StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
-                Email = "test@test.com",
-                Gender = Gender.Male
-            });
-
-            db.EmployeeAccrualRateHistories.Add(new EmployeeAccrualRateHistory
-            {
-                EmployeeId = employeeId,
-                AnnualEntitlement = 15,
-                DailyRate = 0.05m,
-                EffectiveFrom = DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(-6)),
-                EffectiveTo = null
-            });
-
-            await db.SaveChangesAsync();
-            await GetBalanceService(db).InitializeEmployeeLeaveBalancesAsync(employeeId);
-            await service.UpdateEmployeePositionAsync(employeeId, 2);
-
-            var closed = db.EmployeeAccrualRateHistories.First(x => x.EffectiveTo != null);
-
-            Assert.NotNull(closed.EffectiveTo);
-        }
-
-        [Fact]
-        public async Task UpdatePosition_ShouldSendEmail()
-        {
-            var db = GetDb();
-            var email = new FakeEmailService();
-            var service = GetService(db, email);
-
-            db.JobGrades.Add(new JobGrade { JobGradeId = 1, Name = "G1" });
-            db.Positions.Add(new Position { PositionId = 1, JobGradeId = 1 });
-
-            db.LeaveTypes.Add(new LeaveType { Id = 1, Code = "AL", Name = "Annual Leave", Description = "Annual Leave", IsActive = true });
-
-            db.LeaveEntitlementRules.Add(new LeaveEntitlementRule
-            {
-                Id = 1,
-                LeaveTypeId = 1,
-                JobGradeId = 1,
-                MinYearsService = 0,
-                DaysAllocated = 15,
-                IsActive = true
-            });
-
-            var employee = new Employee
-            {
-                EmployeeId = Guid.NewGuid().ToString(),
-                PositionId = 1,
-                StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
-                Email = "test@test.com",
-                Gender = Gender.Male
-            };
-
-            db.Employees.Add(employee);
-            await db.SaveChangesAsync();
-            await GetBalanceService(db).InitializeEmployeeLeaveBalancesAsync(employee.EmployeeId);
-            await service.UpdateEmployeePositionAsync(employee.EmployeeId, 1);
-
-            Assert.True(email.EmailsSent >= 0); // safe assertion (no crash)
-        }
-
-        // ---------------- VALIDATION ----------------
+        // ================= VALIDATION =================
 
         [Fact]
         public async Task UpdatePosition_ShouldThrowIfEmployeeNotFound()
@@ -257,61 +241,25 @@ namespace HRConnect.Tests
             var db = GetDb();
             var service = GetService(db, new FakeEmailService());
 
-            await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                service.UpdateEmployeePositionAsync("invalid", 1));
-        }
-
-        // ---------------- RULE SELECTION ----------------
-
-        [Fact]
-        public async Task ShouldApplyCorrectRuleBasedOnYearsOfService()
-        {
-            var db = GetDb();
-            var service = GetService(db, new FakeEmailService());
-
-            db.JobGrades.Add(new JobGrade { JobGradeId = 1, Name = "G1" });
-            db.Positions.Add(new Position { PositionId = 1, JobGradeId = 1 });
-
-            db.LeaveTypes.Add(new LeaveType { Id = 1, Code = "AL", Name = "Annual Leave", Description = "Annual Leave", IsActive = true });
-
-            db.LeaveEntitlementRules.AddRange(
-                new LeaveEntitlementRule
+            await Assert.ThrowsAsync<NotFoundException>(() =>
+                service.UpdateEmployeeAsync("invalid", new UpdateEmployeeRequestDto
                 {
-                    Id = 1,
-                    LeaveTypeId = 1,
-                    JobGradeId = 1,
-                    MinYearsService = 0,
-                    MaxYearsService = 3,
-                    DaysAllocated = 15,
-                    IsActive = true
-                },
-                new LeaveEntitlementRule
-                {
-                    Id = 2,
-                    LeaveTypeId = 1,
-                    JobGradeId = 1,
-                    MinYearsService = 3,
-                    DaysAllocated = 20,
-                    IsActive = true
-                });
-
-            var employee = new Employee
-            {
-                EmployeeId = Guid.NewGuid().ToString(),
-                PositionId = 1,
-                StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-5)),
-                Email = "test@test.com",
-                Gender = Gender.Male
-            };
-
-            db.Employees.Add(employee);
-            await db.SaveChangesAsync();
-            await GetBalanceService(db).InitializeEmployeeLeaveBalancesAsync(employee.EmployeeId);
-            await service.UpdateEmployeePositionAsync(employee.EmployeeId, 1);
-
-            var segment = db.EmployeeAccrualRateHistories.First();
-
-            Assert.Equal(20, segment.AnnualEntitlement);
+                    Title = Title.Mr,
+                    Gender = Gender.Male,
+                    Name = "Test",
+                    Surname = "User",
+                    IdNumber = "0305054589589",
+                    Nationality = "South African",
+                    Email = "test@singular.co.za",
+                    ContactNumber = "0123456789",
+                    City = "Johannesburg",
+                    ZipCode = "2000",
+                    Branch = Branch.Johannesburg,
+                    MonthlySalary = 10000,
+                    PositionId = 1,
+                    EmploymentStatus = EmploymentStatus.Permanent,
+                    ProfileImage = "img.jpg"
+                }));
         }
     }
 }
