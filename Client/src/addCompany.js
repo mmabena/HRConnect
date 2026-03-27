@@ -1,23 +1,33 @@
+<<<<<<< HEAD
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import AddCompanyUI from "./Components/CompanyManagement/addCompanyUI.jsx";
-import './Navy.css';
-import { addCompany } from './Components/Services/companyService.js';
-import { INDUSTRY_OPTIONS } from './utils/constants.js'
-import { validateCompanyForm } from './utils/companyValidators.js'; 
+import AddCompanyUI from "./Components/companyManagement/addCompanyUI.jsx";
+import "./Navy.css";
+import { addCompany } from "./Components/Services/companyService.js";
+import { INDUSTRY_OPTIONS } from "./utils/constants.js";
+import { validateCompanyForm } from "./utils/companyValidators.js";
+=======
+import { useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import AddCompanyUI from "./Components/companyManagement/addCompanyUI.jsx";
+import "./Navy.css";
+import { addCompany } from "./Components/Services/companyService.js";
+import { INDUSTRY_OPTIONS } from "./utils/constants.js";
+import { validateCompanyForm } from "./utils/companyValidators.js";
+>>>>>>> 0848e386d8177a1edf723616a4cb41f452b58280
 
 function AddCompany() {
   const navigate = useNavigate();
 
   const [formState, setFormState] = useState({
-    companyName: '',
-    registrationNumber: '',
-    taxNumber: '',
-    sdlNumber: '',
-    email: '',
-    phoneNumber: '',
-    physicalAddress: '',
-    industry: 'Select Industry',
+    companyName: "",
+    registrationNumber: "",
+    taxNumber: "",
+    sdlNumber: "",
+    email: "",
+    phoneNumber: "",
+    physicalAddress: "",
+    industry: "Select Industry",
   });
 
   const [validationErrors, setValidationErrors] = useState({});
@@ -25,16 +35,19 @@ function AddCompany() {
   // industryOptions is now imported
   const industryOptions = INDUSTRY_OPTIONS;
 
-  const handleChange = useCallback((field, value) => {
-    setFormState(prev => ({ ...prev, [field]: value }));
-    if (validationErrors[field]) {
-      setValidationErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[field];
-        return newErrors;
-      });
-    }
-  }, [validationErrors]);
+  const handleChange = useCallback(
+    (field, value) => {
+      setFormState((prev) => ({ ...prev, [field]: value }));
+      if (validationErrors[field]) {
+        setValidationErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[field];
+          return newErrors;
+        });
+      }
+    },
+    [validationErrors],
+  );
 
   // validateForm now uses the external validator
   const validateForm = useCallback(() => {
@@ -43,39 +56,42 @@ function AddCompany() {
     return isValid;
   }, [formState]);
 
-
   // handleSave is responsible for validating the form data and submitting it
   // to the backend API via the addCompany service.
-  const handleSave = useCallback(async (e) => {
-    e.preventDefault();
-    if (validateForm()) {
-      const companyData = {
-        ...formState,
-      };
+  const handleSave = useCallback(
+    async (e) => {
+      e.preventDefault();
+      if (validateForm()) {
+        const companyData = {
+          ...formState,
+        };
 
-      try {
-        // Calls the API to add a new company
-        const response = await addCompany(companyData);
-        if (response.status === 201) {
-          alert('Company added successfully!');
-          navigate('/companyManagement?tab=Manage Companies');
-        }
-      } catch (error) {
-        if (error.response && error.response.status === 400) {
-          const errorData = error.response.data.errors || {};
-          setValidationErrors(errorData);
-          alert('Validation failed. Please check the form.');
-        } else {
-          console.error('Failed to save company:', error);
-          alert('An error occurred while saving the company. Please try again.');
+        try {
+          // Calls the API to add a new company
+          const response = await addCompany(companyData);
+          if (response.status === 201) {
+            alert("Company added successfully!");
+            navigate("/companyManagement?tab=Manage Companies");
+          }
+        } catch (error) {
+          if (error.response && error.response.status === 400) {
+            const errorData = error.response.data.errors || {};
+            setValidationErrors(errorData);
+            alert("Validation failed. Please check the form.");
+          } else {
+            console.error("Failed to save company:", error);
+            alert(
+              "An error occurred while saving the company. Please try again.",
+            );
+          }
         }
       }
-    }
-  }, [validateForm, formState, navigate]);
-
+    },
+    [validateForm, formState, navigate],
+  );
 
   const handleCancel = useCallback(() => {
-    navigate('/companyManagement?tab=Manage Companies');
+    navigate("/companyManagement?tab=Manage Companies");
   }, [navigate]);
 
   const handlers = {
@@ -90,11 +106,7 @@ function AddCompany() {
   };
 
   return (
-    <AddCompanyUI
-      formState={formState}
-      handlers={handlers}
-      config={config}
-    />
+    <AddCompanyUI formState={formState} handlers={handlers} config={config} />
   );
 }
 

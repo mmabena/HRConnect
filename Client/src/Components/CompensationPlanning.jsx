@@ -1,16 +1,30 @@
 // src/components/CompensationPlanning.jsx
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import CompanyManagementHeader from "./CompanyManagement/companyManagementHeader.jsx";
-import CompanyManagementNavBar from "./CompanyManagement/companyManagementNavBar.jsx";
+<<<<<<< HEAD
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import CompanyManagementHeader from "./companyManagement/companyManagementHeader.jsx";
+import CompanyManagementNavBar from "./companyManagement/companyManagementNavBar.jsx";
+=======
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import CompanyManagementHeader from "./companyManagement/companyManagementHeader.jsx";
+import CompanyManagementNavBar from "./companyManagement/companyManagementNavBar.jsx";
+>>>>>>> 0848e386d8177a1edf723616a4cb41f452b58280
 import "./MenuBar/MenuBar.css";
-import '../Navy.css';
-
+import "../Navy.css";
 
 // Reusable input field component
-const CompPlanningInputField = ({ id, value, onChange, placeholder, isTextArea = false, inputClassName = '', readOnly = false }) => {
+const CompPlanningInputField = ({
+  id,
+  value,
+  onChange,
+  placeholder,
+  isTextArea = false,
+  inputClassName = "",
+  readOnly = false,
+}) => {
   const handleChange = (e) => {
-    if (onChange && typeof onChange === 'function') {
+    if (onChange && typeof onChange === "function") {
       onChange(e.target.value);
     }
   };
@@ -48,14 +62,9 @@ const CompPlanningInputField = ({ id, value, onChange, placeholder, isTextArea =
 function CompensationPlanning({ currentUser }) {
   const navigate = useNavigate();
 
-  const navTabs = [
-    'Payroll',
-    'Bonuses',
-    'Deductions',
-    'Benefits',
-  ];
+  const navTabs = ["Payroll", "Bonuses", "Deductions", "Benefits"];
   const tabWidths = [80, 80, 100, 80];
-  const initialTab = 'Payroll';
+  const initialTab = "Payroll";
   const [activeTab, setActiveTab] = useState(initialTab);
 
   const handleTabChange = (tab) => {
@@ -74,10 +83,10 @@ function CompensationPlanning({ currentUser }) {
         // const data = await getCompensationDataAsync(currentUser.employeeNumber);
         // setCompensationData(data);
         setCompensationData({
-          payroll: 'Payroll data placeholder...',
-          bonuses: 'Bonuses data placeholder...',
-          deductions: 'Deductions data placeholder...',
-          benefits: 'Benefits data placeholder...',
+          payroll: "Payroll data placeholder...",
+          bonuses: "Bonuses data placeholder...",
+          deductions: "Deductions data placeholder...",
+          benefits: "Benefits data placeholder...",
         });
       } catch (error) {
         console.error("Failed to fetch compensation data:", error);
@@ -107,28 +116,28 @@ function CompensationPlanning({ currentUser }) {
 
       <main className="cm-sections-container">
         {/* Render content based on the active tab, similar to the original component */}
-        {activeTab === 'Payroll' && (
+        {activeTab === "Payroll" && (
           <div className="cm-placeholder-section">
             <h2 className="cm-placeholder-title">Payroll</h2>
             <p>{compensationData.payroll}</p>
           </div>
         )}
 
-        {activeTab === 'Bonuses' && (
+        {activeTab === "Bonuses" && (
           <div className="cm-placeholder-section">
             <h2 className="cm-placeholder-title">Bonuses</h2>
             <p>{compensationData.bonuses}</p>
           </div>
         )}
-        
-        {activeTab === 'Deductions' && (
+
+        {activeTab === "Deductions" && (
           <div className="cm-placeholder-section">
             <h2 className="cm-placeholder-title">Deductions</h2>
             <p>{compensationData.deductions}</p>
           </div>
         )}
-        
-        {activeTab === 'Benefits' && (
+
+        {activeTab === "Benefits" && (
           <div className="cm-placeholder-section">
             <h2 className="cm-placeholder-title">Benefits</h2>
             <p>{compensationData.benefits}</p>
