@@ -81,8 +81,7 @@
           .Build();
 
         ITrigger trigger = TriggerBuilder.Create()
-          //.StartAt(employeePensionEnrollment.EffectiveDate.ToDateTime(TimeOnly.MinValue))
-          .StartAt(DateBuilder.FutureDate(15, IntervalUnit.Second))
+          .StartAt(employeePensionEnrollment.EffectiveDate.ToDateTime(TimeOnly.MinValue)) // To test scheduling use : .StartAt(DateBuilder.FutureDate(30, IntervalUnit.Second))
           .Build();
 
         IScheduler schedulerInstance = await _schedulerFactory.GetScheduler();
@@ -179,7 +178,7 @@
           ?? employeePensionEnrollment.IsVoluntaryContributionPermament;
 
         DateTime today = DateTime.Now;
-        if (today.Day >= 16)
+        if (today.Day >= 26)
         {
           DateOnly firstDayNextMonth = new DateOnly(today.Year, today.Month, 1).AddMonths(1);
           employeePensionEnrollment.EffectiveDate = firstDayNextMonth;
@@ -191,8 +190,7 @@
             .Build();
 
           ITrigger trigger = TriggerBuilder.Create()
-            //.StartAt(employeePensionEnrollment.EffectiveDate.ToDateTime(TimeOnly.MinValue))
-            .StartAt(DateBuilder.FutureDate(10, IntervalUnit.Second))
+            .StartAt(employeePensionEnrollment.EffectiveDate.ToDateTime(TimeOnly.MinValue))  // To test scheduling use : .StartAt(DateBuilder.FutureDate(30, IntervalUnit.Second))
             .Build();
 
           IScheduler schedulerInstance = await _schedulerFactory.GetScheduler();
