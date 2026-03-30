@@ -8,6 +8,7 @@ namespace HRConnect.Tests
 
   public class StatutoryContributionServiceTests
   {
+    private readonly Mock<IPayrollRunService> _payrollRunService;
     private readonly Mock<IStatutoryContributionRepository> _statutoryContributionRepoMock;
     private readonly Mock<IStatutoryContributionService> _statutoryContributionServiceMock;
     private readonly Mock<IEmployeeRepository> _employeeRepoMock;
@@ -17,11 +18,13 @@ namespace HRConnect.Tests
     {
       _statutoryContributionRepoMock = new Mock<IStatutoryContributionRepository>();
       _statutoryContributionServiceMock = new Mock<IStatutoryContributionService>();
+      _payrollRunService = new Mock<IPayrollRunService>();
       _employeeRepoMock = new Mock<IEmployeeRepository>();
 
       _statutoryContributionService = new StatutoryContributionService(
         _employeeRepoMock.Object,
-        _statutoryContributionRepoMock.Object
+        _statutoryContributionRepoMock.Object,
+        _payrollRunService.Object
       );
     }
 
@@ -55,9 +58,6 @@ namespace HRConnect.Tests
       };
 
       _employeeRepoMock.Setup(repo => repo.GetEmployeeByIdAsync(employeeId)).ReturnsAsync(employee);
-
-      //Mock Setup of Employee Update As this is used by AddDeduction service method
-      // _employeeRepoMock.Setup(r => r.UpdateEmployeeAsync(1, It.IsAny<Employee>())).ReturnsAsync(employee);
 
       _statutoryContributionRepoMock.Setup(repo => repo.AddDeductionsAsync(It.IsAny<StatutoryContribution>())).ReturnsAsync((StatutoryContribution d) => d);
 

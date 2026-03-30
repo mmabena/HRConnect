@@ -19,9 +19,8 @@
     private readonly Mock<IEmployeeRepository> _employeeRepositoryMock;
     private readonly Mock<IPayrollRunRepository> _payrollRunRepositoryMock;
     private readonly Mock<IPensionDeductionRepository> _pensionDeductionRepositoryMock;
-    private readonly Mock<IPayrollRunService> _payrollRunServiceMock;
     private readonly Mock<ISchedulerFactory> _scheduler;
-    private readonly ApplicationDBContext _context;
+    // private readonly ApplicationDBContext _context;
 
     public EmployeePensionEnrollmentServiceTests()
     {
@@ -29,12 +28,11 @@
       _employeeRepositoryMock = new Mock<IEmployeeRepository>();
       _payrollRunRepositoryMock = new Mock<IPayrollRunRepository>();
       _pensionDeductionRepositoryMock = new Mock<IPensionDeductionRepository>();
-      _payrollRunServiceMock = new Mock<IPayrollRunService>();
       _scheduler = new Mock<ISchedulerFactory>();
       DbContextOptions<ApplicationDBContext> options = new DbContextOptionsBuilder<ApplicationDBContext>()
         .UseInMemoryDatabase("TestDb")
         .Options;
-      _context = new ApplicationDBContext(options);
+      using var _context = new ApplicationDBContext(options);
 
       _ = _context.PensionOptions.Add(new PensionOption
       {

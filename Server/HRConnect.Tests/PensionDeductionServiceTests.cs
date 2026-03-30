@@ -20,7 +20,7 @@
     private readonly Mock<IEmployeePensionEnrollmentRepository> _employeePensionEnrollmentRepositoryMock;
     private readonly Mock<IPayrollRunRepository> _payrollRunRepositoryMock;
     private readonly Mock<IPayrollRunService> _payrollRunServiceMock;
-    private readonly ApplicationDBContext _context;
+    // private readonly ApplicationDBContext _context;
 
     public PensionDeductionServiceTests()
     {
@@ -33,7 +33,7 @@
       DbContextOptions<ApplicationDBContext> options = new DbContextOptionsBuilder<ApplicationDBContext>()
         .UseInMemoryDatabase("TestDb")
         .Options;
-      _context = new ApplicationDBContext(options);
+      using var _context = new ApplicationDBContext(options);
 
       _ = _context.PensionOptions.Add(new PensionOption
       {
