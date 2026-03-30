@@ -1,27 +1,27 @@
 using System.Text;
+using Audit.Core;
+using Audit.EntityFramework;
 using HRConnect.Api.Data;
 using HRConnect.Api.Interfaces;
 using HRConnect.Api.Interfaces.PensionProjection;
+using HRConnect.Api.Middleware;
 using HRConnect.Api.Models;
-using HRConnect.Api.Repository;
 using HRConnect.Api.Repositories;
+using HRConnect.Api.Repository;
 using HRConnect.Api.Services;
 using HRConnect.Api.Utils;
-using HRConnect.Api.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using OfficeOpenXml;
-using Audit.Core;
-using Audit.EntityFramework;
 using Quartz;
 using Resend;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Audit configuration
+// Audit configuration for custom audit capturing
 Audit.Core.Configuration.Setup()
   .UseEntityFramework(config => config
       .AuditTypeExplicitMapper(map => map
@@ -43,8 +43,7 @@ Audit.Core.Configuration.Setup()
           audit.TabelName = entry.Name;
         })));
 
-ExcelPackage.License.SetNonCommercialPersonal("YourName");
-
+// Controllers and JSON options
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -75,9 +74,9 @@ builder.Services.AddSwaggerGen(c =>
 
   c.AddSecurityDefinition("Bearer", securityScheme);
   c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        { securityScheme, Array.Empty<string>() }
-    });
+  {
+    { securityScheme, Array.Empty<string>() }
+  });
 });
 
 builder.Services.AddOpenApi();
@@ -87,6 +86,7 @@ builder.Services.AddDbContext<ApplicationDBContext>(options =>
   options.AddInterceptors(new AuditSaveChangesInterceptor());
 });
 
+// Authentication & JWT
 builder.Services.AddAuthentication(options =>
 {
   options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -118,11 +118,13 @@ builder.Services.AddAuthentication(options =>
   };
 });
 
+// Authorization policies
 builder.Services.AddAuthorizationBuilder()
     .AddPolicy("SuperUserOnly", policy => policy.RequireRole("SuperUser"))
     .AddPolicy("NormalUserOnly", policy => policy.RequireRole("NormalUser"))
     .AddPolicy("SuperOrNormalUser", policy => policy.RequireRole("SuperUser", "NormalUser"));
 
+// Quartz job scheduling
 builder.Services.AddQuartz(q =>
 {
   var jobKey = new JobKey("PayrollRolloverJob");
@@ -166,6 +168,7 @@ builder.Services.AddTransient<IPensionProjectionService, PensionProjectionServic
 builder.Services.AddScoped<IMedicalOptionRepository, MedicalOptionRepository>();
 builder.Services.AddScoped<IMedicalOptionService, MedicalOptionService>();
 
+// CORS
 builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowReact",
@@ -201,3 +204,4 @@ app.UseAuthorization();
 app.UseMiddleware<ExceptionMiddleware>();
 app.MapControllers();
 app.Run();
+

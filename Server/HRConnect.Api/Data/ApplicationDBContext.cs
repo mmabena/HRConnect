@@ -12,7 +12,8 @@ namespace HRConnect.Api.Data
   {
     public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options) : base(options) { }
 
-    // Core entities
+
+
     public DbSet<User> Users { get; set; }
     public DbSet<Employee> Employees { get; set; }
     public DbSet<Position> Positions { get; set; }
@@ -26,6 +27,7 @@ namespace HRConnect.Api.Data
     public DbSet<PensionOption> PensionOptions { get; set; }
 
     // Payroll/Medical/Tax entities (from main)
+
     public DbSet<MedicalOption> MedicalOptions { get; set; }
     public DbSet<MedicalOptionCategory> MedicalOptionCategories { get; set; }
     public DbSet<TaxTableUpload> TaxTableUploads { get; set; }
@@ -41,7 +43,7 @@ namespace HRConnect.Api.Data
     {
       base.OnModelCreating(modelBuilder);
 
-      // PensionFund -> Employee relationship
+      // PensionFund -> Employee
       modelBuilder.Entity<PensionFund>()
           .HasOne(pf => pf.Employee)
           .WithMany(e => e.PensionFunds)
@@ -55,19 +57,22 @@ namespace HRConnect.Api.Data
           .HasForeignKey(e => e.PensionOptionID)
           .OnDelete(DeleteBehavior.Restrict);
 
-      // Employee relationships
+
+
+      // Employee -> Position
       modelBuilder.Entity<Employee>()
           .HasOne(e => e.Position)
           .WithMany(p => p.Employees)
           .HasForeignKey(e => e.PositionId);
 
+      // Employee -> CareerManager
       modelBuilder.Entity<Employee>()
           .HasOne(e => e.CareerManager)
           .WithMany(e => e.Subordinates)
           .HasForeignKey(e => e.CareerManagerID)
           .OnDelete(DeleteBehavior.Restrict);
 
-      // Position - OccupationalLevel
+      // Position -> OccupationalLevel
       modelBuilder.Entity<Position>()
           .HasOne(p => p.OccupationalLevels)
           .WithMany(o => o.Positions)
@@ -125,16 +130,28 @@ namespace HRConnect.Api.Data
           .HasDefaultValue(0.01m);
 
       // Payroll relationships
+
       modelBuilder.Entity<PayrollPeriod>().HasMany(p => p.Runs)
           .WithOne()
           .HasForeignKey(p => p.PeriodId);
 
-      modelBuilder.Entity<PayrollRun>().HasMany(p => p.Records)
+      modelBuilder.Entity<PayrollRun>().HasMany(p => p.Records);
+
+      modelBuilder.Entity<PayrollPeriod>()
+          .HasMany(p => p.Runs)
+          .WithOne()
+          .HasForeignKey(p => p.PeriodId);
+
+      modelBuilder.Entity<PayrollRun>()
+          .HasMany(p => p.Records)
+
           .WithOne()
           .HasForeignKey(p => p.PayrollRunId);
     }
 
+
     // Override SaveChangesAsync for Payroll Records
+
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
       var modifiedRecords = ChangeTracker.Entries<PayrollRecord>()
@@ -147,6 +164,7 @@ namespace HRConnect.Api.Data
           throw new InvalidOperationException("Record under Hard Lock. Cannot be modified");
         }
       }
+
       return await base.SaveChangesAsync(cancellationToken);
     }
   }

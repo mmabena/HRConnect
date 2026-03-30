@@ -10,15 +10,11 @@ namespace HRConnect.Api.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.RenameColumn(
-                name: "IDNumber",
-                table: "Employees",
-                newName: "IdNumber");
 
-            migrationBuilder.RenameColumn(
-                name: "MontlySalary",
-                table: "Employees",
-                newName: "MonthlySalary");
+        //    migrationBuilder.RenameColumn(
+          //      name: "MontlySalary",
+            //    table: "Employees",
+              //  newName: "MonthlySalary");
 
             migrationBuilder.RenameColumn(
                 name: "CareerManger",

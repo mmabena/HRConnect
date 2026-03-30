@@ -83,8 +83,10 @@ namespace HRConnect.Api.Models
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
         // Allow reverse navigation
         public ICollection<Employee>? Subordinates { get; set; }
+
     public int PensionOptionID { get; set; }
     public PensionOption? PensionOption { get; set; }
-    public ICollection<PensionFund>? PensionFunds { get; set; }
+    public ICollection<PensionFund>? PensionFunds { get; set; }             // navigation
+
   }
 }

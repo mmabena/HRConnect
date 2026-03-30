@@ -57,23 +57,6 @@ namespace HRConnect.Api.Migrations
                     table.PrimaryKey("PK_PensionOptions", x => x.PensionOptionId);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "Positions",
-                columns: table => new
-                {
-                    PositionId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    PositionTitle = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    JobGradeId = table.Column<int>(type: "int", nullable: false),
-                    OccupationalLevelId = table.Column<int>(type: "int", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Positions", x => x.PositionId);
-                });
 
             migrationBuilder.CreateTable(
                 name: "Users",
@@ -218,9 +201,6 @@ namespace HRConnect.Api.Migrations
 
             migrationBuilder.DropTable(
                 name: "PensionFunds");
-
-            migrationBuilder.DropTable(
-                name: "Positions");
 
             migrationBuilder.DropTable(
                 name: "PensionOptions");
