@@ -1,5 +1,5 @@
 import '../../Navy.css';
-import '../../MenuBar.css';
+import "../MenuBar/MenuBar.css";
 
 function AddCompanyUI({ formState, handlers, config }) {
   const {

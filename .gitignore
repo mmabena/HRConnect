@@ -161,3 +161,4 @@ GeneratedClients/
 ########################################
 
 !trusted-dev-cert.pfx
+/Server/.todo/tasks.json

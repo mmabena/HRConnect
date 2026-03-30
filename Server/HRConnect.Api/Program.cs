@@ -1,7 +1,13 @@
+
 using System.Text;
+using Audit.Core;
+using Audit.EntityFramework;
 using HRConnect.Api.Data;
 using HRConnect.Api.Interfaces;
+using HRConnect.Api.Interfaces.PensionProjection;
+using HRConnect.Api.Middleware;
 using HRConnect.Api.Models;
+using HRConnect.Api.Repositories;
 using HRConnect.Api.Repository;
 using HRConnect.Api.Services;
 using HRConnect.Api.Utils;
@@ -10,11 +16,44 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Resend;
+using OfficeOpenXml;
+using Quartz;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+// Audit configuration for custom audit capturing
+Audit.Core.Configuration.Setup()
+  .UseEntityFramework(config => config
+      .AuditTypeExplicitMapper(map => map
+        .Map<StatutoryContribution, AuditLogs>((entity, audit) =>
+        {
+          audit.EmployeeId = entity.EmployeeId;
+          audit.IdNumber = entity.IdNumber;
+          audit.PassportNumber = entity.PassportNumber;
+          audit.MonthlySalary = entity.MonthlySalary;
+          audit.ProjectedSalary = entity.MonthlySalary - entity.UifEmployeeAmount;
+          audit.UifEmployeeAmount = entity.UifEmployeeAmount;
+          audit.UifEmployerAmount = entity.UifEmployerAmount;
+          audit.EmployerSdlContribution = entity.EmployerSdlContribution;
+        })
+        .AuditEntityAction<AuditLogs>((e, entry, audit) =>
+        {
+          audit.AuditedAt = DateTime.UtcNow;
+          audit.AuditAction = entry.Action;
+          audit.TabelName = entry.Name;
+        })));
+
+
+
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+      options.JsonSerializerOptions.Converters.Add(
+          new System.Text.Json.Serialization.JsonStringEnumConverter()
+      );
+    });
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -36,17 +75,18 @@ builder.Services.AddSwaggerGen(c =>
   };
 
   c.AddSecurityDefinition("Bearer", securityScheme);
-
   c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
-    { securityScheme, Array.Empty<string>() }
+        { securityScheme, Array.Empty<string>() }
     });
-
 });
 
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+  options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+  options.AddInterceptors(new AuditSaveChangesInterceptor());
+});
 
 builder.Services.AddAuthentication(options =>
 {
@@ -56,17 +96,14 @@ builder.Services.AddAuthentication(options =>
 .AddJwtBearer(options =>
 {
   var jwt = builder.Configuration.GetSection("JwtSettings");
-  // Read secret and support base64-encoded secrets (recommended) or plain-text fallback
   var secretValue = jwt["Secret"] ?? string.Empty;
   byte[] keyBytes;
   try
   {
-    // Try to interpret as base64 first
     keyBytes = Convert.FromBase64String(secretValue);
   }
   catch (FormatException)
   {
-    // Fallback to UTF8 bytes if not base64
     keyBytes = Encoding.UTF8.GetBytes(secretValue);
   }
 
@@ -84,25 +121,52 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorizationBuilder()
     .AddPolicy("SuperUserOnly", policy => policy.RequireRole("SuperUser"))
-    .AddPolicy("NormalUserOnly", policy => policy.RequireRole("NormalUser"));
+    .AddPolicy("NormalUserOnly", policy => policy.RequireRole("NormalUser"))
+    .AddPolicy("SuperOrNormalUser", policy => policy.RequireRole("SuperUser", "NormalUser"));
 
-// Register Resend
-builder.Services.AddOptions<ResendClientOptions>().Configure<IConfiguration>((o, c) =>
+builder.Services.AddQuartz(q =>
 {
-  o.ApiToken = c["Resend:ApiKey"] ?? throw new InvalidOperationException("Resend API key is not configured.");
+  var jobKey = new JobKey("PayrollRolloverJob");
+  q.AddJob<PayrollRolloverJob>(opts => opts.WithIdentity(jobKey));
+  q.AddTrigger(opts => opts
+      .ForJob(jobKey)
+      .WithIdentity("PayrollRolloverTrigger")
+      .WithCronSchedule("0 0 0 1 * ?"));
 });
-builder.Services.AddHttpClient<ResendClient>();
+builder.Services.AddQuartzHostedService(q =>
+{
+  q.WaitForJobsToComplete = true;
+});
 
+// Dependency injection registrations
 builder.Services.AddScoped<IPensionFundRepository, PensionFundRepository>();
 builder.Services.AddScoped<IPensionOptionRepository, PensionOptionRepository>();
 builder.Services.AddScoped<IEmployeePensionRepository, EmployeePensionRepository>();
 builder.Services.AddScoped<IPensionFundService, PensionFundService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
-builder.Services.AddScoped<HRConnect.Api.Interfaces.IUserService, HRConnect.Api.Services.UserService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<ITaxTableUploadService, TaxTableUploadService>();
+builder.Services.AddScoped<ITaxTableUploadRepository, TaxTableUploadRepository>();
+builder.Services.AddScoped<ITaxDeductionService, TaxDeductionService>();
+builder.Services.AddScoped<ITaxDeductionRepository, TaxDeductionRepository>();
 builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
-builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.Services.AuthService>();
+builder.Services.AddScoped<IPositionRepository, PositionRepository>();
+builder.Services.AddScoped<IPositionService, PositionService>();
+builder.Services.AddScoped<IJobGradeRepository, JobGradeRepository>();
+builder.Services.AddScoped<IJobGradeService, JobGradeService>();
+builder.Services.AddScoped<IOccupationalLevelRepository, OccupationalLevelRepository>();
+builder.Services.AddScoped<IOccupationalLevelService, OccupationalLevelService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IStatutoryContributionRepository, StatutoryContributionRepository>();
+builder.Services.AddScoped<IStatutoryContributionService, StatutoryContributionService>();
+builder.Services.AddTransient<IPensionProjectionService, PensionProjectionService>();
+builder.Services.AddScoped<IMedicalOptionRepository, MedicalOptionRepository>();
+builder.Services.AddScoped<IMedicalOptionService, MedicalOptionService>();
+
 builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowReact",
@@ -118,7 +182,6 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
   var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDBContext>();
-  
   dbContext.Database.Migrate();
 }
 
@@ -131,11 +194,10 @@ if (app.Environment.IsDevelopment())
   });
 }
 
-app.UseHttpsRedirection();
 app.UseCors("AllowReact");
+app.UseGlobalExceptionHandler();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<ExceptionMiddleware>();
 app.MapControllers();
 app.Run();
-
-
