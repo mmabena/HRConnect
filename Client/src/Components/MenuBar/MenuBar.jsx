@@ -192,6 +192,36 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
     onAccessDenied && onAccessDenied("");
   };
 
+  const menuPaths = {
+    0: [
+      "/personal",
+    ],
+    1: [
+      "/employeeList",
+      "/terminateemployee",
+      "/transferemployee",
+      "/trnsferhistory",
+    ],
+    2: [
+      "/taxTableManagement",
+      "/leavemanagement",
+      "/positionManagement",
+      "/company-details",
+      "/salarybudgets",
+    ],
+    3: [
+      "/earnings",
+      "/pension-funds",
+      "/assign-pension",
+      "/medical-aid",
+      "/company-contributions",
+      "/bcea",
+      "/oid",
+      "/stock",
+    ],
+    4: ["/userManagement"],
+  };
+
   return (
     <div className="menu-bar-container">
       <div className="menu-inner">
@@ -235,22 +265,6 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                       onClick={() => handleSubmenuClick("/employeeList")}
                     >
                       Employee List
-                    </span>
-                  </li>
-                  <li>
-                    <span
-                      className="menu-subitem"
-                      onClick={() => handleSubmenuClick("/addEmployee")}
-                    >
-                      Add New Employee
-                    </span>
-                  </li>
-                   <li>
-                    <span
-                      className="menu-subitem"
-                      onClick={() => handleSubmenuClick("/editEmployee")}
-                    >
-                      Edit Employee
                     </span>
                   </li>
                   <li>

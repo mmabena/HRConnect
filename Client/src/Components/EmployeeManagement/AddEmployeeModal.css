@@ -51,7 +51,6 @@
   }
 }
 
-
 .emp-center-frame {
   grid-template-rows: repeat(1,minmax(0,1fr));
   grid-template-columns: repeat(2,minmax(0,1fr));
@@ -73,16 +72,15 @@
 }
 
 
+
 .emp-left-frame {
+   width: 100%;
+  height: 100%;
+  padding: 50px;
   display: flex;
-  padding-top: 50px;
   flex-direction: column;
-  align-items: center;
-  gap: 20px;
-  align-self: stretch;
-  grid-row: 1 / span 1;
-  grid-column: 1 / span 1;
-  justify-self: stretch;
+  gap: 10px;
+  position: relative;
 
 }
 
@@ -94,7 +92,6 @@
   flex: 1;
   text-align: center;
   margin: auto;
-  margin-top: 10px;
 }
 
 .emp-left-frame-bottom {
@@ -104,8 +101,6 @@
   gap: 26px;
   align-items: flex-start;
 }
-
-
 
 .emp-right-frame {
   width: 100%;
@@ -132,12 +127,9 @@
 }
 
 .emp-right-frame-bottom {
-  width: 100%;
-  min-height: 104px;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-top: 30px;
   padding: 0 5px;
   box-sizing: border-box;
   color: #002D40;
@@ -145,6 +137,7 @@
   font-size: 12px;
   line-height: 18px;
 }
+
 .emp-right-frame-bottom-text {
   font-family: 'Instrument Sans', sans-serif;
   font-weight: 400;
@@ -173,34 +166,133 @@
   margin-left: 20px;
 }
 
-.emp-headings-container {
-  width: 360px;
-  margin: 0 auto 30px;
-  text-align: center;
-}
-
-.emp-center-logo {
-  width: 279.32px;
-  height: 35.14px;
-  margin: 0 0 30px -5px;
-  text-align: left;
+.emp-left-icon-wrapper{
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--white);
   display: flex;
-  justify-content: flex-start;
+  width: 34px;
+  height: 34px;
+  padding: 6px;
+  justify-content: center;
   align-items: center;
+  flex-shrink: 0;
 }
 
+.emp-right-icon-wrapper{
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--white);
+  display: flex;
+  position: relative;
+  left: 35%;
+  width: 34px;
+  height: 34px;
+  padding: 6px;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+}
 
-.emp-center-logo-text-bold,
+.emp-headings-container {
+  position: relative;
+  bottom: 38%;
+  background-color: var(--primary-color);
+  display: flex;
+  width: 1250px;
+  height: 76px;
+  padding: 10px 52px;
+  align-items: center;
+  gap: 20px;
+  right: 6%;
+}
+
+.emp-wizard-container {
+  position: relative;
+  bottom: 38%;
+  width: 1250px;
+  height: 76px;
+  display: flex;
+  padding: 25px 0 25px 20px;
+  border-bottom: 1px solid var(--baby-blue);
+  right: 4%;
+  
+}
+
+.emp-wizard-frame{
+  width: 1145px;
+  display: inline-flex;
+  flex-direction: row;
+  flex-shrink: 0;
+  gap:10px;
+}
+
+.emp-step-wrapper
+{
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.emp-line-step{
+  position: relative;
+  top:48%;
+  background: rgba(154, 154, 154, 0.55);
+  width: 6%;
+  margin-left: auto;
+  margin-right: auto;
+  height: 1px;
+  border: none;
+}
+
+.emp-step-inactive{
+  width: 25px;
+  height: 25px;
+  border-radius: 100%;
+  background: rgba(154, 154, 154, 0.40);
+  color:grey ;
+  border: 1px solid var(--light-grey);
+  transition: all .2s;
+}
+
+.emp-step-active {
+  width: 25px;
+  height: 25px;
+  border-radius: 100%;
+  background:rgba(53, 88, 103, 0.23);
+  color: var(--primary-color) !important;
+  border: 1px solid var(--blue);
+}
+
+.emp-wizard-step{
+  display: flex;
+  font-family: "Anek Bangla";
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 500;
+}
+
+.emp-title-wrapper{
+  display: flex;
+  width: 623px;
+  padding-right: 452px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.emp-center-logo-text{
+  color: var(--white);
+  font-family: "Anek Bangla";
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 500;
+}
+
 .emp-center-logo-text-light {
   font-family: 'Anek Bangla', serif;
   font-size: 40px;
   line-height: 100%;
   letter-spacing: 2%;
-}
-
-.emp-center-logo-text-bold {
-  font-weight: 700;
-  color: #002D40;
 }
 
 .emp-center-logo-text-light {
@@ -245,15 +337,25 @@
 
 .emp-personal-details-heading {
   position: relative;
-  color: var(--accent-blue);
-  font-family: "Instrument Sans";
-  font-size: 14px;
+  color: var(--primary-color);
+  font-family: "Anek Bangla";
+  font-size: 16px;
   font-style: normal;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 26px; 
   left: 2%;
 }
 
+.emp-personal-details-sub {
+  position: relative;
+  color: var(--COLOUR-Calm-Blue, #006088);
+  font-family: "Anek Bangla";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  left: 2%;
+  bottom:3%;
+}
 
 .emp-name-surname-container {
   display: flex;
@@ -275,9 +377,9 @@
   font-size: 16px;
   font-family: 'Anek Bangla';
   left: 10px;   /* adjust to align with DD/MM/YYYY */
-  top: 40%;
+  top: 45%;
   transform: translateY(-50%);
-  color: var(--text-primary);
+  color: var(--blue);
   pointer-events: none; /* ensures clicks go to the input */
 }
 
@@ -314,7 +416,6 @@ option:checked {
   align-items: flex-start;
   gap: 5px;
   border-radius: 5px;
-  border-bottom: 1.5px solid var(--accent-blue);
   background-color: transparent;
 }
 
@@ -334,9 +435,36 @@ option:checked {
   text-transform: uppercase;
 }
 
+.emp-start-date[type="date"]::-webkit-calendar-picker-indicator {
+  text-transform: uppercase;
+  color: #898989; /* text color */
+  opacity: 0;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+/* DATE PLACEHOLDER (browser controlled but can influence color) */
+.emp-start-date[type="date"]::-webkit-datetime-edit {
+  color: #898989 ;
+  text-transform: uppercase;
+}
+
+.emp-start-date[type="date"]
+{
+  font-size: 14px;
+  text-align: right;
+  padding-top:5.5px;
+  padding-right: 48%;
+}
+
+
 .emp-name-input[type="date"]
 {
+  font-size: 14px;
   text-align: right;
+  padding-top:5.5px;
   padding-right: 18%;
 }
 
@@ -348,19 +476,17 @@ option:checked {
   pointer-events: none;
 }
 
-.emp-name-input,
+.emp-name-input, .emp-start-date,
 .emp-surname-input, .emp-title-input {
   width: 100%;
   height: 33px;
-  border: none;
-  color: var(--text-primary);
-  /* border-bottom: 1.5px solid #006088; */
+  color: var(--blue);
+  border: 1px solid rgba(0, 96, 136, 0.60);
   padding-left: 5px;
   padding-right: 5px;
   padding-bottom: 5px;
   font-size: 16px;
   outline: none;
-  box-sizing: border-box;
   border-radius: 5px;
   background-color: transparent;
   font-family: 'Anek Bangla';
@@ -396,22 +522,19 @@ option:checked {
 }
 
 
-.emp-name-input-col{
+/* .emp-name-input-col{
     width: 100%;
     height: 33px;
     border: none;
-    color: var(--text-primary);
-    border-bottom: 1.5px solid #006088;
     padding-left: 5px;
     padding-right: 5px;
     padding-bottom: 5px;
     font-size: 16px;
     outline: none;
-    box-sizing: border-box;
     border-radius: 0;
     background-color: transparent;
     font-family:  'Anek Bangla', sans-serif
-}
+} */
 
 
 .dropdown-wrapper {
@@ -439,19 +562,11 @@ option:checked {
 }
 
 
-
-
 .emp-input-row {
   display: flex;
   align-items: center;
   gap: 12px;
 }
-.emp-name-input::placeholder,
-.emp-surname-input::placeholder {
-  color: black;
-}
-
-
 
 .emp-name-input.input-error::placeholder {
   color: red;
@@ -536,11 +651,11 @@ option:checked {
 
 }
 
-.emp-bottom-line-container {
+/* .emp-bottom-line-container {
   width: 360px;
   border-bottom: 1.5px solid var(--accent-blue);
   padding-bottom: 5px;
-}
+} */
 
 .emp-save-button {
   font-family: 'Instrument Sans', sans-serif;
@@ -679,16 +794,10 @@ option:checked {
   gap: 2px;
 }
 
-
 .emp-input-wrapper input,
 .emp-input-wrapper select {
   width: 100%;
   box-sizing: border-box;
-}
-
-.emp-name-input::placeholder {
-  color: #9ca3af;
-  font-size: 16px;
 }
 
 .date-input-wrapper {
@@ -713,12 +822,12 @@ option:checked {
   color: var(--text-primary);
 }
 
-.emp-name-input-col::placeholder {
-  color: var(--text-primary);
-}
+/* .emp-name-input-col::placeholder {
+  color: var(--blue);
+} */
 
 .emp-name-input::placeholder {
-  color: var(--text-primary);
+  color: var(--blue);
 }
 
 .emp-full-width {
@@ -733,15 +842,15 @@ gap: 12px;
 }
 
 
-.emp-disability-group {
+/* .emp-disability-group {
   display: flex;
   flex-direction: column;
   gap: 8px;
-}
+} */
 
 
 .emp-disability-row { 
-  height: 24px;
+  height: 22px;
   width: 20px;
   color: var(--text-primary);
   font-family: "Anek Bangla";
@@ -779,11 +888,13 @@ input[type="radio" i] {
 }
 
 .emp-disability-input {
-  flex: 1;
+  margin-left: 26px;
+  color: var(--text-primary);
+  border: 1px solid rgba(0, 96, 136, 0.60);
+  outline: none;
+  font-family: 'Anek Bangla';
   height: 33px;
-  border: none;
   border-radius: 5px;
-  border-bottom: 1.5px solid var(--accent-blue);
   padding-left: 5px;
   padding-bottom: 5px;
   font-size: 16px;
