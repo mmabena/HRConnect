@@ -5,7 +5,7 @@ import ForgotPassword from "./Components/ForgotPassword/ForgotPassword";
 import AddEmployee from "./Components/EmployeeManagement/AddEmployee";
 import EditEmployee from "./Components/EmployeeManagement/EditEmployee";
 import AddCompany from "./addCompany";
-import EditCompany from "./Components/companyManagement/editCompany";
+import EditCompany from "./Components/CompanyManagement/editCompany.jsx";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
@@ -14,11 +14,10 @@ import EmployeeList from "./Pages/EmployeeManagement/EmployeeList";
 import AddEmployeeModal from "./Components/EmployeeManagement/AddEmployeeModal";
 import UserManagement from "./Components/UserManagement";
 import ViewPositionManagement from "./Components/ViewPositionManagement";
-import EditPositionManagement from "./Components/companyManagement/PositionManagement/EditPositionManagement";
-import AddPositionManagement from "./Components/companyManagement/PositionManagement/AddPositionManagment";
-import PositionManagement from "./Pages/CompanyManagement/PositionManagement/PositionManagement.jsx";
-import ChangePositionManagement from "./Components/companyManagement/PositionManagement/ChangePositionManagement";
-import CompanyManagement from "./companyManagement";
+import EditPositionManagement from "./Components/CompanyManagement/PositionManagement/EditPositionManagement.jsx";
+import AddPositionManagement from "./Components/CompanyManagement/PositionManagement/AddPositionManagment.jsx";
+import PositionManagement from "./Pages/CompanyManagement/PositionManagement/PositionManagement";
+import CompanyManagement from "./companyManagement.js";
 import CompanyContribution from "./Components/CompanyContribution/CompanyContribution";
 import Profile from "./Components/MyProfile";
 import CompensationPlanning from "./Components/CompensationPlanning";
@@ -30,7 +29,7 @@ import ManageUserPositions from   "./Pages/CompanyManagement/PositionManagement/
 import ProjectionCalculator from "./Pages/PayrollTools/ProjectionCalculator";
 import PersonalInformation from "./Components/PersonalInformation.jsx";
 import api from "../src/api/api.js";
-import ChangePositionManagement from "./Components/companyManagement/PositionManagement/ChangePositionManagement.jsx";
+import ChangePositionManagement from "./Components/CompanyManagement/PositionManagement/ChangePositionManagement.jsx";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
