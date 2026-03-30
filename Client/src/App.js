@@ -5,7 +5,7 @@ import ForgotPassword from "./Components/ForgotPassword/ForgotPassword";
 import AddEmployee from "./Components/EmployeeManagement/AddEmployee";
 import EditEmployee from "./Components/EmployeeManagement/EditEmployee";
 import AddCompany from "./addCompany";
-import EditCompany from "./Components/CompanyManagement/editCompany";
+import EditCompany from "./Components/CompanyManagement/editCompany.jsx";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
@@ -14,22 +14,22 @@ import EmployeeList from "./Pages/EmployeeManagement/EmployeeList";
 import AddEmployeeModal from "./Components/EmployeeManagement/AddEmployeeModal";
 import UserManagement from "./Components/UserManagement";
 import ViewPositionManagement from "./Components/ViewPositionManagement";
-import EditPositionManagement from "./Components/CompanyManagement/PositionManagement/EditPositionManagement";
-import AddPositionManagement from "./Components/CompanyManagement/PositionManagement/AddPositionManagment";
+import EditPositionManagement from "./Components/CompanyManagement/PositionManagement/EditPositionManagement.jsx";
+import AddPositionManagement from "./Components/CompanyManagement/PositionManagement/AddPositionManagment.jsx";
 import PositionManagement from "./Pages/CompanyManagement/PositionManagement/PositionManagement";
-import ChangePositionManagement from "./Components/CompanyManagement/PositionManagement/ChangePositionManagement";
-import CompanyManagement from "./companyManagement";
+import CompanyManagement from "./companyManagement.js";
 import CompanyContribution from "./Components/CompanyContribution/CompanyContribution";
 import Profile from "./Components/MyProfile";
 import CompensationPlanning from "./Components/CompensationPlanning";
-import TaxTableManagement from "./Components/CompanyManagement/TaxTableManagement/TaxTableManagement";
+import TaxTableManagement from "./Components/companyManagement/TaxTableManagement/TaxTableManagement";
 import ChangePassword from "./Components/ChangePassword";
-import TaxTableUpload from "./Components/CompanyManagement/TaxTableManagement/TaxTableUpload.jsx";
+import TaxTableUpload from "./Components/companyManagement/TaxTableManagement/TaxTableUpload";
 import MenuBar from "./Components/MenuBar/MenuBar";
-import ManageUserPositions from "./Pages/CompanyManagement/PositionManagement/ManageUserPosition.jsx";
+import ManageUserPositions from   "./Pages/CompanyManagement/PositionManagement/ManageUserPositions.jsx";
 import ProjectionCalculator from "./Pages/PayrollTools/ProjectionCalculator";
 import PersonalInformation from "./Components/PersonalInformation.jsx";
 import api from "../src/api/api.js";
+import ChangePositionManagement from "./Components/CompanyManagement/PositionManagement/ChangePositionManagement.jsx";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
@@ -205,7 +205,7 @@ function App() {
             element={<CompensationPlanning />}
           />
           <Route
-            path="/change-password"
+            path="/changePassword"
             element={<ChangePassword currentUser={currentUser} />}
           />
           <Route
@@ -216,6 +216,8 @@ function App() {
             path="/projection-calculator"
             element={<ProjectionCalculator />}
           />
+          <Route path="/changeposition" element={<ChangePositionManagement />} />
+          <Route path="/manageUserPosition" element={<ManageUserPositions/>} />
           <Route path="/personal" element={<PersonalInformation />} />
         </Routes>
       </div>

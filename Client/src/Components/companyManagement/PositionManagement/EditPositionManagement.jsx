@@ -8,11 +8,10 @@ import api from "../../../api/api";
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 
-const EditPositionManagement = ({ id, isOpen, onClose, onOpenChangeModal })  => {
+const EditPositionManagement = ({ id, isOpen, onClose, onOpenChangeModal }) => {
   const navigate = useNavigate();
   const [originalTitle, setOriginalTitle] = useState("");
   const [allPositions, setAllPositions] = useState([]);
-
 
   const [formData, setFormData] = useState({
     positionId: id,
@@ -28,7 +27,7 @@ const EditPositionManagement = ({ id, isOpen, onClose, onOpenChangeModal })  => 
   const [hasAccess, setHasAccess] = useState(false);
 
   useEffect(() => {
-     if (!id) return; 
+    if (!id) return;
     const initialize = async () => {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -44,8 +43,8 @@ const EditPositionManagement = ({ id, isOpen, onClose, onOpenChangeModal })  => 
             "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
           ];
 
-      const isSuperUser = role === "SuperUser";
-      setHasAccess(isSuperUser);
+        const isSuperUser = role === "SuperUser";
+        setHasAccess(isSuperUser);
 
         const [gradesRes, levelsRes, positionRes, positionsRes] =
           await Promise.all([
@@ -128,17 +127,17 @@ const EditPositionManagement = ({ id, isOpen, onClose, onOpenChangeModal })  => 
           pos.positionId !== parseInt(id),
       );
 
-   if (linkedEmployees.length > 0 || duplicateTitle) {
-  if (onOpenChangeModal) {
-    onOpenChangeModal({
-      currentPosition: originalTitle,
+      if (linkedEmployees.length > 0 || duplicateTitle) {
+        if (onOpenChangeModal) {
+          onOpenChangeModal({
+            currentPosition: originalTitle,
             linkedEmployeesCount: linkedEmployees.length,
             attemptedTitle: positionTitle,
-    });
-    onClose(); // Close the edit modal
-  }
-  return; // Stop further submission
-}
+          });
+          onClose(); // Close the edit modal
+        }
+        return; // Stop further submission
+      }
 
       await api.put(`/positions/${id}`, {
         positionTitle,
@@ -160,12 +159,12 @@ const EditPositionManagement = ({ id, isOpen, onClose, onOpenChangeModal })  => 
 
   /*A FUNCTION FOR THE DATE */
   const formatDate = (date) => {
-    if(!date) return "";
+    if (!date) return "";
 
     return new Date(date).toLocaleDateString("en-GB", {
       day: "numeric",
       month: "long",
-      year: "numeric"
+      year: "numeric",
     });
   };
 
@@ -182,9 +181,8 @@ const EditPositionManagement = ({ id, isOpen, onClose, onOpenChangeModal })  => 
 
         <form onSubmit={handleSubmit} className="pm-form-edit">
           {/* Position Dropdown WITH icon */}
-            <label className="title-placeholder-edit">Position title</label>
+          <label className="title-placeholder-edit">Position title</label>
           <div className="pm-input-group-edit pm-dropdown-wrapper-edit">
-          
             <select
               name="positionTitle"
               className="pm-input-edit "
@@ -206,9 +204,8 @@ const EditPositionManagement = ({ id, isOpen, onClose, onOpenChangeModal })  => 
               className="apm-dropdown-icon"
             />
           </div>
-     <label className="title-placeholder-edit">Position Grade</label>
+          <label className="title-placeholder-edit">Position Grade</label>
           <div className="pm-input-group-edit pm-dropdown-wrapper-edit">
-       
             <select
               name="jobGradeId"
               className="pm-input-edit "
@@ -230,11 +227,10 @@ const EditPositionManagement = ({ id, isOpen, onClose, onOpenChangeModal })  => 
               className="apm-dropdown-icon"
             />
           </div>
-  <label className="title-placeholder-edit">
-              Occupational Description
-            </label>
+          <label className="title-placeholder-edit">
+            Occupational Description
+          </label>
           <div className="pm-input-group-edit pm-dropdown-wrapper-edit">
-          
             <select
               name="occupationalLevelId"
               className="pm-input-edit"
@@ -260,34 +256,32 @@ const EditPositionManagement = ({ id, isOpen, onClose, onOpenChangeModal })  => 
             />
           </div>
 
-<div className="pm-input-group-edit date-input-wrapper">
-  <label className="title-placeholder-edit">
-    Effective Date
-  </label>
+          <div className="pm-input-group-edit ">
+            <label className="title-placeholder-edit">Effective Date</label>
 
-  <div className="date-input-container">
-    <input
-      type="date"
-      name="effectiveDate"
-      className="apm-input date-input"
-      value={formData.effectiveDate}
-      onChange={handleChange}
-      required
-    />
+            <div className="date-input-container">
+              <input
+                type="date"
+                name="effectiveDate"
+                className="apm-input date-input"
+                value={formData.effectiveDate}
+                onChange={handleChange}
+                required
+              />
 
-    {formData.effectiveDate && (
-      <span className="formatted-date-inside">
-        {formatDate(formData.effectiveDate)}
-      </span>
-    )}
+              {formData.effectiveDate && (
+                <span className="formatted-date-inside">
+                  {formatDate(formData.effectiveDate)}
+                </span>
+              )}
 
-    <img
-      src="/images/date-picker-removebg-preview.png"
-      alt="Date picker"
-      className="date-picker-icon"
-    />
-  </div>
-</div>
+              <img
+                src="/images/date-picker-removebg-preview.png"
+                alt="Date picker"
+                className="date-picker-icon"
+              />
+            </div>
+          </div>
 
           <button type="submit" className="apm-save-button">
             Save
