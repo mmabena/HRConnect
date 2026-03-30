@@ -156,3 +156,8 @@ GeneratedClients/
 ########################################
 
 !trusted-dev-cert.pfx
+######################################
+# User Secrets (CRITICAL FOR SENDGRID)
+######################################
+secrets.json
+

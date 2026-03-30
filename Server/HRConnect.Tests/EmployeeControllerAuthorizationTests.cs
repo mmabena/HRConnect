@@ -10,15 +10,19 @@ namespace HRConnect.Tests
     using HRConnect.Api.DTOs.Employee;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using HRConnect.Api.Interfaces;
     public class EmployeeControllerAuthorizationTests
     {
         private static EmployeeController CreateControllerWithRole(string role)
         {
-            // Mock the service
+            // Mock the service and controller dependencies
             var mockService = new Mock<IEmployeeService>();
+            var mockLeaveBalance = new Mock<ILeaveBalanceService>();
 
-            // Create controller
-            var controller = new EmployeeController(mockService.Object);
+            var controller = new EmployeeController(
+                mockService.Object,
+                mockLeaveBalance.Object
+            );
 
             // Mock the HttpContext with a ClaimsPrincipal having a role
             var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
@@ -43,7 +47,12 @@ namespace HRConnect.Tests
             mockService.Setup(s => s.GetAllEmployeesAsync())
                        .ReturnsAsync(new List<EmployeeDto>());
 
-            var controller = new EmployeeController(mockService.Object);
+            var mockLeaveBalance = new Mock<ILeaveBalanceService>();
+
+            var controller = new EmployeeController(
+                mockService.Object,
+                mockLeaveBalance.Object
+            );
 
             // Set up SuperUser role
             var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
@@ -69,8 +78,12 @@ namespace HRConnect.Tests
         {
             // Arrange
             var mockService = new Mock<IEmployeeService>();
-            var controller = new EmployeeController(mockService.Object);
+            var mockLeaveBalance = new Mock<ILeaveBalanceService>();
 
+            var controller = new EmployeeController(
+                mockService.Object,
+                mockLeaveBalance.Object
+            );
             var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
             {
                 new Claim(ClaimTypes.Name, "normaluser@singular.co.za"),
@@ -113,7 +126,12 @@ namespace HRConnect.Tests
                            Surname = dto.Surname
                        });
 
-            var controller = new EmployeeController(mockService.Object);
+            var mockLeaveBalance = new Mock<ILeaveBalanceService>();
+
+            var controller = new EmployeeController(
+                mockService.Object,
+                mockLeaveBalance.Object
+            );
 
             // Set up SuperUser role
             var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
@@ -148,7 +166,12 @@ namespace HRConnect.Tests
                 Email = "test@singular.co.za"
             };
 
-            var controller = new EmployeeController(mockService.Object);
+            var mockLeaveBalance = new Mock<ILeaveBalanceService>();
+
+            var controller = new EmployeeController(
+                mockService.Object,
+                mockLeaveBalance.Object
+            );
 
             // Set up NormalUser role
             var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
