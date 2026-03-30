@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import "../MenuBar.css";
+import "./MenuBar/MenuBar.css";
 
 const ViewPositionManagement = () => {
   const { id } = useParams();
@@ -59,13 +59,7 @@ const ViewPositionManagement = () => {
   }, [id]);
 
   return (
-    <div className="full-screen-bg">
-      {/* Background shapes */}
-      <div className="shape-1"></div>
-      <div className="shape-2"></div>
-      <div className="shape-3"></div>
-      <div className="shape-4"></div>
-      <div className="shape-5"></div>
+    <div className="menu-background custom-scrollbar">
 
       <div className="center-frame">
         <div className="left-frame">
