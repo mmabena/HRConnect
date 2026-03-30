@@ -69,7 +69,7 @@ namespace HRConnect.Api.Models
         [Column(TypeName = "decimal(18,2)")]
         public decimal MonthlySalary { get; set; }
         [Required]
-        public int  PositionId { get; set; }
+        public int PositionId { get; set; }
         public Position? Position { get; set; }
         [Required]
         public EmploymentStatus EmploymentStatus { get; set; }
@@ -83,5 +83,8 @@ namespace HRConnect.Api.Models
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
         // Allow reverse navigation
         public ICollection<Employee>? Subordinates { get; set; }
-    }
+    public int PensionOptionID { get; set; }
+    public PensionOption? PensionOption { get; set; }
+    public ICollection<PensionFund>? PensionFunds { get; set; }
+  }
 }

@@ -10,7 +10,7 @@
       IPensionFundRepository fundRepo,
       IPensionOptionRepository optionRepo,
       IEmployeePensionRepository employeeRepo
-  ) // : IPensionFundService
+  ) : IPensionFundService
   {
 
     // Pension Funds
@@ -85,12 +85,12 @@
     }
 
     // Employee Pension Selection
-    /*
+
     public async Task<ServiceResult> RecordEmployeePensionSelectionAsync(
         string employeeId,
         int pensionOptionId,
         CancellationToken cancellationToken)
-    { 
+    {
       Employee? employee = await employeeRepo.GetEmployeeByIdAsync(employeeId, cancellationToken);
       PensionOption? option = await optionRepo.GetPensionOptionByIdAsync(pensionOptionId, cancellationToken);
 
@@ -111,9 +111,9 @@
         return ServiceResult.Failure("No pension fund available.");
       }
 
-      employee.PensionOptionId = option.PensionOptionId;
+      employee.PensionOptionID = option.PensionOptionId;
 
-      decimal salary = employee.MonthlySalary ?? 0m;
+      decimal salary = employee.MonthlySalary;
       decimal contributionAmount = salary * (option.ContributionPercentage / 100);
 
       PensionFund fund = new()
@@ -131,6 +131,7 @@
       await fundRepo.SaveChangesAsync(cancellationToken);
 
       return ServiceResult.Success("Pension option selected and employee updated.");
-      */
+
+    }
   }
 }
