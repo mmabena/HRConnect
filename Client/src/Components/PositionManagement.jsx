@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import CompanyManagementHeader from "./CompanyManagement/companyManagementHeader";
-import CompanyManagementNavBar from "./CompanyManagement/companyManagementNavBar";
+import CompanyManagementHeader from "./companyManagement/companyManagementHeader";
+import CompanyManagementNavBar from "./companyManagement/companyManagementNavBar";
 import { useNavigate } from "react-router-dom";
 
 import "../MenuBar.css";
@@ -25,8 +25,6 @@ const PositionManagement = () => {
     "Manage Companies",
     "Salary Budgets",
   ];
-
-
 
   const tabWidths = [168, 133, 122, 134, 154, 125, 120];
 
@@ -67,30 +65,31 @@ const PositionManagement = () => {
     <div className="edit-employee-background custom-scrollbar">
       <CompanyManagementHeader title={activeTab} />
 
-  <div className="nav-bar-with-button">
-  <CompanyManagementNavBar
-    tabs={navTabs}
-    activeTab={activeTab}
-    onTabChange={(tab) => {
-      if (tab !== "Position Management") {
-        navigate("/companyManagement");
-      } else {
-        setActiveTab(tab);
-      }
-    }}
-    tabWidths={tabWidths}
-  />
+      <div className="nav-bar-with-button">
+        <CompanyManagementNavBar
+          tabs={navTabs}
+          activeTab={activeTab}
+          onTabChange={(tab) => {
+            if (tab !== "Position Management") {
+              navigate("/companyManagement");
+            } else {
+              setActiveTab(tab);
+            }
+          }}
+          tabWidths={tabWidths}
+        />
 
-  {activeTab === "Position Management" && (
-    <button className="add-position-button" onClick={handleAddPositionClick}>
-      Add Position
-    </button>
-  )}
-</div>
+        {activeTab === "Position Management" && (
+          <button
+            className="add-position-button"
+            onClick={handleAddPositionClick}
+          >
+            Add Position
+          </button>
+        )}
+      </div>
 
-
-
-         <div className="pm-table-wrapper">
+      <div className="pm-table-wrapper">
         <table className="position-table">
           <thead>
             <tr>
@@ -102,29 +101,38 @@ const PositionManagement = () => {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan="3" style={{ textAlign: "center" }}>Loading...</td>
+                <td colSpan="3" style={{ textAlign: "center" }}>
+                  Loading...
+                </td>
               </tr>
             ) : currentPositions.length === 0 ? (
               <tr>
-                <td colSpan="3" style={{ textAlign: "center" }}>No positions found.</td>
+                <td colSpan="3" style={{ textAlign: "center" }}>
+                  No positions found.
+                </td>
               </tr>
             ) : (
               currentPositions.map((position) => (
                 <tr key={position.positionId}>
                   <td>{position.positionTitle}</td>
                   <td>
-                    {new Date(position.createdDate).toLocaleDateString("en-GB", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}
+                    {new Date(position.createdDate).toLocaleDateString(
+                      "en-GB",
+                      {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      },
+                    )}
                   </td>
                   <td>
                     <div className="view-edit-button-group">
                       <button
                         className="text-button"
                         onClick={() =>
-                          navigate(`/viewPositionManagement/${position.positionId}`)
+                          navigate(
+                            `/viewPositionManagement/${position.positionId}`,
+                          )
                         }
                       >
                         View
@@ -133,7 +141,9 @@ const PositionManagement = () => {
                       <button
                         className="text-button"
                         onClick={() =>
-                          navigate(`/editPositionManagement/${position.positionId}`)
+                          navigate(
+                            `/editPositionManagement/${position.positionId}`,
+                          )
                         }
                       >
                         Edit
@@ -189,50 +199,51 @@ const PositionManagement = () => {
           <span className="per-page-label">Per page</span>
         </div>
 
-<div className="pagination-right">
-  {/* Prev Arrow */}
-  <img
-    src="/images/arrow_drop_down_circle.png"
-    alt="Previous"
-    className="pagination-arrow prev"
-    onClick={handlePrev}
-    style={{
-      transform: "rotate(90deg)",
-      cursor: currentPage > 1 ? "pointer" : "not-allowed",
-      opacity: currentPage > 1 ? 1 : 0.4,
-    }}
-  />
+        <div className="pagination-right">
+          {/* Prev Arrow */}
+          <img
+            src="/images/arrow_drop_down_circle.png"
+            alt="Previous"
+            className="pagination-arrow prev"
+            onClick={handlePrev}
+            style={{
+              transform: "rotate(90deg)",
+              cursor: currentPage > 1 ? "pointer" : "not-allowed",
+              opacity: currentPage > 1 ? 1 : 0.4,
+            }}
+          />
 
-  {/* Page Numbers */}
-  <div className="page-numbers">
-    {Array.from({ length: totalPages }, (_, i) => (
-      <button
-        key={i + 1}
-        className={`page-number ${currentPage === i + 1 ? "active-page" : ""}`}
-        onClick={() => handlePageClick(i + 1)}
-        aria-label={`Go to page ${i + 1}`}
-      >
-        {i + 1}
-      </button>
-    ))}
-  </div>
+          {/* Page Numbers */}
+          <div className="page-numbers">
+            {Array.from({ length: totalPages }, (_, i) => (
+              <button
+                key={i + 1}
+                className={`page-number ${currentPage === i + 1 ? "active-page" : ""}`}
+                onClick={() => handlePageClick(i + 1)}
+                aria-label={`Go to page ${i + 1}`}
+              >
+                {i + 1}
+              </button>
+            ))}
+          </div>
 
-  {/* Next Arrow */}
-  <img
-    src="/images/arrow_drop_down_circle.png"
-    alt="Next"
-    className="pagination-arrow next"
-    onClick={handleNext}
-    style={{
-      transform: "rotate(-90deg)",
-      cursor: currentPage < totalPages ? "pointer" : "not-allowed",
-      opacity: currentPage < totalPages ? 1 : 0.4,
-    }}
-  />
+          {/* Next Arrow */}
+          <img
+            src="/images/arrow_drop_down_circle.png"
+            alt="Next"
+            className="pagination-arrow next"
+            onClick={handleNext}
+            style={{
+              transform: "rotate(-90deg)",
+              cursor: currentPage < totalPages ? "pointer" : "not-allowed",
+              opacity: currentPage < totalPages ? 1 : 0.4,
+            }}
+          />
 
-  <div className="pagination-info">{positions.length} Positions @ Singular</div>
-</div>
-
+          <div className="pagination-info">
+            {positions.length} Positions @ Singular
+          </div>
+        </div>
       </div>
     </div>
   );

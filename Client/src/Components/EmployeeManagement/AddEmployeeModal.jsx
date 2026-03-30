@@ -144,6 +144,15 @@ const AddEmployeeModal = ({ closeModal }) => {
     }
   };
 
+  const formatCurrency = (value) => {
+    if (!value) return "";
+    return new Intl.NumberFormat("en-ZA", {
+      style: "currency",
+      currency: "ZAR",
+      minimumFractionDigits: 2,
+    }).format(value);
+  };
+
   if (dataLoading) return <div>Loading...</div>;
 
   return (
@@ -399,8 +408,8 @@ const AddEmployeeModal = ({ closeModal }) => {
 
             {/* Disability (radio buttons) */}
             <div className="emp-disability-wrapper">
-            <span className="emp-disability-label">Disability:</span>
-      
+              <span className="emp-disability-label">Disability:</span>
+
               <div className="emp-disability-row">
                 <label className="emp-radio-option">
                   <input
@@ -423,7 +432,6 @@ const AddEmployeeModal = ({ closeModal }) => {
                   />
                   No
                 </label>
-                
 
                 {employee.disability && (
                   <input
@@ -435,10 +443,8 @@ const AddEmployeeModal = ({ closeModal }) => {
                     onChange={onInputChange}
                   />
                 )}
-                
-                
               </div>
-            {formErrors.disabilityType && (
+              {formErrors.disabilityType && (
                 <span className="emp-error-message">
                   {formErrors.disabilityType}
                 </span>
@@ -586,14 +592,33 @@ const AddEmployeeModal = ({ closeModal }) => {
               {/* Monthly Salary */}
               <div className="emp-full-width emp-input-wrapper">
                 <input
-                  type="number"
-                  min="0"
-                  step="100"
+                  type="text"
                   placeholder="Monthly Salary"
                   className={`emp-name-input ${formErrors.monthlySalary ? "emp-error-input" : ""}`}
                   name="monthlySalary"
                   value={employee.monthlySalary}
-                  onChange={onInputChange}
+                  onChange={(e) => {
+                    let rawValue = e.target.value;
+                    rawValue = rawValue.replace(/[^0-9.]/g, "");
+
+                    const parts = rawValue.split(".");
+                    if (parts.length > 2) {
+                      rawValue = parts[0] + "." + parts[1];
+                    }
+
+                    setEmployee((prev) => ({
+                      ...prev,
+                      monthlySalary: rawValue,
+                    }));
+                  }}
+                  onBlur={(e) => {
+                    if (employee.monthlySalary) {
+                      e.target.value = formatCurrency(employee.monthlySalary);
+                    }
+                  }}
+                  onFocus={(e) => {
+                    e.target.value = employee.monthlySalary || "";
+                  }}
                 />
                 {formErrors.monthlySalary && (
                   <span className="emp-error-message">
