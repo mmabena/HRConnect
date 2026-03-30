@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import CompanyManagementNavBar from "../../../Components/CompanyManagement/companyManagementNavBar";
+import CompanyManagementNavBar from "../../../Components/companyManagement/companyManagementNavBar";
 import { useNavigate, useLocation } from "react-router-dom";
 import { editEmployee } from "../../../api/Employee";
 import api from "../../../api/api";
@@ -329,7 +329,7 @@ const ManageUserPositions = ({ title }) => {
         </div>
 
         {/* Employee Table */}
-           <div className="manage-positions"></div>
+        <div className="manage-positions"></div>
         <table className="positions-table">
           <thead>
             <tr>
@@ -358,9 +358,7 @@ const ManageUserPositions = ({ title }) => {
           <tbody>
             {currentEmployees.length === 0 ? (
               <tr>
-                <td >
-                  No users found.
-                </td>
+                <td>No users found.</td>
               </tr>
             ) : (
               currentEmployees.map((employee) => (
@@ -382,7 +380,7 @@ const ManageUserPositions = ({ title }) => {
 
                   <td>{employee.branch || "N/A"}</td>
                   <td>{positionMap[employee.positionId] || "N/A"}</td>
-                <td>{positionMap[selectedPosition] || "-"}</td>
+                  <td>{positionMap[selectedPosition] || "-"}</td>
                 </tr>
               ))
             )}
@@ -390,52 +388,53 @@ const ManageUserPositions = ({ title }) => {
         </table>
 
         {/* Pagination */}
-{/* Pagination */}
-{employees.length > itemsPerPage && (
-  <div className="pagination-placeholder">
-    <div className="pagination-wrapper">
-      <div className="pagination-right">
-        <img
-          src="/images/arrow_drop_down_circle.png"
-          alt="Previous"
-          className="pagination-arrow prev"
-          onClick={handlePrev}
-          style={{
-            transform: "rotate(90deg)",
-            cursor: currentPage > 1 ? "pointer" : "not-allowed",
-            opacity: currentPage > 1 ? 1 : 0.4,
-          }}
-        />
+        {/* Pagination */}
+        {employees.length > itemsPerPage && (
+          <div className="pagination-placeholder">
+            <div className="pagination-wrapper">
+              <div className="pagination-right">
+                <img
+                  src="/images/arrow_drop_down_circle.png"
+                  alt="Previous"
+                  className="pagination-arrow prev"
+                  onClick={handlePrev}
+                  style={{
+                    transform: "rotate(90deg)",
+                    cursor: currentPage > 1 ? "pointer" : "not-allowed",
+                    opacity: currentPage > 1 ? 1 : 0.4,
+                  }}
+                />
 
-        <div className="page-numbers">
-          {Array.from({ length: totalPages }, (_, i) => (
-            <button
-              key={i + 1}
-              className={`page-number ${
-                currentPage === i + 1 ? "active-page" : ""
-              }`}
-              onClick={() => handlePageClick(i + 1)}
-            >
-              {i + 1}
-            </button>
-          ))}
-        </div>
+                <div className="page-numbers">
+                  {Array.from({ length: totalPages }, (_, i) => (
+                    <button
+                      key={i + 1}
+                      className={`page-number ${
+                        currentPage === i + 1 ? "active-page" : ""
+                      }`}
+                      onClick={() => handlePageClick(i + 1)}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                </div>
 
-        <img
-          src="/images/arrow_drop_down_circle.png"
-          alt="Next"
-          className="pagination-arrow next"
-          onClick={handleNext}
-          style={{
-            transform: "rotate(-90deg)",
-            cursor: currentPage < totalPages ? "pointer" : "not-allowed",
-            opacity: currentPage < totalPages ? 1 : 0.4,
-          }}
-        />
-      </div>
-    </div>
-  </div>
-)}
+                <img
+                  src="/images/arrow_drop_down_circle.png"
+                  alt="Next"
+                  className="pagination-arrow next"
+                  onClick={handleNext}
+                  style={{
+                    transform: "rotate(-90deg)",
+                    cursor:
+                      currentPage < totalPages ? "pointer" : "not-allowed",
+                    opacity: currentPage < totalPages ? 1 : 0.4,
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </header>
   );
