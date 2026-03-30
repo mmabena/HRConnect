@@ -16,7 +16,7 @@
 
   public class MedicalOptionValidatorTests
    {
-     /*private readonly Mock<IMedicalOptionRepository> _mockRepository;
+     private readonly Mock<IMedicalOptionRepository> _mockRepository;
 
      public MedicalOptionValidatorTests()
      {
@@ -507,6 +507,6 @@
          // Assert
          Assert.False(result.IsValid);
          Assert.Contains("do not exist", result.ErrorMessage);
-     }*/
+     }
    }
 }
