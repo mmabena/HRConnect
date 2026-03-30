@@ -1381,11 +1381,19 @@
   padding: 6px 11px;
 }
 
+.employee-button-wrapper{
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 25px;
+  flex-shrink: 0;
+  
+}
 .add-employee-button {
   background-color: var(--success-text-color);
   color: var(--white);
   height: 47px;
-  width: 150px;
+  width: 187px;
   display: flex;
   padding: 5px 10px;
 
@@ -1401,9 +1409,31 @@
   font-family: "Anek Bangla";
   font-size: 20px;
   font-style: normal;
-  font-weight: 700;
+  font-weight: 400;
   line-height: normal;
   letter-spacing: 0.4px;
+  }
+
+  .filter-button{
+  display: flex;
+  padding: 5px 10px;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--white);
+  color: var(--primary-color) ;
+  height: 47px;
+  width: 113px;
+
+  border-radius: 10px;
+  border: 1px solid rgba(79, 110, 120, 0.29);
+  opacity: 0.9;
+  background: var(--white);
+
+  text-align: center;
+  font-family: "Anek Bangla";
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
   }
 
 .heading-icon {
@@ -1439,13 +1469,13 @@
 }
 
 /* Wrapper: Filter + Search bar */
-.filter-search-wrapper {
+.search-wrapper {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap:40px;
   height: 56px;
   position: relative;
-    bottom: 65px;
+  bottom: 65px;
 
 }
 
@@ -1468,14 +1498,19 @@
 
 .search-bar-container {
   position: relative;
-   right: 145%;
-  display: flex;
+  gap: 4px;
+  flex: 1 0 0;
+  left: 215%;
   flex-direction: row;
   width: 360px;
   height: 56px;
-  gap: 4px;
+  gap: 22px;
   align-items: center;
-  background-color: #9C9C9C29;
+  display: flex;
+  min-width: 360px;
+  max-width: 720px;
+  border-radius: 8px;
+  background: rgba(53, 88, 103, 0.17);
   box-sizing: border-box;
   padding: 0 6px;
 

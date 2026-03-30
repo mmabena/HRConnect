@@ -26,10 +26,11 @@ import TaxTableManagement from "./Components/companyManagement/TaxTableManagemen
 import ChangePassword from "./Components/ChangePassword";
 import TaxTableUpload from "./Components/companyManagement/TaxTableManagement/TaxTableUpload";
 import MenuBar from "./Components/MenuBar/MenuBar";
-import ManageUserPositions from "./Pages/CompanyManagement/PositionManagement/ManageUserPositions.jsx";
+import ManageUserPositions from   "./Pages/CompanyManagement/PositionManagement/ManageUserPositions.jsx";
 import ProjectionCalculator from "./Pages/PayrollTools/ProjectionCalculator";
 import PersonalInformation from "./Components/PersonalInformation.jsx";
 import api from "../src/api/api.js";
+import ChangePositionManagement from "./Components/companyManagement/PositionManagement/ChangePositionManagement.jsx";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
