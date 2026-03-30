@@ -131,7 +131,7 @@ namespace HRConnect.Api.Utils.Payroll
 
           if (currentPayRun.Records.Count > 0)
             await PayrollUtil.WriteExcelAsync(currentPayRun, _env.ContentRootPath);
-          await RolloverPayrollDeductions();
+          //await RolloverPayrollDeductions();
         }
 
         Console.WriteLine($"NEXT RUN========{nextRun}");
@@ -145,6 +145,7 @@ namespace HRConnect.Api.Utils.Payroll
         }
         
         await RolloverPayrollDeductions();
+      
       }
       catch (InvalidOperationException ex)
       {
@@ -158,6 +159,8 @@ namespace HRConnect.Api.Utils.Payroll
         throw jobException;
       }
 
+
+      
       //
       //await _pensionDeductionService.PensionDeductionRollover();
       /*await Task.WhenAll(

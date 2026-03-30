@@ -626,13 +626,13 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
     var previousDeductions =
       await _medicalAidDeductionRepository.GetAllRecordsFromPreviousRun(previousPayRunNumber);
 
-    if (previousDeductions.Count == 0 || previousDeductions == null)
+    if (previousDeductions == null || previousDeductions.Count == 0)
       throw new InvalidDataException("No previous Medical Aid Deductions found on the previous Run");
     
     //TODO :  Roll over the deductions
     var filteredPreviousDeductions = previousDeductions
       .Where(p => (p.TerminationDate == null ||
-                  (p.TerminationDate.Value.Month >= currentMonth &&
+                  (p.TerminationDate.Value.Month > currentMonth &&
                    p.TerminationDate.Value.Year >= currentYear)) &&
                   !p.IsActive
                   )
@@ -640,17 +640,47 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
       
       //.Update(p => p.PayrollRunId = currentRun.PayrollRunId)
       .ToList();
-                  
-    //TODO :  Update the current run
+    
     var recordsToRollover = new List<PayrollRecord>();
     var employeeIds = new List<string>();
 
 
     
-    foreach (var filteredPreviousDeduction in filteredPreviousDeductions)
+    foreach (var previousDeduction in filteredPreviousDeductions)
     {
-      recordsToRollover.Add(filteredPreviousDeduction);
+      //recordsToRollover.Add(filteredPreviousDeduction);
       //employeeIds.Add(filteredPreviousDeduction.EmployeeId);
+      
+      // Create a new instance - don't reuse the locked one
+      var newDeduction = new MedicalAidDeduction
+      {
+        EmployeeId = previousDeduction.EmployeeId,
+        Name = previousDeduction.Name,
+        Surname = previousDeduction.Surname,
+        Branch = previousDeduction.Branch,
+        Salary = previousDeduction.Salary,
+        EmployeeStartDate = previousDeduction.EmployeeStartDate,
+        EffectiveDate = previousDeduction.EffectiveDate,
+        MedicalOptionId = previousDeduction.MedicalOptionId,
+        MedicalCategoryId = previousDeduction.MedicalCategoryId,
+        PrincipalCount = previousDeduction.PrincipalCount,
+        AdultCount = previousDeduction.AdultCount,
+        ChildrenCount = previousDeduction.ChildrenCount,
+        PrincipalPremium = previousDeduction.PrincipalPremium,
+        SpousePremium = previousDeduction.SpousePremium,
+        ChildPremium = previousDeduction.ChildPremium,
+        TotalDeductionAmount = previousDeduction.TotalDeductionAmount,
+        IsActive = true,  // New records are active
+        CreatedDate = DateTime.Now,
+        TerminationDate = previousDeduction.TerminationDate,
+        TerminationReason = previousDeduction.TerminationReason,
+        UpdatedDate = previousDeduction.UpdatedDate,
+        // Don't set: PayrollRunId, UpdatedDate, TerminationDate, TerminationReason - these are handled by the rollover process
+        OptionName = previousDeduction.OptionName,
+        OptionCategoryName = previousDeduction.OptionCategoryName,
+        PayrollRunId = currentRun.PayrollRunId  // Set to NEW run ID
+      };
+      recordsToRollover.Add(newDeduction);
     }
     
     await _payrollRunService.AddRecordsCollectionToRunAsync(recordsToRollover);

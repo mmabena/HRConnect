@@ -140,7 +140,7 @@ builder.Services.AddQuartz(q =>
   q.AddTrigger(opts => opts
   .ForJob(jobKey)
   .WithIdentity("PayrollRollover-Trigger")
-  .WithCronSchedule("* 0/1 * * * ?", x =>
+  .WithCronSchedule("* * * * * ?", x =>
   x.WithMisfireHandlingInstructionFireAndProceed())); //when a job misfire happens. 
                                                       // Properly re-execute it and proceed as usual
 
