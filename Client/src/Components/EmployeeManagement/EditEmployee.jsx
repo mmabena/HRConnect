@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef  } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import "./EditEmployee.css";
 import {
@@ -127,8 +127,6 @@ const EditEmployee = () => {
           disabilityType: emp.disabilityDescription || "",
           profileImage: emp.profileImage || "",
         });
-
-        
       } catch (err) {
         toast.error("Could not load employee");
         console.error(err);
@@ -165,6 +163,8 @@ const EditEmployee = () => {
       }));
     }
   };
+
+  
 
   /// Save
   const handleSave = async () => {
@@ -238,6 +238,15 @@ const EditEmployee = () => {
     }
   };
 
+  const formatCurrency = (value) => {
+    if (!value) return "";
+    return new Intl.NumberFormat("en-ZA", {
+      style: "currency",
+      currency: "ZAR",
+      minimumFractionDigits: 2,
+    }).format(value);
+  };
+
   return (
     <div className="emp-menu-background">
       <div className="emp-edit-employee-top-container">
@@ -295,7 +304,7 @@ const EditEmployee = () => {
 
         <div className="emp-sub-container">
           {/* ROW 1 */}
-          <div className="emp-fields-container row-6">
+          <div className="emp-fields-container row-5">
             <div className="emp-field">
               <label className="emp-field-label">Employee Code*</label>
               <input
@@ -414,6 +423,7 @@ const EditEmployee = () => {
                 value={employee.disabilityType || ""}
                 onChange={onInputChange}
                 readOnly={!employee.disability}
+                placeholder={!employee.disability ? "N/A" : ""}
               />
               <div className="emp-error-text">{formErrors.disabilityType}</div>
             </div>
@@ -498,7 +508,7 @@ const EditEmployee = () => {
           </div>
 
           {/* ROW 6 */}
-          <div className="emp-fields-container row-3">
+          <div className="emp-fields-container row-4">
             <div className="emp-field">
               <label className="emp-field-label">Postal Code</label>
               <input
@@ -514,13 +524,21 @@ const EditEmployee = () => {
             <div className="emp-field">
               <label className="emp-field-label">Monthly Salary</label>
               <input
-                type="number"
-                min="0"
-                step="100"
+                type="text"
                 className={`emp-field-input ${formErrors.monthlySalary ? "error" : ""}`}
                 name="monthlySalary"
-                value={employee.monthlySalary || ""}
-                onChange={onInputChange}
+                value={
+                  isEditable
+                    ? employee.monthlySalary
+                    : formatCurrency(employee.monthlySalary)
+                }
+                onChange={(e) => {
+                  const rawValue = e.target.value.replace(/[^0-9]/g, "");
+                  setEmployee((prev) => ({
+                    ...prev,
+                    monthlySalary: rawValue,
+                  }));
+                }}
                 readOnly={!isEditable}
               />
               <div className="emp-error-text">{formErrors.monthlySalary}</div>
@@ -554,7 +572,7 @@ const EditEmployee = () => {
           </div>
 
           {/* ROW 7 */}
-          <div className="emp-fields-container row-3">
+          <div className="emp-fields-container row-4">
             <div className="emp-field">
               <label className="emp-field-label">Employment Status</label>
               <div className="emp-field-dropdown">

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useMemo } from "react";
 import api from "../../../api/api.js";
 import { toast } from "react-toastify";
+import "./TaxTableUpload.css";
 
 /* ---------- YEAR GENERATOR ---------- */
 const generateFinancialYears = (existingYears = []) => {
@@ -44,7 +45,7 @@ function TaxTableUpload({ onClose, onUploadSuccess, existingYears = [] }) {
 
     const ext = selected.name.split(".").pop().toLowerCase();
     if (!["xls", "xlsx"].includes(ext)) {
-      setYearError("Only Excel files (.xls, .xlsx) are allowed.");
+      setYearError("Only Excel files (.xls, .xlsx) are supported.");
       fileInputRef.current.value = "";
       return;
     }

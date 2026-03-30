@@ -17,6 +17,7 @@ namespace HRConnect.Tests
   public class EmployeeServiceTests
   {
     private readonly Mock<IEmployeeRepository> _employeeRepoMock;
+    private readonly Mock<IPositionRepository> _positionRepoMock;
     private readonly Mock<IEmailService> _emailServiceMock;
     private readonly EmployeeService _employeeService;
 
@@ -25,10 +26,12 @@ namespace HRConnect.Tests
     {
       _employeeRepoMock = new Mock<IEmployeeRepository>();
       _emailServiceMock = new Mock<IEmailService>();
+      _positionRepoMock = new Mock<IPositionRepository>();
 
       _employeeService = new EmployeeService(
           _employeeRepoMock.Object,
-          _emailServiceMock.Object
+          _emailServiceMock.Object,
+          _positionRepoMock.Object
       );
     }
 
@@ -49,13 +52,14 @@ namespace HRConnect.Tests
         Gender = Gender.Male,
         IdNumber = "0305055487589",
         TaxNumber = "1234567890",
+        Nationality = "South African",
         PhysicalAddress = "123 Main St",
         Email = "john.smith@singular.co.za",
         ContactNumber = "0123456789",
         Branch = Branch.Johannesburg,
         City = "Johannesburg",
         ZipCode = "2000",
-        PositionId = 1,
+        PositionId = 4,
         MonthlySalary = 20000,
         EmploymentStatus = EmploymentStatus.Permanent,
         CareerManagerID = managerId,
@@ -84,6 +88,13 @@ namespace HRConnect.Tests
                        .ReturnsAsync((Employee?)null);
       _employeeRepoMock.Setup(r => r.GetEmployeeByContactNumberAsync(It.IsAny<string>()))
                        .ReturnsAsync((Employee?)null);
+
+      _positionRepoMock.Setup(p => p.GetPositionByIdAsync(4))
+    .ReturnsAsync(new Position
+        {
+          PositionId = 4,
+          PositionTitle = "Developer"
+        });
 
       var mockTransaction = new Mock<Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction>();
       _employeeRepoMock.Setup(r => r.BeginTransactionAsync())
@@ -116,13 +127,14 @@ namespace HRConnect.Tests
         IdNumber = "0305054589589",
         PhysicalAddress = "123 Main St",
         TaxNumber = "1234567890",
+        Nationality = "South African",
         StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
         Branch = Branch.Johannesburg,
         City = "Johannesburg",
         ZipCode = "2000",
         Title = Title.Ms,
         Gender = Gender.Female,
-        PositionId = 1,
+        PositionId = 4,
         MonthlySalary = 30000,
         EmploymentStatus = EmploymentStatus.Permanent,
         CareerManagerID = "Manager Name",
@@ -150,12 +162,13 @@ namespace HRConnect.Tests
         ContactNumber = "0123456789",
         PhysicalAddress = "123 Main St",
         IdNumber = "0305054589589",
+        Nationality = "Zimbabwean",
         TaxNumber = "1234567890",
         StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
         Branch = Branch.Johannesburg,
         City = "Johannesburg",
         ZipCode = "2000",
-        PositionId = 1,
+        PositionId = 4,
         MonthlySalary = 20000,
         EmploymentStatus = EmploymentStatus.Permanent,
         CareerManagerID = "",
@@ -180,17 +193,19 @@ namespace HRConnect.Tests
         Name = "UpdatedName",
         Surname = "UpdatedSurname",
         IdNumber = "0305054589589",
+        Gender = Gender.Male,
         PassportNumber = "",
         ContactNumber = "0987654321",
         Email = "updated@singular.co.za",
         PhysicalAddress = "456 New Street",
+        Nationality = "South African",
         City = "Cape Town",
         ZipCode = "8000",
         HasDisability = false,
         DisabilityDescription = null,
         Branch = Branch.Johannesburg,
         MonthlySalary = 35000,
-        PositionId = 2,
+        PositionId = 6,
         EmploymentStatus = EmploymentStatus.Permanent,
         CareerManagerID = newManager.EmployeeId,
         ProfileImage = "updated.jpg"
@@ -214,6 +229,13 @@ namespace HRConnect.Tests
 
       _employeeRepoMock.Setup(r => r.UpdateEmployeeAsync(It.IsAny<Employee>()))
                        .ReturnsAsync((Employee e) => e);
+      
+      _positionRepoMock.Setup(p => p.GetPositionByIdAsync(6))
+            .ReturnsAsync(new Position
+            {
+                PositionId = 6,
+                PositionTitle = "Senior Developer"
+            });
 
 
       // Act
@@ -238,12 +260,14 @@ namespace HRConnect.Tests
         IdNumber = "0305054589589",
         ContactNumber = "0123456789",
         Email = "test@singular.co.za",
+        Gender = Gender.Male,
         PhysicalAddress = "123 Street",
         City = "Johannesburg",
+        Nationality = "South African",
         ZipCode = "2000",
         Branch = Branch.Johannesburg,
         MonthlySalary = 20000,
-        PositionId = 1,
+        PositionId = 5,
         EmploymentStatus = EmploymentStatus.Permanent,
         CareerManagerID = "Manager",
         ProfileImage = "profile.jpg"

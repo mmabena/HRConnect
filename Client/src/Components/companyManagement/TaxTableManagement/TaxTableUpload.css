@@ -8,19 +8,22 @@
 /* ------------------- Center frame and content ------------------- */
 .tax-table-frame {
   display: flex;
-  width: 1013px;
-  height: 828px;
+  width: 860px;
+  height: 800px;
   flex-direction: column;
   align-items: center;
-  gap: 15px;
+  gap: 10px;
   border-radius: 10px;
+  overflow: hidden;
   background: var(--BG);
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-}
+} 
+
+
 
 .tax-table-headings-container {
   display: flex;
-  padding-top: 50px;
+  padding-top: 30px;
   flex-direction: column;
   align-items: center;
   gap: 26px;
@@ -141,7 +144,7 @@
   align-items: flex-start;
   gap: 10px;
   flex-shrink: 0;
-
+  
   position: relative;
   background: var(--BG);
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
@@ -208,7 +211,7 @@
   justify-content: center;
   align-items: center;
   text-align: center;
-  color: #002d40;
+  color: #355867;
   position: relative;
   left: 15px;
   margin: 0;
@@ -266,12 +269,12 @@
   align-items: center;
   padding: 11.0222px;
   gap: 5.51px;
-  width: 105px;
-  height: 21px;
-  background: #002d40;
-  border-radius: 12px;
+  width: 124.04px;
+  height: 37.04px;
+  background: #355867;
+  border-radius: 11.2px;
   position: relative;
-  left: 15px;
+  left: 1px;
   order: 2;
   flex-grow: 0;
 }
@@ -325,7 +328,7 @@
 .x-btn {
   display: flex;
   height: 30px;
-  padding: 23px 16px 14px 954px;
+  padding: 10px 1px 9px 800px;
   padding-bottom: 20px;
   justify-content: center;
   align-items: flex-start;
@@ -333,7 +336,7 @@
   flex-shrink: 0;
   align-self: stretch;
   border: none;
-  font-size: 30px;
+  font-size: 22px;
 
   transition:
     transform 0.2s ease,
@@ -428,7 +431,7 @@
   border-radius: 12px;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.08);
   overflow: hidden;
-  width: 81%;
+  width: 90%;
   min-height: 90px;
   position: relative;
   left: 60px;
