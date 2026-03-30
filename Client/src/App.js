@@ -5,11 +5,7 @@ import ForgotPassword from "./Components/ForgotPassword/ForgotPassword";
 import AddEmployee from "./Components/EmployeeManagement/AddEmployee";
 import EditEmployee from "./Components/EmployeeManagement/EditEmployee";
 import AddCompany from "./addCompany";
-<<<<<<< HEAD
 import EditCompany from "./Components/companyManagement/editCompany";
-=======
-import EditCompany from "./Components/companyManagement/editCompany";
->>>>>>> 0848e386d8177a1edf723616a4cb41f452b58280
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
@@ -18,26 +14,15 @@ import EmployeeList from "./Pages/EmployeeManagement/EmployeeList";
 import AddEmployeeModal from "./Components/EmployeeManagement/AddEmployeeModal";
 import UserManagement from "./Components/UserManagement";
 import ViewPositionManagement from "./Components/ViewPositionManagement";
-<<<<<<< HEAD
 import EditPositionManagement from "./Components/companyManagement/PositionManagement/EditPositionManagement";
 import AddPositionManagement from "./Components/companyManagement/PositionManagement/AddPositionManagment";
 import PositionManagement from "./Pages/CompanyManagement/PositionManagement/PositionManagement.jsx";
 import ChangePositionManagement from "./Components/companyManagement/PositionManagement/ChangePositionManagement";
-=======
-import EditPositionManagement from "./Components/companyManagement/PositionManagement/EditPositionManagement";
-import AddPositionManagement from "./Components/companyManagement/PositionManagement/AddPositionManagment";
-import PositionManagement from "./Pages/CompanyManagement/PositionManagement/PositionManagement.jsx";
-import ChangePositionManagement from "./Components/companyManagement/PositionManagement/ChangePositionManagement";
->>>>>>> 0848e386d8177a1edf723616a4cb41f452b58280
 import CompanyManagement from "./companyManagement";
 import CompanyContribution from "./Components/CompanyContribution/CompanyContribution";
 import Profile from "./Components/MyProfile";
 import CompensationPlanning from "./Components/CompensationPlanning";
-<<<<<<< HEAD
 import TaxTableManagement from "./Components/companyManagement/TaxTableManagement/TaxTableManagement";
-=======
-import TaxTableManagement from "./Components/companyManagement/TaxTableManagement/TaxTableManagement";
->>>>>>> 0848e386d8177a1edf723616a4cb41f452b58280
 import ChangePassword from "./Components/ChangePassword";
 import TaxTableUpload from "./Components/companyManagement/TaxTableManagement/TaxTableUpload";
 import MenuBar from "./Components/MenuBar/MenuBar";

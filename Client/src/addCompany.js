@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AddCompanyUI from "./Components/companyManagement/addCompanyUI.jsx";
@@ -6,15 +5,6 @@ import "./Navy.css";
 import { addCompany } from "./Components/Services/companyService.js";
 import { INDUSTRY_OPTIONS } from "./utils/constants.js";
 import { validateCompanyForm } from "./utils/companyValidators.js";
-=======
-import { useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
-import AddCompanyUI from "./Components/companyManagement/addCompanyUI.jsx";
-import "./Navy.css";
-import { addCompany } from "./Components/Services/companyService.js";
-import { INDUSTRY_OPTIONS } from "./utils/constants.js";
-import { validateCompanyForm } from "./utils/companyValidators.js";
->>>>>>> 0848e386d8177a1edf723616a4cb41f452b58280
 
 function AddCompany() {
   const navigate = useNavigate();

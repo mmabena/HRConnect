@@ -1,12 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import api from "../../../api/api.js";
-<<<<<<< HEAD
 import "../../../styles/global.css";
 import TaxTableUpload from "./TaxTableUpload";
-=======
-import "../../../styles/global.css";
-import TaxTableUpload from "./TaxTableUpload";
->>>>>>> 0848e386d8177a1edf723616a4cb41f452b58280
 import NavBar from "../../NavBar.jsx";
 
 function TaxTableManagement({ currentUser }) {

@@ -1,9 +1,5 @@
 import React, { useState, useEffect } from "react";
-<<<<<<< HEAD:Client/src/Pages/CompanyManagement/PositionManagement/ManageUserPositions.jsx
 import CompanyManagementNavBar from "../../../Components/companyManagement/companyManagementNavBar";
-=======
-import CompanyManagementNavBar from "../../../Components/companyManagement/companyManagementNavBar";
->>>>>>> 0848e386d8177a1edf723616a4cb41f452b58280:Client/src/Pages/CompanyManagement/PositionManagement/ManageUserPosition.jsx
 import { useNavigate, useLocation } from "react-router-dom";
 import { editEmployee } from "../../../api/Employee";
 import api from "../../../api/api";

@@ -1,20 +1,9 @@
-<<<<<<< HEAD
 import { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getCompany, deleteCompany, getCompanyById } from './Components/Services/companyService.js';
 import CompanyManagementUI from "./Components/companyManagement/companyManagementUI.jsx";
-=======
-import { useState, useEffect, useCallback } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import {
-  getCompany,
-  deleteCompany,
-  getCompanyById,
-} from "./Components/Services/companyService.js";
-import CompanyManagementUI from "./Components/companyManagement/companyManagementUI.jsx";
->>>>>>> 0848e386d8177a1edf723616a4cb41f452b58280
 
-function companyManagement() {
+function CompanyManagement() {
   const navigate = useNavigate();
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
@@ -111,4 +100,4 @@ function companyManagement() {
   );
 }
 
-export default companyManagement;
+export default CompanyManagement;
