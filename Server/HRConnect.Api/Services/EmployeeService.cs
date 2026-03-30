@@ -12,6 +12,8 @@ namespace HRConnect.Api.Services
   using HRConnect.Api.Mappers;
   using System.Data.Common;
   using System.Runtime.InteropServices;
+  using HRConnect.Api.Data;
+  using Microsoft.EntityFrameworkCore;
 
   //Inline Custom Exceptions for better error handling and clarity
   public class ValidationException : Exception
@@ -35,14 +37,20 @@ namespace HRConnect.Api.Services
   /// </summary>
   public class EmployeeService : IEmployeeService
   {
+    private readonly ApplicationDBContext _context; // For direct DB access in complex operations
     private readonly IEmployeeRepository _employeeRepo;
     private readonly IPositionRepository _positionRepo;
     private readonly IEmailService _emailService;
-    public EmployeeService(IEmployeeRepository employeeRepo, IEmailService emailService, IPositionRepository positionRepo)
+    private readonly ILeaveBalanceService _leaveBalanceService;
+    private readonly ILeaveProcessingService _leaveProcessingService;
+    public EmployeeService(ApplicationDBContext context, IEmployeeRepository employeeRepo, IEmailService emailService, IPositionRepository positionRepo, ILeaveBalanceService leaveBalanceService, ILeaveProcessingService leaveProcessingService)
     {
+      _context = context;
       _employeeRepo = employeeRepo;
       _emailService = emailService;
       _positionRepo = positionRepo;
+      _leaveBalanceService = leaveBalanceService;
+      _leaveProcessingService = leaveProcessingService;
     }
     /// <summary>
     /// Retrieves all employees from the repository.
@@ -51,6 +59,15 @@ namespace HRConnect.Api.Services
     public async Task<List<EmployeeDto>> GetAllEmployeesAsync()
     {
       var employees = await _employeeRepo.GetAllEmployeesAsync();
+      // Mpho Mosia - Recalculate leave balances for all employees before returning the list
+      foreach (var emp in employees)
+      {
+        await _leaveBalanceService.RecalculateAnnualLeaveAsync(emp.EmployeeId);
+      }
+
+      await _leaveProcessingService.RecalculateAllSickLeaveAsync();
+      await _leaveProcessingService.RecalculateAllFamilyResponsibilityLeaveAsync();
+
       return employees.Select(e => e.ToEmployeeDto()).ToList();
     }
     /// <summary>
@@ -60,13 +77,19 @@ namespace HRConnect.Api.Services
     /// <returns>The employee if found; otherwise null.</returns>
     public async Task<EmployeeDto?> GetEmployeeByIdAsync(string employeeId)
     {
+
+      // Mpho Mosia - Recalculate leave balances for the employee before returning the data
+      await _leaveBalanceService.RecalculateAnnualLeaveAsync(employeeId);
+      await _leaveProcessingService.RecalculateAllSickLeaveAsync();
+      await _leaveProcessingService.RecalculateAllFamilyResponsibilityLeaveAsync();
+
       var employee = await _employeeRepo.GetEmployeeByIdAsync(employeeId);
       return employee?.ToEmployeeDto();
     }
 
     public async Task<EmployeeDto?> GetEmployeeByEmailAsync(string employeeEmail)
     {
-      Employee? employee= await _employeeRepo.GetEmployeeByEmailAsync(employeeEmail); 
+      Employee? employee = await _employeeRepo.GetEmployeeByEmailAsync(employeeEmail);
       return employee?.ToEmployeeDto();
     }
     /// <summary>
@@ -104,6 +127,9 @@ namespace HRConnect.Api.Services
       try
       {
         var createdEmployee = await _employeeRepo.CreateEmployeeAsync(new_employee);
+        // Initialize leave balances for the new employee -> Mpho Mosia
+        await _leaveBalanceService.InitializeEmployeeLeaveBalancesAsync(createdEmployee.EmployeeId);
+        await _leaveBalanceService.RecalculateAnnualLeaveAsync(createdEmployee.EmployeeId);
         // Send welcome email notification
         await SendWelcomeEmail(createdEmployee);
         await transaction.CommitAsync();
@@ -129,17 +155,13 @@ namespace HRConnect.Api.Services
       if (existingEmployee == null)
         throw new NotFoundException("Employee not found");
 
-      // Validate input fields
-
       ValidateCommonFields(employeeDto);
       ValidateUpdate(employeeDto);
-      //Check for duplicate entries
       await CheckDuplicateOnUpdate(employeeId, employeeDto);
-      // Ensure Title and Gender combination is valid
+      ValidateTitleAndGender(employeeDto);
       ValidateTitleAndGender(employeeDto);
 
-      // Ensure Title and Gender combination is valid
-      ValidateTitleAndGender(employeeDto);
+      var positionChanged = existingEmployee.PositionId != employeeDto.PositionId;
 
       var position = await _positionRepo.GetPositionByIdAsync(employeeDto.PositionId);
       if (position == null)
@@ -167,6 +189,98 @@ namespace HRConnect.Api.Services
       existingEmployee.UpdatedAt = DateTime.UtcNow;
 
       var updatedEmployee = await _employeeRepo.UpdateEmployeeAsync(existingEmployee);
+
+      // Position change requires recalculation of leave balances and notification email
+      if (positionChanged)
+      {
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
+        // 🔥 GET CURRENT ACTIVE SEGMENT
+        var currentSegment = await _context.EmployeeAccrualRateHistories
+            .Where(x => x.EmployeeId == employeeId && x.EffectiveTo == null)
+            .FirstOrDefaultAsync();
+
+        if (currentSegment != null)
+        {
+          if (currentSegment.EffectiveFrom == today)
+          {
+            _context.EmployeeAccrualRateHistories.Remove(currentSegment);
+          }
+          else
+          {
+            currentSegment.EffectiveTo = today.AddDays(-1);
+          }
+        }
+
+        // 🔥 LOAD FULL EMPLOYEE WITH POSITION + JOBGRADE
+        var fullEmployee = await _context.Employees
+            .Include(e => e.Position)
+                .ThenInclude(p => p.JobGrade)
+            .FirstAsync(e => e.EmployeeId == employeeId);
+
+        // 🔥 GET ANNUAL LEAVE TYPE
+        var annualLeave = await _context.LeaveTypes
+            .FirstAsync(l => l.Code == "AL" && l.IsActive);
+
+        // 🔥 CALCULATE YEARS OF SERVICE
+        var yearsOfService = CalculateYearsOfService(fullEmployee.StartDate);
+
+        // 🔥 GET ENTITLEMENT RULE
+        var newRule = await _context.LeaveEntitlementRules
+            .FirstAsync(r =>
+                r.LeaveTypeId == annualLeave.Id &&
+                r.JobGradeId == fullEmployee.Position.JobGradeId &&
+                r.MinYearsService <= yearsOfService &&
+                (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
+                r.IsActive);
+
+        // 🔥 INSERT NEW ACCRUAL HISTORY RECORD
+        await _context.EmployeeAccrualRateHistories.AddAsync(
+            new EmployeeAccrualRateHistory
+            {
+              EmployeeId = employeeId,
+              PositionId = fullEmployee.PositionId,
+              PositionName = fullEmployee.Position.PositionTitle,
+              AnnualEntitlement = newRule.DaysAllocated,
+              DailyRate = (newRule.DaysAllocated / 12m) / 21.67m,
+              EffectiveFrom = today,
+              EffectiveTo = null,
+              CreatedDate = DateTime.UtcNow
+            });
+
+        await _context.SaveChangesAsync(); // 🔥 IMPORTANT
+
+        // KEEP YOUR EXISTING LOGIC
+        await _leaveBalanceService.RecalculateAnnualLeaveAsync(employeeId);
+        await _leaveProcessingService.RecalculateAllSickLeaveAsync();
+        await _leaveProcessingService.RecalculateAllFamilyResponsibilityLeaveAsync();
+
+        var employeeWithBalances = await _employeeRepo.GetEmployeeByIdAsync(employeeId);
+
+        var annualBalance = employeeWithBalances?.LeaveBalances
+            ?.FirstOrDefault(lb => lb.LeaveType.Code == "AL");
+
+        try
+        {
+          var emailBody = EmailTemplates.GeneratePositionUpdateEmail(
+              employeeWithBalances!,
+              annualBalance?.AccruedDays ?? 0,
+              annualBalance?.TakenDays ?? 0,
+              annualBalance?.AvailableDays ?? 0
+          );
+
+          await _emailService.SendEmailAsync(
+              employeeWithBalances!.Email,
+              "Annual Leave Recalculated Due to Position Change",
+              emailBody
+          );
+        }
+        catch (Exception ex)
+        {
+          Console.WriteLine($"Error sending email: {ex.Message}");
+        }
+      }
+
       return updatedEmployee?.ToEmployeeDto();
     }
     /// <summary>
@@ -351,6 +465,15 @@ namespace HRConnect.Api.Services
     {
       await EmployeeValidationHelpers.ValidateCareerManagerAsync(_employeeRepo, employeeId, careerManagerId);
     }
-    
+    private decimal CalculateYearsOfService(DateOnly startDate)
+    {
+      var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
+      if (startDate > today)
+        return 0;
+
+      var totalDays = today.DayNumber - startDate.DayNumber;
+      return Math.Round(totalDays / 365.25m, 2);
+    }
   }
 }
