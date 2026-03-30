@@ -220,8 +220,8 @@ namespace HRConnect.Api.Utils
             var now = DateTime.UtcNow;
             if (startDate == default)
                 throw new ValidationException("Start date is required");
-            if (startDate.Month != now.Month || startDate.Year != now.Year)
-                throw new ValidationException("Start date must be within the current month.");
+            //if (startDate.Month != now.Month || startDate.Year != now.Year)
+            //    throw new ValidationException("Start date must be within the current month.");
         }
         ///<summary>
         ///Validates that a tax number contains exactly 10 numeric digits when provided.

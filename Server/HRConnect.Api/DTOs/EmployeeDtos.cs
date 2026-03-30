@@ -1,0 +1,80 @@
+namespace HRConnect.Api.DTOs
+{
+    using System;
+    using System.Collections.Generic;
+    using HRConnect.Api.Models;
+    public class CreateEmployeeRequest
+    {
+        public int PositionId { get; set; }
+        public string? CareerManagerID { get; set; }
+        public string Name { get; set; } = null!;
+        public string Surname { get; set; } = null!;
+        public string Email { get; set; } = null!;
+        public Gender Gender { get; set; }
+        public DateOnly StartDate { get; set; }
+    }
+    public class UpdatePositionRequest
+    {
+        public int NewPositionId { get; set; }
+    }
+    public class EmployeeResponse
+    {
+        public string Id { get; set; } = string.Empty;
+
+        public string FullName { get; set; } = null!;
+        public string Gender { get; set; } = null!;
+
+        public string Position { get; set; } = null!;
+        public string JobGrade { get; set; } = null!;
+
+        public DateOnly StartDate { get; set; }
+
+        // Keep this high-level summary
+        public decimal AnnualLeaveRemaining { get; set; }
+
+        // Optional detailed balances (used in GET by ID)
+        public List<LeaveBalanceSummary> LeaveBalances { get; set; } = new();
+    }
+    public class LeaveBalanceSummary
+    {
+        public string LeaveType { get; set; } = null!;
+        public decimal AccruedDays { get; set; }
+        public decimal TakenDays { get; set; }
+        public decimal AvailableDays { get; set; }
+    }
+    public class UpdateLeaveRuleRequest
+    {
+        public int RuleId { get; set; }
+        public decimal NewDaysAllocated { get; set; }
+    }
+    public class UpdateTakenDaysRequest
+    {
+        public string EmployeeId { get; set; } = string.Empty;
+        public int LeaveTypeId { get; set; }
+        public decimal TakenDays { get; set; }
+    }
+    public class LeaveProjectionRequest
+    {
+        public string EmployeeId { get; set; } = string.Empty;
+        public DateOnly ProjectionDate { get; set; }
+    }
+    public class LeaveProjectionResponse
+    {
+        public string EmployeeName { get; set; } = string.Empty;
+        public DateOnly ProjectionDate { get; set; }
+        public decimal ProjectedAccruedDays { get; set; }
+        public decimal TakenDays { get; set; }
+        public decimal ProjectedAvailableDays { get; set; }
+        public int DaysWorked { get; set; }
+    }
+    public class EmployeeWithLeaveDto
+    {
+        public string EmployeeId { get; set; } = string.Empty;
+        public string FullName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Position { get; set; } = string.Empty;
+
+        public List<LeaveBalanceSummary> LeaveBalances { get; set; } = new();
+    }
+
+}
