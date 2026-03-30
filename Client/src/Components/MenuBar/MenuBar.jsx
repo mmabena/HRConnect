@@ -216,8 +216,6 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
     ],
     1: [
       "/employeeList",
-      "/addEmployee",
-      "/editEmployee",
       "/terminateemployee",
       "/transferemployee",
       "/trnsferhistory",

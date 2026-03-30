@@ -2,18 +2,17 @@
 .error-texts {
   color: red;
   font-size: 0.9em;
- line-height: 1rem;     /* ensures the height of the text */
-  min-height: 1rem; 
-  display: block;          /* makes it take full width below input */
-  margin-top: -25px;     /* small space below input */
-  text-align: left;        /* align text to the left */
+  line-height: 1rem; /* ensures the height of the text */
+  min-height: 1rem;
+  display: block; /* makes it take full width below input */
+  margin-top: -25px; /* small space below input */
+  text-align: left; /* align text to the left */
 }
-
 
 /* Dropdown icon styling */
 .apm-dropdown-icon {
   position: absolute;
-  top:10px;
+  top: 10px;
   right: 10px;
   transform: translateY(-50%);
   pointer-events: none;
@@ -26,7 +25,7 @@
   gap: 20px; /* space between dropdown row and button */
   margin-top: 40px;
   padding-left: 35px;
-  margin-bottom:10px;
+  margin-bottom: 10px;
 }
 
 .move-users-row {
@@ -34,7 +33,7 @@
   align-items: center;
   color: var(--primary-color);
   gap: 70px;
-  flex-wrap: nowrap; 
+  flex-wrap: nowrap;
 }
 
 .move-users-label {
@@ -52,13 +51,11 @@
   flex-shrink: 0;
 }
 
-
 .apm-dropdown-icon {
   width: 20px;
   height: 20px;
   cursor: pointer;
 }
-
 
 .save-position-button {
   background-color: #668c4d;
@@ -68,7 +65,7 @@
   border-radius: 8px;
   font-size: 18px;
   font-weight: 700;
-  margin-left:790px;
+  margin-left: 790px;
   cursor: pointer;
   transition: background-color 0.3s ease;
   white-space: nowrap; /* prevent button text from wrapping */
@@ -84,22 +81,24 @@
 .checkbox-cell {
   display: flex;
   align-items: center;
-  gap: 12px;        /*SAME spacing everywhere */
+  gap: 12px; /*SAME spacing everywhere */
 }
 
 /* Optional: force consistent checkbox size */
 .checkbox-cell input[type="checkbox"] {
- appearance: none;          /* Remove default styling */
-  -webkit-appearance: none;  /* Safari */
+  appearance: none; /* Remove default styling */
+  -webkit-appearance: none; /* Safari */
   width: 16px;
   height: 16px;
   border: 1px solid #dddddd; /* Border color */
-  border-radius: 2px;        /* Optional: rounded corners */
+  border-radius: 2px; /* Optional: rounded corners */
   position: relative;
   cursor: pointer;
   outline: none;
   background-color: white;
-  transition: background-color 0.2s, border-color 0.2s;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s;
 }
 
 .checkbox-cell input[type="checkbox"]:checked {
@@ -127,48 +126,46 @@
   padding: 10px;
   gap: 10px;
   box-sizing: border-box;
-  border-radius: 15px;      /* rounded corners for the container */
-  overflow: hidden;          /* ensures corners clip content */
+  border-radius: 15px; /* rounded corners for the container */
+  overflow: hidden; /* ensures corners clip content */
   margin-left: 30px;
-  background-color: #fff;    /* optional, for contrast */
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  background-color: #fff; /* optional, for contrast */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
-.positions-table{
+.positions-table {
   table-layout: fixed; /* forces columns to obey widths */
-  width: 95%;   
-  border-collapse: separate;  /* allows rounded corners on wrapper */
-  border-spacing: 0;          /* no spacing between cells */
+  width: 95%;
+  border-collapse: separate; /* allows rounded corners on wrapper */
+  border-spacing: 0; /* no spacing between cells */
   table-layout: fixed;
-  font-family: 'Anek Bangla', sans-serif; 
-  font-size: 14px;   
-margin:10px;
-  margin-left:30px;
-    border-radius: 15px;      /* rounded corners for the container */
-  overflow: hidden;          /* ensures corners clip content */
+  font-family: "Anek Bangla", sans-serif;
+  font-size: 14px;
+  margin: 10px;
+  margin-left: 30px;
+  border-radius: 15px; /* rounded corners for the container */
+  overflow: hidden; /* ensures corners clip content */
 }
 .positions-table th,
 .positions-table td {
   padding: 20px 10px;
   background-color: white;
-  border: none;              
+  border: none;
   border-bottom: 2px solid rgb(211, 210, 210); /* only bottom border */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   color: #355867;
   font-size: 16px;
-  gap:35px;
-  text-align:left;
+  gap: 35px;
+  text-align: left;
 }
 
 .positions-table th {
   background-color: var(--primary-color);
   color: #ffffff;
   font-weight: bold;
-  gap:10px;
-
+  gap: 10px;
 }
-
 
 .occupational-description {
   display: inline-block;
@@ -182,64 +179,59 @@ margin:10px;
 /* Table without outer borders, only border-bottom */
 .position-table-manage-User {
   width: 95%;
-  border-collapse: separate;  /* allows rounded corners on wrapper */
-  border-spacing: 0;          /* no spacing between cells */
+  border-collapse: separate; /* allows rounded corners on wrapper */
+  border-spacing: 0; /* no spacing between cells */
   table-layout: fixed;
-  font-family: 'Anek Bangla', sans-serif; 
-  font-size: 14px;   
-  margin:30px;
-
+  font-family: "Anek Bangla", sans-serif;
+  font-size: 14px;
+  margin: 30px;
 }
 
-.position-table-manage-User tr{
-  padding:10px;
+.position-table-manage-User tr {
+  padding: 10px;
 }
 /* Assuming your wrapper is .nav-bar-with-buttons */
 .nav-bar-with-buttons {
   display: flex;
-   flex-shrink: 0; 
+  flex-shrink: 0;
   flex-direction: column; /* stack navbar and button vertically */
 
   gap: 1rem; /* space between navbar and button */
 }
 
-
-
 .add-positions-button {
   background-color: #668c4d;
-  font-family: 'Anek Bangla'; 
+  font-family: "Anek Bangla";
   color: white;
-  width:187px;
-  height:47px;
- justify-content:center;
+  width: 187px;
+  height: 47px;
+  justify-content: center;
   border: none;
   border-radius: 10px;
   font-size: 20px;
   line-height: 100%;
   letter-spacing: 2%;
-  margin-left:83%;
-  font-weight:700;
+  margin-left: 83%;
+  font-weight: 700;
   cursor: pointer;
-   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transition: background-color 0.3s ease;
 }
-
-
 
 /* Table headers and cells */
 .position-table-manage-User th,
 .position-table-manage-User td {
   padding: 20px 10px;
   background-color: #f1f1f1;
-  border: none;              
+  border: none;
   border-bottom: 2px solid rgb(211, 210, 210); /* only bottom border */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   color: #355867;
   font-size: 16px;
-  gap:10px;
-  text-align:left;
+  gap: 10px;
+  text-align: left;
 }
 
 /* Table header style */
@@ -247,18 +239,27 @@ margin:10px;
   background-color: var(--primary-color);
   color: #ffffff;
   font-weight: bold;
-
 }
 .positions-table th:nth-child(1),
-.positions-table td:nth-child(1) { width: 25%; } /* Position Title */
+.positions-table td:nth-child(1) {
+  width: 25%;
+} /* Position Title */
 .positions-table th:nth-child(2),
-.positions-table td:nth-child(2) { width: 20%; } /* Position Grade */
+.positions-table td:nth-child(2) {
+  width: 20%;
+} /* Position Grade */
 .positions-table th:nth-child(3),
-.positions-table td:nth-child(3) { width: 30%; } /* Occupational Description */
+.positions-table td:nth-child(3) {
+  width: 30%;
+} /* Occupational Description */
 .positions-table th:nth-child(4),
-.positions-table td:nth-child(4) { width: 20%; } /* Effective Date */
+.positions-table td:nth-child(4) {
+  width: 20%;
+} /* Effective Date */
 .positions-table th:nth-child(5),
-.positions-table td:nth-child(5) { width: 10%; } /* Actions */
+.positions-table td:nth-child(5) {
+  width: 10%;
+} /* Actions */
 
 /* Header styles */
 
@@ -268,12 +269,11 @@ margin:10px;
   box-sizing: border-box;
   display: flex;
   flex-direction: row;
-  align-items: center;       /* vertically center items */
+  align-items: center; /* vertically center items */
   justify-content: space-between; /* push left and right sections to edges */
   padding: 10px 20px;
   gap: 33px;
 }
-
 
 /* Left Section (Logo/Text) */
 .cmn-header-left-section {
@@ -288,7 +288,7 @@ margin:10px;
 
 /* Company Logo Text */
 .cmn-logo-text {
-  font-family: 'Anek Bangla', sans-serif;
+  font-family: "Anek Bangla", sans-serif;
   font-style: normal;
   font-weight: 700;
   font-size: 40px;
@@ -298,7 +298,6 @@ margin:10px;
   margin: 0;
   white-space: nowrap;
 }
-
 
 /* Right Section (Icons & Date/Time) */
 .cmn-header-right-section {
@@ -314,7 +313,7 @@ margin:10px;
 .cm-navbar-tab-button--active {
   color: #668c4d;
   padding-bottom: 5px;
-  }
+}
 
 .nav-bar-with-buttons {
   display: flex;
@@ -323,7 +322,6 @@ margin:10px;
   padding: 0 24px;
   margin-top: 20px;
 }
-
 
 /* Date/Time Container */
 .cmn-datetime-wrapper {
@@ -349,14 +347,14 @@ margin:10px;
 .cmn-datetime-month,
 .cmn-datetime-year,
 .cmn-datetime-time {
-  background-color: #9C9C9C29;
+  background-color: #9c9c9c29;
   border-radius: 6px;
   height: 34px;
   padding: 6px 11px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'League Spartan', sans-serif;
+  font-family: "League Spartan", sans-serif;
   font-style: normal;
   font-weight: 400;
   font-size: 17px;
@@ -387,7 +385,7 @@ margin:10px;
 .modal-content-edit,
 .modal-content-change {
   width: 640px; /* slightly smaller for neatness */
-  height:800px;
+  height: 800px;
   justify-content: center;
   padding: 90px 40px;
   border-radius: 14px;
@@ -401,7 +399,7 @@ margin:10px;
 /* Header alignment */
 .headings-container {
   text-align: center;
-  margin-left:70px;
+  margin-left: 70px;
   margin-bottom: 35px;
 }
 
@@ -423,35 +421,36 @@ margin:10px;
 .apm-title {
   font-size: 30px;
   font-weight: 600;
-  margin-left:80px;
-  color: #1e2b32;
-  margin-bottom:30px;
+  margin-left: 80px;
+  color: var(--primary-dark);
+  margin-bottom: 30px;
 }
 
 .pm-title-add,
 .pm-title-edit,
-.pm-title-change{
+.pm-title-change {
   font-size: 32px;
   font-weight: 700;
-  margin-left:50px;
-  color: #1e2b32;
-
+  margin-left: 50px;
+  color: var(--primary-dark);
 }
-
 
 /* Position label */
 
-.title-placeholder-edit{
+.title-placeholder-edit {
   display: block;
-  width: 360px;       /* same width as input */
+  width: 360px; /* same width as input */
   font-size: 14px;
   font-weight: 500;
-  color: black;
-  font-family: 'Instrument Sans', sans-serif;
+  color: var(--primary-dark);
+  background-color: transparent;
+  font-family: "Instrument Sans", sans-serif;
   text-align: left;
 }
-.title-placeholder-add.inside-input{
- position: absolute;
+
+
+.title-placeholder-add.inside-input {
+  position: absolute;
   left: 5px;
   top: 50%;
   transform: translateY(-50%);
@@ -459,8 +458,6 @@ margin:10px;
   pointer-events: none; /* So clicks go to input */
   font-size: 14px;
   white-space: nowrap;
-
-
 }
 
 .hidden-date-picker {
@@ -482,17 +479,16 @@ margin:10px;
   min-height: 40px;
   width: 100%;
   box-sizing: border-box;
+  color: var(--primary-dark);
 }
-
 
 .title-placeholder-change {
   align-self: flex-start;
   font-size: 14px;
   color: #121212;
-  margin-left:106px;
+  margin-left: 106px;
   margin-bottom: 6px;
 }
-
 
 /* Input group styling (dropdown) */
 .pm-input-add::placeholder {
@@ -500,46 +496,41 @@ margin:10px;
   opacity: 1; /* ensures it is not faded in some browsers */
 }
 .pm-input-add,
-.pm-input-change{
+.pm-input-change {
   width: 360px;
   height: 33px;
   border: none;
   border-bottom: 1.5px solid #006088;
-    border-radius: 4px;
+  border-radius: 4px;
   padding-left: 5px;
   padding-bottom: 5px;
   font-size: 14px;
-  font-family: 'Instrument Sans', sans-serif;
+  font-family: "Instrument Sans", sans-serif;
   outline: none;
   box-sizing: border-box;
   background-color: transparent;
+  color: var(--primary-dark);
 }
 
-
-
-.pm-input-edit{
-   width: 360px;
-   height: 33px;
-    border: none;
-    margin-top:-100px;
-     outline: none;
-    background-color: transparent;
-    border-bottom: 1.9px solid #006088;
-    padding-bottom: 5px;
-    color:#0e2d36;
+.pm-input-edit {
+  width: 360px;
+  height: 33px;
+  border: none;
+  margin-top: -100px;
+  outline: none;
+  background-color: transparent;
+  border-bottom: 1.9px solid #006088;
+  padding-bottom: 5px;
+  color: var(--primary-dark);
   font-size: 15px;
-  font-family: 'Instrument Sans', sans-serif;
+  font-family: "Instrument Sans", sans-serif;
 }
-
 
 .pm-input-group-add,
 .pm-input-group-edit {
-  width:360px;
-  margin-bottom:20px;
- 
+  width: 360px;
+  margin-bottom: 20px;
 }
-
-
 
 /* Dropdown wrapper */
 .pm-dropdown-wrapper-add,
@@ -549,12 +540,12 @@ margin:10px;
   margin-bottom: 20px;
 }
 
-.pm-dropdown-wrapper-add  select,
+.pm-dropdown-wrapper-add select,
 .pm-dropdown-wrapper-edit select,
 .pm-dropdown-wrapper-change select {
   width: 360px;
   appearance: none;
-    border-radius: 5px;
+  border-radius: 5px;
 }
 
 /* Hide the default browser calendar icon */
@@ -583,64 +574,59 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   top: 50%;
   transform: translateY(-50%);
   cursor: pointer;
-
 }
 
 .date-input-container {
   position: relative;
   display: flex;
-  width:100%;
+  width: 100%;
   align-items: center;
-  top:15%;
+  top: 15%;
 }
 
-.formatted-date-inside{
+.formatted-date-inside {
   position: absolute;
 
   top: 60%;
   transform: translateY(-50%);
   pointer-events: none;
   font-size: 15px;
-  color:#002D40;
+  color: #002d40;
   z-index: 2;
 }
 
 /* hide the default yyyy-mm-dd text */
-.date-input::-webkit-datetime-edit{
+.date-input::-webkit-datetime-edit {
   color: transparent;
 }
 
-.apm-input.select-dropdown{
+.apm-input.select-dropdown {
   border-radius: 5px;
-  color:#0e2d36;
-  width:360px;
+  color: #0e2d36;
+  width: 360px;
 }
 
-.apm-dropdown-icon-new{
-
- 
-margin-left: -32px;
+.apm-dropdown-icon-new {
+  margin-left: -32px;
   width: 18px;
   height: 18px;
   pointer-events: none;
   z-index: 1;
 }
 
-
-
 /* Info text */
 .apm-info-,
 .info-text {
   text-align: center;
   font-size: 14px;
-  margin-right:80px;
-  margin-top:15px;
+  margin-right: 80px;
+  margin-top: 15px;
   margin-bottom: 30px;
-  color: #002D40;
+  color: #002d40;
 }
-.apm-input.date-input{
+.apm-input.date-input {
   border-radius: 5px;
-  color:#0e2d36;
+  color: var(--primary-dark);
 }
 
 /* Question text */
@@ -648,24 +634,24 @@ margin-left: -32px;
   align-self: flex-start;
   font-size: 15px;
   margin-bottom: 5px;
-  padding-left:105px;
-     color: #002D40;
+  padding-left: 105px;
+  color: #002d40;
 }
 
 /* Form spacing */
 .pm-form {
   width: 100%;
-  margin-top:30px;
- padding-left:100px;
+  margin-top: 30px;
+  padding-left: 100px;
   display: flex;
   flex-direction: column;
   gap: 18px;
 }
 
-.pm-form-edit{
+.pm-form-edit {
   width: 100%;
 
- padding-left:100px;
+  padding-left: 100px;
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -674,7 +660,7 @@ margin-left: -32px;
 /* Checkbox alignment */
 .checkbox-cell-position {
   padding-left: 0;
-  padding:15px;
+  padding: 15px;
   font-size: 14px;
   display: flex;
   align-items: center;
@@ -693,7 +679,9 @@ margin-left: -32px;
   cursor: pointer;
   outline: none;
   background-color: white;
-  transition: background-color 0.2s, border-color 0.2s;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s;
 }
 
 .checkbox-cell-position input[type="checkbox"]:checked {
@@ -716,7 +704,7 @@ margin-left: -32px;
 /* Reserve space for conditional link so container doesn't jump */
 .apm-view-users {
   height: 30px;
-  margin:5px;
+  margin: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -735,8 +723,7 @@ margin-left: -32px;
   color: #2e6c8c;
   cursor: pointer;
   font-weight: 400;
-  margin-right:100px;
-
+  margin-right: 100px;
 }
 
 .apm-link:hover {
@@ -745,7 +732,7 @@ margin-left: -32px;
 
 /* Save button */
 .pm-save-button-add {
-  font-family: 'Instrument Sans', sans-serif;
+  font-family: "Instrument Sans", sans-serif;
   width: 360px;
   height: 37px;
   background-color: #355867;
@@ -764,7 +751,7 @@ margin-left: -32px;
   margin-top: 25px;
 }
 .apm-save-button {
-   font-family: 'Instrument Sans', sans-serif;
+  font-family: "Instrument Sans", sans-serif;
   width: 360px;
   height: 37px;
   background-color: #355867;
@@ -780,54 +767,30 @@ margin-left: -32px;
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s ease;
-margin-top: -6px;
+  margin-top: -6px;
 }
 
 .apm-save-button:hover {
   background-color: #355867;
-
 }
 
 /* Footer */
 .pm-footer {
   margin-top: 40px;
-margin-right:100px;
+  margin-right: 100px;
   text-align: center;
   font-size: 12px;
-  color:   #002D40;
+  color: #002d40;
 }
 .pm-footer-edit {
   margin-top: 30px;
-margin-right:100px;
+  margin-right: 100px;
   text-align: center;
   font-size: 12px;
-  color:   #002D40;
+  color: #002d40;
 }
-.footer1{
-  margin-top:-10px;
-margin-bottom:8px;
-font-weight:10px;
+.footer1 {
+  margin-top: -10px;
+  margin-bottom: 8px;
+  font-weight: 10px;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
