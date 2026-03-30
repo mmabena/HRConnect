@@ -124,7 +124,7 @@ namespace HRConnect.Tests
         Branch = Branch.Johannesburg,
         City = "Johannesburg",
         ZipCode = "2000",
-        PositionId = 1,
+        PositionId = 4,
         MonthlySalary = 20000,
         EmploymentStatus = EmploymentStatus.Permanent,
         CareerManagerID = managerId,
