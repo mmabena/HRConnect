@@ -139,7 +139,7 @@ builder.Services.AddQuartz(q =>
   q.AddTrigger(opts => opts
   .ForJob(jobKey)
   .WithIdentity("PayrollRollover-Trigger")
-  .WithCronSchedule("0/20 * * * * ?", x =>
+  .WithCronSchedule("0/50 * * * * ?", x =>
   x.WithMisfireHandlingInstructionFireAndProceed())); //when a job misfire happens. 
                                                       // Properly re-execute it and proceed as usual
 
@@ -149,6 +149,15 @@ builder.Services.AddQuartz(q =>
   // 1 -> first day of the year
   // * -> for any/every month 
   // ? -> for all days of the week
+
+  JobKey employeePensionEnrollmentJob = new("EmployeeEnrollmentJob");
+  _ = q.AddJob<EmployeeEnrollmentJob>(opts =>
+        opts.WithIdentity(employeePensionEnrollmentJob)
+        .StoreDurably());
+
+  _ = q.AddTrigger(opts => opts
+      .ForJob(jobKey)
+      .StartNow());
 
   //Adding persistence to quartz to be able to be run in the back
   q.UsePersistentStore(options =>
@@ -203,6 +212,7 @@ builder.Services.AddTransient<IPensionProjectionService, PensionProjectionServic
 builder.Services.AddScoped<IMedicalOptionRepository, MedicalOptionRepository>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IMedicalOptionService,
   HRConnect.Api.Services.MedicalOptionService>();
+builder.Services.AddScoped<IPensionOptionRepository, PensionOptionRepository>();
 builder.Services.AddScoped<IEmployeePensionEnrollmentRepository, EmployeePensionEnrollmentRepository>();
 builder.Services.AddTransient<IEmployeePensionEnrollmentService, EmployeePensionEnrollmentService>();
 builder.Services.AddScoped<IPensionDeductionRepository, PensionDeductionRepository>();

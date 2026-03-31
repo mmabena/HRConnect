@@ -3,7 +3,6 @@
   using System.Collections.Generic;
   using System.Text.Json;
   using System.Threading.Tasks;
-  using HRConnect.Api.Data;
   using HRConnect.Api.DTOs.Employee.Pension;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Interfaces.Pension;
@@ -15,19 +14,18 @@
   using HRConnect.Api.Utils;
   using HRConnect.Api.Utils.Pension.ValidationHelpers;
   using HRConnect.Api.Utils.Quartz.Pension;
-  using Microsoft.EntityFrameworkCore;
   using Quartz;
 
   public class EmployeePensionEnrollmentService(IEmployeePensionEnrollmentRepository employeePensionEnrollmentRepository,
     IEmployeeRepository employeeRepository, IPayrollRunRepository payrollRunRepository, IPensionDeductionRepository pensionDeductionRepository,
-    ISchedulerFactory scheduler, ApplicationDBContext context) : IEmployeePensionEnrollmentService
+    IPensionOptionRepository pensionOptionRepository, ISchedulerFactory scheduler) : IEmployeePensionEnrollmentService
   {
     private readonly IEmployeePensionEnrollmentRepository _employeePensionEnrollmentRepository = employeePensionEnrollmentRepository;
     private readonly IEmployeeRepository _employeeRepository = employeeRepository;
     private readonly IPayrollRunRepository _payrollRunRepository = payrollRunRepository;
     private readonly IPensionDeductionRepository _pensionDeductionRepository = pensionDeductionRepository;
+    private readonly IPensionOptionRepository _pensionOptionRepository = pensionOptionRepository;
     private readonly ISchedulerFactory _schedulerFactory = scheduler;
-    private readonly ApplicationDBContext _context = context;
     private static readonly decimal MAX_MONTHLYCONTRIBUTION = 29166.66M;
 
     ///<summary>
@@ -81,7 +79,7 @@
           .Build();
 
         ITrigger trigger = TriggerBuilder.Create()
-          .StartAt(employeePensionEnrollment.EffectiveDate.ToDateTime(TimeOnly.MinValue)) // To test scheduling use : .StartAt(DateBuilder.FutureDate(30, IntervalUnit.Second))
+          .StartAt(employeePensionEnrollment.EffectiveDate.ToDateTime(TimeOnly.MinValue)) // To test scheduling use : .StartAt(DateBuilder.FutureDate(5, IntervalUnit.Second))
           .Build();
 
         IScheduler schedulerInstance = await _schedulerFactory.GetScheduler();
@@ -190,7 +188,7 @@
             .Build();
 
           ITrigger trigger = TriggerBuilder.Create()
-            .StartAt(employeePensionEnrollment.EffectiveDate.ToDateTime(TimeOnly.MinValue))  // To test scheduling use : .StartAt(DateBuilder.FutureDate(30, IntervalUnit.Second))
+            .StartAt(employeePensionEnrollment.EffectiveDate.ToDateTime(TimeOnly.MinValue))  //To test scheduling use : .StartAt(DateBuilder.FutureDate(5, IntervalUnit.Second))
             .Build();
 
           IScheduler schedulerInstance = await _schedulerFactory.GetScheduler();
@@ -241,8 +239,7 @@
     ///</returns>
     private async Task<decimal> GetEmployeePensionOptionPercentageAsync(int pensionOptionId)
     {
-      decimal? employeePensionOption = await _context.PensionOptions.Where(po => po.PensionOptionId == pensionOptionId)
-        .Select(po => po.ContributionPercentage).FirstOrDefaultAsync();
+      decimal? employeePensionOption = await _pensionOptionRepository.GetPensionOptionPercentageByIdAsync(pensionOptionId);
       return employeePensionOption ?? throw new NotFoundException("Pension option not found");
     }
 
@@ -381,7 +378,9 @@
       foreach (Employee employee in employeesWithPensionOption)
       {
         int employeeAge = CalculateAge.UsingDOB(employee.DateOfBirth);
-        if (!employee.IsActive && (employeeAge >= 65))
+        DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+        DateOnly firstDayNextMonth = new DateOnly(today.Year, today.Month, 1).AddMonths(1);
+        if (!employee.IsActive || (employeeAge >= 65))
         {
           continue;
         }
@@ -399,7 +398,7 @@
             PayrollRunId = currentPayRollRun.PayrollRunId,
             PensionOptionId = (int)employee.PensionOptionId,
             StartDate = employee.StartDate,
-            EffectiveDate = DateOnly.FromDateTime(DateTime.Now),
+            EffectiveDate = firstDayNextMonth,
             VoluntaryContribution = (bool)employeeExisitingPensionEnrollment.IsVoluntaryContributionPermament ?
               employeeExisitingPensionEnrollment.VoluntaryContribution : 0.00M,
             IsVoluntaryContributionPermament = employeeExisitingPensionEnrollment.IsVoluntaryContributionPermament,
@@ -421,7 +420,7 @@
             PayrollRunId = currentPayRollRun.PayrollRunId,
             PensionOptionId = (int)employee.PensionOptionId,
             StartDate = employee.StartDate,
-            EffectiveDate = DateOnly.FromDateTime(DateTime.Now),
+            EffectiveDate = firstDayNextMonth,
             IsLocked = false,
           };
 
@@ -432,6 +431,55 @@
           }
 
           _ = await _employeePensionEnrollmentRepository.AddAsync(employeePensionEnrollment);
+        }
+      }
+    }
+
+    ///<summary>
+    ///Intialized quartz job to enroll employee to pension based on their pension option
+    ///</summary>
+    public async Task InitializeEmployeePensionEnrollment()
+    {
+      PayrollRun? currentPayRollRun = await _payrollRunRepository.GetCurrentRunAsync() ?? throw new NotFoundException("Current payroll run not found");
+      List<Employee> employeesWithPensionOption = await _employeeRepository.GetAllEmployeeWithAPensionOption();
+
+      foreach (Employee employee in employeesWithPensionOption)
+      {
+        int employeeAge = CalculateAge.UsingDOB(employee.DateOfBirth);
+        DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+        DateOnly firstDayNextMonth = new DateOnly(today.Year, today.Month, 1).AddMonths(1);
+        if (!employee.IsActive || (employeeAge >= 65))
+        {
+          continue;
+        }
+
+        EmployeePensionEnrollment? employeeExisitingPensionEnrollment = await _employeePensionEnrollmentRepository.
+          GetByEmployeeIdAndLastRunIdAsync(employee.EmployeeId);
+        if (employeeExisitingPensionEnrollment != null &&
+          (employeeExisitingPensionEnrollment.PayrollRunId == currentPayRollRun.PayrollRunId))
+        {
+          continue;
+        }
+        else
+        {
+          EmployeePensionEnrollment employeePensionEnrollment = new()
+          {
+            EmployeeId = employee.EmployeeId,
+            PayrollRunId = currentPayRollRun.PayrollRunId,
+            PensionOptionId = (int)employee.PensionOptionId,
+            StartDate = employee.StartDate,
+            EffectiveDate = firstDayNextMonth,
+            IsLocked = false,
+          };
+
+          if (employeeExisitingPensionEnrollment != null &&
+            (employeeExisitingPensionEnrollment.PayrollRunId == employeePensionEnrollment.PayrollRunId))
+          {
+            continue;
+          }
+
+          _ = await _employeePensionEnrollmentRepository.AddAsync(employeePensionEnrollment);
+          await HandlePensionEnrollment(employeePensionEnrollment);
         }
       }
     }

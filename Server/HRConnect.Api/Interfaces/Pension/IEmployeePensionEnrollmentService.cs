@@ -10,6 +10,7 @@
     Task<List<EmployeePensionEnrollmentDto>> GetPensionEnrollementsByPayRollRunIdAsync(int payrollRunId);
     Task<List<EmployeePensionEnrollmentDto>> GetPensionEnrollementsNotLocked();
     Task<EmployeePensionEnrollmentDto> UpdateEmployeePensionEnrollementAsync(EmployeePensionEnrollmentUpdateDto employeePensionEnrollmentUpdateDto);
+    Task InitializeEmployeePensionEnrollment();
     Task LockEmployeePensionEnrollmentsAsync();
     Task RollOverEmloyeePensionEnrollmentAsync();
   }

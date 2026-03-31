@@ -18,6 +18,7 @@
     private readonly Mock<IPensionDeductionRepository> _pensionDeductionRepositoryMock;
     private readonly Mock<IEmployeeRepository> _employeeRepositoryMock;
     private readonly Mock<IEmployeePensionEnrollmentRepository> _employeePensionEnrollmentRepositoryMock;
+    private readonly Mock<IPensionOptionRepository> _pensionOptionRepositoryMock;
     private readonly Mock<IPayrollRunRepository> _payrollRunRepositoryMock;
     private readonly Mock<IPayrollRunService> _payrollRunServiceMock;
     private readonly ApplicationDBContext _context;
@@ -27,6 +28,7 @@
       _pensionDeductionRepositoryMock = new Mock<IPensionDeductionRepository>();
       _employeeRepositoryMock = new Mock<IEmployeeRepository>();
       _employeePensionEnrollmentRepositoryMock = new Mock<IEmployeePensionEnrollmentRepository>();
+      _pensionOptionRepositoryMock = new Mock<IPensionOptionRepository>();
       _payrollRunRepositoryMock = new Mock<IPayrollRunRepository>();
       _payrollRunServiceMock = new Mock<IPayrollRunService>();
       //_context = new Mock<ApplicationDBContext>();
@@ -44,9 +46,9 @@
         _pensionDeductionRepositoryMock.Object,
         _employeeRepositoryMock.Object,
         _employeePensionEnrollmentRepositoryMock.Object,
+        _pensionOptionRepositoryMock.Object,
         _payrollRunRepositoryMock.Object,
-        _payrollRunServiceMock.Object,
-        _context
+        _payrollRunServiceMock.Object
       );
     }
 
@@ -59,6 +61,11 @@
         EmployeeId = "EMP001",
       };
 
+      PensionOption pensionOption = new()
+      {
+        PensionOptionId = 1,
+        ContributionPercentage = 2.50M
+      };
       // Fake employee so the service doesn't throw EmployeeNotFoundException
       Employee fakeEmployee = new()
       {
@@ -101,6 +108,10 @@
         CreatedDate = DateOnly.FromDateTime(DateTime.UtcNow),
         IsActive = true,
       };
+
+      _ = _pensionOptionRepositoryMock
+          .Setup(r => r.GetPensionOptionPercentageByIdAsync(pensionOption.PensionOptionId))
+          .ReturnsAsync(pensionOption.ContributionPercentage);
 
       _ = _employeeRepositoryMock
           .Setup(r => r.GetEmployeeByIdAsync("EMP001"))
