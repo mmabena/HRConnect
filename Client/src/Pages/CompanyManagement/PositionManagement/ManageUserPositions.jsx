@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import CompanyManagementNavBar from "../../../Components/companyManagement/companyManagementNavBar";
 import { useNavigate, useLocation } from "react-router-dom";
-import { editEmployee, fetchAllEmployees } from "../../../api/Employee";
+import { editEmployee, fetchAllEmployees,showConfirmationToast } from "../../../api/Employee";
 import api from "../../../api/api";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
@@ -206,6 +206,11 @@ const ManageUserPositions = ({ title }) => {
       toast.error("Please select a position.");
       return;
     }
+     const confirmed = await showConfirmationToast(
+    "Are you sure you want to save changes?",
+  );
+
+  if (!confirmed) return;
 
     try {
       const updatePromises = selectedIds

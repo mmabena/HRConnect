@@ -104,6 +104,7 @@
   transition:
     background-color 0.2s,
     border-color 0.2s;
+    
 }
 
 .checkbox-cell input[type="checkbox"]:checked {
@@ -111,15 +112,15 @@
   border-color: #a0a0a0;
 }
 .checkbox-cell input[type="checkbox"]:checked::after {
-  content: "";
+ content: "";
   position: absolute;
-  left: 4px;
-  top: 0px;
+  left: 50%;
+  top: 50%;
   width: 4px;
   height: 8px;
   border: solid white;
   border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
+    transform: translate(-50%, -60%) rotate(45deg);
 }
 /*Company Management Section*/
 /* Wrapper for table to apply rounded borders */
@@ -683,7 +684,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 /* Optional: consistent checkbox style */
-.checkbox-cell-position-edit input[type="checkbox"] {
+.checkbox-cell-position-edit input[type="checkbox"], .checkbox-cell input[type="checkbox"] {
   appearance: none;
   -webkit-appearance: none;
   width: 16px;
@@ -699,7 +700,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     border-color 0.2s;
 }
 
-.checkbox-cell-position-edit input[type="checkbox"]:checked {
+.checkbox-cell-position-edit input[type="checkbox"]:checked, .checkbox-cell input[type="checkbox"]:checked {
    
   background-color: #355867;
   border-color: #a0a0a0;
@@ -714,7 +715,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   height: 8px;
   border: solid white;
   border-width: 0 2px 2px 0;
-    transform: translate(-50%, -65%) rotate(45deg);
+    transform: translate(-40%, -60%) rotate(45deg);
 }
 
 /* Reserve space for conditional link so container doesn't jump */
