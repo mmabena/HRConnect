@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRConnect.Api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20260325121030_InitialMphoToMatchMain")]
-    partial class InitialMphoToMatchMain
+    [Migration("20260331103356_InitialCleanSetup")]
+    partial class InitialCleanSetup
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -353,26 +353,50 @@ namespace HRConnect.Api.Migrations
                         new
                         {
                             JobGradeId = 1,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             IsActive = true,
-                            Name = "Unskilled–Middle",
-                            UpdatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                            Name = "Executive Director",
+                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             JobGradeId = 2,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             IsActive = true,
-                            Name = "Senior Management",
-                            UpdatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                            Name = "Junior Management",
+                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             JobGradeId = 3,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             IsActive = true,
-                            Name = "Executive Director",
-                            UpdatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                            Name = "Middle Management",
+                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            JobGradeId = 4,
+                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsActive = true,
+                            Name = "Skilled/Semi Skilled",
+                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            JobGradeId = 5,
+                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsActive = true,
+                            Name = "Top/Senior Management",
+                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            JobGradeId = 6,
+                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsActive = true,
+                            Name = "Unskilled",
+                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });
                 });
 
@@ -480,16 +504,6 @@ namespace HRConnect.Api.Migrations
                             Id = 1,
                             DaysAllocated = 15m,
                             IsActive = true,
-                            JobGradeId = 1,
-                            LeaveTypeId = 1,
-                            MaxYearsService = 2.99m,
-                            MinYearsService = 0m
-                        },
-                        new
-                        {
-                            Id = 2,
-                            DaysAllocated = 18m,
-                            IsActive = true,
                             JobGradeId = 2,
                             LeaveTypeId = 1,
                             MaxYearsService = 2.99m,
@@ -497,8 +511,8 @@ namespace HRConnect.Api.Migrations
                         },
                         new
                         {
-                            Id = 3,
-                            DaysAllocated = 22m,
+                            Id = 2,
+                            DaysAllocated = 15m,
                             IsActive = true,
                             JobGradeId = 3,
                             LeaveTypeId = 1,
@@ -507,18 +521,28 @@ namespace HRConnect.Api.Migrations
                         },
                         new
                         {
-                            Id = 4,
-                            DaysAllocated = 18m,
+                            Id = 3,
+                            DaysAllocated = 15m,
                             IsActive = true,
-                            JobGradeId = 1,
+                            JobGradeId = 4,
                             LeaveTypeId = 1,
-                            MaxYearsService = 5m,
-                            MinYearsService = 3m
+                            MaxYearsService = 2.99m,
+                            MinYearsService = 0m
+                        },
+                        new
+                        {
+                            Id = 4,
+                            DaysAllocated = 15m,
+                            IsActive = true,
+                            JobGradeId = 6,
+                            LeaveTypeId = 1,
+                            MaxYearsService = 2.99m,
+                            MinYearsService = 0m
                         },
                         new
                         {
                             Id = 5,
-                            DaysAllocated = 21m,
+                            DaysAllocated = 18m,
                             IsActive = true,
                             JobGradeId = 2,
                             LeaveTypeId = 1,
@@ -528,7 +552,7 @@ namespace HRConnect.Api.Migrations
                         new
                         {
                             Id = 6,
-                            DaysAllocated = 25m,
+                            DaysAllocated = 18m,
                             IsActive = true,
                             JobGradeId = 3,
                             LeaveTypeId = 1,
@@ -538,110 +562,116 @@ namespace HRConnect.Api.Migrations
                         new
                         {
                             Id = 7,
-                            DaysAllocated = 20m,
+                            DaysAllocated = 18m,
                             IsActive = true,
-                            JobGradeId = 1,
+                            JobGradeId = 4,
                             LeaveTypeId = 1,
-                            MinYearsService = 5.01m
+                            MaxYearsService = 5m,
+                            MinYearsService = 3m
                         },
                         new
                         {
                             Id = 8,
-                            DaysAllocated = 23m,
+                            DaysAllocated = 18m,
                             IsActive = true,
-                            JobGradeId = 2,
+                            JobGradeId = 6,
                             LeaveTypeId = 1,
-                            MinYearsService = 5.01m
+                            MaxYearsService = 5m,
+                            MinYearsService = 3m
                         },
                         new
                         {
                             Id = 9,
-                            DaysAllocated = 27m,
+                            DaysAllocated = 20m,
                             IsActive = true,
-                            JobGradeId = 3,
+                            JobGradeId = 2,
                             LeaveTypeId = 1,
                             MinYearsService = 5.01m
                         },
                         new
                         {
                             Id = 10,
-                            DaysAllocated = 30m,
+                            DaysAllocated = 20m,
                             IsActive = true,
-                            JobGradeId = 1,
-                            LeaveTypeId = 2,
-                            MinYearsService = 0m
+                            JobGradeId = 3,
+                            LeaveTypeId = 1,
+                            MinYearsService = 5.01m
                         },
                         new
                         {
                             Id = 11,
-                            DaysAllocated = 30m,
+                            DaysAllocated = 20m,
                             IsActive = true,
-                            JobGradeId = 2,
-                            LeaveTypeId = 2,
-                            MinYearsService = 0m
+                            JobGradeId = 4,
+                            LeaveTypeId = 1,
+                            MinYearsService = 5.01m
                         },
                         new
                         {
                             Id = 12,
-                            DaysAllocated = 30m,
+                            DaysAllocated = 20m,
                             IsActive = true,
-                            JobGradeId = 3,
-                            LeaveTypeId = 2,
-                            MinYearsService = 0m
+                            JobGradeId = 6,
+                            LeaveTypeId = 1,
+                            MinYearsService = 5.01m
                         },
                         new
                         {
                             Id = 13,
-                            DaysAllocated = 120m,
+                            DaysAllocated = 18m,
                             IsActive = true,
-                            JobGradeId = 1,
-                            LeaveTypeId = 3,
+                            JobGradeId = 5,
+                            LeaveTypeId = 1,
+                            MaxYearsService = 2.99m,
                             MinYearsService = 0m
                         },
                         new
                         {
                             Id = 14,
-                            DaysAllocated = 120m,
+                            DaysAllocated = 21m,
                             IsActive = true,
-                            JobGradeId = 2,
-                            LeaveTypeId = 3,
-                            MinYearsService = 0m
+                            JobGradeId = 5,
+                            LeaveTypeId = 1,
+                            MaxYearsService = 5m,
+                            MinYearsService = 3m
                         },
                         new
                         {
                             Id = 15,
-                            DaysAllocated = 120m,
+                            DaysAllocated = 23m,
                             IsActive = true,
-                            JobGradeId = 3,
-                            LeaveTypeId = 3,
-                            MinYearsService = 0m
+                            JobGradeId = 5,
+                            LeaveTypeId = 1,
+                            MinYearsService = 5.01m
                         },
                         new
                         {
                             Id = 16,
-                            DaysAllocated = 3m,
+                            DaysAllocated = 22m,
                             IsActive = true,
                             JobGradeId = 1,
-                            LeaveTypeId = 4,
+                            LeaveTypeId = 1,
+                            MaxYearsService = 2.99m,
                             MinYearsService = 0m
                         },
                         new
                         {
                             Id = 17,
-                            DaysAllocated = 3m,
+                            DaysAllocated = 25m,
                             IsActive = true,
-                            JobGradeId = 2,
-                            LeaveTypeId = 4,
-                            MinYearsService = 0m
+                            JobGradeId = 1,
+                            LeaveTypeId = 1,
+                            MaxYearsService = 5m,
+                            MinYearsService = 3m
                         },
                         new
                         {
                             Id = 18,
-                            DaysAllocated = 3m,
+                            DaysAllocated = 27m,
                             IsActive = true,
-                            JobGradeId = 3,
-                            LeaveTypeId = 4,
-                            MinYearsService = 0m
+                            JobGradeId = 1,
+                            LeaveTypeId = 1,
+                            MinYearsService = 5.01m
                         });
                 });
 
@@ -1056,68 +1086,6 @@ namespace HRConnect.Api.Migrations
                         .IsUnique();
 
                     b.ToTable("Positions");
-
-                    b.HasData(
-                        new
-                        {
-                            PositionId = 1,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsActive = false,
-                            JobGradeId = 1,
-                            OccupationalLevelId = 1,
-                            PositionTitle = "Unskilled",
-                            UpdatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            PositionId = 2,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsActive = false,
-                            JobGradeId = 1,
-                            OccupationalLevelId = 1,
-                            PositionTitle = "Skilled/Semi Skilled",
-                            UpdatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            PositionId = 3,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsActive = false,
-                            JobGradeId = 1,
-                            OccupationalLevelId = 1,
-                            PositionTitle = "Junior Management",
-                            UpdatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            PositionId = 4,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsActive = false,
-                            JobGradeId = 1,
-                            OccupationalLevelId = 1,
-                            PositionTitle = "Middle Management",
-                            UpdatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            PositionId = 5,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsActive = false,
-                            JobGradeId = 2,
-                            OccupationalLevelId = 2,
-                            PositionTitle = "Top/Senior Management",
-                            UpdatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            PositionId = 6,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsActive = false,
-                            JobGradeId = 3,
-                            OccupationalLevelId = 3,
-                            PositionTitle = "Executive Director",
-                            UpdatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        });
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.StatutoryContribution", b =>
