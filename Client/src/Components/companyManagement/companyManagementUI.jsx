@@ -1,16 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import CompanyManagementHeader from './companyManagementHeader.jsx';
-import CompanyManagementNavBar from './companyManagementNavBar.jsx';
-import TaxTableUpload from './TaxTableManagement/TaxTableUpload.jsx';
-
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import CompanyManagementHeader from "./companyManagementHeader.jsx";
+import CompanyManagementNavBar from "./companyManagementNavBar.jsx";
+import TaxTableUpload from "./TaxTableManagement/TaxTableUpload.jsx";
 
 import "../MenuBar/MenuBar.css";
-import '../../Navy.css';
+import "../../Navy.css";
 
-const CmInputField = ({ id, value, onChange, placeholder, isTextArea = false, inputClassName = '', readOnly = false }) => {
+const CmInputField = ({
+  id,
+  value,
+  onChange,
+  placeholder,
+  isTextArea = false,
+  inputClassName = "",
+  readOnly = false,
+}) => {
   const handleChange = (e) => {
-    if (onChange && typeof onChange === 'function') {
+    if (onChange && typeof onChange === "function") {
       onChange(e.target.value);
     }
   };
@@ -21,7 +28,7 @@ const CmInputField = ({ id, value, onChange, placeholder, isTextArea = false, in
         <textarea
           id={id}
           value={value}
-          onChange={readOnly ? undefined : handleChange} 
+          onChange={readOnly ? undefined : handleChange}
           placeholder={placeholder}
           className={`cm-form-field--input cm-form-field--textarea ${inputClassName}`}
           readOnly={readOnly}
@@ -36,7 +43,7 @@ const CmInputField = ({ id, value, onChange, placeholder, isTextArea = false, in
         id={id}
         type="text"
         value={value}
-        onChange={readOnly ? undefined : handleChange} 
+        onChange={readOnly ? undefined : handleChange}
         placeholder={placeholder}
         className={`cm-form-field--input ${inputClassName}`}
         readOnly={readOnly}
@@ -49,23 +56,23 @@ function CompanyManagementUI({
   companies,
   selectedCompanyId,
   viewedCompanyDetails,
-  handlers, 
-  config, 
+  handlers,
+  config,
 }) {
   const navigate = useNavigate();
-  
+
   const { handleEditCompanyDetails, handleCompanySelectChange } = handlers;
   const { initialTab } = config;
   const [activeTab, setActiveTab] = useState(initialTab);
 
   const navTabs = [
-    'Tax Table Management',
-    'Upload TAX Tables',
-    'Company Details',
-    'Leave Management',
-    'Position Management',
-    'Manage Companies',
-    'Salary Budgets',
+    "Tax Table Management",
+    "Upload TAX Tables",
+    "Company Details",
+    "Leave Management",
+    "Position Management",
+    "Manage Companies",
+    "Salary Budgets",
   ];
   const tabWidths = [168, 133, 122, 134, 154, 125, 120];
 
@@ -74,39 +81,38 @@ function CompanyManagementUI({
   }, [initialTab]);
 
   const handleAddCompanyClick = () => {
-    navigate('/addCompany');
+    navigate("/addCompany");
   };
 
   return (
-  <div className="menu-background custom-scrollbars">
-    {/* Pass activeTab as title to the header */}
-    <CompanyManagementHeader title={activeTab} />
+    <div className="menu-background custom-scrollbars">
+      {/* Pass activeTab as title to the header */}
+      <CompanyManagementHeader title={activeTab} />
 
-    <CompanyManagementNavBar
-      tabs={navTabs}
-      activeTab={activeTab}
-      onTabChange={(tab) => {
-        if (tab === 'Position Management') {
-          navigate('/positionManagement');
-        } else {
-          setActiveTab(tab);
-        }
-      }}
-      tabWidths={tabWidths}
-    />
-
+      <CompanyManagementNavBar
+        tabs={navTabs}
+        activeTab={activeTab}
+        onTabChange={(tab) => {
+          if (tab === "Position Management") {
+            navigate("/positionManagement");
+          } else {
+            setActiveTab(tab);
+          }
+        }}
+        tabWidths={tabWidths}
+      />
 
       <main className="cm-sections-container">
-        {activeTab === 'Tax Table Management' && (
+        {activeTab === "Tax Table Management" && (
           <div className="cm-placeholder-section">
             <h2 className="cm-placeholder-title">Tax Table Management</h2>
             <p>Tax Table Management content goes here</p>
           </div>
         )}
-        
-        {activeTab === 'Upload TAX Tables' && <TaxTableUpload />}
 
-        {activeTab === 'Company Details' && (
+        {activeTab === "Upload TAX Tables" && <TaxTableUpload />}
+
+        {activeTab === "Company Details" && (
           <>
             <section className="cm-section-container">
               <div className="cm-section-title-bar">
@@ -115,7 +121,12 @@ function CompanyManagementUI({
               <div className="cm-section-content-area">
                 <div className="cm-form-row-grid">
                   <div className="cm-form-column-item">
-                    <label htmlFor="select-company-dropdown" className="drop-field-label">Please select a company for viewing.</label>
+                    <label
+                      htmlFor="select-company-dropdown"
+                      className="drop-field-label"
+                    >
+                      Please select a company for viewing.
+                    </label>
                     <select
                       id="select-company-dropdown"
                       value={selectedCompanyId}
@@ -124,7 +135,10 @@ function CompanyManagementUI({
                     >
                       <option value="">Select Company</option>
                       {companies.map((company) => (
-                        <option key={company.companyId} value={company.companyId}>
+                        <option
+                          key={company.companyId}
+                          value={company.companyId}
+                        >
                           {company.companyName}
                         </option>
                       ))}
@@ -144,61 +158,102 @@ function CompanyManagementUI({
                     <div className="cm-form-row-grid">
                       <div className="cm-form-column-item">
                         <label className="field-label">Company Name</label>
-                        <CmInputField value={viewedCompanyDetails.companyName} readOnly />
+                        <CmInputField
+                          value={viewedCompanyDetails.companyName}
+                          readOnly
+                        />
                       </div>
                       <div className="cm-form-column-item">
-                        <label className="field-label">Registration Number</label>
-                        <CmInputField value={viewedCompanyDetails.registrationNumber} readOnly />
+                        <label className="field-label">
+                          Registration Number
+                        </label>
+                        <CmInputField
+                          value={viewedCompanyDetails.registrationNumber}
+                          readOnly
+                        />
                       </div>
                     </div>
                     <div className="cm-form-row-grid">
                       <div className="cm-form-column-item">
                         <label className="field-label">Tax Number</label>
-                        <CmInputField value={viewedCompanyDetails.taxNumber} readOnly />
+                        <CmInputField
+                          value={viewedCompanyDetails.taxNumber}
+                          readOnly
+                        />
                       </div>
                       <div className="cm-form-column-item">
                         <label className="field-label">SDL Number</label>
-                        <CmInputField value={viewedCompanyDetails.sdlNumber} readOnly />
+                        <CmInputField
+                          value={viewedCompanyDetails.sdlNumber}
+                          readOnly
+                        />
                       </div>
                     </div>
                     <div className="cm-form-row-grid">
                       <div className="cm-form-column-item">
                         <label className="field-label">Email</label>
-                        <CmInputField value={viewedCompanyDetails.email} readOnly />
+                        <CmInputField
+                          value={viewedCompanyDetails.email}
+                          readOnly
+                        />
                       </div>
                       <div className="cm-form-column-item">
                         <label className="field-label">Phone Number</label>
-                        <CmInputField value={viewedCompanyDetails.phoneNumber} readOnly />
+                        <CmInputField
+                          value={viewedCompanyDetails.phoneNumber}
+                          readOnly
+                        />
                       </div>
                     </div>
                     <div className="cm-form-row-grid">
                       <div className="cm-form-column-item">
                         <label className="field-label">Physical Address</label>
-                        <CmInputField value={viewedCompanyDetails.physicalAddress} isTextArea readOnly />
+                        <CmInputField
+                          value={viewedCompanyDetails.physicalAddress}
+                          isTextArea
+                          readOnly
+                        />
                       </div>
                       <div className="cm-form-column-item">
                         <label className="field-label">Industry</label>
-                        <CmInputField value={viewedCompanyDetails.industry} readOnly />
+                        <CmInputField
+                          value={viewedCompanyDetails.industry}
+                          readOnly
+                        />
                       </div>
                     </div>
                     <div className="cm-form-row-grid">
                       <div className="cm-form-column-item">
                         <label className="field-label">Company Rule Code</label>
-                        <CmInputField value={viewedCompanyDetails.companyRuleCode} readOnly />
+                        <CmInputField
+                          value={viewedCompanyDetails.companyRuleCode}
+                          readOnly
+                        />
                       </div>
                       <div className="cm-form-column-item">
                         <label className="field-label">Short Description</label>
-                        <CmInputField value={viewedCompanyDetails.shortDescription} readOnly />
+                        <CmInputField
+                          value={viewedCompanyDetails.shortDescription}
+                          readOnly
+                        />
                       </div>
                     </div>
                     <div className="cm-form-row-grid">
                       <div className="cm-form-column-item">
                         <label className="field-label">Long Description</label>
-                        <CmInputField value={viewedCompanyDetails.longDescription} isTextArea readOnly />
+                        <CmInputField
+                          value={viewedCompanyDetails.longDescription}
+                          isTextArea
+                          readOnly
+                        />
                       </div>
                       <div className="cm-form-column-item">
                         <label className="field-label">Comments</label>
-                        <CmInputField value={viewedCompanyDetails.comments} isTextArea readOnly />
+                        <CmInputField
+                          value={viewedCompanyDetails.comments}
+                          isTextArea
+                          readOnly
+                        />
                       </div>
                     </div>
                   </div>
@@ -211,42 +266,78 @@ function CompanyManagementUI({
                   <div className="cm-section-content-area">
                     <div className="cm-form-row-grid">
                       <div className="cm-form-column-item">
-                        <label className="field-label">Rule Default Currency</label>
-                        <CmInputField value={viewedCompanyDetails.ruleDefaultCurrency} readOnly />
+                        <label className="field-label">
+                          Rule Default Currency
+                        </label>
+                        <CmInputField
+                          value={viewedCompanyDetails.ruleDefaultCurrency}
+                          readOnly
+                        />
                       </div>
                       <div className="cm-form-column-item">
                         <label className="field-label">Tax Country</label>
-                        <CmInputField value={viewedCompanyDetails.taxCountry} readOnly />
+                        <CmInputField
+                          value={viewedCompanyDetails.taxCountry}
+                          readOnly
+                        />
                       </div>
                     </div>
                     <div className="cm-form-row-grid">
                       <div className="cm-form-column-item">
-                        <label className="field-label">Default Tax Calculation</label>
-                        <CmInputField value={viewedCompanyDetails.defaultTaxCalculation} readOnly />
+                        <label className="field-label">
+                          Default Tax Calculation
+                        </label>
+                        <CmInputField
+                          value={viewedCompanyDetails.defaultTaxCalculation}
+                          readOnly
+                        />
                       </div>
                       <div className="cm-form-column-item">
                         <label className="field-label">SIC Type</label>
-                        <CmInputField value={viewedCompanyDetails.sicType} readOnly />
+                        <CmInputField
+                          value={viewedCompanyDetails.sicType}
+                          readOnly
+                        />
                       </div>
                     </div>
                     <div className="cm-form-row-grid">
                       <div className="cm-form-column-item">
                         <label className="field-label">SEZ Type</label>
-                        <CmInputField value={viewedCompanyDetails.sezType} readOnly />
+                        <CmInputField
+                          value={viewedCompanyDetails.sezType}
+                          readOnly
+                        />
                       </div>
                       <div className="cm-form-column-item">
-                        <label className="field-label">Employer Information Override</label>
-                        <CmInputField value={viewedCompanyDetails.employerInformationOverride} readOnly />
+                        <label className="field-label">
+                          Employer Information Override
+                        </label>
+                        <CmInputField
+                          value={
+                            viewedCompanyDetails.employerInformationOverride
+                          }
+                          readOnly
+                        />
                       </div>
                     </div>
                     <div className="cm-form-row-grid">
                       <div className="cm-form-column-item">
                         <label className="field-label">Created Date</label>
-                        <CmInputField value={new Date(viewedCompanyDetails.createdDate).toLocaleString()} readOnly />
+                        <CmInputField
+                          value={new Date(
+                            viewedCompanyDetails.createdDate,
+                          ).toLocaleString()}
+                          readOnly
+                        />
                       </div>
                       <div className="cm-form-column-item">
                         <label className="field-label">Last Updated Date</label>
-                        <CmInputField value={new Date(viewedCompanyDetails.lastUpdatedDate).toLocaleString()} readOnly />
+                        <CmInputField
+                          value={new Date(
+                            viewedCompanyDetails.lastUpdatedDate,
+                          ).toLocaleString()}
+                          readOnly
+                        />
                       </div>
                     </div>
                   </div>
@@ -256,20 +347,25 @@ function CompanyManagementUI({
           </>
         )}
 
-        {activeTab === 'Leave Management' && (
+        {activeTab === "Leave Management" && (
           <div className="cm-placeholder-section">
-            <h2 className="cm-placeholder-title">Leave Management Content Goes Here</h2>
+            <h2 className="cm-placeholder-title">
+              Leave Management Content Goes Here
+            </h2>
             <p>This section will handle Leave Management content.</p>
           </div>
         )}
 
         {/* Removed inline PositionManagement rendering for Position Management tab */}
-        
-        {activeTab === 'Manage Companies' && (
+
+        {activeTab === "Manage Companies" && (
           <div className="cm-section-container">
             <div className="cm-section-title-bar">
               <h2 className="cm-section-title">Manage Companies</h2>
-              <button className="add-new-company-button" onClick={handleAddCompanyClick}>
+              <button
+                className="add-new-company-button"
+                onClick={handleAddCompanyClick}
+              >
                 Add New Company
               </button>
             </div>
@@ -278,18 +374,20 @@ function CompanyManagementUI({
                 <p>No companies found.</p>
               ) : (
                 companies.map((company) => (
-                  <div
-                    key={company.companyId}
-                    className="cm-company-card"
-                  >
+                  <div key={company.companyId} className="cm-company-card">
                     <div className="cm-form-row-grid">
                       <div className="cm-form-column-item">
                         <label className="field-label">Company Name</label>
                         <CmInputField value={company.companyName} readOnly />
                       </div>
                       <div className="cm-form-column-item">
-                        <label className="field-label">Registration Number</label>
-                        <CmInputField value={company.registrationNumber} readOnly />
+                        <label className="field-label">
+                          Registration Number
+                        </label>
+                        <CmInputField
+                          value={company.registrationNumber}
+                          readOnly
+                        />
                       </div>
                     </div>
                     <div className="cm-form-row-grid">
@@ -312,11 +410,13 @@ function CompanyManagementUI({
                         <CmInputField value={company.industry} readOnly />
                       </div>
                     </div>
-                            <div className="cm-form-row-grid cm-form-row-grid--margin-top">
+                    <div className="cm-form-row-grid cm-form-row-grid--margin-top">
                       <div className="cm-form-column-item">
                         <button
                           className="cm-edit-button"
-                          onClick={() => handleEditCompanyDetails(company.companyId)}
+                          onClick={() =>
+                            handleEditCompanyDetails(company.companyId)
+                          }
                         >
                           Edit
                         </button>
@@ -329,9 +429,11 @@ function CompanyManagementUI({
           </div>
         )}
 
-        {activeTab === 'Salary Budgets' && (
+        {activeTab === "Salary Budgets" && (
           <div className="cm-placeholder-section">
-            <h2 className="cm-placeholder-title">Salary Budgets Content Goes Here</h2>
+            <h2 className="cm-placeholder-title">
+              Salary Budgets Content Goes Here
+            </h2>
             <p>This section will handle Salary Budgets content.</p>
           </div>
         )}

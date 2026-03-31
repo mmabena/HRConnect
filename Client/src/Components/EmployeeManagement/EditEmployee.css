@@ -167,6 +167,11 @@
 
   justify-content: space-between;
 }
+.emp-fields-container.row-5 {
+  width: 1457px;
+
+  justify-content: space-between;
+}
 
 .emp-fields-container.row-6 .field {
   width: 176.5px;
@@ -181,6 +186,18 @@
   justify-content: space-between;
   /* equal spacing between fields */
   gap: 65px;
+  margin-bottom: 20px;
+  /* spacing between rows */
+}
+
+.emp-fields-container.row-4 {
+  width: 1384px;
+  /* same width as row-6 */
+  display: grid;
+  justify-content: space-between;
+  grid-template-columns: repeat(3, 1fr);
+  /* equal spacing between fields */
+  gap: 180px;
   margin-bottom: 20px;
   /* spacing between rows */
 }

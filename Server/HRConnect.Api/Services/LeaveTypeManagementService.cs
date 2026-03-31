@@ -13,10 +13,12 @@ namespace HRConnect.Api.Services
     public class LeaveTypeManagementService : ILeaveTypeManagementService
     {
         private readonly ApplicationDBContext _context;
+        private readonly ILeaveBalanceService _leaveBalanceService;
 
-        public LeaveTypeManagementService(ApplicationDBContext context)
+        public LeaveTypeManagementService(ApplicationDBContext context, ILeaveBalanceService leaveBalanceService)
         {
             _context = context;
+            _leaveBalanceService = leaveBalanceService;
         }
         /// <summary>
         /// Retrieves a list of all leave types along with their associated entitlement rules from the database,
@@ -224,6 +226,14 @@ namespace HRConnect.Api.Services
 
             await _context.LeaveEntitlementRules.AddRangeAsync(rules);
             await _context.SaveChangesAsync();
+            var employees = await _context.Employees
+                .Select(e => e.EmployeeId)
+                .ToListAsync();
+
+            foreach (var empId in employees)
+            {
+                await _leaveBalanceService.RecalculateAnnualLeaveAsync(empId);
+            }
 
             return await GetLeaveTypeByIdAsync(leaveType.Id);
         }
@@ -253,7 +263,8 @@ namespace HRConnect.Api.Services
                     errors.Add($"DaysAllocated must be greater than zero for JobGrade {rule.JobGradeId}.");
             }
 
-            var grouped = rules.GroupBy(r => r.JobGradeId);
+            var grouped = rules.GroupBy(r =>
+                new[] { 2, 3, 4, 6 }.Contains(r.JobGradeId) ? 1 : r.JobGradeId);
 
             foreach (var group in grouped)
             {

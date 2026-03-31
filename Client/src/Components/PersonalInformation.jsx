@@ -663,7 +663,7 @@ const PersonalInformation = () => {
                 id="monthlySalary"
                 value={employeeData.monthlySalary || ""}
                 onChange={handleInputChange}
-                readOnly={!isEditable}
+                readOnly
               />
               <div className="emp-error-text">{formErrors.monthlySalary}</div>
             </div>

@@ -52,7 +52,11 @@ namespace HRConnect.Api.Services
             var employees = await _context.Employees
                 .Include(e => e.Position)
                 .Include(e => e.LeaveBalances)
-                .Where(e => e.Position.JobGradeId == rule.JobGradeId)
+                .Where(e =>
+                    (new[] { 2, 3, 4, 6 }.Contains(e.Position.JobGradeId) &&
+                     new[] { 2, 3, 4, 6 }.Contains(rule.JobGradeId))
+                    ||
+                    e.Position.JobGradeId == rule.JobGradeId)
                 .ToListAsync();
 
             foreach (var employee in employees)
@@ -103,7 +107,11 @@ namespace HRConnect.Api.Services
                 .Include(e => e.Position)
                 .Include(e => e.LeaveBalances)
                     .ThenInclude(lb => lb.LeaveType)
-                .Where(e => e.Position.JobGradeId == rule.JobGradeId)
+                .Where(e =>
+                    (new[] { 2, 3, 4, 6 }.Contains(e.Position.JobGradeId) &&
+                     new[] { 2, 3, 4, 6 }.Contains(rule.JobGradeId))
+                    ||
+                    e.Position.JobGradeId == rule.JobGradeId)
                 .ToListAsync();
 
             var employeeIds = employees.Select(e => e.EmployeeId).ToList();
@@ -135,13 +143,16 @@ namespace HRConnect.Api.Services
                 if (segment != null)
                 {
                     segment.AnnualEntitlement = rule.DaysAllocated;
-                    segment.DailyRate = rule.DaysAllocated / 260m;
+                    segment.DailyRate = (rule.DaysAllocated / 12m) / 21.67m;
                 }
-
+                await _context.SaveChangesAsync();
                 await _leaveBalanceService.RecalculateAnnualLeaveAsync(employee.EmployeeId);
 
                 var updatedBalance = employee.LeaveBalances
-                    .First(lb => lb.LeaveTypeId == rule.LeaveTypeId);
+                    .FirstOrDefault(lb => lb.LeaveTypeId == rule.LeaveTypeId);
+
+                if (updatedBalance == null)
+                    continue;
 
                 var emailBody = EmailTemplates.GenerateRuleChangeEmail(
                      employee,
