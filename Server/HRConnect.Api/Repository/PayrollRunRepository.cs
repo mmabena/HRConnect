@@ -14,41 +14,28 @@ namespace HRConnect.Api.Repository
       _context = context;
     }
 
-    /*
-     * Remove ability to query the payrollRun to get a particular record
-     *TPC Inheritance strategy allows for concrete classes to be queried
-     * */
-    public Task<PayrollRun> GetAllPayRecordsFromPayRun(PayrollRun payrollRun)
-    {
-      // //Get all pension record from current run
-      // var pensionRecords = await _context.Set<PensionDeduction>()
-      //   .Where(r => r.PayrollRunId == payrollRun.payrollRunNumber)
-      // .ToListAsync();
-      // var medicalAidRecords = await _context.Set<MedicalAidDeduction>()
-      //   .Where(r => r.PayrollRunId == payrollRun.payrollRunNumber)
-      // .ToListAsync();
-      // payrollRun.Records = pensionRecords.Cast<PayrollRecord>()
-      //                     .Concat(medicalAidRecords.Cast<PayrollRecord>()).ToList();
-      throw new NotImplementedException();
-      // return payrollRun;
-    }
     public async Task<IEnumerable<PayrollRun>> GetAllPayruns()
     {
       return await _context.PayrollRuns.ToListAsync();
     }
-    public async Task<PayrollRun?> GetPayrunByRunNumberAsync(int id)
+    public async Task<PayrollRun?> GetUnlockedPayrunByRunNumberAsync(int payrollRunNumber)
     {
-      var payrun = await _context.PayrollRuns.Where(r => !r.IsLocked).Include(r => r.Records).FirstOrDefaultAsync(p => p.PayrollRunNumber == id);
+
+      var payrun = await _context.PayrollRuns.Include(r => r.Records).FirstOrDefaultAsync(p => p.PayrollRunNumber == payrollRunNumber);
       return payrun;
     }
-    /// CONSIDER CHANGING THE RETURN TYPE OF THIS TASK
+    public async Task<PayrollRun?> GetPayrunByRunNumberAsync(int payrollRunNumber)
+    {
+      var payrun = await _context.PayrollRuns.Where(r => !r.IsLocked).Include(r => r.Records).FirstOrDefaultAsync(p => p.PayrollRunNumber == payrollRunNumber);
+      return payrun;
+    }
     public async Task<PayrollRun> CreatePayrollRunAsync(PayrollRun payrollRun)
     {
       await _context.PayrollRuns.AddAsync(payrollRun);
       await _context.SaveChangesAsync();
       return payrollRun;
     }
-    /*Get the current payrun using the provided date*/
+
     public async Task<PayrollRun?> GetRunByDateAsync(int payrollRunNumber, DateTime startDate, DateTime endDate)
     {
       var run = await _context.PayrollRuns.Include(r => r.Period).Where(r =>
@@ -65,7 +52,6 @@ namespace HRConnect.Api.Repository
       }
       return run;
     }
-    /*Get the current payrun using the date and time when this is called*/
     public async Task<PayrollRun?> GetCurrentRunAsync()
     {
       var payrun = await _context.PayrollRuns.Where(r => !r.IsLocked)
@@ -75,7 +61,6 @@ namespace HRConnect.Api.Repository
         return payrun;
       return null;
     }
-
 
     public Task UpdateRun(PayrollRun payrollRun)
     {

@@ -14,7 +14,8 @@ namespace HRConnect.Api.Interfaces
   /// </remarks>
   public interface IPayrollRunService
   {
-    Task<PayrollRunDto?> GetPayrunByRunNumberAsync(int id);
+    Task<PayrollRunDto?> GetPayrunByRunNumberAsync(int payrollRunNumber);
+
     Task<IEnumerable<PayrollRunDto>> GetAllPayruns();
     // Task<PayrollRun> CreatePayrollRunAsync(PayrollRun payrollRun);
 
@@ -43,8 +44,8 @@ namespace HRConnect.Api.Interfaces
     /// <exception cref="InvalidDataException">Invalid Type Expected 'PayrollRecord'
     /// </exception>
     Task AddRecordToCurrentRunAsync(PayrollRecord payrollRecord, string employeeId);
-    [Obsolete("All PayrollRecord's should be queried using their respective Repository or Service calls")]
-    Task<PayrollRun> GetAllPayRecordsFromPayRunAsync(int payrollRunNumber);
+
+    // Task<IEnumerable<PayrollRun?>> GetAllPayRecordsFromPayRunAsync(int payrollRunNumber);
     Task LockAllOlderPayrollRuns();
   }
 }

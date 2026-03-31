@@ -95,7 +95,6 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
 
       payrollPeriod.Runs.Add(newRun);
       await _payrollRunRepo.CreatePayrollRunAsync(newRun);
-      Console.WriteLine($"ADDED RUN TO PERIOD\n{payrollPeriod.Runs.Count}");
     }
 
     public async Task Execute(IJobExecutionContext context)
@@ -104,13 +103,13 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
       DateTime currentDate = DateTime.Now;
       int runId = ((currentDate.Month + 8) % 12) + 1;
 
-      //   if (currentDate.Date !=
-      // new DateTime(currentDate.Year, currentDate.Month,
-      // DateTime.DaysInMonth(currentDate.Year, currentDate.Month)))
-      //   {
-      //     Console.WriteLine("Safe Guard Doing It's Job");
-      //     return;
-      //   }
+      if (currentDate.Date !=
+    new DateTime(currentDate.Year, currentDate.Month,
+    DateTime.DaysInMonth(currentDate.Year, currentDate.Month)))
+      {
+        Console.WriteLine("Safe Guard Doing It's Job");
+        return;
+      }
 
       try
       {
@@ -174,8 +173,8 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
       catch (InvalidOperationException ex)
       {
         Console.WriteLine($"Invalid Operation on locked entity \n{ex}");
-        var jobException = new JobExecutionException();
-        // throw jobException;
+        var jobException = new JobExecutionException(ex);
+        throw jobException;
       }
       catch (Exception ex)
       {

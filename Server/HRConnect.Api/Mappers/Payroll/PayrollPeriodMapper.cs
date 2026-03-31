@@ -16,18 +16,18 @@ namespace HRConnect.Api.Mappers.Payroll
         Runs = periodModel.Runs
       };
     }
-    public static PayrollPeriod ToPayrollPeriodFromDto(this PayrollPeriodDto dto)
-    {
-      return new PayrollPeriod
-      {
-        PayrollPeriodId = dto.PayrollPeriodId,
-        StartDate = dto.StartDate,
-        EndDate = dto.EndDate,
-        IsClosed = dto.IsClosed,
-        IsLocked = dto.IsLocked,
-        Runs = dto.Runs
-      };
-    }
+    // public static PayrollPeriod ToPayrollPeriodFromDto(this PayrollPeriodDto dto)
+    // {
+    //   return new PayrollPeriod
+    //   {
+    //     PayrollPeriodId = dto.PayrollPeriodId,
+    //     StartDate = dto.StartDate,
+    //     EndDate = dto.EndDate,
+    //     IsClosed = dto.IsClosed,
+    //     IsLocked = dto.IsLocked,
+    //     Runs = dto.Runs
+    //   };
+    // }
   }
 }
 

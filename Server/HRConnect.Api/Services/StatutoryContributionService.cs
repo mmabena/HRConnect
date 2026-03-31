@@ -48,7 +48,6 @@ namespace HRConnect.Api.Services
       using (var scope = AuditScope.Create("StatutoryContribution:Insert",
             () => new { employeeId }, EventCreationPolicy.InsertOnEnd))
       {
-        Console.WriteLine($"=============Creating A new UIF Deduction");
         try
         {
           Employee? employee = await _employeeRepo.GetEmployeeByIdAsync(employeeId);

@@ -31,25 +31,24 @@ namespace HRConnect.Api.Services
     ///nullable</remarks>
     public async Task WriteExcelAsync(PayrollRun run)
     {
-      ExcelPackage.License.SetNonCommercialPersonal("YourName"); //already in program cs so probably remove?
+      //      ExcelPackage.License.SetNonCommercialPersonal("YourName"); //already in program cs so probably remove?
 
       try
       {
         string reportsFolder = Path.Combine(_env.ContentRootPath, "Reports");
 
-        string destinationFolder = Path.Combine(reportsFolder, run.PayrollRunNumber.ToString(CultureInfo.InvariantCulture));//, ;
+        string destinationFolder = Path.Combine(reportsFolder, $"{run.FinalisedDate!.Value.Year}_Payrun_{run.PayrollRunNumber.ToString(CultureInfo.InvariantCulture)}");//, ;
         _ = Directory.CreateDirectory(destinationFolder);
         string filePath = Path.Combine(destinationFolder, $"PayrollRun_{run.PayrollRunNumber}.xlsx");
 
         using var package = new ExcelPackage();
 
         // Group records by concrete type
-        // (PensionDeductions, MedicalAidDeductions)
+        // (PensionDeductions, MedicalAidDeductions, StatutoryContributions etc)
         var recordsByType = run.Records.GroupBy(r => r.GetType().Name);
 
         foreach (var group in recordsByType)
         {
-          Console.Write($"%%%%%%RECORDS FOUND IN RUNS {group.GetType().Name}");
           string sheetName = group.Key;
           var worksheet = package.Workbook.Worksheets.Add(sheetName);
 

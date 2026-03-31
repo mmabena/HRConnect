@@ -3,8 +3,6 @@ namespace HRConnect.Api.Utils.Payroll
   using HRConnect.Api.Models.Payroll;
   using OfficeOpenXml;
   using System.IO;
-  using System.Globalization;
-  using System.Reflection;
 
   public class PayrollUtil
   {

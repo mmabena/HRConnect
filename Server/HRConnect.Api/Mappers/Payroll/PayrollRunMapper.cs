@@ -9,17 +9,14 @@ namespace HRConnect.Api.Mappers.Payroll
       return new PayrollRunDto
       {
         PeriodId = runModel.PeriodId,
-        Period = runModel.Period,
+        // Period = runModel.Period,
         PeriodDate = runModel.PeriodDate,
         IsFinalised = runModel.IsFinalised,
-        FinalisedDate = runModel.FinalisedDate,//forcibly casting even if we have no finalised date
+        FinalisedDate = runModel.FinalisedDate,
         PayrollRunNumber = runModel.PayrollRunNumber,
         Records = runModel.Records
       };
     }
-    public static PayrollRun ToPayrollRunFromRequestDto(this PayrollRunRequestDto dto)
-    {
-      return new PayrollRun { };
-    }
+
   }
 }

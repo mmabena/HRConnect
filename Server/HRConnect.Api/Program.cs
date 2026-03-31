@@ -140,8 +140,7 @@ builder.Services.AddQuartz(q =>
   .ForJob(RolloverJobKey)
   .WithIdentity("PayrollRollover-Trigger")
   .WithCronSchedule("10 * * * * ?", x =>
-  x.WithMisfireHandlingInstructionFireAndProceed())); //when a job misfire happens. 
-                                                      // Properly re-execute it and proceed as usual
+  x.WithMisfireHandlingInstructionFireAndProceed()));
 
   // 0 -> 0 seconds
   // 0 -> 0 minutes
@@ -209,9 +208,9 @@ builder.Services.AddTransient<IEmployeePensionEnrollmentService, EmployeePension
 builder.Services.AddScoped<IPensionDeductionRepository, PensionDeductionRepository>();
 builder.Services.AddTransient<IPensionDeductionService, PensionDeductionService>();
 
-builder.Services.AddScoped<IMedicalAidEligibilityService, MedicalAidEligibilityService>();
-builder.Services.AddScoped<IMedicalAidDeductionRepository, MedicalAidDeductionRepository>();
-builder.Services.AddScoped<IMedicalAidDeductionService, MedicalAidDeductionService>();
+// builder.Services.AddScoped<IMedicalAidEligibilityService, MedicalAidEligibilityService>();
+// builder.Services.AddScoped<IMedicalAidDeductionRepository, MedicalAidDeductionRepository>();
+// builder.Services.AddScoped<IMedicalAidDeductionService, MedicalAidDeductionService>();
 builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowReact",

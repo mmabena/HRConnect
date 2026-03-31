@@ -38,7 +38,7 @@ namespace HRConnect.Api.Models.PayrollDeduction
     [ForeignKey(nameof(MedicalOptionCategory))]
     public int MedicalCategoryId { get; set; }
     public string OptionCategory { get; set; } = string.Empty;
-    public DateTime CreatedDate { get; set; } = DateTime.Now; // setting the default date to use UTC (Ask??)
+    public DateTime CreatedDate { get; set; } = DateTime.Now;
     public MedicalOption? MedicalOption { get; set; }
     public MedicalOptionCategory? MedicalOptionCategory { get; set; }
     // this is the end date of the medical aid (caters for the event when the member changes plans or terminates their medical aid)
