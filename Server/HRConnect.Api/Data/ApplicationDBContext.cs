@@ -162,7 +162,7 @@ namespace HRConnect.Api.Data
       .WithOne(r => r.Period)
       .HasForeignKey(p => p.PeriodId);
 
-      //EF needs to know that PayrollRecord is base type (abstract)
+      //EF needs to know that PayrollRecord is a base type (abstract)
       modelBuilder.Entity<PayrollRecord>().UseTpcMappingStrategy();
 
       //EF needs to know derived types
