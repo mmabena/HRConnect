@@ -48,7 +48,13 @@ Audit.Core.Configuration.Setup()
 ExcelPackage.License.SetNonCommercialPersonal("YourName");
 
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+      options.JsonSerializerOptions.Converters.Add(
+          new System.Text.Json.Serialization.JsonStringEnumConverter()
+      );
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -93,7 +99,6 @@ builder.Services.AddAuthentication(options =>
 .AddJwtBearer(options =>
 {
   var jwt = builder.Configuration.GetSection("JwtSettings");
-  // Read secret and support base64-encoded secrets (recommended) or plain-text fallback
   var secretValue = jwt["Secret"] ?? string.Empty;
   byte[] keyBytes;
   try
@@ -167,6 +172,7 @@ builder.Services.AddQuartzHostedService(q =>
   q.WaitForJobsToComplete = true;
 });
 
+builder.Configuration.AddUserSecrets<Program>();
 builder.Services.AddSingleton(provider =>
   provider.GetRequiredService<ISchedulerFactory>().GetScheduler().GetAwaiter().GetResult());
 
@@ -196,21 +202,31 @@ builder.Services.AddScoped<IJobGradeService, JobGradeService>();
 builder.Services.AddScoped<IOccupationalLevelRepository, OccupationalLevelRepository>();
 builder.Services.AddScoped<IOccupationalLevelService, OccupationalLevelService>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.Services.AuthService>();
+
+// Mpho Mosia - Leave Services 
+builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+builder.Services.AddScoped<ILeaveBalanceService, LeaveBalanceService>();
+builder.Services.AddScoped<ILeaveProcessingService, LeaveProcessingService>();
+builder.Services.AddScoped<ILeaveRuleService, LeaveRuleService>();
+
+builder.Services.AddScoped<ILeaveTypeManagementService, LeaveTypeManagementService>();
+builder.Services.AddScoped<ILeaveApplicationService, LeaveApplicationService>();
+
+builder.Services.AddHostedService<LeaveAutomationBackgroundService>();
+
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IStatutoryContributionRepository, StatutoryContributionRepository>();
 builder.Services.AddScoped<IStatutoryContributionService, StatutoryContributionService>();
 builder.Services.AddTransient<IPensionProjectionService, PensionProjectionService>();
 builder.Services.AddScoped<IMedicalOptionRepository, MedicalOptionRepository>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IMedicalOptionService,
-  HRConnect.Api.Services.MedicalOptionService>();
+HRConnect.Api.Services.MedicalOptionService>();
 builder.Services.AddScoped<IEmployeePensionEnrollmentRepository, EmployeePensionEnrollmentRepository>();
 builder.Services.AddTransient<IEmployeePensionEnrollmentService, EmployeePensionEnrollmentService>();
 builder.Services.AddScoped<IPensionDeductionRepository, PensionDeductionRepository>();
 builder.Services.AddTransient<IPensionDeductionService, PensionDeductionService>();
 
-// builder.Services.AddScoped<IMedicalAidEligibilityService, MedicalAidEligibilityService>();
-// builder.Services.AddScoped<IMedicalAidDeductionRepository, MedicalAidDeductionRepository>();
-// builder.Services.AddScoped<IMedicalAidDeductionService, MedicalAidDeductionService>();
+
 builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowReact",
@@ -247,5 +263,6 @@ app.UseCors("AllowReact");
 app.UseGlobalExceptionHandler();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<ExceptionMiddleware>();
 app.MapControllers();
 app.Run();

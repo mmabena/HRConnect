@@ -6,6 +6,8 @@ namespace HRConnect.Api.DTOs
     public int TaxYear { get; set; }
     public string FileName { get; set; } = null!;
     public string FileUrl { get; set; } = null!;
+    public DateTime EffectiveFrom { get; set; }
+    public DateTime UploadedAt { get; set; }
   }
   public class TaxTableUploadRequest
   {
