@@ -205,6 +205,12 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+  var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+  await userService.SyncEmployeeUsersAsync();
+}
+
 if (app.Environment.IsDevelopment())
 {
   app.UseSwagger();

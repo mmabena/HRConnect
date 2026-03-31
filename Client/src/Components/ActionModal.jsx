@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { FaTimes, FaEdit } from "react-icons/fa";
+import { fetchRoles, updateUserRole } from "../api/UserManagement";
+import { resolveRole } from "../utils/roleUtils";
 
 const ActionsModal = ({ isOpen, onClose, user, onSuccess }) => {
   const [roles, setRoles] = useState([]);
-  const [selectedRole, setSelectedRole] = useState(0);
-  const [selectedStatus, setSelectedStatus] = useState(1); // Default active
+  const [selectedRole, setSelectedRole] = useState("");
   const [showDropdowns, setShowDropdowns] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -12,15 +13,13 @@ const ActionsModal = ({ isOpen, onClose, user, onSuccess }) => {
   useEffect(() => {
     if (!isOpen) return;
 
-    const fetchRoles = async () => {
+    const loadRoles = async () => {
       try {
-        const res = await fetch("http://localhost:5037/api/User/roles");
-        if (!res.ok) throw new Error("Failed to fetch roles");
-        const data = await res.json();
+        const data = await fetchRoles();
 
         // Normalize roles with consistent keys
         const normalizedRoles = data.map((r) => ({
-          id: r.roleId || r.id,
+          id: r.roleId ?? r.id,
           name: r.name,
         }));
 
@@ -30,17 +29,16 @@ const ActionsModal = ({ isOpen, onClose, user, onSuccess }) => {
       }
     };
 
-    fetchRoles();
+    loadRoles();
   }, [isOpen]);
 
   // When user changes, set role and status explicitly as numbers
   useEffect(() => {
     if (user) {
-      setSelectedRole(Number(user.roleId) || 0);
-
-      // Backend expects 0 or 1 exactly; coerce here safely
-      const statusNum = Number(user.status);
-      setSelectedStatus(statusNum === 0 ? 0 : 1); // force either 0 or 1
+      const normalizedUserRole = resolveRole(user);
+      setSelectedRole(
+        normalizedUserRole.roleId != null ? normalizedUserRole.roleId : "",
+      );
       setShowDropdowns(false);
     }
   }, [user]);
@@ -51,35 +49,17 @@ const ActionsModal = ({ isOpen, onClose, user, onSuccess }) => {
       return;
     }
 
-    if (selectedRole === 0) {
+    if (selectedRole === "" || Number.isNaN(Number(selectedRole))) {
       alert("Please select a valid role.");
-      return;
-    }
-
-    if (selectedStatus !== 0 && selectedStatus !== 1) {
-      alert("Please select a valid status.");
       return;
     }
 
     setIsSaving(true);
 
     try {
-      const res = await fetch("http://localhost:5037/api/User/update-role-status", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: user.userId,
-          roleId: selectedRole,
-          status: selectedStatus,
-        }),
-      });
+      const updatedUser = await updateUserRole(user.userId, Number(selectedRole));
 
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(`Failed to update: ${text || res.statusText}`);
-      }
-
-      if (onSuccess) onSuccess();
+      if (onSuccess) onSuccess(updatedUser);
       onClose();
     } catch (error) {
       console.error(error);
@@ -96,7 +76,7 @@ const ActionsModal = ({ isOpen, onClose, user, onSuccess }) => {
       <div className="actions-modal" onClick={(e) => e.stopPropagation()}>
         <div className="actions-modal-header">
           <h3>
-            Actions for {user.firstName} {user.lastName}
+            Actions for {user.name || user.email}
           </h3>
           <button className="close-btn" onClick={onClose}>
             <FaTimes />
@@ -109,7 +89,7 @@ const ActionsModal = ({ isOpen, onClose, user, onSuccess }) => {
             onClick={() => setShowDropdowns((v) => !v)}
           >
             <FaEdit style={{ marginRight: 6 }} />
-            Update Role & Status
+            Update Role
           </button>
 
           {showDropdowns && (
@@ -121,7 +101,7 @@ const ActionsModal = ({ isOpen, onClose, user, onSuccess }) => {
                   value={selectedRole}
                   onChange={(e) => setSelectedRole(Number(e.target.value))}
                 >
-                  <option value={0} disabled>
+                  <option value="" disabled>
                     -- Select Role --
                   </option>
                   {roles.map(({ id, name }) => (
@@ -129,21 +109,6 @@ const ActionsModal = ({ isOpen, onClose, user, onSuccess }) => {
                       {name}
                     </option>
                   ))}
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="statusSelect">Status:</label>
-                <select
-                  id="statusSelect"
-                  value={selectedStatus}
-                  onChange={(e) => {
-                    const val = Number(e.target.value);
-                    if (val === 0 || val === 1) setSelectedStatus(val);
-                  }}
-                >
-                  <option value={1}>Active</option>
-                  <option value={0}>Inactive</option>
                 </select>
               </div>
             </>

@@ -4,10 +4,8 @@
   using Moq;
   using Moq.EntityFrameworkCore;
   using System.Collections.Generic;
-  using System.Threading.Tasks;
   using Api.Mappers;
   using Api.Utils.MedicalOption;
-  using HRConnect.Api.Utils.MedicalOption;
   using HRConnect.Api.DTOs.MedicalOption;
   using HRConnect.Api.Models;
   using HRConnect.Api.Interfaces;
@@ -81,7 +79,7 @@
 
      // ID Existence Tests
      [Fact]
-     public async Task ValidateAllIdsExistAsyncShouldReturnTrueForValidIds()
+    public void ValidateAllIdsExistAsyncShouldReturnTrueForValidIds()
      {
          // Arrange
          var bulkUpdateDto = new List<UpdateMedicalOptionVariantsDto>
@@ -105,7 +103,7 @@
      }
 
      [Fact]
-     public async Task ValidateAllIdsExistAsyncShouldReturnFalseForInvalidIds()
+    public void ValidateAllIdsExistAsyncShouldReturnFalseForInvalidIds()
      {
          // Arrange
          var bulkUpdateDto = new List<UpdateMedicalOptionVariantsDto>
@@ -129,7 +127,7 @@
 
      // Category Membership Tests
      [Fact]
-     public async Task ValidateAllIdsInCategoryAsyncShouldReturnTrueForValidCategoryIds()
+    public void ValidateAllIdsInCategoryAsyncShouldReturnTrueForValidCategoryIds()
      {
          // Arrange
          var categoryId = 1;
@@ -154,7 +152,7 @@
      }
 
      [Fact]
-     public async Task ValidateAllIdsInCategoryAsyncShouldReturnFalseForWrongCategoryIds()
+    public void ValidateAllIdsInCategoryAsyncShouldReturnFalseForWrongCategoryIds()
      {
          // Arrange
          var categoryId = 1;
@@ -465,7 +463,7 @@
            });
     
          _mockRepository.Setup(r => r.GetAllOptionsUnderCategoryAsync(categoryId))
-           .ReturnsAsync(dbData.Select(option => option.ToMedicalOptionDto()).ToList());
+           .ReturnsAsync(dbData.Select(option => (MedicalOptionDto?)option.ToMedicalOptionDto()).ToList());
     
          _mockRepository.Setup(r => r.BulkUpdateByCategoryIdAsync(categoryId, bulkUpdateDto))
            .ReturnsAsync(updatedOptions);
@@ -498,7 +496,7 @@
          var testDate = new DateTime(2024, 11, 15, 12, 0, 0);
          
          _mockRepository.Setup(r => r.GetAllOptionsUnderCategoryAsync(categoryId))
-                    .ReturnsAsync(dbData.Select(option => option.ToMedicalOptionDto()).ToList());
+                    .ReturnsAsync(dbData.Select(option => (MedicalOptionDto?)option.ToMedicalOptionDto()).ToList());
          
          // Act
          var result = await MedicalOptionValidator.ValidateAllCategoryVariantsComprehensiveAsync(

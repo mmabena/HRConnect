@@ -1,6 +1,7 @@
 using HRConnect.Api.DTOs.User;
 using HRConnect.Api.Mappers;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HRConnect.Api.Controllers
 {
@@ -54,6 +55,13 @@ namespace HRConnect.Api.Controllers
       return Ok(user.ToUserDto());
     }
 
+    [HttpGet("roles")]
+    public async Task<IActionResult> GetRoleOptions()
+    {
+      var roles = await _userService.GetRoleOptionsAsync();
+      return Ok(roles);
+    }
+
     [HttpPut("{UserId}")]
     public async Task<IActionResult> UpdateUser(int UserId, [FromBody] UpdateUserRequestDto updatedUser)
     {
@@ -62,6 +70,40 @@ namespace HRConnect.Api.Controllers
         var result = await _userService.UpdateUserAsync(UserId, updatedUser);
         if (result == null) return NotFound();
         return NoContent();
+      }
+      catch (ArgumentException ex)
+      {
+        ModelState.AddModelError("Validation", ex.Message);
+        return ValidationProblem(ModelState);
+      }
+    }
+
+    [HttpPut("{UserId}/role")]
+    [Authorize(Roles = "SuperUser")]
+    public async Task<IActionResult> UpdateUserRole(int UserId, [FromBody] UpdateUserRoleRequestDto request)
+    {
+      try
+      {
+        var result = await _userService.UpdateUserRoleAsync(UserId, request);
+        if (result == null) return NotFound();
+        return Ok(result.ToUserDto());
+      }
+      catch (ArgumentException ex)
+      {
+        ModelState.AddModelError("Validation", ex.Message);
+        return ValidationProblem(ModelState);
+      }
+    }
+
+    [HttpPut("employee/{employeeId}/role")]
+    [Authorize(Roles = "SuperUser")]
+    public async Task<IActionResult> UpdateEmployeeUserRole(string employeeId, [FromBody] UpdateUserRoleRequestDto request)
+    {
+      try
+      {
+        var result = await _userService.UpdateEmployeeUserRoleAsync(employeeId, request);
+        if (result == null) return NotFound();
+        return Ok(result.ToUserDto());
       }
       catch (ArgumentException ex)
       {
