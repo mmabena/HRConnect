@@ -2,13 +2,12 @@ import React, { useState, useEffect } from "react";
 import { fetchAllEmployees } from "../../api/Employee";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import AddEmployeeModal from "../../Components/EmployeeManagement/AddEmployeeModal";
-
 import useEmployees from "../../hooks/useEmployees";
 import useEmployeeFilter from "../../hooks/useEmployeeFilter";
 import useEmpPagination from "../../hooks/useEmpPagination";
 import useDropdown from "../../hooks/useDropdown";
 import useInitialColors from "../../hooks/useInitialColors";
-
+import { Plus, SlidersHorizontal } from "lucide-react";
 
 import "../../Components/MenuBar/MenuBar.css";
 import "./EmployeeList.css";
@@ -90,8 +89,7 @@ const EmployeeList = () => {
             </div>
           ))}
           <div className="right-controls">
-            <div className="heading-item filter-search-wrapper">
-              <span className="filter-label">Filter</span>
+            <div className="heading-item search-wrapper">
               <div className="search-bar-container">
                 <img
                   src="/images/menu.svg"
@@ -119,12 +117,24 @@ const EmployeeList = () => {
                 />
               </div>
             </div>
+            <div className= "employee-button-wrapper">
             <button
+              className="filter-button"
+            >
+              <SlidersHorizontal size={20} />
+            
+              Filter
+            </button>
+
+             <button
               className="add-employee-button"
               onClick={handleAddEmployeeClick}
             >
+              <Plus size={20} />
+            
               Add Employee
             </button>
+            </div>
           </div>
         </div>
 

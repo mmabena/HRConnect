@@ -216,8 +216,6 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
     ],
     1: [
       "/employeeList",
-      "/addEmployee",
-      "/editEmployee",
       "/terminateemployee",
       "/transferemployee",
       "/trnsferhistory",
@@ -298,22 +296,6 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                       onClick={() => handleSubmenuClick("/employeeList")}
                     >
                       Employee List
-                    </span>
-                  </li>
-                  <li>
-                    <span
-                      className="menu-subitem"
-                      onClick={() => handleSubmenuClick("/addEmployee")}
-                    >
-                      Add New Employee
-                    </span>
-                  </li>
-                  <li>
-                    <span
-                      className="menu-subitem"
-                      onClick={() => handleSubmenuClick("/editEmployee")}
-                    >
-                      Edit Employee
                     </span>
                   </li>
                   <li>

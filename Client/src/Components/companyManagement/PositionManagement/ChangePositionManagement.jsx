@@ -1,14 +1,20 @@
 import { useState, useEffect } from "react";
 import api from "../../../api/api";
-import {useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "../../MenuBar/MenuBar.css";
 import "../../../Pages/CompanyManagement/PositionManagement/PositionManagement.css";
 
-const ChangePositionManagement = ({ isOpen, onClose, currentPosition, linkedEmployeesCount, attemptedTitle }) => {
+const ChangePositionManagement = ({
+  isOpen,
+  onClose,
+  currentPosition,
+  linkedEmployeesCount,
+  attemptedTitle,
+}) => {
   const [moveUsers, setMoveUsers] = useState(false);
   const [allPositions, setAllPositions] = useState([]);
-    const navigate = useNavigate();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     positionTitle: attemptedTitle || "",
   });
@@ -34,7 +40,7 @@ const ChangePositionManagement = ({ isOpen, onClose, currentPosition, linkedEmpl
         allPositions.find(
           (pos) =>
             pos.positionTitle?.toLowerCase() ===
-            (attemptedTitle || currentPosition || "").toLowerCase()
+            (attemptedTitle || currentPosition || "").toLowerCase(),
         )?.positionTitle || "";
       setFormData((prev) => ({
         ...prev,
@@ -73,7 +79,10 @@ const ChangePositionManagement = ({ isOpen, onClose, currentPosition, linkedEmpl
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content-change"onClick={(e) => e.stopPropagation()}>
+      <div
+        className="modal-content-change"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="headings-container">
           <div className="apm-logo">
             <span className="apm-logo-bold">singular</span>
@@ -107,7 +116,8 @@ const ChangePositionManagement = ({ isOpen, onClose, currentPosition, linkedEmpl
 
         <div className="pm-info-text">
           <p className="info-text">
-            This position currently has <b>{linkedEmployeesCount} users </b>assigned.
+            This position currently has <b>{linkedEmployeesCount} users </b>
+            assigned.
           </p>
         </div>
 

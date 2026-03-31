@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import CompanyManagementNavBar from "./companyManagementNavBar";
 import PositionManagement from "./PositionManagement";
 import CompanyManagementHeader from "./companyManagement/CompanyManagementHeader";
-import CompanyManagementUI from "./CompanyManagement/companyManagementUI";
+import CompanyManagementUI from "./companyManagement/companyManagementUI";
 const navTabs = [
   "Tax Table Management",
   "Upload TAX Tables",
@@ -11,7 +11,7 @@ const navTabs = [
   "Leave Management",
   "Position Management",
   "Manage Companies",
-  "Salary Budgets"
+  "Salary Budgets",
 ];
 
 const tabWidths = [168, 133, 122, 134, 154, 125, 120];
@@ -21,10 +21,12 @@ const CompanyManagementLayout = ({
   selectedCompanyId,
   viewedCompanyDetails,
   handlers,
-  config
+  config,
 }) => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState(config?.initialTab || "Company Details");
+  const [activeTab, setActiveTab] = useState(
+    config?.initialTab || "Company Details",
+  );
 
   // Get the header title based on active tab
   const getHeaderTitle = () => {
@@ -47,7 +49,7 @@ const CompanyManagementLayout = ({
       <CompanyManagementNavBar
         tabs={navTabs}
         activeTab={activeTab}
-        onTabChange={setActiveTab}  // Passing the setter directly
+        onTabChange={setActiveTab} // Passing the setter directly
         tabWidths={tabWidths}
       />
 
@@ -66,7 +68,10 @@ const CompanyManagementLayout = ({
       {/* Main Sections */}
       <main className="cm-sections-container">
         {activeTab === "Position Management" ? (
-          <PositionManagement activeTab={activeTab} setActiveTab={setActiveTab} />
+          <PositionManagement
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+          />
         ) : (
           <CompanyManagementUI
             companies={companies}
