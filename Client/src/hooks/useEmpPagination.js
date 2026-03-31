@@ -1,55 +1,26 @@
-import { useEffect, useState } from "react";
-import { fetchAllEmployees } from "../api/Employee";
-import api from "../api/api";
+import { useState } from "react";
 
-/**
- * Custom React hook responsible for retrieving employee
- * and position data from the API when a component mounts.
- *
- * @returns {Object} An object containing:
- * - positions: list of available job positions
- * - allEmployees: list of all employees
- * - loading: indicates whether the data is still being fetched
- */
-const useEmployeeData = () => {
+const useEmpPagination = (data, defaultItemsPerPage = 7) => {
+  const [activePage, setActivePage] = useState(1);
 
-  const [positions, setPositions] = useState([]);
-  const [allEmployees, setAllEmployees] = useState([]);
-  const [loading, setLoading] = useState(true);
-  /**
-   * Runs once when the component using this hook mounts.
-   * Fetches employees and positions from the backend.
-   */
-  useEffect(() => {
+  const [itemsPerPage, setItemsPerPage] = useState(defaultItemsPerPage);
 
-    const fetchData = async () => {
-      try {
+  const totalPages = Math.ceil(data.length / itemsPerPage);
 
-        const employees = await fetchAllEmployees();
-        const positionsRes = await api.get("/positions");
+  const indexOfFirstItem = (activePage - 1) * itemsPerPage;
+  const indexOfLastItem = indexOfFirstItem + itemsPerPage;
 
-        setAllEmployees(employees);
-        setPositions(positionsRes.data);
-        console.log("Employees:", employees);
-        console.log("Positions:", positionsRes.data);
-
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-    
-
-  }, []);
+  const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
 
   return {
-    positions,
-    allEmployees,
-    loading,
+    activePage,
+    setActivePage,
+    itemsPerPage,
+    setItemsPerPage,
+    totalPages,
+    indexOfFirstItem,
+    indexOfLastItem,
+    currentItems,
   };
 };
-
-export default useEmployeeData;
+export default useEmpPagination;
