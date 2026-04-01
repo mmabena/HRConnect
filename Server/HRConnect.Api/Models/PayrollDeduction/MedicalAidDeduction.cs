@@ -5,7 +5,7 @@ namespace HRConnect.Api.Models.PayrollDeduction
 
   public class MedicalAidDeduction : PayrollRecord
   {
-    // [Key]
+    [Column("MedicalAidDeductionId")]
     public int MedicalAidDeductionId { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Surname { get; set; } = string.Empty;
@@ -38,8 +38,15 @@ namespace HRConnect.Api.Models.PayrollDeduction
     [ForeignKey(nameof(MedicalOptionCategory))]
     public int MedicalCategoryId { get; set; }
     public string OptionCategory { get; set; } = string.Empty;
-    public DateTime CreatedDate { get; set; } = DateTime.Now; // setting the default date to use UTC (Ask??)
+    public DateTime CreatedDate { get; set; } = DateTime.Now;
     public MedicalOption? MedicalOption { get; set; }
     public MedicalOptionCategory? MedicalOptionCategory { get; set; }
+    // this is the end date of the medical aid (caters for the event when the member changes plans or terminates their medical aid)
+    public DateTime? TerminationDate { get; set; }
+    public string OptionCategoryName { get; set; } = string.Empty;
+
+    public DateTime UpdatedDate { get; set; }
+    public string? TerminationReason { get; set; } = string.Empty;// Reason for termination (Moving to another premium?, moving to another medical aid provider, etc.)
+
   }
 }

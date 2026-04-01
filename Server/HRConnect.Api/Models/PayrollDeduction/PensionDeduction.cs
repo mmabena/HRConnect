@@ -2,6 +2,7 @@ namespace HRConnect.Api.Models.PayrollDeduction
 {
   using System.ComponentModel.DataAnnotations.Schema;
   using HRConnect.Api.Models.Payroll;
+  using Microsoft.EntityFrameworkCore;
 
   public class PensionDeduction : PayrollRecord
   {
@@ -14,6 +15,7 @@ namespace HRConnect.Api.Models.PayrollDeduction
     public string IdNumber { get; set; } = string.Empty;
     public string? Passport { get; set; }
     public string TaxNumber { get; set; } = string.Empty;
+    [Column(TypeName = "decimal(18,2)")]
     public decimal PensionableSalary { get; set; }
     public int PensionOptionId { get; set; }
     [Column(TypeName = "decimal(18,2)")]
@@ -22,6 +24,7 @@ namespace HRConnect.Api.Models.PayrollDeduction
     public decimal PensionContribution { get; set; }
     [Column(TypeName = "decimal(18,2)")]
     public decimal VoluntaryContribution { get; set; }
+    [Precision(18, 2)]
     public decimal TotalPensionContribution { get; set; }
     public string EmailAddress { get; set; } = string.Empty;
     public string PhysicalAddress { get; set; } = string.Empty;
@@ -29,4 +32,3 @@ namespace HRConnect.Api.Models.PayrollDeduction
     public bool IsActive { get; set; }
   }
 }
-

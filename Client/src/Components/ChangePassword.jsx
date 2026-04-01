@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../api/api.js";
+import { jwtDecode } from "jwt-decode";
 import "../Navy.css";
 
 const ChangePassword = ({ onClose }) => {
@@ -34,10 +35,17 @@ const ChangePassword = ({ onClose }) => {
       setIsLoading(true);
 
       const token = localStorage.getItem("token");
+      const decoded = jwtDecode(token);
 
-      const response = await axios.put(
-        "http://localhost:5147/api/user/change-password",
+      console.log("DECODED TOKEN:", decoded);
+
+      const email = decoded.sub;
+      console.log("EMAIL BEING SENT:", email);
+
+      await api.post(
+        "/user/change-password",
         {
+          email,
           currentPassword,
           newPassword,
         },
@@ -48,26 +56,22 @@ const ChangePassword = ({ onClose }) => {
         }
       );
 
-      if (response.status === 200) {
-        setSuccessMessage("Password changed successfully!");
-        setCurrentPassword("");
-        setNewPassword("");
-        setConfirmPassword("");
-      }
-
+      setSuccessMessage("Password changed successfully!");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
     } catch (error) {
       console.error("Change password error:", error);
 
-      if (error.response?.data) {
+      if (typeof error.response?.data === "string") {
         setError(error.response.data);
       } else {
-        setError("Failed to change password. Please try again.");
+        setError("Failed to change password.");
       }
     } finally {
       setIsLoading(false);
     }
   };
-
     return (
         <div className="modal-overlay1">
     <div className="signin-container">

@@ -304,7 +304,7 @@
         throw new InvalidOperationException("Failed to update employee's pension option");
       }
 
-      PensionDeduction pensionDeduction = _pensionDeductionRepository.GetByEmployeeIdAndIsNotLockedAsync(employeeId).Result 
+      PensionDeduction pensionDeduction = _pensionDeductionRepository.GetByEmployeeIdAndIsNotLockedAsync(employeeId).Result
         ?? throw new NotFoundException("Pension deduction for employee not found");
       pensionDeduction.PensionOptionId = newPensionOptionId;
       decimal pensionOptionPercentage = await GetEmployeePensionOptionPercentageAsync(newPensionOptionId);

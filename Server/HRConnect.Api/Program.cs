@@ -11,8 +11,8 @@ using HRConnect.Api.Repositories;
 using HRConnect.Api.Repository;
 using HRConnect.Api.Services;
 using HRConnect.Api.Utils;
+using HRConnect.Api.Utils.Jobs.Payroll;
 using HRConnect.Api.Utils.Payroll;
-using HRConnect.Api.Utils.Quartz.Pension;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -48,7 +48,13 @@ Audit.Core.Configuration.Setup()
 ExcelPackage.License.SetNonCommercialPersonal("YourName");
 
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+      options.JsonSerializerOptions.Converters.Add(
+          new System.Text.Json.Serialization.JsonStringEnumConverter()
+      );
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -93,7 +99,6 @@ builder.Services.AddAuthentication(options =>
 .AddJwtBearer(options =>
 {
   var jwt = builder.Configuration.GetSection("JwtSettings");
-  // Read secret and support base64-encoded secrets (recommended) or plain-text fallback
   var secretValue = jwt["Secret"] ?? string.Empty;
   byte[] keyBytes;
   try
@@ -126,27 +131,26 @@ builder.Services.AddAuthorizationBuilder()
 
 builder.Services.AddQuartz(q =>
 {
-  var jobKey = new JobKey("PayrollRolloverJob");
+  var RolloverJobKey = new JobKey("PayrollRolloverJob");
 
   //Add a service for to run as a background job 
   q.AddJob<PayrollRolloverJob>(opts =>
-  opts.WithIdentity(jobKey)
+  opts.WithIdentity(RolloverJobKey)
   .StoreDurably());
 
   //Triggers that will need to be fired to run background job
   // using Cron Schedule
   // Second, Minute, Hour, Day of The Month, Month, Day of The Week
   q.AddTrigger(opts => opts
-  .ForJob(jobKey)
+  .ForJob(RolloverJobKey)
   .WithIdentity("PayrollRollover-Trigger")
-  .WithCronSchedule("0/50 * * * * ?", x =>
-  x.WithMisfireHandlingInstructionFireAndProceed())); //when a job misfire happens. 
-                                                      // Properly re-execute it and proceed as usual
+  .WithCronSchedule("10 * * * * ?", x =>
+  x.WithMisfireHandlingInstructionFireAndProceed()));
 
   // 0 -> 0 seconds
   // 0 -> 0 minutes
   // 0 -> 0 hours
-  // 1 -> first day of the year
+  // 1 -> first day of the month 
   // * -> for any/every month 
   // ? -> for all days of the week
 
@@ -160,15 +164,15 @@ builder.Services.AddQuartz(q =>
       .StartNow());
 
   //Adding persistence to quartz to be able to be run in the back
-  q.UsePersistentStore(options =>
+  q.UsePersistentStore(store =>
   {
-    options.UseSqlServer(options =>
+    store.UseSqlServer(options =>
         {
           options.ConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
           options.TablePrefix = "quartz.QRTZ_";
         });
-    options.UseSerializer<Quartz.Simpl.SystemTextJsonObjectSerializer>();
-    options.UseProperties = true;
+    store.UseSerializer<Quartz.Simpl.SystemTextJsonObjectSerializer>();
+    store.UseProperties = true;
   });
 });
 
@@ -177,6 +181,7 @@ builder.Services.AddQuartzHostedService(q =>
   q.WaitForJobsToComplete = true;
 });
 
+builder.Configuration.AddUserSecrets<Program>();
 builder.Services.AddSingleton(provider =>
   provider.GetRequiredService<ISchedulerFactory>().GetScheduler().GetAwaiter().GetResult());
 
@@ -185,7 +190,8 @@ builder.Services.AddScoped<IPayrollPeriodRepository, PayrollPeriodRepository>();
 builder.Services.AddScoped<IPayrollRunRepository, PayrollRunRepository>();
 builder.Services.AddScoped<IPayrollRunService, PayrollRunService>();
 builder.Services.AddScoped<IPayrollPeriodService, PayrollPeriodService>();
-builder.Services.AddScoped<PayrollRolloverJob>();//for Quartz
+builder.Services.AddScoped<IReportsService, ReportsService>();
+builder.Services.AddScoped<PayrollRolloverJob>();
 builder.Services.AddScoped<PayrollInit>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
@@ -205,6 +211,18 @@ builder.Services.AddScoped<IJobGradeService, JobGradeService>();
 builder.Services.AddScoped<IOccupationalLevelRepository, OccupationalLevelRepository>();
 builder.Services.AddScoped<IOccupationalLevelService, OccupationalLevelService>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.Services.AuthService>();
+
+// Mpho Mosia - Leave Services 
+builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+builder.Services.AddScoped<ILeaveBalanceService, LeaveBalanceService>();
+builder.Services.AddScoped<ILeaveProcessingService, LeaveProcessingService>();
+builder.Services.AddScoped<ILeaveRuleService, LeaveRuleService>();
+
+builder.Services.AddScoped<ILeaveTypeManagementService, LeaveTypeManagementService>();
+builder.Services.AddScoped<ILeaveApplicationService, LeaveApplicationService>();
+
+builder.Services.AddHostedService<LeaveAutomationBackgroundService>();
+
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IStatutoryContributionRepository, StatutoryContributionRepository>();
 builder.Services.AddScoped<IStatutoryContributionService, StatutoryContributionService>();
@@ -218,9 +236,7 @@ builder.Services.AddTransient<IEmployeePensionEnrollmentService, EmployeePension
 builder.Services.AddScoped<IPensionDeductionRepository, PensionDeductionRepository>();
 builder.Services.AddTransient<IPensionDeductionService, PensionDeductionService>();
 
-builder.Services.AddScoped<IMedicalAidEligibilityService, MedicalAidEligibilityService>();
-builder.Services.AddScoped<IMedicalAidDeductionRepository, MedicalAidDeductionRepository>();
-builder.Services.AddScoped<IMedicalAidDeductionService, MedicalAidDeductionService>();
+
 builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowReact",
@@ -238,7 +254,7 @@ using (var scope = app.Services.CreateScope())
 {
   var initialiser = scope.ServiceProvider.GetRequiredService<PayrollInit>();
 
-  //initialise a payperiod and payrun
+  //initialise a payperiod and payrun on app start up
   await initialiser.InitialisePayrollPeriod();
 }
 
@@ -257,5 +273,6 @@ app.UseCors("AllowReact");
 app.UseGlobalExceptionHandler();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<ExceptionMiddleware>();
 app.MapControllers();
 app.Run();

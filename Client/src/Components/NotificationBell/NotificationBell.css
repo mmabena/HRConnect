@@ -1,0 +1,74 @@
+.notification-bell-wrapper {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  right: 255px;
+  bottom: 1px;
+  margin-left: auto;
+}
+
+/* Make icon white */
+.cm-notification-icon {
+  width: 24px;
+  height: 24px;
+  filter: brightness(0) invert(1); /* turns icon white */
+  
+}
+
+/* Red notification dot */
+.notification-dot {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 12px;
+  height: 12px;
+  background-color: #fd1c03;
+  border-radius: 50%;
+}
+
+/* Modal now opens to the RIGHT of the menu bar */
+.notification-modal {
+  position: absolute;
+  bottom: 30px;   /* 👈 places modal above the bell */
+  left: 40px;
+  width: 250px;
+  max-height: 400px;
+  background: rgb(255, 253, 253);
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 1000;
+}
+
+/* Header */
+.modal-header {
+  display: flex;
+  justify-content: center;
+  font-family: 'Anek Bangla';
+  font-size: 18px;
+  padding: 10px;
+  font-weight: 500;
+  color: #002D40;
+  border-bottom: 1px solid #ccc;
+}
+
+/* Notification list */
+.modal-list {
+  list-style: none;
+  margin: 0;
+  padding: 10px;
+  color: black;
+}
+
+/* Each notification */
+.modal-list li {
+  padding: 8px 6px;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+}
+
+/* Hover effect (nice UX) */
+.modal-list li:hover {
+  background-color: #f5f5f5;
+}
