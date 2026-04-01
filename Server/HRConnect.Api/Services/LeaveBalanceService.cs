@@ -50,7 +50,7 @@ namespace HRConnect.Api.Services
                 // Skip if already exists
                 if (employee.LeaveBalances.Any(b => b.LeaveTypeId == leaveType.Id))
                     continue;
-                    
+
                 if (leaveType.Code == "AL")
                 {
                     var rule = await _context.LeaveEntitlementRules
@@ -601,7 +601,9 @@ namespace HRConnect.Api.Services
                 .Reference(e => e.Position)
                 .LoadAsync();
 
-            var yearsOfService = CalculateYearsOfService(employee.StartDate);
+            var endOfPreviousYearDate = new DateTime(currentYear - 1, 12, 31);
+
+            var yearsOfService = (decimal)((endOfPreviousYearDate - employee.StartDate.ToDateTime(TimeOnly.MinValue)).TotalDays / 365.25);
 
             var rule = await _context.LeaveEntitlementRules
                 .Where(r =>
@@ -613,15 +615,9 @@ namespace HRConnect.Api.Services
                 .OrderByDescending(r => r.MinYearsService)
                 .FirstAsync();
 
-            decimal dailyRate = (rule.DaysAllocated / 12m) / 21.67m;
-
             var endOfPreviousYear = new DateOnly(currentYear - 1, 12, 31);
 
-            int workingDays = WorkingDayCalculator.CountWorkingDays(
-                employee.StartDate,
-                endOfPreviousYear);
-
-            decimal accrued = Math.Round(workingDays * dailyRate, 2);
+            decimal accrued = rule.DaysAllocated;
 
             var carryover = accrued <= 5 ? accrued : 5;
             var forfeited = accrued > 5 ? accrued - 5 : 0;
@@ -644,7 +640,7 @@ namespace HRConnect.Api.Services
                         Accrued = accrued,
                         Used = 0,
                         Forfeited = forfeited,
-                        ClosingBalance = accrued,
+                        ClosingBalance = carryover,
                         CreatedDate = DateTime.UtcNow
                     });
             }
