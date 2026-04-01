@@ -31,7 +31,7 @@ namespace HRConnect.Api.Utils
 
                     <p><strong>Employee:</strong> {employee.Name} {employee.Surname}</p>
                     <p><strong>Leave Type:</strong> {leaveType.Name}</p>
-                    <p><strong>Dates:</strong> {application.StartDate} → {application.EndDate}</p>
+                    <p><strong>Dates:</strong> {application.StartDate:dd MMM yyyy} → {application.EndDate:dd MMM yyyy}</p>
                     <p><strong>Days Requested:</strong> {application.DaysRequested}</p>
 
                     <br>
@@ -85,7 +85,7 @@ namespace HRConnect.Api.Utils
                     {(approved ? "" : $"<p><strong>Reason:</strong> {application.RejectionReason}</p>")}
 
                     <p><strong>Leave Type:</strong> {leaveType.Name}</p>
-                    <p><strong>Dates:</strong> {application.StartDate} to {application.EndDate}</p>
+                    <p><strong>Dates:</strong> {application.StartDate:dd MMM yyyy} to {application.EndDate:dd MMM yyyy}</p>
                     <p><strong>Days:</strong> {application.DaysRequested}</p>
 
                     <br/>
@@ -148,7 +148,7 @@ namespace HRConnect.Api.Utils
                     You currently have {availableDays} days of Annual Leave remaining.
 
                     Only 5 days can be carried over into the next year.
-                    {forfeitedDays} days will be forfeited if its not used before 31 December.
+                    {forfeitedDays} days will be forfeited if not used before 31 December.
 
                     Regards,
                     HRConnect
