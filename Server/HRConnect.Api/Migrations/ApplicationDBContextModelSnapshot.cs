@@ -902,50 +902,50 @@ namespace HRConnect.Api.Migrations
                         new
                         {
                             JobGradeId = 1,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedDate = new DateTime(2026, 2, 11, 14, 33, 32, 0, DateTimeKind.Unspecified),
                             IsActive = true,
                             Name = "Executive Director",
-                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                            UpdatedDate = new DateTime(2026, 2, 27, 10, 15, 8, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             JobGradeId = 2,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedDate = new DateTime(2026, 2, 12, 7, 14, 45, 0, DateTimeKind.Unspecified),
                             IsActive = true,
                             Name = "Junior Management",
-                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                            UpdatedDate = new DateTime(2026, 2, 27, 6, 41, 39, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             JobGradeId = 3,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedDate = new DateTime(2026, 2, 12, 7, 15, 20, 0, DateTimeKind.Unspecified),
                             IsActive = true,
                             Name = "Middle Management",
-                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                            UpdatedDate = new DateTime(2026, 2, 12, 7, 15, 20, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             JobGradeId = 4,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedDate = new DateTime(2026, 2, 12, 7, 15, 39, 0, DateTimeKind.Unspecified),
                             IsActive = true,
                             Name = "Skilled/Semi Skilled",
-                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                            UpdatedDate = new DateTime(2026, 2, 12, 7, 15, 39, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             JobGradeId = 5,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedDate = new DateTime(2026, 2, 12, 7, 15, 54, 0, DateTimeKind.Unspecified),
                             IsActive = true,
                             Name = "Top/Senior Management",
-                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                            UpdatedDate = new DateTime(2026, 2, 12, 7, 15, 54, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             JobGradeId = 6,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedDate = new DateTime(2026, 2, 12, 7, 16, 8, 0, DateTimeKind.Unspecified),
                             IsActive = true,
                             Name = "Unskilled",
-                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                            UpdatedDate = new DateTime(2026, 2, 12, 7, 16, 8, 0, DateTimeKind.Unspecified)
                         });
                 });
 
@@ -1482,6 +1482,56 @@ namespace HRConnect.Api.Migrations
                         .IsUnique();
 
                     b.ToTable("OccupationalLevels");
+
+                    b.HasData(
+                        new
+                        {
+                            OccupationalLevelId = 1,
+                            CreatedDate = new DateTime(2026, 2, 12, 12, 26, 22, 0, DateTimeKind.Unspecified),
+                            Description = "Top management",
+                            IsActive = true,
+                            UpdatedDate = new DateTime(2026, 2, 23, 13, 45, 35, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            OccupationalLevelId = 2,
+                            CreatedDate = new DateTime(2026, 2, 12, 12, 31, 7, 0, DateTimeKind.Unspecified),
+                            Description = "Skilled technical and academically qualified workers, junior management, supervisors, foremen and superintendents",
+                            IsActive = true,
+                            UpdatedDate = new DateTime(2026, 2, 23, 13, 51, 57, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            OccupationalLevelId = 3,
+                            CreatedDate = new DateTime(2026, 2, 12, 12, 26, 59, 0, DateTimeKind.Unspecified),
+                            Description = "Semi-skilled and discretionary decision making",
+                            IsActive = true,
+                            UpdatedDate = new DateTime(2026, 2, 23, 13, 52, 19, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            OccupationalLevelId = 4,
+                            CreatedDate = new DateTime(2026, 2, 13, 12, 54, 57, 0, DateTimeKind.Unspecified),
+                            Description = "Professionally qualified, experienced specialists, and mid-management",
+                            IsActive = true,
+                            UpdatedDate = new DateTime(2026, 2, 23, 13, 52, 42, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            OccupationalLevelId = 5,
+                            CreatedDate = new DateTime(2026, 2, 12, 12, 29, 24, 0, DateTimeKind.Unspecified),
+                            Description = "Senior management",
+                            IsActive = true,
+                            UpdatedDate = new DateTime(2026, 2, 23, 13, 53, 2, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            OccupationalLevelId = 6,
+                            CreatedDate = new DateTime(2026, 2, 12, 12, 30, 2, 0, DateTimeKind.Unspecified),
+                            Description = "Unskilled and defined decision making",
+                            IsActive = true,
+                            UpdatedDate = new DateTime(2026, 2, 23, 13, 53, 25, 0, DateTimeKind.Unspecified)
+                        });
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.PasswordHistory", b =>
@@ -1726,6 +1776,218 @@ namespace HRConnect.Api.Migrations
                         .IsUnique();
 
                     b.ToTable("Positions");
+
+                    b.HasData(
+                        new
+                        {
+                            PositionId = 1,
+                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsActive = true,
+                            JobGradeId = 1,
+                            OccupationalLevelId = 1,
+                            PositionTitle = "Chief Financial Officer",
+                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            PositionId = 2,
+                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsActive = true,
+                            JobGradeId = 1,
+                            OccupationalLevelId = 1,
+                            PositionTitle = "Chief Operating Officer",
+                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            PositionId = 3,
+                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsActive = true,
+                            JobGradeId = 1,
+                            OccupationalLevelId = 1,
+                            PositionTitle = "Officer",
+                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            PositionId = 4,
+                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsActive = true,
+                            JobGradeId = 1,
+                            OccupationalLevelId = 1,
+                            PositionTitle = "Executive",
+                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            PositionId = 5,
+                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsActive = true,
+                            JobGradeId = 1,
+                            OccupationalLevelId = 1,
+                            PositionTitle = "Founder",
+                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            PositionId = 6,
+                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsActive = true,
+                            JobGradeId = 1,
+                            OccupationalLevelId = 1,
+                            PositionTitle = "Head: Financial Services",
+                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            PositionId = 7,
+                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsActive = true,
+                            JobGradeId = 2,
+                            OccupationalLevelId = 2,
+                            PositionTitle = "Accountant",
+                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            PositionId = 8,
+                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsActive = true,
+                            JobGradeId = 2,
+                            OccupationalLevelId = 2,
+                            PositionTitle = "Admin Manager",
+                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            PositionId = 9,
+                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsActive = true,
+                            JobGradeId = 2,
+                            OccupationalLevelId = 2,
+                            PositionTitle = "Analyst",
+                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            PositionId = 10,
+                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsActive = true,
+                            JobGradeId = 2,
+                            OccupationalLevelId = 2,
+                            PositionTitle = "Associate Data Analyst",
+                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            PositionId = 11,
+                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsActive = true,
+                            JobGradeId = 2,
+                            OccupationalLevelId = 2,
+                            PositionTitle = "Associate Project Analyst",
+                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            PositionId = 12,
+                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsActive = true,
+                            JobGradeId = 2,
+                            OccupationalLevelId = 2,
+                            PositionTitle = "Associate Software Engineer",
+                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            PositionId = 13,
+                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsActive = true,
+                            JobGradeId = 2,
+                            OccupationalLevelId = 2,
+                            PositionTitle = "Bookkeeper",
+                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            PositionId = 14,
+                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsActive = true,
+                            JobGradeId = 2,
+                            OccupationalLevelId = 3,
+                            PositionTitle = "Client Liason Manager",
+                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            PositionId = 17,
+                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsActive = true,
+                            JobGradeId = 2,
+                            OccupationalLevelId = 2,
+                            PositionTitle = "Data Analyst",
+                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            PositionId = 18,
+                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsActive = true,
+                            JobGradeId = 2,
+                            OccupationalLevelId = 4,
+                            PositionTitle = "Finance Administrator",
+                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            PositionId = 19,
+                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsActive = true,
+                            JobGradeId = 2,
+                            OccupationalLevelId = 2,
+                            PositionTitle = "Finance Agent 1",
+                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            PositionId = 20,
+                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsActive = true,
+                            JobGradeId = 2,
+                            OccupationalLevelId = 2,
+                            PositionTitle = "Finance Agent 2",
+                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            PositionId = 21,
+                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsActive = true,
+                            JobGradeId = 2,
+                            OccupationalLevelId = 2,
+                            PositionTitle = "Finance Agent 3",
+                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            PositionId = 22,
+                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsActive = true,
+                            JobGradeId = 2,
+                            OccupationalLevelId = 2,
+                            PositionTitle = "Finance Supervisor",
+                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        },
+                        new
+                        {
+                            PositionId = 23,
+                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsActive = true,
+                            JobGradeId = 2,
+                            OccupationalLevelId = 2,
+                            PositionTitle = "INACTIVE Software Developer",
+                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        });
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.StatutoryContributionType", b =>
