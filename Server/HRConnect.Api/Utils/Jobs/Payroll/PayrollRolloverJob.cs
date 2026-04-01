@@ -103,13 +103,13 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
       DateTime currentDate = DateTime.Now;
       int runId = ((currentDate.Month + 8) % 12) + 1;
 
-      if (currentDate.Date !=
-    new DateTime(currentDate.Year, currentDate.Month,
-    DateTime.DaysInMonth(currentDate.Year, currentDate.Month)))
-      {
-        Console.WriteLine("Safe Guard Doing It's Job");
-        return;
-      }
+      //   if (currentDate.Date !=
+      // new DateTime(currentDate.Year, currentDate.Month,
+      // DateTime.DaysInMonth(currentDate.Year, currentDate.Month)))
+      //   {
+      //     Console.WriteLine("Safe Guard: Today Is Not The Last Day Of The Month.");
+      //     return;
+      //   }
 
       try
       {
@@ -154,7 +154,7 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
                 continue;
             }
           }
-          //update the current run to implement lock
+
           await _payrollRunRepo.UpdateRun(currentPayRun);
 
           if (currentPayRun.Records.Count > 0)

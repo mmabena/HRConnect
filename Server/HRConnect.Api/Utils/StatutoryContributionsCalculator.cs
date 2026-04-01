@@ -60,7 +60,8 @@ namespace HRConnect.Api.Utils
     {
       decimal employee = CalculateUifEmployee(monthlySalary);
       decimal employer = CalculateUifEmployer(monthlySalary);
-      if ((employee + employer) > StatutoryContributionConstants.UIFCap)
+      //This becomes a redundant check eventually
+      if ((employee + employer) > StatutoryContributionConstants.TotalUIFCap)
       {
         employee /= 2;
         employer /= 2;

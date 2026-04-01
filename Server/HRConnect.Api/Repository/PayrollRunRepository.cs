@@ -40,7 +40,7 @@ namespace HRConnect.Api.Repository
     {
       var run = await _context.PayrollRuns.Include(r => r.Period).Where(r =>
           (r.PayrollRunNumber == payrollRunNumber) &&
-          (r.Period.StartDate >= startDate) &&
+          (r.Period.EndDate >= startDate) &&
           (r.Period.StartDate <= endDate))
         .Include(r => r.Records)//I do not know if this is necessary 
         .FirstOrDefaultAsync();

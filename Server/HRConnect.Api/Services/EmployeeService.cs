@@ -131,7 +131,7 @@ namespace HRConnect.Api.Services
         await _leaveBalanceService.InitializeEmployeeLeaveBalancesAsync(createdEmployee.EmployeeId);
         await _leaveBalanceService.RecalculateAnnualLeaveAsync(createdEmployee.EmployeeId);
         // Send welcome email notification
-        await SendWelcomeEmail(createdEmployee);
+        // await SendWelcomeEmail(createdEmployee);
         await transaction.CommitAsync();
         return createdEmployee.ToEmployeeDto();
       }
