@@ -243,6 +243,15 @@ namespace HRConnect.Api.Data
 
       );
 
+      modelBuilder.Entity<OccupationalLevel>().HasData(
+          new OccupationalLevel { OccupationalLevelId = 1, Description = "Top Management", IsActive = true, CreatedDate = new DateTime(2026, 1, 1), UpdatedDate = new DateTime(2026, 1, 1) },
+          new OccupationalLevel { OccupationalLevelId = 2, Description = "", IsActive = true, CreatedDate = new DateTime(2026, 1, 1), UpdatedDate = new DateTime(2026, 1, 1) },
+          new OccupationalLevel { OccupationalLevelId = 3, Description = "Middle Management", IsActive = true, CreatedDate = new DateTime(2026, 1, 1), UpdatedDate = new DateTime(2026, 1, 1) },
+          new OccupationalLevel { OccupationalLevelId = 4, Description = "Junior Management", IsActive = true, CreatedDate = new DateTime(2026, 1, 1), UpdatedDate = new DateTime(2026, 1, 1) },
+          new OccupationalLevel { OccupationalLevelId = 5, Description = "Skilled", IsActive = true, CreatedDate = new DateTime(2026, 1, 1), UpdatedDate = new DateTime(2026, 1, 1) },
+          new OccupationalLevel { OccupationalLevelId = 6, Description = "Unskilled", IsActive = true, CreatedDate = new DateTime(2026, 1, 1), UpdatedDate = new DateTime(2026, 1, 1) }
+      );
+
 
       // Leave Types (Policy stored here)
       modelBuilder.Entity<LeaveType>().HasData(
