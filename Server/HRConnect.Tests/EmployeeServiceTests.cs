@@ -161,7 +161,8 @@ namespace HRConnect.Tests
         EmploymentStatus = EmploymentStatus.Permanent,
         CareerManagerID = managerId,
         StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
-        ProfileImage = "profile.jpg"
+        ProfileImage = "profile.jpg",
+        PensionOptionId = 1,
       };
 
       _employeeRepoMock.Setup(r => r.GetEmployeeByIdAsync(managerId))
@@ -236,9 +237,9 @@ namespace HRConnect.Tests
       var existing = new Employee
       {
         EmployeeId = employeeId,
-        PositionId = 1, 
-        Position = _context.Positions.First(p => p.PositionId == 1), 
-        StartDate = DateOnly.FromDateTime(DateTime.UtcNow) 
+        PositionId = 1,
+        Position = _context.Positions.First(p => p.PositionId == 1),
+        StartDate = DateOnly.FromDateTime(DateTime.UtcNow)
       };
       _context.Employees.Add(existing);
       _context.LeaveTypes.Add(new LeaveType

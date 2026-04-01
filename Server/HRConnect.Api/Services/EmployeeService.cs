@@ -124,7 +124,7 @@ namespace HRConnect.Api.Services
         await _leaveBalanceService.InitializeEmployeeLeaveBalancesAsync(createdEmployee.EmployeeId);
         await _leaveBalanceService.RecalculateAnnualLeaveAsync(createdEmployee.EmployeeId);
         // Send welcome email notification
-        await SendWelcomeEmail(createdEmployee);
+        // await SendWelcomeEmail(createdEmployee);
         await transaction.CommitAsync();
         return createdEmployee.ToEmployeeDto();
       }
@@ -180,6 +180,7 @@ namespace HRConnect.Api.Services
       existingEmployee.HasDisability = employeeDto.HasDisability;
       existingEmployee.DisabilityDescription = employeeDto.DisabilityDescription;
       existingEmployee.UpdatedAt = DateTime.UtcNow;
+      existingEmployee.IsActive = employeeDto.IsActive;
 
       var updatedEmployee = await _employeeRepo.UpdateEmployeeAsync(existingEmployee);
 
@@ -449,7 +450,7 @@ namespace HRConnect.Api.Services
         EmployeeValidationHelpers.ValidateGender(employeeRequestDto.Gender);
       }
     }
-    // <summary>
+    /// <summary>
     /// Performs additional validation rules specific to employee updates.
     /// </summary>
     /// <param name="employeeRequestDto">The employee update request DTO</param>
@@ -472,5 +473,6 @@ namespace HRConnect.Api.Services
       var totalDays = today.DayNumber - startDate.DayNumber;
       return Math.Round(totalDays / 365.25m, 2);
     }
+
   }
 }
