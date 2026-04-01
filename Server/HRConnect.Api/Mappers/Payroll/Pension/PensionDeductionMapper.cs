@@ -1,0 +1,33 @@
+﻿namespace HRConnect.Api.Mappers.Payroll.Pension
+{
+  using HRConnect.Api.DTOs.Payroll.Pension;
+  using HRConnect.Api.Models.PayrollDeduction;
+
+  public static class PensionDeductionMapper
+  {
+    public static PensionDeductionDto ToPensionDeductionDTO(this PensionDeduction pensionDeduction)
+    {
+      return new PensionDeductionDto
+      {
+        EmployeeId = pensionDeduction.EmployeeId,
+        FirstName = pensionDeduction.FirstName,
+        LastName = pensionDeduction.LastName,
+        DateJoinedCompany = pensionDeduction.DateJoinedCompany,
+        IDNumber = pensionDeduction.IdNumber,
+        Passport = pensionDeduction.Passport,
+        TaxNumber = pensionDeduction.TaxNumber,
+        PensionableSalary = pensionDeduction.PensionableSalary,
+        PensionOptionId = pensionDeduction.PensionOptionId,
+        PendsionCategoryPercentage = pensionDeduction.PendsionCategoryPercentage,
+        PensionContribution = pensionDeduction.PensionContribution,
+        VoluntaryContribution = pensionDeduction.VoluntaryContribution,
+        TotalContribution = pensionDeduction.TotalPensionContribution,
+        EmailAddress = pensionDeduction.EmailAddress,
+        PhyscialAddress = pensionDeduction.PhysicalAddress,
+        PayrollRunId = pensionDeduction.PayrollRunId,
+        CreatedDate = pensionDeduction.CreatedDate,
+        IsActive = pensionDeduction.IsActive,
+      };
+    }
+  }
+}

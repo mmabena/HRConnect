@@ -1,15 +1,19 @@
 namespace HRConnect.Api.Interfaces
 {
-  using HRConnect.Api.DTOs.Payroll;
   using HRConnect.Api.Models.Payroll;
 
   public interface IPayrollRunRepository
   {
-    Task<PayrollRunDto> GetByIdAsync(int id);
-    /// CONSIDER CHANGING THE RETURN TYPE OF THIS TASK
-    Task<PayrollRunDto> CreatePayrollRunAsync(PayrollRun payrollRun);
-    Task<bool> HasFinalRunAsync(int id);
+    Task<PayrollRun?> GetPayrunByRunNumberAsync(int payrollRunNumber);
+
+    Task<PayrollRun?> GetUnlockedPayrunByRunNumberAsync(int payrollRunNumber);
+    Task<IEnumerable<PayrollRun>> GetAllPayruns();
+    Task<PayrollRun> CreatePayrollRunAsync(PayrollRun payrollRun);
+    Task<PayrollRun?> GetRunByDateAsync(int payrollRunNumber, DateTime startDate, DateTime endDate);
     Task<PayrollRun?> GetCurrentRunAsync();
-    Task UpdateRunAsync(PayrollRun payrollRun);
+    Task<PayrollRun?> GetLastPayrun();
+    Task<PayrollRun?> IsExpiredPayRunUnlocked();
+    Task UpdateRun(PayrollRun payrollRun);
+    Task UpdateExpiredRun(PayrollRun payrollRun);
   }
 }

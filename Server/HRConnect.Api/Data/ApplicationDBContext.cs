@@ -3,7 +3,12 @@ namespace HRConnect.Api.Data
   using HRConnect.Api.Models;
   using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Models.PayrollDeduction;
+  using HRConnect.Api.Models.Pension;
+  using HRConnect.Api.Models.Payroll;
+  using HRConnect.Api.Models.PayrollDeduction;
   using Microsoft.EntityFrameworkCore;
+  using AppAny.Quartz.EntityFrameworkCore.Migrations;
+  using AppAny.Quartz.EntityFrameworkCore.Migrations.SqlServer;
 
   public class ApplicationDBContext(DbContextOptions dbContextOptions) : DbContext(dbContextOptions)
   {
@@ -14,6 +19,8 @@ namespace HRConnect.Api.Data
     public DbSet<OccupationalLevel> OccupationalLevels { get; set; }
     public DbSet<PasswordResetPin> PasswordResetPins { get; set; }
     public DbSet<PasswordHistory> PasswordHistories { get; set; }
+
+    // Payroll (MAIN)
     public DbSet<MedicalOption> MedicalOptions { get; set; }
     public DbSet<MedicalOptionCategory> MedicalOptionCategories { get; set; }
     public DbSet<TaxTableUpload> TaxTableUploads { get; set; }
@@ -25,11 +32,30 @@ namespace HRConnect.Api.Data
     public DbSet<PayrollRun> PayrollRuns { get; set; }
     public DbSet<PayrollRecord> PayrollRecords { get; set; }
 
+    // INJECTED (LEAVE SYSTEM)
+    public DbSet<LeaveType> LeaveTypes { get; set; }
+    public DbSet<LeaveEntitlementRule> LeaveEntitlementRules { get; set; }
+    public DbSet<EmployeeLeaveBalance> EmployeeLeaveBalances { get; set; }
+    public DbSet<LeaveApplication> LeaveApplications { get; set; }
+    public DbSet<EmployeeAccrualRateHistory> EmployeeAccrualRateHistories { get; set; }
+    public DbSet<AnnualLeaveAccrualHistory> AnnualLeaveAccrualHistories { get; set; }
+    public DbSet<PensionOption> PensionOptions { get; set; }
+    public DbSet<EmployeePensionEnrollment> EmployeePensionEnrollments { get; set; }
+    public DbSet<PensionDeduction> PensionDeductions { get; set; }
+    public DbSet<MedicalAidDeduction> MedicalAidDeductions { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
       base.OnModelCreating(modelBuilder);
+      // Creating namespace for Quartz migrations separate from HRConnect.dbo 
+      modelBuilder.AddQuartz(builder =>
+      {
+        builder.UseSqlServer(schema: "quartz", prefix: "QRTZ_");
+      });
 
-      // Employee relationships
+      // ================= MAIN CONFIG =================
+
       modelBuilder.Entity<Employee>()
           .HasOne(e => e.Position)
           .WithMany(p => p.Employees)
@@ -41,28 +67,61 @@ namespace HRConnect.Api.Data
           .HasForeignKey(e => e.CareerManagerID)
           .OnDelete(DeleteBehavior.Restrict);
 
-      // Position - OccupationalLevel
       modelBuilder.Entity<Position>()
           .HasOne(p => p.OccupationalLevels)
           .WithMany(o => o.Positions)
           .HasForeignKey(p => p.OccupationalLevelId)
-          .OnDelete(DeleteBehavior.Restrict);  // <-- prevent cascade
+          .OnDelete(DeleteBehavior.Restrict);
 
-      // Unique index on Position.PositionTitle
       modelBuilder.Entity<Position>()
           .HasIndex(p => p.PositionTitle)
           .IsUnique();
 
-      // Unique index on OccupationalLevel.Description
       modelBuilder.Entity<OccupationalLevel>()
           .HasIndex(o => o.Description)
           .IsUnique();
 
-      // Enum conversions
       modelBuilder.Entity<Employee>().Property(e => e.Title).HasConversion<string>();
       modelBuilder.Entity<Employee>().Property(e => e.Gender).HasConversion<string>();
       modelBuilder.Entity<Employee>().Property(e => e.Branch).HasConversion<string>();
       modelBuilder.Entity<Employee>().Property(e => e.EmploymentStatus).HasConversion<string>();
+
+      modelBuilder.Entity<Employee>()
+              .HasMany(e => e.LeaveBalances)
+              .WithOne(b => b.Employee)
+              .HasForeignKey(b => b.EmployeeId)
+              .OnDelete(DeleteBehavior.Cascade);
+
+      modelBuilder.Entity<Employee>()
+          .HasMany(e => e.LeaveApplications)
+          .WithOne(l => l.Employee)
+          .HasForeignKey(l => l.EmployeeId)
+          .OnDelete(DeleteBehavior.Cascade);
+
+      modelBuilder.Entity<EmployeeLeaveBalance>()
+          .HasOne(lb => lb.LeaveType)
+          .WithMany()
+          .HasForeignKey(lb => lb.LeaveTypeId)
+          .OnDelete(DeleteBehavior.Restrict);
+
+      modelBuilder.Entity<LeaveEntitlementRule>()
+          .HasOne(r => r.JobGrade)
+          .WithMany(j => j.LeaveEntitlementRules)
+          .HasForeignKey(r => r.JobGradeId)
+          .OnDelete(DeleteBehavior.Restrict);
+
+      // INJECTED FIX: Prevent multiple cascade paths
+      modelBuilder.Entity<EmployeeAccrualRateHistory>()
+          .HasOne(e => e.Employee)
+          .WithMany(e => e.AccrualRateHistory)
+          .HasForeignKey(e => e.EmployeeId)
+          .OnDelete(DeleteBehavior.Cascade);
+
+      modelBuilder.Entity<EmployeeAccrualRateHistory>()
+          .HasOne(e => e.Position)
+          .WithMany()
+          .HasForeignKey(e => e.PositionId)
+          .OnDelete(DeleteBehavior.Restrict);
 
       // TaxDeduction
       modelBuilder.Entity<TaxDeduction>(entity =>
@@ -100,28 +159,214 @@ namespace HRConnect.Api.Data
         .HasDefaultValue(0.01m);
 
       modelBuilder.Entity<PayrollPeriod>().HasMany(p => p.Runs)
-      .WithOne()
+      .WithOne(r => r.Period)
       .HasForeignKey(p => p.PeriodId);
 
-      modelBuilder.Entity<PayrollRun>().HasMany(p => p.Records)
-      .WithOne()
-      .HasForeignKey(p => p.PayrollRunId);
+      //EF needs to know that PayrollRecord is a base type (abstract)
+      modelBuilder.Entity<PayrollRecord>().UseTpcMappingStrategy();
+
+      //EF needs to know derived types
+      modelBuilder.Entity<PensionDeduction>().ToTable("PensionDeductions");
+      modelBuilder.Entity<MedicalAidDeduction>().ToTable("MedicalAidDeductions");
+      modelBuilder.Entity<StatutoryContribution>().ToTable("StatutoryContributions");
+
+      modelBuilder.Entity<PayrollRun>(b =>
+        {
+          b.HasKey(r => r.PayrollRunId);
+          b.Property(r => r.PayrollRunId).ValueGeneratedOnAdd();
+          b.HasMany(r => r.Records)
+       .WithOne(r => r.PayrollRun)
+       .HasForeignKey(r => r.PayrollRunId);
+        });
+
+      // Prevent overwrites and possible race conditions
+      // Concurrency tokens are used to make sure that the new entry matches the row being referenced
+      // exatcly
+      modelBuilder.Entity<PayrollRun>().Property(p => p.IsLocked).IsConcurrencyToken();
+      modelBuilder.Entity<PayrollPeriod>().Property(p => p.IsLocked).IsConcurrencyToken();
+      modelBuilder.Entity<PayrollRecord>().Property(p => p.IsLocked).IsConcurrencyToken();
+
+      // Medical Aid Deduction Delete Nehavior
+      modelBuilder.Entity<MedicalAidDeduction>()
+        .HasOne(m => m.MedicalOption)
+        .WithMany()
+        .HasForeignKey(m => m.MedicalOptionId)
+        .OnDelete(DeleteBehavior.NoAction);
+
+      modelBuilder.Entity<MedicalAidDeduction>()
+        .HasOne(m => m.MedicalOptionCategory)
+        .WithMany()
+        .HasForeignKey(m => m.MedicalCategoryId)
+        .OnDelete(DeleteBehavior.NoAction);
+
+      modelBuilder.Entity<PensionOption>()
+        .HasMany(e => e.Employee)
+        .WithOne(po => po.PensionOption)
+        .HasForeignKey(po => po.PensionOptionId)
+        .OnDelete(DeleteBehavior.SetNull);
+
+      modelBuilder.Entity<Employee>()
+        .HasMany(epe => epe.EmployeePensionEnrollment)
+        .WithOne(e => e.Employee)
+        .HasForeignKey(e => e.EmployeeId)
+        .OnDelete(DeleteBehavior.Cascade)
+        .IsRequired();
+
+      modelBuilder.Entity<PensionOption>()
+        .HasMany(epe => epe.EmployeePensionEnrollment)
+        .WithOne(po => po.PensionOption)
+        .HasForeignKey(po => po.PensionOptionId)
+        .OnDelete(DeleteBehavior.Cascade)
+        .IsRequired();
+
+      modelBuilder.Entity<EmployeePensionEnrollment>().HasOne<PayrollRun>()
+      .WithMany()
+      .HasForeignKey(t => t.PayrollRunId)
+      .HasPrincipalKey(p => p.PayrollRunId);
+
+      //Notifaction Configurations
+      modelBuilder.Entity<Notification>().Property(n => n.Severity)
+          .HasConversion<string>();
+
+      modelBuilder.Entity<Notification>().Property(n => n.Type)
+      .HasConversion<string>();
+
+      // ================= SEED DATA (UNCHANGED FROM YOUR SYSTEM) =================
+
+      modelBuilder.Entity<JobGrade>().HasData(
+ new JobGrade { JobGradeId = 1, Name = "Executive Director", IsActive = true, CreatedDate = new DateTime(2026, 1, 1), UpdatedDate = new DateTime(2026, 1, 1) },
+          new JobGrade { JobGradeId = 2, Name = "Junior Management", IsActive = true, CreatedDate = new DateTime(2026, 1, 1), UpdatedDate = new DateTime(2026, 1, 1) },
+          new JobGrade { JobGradeId = 3, Name = "Middle Management", IsActive = true, CreatedDate = new DateTime(2026, 1, 1), UpdatedDate = new DateTime(2026, 1, 1) },
+          new JobGrade { JobGradeId = 4, Name = "Skilled/Semi Skilled", IsActive = true, CreatedDate = new DateTime(2026, 1, 1), UpdatedDate = new DateTime(2026, 1, 1) },
+          new JobGrade { JobGradeId = 5, Name = "Top/Senior Management", IsActive = true, CreatedDate = new DateTime(2026, 1, 1), UpdatedDate = new DateTime(2026, 1, 1) },
+          new JobGrade { JobGradeId = 6, Name = "Unskilled", IsActive = true, CreatedDate = new DateTime(2026, 1, 1), UpdatedDate = new DateTime(2026, 1, 1) }
+
+      );
+
+      modelBuilder.Entity<OccupationalLevel>().HasData(
+          new OccupationalLevel { OccupationalLevelId = 1, Description = "Top Management", IsActive = true, CreatedDate = new DateTime(2026, 1, 1), UpdatedDate = new DateTime(2026, 1, 1) },
+          new OccupationalLevel { OccupationalLevelId = 2, Description = "", IsActive = true, CreatedDate = new DateTime(2026, 1, 1), UpdatedDate = new DateTime(2026, 1, 1) },
+          new OccupationalLevel { OccupationalLevelId = 3, Description = "Middle Management", IsActive = true, CreatedDate = new DateTime(2026, 1, 1), UpdatedDate = new DateTime(2026, 1, 1) },
+          new OccupationalLevel { OccupationalLevelId = 4, Description = "Junior Management", IsActive = true, CreatedDate = new DateTime(2026, 1, 1), UpdatedDate = new DateTime(2026, 1, 1) },
+          new OccupationalLevel { OccupationalLevelId = 5, Description = "Skilled", IsActive = true, CreatedDate = new DateTime(2026, 1, 1), UpdatedDate = new DateTime(2026, 1, 1) },
+          new OccupationalLevel { OccupationalLevelId = 6, Description = "Unskilled", IsActive = true, CreatedDate = new DateTime(2026, 1, 1), UpdatedDate = new DateTime(2026, 1, 1) }
+      );
+
+
+      // Leave Types (Policy stored here)
+      modelBuilder.Entity<LeaveType>().HasData(
+          new LeaveType
+          {
+            Id = 1,
+            Name = "Annual Leave",
+            Code = "AL",
+            Description = "Annual Leave Policy",
+            ResetMonth = 1,
+            ResetDay = 1,
+            MaxCarryoverDays = 5,
+            CarryoverExpiryMonth = 1,
+            CarryoverExpiryDay = 1,
+            CarryoverNotificationMonth = 12,
+            CarryoverNotificationDay = 1,
+            IsRollingWindow = false,
+            RollingMonths = null,
+            FemaleOnly = false,
+            IsActive = true
+          },
+          new LeaveType
+          {
+            Id = 2,
+            Name = "Sick Leave",
+            Code = "SL",
+            Description = "Sick Leave Policy",
+            ResetMonth = null,
+            ResetDay = null,
+            IsRollingWindow = true,
+            RollingMonths = 36,
+            FemaleOnly = false,
+            IsActive = true
+          },
+          new LeaveType
+          {
+            Id = 3,
+            Name = "Maternity Leave",
+            Code = "ML",
+            Description = "Maternity Leave Policy",
+            FemaleOnly = true,
+            IsRollingWindow = false,
+            IsActive = true
+          },
+          new LeaveType
+          {
+            Id = 4,
+            Name = "Family Responsibility Leave",
+            Code = "FRL",
+            Description = "Family Responsibility Policy",
+            IsRollingWindow = true,
+            RollingMonths = 12,
+            FemaleOnly = false,
+            IsActive = true
+          }
+      );
+
+      // Leave Entitlement Rules (ONLY entitlement tiers)
+      modelBuilder.Entity<LeaveEntitlementRule>().HasData(
+    // ===== GROUP A (2,3,4,6 SAME) =====
+
+    // <3 years
+    new LeaveEntitlementRule { Id = 1, LeaveTypeId = 1, JobGradeId = 2, MinYearsService = 0, MaxYearsService = 2.99m, DaysAllocated = 15, IsActive = true },
+    new LeaveEntitlementRule { Id = 2, LeaveTypeId = 1, JobGradeId = 3, MinYearsService = 0, MaxYearsService = 2.99m, DaysAllocated = 15, IsActive = true },
+    new LeaveEntitlementRule { Id = 3, LeaveTypeId = 1, JobGradeId = 4, MinYearsService = 0, MaxYearsService = 2.99m, DaysAllocated = 15, IsActive = true },
+    new LeaveEntitlementRule { Id = 4, LeaveTypeId = 1, JobGradeId = 6, MinYearsService = 0, MaxYearsService = 2.99m, DaysAllocated = 15, IsActive = true },
+
+    // 3–5 years
+    new LeaveEntitlementRule { Id = 5, LeaveTypeId = 1, JobGradeId = 2, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 18, IsActive = true },
+    new LeaveEntitlementRule { Id = 6, LeaveTypeId = 1, JobGradeId = 3, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 18, IsActive = true },
+    new LeaveEntitlementRule { Id = 7, LeaveTypeId = 1, JobGradeId = 4, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 18, IsActive = true },
+    new LeaveEntitlementRule { Id = 8, LeaveTypeId = 1, JobGradeId = 6, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 18, IsActive = true },
+
+    // >5 years
+    new LeaveEntitlementRule { Id = 9, LeaveTypeId = 1, JobGradeId = 2, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 20, IsActive = true },
+    new LeaveEntitlementRule { Id = 10, LeaveTypeId = 1, JobGradeId = 3, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 20, IsActive = true },
+    new LeaveEntitlementRule { Id = 11, LeaveTypeId = 1, JobGradeId = 4, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 20, IsActive = true },
+    new LeaveEntitlementRule { Id = 12, LeaveTypeId = 1, JobGradeId = 6, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 20, IsActive = true },
+
+    // ===== GROUP B (5) =====
+    new LeaveEntitlementRule { Id = 13, LeaveTypeId = 1, JobGradeId = 5, MinYearsService = 0, MaxYearsService = 2.99m, DaysAllocated = 18, IsActive = true },
+    new LeaveEntitlementRule { Id = 14, LeaveTypeId = 1, JobGradeId = 5, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 21, IsActive = true },
+    new LeaveEntitlementRule { Id = 15, LeaveTypeId = 1, JobGradeId = 5, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 23, IsActive = true },
+
+    // ===== GROUP C (1) =====
+    new LeaveEntitlementRule { Id = 16, LeaveTypeId = 1, JobGradeId = 1, MinYearsService = 0, MaxYearsService = 2.99m, DaysAllocated = 22, IsActive = true },
+    new LeaveEntitlementRule { Id = 17, LeaveTypeId = 1, JobGradeId = 1, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 25, IsActive = true },
+    new LeaveEntitlementRule { Id = 18, LeaveTypeId = 1, JobGradeId = 1, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 27, IsActive = true }
+
+      );
     }
+
     //Override 'SaveChangesAsync' for Payroll Records to enforce locked records on a payroll run 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-      //Intercept all instances of saving to db
-      var modifiedRecords = ChangeTracker.Entries<PayrollRecord>()
-      .Where(e => e.State == EntityState.Modified);
+      //Intercept all instances of saving any changes to db
+      var modifiedRecords = ChangeTracker.Entries()
+            .Where(e => (e.State == EntityState.Modified || e.State == EntityState.Deleted) &&
+            (
+            e.Entity is PayrollPeriod ||
+            e.Entity is PayrollRun ||
+            e.Entity is PayrollRecord ||
+            e.Entity is EmployeePensionEnrollment
+            ));
 
       foreach (var e in modifiedRecords)
       {
-        //Any locked record/entity should be under a Hard Lock. Don't allow any changes
-        if (e.Entity.IsLocked)
+        //Any locked entity should be under a Hard Lock. Don't allow any changes
+        var prevLockState = (bool)e.OriginalValues["IsLocked"]!;
+        if (prevLockState)
         {
-          throw new InvalidOperationException("Record under Hard Lock. Cannot be modified");
+          throw new InvalidOperationException("Record/Run under Hard Lock. Cannot be modified");
         }
       }
+
       return await base.SaveChangesAsync(cancellationToken);
     }
   }

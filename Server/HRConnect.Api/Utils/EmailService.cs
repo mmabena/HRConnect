@@ -17,28 +17,34 @@ namespace HRConnect.Api.Utils
 
     public EmailService(IConfiguration configuration)
     {
-      string apiKey = configuration["SendGrid:ApiKey"];
-      _client = new SendGridClient(apiKey);
-      _fromEmail = configuration["SendGrid:FromEmail"] ?? "ochimerema@gmail.com";
-      _fromName = configuration["SendGrid:FromName"] ?? "HRConnect";
+      string? sendGridApiKey = configuration["SendGrid:ApiKey"];
+      _fromEmail = configuration["SendGrid:FromEmail"] ?? "noreply@hrconnect.com";
+      _fromName = configuration["SendGrid:FromName"] ?? "HRConnect Team";
+
+      if (string.IsNullOrWhiteSpace(sendGridApiKey))
+      {
+        throw new InvalidOperationException("SendGrid API key is not configured.");
+      }
+
+      _client = new SendGridClient(sendGridApiKey);
     }
 
     public async Task SendEmailAsync(string recipientEmail, string subject, string body)
     {
-        var msg = new SendGridMessage()
-        {
-            From = new EmailAddress(_fromEmail, _fromName),
-            Subject = subject,
-            HtmlContent = body
-        };
-        msg.AddTo(new EmailAddress(recipientEmail));
+      var msg = new SendGridMessage()
+      {
+        From = new EmailAddress(_fromEmail, _fromName),
+        Subject = subject,
+        HtmlContent = body
+      };
+      msg.AddTo(new EmailAddress(recipientEmail));
 
-        var response = await _client.SendEmailAsync(msg);
+      var response = await _client.SendEmailAsync(msg);
 
-        if (!response.IsSuccessStatusCode)
-        {
-            throw new InvalidOperationException($"Failed to send email to {recipientEmail}. StatusCode: {response.StatusCode}");
-        }
+      if (!response.IsSuccessStatusCode)
+      {
+        throw new InvalidOperationException($"Failed to send email to {recipientEmail}. StatusCode: {response.StatusCode}");
+      }
     }
   }
 }
