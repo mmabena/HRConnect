@@ -13,7 +13,7 @@
   using HRConnect.Api.Models.Pension;
   using HRConnect.Api.Utils;
   using HRConnect.Api.Utils.Pension.ValidationHelpers;
-  using HRConnect.Api.Utils.Quartz.Pension;
+  using HRConnect.Api.Utils.Jobs.Pension;
   using Quartz;
 
   public class EmployeePensionEnrollmentService(IEmployeePensionEnrollmentRepository employeePensionEnrollmentRepository,

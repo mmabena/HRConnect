@@ -12,6 +12,7 @@ using HRConnect.Api.Repository;
 using HRConnect.Api.Services;
 using HRConnect.Api.Utils;
 using HRConnect.Api.Utils.Jobs.Payroll;
+using HRConnect.Api.Utils.Jobs.Pension;
 using HRConnect.Api.Utils.Payroll;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -160,7 +161,7 @@ builder.Services.AddQuartz(q =>
         .StoreDurably());
 
   _ = q.AddTrigger(opts => opts
-      .ForJob(jobKey)
+      .ForJob(employeePensionEnrollmentJob)
       .StartNow());
 
   //Adding persistence to quartz to be able to be run in the back

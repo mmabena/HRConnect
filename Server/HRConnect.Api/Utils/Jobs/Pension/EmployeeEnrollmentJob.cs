@@ -1,7 +1,7 @@
-﻿namespace HRConnect.Api.Utils.Quartz.Pension
+﻿namespace HRConnect.Api.Utils.Jobs.Pension
 {
   using System.Threading.Tasks;
-  using global::Quartz;
+  using Quartz;
   using HRConnect.Api.Services;
 
   public class EmployeeEnrollmentJob(IServiceProvider serviceProvider) : IJob
