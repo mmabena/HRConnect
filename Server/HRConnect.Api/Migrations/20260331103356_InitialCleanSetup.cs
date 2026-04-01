@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace HRConnect.Api.Migrations
 {
   /// <inheritdoc />
-  public partial class InitialMphoToMatchMain : Migration
+  public partial class InitialCleanSetup : Migration
   {
     /// <inheritdoc />
     protected override void Up(MigrationBuilder migrationBuilder)
@@ -568,9 +568,12 @@ namespace HRConnect.Api.Migrations
           columns: new[] { "JobGradeId", "CreatedDate", "IsActive", "Name", "UpdatedDate" },
           values: new object[,]
           {
-                    { 1, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Unskilled–Middle", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 2, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Senior Management", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 3, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Executive Director", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) }
+                    { 1, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Executive Director", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 2, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Junior Management", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 3, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Middle Management", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 4, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Skilled/Semi Skilled", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 5, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Top/Senior Management", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+                    { 6, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Unskilled", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) }
           });
 
       migrationBuilder.InsertData(
@@ -599,37 +602,24 @@ namespace HRConnect.Api.Migrations
           columns: new[] { "Id", "DaysAllocated", "IsActive", "JobGradeId", "LeaveTypeId", "MaxYearsService", "MinYearsService" },
           values: new object[,]
           {
-                    { 1, 15m, true, 1, 1, 2.99m, 0m },
-                    { 2, 18m, true, 2, 1, 2.99m, 0m },
-                    { 3, 22m, true, 3, 1, 2.99m, 0m },
-                    { 4, 18m, true, 1, 1, 5m, 3m },
-                    { 5, 21m, true, 2, 1, 5m, 3m },
-                    { 6, 25m, true, 3, 1, 5m, 3m },
-                    { 7, 20m, true, 1, 1, null, 5.01m },
-                    { 8, 23m, true, 2, 1, null, 5.01m },
-                    { 9, 27m, true, 3, 1, null, 5.01m },
-                    { 10, 30m, true, 1, 2, null, 0m },
-                    { 11, 30m, true, 2, 2, null, 0m },
-                    { 12, 30m, true, 3, 2, null, 0m },
-                    { 13, 120m, true, 1, 3, null, 0m },
-                    { 14, 120m, true, 2, 3, null, 0m },
-                    { 15, 120m, true, 3, 3, null, 0m },
-                    { 16, 3m, true, 1, 4, null, 0m },
-                    { 17, 3m, true, 2, 4, null, 0m },
-                    { 18, 3m, true, 3, 4, null, 0m }
-          });
-
-      migrationBuilder.InsertData(
-          table: "Positions",
-          columns: new[] { "PositionId", "CreatedDate", "IsActive", "JobGradeId", "OccupationalLevelId", "PositionTitle", "UpdatedDate" },
-          values: new object[,]
-          {
-                    { 1, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, 1, 1, "Unskilled", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 2, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, 1, 1, "Skilled/Semi Skilled", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 3, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, 1, 1, "Junior Management", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 4, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, 1, 1, "Middle Management", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 5, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, 2, 2, "Top/Senior Management", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 6, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), false, 3, 3, "Executive Director", new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) }
+                    { 1, 15m, true, 2, 1, 2.99m, 0m },
+                    { 2, 15m, true, 3, 1, 2.99m, 0m },
+                    { 3, 15m, true, 4, 1, 2.99m, 0m },
+                    { 4, 15m, true, 6, 1, 2.99m, 0m },
+                    { 5, 18m, true, 2, 1, 5m, 3m },
+                    { 6, 18m, true, 3, 1, 5m, 3m },
+                    { 7, 18m, true, 4, 1, 5m, 3m },
+                    { 8, 18m, true, 6, 1, 5m, 3m },
+                    { 9, 20m, true, 2, 1, null, 5.01m },
+                    { 10, 20m, true, 3, 1, null, 5.01m },
+                    { 11, 20m, true, 4, 1, null, 5.01m },
+                    { 12, 20m, true, 6, 1, null, 5.01m },
+                    { 13, 18m, true, 5, 1, 2.99m, 0m },
+                    { 14, 21m, true, 5, 1, 5m, 3m },
+                    { 15, 23m, true, 5, 1, null, 5.01m },
+                    { 16, 22m, true, 1, 1, 2.99m, 0m },
+                    { 17, 25m, true, 1, 1, 5m, 3m },
+                    { 18, 27m, true, 1, 1, null, 5.01m }
           });
 
       migrationBuilder.CreateIndex(

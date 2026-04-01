@@ -2,7 +2,7 @@ namespace HRConnect.Api.Services
 {
   using System.Globalization;
   using HRConnect.Api.DTOs.Employee.Pension;
-  using HRConnect.Api.Interfaces.PensionProjection;
+  using HRConnect.Api.Interfaces.Pension;
   using HRConnect.Api.Models;
   using HRConnect.Api.Utils;
 
@@ -41,14 +41,14 @@ namespace HRConnect.Api.Services
 
       if (pensionProjectRequestDto.VoluntaryContribution != 0)
       {
-        if (ValidVoluntaryContribution(pensionProjectRequestDto.VoluntaryContribution, PensionOption.GetPensionPercentage(pensionProjectRequestDto.SelectedPensionPercentage),
+        if (ValidVoluntaryContribution(pensionProjectRequestDto.VoluntaryContribution, Utils.AvailablePensionOptions.GetPensionPercentage(pensionProjectRequestDto.SelectedPensionPercentage),
           pensionProjectRequestDto.Salary) != "")
         {
           return new PensionProjectionResultDto
           {
             WarningMessage = ValidVoluntaryContribution(
                 pensionProjectRequestDto.VoluntaryContribution,
-                PensionOption.GetPensionPercentage(pensionProjectRequestDto.SelectedPensionPercentage),
+                Utils.AvailablePensionOptions.GetPensionPercentage(pensionProjectRequestDto.SelectedPensionPercentage),
                 pensionProjectRequestDto.Salary
               )
           };
@@ -270,7 +270,7 @@ namespace HRConnect.Api.Services
             empSalary = Math.Round(empSalary * (decimal)(SALARYINCREASE_PERCENTAGE + 1), 2);
           }
 
-          decimal monthlyContribution = Math.Round(empSalary * (decimal)PensionOption.GetPensionPercentage(selectedPercentage), 2);
+          decimal monthlyContribution = Math.Round(empSalary * (decimal)Utils.AvailablePensionOptions.GetPensionPercentage(selectedPercentage), 2);
 
           if (voluntaryContributionFrequency == ContributionFrequency.Permanent)
           {
