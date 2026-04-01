@@ -75,8 +75,6 @@ namespace HRConnect.Api.Services
 
       //Recalculate leave balances for the employee before returning the data
       await _leaveBalanceService.RecalculateAnnualLeaveAsync(employeeId);
-      await _leaveProcessingService.RecalculateAllSickLeaveAsync();
-      await _leaveProcessingService.RecalculateAllFamilyResponsibilityLeaveAsync();
 
       var employee = await _employeeRepo.GetEmployeeByIdAsync(employeeId);
       return employee?.ToEmployeeDto();
