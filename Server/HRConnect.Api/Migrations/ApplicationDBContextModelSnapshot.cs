@@ -902,50 +902,50 @@ namespace HRConnect.Api.Migrations
                         new
                         {
                             JobGradeId = 1,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedDate = new DateTime(2026, 2, 11, 14, 33, 32, 0, DateTimeKind.Unspecified),
                             IsActive = true,
                             Name = "Executive Director",
-                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                            UpdatedDate = new DateTime(2026, 2, 27, 10, 15, 8, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             JobGradeId = 2,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedDate = new DateTime(2026, 2, 12, 7, 14, 45, 0, DateTimeKind.Unspecified),
                             IsActive = true,
                             Name = "Junior Management",
-                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                            UpdatedDate = new DateTime(2026, 2, 27, 6, 41, 39, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             JobGradeId = 3,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedDate = new DateTime(2026, 2, 12, 7, 15, 20, 0, DateTimeKind.Unspecified),
                             IsActive = true,
                             Name = "Middle Management",
-                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                            UpdatedDate = new DateTime(2026, 2, 12, 7, 15, 20, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             JobGradeId = 4,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedDate = new DateTime(2026, 2, 12, 7, 15, 39, 0, DateTimeKind.Unspecified),
                             IsActive = true,
                             Name = "Skilled/Semi Skilled",
-                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                            UpdatedDate = new DateTime(2026, 2, 12, 7, 15, 39, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             JobGradeId = 5,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedDate = new DateTime(2026, 2, 12, 7, 15, 54, 0, DateTimeKind.Unspecified),
                             IsActive = true,
                             Name = "Top/Senior Management",
-                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                            UpdatedDate = new DateTime(2026, 2, 12, 7, 15, 54, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             JobGradeId = 6,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedDate = new DateTime(2026, 2, 12, 7, 16, 8, 0, DateTimeKind.Unspecified),
                             IsActive = true,
                             Name = "Unskilled",
-                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                            UpdatedDate = new DateTime(2026, 2, 12, 7, 16, 8, 0, DateTimeKind.Unspecified)
                         });
                 });
 
