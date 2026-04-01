@@ -3,6 +3,7 @@
   using System.Threading.Tasks;
   using Quartz;
   using HRConnect.Api.Services;
+  using HRConnect.Api.Interfaces.Pension;
 
   public class EmployeeEnrollmentJob(IServiceProvider serviceProvider) : IJob
   {
@@ -14,7 +15,7 @@
     public async Task Execute(IJobExecutionContext context)
     {
       using IServiceScope scope = _serviceProvider.CreateScope();
-      EmployeePensionEnrollmentService intializer = scope.ServiceProvider.GetRequiredService<EmployeePensionEnrollmentService>();
+      IEmployeePensionEnrollmentService intializer = scope.ServiceProvider.GetRequiredService<IEmployeePensionEnrollmentService>();
 
       await intializer.InitializeEmployeePensionEnrollment();
     }

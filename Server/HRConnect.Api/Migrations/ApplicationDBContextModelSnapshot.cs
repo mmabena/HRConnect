@@ -1482,32 +1482,6 @@ namespace HRConnect.Api.Migrations
                         .IsUnique();
 
                     b.ToTable("OccupationalLevels");
-
-                    b.HasData(
-                        new
-                        {
-                            OccupationalLevelId = 1,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Level 1",
-                            IsActive = true,
-                            UpdatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            OccupationalLevelId = 2,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Level 2",
-                            IsActive = true,
-                            UpdatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            OccupationalLevelId = 3,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Level 3",
-                            IsActive = true,
-                            UpdatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        });
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.PasswordHistory", b =>

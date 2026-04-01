@@ -234,43 +234,15 @@ namespace HRConnect.Api.Data
       // ================= SEED DATA (UNCHANGED FROM YOUR SYSTEM) =================
 
       modelBuilder.Entity<JobGrade>().HasData(
-          new JobGrade { JobGradeId = 1, Name = "Unskilled–Middle", CreatedDate = new DateTime(2024, 1, 1), UpdatedDate = new DateTime(2024, 1, 1) },
-          new JobGrade { JobGradeId = 2, Name = "Senior Management", CreatedDate = new DateTime(2024, 1, 1), UpdatedDate = new DateTime(2024, 1, 1) },
-          new JobGrade { JobGradeId = 3, Name = "Executive Director", CreatedDate = new DateTime(2024, 1, 1), UpdatedDate = new DateTime(2024, 1, 1) }
+ new JobGrade { JobGradeId = 1, Name = "Executive Director", IsActive = true, CreatedDate = new DateTime(2026, 1, 1), UpdatedDate = new DateTime(2026, 1, 1) },
+          new JobGrade { JobGradeId = 2, Name = "Junior Management", IsActive = true, CreatedDate = new DateTime(2026, 1, 1), UpdatedDate = new DateTime(2026, 1, 1) },
+          new JobGrade { JobGradeId = 3, Name = "Middle Management", IsActive = true, CreatedDate = new DateTime(2026, 1, 1), UpdatedDate = new DateTime(2026, 1, 1) },
+          new JobGrade { JobGradeId = 4, Name = "Skilled/Semi Skilled", IsActive = true, CreatedDate = new DateTime(2026, 1, 1), UpdatedDate = new DateTime(2026, 1, 1) },
+          new JobGrade { JobGradeId = 5, Name = "Top/Senior Management", IsActive = true, CreatedDate = new DateTime(2026, 1, 1), UpdatedDate = new DateTime(2026, 1, 1) },
+          new JobGrade { JobGradeId = 6, Name = "Unskilled", IsActive = true, CreatedDate = new DateTime(2026, 1, 1), UpdatedDate = new DateTime(2026, 1, 1) }
+
       );
 
-      modelBuilder.Entity<OccupationalLevel>().HasData(
-        new OccupationalLevel
-        {
-          OccupationalLevelId = 1,
-          Description = "Level 1",
-          CreatedDate = new DateTime(2024, 1, 1),
-          UpdatedDate = new DateTime(2024, 1, 1)
-        },
-        new OccupationalLevel
-        {
-          OccupationalLevelId = 2,
-          Description = "Level 2",
-          CreatedDate = new DateTime(2024, 1, 1),
-          UpdatedDate = new DateTime(2024, 1, 1)
-        },
-        new OccupationalLevel
-        {
-          OccupationalLevelId = 3,
-          Description = "Level 3",
-          CreatedDate = new DateTime(2024, 1, 1),
-          UpdatedDate = new DateTime(2024, 1, 1)
-        }
-      );
-
-      modelBuilder.Entity<Position>().HasData(
-          new Position { PositionId = 1, PositionTitle = "Unskilled", JobGradeId = 1, OccupationalLevelId = 1, CreatedDate = new DateTime(2024, 1, 1), UpdatedDate = new DateTime(2024, 1, 1) },
-          new Position { PositionId = 2, PositionTitle = "Skilled/Semi Skilled", JobGradeId = 1, OccupationalLevelId = 1, CreatedDate = new DateTime(2024, 1, 1), UpdatedDate = new DateTime(2024, 1, 1) },
-          new Position { PositionId = 3, PositionTitle = "Junior Management", JobGradeId = 1, OccupationalLevelId = 1, CreatedDate = new DateTime(2024, 1, 1), UpdatedDate = new DateTime(2024, 1, 1) },
-          new Position { PositionId = 4, PositionTitle = "Middle Management", JobGradeId = 1, OccupationalLevelId = 1, CreatedDate = new DateTime(2024, 1, 1), UpdatedDate = new DateTime(2024, 1, 1) },
-          new Position { PositionId = 5, PositionTitle = "Top/Senior Management", JobGradeId = 2, OccupationalLevelId = 2, CreatedDate = new DateTime(2024, 1, 1), UpdatedDate = new DateTime(2024, 1, 1) },
-          new Position { PositionId = 6, PositionTitle = "Executive Director", JobGradeId = 3, OccupationalLevelId = 3, CreatedDate = new DateTime(2024, 1, 1), UpdatedDate = new DateTime(2024, 1, 1) }
-      );
 
       // Leave Types (Policy stored here)
       modelBuilder.Entity<LeaveType>().HasData(
@@ -330,35 +302,36 @@ namespace HRConnect.Api.Data
 
       // Leave Entitlement Rules (ONLY entitlement tiers)
       modelBuilder.Entity<LeaveEntitlementRule>().HasData(
-          // Annual <3
-          new LeaveEntitlementRule { Id = 1, LeaveTypeId = 1, JobGradeId = 1, MinYearsService = 0, MaxYearsService = 2.99m, DaysAllocated = 15, IsActive = true },
-          new LeaveEntitlementRule { Id = 2, LeaveTypeId = 1, JobGradeId = 2, MinYearsService = 0, MaxYearsService = 2.99m, DaysAllocated = 18, IsActive = true },
-          new LeaveEntitlementRule { Id = 3, LeaveTypeId = 1, JobGradeId = 3, MinYearsService = 0, MaxYearsService = 2.99m, DaysAllocated = 22, IsActive = true },
+    // ===== GROUP A (2,3,4,6 SAME) =====
 
-          // Annual 3–5
-          new LeaveEntitlementRule { Id = 4, LeaveTypeId = 1, JobGradeId = 1, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 18, IsActive = true },
-          new LeaveEntitlementRule { Id = 5, LeaveTypeId = 1, JobGradeId = 2, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 21, IsActive = true },
-          new LeaveEntitlementRule { Id = 6, LeaveTypeId = 1, JobGradeId = 3, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 25, IsActive = true },
+    // <3 years
+    new LeaveEntitlementRule { Id = 1, LeaveTypeId = 1, JobGradeId = 2, MinYearsService = 0, MaxYearsService = 2.99m, DaysAllocated = 15, IsActive = true },
+    new LeaveEntitlementRule { Id = 2, LeaveTypeId = 1, JobGradeId = 3, MinYearsService = 0, MaxYearsService = 2.99m, DaysAllocated = 15, IsActive = true },
+    new LeaveEntitlementRule { Id = 3, LeaveTypeId = 1, JobGradeId = 4, MinYearsService = 0, MaxYearsService = 2.99m, DaysAllocated = 15, IsActive = true },
+    new LeaveEntitlementRule { Id = 4, LeaveTypeId = 1, JobGradeId = 6, MinYearsService = 0, MaxYearsService = 2.99m, DaysAllocated = 15, IsActive = true },
 
-          // Annual >5
-          new LeaveEntitlementRule { Id = 7, LeaveTypeId = 1, JobGradeId = 1, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 20, IsActive = true },
-          new LeaveEntitlementRule { Id = 8, LeaveTypeId = 1, JobGradeId = 2, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 23, IsActive = true },
-          new LeaveEntitlementRule { Id = 9, LeaveTypeId = 1, JobGradeId = 3, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 27, IsActive = true },
+    // 3–5 years
+    new LeaveEntitlementRule { Id = 5, LeaveTypeId = 1, JobGradeId = 2, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 18, IsActive = true },
+    new LeaveEntitlementRule { Id = 6, LeaveTypeId = 1, JobGradeId = 3, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 18, IsActive = true },
+    new LeaveEntitlementRule { Id = 7, LeaveTypeId = 1, JobGradeId = 4, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 18, IsActive = true },
+    new LeaveEntitlementRule { Id = 8, LeaveTypeId = 1, JobGradeId = 6, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 18, IsActive = true },
 
-          // Sick (all grades)
-          new LeaveEntitlementRule { Id = 10, LeaveTypeId = 2, JobGradeId = 1, MinYearsService = 0, MaxYearsService = null, DaysAllocated = 30, IsActive = true },
-          new LeaveEntitlementRule { Id = 11, LeaveTypeId = 2, JobGradeId = 2, MinYearsService = 0, MaxYearsService = null, DaysAllocated = 30, IsActive = true },
-          new LeaveEntitlementRule { Id = 12, LeaveTypeId = 2, JobGradeId = 3, MinYearsService = 0, MaxYearsService = null, DaysAllocated = 30, IsActive = true },
+    // >5 years
+    new LeaveEntitlementRule { Id = 9, LeaveTypeId = 1, JobGradeId = 2, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 20, IsActive = true },
+    new LeaveEntitlementRule { Id = 10, LeaveTypeId = 1, JobGradeId = 3, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 20, IsActive = true },
+    new LeaveEntitlementRule { Id = 11, LeaveTypeId = 1, JobGradeId = 4, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 20, IsActive = true },
+    new LeaveEntitlementRule { Id = 12, LeaveTypeId = 1, JobGradeId = 6, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 20, IsActive = true },
 
-          // Maternity
-          new LeaveEntitlementRule { Id = 13, LeaveTypeId = 3, JobGradeId = 1, MinYearsService = 0, MaxYearsService = null, DaysAllocated = 120, IsActive = true },
-          new LeaveEntitlementRule { Id = 14, LeaveTypeId = 3, JobGradeId = 2, MinYearsService = 0, MaxYearsService = null, DaysAllocated = 120, IsActive = true },
-          new LeaveEntitlementRule { Id = 15, LeaveTypeId = 3, JobGradeId = 3, MinYearsService = 0, MaxYearsService = null, DaysAllocated = 120, IsActive = true },
+    // ===== GROUP B (5) =====
+    new LeaveEntitlementRule { Id = 13, LeaveTypeId = 1, JobGradeId = 5, MinYearsService = 0, MaxYearsService = 2.99m, DaysAllocated = 18, IsActive = true },
+    new LeaveEntitlementRule { Id = 14, LeaveTypeId = 1, JobGradeId = 5, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 21, IsActive = true },
+    new LeaveEntitlementRule { Id = 15, LeaveTypeId = 1, JobGradeId = 5, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 23, IsActive = true },
 
-          // Family Responsibility(all grades)
-          new LeaveEntitlementRule { Id = 16, LeaveTypeId = 4, JobGradeId = 1, MinYearsService = 0, MaxYearsService = null, DaysAllocated = 3, IsActive = true },
-          new LeaveEntitlementRule { Id = 17, LeaveTypeId = 4, JobGradeId = 2, MinYearsService = 0, MaxYearsService = null, DaysAllocated = 3, IsActive = true },
-          new LeaveEntitlementRule { Id = 18, LeaveTypeId = 4, JobGradeId = 3, MinYearsService = 0, MaxYearsService = null, DaysAllocated = 3, IsActive = true }
+    // ===== GROUP C (1) =====
+    new LeaveEntitlementRule { Id = 16, LeaveTypeId = 1, JobGradeId = 1, MinYearsService = 0, MaxYearsService = 2.99m, DaysAllocated = 22, IsActive = true },
+    new LeaveEntitlementRule { Id = 17, LeaveTypeId = 1, JobGradeId = 1, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 25, IsActive = true },
+    new LeaveEntitlementRule { Id = 18, LeaveTypeId = 1, JobGradeId = 1, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 27, IsActive = true }
+
       );
     }
 
