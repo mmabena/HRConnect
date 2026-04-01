@@ -10,6 +10,8 @@ namespace HRConnect.Tests
     using HRConnect.Api.Services;
     using Microsoft.EntityFrameworkCore;
     using Xunit;
+    using Moq;
+    using HRConnect.Api.Interfaces;
 
     public class LeaveTypeManagementServiceTests
     {
@@ -20,6 +22,11 @@ namespace HRConnect.Tests
                 .Options;
 
             return new ApplicationDBContext(options);
+        }
+        private static LeaveTypeManagementService CreateService(ApplicationDBContext context)
+        {
+            var mockLeaveBalanceService = new Mock<ILeaveBalanceService>();
+            return new LeaveTypeManagementService(context, mockLeaveBalanceService.Object);
         }
 
         [Fact]
@@ -34,7 +41,7 @@ namespace HRConnect.Tests
 
             await context.SaveChangesAsync();
 
-            var service = new LeaveTypeManagementService(context);
+            var service = CreateService(context);
 
             var result = await service.GetLeaveTypesAsync();
 
@@ -51,7 +58,7 @@ namespace HRConnect.Tests
 
             await context.SaveChangesAsync();
 
-            var service = new LeaveTypeManagementService(context);
+            var service = CreateService(context);
 
             var result = await service.GetLeaveTypeByIdAsync(1);
 
@@ -62,7 +69,7 @@ namespace HRConnect.Tests
         public async Task GetLeaveTypeByIdShouldThrowIfNotFound()
         {
             var context = GetInMemoryDb();
-            var service = new LeaveTypeManagementService(context);
+            var service = CreateService(context);
 
             await Assert.ThrowsAsync<KeyNotFoundException>(() =>
                 service.GetLeaveTypeByIdAsync(99));
@@ -73,7 +80,7 @@ namespace HRConnect.Tests
         {
             var context = GetInMemoryDb();
 
-            var service = new LeaveTypeManagementService(context);
+            var service = CreateService(context);
 
             var request = new CreateLeaveTypeRequest
             {
@@ -115,7 +122,7 @@ namespace HRConnect.Tests
 
             await context.SaveChangesAsync();
 
-            var service = new LeaveTypeManagementService(context);
+            var service = CreateService(context);
 
             var request = new CreateLeaveTypeRequest
             {
@@ -151,7 +158,7 @@ namespace HRConnect.Tests
             });
             await context.SaveChangesAsync();
 
-            var service = new LeaveTypeManagementService(context);
+            var service = CreateService(context);
 
             var request = new CreateLeaveTypeRequest
             {
@@ -188,7 +195,7 @@ namespace HRConnect.Tests
 
             await context.SaveChangesAsync();
 
-            var service = new LeaveTypeManagementService(context);
+            var service = CreateService(context);
 
             var request = new UpdateLeaveTypeRequest
             {
@@ -213,7 +220,7 @@ namespace HRConnect.Tests
         public async Task UpdateLeaveTypeShouldThrowIfNotFound()
         {
             var context = GetInMemoryDb();
-            var service = new LeaveTypeManagementService(context);
+            var service = CreateService(context);
 
             var request = new UpdateLeaveTypeRequest
             {

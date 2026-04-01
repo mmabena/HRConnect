@@ -26,9 +26,12 @@ namespace HRConnect.Api.Services
         /// <returns></returns>
         public async Task RecalculateAllSickLeaveAsync()
         {
-            var employees = await _context.Employees
-                .Include(e => e.LeaveBalances)
-                    .ThenInclude(lb => lb.LeaveType)
+            var employees = await _context.EmployeeLeaveBalances
+                .Include(b => b.Employee)
+                .Include(b => b.LeaveType)
+                .Where(b => b.LeaveType.Code == "SL")
+                .Select(b => b.Employee)
+                .Distinct()
                 .ToListAsync();
 
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
@@ -51,10 +54,12 @@ namespace HRConnect.Api.Services
                 decimal entitled =
                     monthsWorked < 6 ? monthsWorked : 30;
 
-                if (monthsWorked >= 36)
+                var cycleNumber = monthsWorked / 36;
+
+                if (sickBalance.LastResetYear == null || sickBalance.LastResetYear != cycleNumber)
                 {
                     sickBalance.TakenDays = 0;
-                    entitled = 30;
+                    sickBalance.LastResetYear = cycleNumber;
                 }
 
                 sickBalance.AccruedDays = entitled;
@@ -83,7 +88,7 @@ namespace HRConnect.Api.Services
         }
         /// <summary>
         /// Resets the maternity leave balance for all eligible employees when they have a new pregnancy, based on the applicable policy.
-         /// </summary>
+        /// </summary>
         /// </summary>
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
