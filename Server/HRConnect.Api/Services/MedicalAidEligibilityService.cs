@@ -1,4 +1,4 @@
-﻿namespace HRConnect.Api.Services;
+namespace HRConnect.Api.Services;
 
 using DTOs;
 using DTOs.Employee;
@@ -50,6 +50,12 @@ public class MedicalAidEligibilityService : IMedicalAidEligibilityService
         if (employee == null)
         {
             throw new KeyNotFoundException($"Employee with ID {employeeId} not found");
+        }
+
+        // Check if employee is permanent
+        if (employee.EmploymentStatus != EmploymentStatus.Permanent)
+        {
+            throw new ArgumentException("Medical aid eligibility only available to permanent employees");
         }
 
         // Calculate total dependents

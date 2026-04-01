@@ -94,35 +94,53 @@
     /// <exception cref="ArgumentException">Thrown when categoryId is invalid or no matching options found.</exception>
     Task<IReadOnlyList<MedicalOptionDto>> BulkUpdateByCategoryIdAsync(int categoryId,
       IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto);
-
-// New Methods
-    // Get
-    // Get all Possible options for employee based on salary
+    
+    /// <summary>Retrieves all medical options matching an employee's salary bracket.</summary>
+    /// <param name="salaryAmount">The employee's salary to match against salary brackets.</param>
+    /// <returns>Medical options grouped by category ID that match the salary bracket.</returns>
     Task<List<IGrouping<int, MedicalOption>>> GetAllOptionsWithinEmployeeSalary(
       decimal salaryAmount);
 
-    // Get eligible options for employee
+    /// <summary>Retrieves all eligible medical options available to a specific employee.</summary>
+    /// <param name="employeeId">The unique identifier of the employee.</param>
+    /// <returns>Eligible medical options grouped by category ID for the employee.</returns>
     Task<List<IGrouping<int, MedicalOptionDto>>> GetEmployeeEligibleOptions(string employeeId);
 
-    // Get All options under category via category ID
+    /// <summary>Retrieves all medical options under a specific category by its ID.</summary>
+    /// <param name="id">The unique identifier of the medical option category.</param>
+    /// <returns>Medical options grouped by category ID for the specified category.</returns>
     Task<List<IGrouping<int, MedicalOption>>> GetAllCategoryOptionsById(int id);
 
-    // Medical Options Category
+    /// <summary>Retrieves all medical option categories grouped by their unique identifiers.</summary>
+    /// <returns>Medical option categories grouped by category ID.</returns>
     Task<List<IGrouping<int, MedicalOptionCategory>>> GetAllMedicalOptionCategories();
 
+    /// <summary>Retrieves all medical option categories by category ID.</summary>
+    /// <param name="id">The unique identifier of the medical option category.</param>
+    /// <returns>List of medical option categories matching the ID.</returns>
     Task<List<MedicalOptionCategory>> GetCategoryById(int id);
     
-    // Get Current DB Copy
+    /// <summary>Retrieves the current database copy of all medical options.</summary>
+    /// <returns>A read-only list of all medical options from the database.</returns>
     Task<IReadOnlyList<MedicalOptionDto>> GetCurrentDbCopy();
 
-    // Create
+    /// <summary>Creates a new medical option category.</summary>
+    /// <param name="createCategoryPayload">The medical option category data to create.</param>
+    /// <returns>The newly created medical option category as a DTO.</returns>
     Task<MedicalOptionCategoryDto> CreateMedicalOptionCategory(
       CreateMedicalOptionCategoryDto createCategoryPayload);
 
+    /// <summary>Creates multiple medical options within an existing category.</summary>
+    /// <param name="id">The unique identifier of the medical option category.</param>
+    /// <param name="createOptionsPayload">Collection of medical options to create.</param>
+    /// <returns>List of created medical option variants.</returns>
     Task<List<CreateMedicalOptionVariantsDto>> CreateBulkOptionsByExistingCategoryId(int id,
       IReadOnlyCollection<CreateMedicalOptionVariantsDto> createOptionsPayload);
 
-    // Update
+    /// <summary>Updates an existing medical option category.</summary>
+    /// <param name="id">The unique identifier of the medical option category to update.</param>
+    /// <param name="updateCategoryPayload">The updated medical option category data.</param>
+    /// <returns>The updated medical option category as a DTO.</returns>
     Task<MedicalOptionCategoryDto> UpdateExistingCategoryById(int id,
       UpdateMedicalOptionCategoryDto updateCategoryPayload);
   }

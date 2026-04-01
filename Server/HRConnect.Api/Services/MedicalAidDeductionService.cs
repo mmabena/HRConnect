@@ -3,6 +3,7 @@ namespace HRConnect.Api.Services;
 using DTOs.MedicalOption;
 using DTOs.Payroll.PayrollDeduction.MedicalAidDeduction;
 using Interfaces;
+using Mappers;
 using Models.Payroll;
 using Models.PayrollDeduction;
 using Utils.MedicalAidDeduction;
@@ -34,6 +35,8 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
     _serviceScopeFactory = serviceScopeFactory;
   }
 
+
+
   public async Task<MedicalAidDeductionDto> GetMedicalAidDeductionsByEmployeeIdAsync(string employeeId)
   {
     var employeeDeductions = await _medicalAidDeductionRepository
@@ -46,7 +49,7 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
 
     // Return the first/most recent deduction
     var deduction = employeeDeductions.First();
-    return MapToDto(deduction);
+    return MedicalAidDeductionMapper.MapToDto(deduction);
   }
 
   public async Task<IReadOnlyList<MedicalAidDeduction>> GetAllMedicalAidDeductions()
@@ -65,21 +68,10 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
         {
             throw new KeyNotFoundException($"Employee with ID {employeeId} not found");
         }
-
-        // Is employee permanent ?
+        
         if (employee.EmploymentStatus.ToString() != "Permanent")
           throw new ArgumentException("Medical Aid is only applicable to permanent employees");
-          // throw exception only permanet employees are eligable for medical aid deductions
-
-
-        // Check if there is a medical aid deduction against employee (need to refine it further through including active payroll run)
-
-        // temp implementation
-        //var existingDedcutions =
-        // await _medicalAidDeductionRepository.GetMedicalAidDeductionsByEmployeeIdAsync(employeeId);
-
-        //if ((existingDedcutions != null  || existingDedcutions.Count > 0 )&& existingDedcutions.Any(d => d.IsActive)) throw new ArgumentException("Employee has an existing medical aid deduction");
-
+        
         // Get medical option details to ensure it exists and get category info
         var medicalOption = await _medicalOptionRepository.GetMedicalOptionByIdAsync(medicalOptionId);
 
@@ -202,15 +194,13 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
             totalChildPremium = Math.Abs((decimal)childPremium * request.ChildrenCount);
           }
         }
-
-        // Getting estimated Contributions
-        // Need to consider skipping Network choice
-        decimal principalPremiumEstimate = CalculatePrincipalPremium(medicalOption);
+        
+        decimal principalPremiumEstimate = MedicalAidDeductionUtil.CalculatePrincipalPremium(medicalOption);
         decimal spousePremiumEstimate =
-          CalculateAdultPremium(medicalOption, request.AdultCount);
+          MedicalAidDeductionUtil.CalculateAdultPremium(medicalOption, request.AdultCount);
         decimal childPremiumEstimate =
-          CalculateChildPremium(medicalOption, request.ChildrenCount); // cater for network choice
-        decimal totalPremiumEstimate = CalculateTotalPremium(principalPremiumEstimate,
+          MedicalAidDeductionUtil.CalculateChildPremium(medicalOption, request.ChildrenCount); 
+        decimal totalPremiumEstimate = MedicalAidDeductionUtil.CalculateTotalPremium(principalPremiumEstimate,
           spousePremiumEstimate, childPremiumEstimate);
 
         if (employee.MonthlySalary < totalPremiumEstimate)
@@ -253,7 +243,7 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
       TotalDeductionAmount = totalPremiumEstimate,
 
       // Effective date (default to now if not specified)
-      EffectiveDate = GetEffectiveDate(employee.StartDate.ToDateTime(TimeOnly.MinValue)),
+      EffectiveDate = MedicalAidDeductionUtil.GetEffectiveDate(employee.StartDate.ToDateTime(TimeOnly.MinValue)),
 
       // Set as active by default
       IsActive = MedicalAidDeductionUtil.EffectDateBeforeMidMonth(employee.StartDate.ToDateTime(TimeOnly.MinValue)),
@@ -267,7 +257,7 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
 
     await _medicalAidDeductionRepository.AddNewMedicalAidDeductionsAsync(deduction);
 
-    return MapToDto(deduction);
+    return MedicalAidDeductionMapper.MapToDto(deduction);
   }
 
   public async Task<UpdateMedicalAidDeductionResponseDto> UpdateDeductionsByEmpIdAsync(
@@ -298,106 +288,6 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
     
     if (updatePayload.PrincipalCount > 1)
       throw new ArgumentException("Principal count cannot exceed 1");
-    /*
-    // Create separate scopes for parallel operations
-    using var payrollRunScope = _serviceScopeFactory.CreateScope();
-    using var employeeScope = _serviceScopeFactory.CreateScope();
-    using var medicalAidDeductionScope = _serviceScopeFactory.CreateScope();
-    using var medicalOptionScope = _serviceScopeFactory.CreateScope();
-
-    
-    // Attach required service methods to scoped services
-    var payrollRunService =
-      payrollRunScope.ServiceProvider.GetRequiredService<IPayrollRunService>();
-    
-    var employeeService = employeeScope.ServiceProvider.GetRequiredService<IEmployeeService>();
-    
-    var medicalAidDeductionsRepository = medicalAidDeductionScope.ServiceProvider
-      .GetRequiredService<IMedicalAidDeductionRepository>();
-    
-    var medicalOptionService =
-      medicalOptionScope.ServiceProvider.GetRequiredService<IMedicalOptionService>();
-
-    
-    // Call the desired methods, to execute in parallel
-    // Note : goal -> Get Medical Option and confirm if there is an active deduction on employee
-    var payrollTask = payrollRunService.GetCurrentRunAsync();
-    var employeeTask = employeeService.GetEmployeeByIdAsync(employeeId);
-    var medicalAidDeductionTask =
-      medicalAidDeductionsRepository.GetMedicalAidDeductionsByEmployeeIdAsync(employeeId);
-    var medicalOptionTask =
-      medicalOptionService.GetMedicalOptionByIdAsync(updatePayload.MedicalOptionId);
-    var medicalOptionCategoryTask =
-      medicalOptionService.GetCategoryById(updatePayload.MedicalCategoryId);
-    
-    // Create a task to wait for all tasks to complete
-    await Task.WhenAll(payrollTask, employeeTask, medicalAidDeductionTask, medicalOptionTask,
-      medicalOptionCategoryTask);
-    
-    // Access data from service calls
-    var currentRunId = payrollTask.Result.PayrollRunId;
-    var employeeData = employeeTask.Result;
-    var medicalAidDeductionsData = medicalAidDeductionTask.Result;
-    var medicalOptionData = medicalOptionTask.Result;
-    var medicalOptionCategoryData = medicalOptionCategoryTask.Result;
-    
-    
-    
-    if(employeeData == null) throw new ArgumentException("Employee not found");
-    if(medicalOptionData == null) throw new ArgumentException("Medical option not found");
-    if (medicalOptionCategoryData == null || medicalOptionCategoryData.Count == 0)
-      throw new ArgumentException("Medical option category not found");
-    if (medicalAidDeductionsData == null)
-      throw new ArgumentException("Active medical aid deduction not found");
-
-
-    
-    //perform calculations
-    
-    decimal principalPremium = CalculatePrincipalPremium(medicalOptionData);
-    decimal spousePremium = CalculateAdultPremium(medicalOptionData, updatePayload.AdultCount);
-    decimal childPremium = CalculateChildPremium(medicalOptionData, updatePayload.ChildrenCount);
-    decimal totalDeductionAmount = CalculateTotalPremium(principalPremium,spousePremium,childPremium);
-    
-    //create entity
-
-    var updateEntity = new MedicalAidDeduction
-    {
-      // Employee details from employee service
-      Name = employeeData.Name,
-      Surname = employeeData.Surname,
-      Branch = employeeData.Branch.ToString(),
-      Salary = employeeData.MonthlySalary,
-      EmployeeStartDate = employeeData.StartDate.ToDateTime(TimeOnly.MinValue),
-
-      // Medical option details
-      MedicalOptionId = updatePayload.MedicalOptionId,
-      OptionName = medicalOptionData.MedicalOptionName,
-      MedicalCategoryId = medicalOptionData.MedicalOptionCategoryId,
-      OptionCategoryName = medicalOptionCategoryData.Select(c => c.MedicalOptionCategoryName).ToString(),
-
-      // Dependent counts from request
-      PrincipalCount = updatePayload.PrincipalCount,
-      AdultCount = updatePayload.AdultCount,
-      ChildrenCount = updatePayload.ChildrenCount,
-
-      // Premium amounts from request (already calculated by client from eligible options)
-      PrincipalPremium = principalPremium,
-      SpousePremium = spousePremium,
-      ChildPremium = childPremium, // cater for network choice
-      TotalDeductionAmount = totalDeductionAmount,
-      // Effective date (default to now if not specified)
-      EffectiveDate = GetEffectiveDate(employeeData.StartDate.ToDateTime(TimeOnly.MinValue)),
-
-      // Set as active by default
-      UpdatedDate = DateTime.Now.ToLocalTime()
-    };
-    
-    //Update
-    //await medicalAidDeductionsRepository.UpdateDeductionsByEmpIdAsync(employeeId, currentRunId, updateEntity);
-    await _medicalAidDeductionRepository.UpdateDeductionsByEmpIdAsync(employeeId, currentRunId,
-      updateEntity);
-    return MapToDto(updateEntity);*/
 
     // Separate scopes => separate DbContext instances per parallel branch
       using var payrollRunScope = _serviceScopeFactory.CreateScope();
@@ -460,10 +350,10 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
       if (activeDeductionForCurrentRun == null)
         throw new ArgumentException("No active medical aid deduction found for the current payroll run.");
     
-      decimal principalPremium = CalculatePrincipalPremium(medicalOptionData);
-      decimal spousePremium = CalculateAdultPremium(medicalOptionData, updatePayload.AdultCount);
-      decimal childPremium = CalculateChildPremium(medicalOptionData, updatePayload.ChildrenCount);
-      decimal totalDeductionAmount = CalculateTotalPremium(principalPremium, spousePremium, childPremium);
+      decimal principalPremium = MedicalAidDeductionUtil.CalculatePrincipalPremium(medicalOptionData);
+      decimal spousePremium = MedicalAidDeductionUtil.CalculateAdultPremium(medicalOptionData, updatePayload.AdultCount);
+      decimal childPremium = MedicalAidDeductionUtil.CalculateChildPremium(medicalOptionData, updatePayload.ChildrenCount);
+      decimal totalDeductionAmount = MedicalAidDeductionUtil.CalculateTotalPremium(principalPremium, spousePremium, childPremium);
     
       // Check if Total Sum is not greater than salary
       if (totalDeductionAmount > employeeData.MonthlySalary)
@@ -516,7 +406,7 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
       currentRun.PayrollRunId,
       updateEntity);
 
-    return ToUpdateMedicalAidDeductionResponseDto(updateEntity);
+    return MedicalAidDeductionMapper.ToUpdateMedicalAidDeductionResponseDto(updateEntity);
 
   }
 
@@ -685,9 +575,7 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
     
     await _payrollRunService.AddRecordsCollectionToRunAsync(recordsToRollover);
     
-    //get record count
-    //int recordAddedCount = await _payrollRunService.AddBulkRecordsToCurrentRunAsync(recordsToRollover, employeeIds);
-    //Console.WriteLine($"Successfully added {recordAddedCount} records to payroll run");
+
     
     await SaveChangesAsync();
   }
@@ -696,125 +584,4 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
   {
     await _medicalAidDeductionRepository.SaveChangesAsync();
   }
-
-  //TODO :  Move to Mappers
-    /// <summary>
-    /// Maps a MedicalAidDeduction entity to a MedicalAidDeductionDto.
-    /// </summary>
-    private static MedicalAidDeductionDto MapToDto(MedicalAidDeduction request)
-    {
-        return new MedicalAidDeductionDto
-        {
-            PayrollRunId = request.Id,
-            EmployeeId = request.EmployeeId ?? string.Empty,
-            Name = request.Name,
-            Surname = request.Surname,
-            Branch = request.Branch,
-            Salary = request.Salary,
-            EmployeeStartDate = request.EmployeeStartDate,
-            EffectiveDate = request.EffectiveDate,
-            MedicalOptionId = request.MedicalOptionId,
-            MedicalCategoryId = request.MedicalCategoryId,
-            PrincipalCount = request.PrincipalCount,
-            AdultCount = request.AdultCount,
-            ChildrenCount = request.ChildrenCount,
-            PrincipalPremium = request.PrincipalPremium,
-            SpousePremium = request.SpousePremium,
-            ChildPremium = request.ChildPremium,
-            TotalDeductionAmount = request.TotalDeductionAmount,
-            CreatedDate = request.CreatedDate,
-            IsActive = request.IsActive,
-            UpdatedDate = request.UpdatedDate
-        };
-    }
-    
-    private static UpdateMedicalAidDeductionResponseDto ToUpdateMedicalAidDeductionResponseDto(MedicalAidDeduction response)
-    {
-      return new UpdateMedicalAidDeductionResponseDto
-      {
-        Id = response.Id,
-        PayrollRunId = response.Id,
-        EmployeeId = response.EmployeeId ?? string.Empty,
-        Name = response.Name,
-        Surname = response.Surname,
-        Branch = response.Branch,
-        Salary = response.Salary,
-        EmployeeStartDate = response.EmployeeStartDate,
-        EffectiveDate = response.EffectiveDate,
-        MedicalOptionId = response.MedicalOptionId,
-        OptionName = response.OptionName,
-        MedicalCategoryId = response.MedicalCategoryId,
-        OptionCategoryName = response.OptionCategoryName,
-        PrincipalCount = response.PrincipalCount,
-        AdultCount = response.AdultCount,
-        ChildrenCount = response.ChildrenCount,
-        PrincipalPremium = response.PrincipalPremium,
-        SpousePremium = response.SpousePremium,
-        ChildPremium = response.ChildPremium,
-        TotalDeductionAmount = response.TotalDeductionAmount,
-        CreatedDate = response.CreatedDate,
-        IsActive = response.IsActive,
-        UpdatedDate = response.UpdatedDate,
-        TerminationDate = response.TerminationDate,
-        TerminationReason = response.TerminationReason,
-      };
-    }
-
-    //private methods
-
-    /// <summary>
-    /// Calculates the principal premium based on total monthly contributions.
-    /// </summary>
-    private static decimal CalculatePrincipalPremium(MedicalOptionDto? option)
-    {
-      return option.TotalMonthlyContributionsPrincipal ?? option.TotalMonthlyContributionsAdult ;
-    }
-
-    /// <summary>
-    /// Calculates the adult premium based on number of adults and per-adult contribution.
-    /// </summary>
-    private static decimal CalculateAdultPremium(MedicalOptionDto? option, int numberOfAdults)
-    {
-      if (numberOfAdults <= 0) return 0m;
-
-      decimal adultContribution = option.TotalMonthlyContributionsAdult;
-      return adultContribution * numberOfAdults;
-    }
-
-    /// <summary>
-    /// Calculates the child premium based on number of children and per-child contribution.
-    /// </summary>
-    private static decimal CalculateChildPremium(MedicalOptionDto? option, int numberOfChildren)
-    {
-      if (numberOfChildren <= 0) return 0m;
-
-      decimal childContribution = option.TotalMonthlyContributionsChild;
-      if (option.MedicalOptionName.Contains("Network") &&
-          (int.TryParse(option.MedicalOptionName[^1].ToString(), out int index) && index > 0 && index < 4))
-      {
-        return childContribution;
-      }
-      return childContribution * numberOfChildren;
-    }
-
-    private static decimal CalculateTotalPremium(decimal principalPremium, decimal adultPremium,
-      decimal childPremium)
-    {
-      return Math.Abs(principalPremium + adultPremium + childPremium);
-    }
-
-    /// <summary>
-    /// Get Effective date based on date supplied.
-    /// </summary>
-    /// <remarks>
-    /// In accordance to the business rules, if the date is before mid-month, the effective date is the start date of the employee
-    /// Else the effective date is the 1st of the following month within the current year.
-    /// </remarks>
-    /// 
-    private static DateTime GetEffectiveDate(DateTime date)
-    {
-      return date.Day <= 15
-        ? date
-        : new DateTime(DateTime.Now.Year, DateTime.Now.AddMonths(1).Month, 1);
-    }
 }
