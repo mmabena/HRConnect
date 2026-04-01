@@ -126,7 +126,7 @@ const ChangePositionManagement = ({
         </p>
 
         <form onSubmit={handleSubmit} className="pm-form">
-          <div className="checkbox-cell-position">
+          <div className="checkbox-cell-position-edit">
             <input
               type="checkbox"
               name="moveOption"
@@ -136,7 +136,7 @@ const ChangePositionManagement = ({
             Keep users in current position
           </div>
 
-          <div className="checkbox-cell-position">
+          <div className="checkbox-cell-position-edit">
             <input
               type="checkbox"
               name="moveOption"

@@ -527,7 +527,7 @@ const PersonalInformation = () => {
                 <input
                   className="emp-field-input"
                   id={id}
-                  value={employeeData[id] || ""}
+                  value={employeeData[id] || ""}   
                   readOnly
                 />
               </div>

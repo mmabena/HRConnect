@@ -15,13 +15,13 @@
   [DisallowConcurrentExecution]
   public class EmployeePensionEnrollmentJob(IEmployeePensionEnrollmentRepository employeePensionEnrollmentRepository,
     IEmployeeRepository employeeRepository, IPayrollRunRepository payrollRunRepository, IPensionDeductionRepository pensionDeductionRepository,
-    ApplicationDBContext context) : IJob
+    IPensionOptionRepository pensionOptionRepository) : IJob
   {
     private readonly IEmployeePensionEnrollmentRepository _employeePensionEnrollmentRepository = employeePensionEnrollmentRepository;
     private readonly IPayrollRunRepository _payrollRunRepository = payrollRunRepository;
     private readonly IEmployeeRepository _employeeRepository = employeeRepository;
     private readonly IPensionDeductionRepository _pensionDeductionRepository = pensionDeductionRepository;
-    private readonly ApplicationDBContext _context = context;
+    private readonly IPensionOptionRepository _pensionOptionRepository = pensionOptionRepository;
     private static readonly decimal MAX_MONTHLYCONTRIBUTION = 29166.66M;
 
     ///<summary>
@@ -133,8 +133,7 @@
     ///</returns
     private async Task<decimal> GetEmployeePensionOptionPercentageAsync(int pensionOptionId)
     {
-      decimal? employeePensionOption = await _context.PensionOptions.Where(po => po.PensionOptionId == pensionOptionId)
-        .Select(po => po.ContributionPercentage).FirstOrDefaultAsync();
+      decimal? employeePensionOption = await _pensionOptionRepository.GetPensionOptionPercentageByIdAsync(pensionOptionId);
       return employeePensionOption ?? throw new NotFoundException("Pension option not found");
     }
 
