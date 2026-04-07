@@ -9,7 +9,7 @@ import useEmployeeData from "../../hooks/useEmployeeData";
 import useEmployeeValidation from "../../hooks/useEmployeeValidation";
 import useImageUpload from "../../hooks/useImageUpload";
 import useUserRole from "../../hooks/useUserRole";
-import { UserRoundPlus, X } from "lucide-react";
+import { ArrowRight, Upload, UserRoundPlus, X } from "lucide-react";
 
 /// </summary>
 /// MOCK super user role
@@ -60,7 +60,7 @@ const AddEmployeeModal = ({ closeModal }) => {
   const handleImageClick = () => {
     fileInputRef.current.click();
   };
-  const [fileName, setFileName] = useState("Profile Picture");
+  const [fileName, setFileName] = useState("Click to upload or drag a file here PDF, JPG or PNG · max 5MB");
 
   if (role !== "superuser") {
     return <div>Access Denied. Only super users can access this page.</div>;
@@ -156,66 +156,62 @@ const AddEmployeeModal = ({ closeModal }) => {
   if (dataLoading) return <div>Loading...</div>;
 
   return (
-      
-  
     <div className="emp-center-frame">
-    
       <div className="emp-left-frame">
         <div className="emp-left-frame-centered">
           <div className="emp-headings-container">
             <div className="emp-left-icon-wrapper">
-            <UserRoundPlus size={24}/>
-           </div>
-              <span className="emp-title-wrapper emp-center-logo-text">New Employee</span>
-              <div className="emp-right-icon-wrapper">
-            <X size={24}/>
-           </div>
-        </div>
-        <div className="emp-wizard-container">
-          <div className="emp-wizard-frame">
-            <div className="emp-step-wrapper">
-            <div className = "emp-step-active">1</div>
-            <span className="emp-wizard-step">Personal Details</span>
+              <UserRoundPlus size={24} />
             </div>
-            
-            <div className="emp-line-step"></div>
-            
-            <div className="emp-step-wrapper">
-            <div className="emp-step-inactive">2</div>
-              <span className="emp-wizard-step">Banking Details</span>
-            </div>
-           
-            <div className="emp-line-step"></div>
-              <div className="emp-step-wrapper">
-            <div className="emp-step-inactive">3</div>
-              <span className="emp-wizard-step">Leave</span>
-            </div>
-
-            <div className="emp-line-step"></div>
-
-             <div className="emp-step-wrapper">
-            <div className="emp-step-inactive">4</div>
-              <span className="emp-wizard-step">Pension</span>
-            </div>
-
-            <div className="emp-line-step"></div>
-
-             <div className="emp-step-wrapper">
-            <div className="emp-step-inactive">5</div>
-              <span className="emp-wizard-step">Medical Aid</span>
-            </div>
-            <div className="emp-line-step"></div>
-
-             <div className="emp-step-wrapper">
-            <div className="emp-step-inactive">6</div>
-              <span className="emp-wizard-step">Preview</span>
+            <span className="emp-title-wrapper emp-center-logo-text">
+              New Employee
+            </span>
+            <div className="emp-right-icon-wrapper">
+              <X size={24} />
             </div>
           </div>
+          <div className="emp-wizard-container">
+            <div className="emp-wizard-frame">
+              <div className="emp-step-wrapper">
+                <div className="emp-step-active">1</div>
+                <span className="emp-wizard-step">Personal Details</span>
+              </div>
 
-        </div>
-        </div>
+              <div className="emp-line-step"></div>
 
-        
+              <div className="emp-step-wrapper">
+                <div className="emp-step-inactive">2</div>
+                <span className="emp-wizard-step">Banking Details</span>
+              </div>
+
+              <div className="emp-line-step"></div>
+              <div className="emp-step-wrapper">
+                <div className="emp-step-inactive">3</div>
+                <span className="emp-wizard-step">Leave</span>
+              </div>
+
+              <div className="emp-line-step"></div>
+
+              <div className="emp-step-wrapper">
+                <div className="emp-step-inactive">4</div>
+                <span className="emp-wizard-step">Pension</span>
+              </div>
+
+              <div className="emp-line-step"></div>
+
+              <div className="emp-step-wrapper">
+                <div className="emp-step-inactive">5</div>
+                <span className="emp-wizard-step">Medical Aid</span>
+              </div>
+              <div className="emp-line-step"></div>
+
+              <div className="emp-step-wrapper">
+                <div className="emp-step-inactive">6</div>
+                <span className="emp-wizard-step">Preview</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <div className="emp-name-surname-container">
           <div className="emp-form-grid">
@@ -725,31 +721,39 @@ const AddEmployeeModal = ({ closeModal }) => {
               </div>
 
               <div className="emp-input-wrapper">
-                <span className="upload-label">
-                  {uploading ? "Uploading..." : fileName}
-                </span>
-
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  className={`emp-name-input hidden-file-input ${formErrors.startDate ? "emp-error-input" : ""}`}
-                  onChange={onFileChange}
-                  name="profileImage"
-                  accept="image/*"
-                />
-
-                <img
-                  src="/images/arrow_upload_ready.png"
-                  alt="Upload profile"
-                  className="upload-icon"
-                  onClick={handleImageClick}
-                />
-
-                {formErrors.profileImage && (
-                  <span className="emp-error-message">
-                    {formErrors.profileImage}
+                <div className="emp-upload-wrapper">
+                  
+                  <span className="upload-label">
+                    Attach Profile Image
                   </span>
-                )}
+
+                  <div className="upload-container">
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      className={`emp-name-input hidden-file-input ${formErrors.startDate ? "emp-error-input" : ""}`}
+                      onChange={onFileChange}
+                      name="profileImage"
+                      accept="image/*"
+                    />
+
+                    <Upload
+                      alt="Upload icon"
+                      className="upload-icon"
+                      onClick={handleImageClick}
+                    />
+
+                    <span className="upload-text">
+                      {uploading ? "Uploading..." : fileName}
+                    </span>
+
+                  </div>
+                  {formErrors.profileImage && (
+                    <span className="emp-error-message">
+                      {formErrors.profileImage}
+                    </span>
+                  )}
+                </div>
               </div>
 
               {/* Save Button */}
@@ -762,6 +766,8 @@ const AddEmployeeModal = ({ closeModal }) => {
                 disabled={loading}
               >
                 {loading ? "Saving..." : "Next"}
+
+                <ArrowRight size={20} className="save-button-icon" />
               </button>
 
               {/* <div className="emp-right-frame-bottom">
