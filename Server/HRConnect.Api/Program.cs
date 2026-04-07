@@ -12,6 +12,7 @@ using HRConnect.Api.Repository;
 using HRConnect.Api.Services;
 using HRConnect.Api.Utils;
 using HRConnect.Api.Utils.Jobs.Payroll;
+using HRConnect.Api.Utils.Jobs.Pension;
 using HRConnect.Api.Utils.Payroll;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -154,6 +155,15 @@ builder.Services.AddQuartz(q =>
   // * -> for any/every month 
   // ? -> for all days of the week
 
+  JobKey employeePensionEnrollmentJob = new("EmployeeEnrollmentJob");
+  _ = q.AddJob<EmployeeEnrollmentJob>(opts =>
+        opts.WithIdentity(employeePensionEnrollmentJob)
+        .StoreDurably());
+
+  _ = q.AddTrigger(opts => opts
+      .ForJob(employeePensionEnrollmentJob)
+      .StartNow());
+
   //Adding persistence to quartz to be able to be run in the back
   q.UsePersistentStore(store =>
   {
@@ -221,7 +231,8 @@ builder.Services.AddScoped<IStatutoryContributionService, StatutoryContributionS
 builder.Services.AddTransient<IPensionProjectionService, PensionProjectionService>();
 builder.Services.AddScoped<IMedicalOptionRepository, MedicalOptionRepository>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IMedicalOptionService,
-HRConnect.Api.Services.MedicalOptionService>();
+  HRConnect.Api.Services.MedicalOptionService>();
+builder.Services.AddScoped<IPensionOptionRepository, PensionOptionRepository>();
 builder.Services.AddScoped<IEmployeePensionEnrollmentRepository, EmployeePensionEnrollmentRepository>();
 builder.Services.AddTransient<IEmployeePensionEnrollmentService, EmployeePensionEnrollmentService>();
 builder.Services.AddScoped<IPensionDeductionRepository, PensionDeductionRepository>();

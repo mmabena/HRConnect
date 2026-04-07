@@ -31,8 +31,6 @@ namespace HRConnect.Api.Services
     ///nullable</remarks>
     public async Task WriteExcelAsync(PayrollRun run)
     {
-      //      ExcelPackage.License.SetNonCommercialPersonal("YourName"); //already in program cs so probably remove?
-
       try
       {
         string reportsFolder = Path.Combine(_env.ContentRootPath, "Reports");
@@ -96,7 +94,6 @@ namespace HRConnect.Api.Services
         }
 
         await package.SaveAsAsync(new FileInfo(filePath));
-        Console.WriteLine($"===============>Payroll Excel report generated: {filePath}");
       }
       catch (Exception ex)
       {

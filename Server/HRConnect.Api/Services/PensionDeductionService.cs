@@ -2,7 +2,6 @@
 {
   using System.Collections.Generic;
   using System.Threading.Tasks;
-  using HRConnect.Api.Data;
   using HRConnect.Api.DTOs.Payroll.Pension;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Interfaces.Pension;
@@ -12,18 +11,17 @@
   using HRConnect.Api.Models.PayrollDeduction;
   using HRConnect.Api.Models.Pension;
   using HRConnect.Api.Utils.Pension.ValidationHelpers;
-  using Microsoft.EntityFrameworkCore;
 
   public class PensionDeductionService(IPensionDeductionRepository pensionDeductionRepository,
-    IEmployeeRepository employeeRepository, IEmployeePensionEnrollmentRepository employeePensionEnrollmentRepository,
-    IPayrollRunRepository payrollRunRepository, IPayrollRunService payrollRunService, ApplicationDBContext context) : IPensionDeductionService
+    IEmployeeRepository employeeRepository, IEmployeePensionEnrollmentRepository employeePensionEnrollmentRepository, 
+    IPensionOptionRepository pensionOptionRepository, IPayrollRunRepository payrollRunRepository, IPayrollRunService payrollRunService) : IPensionDeductionService
   {
     private readonly IPensionDeductionRepository _pensionDeductionRepository = pensionDeductionRepository;
     private readonly IEmployeeRepository _employeeRepository = employeeRepository;
     private readonly IEmployeePensionEnrollmentRepository _employeePensionEnrollmentRepository = employeePensionEnrollmentRepository;
+    private readonly IPensionOptionRepository _pensionOptionRepository = pensionOptionRepository;
     private readonly IPayrollRunRepository _payrollRunRepository = payrollRunRepository;
     private readonly IPayrollRunService _payrollRunService = payrollRunService;
-    private readonly ApplicationDBContext _context = context;
     private static readonly decimal MAX_MONTHLYCONTRIBUTION = 29166.66M;
 
     ///<summary>
@@ -162,8 +160,7 @@
     ///</returns
     private async Task<decimal> GetEmployeePensionOptionPercentageAsync(int pensionOptionId)
     {
-      decimal? employeePensionOption = await _context.PensionOptions.Where(po => po.PensionOptionId == pensionOptionId)
-        .Select(po => po.ContributionPercentage).FirstOrDefaultAsync();
+      decimal? employeePensionOption = await _pensionOptionRepository.GetPensionOptionPercentageByIdAsync(pensionOptionId);
       return employeePensionOption ?? throw new NotFoundException("Pension option not found");
     }
 
@@ -278,9 +275,7 @@
         Employee? employee = await _employeeRepository.GetEmployeeByIdAsync(enrollment.EmployeeId);
         if (employee != null && employee.IsActive)
         {
-          decimal pensionCategoryPercentage = await _context.PensionOptions
-          .Where(po => po.PensionOptionId == employee.PensionOptionId)
-          .Select(po => po.ContributionPercentage).FirstOrDefaultAsync();
+          decimal pensionCategoryPercentage = await _pensionOptionRepository.GetPensionOptionPercentageByIdAsync((int)employee.PensionOptionId);
 
           PensionDeduction pensionDeduction = new()
           {

@@ -1,6 +1,6 @@
 namespace HRConnect.Api.Utils.Jobs.Payroll
 {
-  using Quartz;
+  using global::Quartz;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Interfaces.Pension;
   using HRConnect.Api.Models.Payroll;
@@ -28,7 +28,6 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
     private readonly IPayrollPeriodService _payrollPeriodService;
     private readonly IPayrollRunRepository _payrollRunRepo;
     private readonly IEmployeePensionEnrollmentService _employeePensionEnrollmentService;
-    private readonly IPensionDeductionService _pensionDeductionService;
     private readonly IServiceProvider _serviceProvider;
     private readonly IReportsService _reportsService;
     private static readonly int MAX_RUNS = 12;
@@ -45,7 +44,6 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
       _now = now ?? (() => DateTime.Now);
       _serviceProvider = serviceProvider;
       _employeePensionEnrollmentService = employeePensionEnrollmentService;
-      _pensionDeductionService = pensionDeductionService;
     }
     /// <summary>
     /// Rolls over to a new period <see cref="PayrollPeriod"/> and creates and new valid payroll run <see cref="PayrollRun"/>  
@@ -186,16 +184,19 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
       await RolloverPayrollDeductions();
     }
 
+    ///<summary>
+    ///Auxilary function to rollover pay roll records
+    ///</summary>
     private async Task RolloverPayrollDeductions()
     {
       using IServiceScope pensionDeductionServiceScope = _serviceProvider.CreateScope();
 
       IPensionDeductionService pensionDeductionService = pensionDeductionServiceScope.ServiceProvider.GetRequiredService<IPensionDeductionService>();
 
-      var tasks = new[]
-      {
+      Task[] tasks =
+      [
         pensionDeductionService.PensionDeductionRollover()
-      };
+      ];
 
       await Task.WhenAll(tasks);
     }
