@@ -975,54 +975,54 @@ namespace HRConnect.Api.Migrations
                       onDelete: ReferentialAction.Cascade);
           });
 
-      migrationBuilder.InsertData(
-          table: "JobGrades",
-          columns: new[] { "JobGradeId", "CreatedDate", "IsActive", "Name", "UpdatedDate" },
-          values: new object[,]
-          {
-                    { 1, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Executive Director", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 2, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Junior Management", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 3, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Middle Management", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 4, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Skilled/Semi Skilled", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 5, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Top/Senior Management", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { 6, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Unskilled", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) }
-          });
+      // migrationBuilder.InsertData(
+      //     table: "JobGrades",
+      //     columns: new[] { "JobGradeId", "CreatedDate", "IsActive", "Name", "UpdatedDate" },
+      //     values: new object[,]
+      //     {
+      //               { 1, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Executive Director", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+      //               { 2, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Junior Management", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+      //               { 3, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Middle Management", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+      //               { 4, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Skilled/Semi Skilled", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+      //               { 5, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Top/Senior Management", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
+      //               { 6, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), true, "Unskilled", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) }
+      //     });
 
-      migrationBuilder.InsertData(
-          table: "LeaveTypes",
-          columns: new[] { "Id", "CarryoverExpiryDay", "CarryoverExpiryMonth", "CarryoverNotificationDay", "CarryoverNotificationMonth", "Code", "Description", "FemaleOnly", "IsActive", "IsRollingWindow", "MaxCarryoverDays", "Name", "ResetDay", "ResetMonth", "RollingMonths" },
-          values: new object[,]
-          {
-                    { 1, 1, 1, 1, 12, "AL", "Annual Leave Policy", false, true, false, 5, "Annual Leave", 1, 1, null },
-                    { 2, null, null, null, null, "SL", "Sick Leave Policy", false, true, true, null, "Sick Leave", null, null, 36 },
-                    { 3, null, null, null, null, "ML", "Maternity Leave Policy", true, true, false, null, "Maternity Leave", null, null, null },
-                    { 4, null, null, null, null, "FRL", "Family Responsibility Policy", false, true, true, null, "Family Responsibility Leave", null, null, 12 }
-          });
+      // migrationBuilder.InsertData(
+      //     table: "LeaveTypes",
+      //     columns: new[] { "Id", "CarryoverExpiryDay", "CarryoverExpiryMonth", "CarryoverNotificationDay", "CarryoverNotificationMonth", "Code", "Description", "FemaleOnly", "IsActive", "IsRollingWindow", "MaxCarryoverDays", "Name", "ResetDay", "ResetMonth", "RollingMonths" },
+      //     values: new object[,]
+      //     {
+      //               { 1, 1, 1, 1, 12, "AL", "Annual Leave Policy", false, true, false, 5, "Annual Leave", 1, 1, null },
+      //               { 2, null, null, null, null, "SL", "Sick Leave Policy", false, true, true, null, "Sick Leave", null, null, 36 },
+      //               { 3, null, null, null, null, "ML", "Maternity Leave Policy", true, true, false, null, "Maternity Leave", null, null, null },
+      //               { 4, null, null, null, null, "FRL", "Family Responsibility Policy", false, true, true, null, "Family Responsibility Leave", null, null, 12 }
+      //     });
 
-      migrationBuilder.InsertData(
-          table: "LeaveEntitlementRules",
-          columns: new[] { "Id", "DaysAllocated", "IsActive", "JobGradeId", "LeaveTypeId", "MaxYearsService", "MinYearsService" },
-          values: new object[,]
-          {
-                    { 1, 15m, true, 2, 1, 2.99m, 0m },
-                    { 2, 15m, true, 3, 1, 2.99m, 0m },
-                    { 3, 15m, true, 4, 1, 2.99m, 0m },
-                    { 4, 15m, true, 6, 1, 2.99m, 0m },
-                    { 5, 18m, true, 2, 1, 5m, 3m },
-                    { 6, 18m, true, 3, 1, 5m, 3m },
-                    { 7, 18m, true, 4, 1, 5m, 3m },
-                    { 8, 18m, true, 6, 1, 5m, 3m },
-                    { 9, 20m, true, 2, 1, null, 5.01m },
-                    { 10, 20m, true, 3, 1, null, 5.01m },
-                    { 11, 20m, true, 4, 1, null, 5.01m },
-                    { 12, 20m, true, 6, 1, null, 5.01m },
-                    { 13, 18m, true, 5, 1, 2.99m, 0m },
-                    { 14, 21m, true, 5, 1, 5m, 3m },
-                    { 15, 23m, true, 5, 1, null, 5.01m },
-                    { 16, 22m, true, 1, 1, 2.99m, 0m },
-                    { 17, 25m, true, 1, 1, 5m, 3m },
-                    { 18, 27m, true, 1, 1, null, 5.01m }
-          });
+      // migrationBuilder.InsertData(
+      //     table: "LeaveEntitlementRules",
+      //     columns: new[] { "Id", "DaysAllocated", "IsActive", "JobGradeId", "LeaveTypeId", "MaxYearsService", "MinYearsService" },
+      //     values: new object[,]
+      //     {
+      //               { 1, 15m, true, 2, 1, 2.99m, 0m },
+      //               { 2, 15m, true, 3, 1, 2.99m, 0m },
+      //               { 3, 15m, true, 4, 1, 2.99m, 0m },
+      //               { 4, 15m, true, 6, 1, 2.99m, 0m },
+      //               { 5, 18m, true, 2, 1, 5m, 3m },
+      //               { 6, 18m, true, 3, 1, 5m, 3m },
+      //               { 7, 18m, true, 4, 1, 5m, 3m },
+      //               { 8, 18m, true, 6, 1, 5m, 3m },
+      //               { 9, 20m, true, 2, 1, null, 5.01m },
+      //               { 10, 20m, true, 3, 1, null, 5.01m },
+      //               { 11, 20m, true, 4, 1, null, 5.01m },
+      //               { 12, 20m, true, 6, 1, null, 5.01m },
+      //               { 13, 18m, true, 5, 1, 2.99m, 0m },
+      //               { 14, 21m, true, 5, 1, 5m, 3m },
+      //               { 15, 23m, true, 5, 1, null, 5.01m },
+      //               { 16, 22m, true, 1, 1, 2.99m, 0m },
+      //               { 17, 25m, true, 1, 1, 5m, 3m },
+      //               { 18, 27m, true, 1, 1, null, 5.01m }
+      //     });
 
       migrationBuilder.CreateIndex(
           name: "IX_AnnualLeaveAccrualHistories_EmployeeId",
