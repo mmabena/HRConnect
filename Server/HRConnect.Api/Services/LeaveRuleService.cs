@@ -3,8 +3,6 @@ namespace HRConnect.Api.Services
   using HRConnect.Api.Data;
   using HRConnect.Api.DTOs;
   using HRConnect.Api.Interfaces;
-  using HRConnect.Api.Models;
-  using Microsoft.EntityFrameworkCore;
   using HRConnect.Api.Utils;
 
   public class LeaveRuleService : ILeaveRuleService
@@ -12,13 +10,16 @@ namespace HRConnect.Api.Services
     private readonly ApplicationDBContext _context;
     private readonly IEmailService _emailService;
     private readonly ILeaveBalanceService _leaveBalanceService;
+    private readonly ILeaveRuleRepository _leaveRuleRepo;
 
     public LeaveRuleService(
         ApplicationDBContext context,
+        ILeaveRuleRepository leaveRulesRepository,
         IEmailService emailService,
         ILeaveBalanceService leaveBalanceService)
     {
       _context = context;
+      _leaveRuleRepo = leaveRulesRepository;
       _emailService = emailService;
       _leaveBalanceService = leaveBalanceService;
     }
@@ -36,9 +37,7 @@ namespace HRConnect.Api.Services
         throw new InvalidOperationException("Days allocated cannot be negative.");
 
       //Get LeaveEntitlementRule by Id
-      var rule = await _context.LeaveEntitlementRules
-          .Include(r => r.LeaveType)
-          .FirstOrDefaultAsync(r => r.Id == request.RuleId);
+      var rule = await _leaveRuleRepo.GetLeaveEntitlementRuleByIdAsync(request.RuleId);
 
       if (rule == null)
         throw new InvalidOperationException("Rule not found.");
@@ -50,15 +49,7 @@ namespace HRConnect.Api.Services
           rule.MaxYearsService < rule.MinYearsService)
         throw new InvalidOperationException("MaxYearsService cannot be less than MinYearsService.");
       //Get employee by jobgradeId using LeaveEntitlmentRule
-      var employees = await _context.Employees
-          .Include(e => e.Position)
-          .Include(e => e.LeaveBalances)
-          .Where(e =>
-              (new[] { 2, 3, 4, 6 }.Contains(e.Position.JobGradeId) &&
-               new[] { 2, 3, 4, 6 }.Contains(rule.JobGradeId))
-              ||
-              e.Position.JobGradeId == rule.JobGradeId)
-          .ToListAsync();
+      var employees = await _leaveRuleRepo.GetEmployeeByJobGradeIdAsync(rule.JobGradeId);
 
       foreach (var employee in employees)
       {
@@ -84,7 +75,8 @@ namespace HRConnect.Api.Services
 
       rule.DaysAllocated = request.NewDaysAllocated;
 
-      await _context.SaveChangesAsync();
+      // this call is never made or used
+      _ = await _context.SaveChangesAsync();
 
       await RecalculateEmployeesForRuleChangeAsync(rule.Id);
     }
@@ -97,29 +89,16 @@ namespace HRConnect.Api.Services
     /// <exception cref="InvalidOperationException"></exception>
     public async Task RecalculateEmployeesForRuleChangeAsync(int ruleId)
     {
-      var rule = await _context.LeaveEntitlementRules
-          .Include(r => r.LeaveType)
-          .FirstOrDefaultAsync(r => r.Id == ruleId);
+      var rule = await _leaveRuleRepo.GetLeaveEntitlementRuleByIdAsync(ruleId);
 
       if (rule == null)
         throw new InvalidOperationException("Rule not found.");
 
-      var employees = await _context.Employees
-          .Include(e => e.Position)
-          .Include(e => e.LeaveBalances)
-              .ThenInclude(lb => lb.LeaveType)
-          .Where(e =>
-              (new[] { 2, 3, 4, 6 }.Contains(e.Position.JobGradeId) &&
-               new[] { 2, 3, 4, 6 }.Contains(rule.JobGradeId))
-              ||
-              e.Position.JobGradeId == rule.JobGradeId)
-          .ToListAsync();
+      var employees = await _leaveRuleRepo.GetEmployeeByJobGradeIdAsync(rule.JobGradeId);
 
       var employeeIds = employees.Select(e => e.EmployeeId).ToList();
 
-      var segments = await _context.EmployeeAccrualRateHistories
-          .Where(x => employeeIds.Contains(x.EmployeeId) && x.EffectiveTo == null)
-          .ToListAsync();
+      var segments = await _leaveRuleRepo.GetEmployeeAccrualRateHistoryAsync(employeeIds);
 
       foreach (var employee in employees)
       {
@@ -146,7 +125,9 @@ namespace HRConnect.Api.Services
           segment.AnnualEntitlement = rule.DaysAllocated;
           segment.DailyRate = (rule.DaysAllocated / 12m) / 21.67m;
         }
+
         await _context.SaveChangesAsync();
+
         await _leaveBalanceService.RecalculateAnnualLeaveAsync(employee.EmployeeId);
 
         var updatedBalance = employee.LeaveBalances

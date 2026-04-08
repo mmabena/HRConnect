@@ -1,6 +1,5 @@
 namespace HRConnect.Api.Utils.Seed
 {
-
   using HRConnect.Api.Data;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
@@ -10,11 +9,7 @@ namespace HRConnect.Api.Utils.Seed
   {
     private readonly ApplicationDBContext _context;
     //Repos to add seed value
-    private readonly IJobGradeRepository _jobGradeRepo;
     private readonly IPositionRepository _positionRepo;
-    private readonly IOccupationalLevelRepository _occupationalLevelRepo;
-    private readonly ILeaveTypeManagementRepository _leaveTypeManagementRepo;
-    //services to follow correct code path
 
     //Seed Data we need
     private readonly List<JobGrade> _seedJobGrade = new()
@@ -22,31 +17,37 @@ namespace HRConnect.Api.Utils.Seed
        //DON'T MANUALLY SET IDs
         new JobGrade
         {
+          // JobGradeId=1,
           Name="Executive Director",
           IsActive=true,
         },
         new JobGrade
         {
+          // JobGradeId=2,
           Name="Junior Management",
           IsActive=true
         },
         new JobGrade
         {
+          // JobGradeId=3,
           Name="Middle Management",
           IsActive=true
         },
         new JobGrade
         {
+          // JobGradeId=4,
           Name="Skiiled/Semi Skilled",
           IsActive=true
         },
         new JobGrade
         {
+          // JobGradeId=5,
           Name="Top/Senior Management",
           IsActive=true
         },
         new JobGrade
         {
+          // JobGradeId=6,
           Name="Unskilled",
           IsActive=true
         }
@@ -76,11 +77,13 @@ namespace HRConnect.Api.Utils.Seed
     {
       new OccupationalLevel
       {
+        // OccupationalLevelId=1,
         Description="Top Management",
         IsActive=true
       },
       new OccupationalLevel
       {
+        // OccupationalLevelId=2,
         Description="Senior Management",
         IsActive=true
       }
@@ -95,35 +98,32 @@ namespace HRConnect.Api.Utils.Seed
     new LeaveEntitlementRule {  LeaveTypeId = 1, JobGradeId = 6, MinYearsService = 0, MaxYearsService = 2.99m, DaysAllocated = 15, IsActive = true },
 
     // 3-5 years
-    new LeaveEntitlementRule { Id = 5, LeaveTypeId = 1, JobGradeId = 2, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 18, IsActive = true },
-    new LeaveEntitlementRule { Id = 6, LeaveTypeId = 1, JobGradeId = 3, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 18, IsActive = true },
-    new LeaveEntitlementRule { Id = 7, LeaveTypeId = 1, JobGradeId = 4, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 18, IsActive = true },
-    new LeaveEntitlementRule { Id = 8, LeaveTypeId = 1, JobGradeId = 6, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 18, IsActive = true },
+    new LeaveEntitlementRule {  LeaveTypeId = 1, JobGradeId = 2, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 18, IsActive = true },
+    new LeaveEntitlementRule {  LeaveTypeId = 1, JobGradeId = 3, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 18, IsActive = true },
+    new LeaveEntitlementRule {  LeaveTypeId = 1, JobGradeId = 4, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 18, IsActive = true },
+    new LeaveEntitlementRule {  LeaveTypeId = 1, JobGradeId = 6, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 18, IsActive = true },
 
     // >5 years
-    new LeaveEntitlementRule { Id = 9, LeaveTypeId = 1, JobGradeId = 2, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 20, IsActive = true },
-    new LeaveEntitlementRule { Id = 10, LeaveTypeId = 1, JobGradeId = 3, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 20, IsActive = true },
-    new LeaveEntitlementRule { Id = 11, LeaveTypeId = 1, JobGradeId = 4, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 20, IsActive = true },
-    new LeaveEntitlementRule { Id = 12, LeaveTypeId = 1, JobGradeId = 6, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 20, IsActive = true },
+    new LeaveEntitlementRule {  LeaveTypeId = 1, JobGradeId = 2, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 20, IsActive = true },
+    new LeaveEntitlementRule { LeaveTypeId=1, JobGradeId = 3, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 20, IsActive = true },
+    new LeaveEntitlementRule {  LeaveTypeId = 1, JobGradeId = 4, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 20, IsActive = true },
+    new LeaveEntitlementRule {  LeaveTypeId = 1, JobGradeId = 6, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 20, IsActive = true },
 
     // GROUP B (5)
-    new LeaveEntitlementRule { Id = 13, LeaveTypeId = 1, JobGradeId = 5, MinYearsService = 0, MaxYearsService = 2.99m, DaysAllocated = 18, IsActive = true },
-    new LeaveEntitlementRule { Id = 14, LeaveTypeId = 1, JobGradeId = 5, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 21, IsActive = true },
-    new LeaveEntitlementRule { Id = 15, LeaveTypeId = 1, JobGradeId = 5, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 23, IsActive = true },
+    new LeaveEntitlementRule {  LeaveTypeId = 1, JobGradeId = 5, MinYearsService = 0, MaxYearsService = 2.99m, DaysAllocated = 18, IsActive = true },
+    new LeaveEntitlementRule {  LeaveTypeId = 1, JobGradeId = 5, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 21, IsActive = true },
+    new LeaveEntitlementRule {  LeaveTypeId = 1, JobGradeId = 5, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 23, IsActive = true },
 
     // GROUP C (1)
-    new LeaveEntitlementRule { Id = 16, LeaveTypeId = 1, JobGradeId = 1, MinYearsService = 0, MaxYearsService = 2.99m, DaysAllocated = 22, IsActive = true },
-    new LeaveEntitlementRule { Id = 17, LeaveTypeId = 1, JobGradeId = 1, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 25, IsActive = true },
-    new LeaveEntitlementRule { Id = 18, LeaveTypeId = 1, JobGradeId = 1, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 27, IsActive = true }
-
+    new LeaveEntitlementRule {  LeaveTypeId = 1, JobGradeId = 1, MinYearsService = 0, MaxYearsService = 2.99m, DaysAllocated = 22, IsActive = true },
+    new LeaveEntitlementRule {  LeaveTypeId = 2, JobGradeId = 1, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 25, IsActive = true },
+    new LeaveEntitlementRule {  LeaveTypeId = 1, JobGradeId = 1, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 27, IsActive = true }
     };
-
-
-
     private readonly List<LeaveType> _seedLeaveTypes = new()
     {
       new LeaveType
       {
+        // Id=1,
         Name = "Annual Leave",
         Code = "AL",
         Description = "Annual Leave Policy",
@@ -139,6 +139,7 @@ namespace HRConnect.Api.Utils.Seed
         IsActive = true
       }, new LeaveType
       {
+        // Id=2,
         Name = "Sick Leave",
         Code = "SL",
         Description = "Sick Leave Policy",
@@ -149,6 +150,7 @@ namespace HRConnect.Api.Utils.Seed
       },
        new LeaveType
       {
+        // Id=3,
         Name = "Maternity Leave",
         Code = "ML",
         Description = "Maternity Leave Policy",
@@ -158,6 +160,7 @@ namespace HRConnect.Api.Utils.Seed
       },
       new LeaveType
        {
+        // Id=4,
         Name = "Family Responsibility Leave",
         Code = "FRL",
         Description = "Family Responsibility Policy",
@@ -167,79 +170,95 @@ namespace HRConnect.Api.Utils.Seed
         IsActive = true
        }
     };
-    public PositionAndLeaveSeed(ApplicationDBContext context, IJobGradeRepository jobGradeRepo, IPositionRepository positionRepo,
-    IOccupationalLevelRepository occupationalLevelRepo, ILeaveTypeManagementRepository leaveTypeManagementRepo)
+    public PositionAndLeaveSeed(ApplicationDBContext context)
     {
       _context = context;
-      _jobGradeRepo = jobGradeRepo;
-      _positionRepo = positionRepo;
-      _occupationalLevelRepo = occupationalLevelRepo;
-      _leaveTypeManagementRepo = leaveTypeManagementRepo;
     }
 
     public async Task SeedAsync()
     {
       await SeedJobGrade();
       await SeedOccuptationLevel();
-      await SeedPositions();
       await SeedLeaveTypes();
+      await SeedLeaveEntitlementRules();
     }
 
-    //Seed the Job Grade first
+    //Seed the Job Grade first using transaction
     public async Task SeedJobGrade()
     {
-      JobGrade? job;
-      foreach (var e in _seedJobGrade)
+      if (!await _context.JobGrades.AnyAsync())
       {
-        if (!await _context.JobGrades.AnyAsync(j => j.Name == e.Name))
-        {
-          job = e;
-          _ = await _jobGradeRepo.AddJobGradeAsync(job);
-        }
+        //Allow explicit insertions with IDs
+        _ = await _context.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT JobGrades ON");
+
+        //reset ID for seeding
+        _ = await _context.Database.ExecuteSqlRawAsync(
+         "DBCC CHECKIDENT ('JobGrades', RESEED, 0)");
+
+        await _context.JobGrades.AddRangeAsync(_seedJobGrade);
+        _ = await _context.SaveChangesAsync();
+
+        _ = await _context.Database.ExecuteSqlRawAsync(
+          "SET IDENTITY_INSERT JobGrades OFF"
+        );
       }
     }
 
     //Seed OccupationalLevel 
     public async Task SeedOccuptationLevel()
     {
-      OccupationalLevel? occupation;
-      foreach (var e in _seedOccuptationLevel)
+      if (!await _context.OccupationalLevels.AnyAsync())
       {
-        if (!await _context.OccupationalLevels.AnyAsync(o => o.Description == e.Description))
-        {
-          occupation = e;
-          await _occupationalLevelRepo.AddOccupationalLevelAsync(occupation);
-        }
+        _ = await _context.Database.ExecuteSqlRawAsync(
+          "SET IDENTITY_INSERT OccupationalLevels ON"
+         );
+        //reset ID for seeding
+        _ = await _context.Database.ExecuteSqlRawAsync(
+         "DBCC CHECKIDENT ('OccupationalLevels', RESEED, 0)");
+
+        _context.OccupationalLevels.AddRange(_seedOccuptationLevel);
+
+        _ = await _context.SaveChangesAsync();
+        _ = await _context.Database.ExecuteSqlRawAsync(
+          "SET IDENTITY_INSERT OccupationalLevels OFF");
       }
     }
-
-    //Seed Positions
-    public async Task SeedPositions()
+    //Seed LeaveEntitlementRules
+    public async Task SeedLeaveEntitlementRules()
     {
-      Position? position;
-      foreach (var e in _seedPositions)
+      if (!await _context.LeaveEntitlementRules.AnyAsync())
       {
-        if (!await _context.Positions.AnyAsync(p => p.PositionTitle == e.PositionTitle))
-        {
-          {
-            position = e;
-            _ = await _positionRepo.AddPositionAsync(position);
-          }
-        }
+        _ = await _context.Database.ExecuteSqlRawAsync(
+          "SET IDENTITY_INSERT LeaveEntitlementRules ON"
+         );
+        //reset ID for seeding
+        _ = await _context.Database.ExecuteSqlRawAsync(
+         "DBCC CHECKIDENT ('LeaveEntitlementRules', RESEED, 0)");
+
+        await _context.LeaveEntitlementRules.AddRangeAsync(_seedLeaveEntitlementRules);
+
+        _ = await _context.SaveChangesAsync();
+        _ = await _context.Database.ExecuteSqlRawAsync(
+          "SET IDENTITY_INSERT LeaveEntitlementRules OFF");
       }
     }
-
     //Seed LeaveTypes
     public async Task SeedLeaveTypes()
     {
-      LeaveType? type;
-      foreach (var e in _seedLeaveTypes)
+      if (!await _context.LeaveTypes.AnyAsync())
       {
-        if (!await _context.LeaveTypes.AnyAsync(l => l.Description == e.Description))
-        {
-          type = e;
-          _ = await _leaveTypeManagementRepo.CreateLeaveTypeAsync(type);
-        }
+        _ = await _context.Database.ExecuteSqlRawAsync(
+          "SET IDENTITY_INSERT LeaveTypes ON"
+         );
+        //reset ID for seeding
+        _ = await _context.Database.ExecuteSqlRawAsync(
+         "DBCC CHECKIDENT ('LeaveTypes', RESEED, 0)");
+
+        await _context.LeaveTypes.AddRangeAsync(_seedLeaveTypes);
+
+        _ = await _context.SaveChangesAsync();
+        _ = await _context.Database.ExecuteSqlRawAsync(
+          "SET IDENTITY_INSERT LeaveTypes OFF");
       }
     }
   }

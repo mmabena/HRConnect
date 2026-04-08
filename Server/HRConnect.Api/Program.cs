@@ -14,6 +14,7 @@ using HRConnect.Api.Utils;
 using HRConnect.Api.Utils.Jobs.Payroll;
 using HRConnect.Api.Utils.Jobs.Pension;
 using HRConnect.Api.Utils.Payroll;
+using HRConnect.Api.Utils.Seed;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -88,7 +89,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
     {
-      options.UseSqlServer(builder.Configuration.GetConnectionString("DBeaverConnection"));
+      options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
       options.AddInterceptors(new AuditSaveChangesInterceptor());
     });
 
@@ -169,7 +170,7 @@ builder.Services.AddQuartz(q =>
   {
     store.UseSqlServer(options =>
         {
-          options.ConnectionString = builder.Configuration.GetConnectionString("DBeaverConnection")!;
+          options.ConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
           options.TablePrefix = "quartz.QRTZ_";
         });
     store.UseSerializer<Quartz.Simpl.SystemTextJsonObjectSerializer>();
@@ -237,7 +238,8 @@ builder.Services.AddScoped<IEmployeePensionEnrollmentRepository, EmployeePension
 builder.Services.AddTransient<IEmployeePensionEnrollmentService, EmployeePensionEnrollmentService>();
 builder.Services.AddScoped<IPensionDeductionRepository, PensionDeductionRepository>();
 builder.Services.AddTransient<IPensionDeductionService, PensionDeductionService>();
-
+builder.Services.AddScoped<ILeaveRuleRepository, LeaveRuleRepository>();
+builder.Services.AddScoped<PositionAndLeaveSeed>();
 
 builder.Services.AddCors(options =>
 {
@@ -251,7 +253,7 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-
+//Automatically create payroll run on app start up
 using (var scope = app.Services.CreateScope())
 {
   var initialiser = scope.ServiceProvider.GetRequiredService<PayrollInit>();
@@ -259,6 +261,14 @@ using (var scope = app.Services.CreateScope())
   //initialise a payperiod and payrun on app start up
   await initialiser.InitialisePayrollPeriod();
 }
+
+using (var scope = app.Services.CreateScope())
+{
+  var seeder = scope.ServiceProvider.GetRequiredService<PositionAndLeaveSeed>();
+
+  await seeder.SeedAsync();
+}
+
 
 if (app.Environment.IsDevelopment())
 {
