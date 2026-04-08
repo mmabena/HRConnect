@@ -6,11 +6,15 @@ namespace HRConnect.Api.Mappers.Payroll
   {
     public static PayrollPeriodDto ToPayrollPeriodDto(this PayrollPeriod periodModel)
     {
-      return new PayrollPeriodDto { };
-    }
-    public static PayrollPeriod ToPayrollPeriodFromDto(this PayrollPeriodDto dto)
-    {
-      return new PayrollPeriod { };
+      return new PayrollPeriodDto
+      {
+        PayrollPeriodId = periodModel.PayrollPeriodId,
+        StartDate = periodModel.StartDate,
+        EndDate = periodModel.EndDate,
+        IsClosed = periodModel.IsClosed,
+        IsLocked = periodModel.IsLocked,
+        Runs = periodModel.Runs
+      };
     }
   }
 }

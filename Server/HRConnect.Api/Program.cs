@@ -1,24 +1,25 @@
-using HRConnect.Api.Data;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 using System.Text;
-using Resend;
-using HRConnect.Api.Interfaces;
-using HRConnect.Api.Middleware;
-using HRConnect.Api.Repositories;
-using HRConnect.Api.Services;
-using HRConnect.Api.Repository;
-using Microsoft.AspNetCore.Identity;
-using HRConnect.Api.Models;
-using HRConnect.Api.Middleware;
-using HRConnect.Api.Services;
-using HRConnect.Api.Utils;
-using OfficeOpenXml;
-using HRConnect.Api.Interfaces.PensionProjection;
 using Audit.Core;
 using Audit.EntityFramework;
+using HRConnect.Api.Data;
+// using Resend;
+using HRConnect.Api.Interfaces;
+using HRConnect.Api.Interfaces.Pension;
+using HRConnect.Api.Middleware;
+using HRConnect.Api.Models;
+using HRConnect.Api.Repositories;
+using HRConnect.Api.Repository;
+using HRConnect.Api.Services;
+using HRConnect.Api.Utils;
+using HRConnect.Api.Utils.Jobs.Payroll;
+using HRConnect.Api.Utils.Jobs.Pension;
+using HRConnect.Api.Utils.Payroll;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using OfficeOpenXml;
 using Quartz;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -40,7 +41,7 @@ Audit.Core.Configuration.Setup()
           })
         .AuditEntityAction<AuditLogs>((e, entry, audit) =>
         {
-          audit.AuditedAt = DateTime.UtcNow;
+          audit.AuditedAt = DateTime.Now;
           audit.AuditAction = entry.Action;
           audit.TabelName = entry.Name;
         })));
@@ -131,31 +132,68 @@ builder.Services.AddAuthorizationBuilder()
 
 builder.Services.AddQuartz(q =>
 {
-  var jobKey = new JobKey("PayrollRolloverJob");
+  var RolloverJobKey = new JobKey("PayrollRolloverJob");
 
   //Add a service for to run as a background job 
-  q.AddJob<PayrollRolloverJob>(opts => opts.WithIdentity(jobKey));
+  q.AddJob<PayrollRolloverJob>(opts =>
+  opts.WithIdentity(RolloverJobKey)
+  .StoreDurably());
 
   //Triggers that will need to be fired to run background job
   // using Cron Schedule
   // Second, Minute, Hour, Day of The Month, Month, Day of The Week
   q.AddTrigger(opts => opts
-  .ForJob(jobKey)
-  .WithIdentity("PayrollRolloverTrigger")
-  .WithCronSchedule("0 0 0 1 * ?"));
+  .ForJob(RolloverJobKey)
+  .WithIdentity("PayrollRollover-Trigger")
+  .WithCronSchedule("0 0 0 1 * ?", x =>
+  x.WithMisfireHandlingInstructionFireAndProceed()));
+
   // 0 -> 0 seconds
   // 0 -> 0 minutes
   // 0 -> 0 hours
-  // 1 -> first day of the year
+  // 1 -> first day of the month 
   // * -> for any/every month 
   // ? -> for all days of the week
+
+  JobKey employeePensionEnrollmentJob = new("EmployeeEnrollmentJob");
+  _ = q.AddJob<EmployeeEnrollmentJob>(opts =>
+        opts.WithIdentity(employeePensionEnrollmentJob)
+        .StoreDurably());
+
+  _ = q.AddTrigger(opts => opts
+      .ForJob(employeePensionEnrollmentJob)
+      .StartNow());
+
+  //Adding persistence to quartz to be able to be run in the back
+  q.UsePersistentStore(store =>
+  {
+    store.UseSqlServer(options =>
+        {
+          options.ConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
+          options.TablePrefix = "quartz.QRTZ_";
+        });
+    store.UseSerializer<Quartz.Simpl.SystemTextJsonObjectSerializer>();
+    store.UseProperties = true;
+  });
 });
+
 builder.Services.AddQuartzHostedService(q =>
 {
   q.WaitForJobsToComplete = true;
 });
 
 builder.Configuration.AddUserSecrets<Program>();
+builder.Services.AddSingleton(provider =>
+  provider.GetRequiredService<ISchedulerFactory>().GetScheduler().GetAwaiter().GetResult());
+
+//Register payroll stuff
+builder.Services.AddScoped<IPayrollPeriodRepository, PayrollPeriodRepository>();
+builder.Services.AddScoped<IPayrollRunRepository, PayrollRunRepository>();
+builder.Services.AddScoped<IPayrollRunService, PayrollRunService>();
+builder.Services.AddScoped<IPayrollPeriodService, PayrollPeriodService>();
+builder.Services.AddScoped<IReportsService, ReportsService>();
+builder.Services.AddScoped<PayrollRolloverJob>();
+builder.Services.AddScoped<PayrollInit>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
@@ -192,7 +230,14 @@ builder.Services.AddScoped<IStatutoryContributionService, StatutoryContributionS
 builder.Services.AddTransient<IPensionProjectionService, PensionProjectionService>();
 builder.Services.AddScoped<IMedicalOptionRepository, MedicalOptionRepository>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IMedicalOptionService,
-HRConnect.Api.Services.MedicalOptionService>();
+  HRConnect.Api.Services.MedicalOptionService>();
+builder.Services.AddScoped<IPensionOptionRepository, PensionOptionRepository>();
+builder.Services.AddScoped<IEmployeePensionEnrollmentRepository, EmployeePensionEnrollmentRepository>();
+builder.Services.AddTransient<IEmployeePensionEnrollmentService, EmployeePensionEnrollmentService>();
+builder.Services.AddScoped<IPensionDeductionRepository, PensionDeductionRepository>();
+builder.Services.AddTransient<IPensionDeductionService, PensionDeductionService>();
+
+
 builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowReact",
@@ -204,6 +249,15 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+
+using (var scope = app.Services.CreateScope())
+{
+  var initialiser = scope.ServiceProvider.GetRequiredService<PayrollInit>();
+
+  //initialise a payperiod and payrun on app start up
+  await initialiser.InitialisePayrollPeriod();
+}
 
 if (app.Environment.IsDevelopment())
 {

@@ -64,7 +64,7 @@ namespace HRConnect.Api.Services
             var daysRequested =
                 WorkingDayCalculator.CountWorkingDays(request.StartDate, request.EndDate);
 
-            if (balance.AvailableDays < daysRequested)
+            if (balance.AvailableDays <= 0 || balance.AvailableDays < daysRequested)
                 throw new InvalidOperationException("Insufficient leave balance.");
 
             var application = new LeaveApplication

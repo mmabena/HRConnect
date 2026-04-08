@@ -43,25 +43,29 @@ namespace HRConnect.Api.Services
 
             foreach (var leaveType in leaveTypes)
             {
+                // Skip gender-restricted leave
                 if (leaveType.FemaleOnly && employee.Gender != Gender.Female)
                     continue;
 
+                // Skip if already exists
                 if (employee.LeaveBalances.Any(b => b.LeaveTypeId == leaveType.Id))
-                    continue;
-
-                var rule = await _context.LeaveEntitlementRules
-                    .FirstOrDefaultAsync(r =>
-                        r.LeaveTypeId == leaveType.Id &&
-                        r.JobGradeId == employee.Position.JobGradeId &&
-                        r.MinYearsService <= yearsOfService &&
-                        (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
-                        r.IsActive);
-
-                if (rule == null)
                     continue;
 
                 if (leaveType.Code == "AL")
                 {
+                    var rule = await _context.LeaveEntitlementRules
+                        .Where(r =>
+                            r.LeaveTypeId == leaveType.Id &&
+                            r.JobGradeId == employee.Position.JobGradeId &&
+                            r.MinYearsService <= yearsOfService &&
+                            (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
+                            r.IsActive)
+                        .OrderByDescending(r => r.MinYearsService)
+                        .FirstOrDefaultAsync();
+
+                    if (rule == null)
+                        continue;
+
                     var annualBalance = new EmployeeLeaveBalance
                     {
                         EmployeeId = employee.EmployeeId,
@@ -76,8 +80,11 @@ namespace HRConnect.Api.Services
 
                     await _context.EmployeeLeaveBalances.AddAsync(annualBalance);
                     await _context.SaveChangesAsync();
+
+                    // Backfill accrual history
                     await BackfillHistoricalAnnualAccrualAsync(employee);
 
+                    // Ensure accrual segment exists
                     var hasSegment = await _context.EmployeeAccrualRateHistories
                         .AnyAsync(s => s.EmployeeId == employee.EmployeeId);
 
@@ -88,16 +95,15 @@ namespace HRConnect.Api.Services
 
                     continue;
                 }
-
                 if (leaveType.Code == "SL")
                 {
                     var sickBalance = new EmployeeLeaveBalance
                     {
                         EmployeeId = employee.EmployeeId,
                         LeaveTypeId = leaveType.Id,
-                        AccruedDays = rule.DaysAllocated,
+                        AccruedDays = 30,
                         TakenDays = 0,
-                        AvailableDays = rule.DaysAllocated
+                        AvailableDays = 30
                     };
 
                     await _context.EmployeeLeaveBalances.AddAsync(sickBalance);
@@ -106,16 +112,15 @@ namespace HRConnect.Api.Services
                     await RecalculateSickLeaveAsync(employee.EmployeeId);
                     continue;
                 }
-
                 if (leaveType.Code == "FRL")
                 {
                     var frlBalance = new EmployeeLeaveBalance
                     {
                         EmployeeId = employee.EmployeeId,
                         LeaveTypeId = leaveType.Id,
-                        AccruedDays = rule.DaysAllocated,
+                        AccruedDays = 3,
                         TakenDays = 0,
-                        AvailableDays = rule.DaysAllocated,
+                        AvailableDays = 3,
                         LastResetYear = DateTime.UtcNow.Year
                     };
 
@@ -126,16 +131,16 @@ namespace HRConnect.Api.Services
                     continue;
                 }
 
-                var balance = new EmployeeLeaveBalance
+                var defaultBalance = new EmployeeLeaveBalance
                 {
                     EmployeeId = employee.EmployeeId,
                     LeaveTypeId = leaveType.Id,
-                    AccruedDays = rule.DaysAllocated,
+                    AccruedDays = 0,
                     TakenDays = 0,
-                    AvailableDays = rule.DaysAllocated
+                    AvailableDays = 0
                 };
 
-                await _context.EmployeeLeaveBalances.AddAsync(balance);
+                await _context.EmployeeLeaveBalances.AddAsync(defaultBalance);
             }
 
             await _context.SaveChangesAsync();
@@ -596,21 +601,23 @@ namespace HRConnect.Api.Services
                 .Reference(e => e.Position)
                 .LoadAsync();
 
+            var endOfPreviousYearDate = new DateTime(currentYear - 1, 12, 31);
+
+            var yearsOfService = (decimal)((endOfPreviousYearDate - employee.StartDate.ToDateTime(TimeOnly.MinValue)).TotalDays / 365.25);
+
             var rule = await _context.LeaveEntitlementRules
-                .FirstAsync(r =>
+                .Where(r =>
                     r.LeaveTypeId == annualLeave.Id &&
                     r.JobGradeId == employee.Position.JobGradeId &&
-                    r.IsActive);
-
-            decimal dailyRate = (rule.DaysAllocated / 12m) / 21.67m;
+                    r.MinYearsService <= yearsOfService &&
+                    (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
+                    r.IsActive)
+                .OrderByDescending(r => r.MinYearsService)
+                .FirstAsync();
 
             var endOfPreviousYear = new DateOnly(currentYear - 1, 12, 31);
 
-            int workingDays = WorkingDayCalculator.CountWorkingDays(
-                employee.StartDate,
-                endOfPreviousYear);
-
-            decimal accrued = Math.Round(workingDays * dailyRate, 2);
+            decimal accrued = rule.DaysAllocated;
 
             var carryover = accrued <= 5 ? accrued : 5;
             var forfeited = accrued > 5 ? accrued - 5 : 0;
@@ -633,7 +640,7 @@ namespace HRConnect.Api.Services
                         Accrued = accrued,
                         Used = 0,
                         Forfeited = forfeited,
-                        ClosingBalance = accrued,
+                        ClosingBalance = carryover,
                         CreatedDate = DateTime.UtcNow
                     });
             }
@@ -661,12 +668,14 @@ namespace HRConnect.Api.Services
             var yearsOfService = CalculateYearsOfService(employee.StartDate);
 
             var rule = await _context.LeaveEntitlementRules
-                .FirstAsync(r =>
-                    r.LeaveTypeId == annualLeave.Id &&
-                    r.JobGradeId == employee.Position.JobGradeId &&
-                    r.MinYearsService <= yearsOfService &&
-                    (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
-                    r.IsActive);
+                .Where(r =>
+                r.LeaveTypeId == annualLeave.Id &&
+                r.JobGradeId == employee.Position.JobGradeId &&
+                r.MinYearsService <= yearsOfService &&
+                (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
+                r.IsActive)
+                .OrderByDescending(r => r.MinYearsService)
+                .FirstAsync();
 
             await _context.Entry(employee)
                 .Reference(e => e.Position)

@@ -210,5 +210,10 @@ namespace HRConnect.Api.Repository
       return await _context.Employees
           .FirstOrDefaultAsync(e => e.ContactNumber == contactNumber && e.EmployeeId != employeeId);
     }
+
+    public async Task<List<Employee>> GetAllEmployeeWithAPensionOption()
+    {
+      return await _context.Employees.Where(e => e.PensionOptionId != null && e.EmploymentStatus == EmploymentStatus.Permanent).ToListAsync();
+    }
   }
 }
