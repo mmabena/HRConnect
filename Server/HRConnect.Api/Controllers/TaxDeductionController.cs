@@ -26,7 +26,7 @@ namespace HRConnect.Api.Controllers
     }
 
     /// <summary>
-    /// Calculates the tax payable based on tax year, remuneration and age
+    /// Calculates the tax payable based on remuneration and age
     /// </summary>
     [HttpGet("calculate")]
     public async Task<ActionResult<decimal>> CalculateTax([FromQuery] decimal remuneration,[FromQuery] int age)
