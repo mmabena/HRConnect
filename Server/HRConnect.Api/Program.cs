@@ -10,6 +10,7 @@ using HRConnect.Api.Models;
 using HRConnect.Api.Repositories;
 using HRConnect.Api.Repository;
 using HRConnect.Api.Services;
+using HRConnect.Api.Hubs;
 using HRConnect.Api.Utils;
 using HRConnect.Api.Utils.Jobs.Payroll;
 using HRConnect.Api.Utils.Jobs.Pension;
@@ -23,6 +24,7 @@ using OfficeOpenXml;
 using Quartz;
 
 var builder = WebApplication.CreateBuilder(args);
+
 
 //Audit configuration for custom audit capturing
 Audit.Core.Configuration.Setup()
@@ -236,7 +238,7 @@ builder.Services.AddScoped<IEmployeePensionEnrollmentRepository, EmployeePension
 builder.Services.AddTransient<IEmployeePensionEnrollmentService, EmployeePensionEnrollmentService>();
 builder.Services.AddScoped<IPensionDeductionRepository, PensionDeductionRepository>();
 builder.Services.AddTransient<IPensionDeductionService, PensionDeductionService>();
-
+builder.Services.AddSignalR();
 
 builder.Services.AddCors(options =>
 {
@@ -276,4 +278,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseMiddleware<ExceptionMiddleware>();
 app.MapControllers();
+app.MapHub<UserPositionHub>("/userPositionHub");
 app.Run();

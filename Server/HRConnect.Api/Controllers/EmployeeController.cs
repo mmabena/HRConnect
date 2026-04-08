@@ -10,6 +10,9 @@ namespace HRConnect.Api.Controllers
     using HRConnect.Api.DTOs.Employee;
     using Microsoft.AspNetCore.Authorization;
     using HRConnect.Api.DTOs;
+    using HRConnect.Api.Hubs;
+    using Microsoft.AspNetCore.SignalR;
+
     [Route("api/employee")]
     [ApiController]
     public class EmployeeController : ControllerBase
@@ -17,12 +20,16 @@ namespace HRConnect.Api.Controllers
         private readonly IEmployeeService _employeeService;
         private readonly ILeaveBalanceService _leaveBalanceService;
 
+        private readonly IHubContext<UserPositionHub> _userPositionHubContext;
+
         public EmployeeController(
             IEmployeeService employeeService,
-            ILeaveBalanceService leaveBalanceService)
+            ILeaveBalanceService leaveBalanceService,
+            IHubContext<UserPositionHub> userPositionHubContext)
         {
             _employeeService = employeeService;
             _leaveBalanceService = leaveBalanceService;
+            _userPositionHubContext = userPositionHubContext;
         }
 
         [HttpGet]
@@ -67,6 +74,11 @@ namespace HRConnect.Api.Controllers
             var updatedEmployee = await _employeeService.UpdateEmployeeAsync(EmployeeId, employeeDto);
             if (updatedEmployee == null)
                 return NotFound();
+
+                await _userPositionHubContext.Clients.All.SendAsync(
+                    "ReceivePositionUpdate", 
+                
+                    EmployeeId, updatedEmployee.EmployeeId, updatedEmployee.PositionTitle);
 
             return Ok(updatedEmployee);
         }
