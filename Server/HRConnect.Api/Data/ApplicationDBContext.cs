@@ -12,8 +12,6 @@ namespace HRConnect.Api.Data
   {
     public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options) : base(options) { }
 
-
-
     public DbSet<User> Users { get; set; }
     public DbSet<Employee> Employees { get; set; }
     public DbSet<Position> Positions { get; set; }
@@ -56,8 +54,6 @@ namespace HRConnect.Api.Data
           .WithMany(po => po.Employees)
           .HasForeignKey(e => e.PensionOptionID)
           .OnDelete(DeleteBehavior.Restrict);
-
-
 
       // Employee -> Position
       modelBuilder.Entity<Employee>()

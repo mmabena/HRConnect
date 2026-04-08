@@ -86,35 +86,26 @@
 
     // Employee Pension Selection
     public async Task<ServiceResult> RecordEmployeePensionSelectionAsync(
-        string employeeId,
-        int pensionOptionId,
-        CancellationToken cancellationToken)
+     string employeeId,
+     int pensionOptionId,
+     CancellationToken cancellationToken)
     {
       Employee? employee = await employeeRepo.GetEmployeeByIdAsync(employeeId, cancellationToken);
       PensionOption? option = await optionRepo.GetPensionOptionByIdAsync(pensionOptionId, cancellationToken);
 
       if (employee == null || option == null)
-      {
         return ServiceResult.Failure("Employee or Pension Option not found.");
-      }
 
       if (employee.EmploymentStatus != EmploymentStatus.Permanent)
-      {
         return ServiceResult.Failure("Only permanent employees may select a pension option.");
-      }
 
-      PensionFund? fundRecord = await fundRepo.GetPensionFundByIdAsync(1, cancellationToken);
-
-      if (fundRecord == null)
-      {
-        return ServiceResult.Failure("No pension fund available.");
-      }
-
+      // Update employee with chosen option
       employee.PensionOptionID = option.PensionOptionId;
 
       decimal salary = employee.MonthlySalary;
       decimal contributionAmount = salary * (option.ContributionPercentage / 100);
 
+      // Create a new PensionFund record automatically
       PensionFund fund = new()
       {
         EmployeeId = employee.EmployeeId,
@@ -123,14 +114,14 @@
         MonthlySalary = salary,
         ContributionPercentage = option.ContributionPercentage,
         ContributionAmount = contributionAmount,
-        TaxCode = 4001
+        TaxCode = 4001 // or derive dynamically
       };
 
       await fundRepo.AddOrUpdatePensionFundAsync(fund, cancellationToken);
       await fundRepo.SaveChangesAsync(cancellationToken);
 
-      return ServiceResult.Success("Pension option selected and employee updated.");
-
+      return ServiceResult.Success("Pension option selected and pension fund created.");
     }
+
   }
 }
