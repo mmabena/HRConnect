@@ -2,7 +2,8 @@ namespace HRConnect.Api.Utils.Notification
 {
   using HRConnect.Api.Interfaces.Notification;
   using HRConnect.Api.Models;
-  public class InAppDeliveryStrategy : INotificationDeliveryStrategy {
+  public class InAppDeliveryStrategy : INotificationDeliveryStrategy
+  {
     public string Name => "In-App";
     public async Task SendNotificationAsync(Notification notification)
     {
