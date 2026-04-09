@@ -292,7 +292,8 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                 alt="Personal icon"
                 className="menu-icon"
               />
-              <span className="menu-heading">Personal Information</span>
+              <span className="menu-heading" 
+              onClick={() => handleSubmenuClick("/personal")}>Personal Information</span>
             </div>
           </li>
 
