@@ -2,12 +2,8 @@ import "./MenuBar.css";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-<<<<<<< HEAD
 import api from "../../../src/api/api.js";
 import { fetchNotifications } from "../../Pages/NotificationPage/notificationsApi.js";
-=======
-import axios from "axios";
->>>>>>> 2d29c060b2df8fb6c53a2e8bcd8ab465575ff17a
 
 const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   const [reportOpen, setReportOpen] = useState(false);
@@ -21,7 +17,6 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   const [manualReportToggle, setManualReportToggle] = useState(false);
   const [manualAdminToggle, setManualAdminToggle] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-<<<<<<< HEAD
   const [activeIndex, setActiveIndex] = useState(null);
 
   const [notifications, setNotifications] = useState([]);
@@ -30,14 +25,6 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   const role = currentUser?.role?.toLowerCase();
 
   const displayName = currentUser?.username || currentUser?.email || "User";
-=======
-  
-  //displaying user initials
-  const displayName =
-  currentUser?.username ||
-  currentUser?.email ||
-  "User";
->>>>>>> 2d29c060b2df8fb6c53a2e8bcd8ab465575ff17a
   const [canProjectPension, setCanProjectPension] = useState(false);
 
   //displaying user initials
@@ -51,7 +38,6 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-<<<<<<< HEAD
   const isActive = (paths) => {
     return paths.some((path) => location.pathname.startsWith(path));
   };
@@ -60,10 +46,6 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
     setActiveIndex((prev) => (prev === index ? null : index));
     toggleFunction(); // keeps your existing toggle working
   };
-=======
-  // FIX: Access the role directly from the currentUser object
-  const role = currentUser?.role?.toLowerCase();
->>>>>>> 2d29c060b2df8fb6c53a2e8bcd8ab465575ff17a
 
   const permissions = {
     isAdmin: ["admin", "superuser"].includes(role),
@@ -71,10 +53,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   };
 
   const isEmployeeManagementPage =
-<<<<<<< HEAD
     location.pathname.startsWith("/employeeList") ||
-=======
->>>>>>> 2d29c060b2df8fb6c53a2e8bcd8ab465575ff17a
     location.pathname.startsWith("/addEmployee") ||
     location.pathname.startsWith("/employeeList") ||
     location.pathname.startsWith("/editEmployee");
@@ -144,9 +123,8 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
       const decodedTokenEmail = jwtDecode(token).sub;
       if (decodedTokenEmail == email) {
         try {
-          axios.get(`${baseUrl}/employee/email/${email}`, {
+          api.get(`${baseUrl}/employee/email/${email}`, {
               headers: {
-<<<<<<< HEAD
                 Authorization: `Bearer ${token}`,
               },
             })
@@ -165,9 +143,6 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                 }
               } else {
                 console.error("Unexpeted status:", response.status);
-=======
-                  "Authorization": `Bearer ${token}`
->>>>>>> 2d29c060b2df8fb6c53a2e8bcd8ab465575ff17a
               }
           })
           .then(response => {
@@ -684,7 +659,6 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
       </div>
       
       <div className="menu-footer">
-<<<<<<< HEAD
         <div className="menu-icon-wrapper">
           <div className="menu-icon-wrapper">
             <img
@@ -714,13 +688,6 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
           />
         </div>
 
-=======
-        <img
-          src="/images/setitngs_icon.png"
-          alt="Settings icon"
-          className="menu-icon"
-        />
->>>>>>> 2d29c060b2df8fb6c53a2e8bcd8ab465575ff17a
         {/* Container for user details */}
         <div className="user-details-container">
           <div className="menu-initials-circle" onClick={(e) => {

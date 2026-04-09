@@ -7,14 +7,11 @@
   display: block; /* makes it take full width below input */
   margin-top: -25px; /* small space below input */
   text-align: left; /* align text to the left */
-<<<<<<< HEAD
-=======
 }
 .position-page-numbers {
   display: flex;
    align-items: center;
   gap: 6px;
->>>>>>> 2d29c060b2df8fb6c53a2e8bcd8ab465575ff17a
 }
 
 /* Dropdown icon styling */
@@ -107,10 +104,7 @@
   transition:
     background-color 0.2s,
     border-color 0.2s;
-<<<<<<< HEAD
-=======
     
->>>>>>> 2d29c060b2df8fb6c53a2e8bcd8ab465575ff17a
 }
 
 .checkbox-cell input[type="checkbox"]:checked {
@@ -144,10 +138,6 @@
   background-color: #fff; /* optional, for contrast */
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
-<<<<<<< HEAD
-
-=======
->>>>>>> 2d29c060b2df8fb6c53a2e8bcd8ab465575ff17a
 .positions-table {
   table-layout: fixed; /* forces columns to obey widths */
   width: 95%;
@@ -465,10 +455,6 @@
   text-align: left;
 }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 2d29c060b2df8fb6c53a2e8bcd8ab465575ff17a
 .title-placeholder-add.inside-input {
   position: absolute;
   left: 5px;

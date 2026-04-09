@@ -123,22 +123,7 @@ function TaxTableManagement() {
   return (
     <div className="menu-background custom-scrollbar">
       <div className="wrap-container">
-<<<<<<< HEAD
-        <div className="heading-container">
-          Comapany Management
-          {/* <div className="icon">
-            <img
-              src="/images/notifications.png"
-              alt="Notification Icon"
-              className="heading-icon"
-            />
-            <div className="utility-box large-box">{currentDate}</div>
-            <div className="utility-box small-box">{currentTime}</div>
-          </div> */}
-        </div>
-=======
         <div className="heading-container">Comapany Management</div>
->>>>>>> 2d29c060b2df8fb6c53a2e8bcd8ab465575ff17a
       </div>
       <div className="navbar-with-button">
         <NavBar />

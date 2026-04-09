@@ -1,13 +1,8 @@
 // src/components/CompensationPlanning.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-<<<<<<< HEAD
 import CompanyManagementHeader from "../Components/companyManagement/companyManagementHeader.jsx";
 import CompanyManagementNavBar from './CompanyManagementNavBar.jsx';
-=======
-import CompanyManagementHeader from './companyManagement/companyManagementHeader.jsx';
-import CompanyManagementNavBar from './companyManagement/companyManagementNavBar.jsx';
->>>>>>> 2d29c060b2df8fb6c53a2e8bcd8ab465575ff17a
 import "./MenuBar/MenuBar.css";
 import "../Navy.css";
 
