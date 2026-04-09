@@ -1,12 +1,9 @@
 namespace HRConnect.Api.Utils.Jobs.Notification
 {
-  using System.Configuration;
-  using FluentValidation;
   using global::Quartz;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Interfaces.Notification;
   using HRConnect.Api.Models;
-  using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
 
   // Prevent multiple of these jobs from running concurrently
   [DisallowConcurrentExecution]
@@ -37,9 +34,9 @@ namespace HRConnect.Api.Utils.Jobs.Notification
 
       int secondsUntilRollover = (DateTime.Now - payrollExecutionDate.Value).Seconds;
 
-      // Console.WriteLine($"=====DAYS UNTIL Payroll Rollover job {secondsUntilRollover}");
       if (secondsUntilRollover > 0)
       {
+        // var superUsers = await _
         var notification = new Notification
         {
           Message = $"Finalise Payroll. Payroll Will Rollover In {secondsUntilRollover}",

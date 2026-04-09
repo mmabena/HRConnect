@@ -153,7 +153,7 @@ builder.Services.AddQuartz(q =>
   q.AddTrigger(opts => opts
   .ForJob(RolloverJobKey)
   .WithIdentity("PayrollRollover-Trigger")
-  .WithCronSchedule("10 0/1 * * * ?", x =>
+  .WithCronSchedule("0 0 0 1 * ?", x =>
   x.WithMisfireHandlingInstructionFireAndProceed()));
 
   q.AddTrigger(opts => opts
@@ -221,7 +221,7 @@ builder.Services.AddScoped<IPositionRepository, PositionRepository>();
 builder.Services.AddScoped<IPositionService, PositionService>();
 builder.Services.AddScoped<IJobGradeRepository, JobGradeRepository>();
 builder.Services.AddScoped<IJobGradeService, JobGradeService>();
-builder.Services.AddScoped<ILeaveTypeManagementRepository, LeaveTypeManagementRepository>();
+// builder.Services.AddScoped<ILeaveTypeManagementRepository, LeaveTypeManagementRepository>();
 builder.Services.AddScoped<IOccupationalLevelRepository, OccupationalLevelRepository>();
 builder.Services.AddScoped<IOccupationalLevelService, OccupationalLevelService>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.Services.AuthService>();
@@ -249,7 +249,6 @@ builder.Services.AddScoped<IEmployeePensionEnrollmentRepository, EmployeePension
 builder.Services.AddTransient<IEmployeePensionEnrollmentService, EmployeePensionEnrollmentService>();
 builder.Services.AddScoped<IPensionDeductionRepository, PensionDeductionRepository>();
 builder.Services.AddTransient<IPensionDeductionService, PensionDeductionService>();
-builder.Services.AddScoped<ILeaveRuleRepository, LeaveRuleRepository>();
 
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
