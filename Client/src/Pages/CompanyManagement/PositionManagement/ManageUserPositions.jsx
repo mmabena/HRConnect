@@ -25,6 +25,7 @@ const ManageUserPositions = ({ title }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { currentPositionTitle, newPositionTitle } = location.state || {};
+  
 
   const navTabs = [
     "Tax Table Management",
@@ -135,7 +136,7 @@ const ManageUserPositions = ({ title }) => {
   // ----------------------------
   useEffect(() => {
     const newConnection = new signalR.HubConnectionBuilder()
-      .withUrl("http://localhost:3000/userPositionHub")
+      .withUrl("http://localhost:5147/userPositionHub", { accessTokenFactory: () => localStorage.getItem("token") })
       .withAutomaticReconnect()
       .build();
     setConnection(newConnection);
@@ -211,21 +212,34 @@ const ManageUserPositions = ({ title }) => {
   // ----------------------------
   const handleSave = async () => {
     const selectedIds = Object.keys(selectedEmployees).filter(
-      (id) => selectedEmployees[id]
+      (id) => selectedEmployees[id],
     );
-    if (!selectedIds.length) return toast.error("Select at least one employee");
-    if (!selectedPosition) return toast.error("Select a position");
 
-    const confirmed = await showConfirmationToast(
-      "Are you sure you want to save changes?"
-    );
-    if (!confirmed) return;
+    if (!selectedIds.length) {
+      toast.error("Please select at least one employee.");
+      return;
+    }
+
+    if (!selectedPosition) {
+      toast.error("Please select a position.");
+      return;
+    }
+     const confirmed = await showConfirmationToast(
+    "Are you sure you want to save changes?",
+  );
+
+  if (!confirmed) return;
 
     try {
-      const updatePromises = selectedIds.map((id) => {
-        const emp = employees.find((e) => e.employeeId.toString() === id);
-        if (!emp) return null;
- const updatedEmp = {
+      const updatePromises = selectedIds
+        .map((employeeId) => {
+          const emp = employees.find(
+            (e) => e.employeeId.toString() === employeeId,
+          );
+
+          if (!emp) return null;
+
+          const updatedEmp = {
             employeeId: emp.employeeId,
             positionId: Number(selectedPosition),
             title: emp.title,
@@ -251,20 +265,40 @@ const ManageUserPositions = ({ title }) => {
             nationality: emp.nationality,
           };
 
-        return editEmployee(emp.employeeId, updatedEmp);
-      }).filter(Boolean);
+          return editEmployee(emp.employeeId, updatedEmp);
+        })
+        .filter(Boolean);
 
       await Promise.all(updatePromises);
-        toast.success("Positions updated successfully.");
 
-      // Remove updated employees immediately from current table
+      toast.success("Positions updated successfully.");
+
+      //KEY FIX: Update UI immediately WITHOUT refetch
       setEmployees((prev) =>
-        prev.filter((emp) => !selectedIds.includes(emp.employeeId.toString()))
+        prev.map((emp) => {
+          if (selectedIds.includes(emp.employeeId.toString())) {
+            const newPosition = positions.find(
+              (p) => p.positionId === Number(selectedPosition),
+            );
+
+            return {
+              ...emp,
+              positionId: Number(selectedPosition),
+
+              //THIS is what makes UI update instantly
+              position: newPosition
+                ? {
+                    ...newPosition,
+                  }
+                : emp.position,
+            };
+          }
+          return emp;
+        }),
       );
 
       setSelectedEmployees({});
       setSelectedPosition("");
-    
     } catch (error) {
       console.error(
         "Failed to update positions:",

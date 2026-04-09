@@ -10,11 +10,12 @@ using HRConnect.Api.Models;
 using HRConnect.Api.Repositories;
 using HRConnect.Api.Repository;
 using HRConnect.Api.Services;
-using HRConnect.Api.Hubs;
 using HRConnect.Api.Utils;
 using HRConnect.Api.Utils.Jobs.Payroll;
 using HRConnect.Api.Utils.Jobs.Pension;
+using HRConnect.Api.Utils.Jobs.Notification;
 using HRConnect.Api.Utils.Payroll;
+using HRConnect.Api.Utils.Seed;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -22,9 +23,12 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using OfficeOpenXml;
 using Quartz;
+using HRConnect.Api.Hubs;
+using HRConnect.Api.Interfaces.Notification;
+using HRConnect.Api.Utils.Factories;
+using HRConnect.Api.Utils.Notification;
 
 var builder = WebApplication.CreateBuilder(args);
-
 
 //Audit configuration for custom audit capturing
 Audit.Core.Configuration.Setup()
@@ -90,7 +94,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
     {
-      options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+      options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!);
       options.AddInterceptors(new AuditSaveChangesInterceptor());
     });
 
@@ -135,21 +139,28 @@ builder.Services.AddAuthorizationBuilder()
 builder.Services.AddQuartz(q =>
 {
   var RolloverJobKey = new JobKey("PayrollRolloverJob");
+  var NotificationJobKey = new JobKey("NotificationJob");
 
   //Add a service for to run as a background job 
   q.AddJob<PayrollRolloverJob>(opts =>
   opts.WithIdentity(RolloverJobKey)
   .StoreDurably());
 
+  q.AddJob<NotificationJob>(opts =>
+  opts.WithIdentity(NotificationJobKey)
+  .StoreDurably());
   //Triggers that will need to be fired to run background job
   // using Cron Schedule
-  // Second, Minute, Hour, Day of The Month, Month, Day of The Week
   q.AddTrigger(opts => opts
   .ForJob(RolloverJobKey)
   .WithIdentity("PayrollRollover-Trigger")
   .WithCronSchedule("0 0 0 1 * ?", x =>
   x.WithMisfireHandlingInstructionFireAndProceed()));
 
+  q.AddTrigger(opts => opts
+  .ForJob(NotificationJobKey)
+  .WithIdentity("NotificationJOb-Trigger")
+  .WithCronSchedule("5,6,7,8,9,10 0/1 * * * ?"));
   // 0 -> 0 seconds
   // 0 -> 0 minutes
   // 0 -> 0 hours
@@ -158,13 +169,13 @@ builder.Services.AddQuartz(q =>
   // ? -> for all days of the week
 
   JobKey employeePensionEnrollmentJob = new("EmployeeEnrollmentJob");
-  _ = q.AddJob<EmployeeEnrollmentJob>(opts =>
-        opts.WithIdentity(employeePensionEnrollmentJob)
-        .StoreDurably());
+  q.AddJob<EmployeeEnrollmentJob>(opts =>
+         opts.WithIdentity(employeePensionEnrollmentJob)
+         .StoreDurably());
 
-  _ = q.AddTrigger(opts => opts
-      .ForJob(employeePensionEnrollmentJob)
-      .StartNow());
+  q.AddTrigger(opts => opts
+       .ForJob(employeePensionEnrollmentJob)
+       .StartNow());
 
   //Adding persistence to quartz to be able to be run in the back
   q.UsePersistentStore(store =>
@@ -211,6 +222,7 @@ builder.Services.AddScoped<IPositionRepository, PositionRepository>();
 builder.Services.AddScoped<IPositionService, PositionService>();
 builder.Services.AddScoped<IJobGradeRepository, JobGradeRepository>();
 builder.Services.AddScoped<IJobGradeService, JobGradeService>();
+// builder.Services.AddScoped<ILeaveTypeManagementRepository, LeaveTypeManagementRepository>();
 builder.Services.AddScoped<IOccupationalLevelRepository, OccupationalLevelRepository>();
 builder.Services.AddScoped<IOccupationalLevelService, OccupationalLevelService>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.Services.AuthService>();
@@ -238,7 +250,15 @@ builder.Services.AddScoped<IEmployeePensionEnrollmentRepository, EmployeePension
 builder.Services.AddTransient<IEmployeePensionEnrollmentService, EmployeePensionEnrollmentService>();
 builder.Services.AddScoped<IPensionDeductionRepository, PensionDeductionRepository>();
 builder.Services.AddTransient<IPensionDeductionService, PensionDeductionService>();
+
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<INotificationFactory, NotificationFactory>();
+builder.Services.AddScoped<INotificationDispatcher, NotificationDispatcher>();
+builder.Services.AddScoped<IJobScheduleService, JobScheduleService>();
 builder.Services.AddSignalR();
+
+builder.Services.AddScoped<PositionAndLeaveSeed>();
 
 builder.Services.AddCors(options =>
 {
@@ -252,7 +272,7 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-
+//Automatically create payroll run on app start up
 using (var scope = app.Services.CreateScope())
 {
   var initialiser = scope.ServiceProvider.GetRequiredService<PayrollInit>();
@@ -260,6 +280,14 @@ using (var scope = app.Services.CreateScope())
   //initialise a payperiod and payrun on app start up
   await initialiser.InitialisePayrollPeriod();
 }
+
+using (var scope = app.Services.CreateScope())
+{
+  var seeder = scope.ServiceProvider.GetRequiredService<PositionAndLeaveSeed>();
+
+  await seeder.SeedAsync();
+}
+
 
 if (app.Environment.IsDevelopment())
 {

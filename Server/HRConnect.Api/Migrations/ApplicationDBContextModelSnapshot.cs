@@ -604,6 +604,7 @@ namespace HRConnect.Api.Migrations
                     b.HasIndex("EmployeeId");
 
                     b.ToTable("AnnualLeaveAccrualHistories", (string)null);
+                    b.ToTable("AnnualLeaveAccrualHistories", (string)null);
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.AuditLogs", b =>
@@ -659,6 +660,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("AuditId");
 
+                    b.ToTable("AuditLogs", (string)null);
                     b.ToTable("AuditLogs", (string)null);
                 });
 
@@ -774,6 +776,7 @@ namespace HRConnect.Api.Migrations
                     b.HasIndex("PositionId");
 
                     b.ToTable("Employees", (string)null);
+                    b.ToTable("Employees", (string)null);
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.EmployeeAccrualRateHistory", b =>
@@ -816,6 +819,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("PositionId");
 
+                    b.ToTable("EmployeeAccrualRateHistories", (string)null);
                     b.ToTable("EmployeeAccrualRateHistories", (string)null);
                 });
 
@@ -871,6 +875,7 @@ namespace HRConnect.Api.Migrations
                     b.HasIndex("LeaveTypeId");
 
                     b.ToTable("EmployeeLeaveBalances", (string)null);
+                    b.ToTable("EmployeeLeaveBalances", (string)null);
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.JobGrade", b =>
@@ -897,56 +902,6 @@ namespace HRConnect.Api.Migrations
                     b.HasKey("JobGradeId");
 
                     b.ToTable("JobGrades", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            JobGradeId = 1,
-                            CreatedDate = new DateTime(2026, 2, 11, 14, 33, 32, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            Name = "Executive Director",
-                            UpdatedDate = new DateTime(2026, 2, 27, 10, 15, 8, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            JobGradeId = 2,
-                            CreatedDate = new DateTime(2026, 2, 12, 7, 14, 45, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            Name = "Junior Management",
-                            UpdatedDate = new DateTime(2026, 2, 27, 6, 41, 39, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            JobGradeId = 3,
-                            CreatedDate = new DateTime(2026, 2, 12, 7, 15, 20, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            Name = "Middle Management",
-                            UpdatedDate = new DateTime(2026, 2, 12, 7, 15, 20, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            JobGradeId = 4,
-                            CreatedDate = new DateTime(2026, 2, 12, 7, 15, 39, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            Name = "Skilled/Semi Skilled",
-                            UpdatedDate = new DateTime(2026, 2, 12, 7, 15, 39, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            JobGradeId = 5,
-                            CreatedDate = new DateTime(2026, 2, 12, 7, 15, 54, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            Name = "Top/Senior Management",
-                            UpdatedDate = new DateTime(2026, 2, 12, 7, 15, 54, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            JobGradeId = 6,
-                            CreatedDate = new DateTime(2026, 2, 12, 7, 16, 8, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            Name = "Unskilled",
-                            UpdatedDate = new DateTime(2026, 2, 12, 7, 16, 8, 0, DateTimeKind.Unspecified)
-                        });
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.LeaveApplication", b =>
@@ -1011,6 +966,7 @@ namespace HRConnect.Api.Migrations
                     b.HasIndex("LeaveTypeId");
 
                     b.ToTable("LeaveApplications", (string)null);
+                    b.ToTable("LeaveApplications", (string)null);
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.LeaveEntitlementRule", b =>
@@ -1046,182 +1002,6 @@ namespace HRConnect.Api.Migrations
                     b.HasIndex("LeaveTypeId");
 
                     b.ToTable("LeaveEntitlementRules", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            DaysAllocated = 15m,
-                            IsActive = true,
-                            JobGradeId = 2,
-                            LeaveTypeId = 1,
-                            MaxYearsService = 2.99m,
-                            MinYearsService = 0m
-                        },
-                        new
-                        {
-                            Id = 2,
-                            DaysAllocated = 15m,
-                            IsActive = true,
-                            JobGradeId = 3,
-                            LeaveTypeId = 1,
-                            MaxYearsService = 2.99m,
-                            MinYearsService = 0m
-                        },
-                        new
-                        {
-                            Id = 3,
-                            DaysAllocated = 15m,
-                            IsActive = true,
-                            JobGradeId = 4,
-                            LeaveTypeId = 1,
-                            MaxYearsService = 2.99m,
-                            MinYearsService = 0m
-                        },
-                        new
-                        {
-                            Id = 4,
-                            DaysAllocated = 15m,
-                            IsActive = true,
-                            JobGradeId = 6,
-                            LeaveTypeId = 1,
-                            MaxYearsService = 2.99m,
-                            MinYearsService = 0m
-                        },
-                        new
-                        {
-                            Id = 5,
-                            DaysAllocated = 18m,
-                            IsActive = true,
-                            JobGradeId = 2,
-                            LeaveTypeId = 1,
-                            MaxYearsService = 5m,
-                            MinYearsService = 3m
-                        },
-                        new
-                        {
-                            Id = 6,
-                            DaysAllocated = 18m,
-                            IsActive = true,
-                            JobGradeId = 3,
-                            LeaveTypeId = 1,
-                            MaxYearsService = 5m,
-                            MinYearsService = 3m
-                        },
-                        new
-                        {
-                            Id = 7,
-                            DaysAllocated = 18m,
-                            IsActive = true,
-                            JobGradeId = 4,
-                            LeaveTypeId = 1,
-                            MaxYearsService = 5m,
-                            MinYearsService = 3m
-                        },
-                        new
-                        {
-                            Id = 8,
-                            DaysAllocated = 18m,
-                            IsActive = true,
-                            JobGradeId = 6,
-                            LeaveTypeId = 1,
-                            MaxYearsService = 5m,
-                            MinYearsService = 3m
-                        },
-                        new
-                        {
-                            Id = 9,
-                            DaysAllocated = 20m,
-                            IsActive = true,
-                            JobGradeId = 2,
-                            LeaveTypeId = 1,
-                            MinYearsService = 5.01m
-                        },
-                        new
-                        {
-                            Id = 10,
-                            DaysAllocated = 20m,
-                            IsActive = true,
-                            JobGradeId = 3,
-                            LeaveTypeId = 1,
-                            MinYearsService = 5.01m
-                        },
-                        new
-                        {
-                            Id = 11,
-                            DaysAllocated = 20m,
-                            IsActive = true,
-                            JobGradeId = 4,
-                            LeaveTypeId = 1,
-                            MinYearsService = 5.01m
-                        },
-                        new
-                        {
-                            Id = 12,
-                            DaysAllocated = 20m,
-                            IsActive = true,
-                            JobGradeId = 6,
-                            LeaveTypeId = 1,
-                            MinYearsService = 5.01m
-                        },
-                        new
-                        {
-                            Id = 13,
-                            DaysAllocated = 18m,
-                            IsActive = true,
-                            JobGradeId = 5,
-                            LeaveTypeId = 1,
-                            MaxYearsService = 2.99m,
-                            MinYearsService = 0m
-                        },
-                        new
-                        {
-                            Id = 14,
-                            DaysAllocated = 21m,
-                            IsActive = true,
-                            JobGradeId = 5,
-                            LeaveTypeId = 1,
-                            MaxYearsService = 5m,
-                            MinYearsService = 3m
-                        },
-                        new
-                        {
-                            Id = 15,
-                            DaysAllocated = 23m,
-                            IsActive = true,
-                            JobGradeId = 5,
-                            LeaveTypeId = 1,
-                            MinYearsService = 5.01m
-                        },
-                        new
-                        {
-                            Id = 16,
-                            DaysAllocated = 22m,
-                            IsActive = true,
-                            JobGradeId = 1,
-                            LeaveTypeId = 1,
-                            MaxYearsService = 2.99m,
-                            MinYearsService = 0m
-                        },
-                        new
-                        {
-                            Id = 17,
-                            DaysAllocated = 25m,
-                            IsActive = true,
-                            JobGradeId = 1,
-                            LeaveTypeId = 1,
-                            MaxYearsService = 5m,
-                            MinYearsService = 3m
-                        },
-                        new
-                        {
-                            Id = 18,
-                            DaysAllocated = 27m,
-                            IsActive = true,
-                            JobGradeId = 1,
-                            LeaveTypeId = 1,
-                            MinYearsService = 5.01m
-                        });
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.LeaveType", b =>
@@ -1280,57 +1060,6 @@ namespace HRConnect.Api.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("LeaveTypes", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CarryoverExpiryDay = 1,
-                            CarryoverExpiryMonth = 1,
-                            CarryoverNotificationDay = 1,
-                            CarryoverNotificationMonth = 12,
-                            Code = "AL",
-                            Description = "Annual Leave Policy",
-                            FemaleOnly = false,
-                            IsActive = true,
-                            IsRollingWindow = false,
-                            MaxCarryoverDays = 5,
-                            Name = "Annual Leave",
-                            ResetDay = 1,
-                            ResetMonth = 1
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Code = "SL",
-                            Description = "Sick Leave Policy",
-                            FemaleOnly = false,
-                            IsActive = true,
-                            IsRollingWindow = true,
-                            Name = "Sick Leave",
-                            RollingMonths = 36
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Code = "ML",
-                            Description = "Maternity Leave Policy",
-                            FemaleOnly = true,
-                            IsActive = true,
-                            IsRollingWindow = false,
-                            Name = "Maternity Leave"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Code = "FRL",
-                            Description = "Family Responsibility Policy",
-                            FemaleOnly = false,
-                            IsActive = true,
-                            IsRollingWindow = true,
-                            Name = "Family Responsibility Leave",
-                            RollingMonths = 12
-                        });
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.MedicalOption", b =>
@@ -1393,6 +1122,7 @@ namespace HRConnect.Api.Migrations
                     b.HasIndex("MedicalOptionCategoryId");
 
                     b.ToTable("MedicalOptions", (string)null);
+                    b.ToTable("MedicalOptions", (string)null);
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.MedicalOptionCategory", b =>
@@ -1410,6 +1140,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("MedicalOptionCategoryId");
 
+                    b.ToTable("MedicalOptionCategories", (string)null);
                     b.ToTable("MedicalOptionCategories", (string)null);
                 });
 
@@ -1453,6 +1184,7 @@ namespace HRConnect.Api.Migrations
                     b.HasKey("NotificationId");
 
                     b.ToTable("Notifications", (string)null);
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.OccupationalLevel", b =>
@@ -1482,6 +1214,7 @@ namespace HRConnect.Api.Migrations
                         .IsUnique();
 
                     b.ToTable("OccupationalLevels", (string)null);
+                    b.ToTable("OccupationalLevels", (string)null);
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.PasswordHistory", b =>
@@ -1504,6 +1237,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("Id");
 
+                    b.ToTable("PasswordHistories", (string)null);
                     b.ToTable("PasswordHistories", (string)null);
                 });
 
@@ -1538,6 +1272,7 @@ namespace HRConnect.Api.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("PasswordResetPins", (string)null);
+                    b.ToTable("PasswordResetPins", (string)null);
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.Payroll.PayrollPeriod", b =>
@@ -1563,6 +1298,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("PayrollPeriodId");
 
+                    b.ToTable("PayrollPeriods", (string)null);
                     b.ToTable("PayrollPeriods", (string)null);
                 });
 
@@ -1627,6 +1363,7 @@ namespace HRConnect.Api.Migrations
                     b.HasIndex("PeriodId");
 
                     b.ToTable("PayrollRuns", (string)null);
+                    b.ToTable("PayrollRuns", (string)null);
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.Pension.EmployeePensionEnrollment", b =>
@@ -1671,6 +1408,7 @@ namespace HRConnect.Api.Migrations
                     b.HasIndex("PensionOptionId");
 
                     b.ToTable("EmployeePensionEnrollments", (string)null);
+                    b.ToTable("EmployeePensionEnrollments", (string)null);
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.PensionOption", b =>
@@ -1686,6 +1424,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("PensionOptionId");
 
+                    b.ToTable("PensionOptions", (string)null);
                     b.ToTable("PensionOptions", (string)null);
                 });
 
@@ -1725,6 +1464,7 @@ namespace HRConnect.Api.Migrations
                     b.HasIndex("PositionTitle")
                         .IsUnique();
 
+                    b.ToTable("Positions", (string)null);
                     b.ToTable("Positions", (string)null);
                 });
 
@@ -1769,6 +1509,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("Id");
 
+                    b.ToTable("StatutoryContributionTypes", (string)null);
                     b.ToTable("StatutoryContributionTypes", (string)null);
                 });
 
@@ -1871,6 +1612,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("UserId");
 
+                    b.ToTable("Users", (string)null);
                     b.ToTable("Users", (string)null);
                 });
 

@@ -254,9 +254,9 @@ namespace HRConnect.Api.Services
         await _context.SaveChangesAsync(); // IMPORTANT
 
         // KEEP YOUR EXISTING LOGIC
-        //await _leaveBalanceService.RecalculateAnnualLeaveAsync(employeeId);
-        //await _leaveProcessingService.RecalculateAllSickLeaveAsync();
-        //await _leaveProcessingService.RecalculateAllFamilyResponsibilityLeaveAsync();
+       // await _leaveBalanceService.RecalculateAnnualLeaveAsync(employeeId);
+       // await _leaveProcessingService.RecalculateAllSickLeaveAsync();
+      //  await _leaveProcessingService.RecalculateAllFamilyResponsibilityLeaveAsync();
 
         var employeeWithBalances = await _context.Employees
             .Include(e => e.LeaveBalances)

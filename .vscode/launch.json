@@ -1,0 +1,16 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": ".NET Core Launch (console)",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${workspaceFolder}/Server/HRConnect.Api/bin/Debug/net9.0/HRConnect.Api.dll",
+      "cwd": "${workspaceFolder}/Server/HRConnect.Api",
+      "env": {
+        "DOTNET_ENVIRONMENT": "Development",
+        "ConnectionStrings__DefaultConnection": "Data Source=localhost;Initial Catalog=HRConnect;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False"
+      }
+    }
+  ]
+}
