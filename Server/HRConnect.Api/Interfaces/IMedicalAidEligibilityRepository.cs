@@ -1,10 +1,10 @@
 ﻿namespace HRConnect.Api.Interfaces
 {
-  using DTOs;
+  using HRConnect.Api.DTOs;
 
   public interface IMedicalAidEligibilityRepository
   {
-    Task<IReadOnlyList<ResponseEligibileOptionsDto>> GetEmployeeEligibleMedicalOptionsAsync(string employeeId, RequestEligibileOptionsDto payload);
-    //Task
+    Task<IReadOnlyList<ResponseEligibileOptionsDto>> GetEmployeeEligibleMedicalOptionsAsync(
+      string employeeId, RequestEligibileOptionsDto payload);
   }
 }

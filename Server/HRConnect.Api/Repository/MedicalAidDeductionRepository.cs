@@ -1,10 +1,10 @@
 namespace HRConnect.Api.Repository
 {
-  using Data;
-  using Interfaces;
+  using HRConnect.Api.Data;
+  using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Models.PayrollDeduction;
   using Microsoft.EntityFrameworkCore;
-  using Models.PayrollDeduction;
-
+  
   public class MedicalAidDeductionRepository : IMedicalAidDeductionRepository
   {
     private readonly ApplicationDBContext _context;

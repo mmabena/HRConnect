@@ -1,7 +1,7 @@
 namespace HRConnect.Api.Utils.Payroll
 {
-  using Interfaces;
-  using Models.Payroll;
+  using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Models.Payroll;
 
   public class PayrollInit
   {
@@ -16,17 +16,17 @@ namespace HRConnect.Api.Utils.Payroll
     }
 
     /// <summary>
-    /// Intitialies a valid active payroll period <see cref="PayrollPeriod"/>
-    /// and adds new unlocked payroll run <see cref="PayrollRun"/>
+    /// Intitialies a valid active payroll period <see cref="PayrollPeriod"/> 
+    /// and adds new unlocked payroll run <see cref="PayrollRun"/> 
     /// to the period's collection
     /// </summary>
     /// <remarks>
-    /// This method is called in the applications entry point. Since only 1 payroll period and run
-    /// can be active at a time, let the application handle this automatically. No user input is required of allowed
-    /// </remark>
+    /// This method is called in the applications entry point. Since only 1 payroll period and run 
+    /// can be active at a time, let the application handle this automatically. No user input is required or allowed
+    /// </remarks>
     public async Task InitialisePayrollPeriod()
     {
-      var payperiod = await _payrollPeriodService.GetLastPeriodAsync(); // in production remove this
+      var payperiod = await _payrollPeriodService.GetLastPeriodAsync();
       await _payrollRunService.LockAllOlderPayrollRuns();
       if (payperiod == null)
       {

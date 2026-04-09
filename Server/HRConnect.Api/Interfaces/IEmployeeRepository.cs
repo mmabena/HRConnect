@@ -3,8 +3,6 @@ namespace HRConnect.Api.Interfaces
   using System.Collections.Generic;
   using System.Threading.Tasks;
   using HRConnect.Api.Models;
-  using HRConnect.Api.DTOs.Employee;
-  using Microsoft.EntityFrameworkCore;
   using Microsoft.EntityFrameworkCore.Storage;
 
   public interface IEmployeeRepository
@@ -16,6 +14,7 @@ namespace HRConnect.Api.Interfaces
     Task<List<string>> GetAllEmployeeIdsWithPrefix(string prefix);
     Task<bool> DeleteEmployeeAsync(string employeeId);
     Task<IDbContextTransaction> BeginTransactionAsync();
+
     Task<Employee?> GetEmployeeByEmailAsync(string email);
     Task<Employee?> GetEmployeeByEmailAsync(string email, string employeeId);
     Task<Employee?> GetEmployeeByIdNumberAsync(string idNumber);
@@ -25,6 +24,7 @@ namespace HRConnect.Api.Interfaces
     Task<Employee?> GetEmployeeByTaxNumberAsync(string taxNumber);
     Task<Employee?> GetEmployeeByTaxNumberAsync(string taxNumber, string employeeId);
     Task<Employee?> GetEmployeeByContactNumberAsync(string contactNumber);
-    Task<Employee?> GetEmployeeByContactNumberAsync(string contactNumber, string EmployeeId);
+    Task<Employee?> GetEmployeeByContactNumberAsync(string contactNumber, string employeeId);
+    Task<List<Employee>> GetAllEmployeeWithAPensionOption();
   }
 }

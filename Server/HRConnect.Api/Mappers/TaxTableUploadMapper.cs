@@ -24,7 +24,9 @@ namespace HRConnect.Api.Mappers
         Id = entity.Id,
         TaxYear = entity.TaxYear,
         FileName = entity.FileName,
-        FileUrl = entity.FileUrl
+        FileUrl = entity.FileUrl,
+        EffectiveFrom = entity.EffectiveFrom,
+        UploadedAt = entity.UploadedAt
       };
     }
   }

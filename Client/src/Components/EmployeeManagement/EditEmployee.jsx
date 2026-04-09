@@ -1,13 +1,20 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useParams } from "react-router-dom";
-import "../../Navy.css";
+import "./EditEmployee.css";
 import {
   editEmployee,
   formatDateForDisplay,
-  toISOStringSafe,
+  fetchAllEmployees,
   showConfirmationToast,
   GetEmployeeByEmployeeNumberAsync,
+  formatDateToYYYYMMDD,
 } from "../../api/Employee";
+
+import useEmployeeData from "../../hooks/useEmployeeData";
+import useEmployeeForm from "../../hooks/useEmployeeForm";
+import useEmployeeValidation from "../../hooks/useEmployeeValidation";
+import useImageUpload from "../../hooks/useImageUpload";
+import useUserRole from "../../hooks/useUserRole";
 
 import { toast } from "react-toastify";
 /// </summary>
@@ -21,566 +28,604 @@ const getCurrentUserRole = () => {
 const EditEmployee = () => {
   const location = useLocation();
   const readOnly = location.state?.readOnly || false;
-  const { employeeNumber } = useParams();
-
+  const { employeeId } = useParams();
   const [activeTab, setActiveTab] = useState("Personal");
   const [isEditable, setIsEditable] = useState(false);
-  const [userRole, setUserRole] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [formErrors, setFormErrors] = useState({});
-
+  const role = useUserRole();
+  const [loading, setLoading] = useState(true);
+  const fileInputRef = useRef(null);
+  //const positionTitle = positions.find(p => p.positionId === employeeData.jobTitle)?.positionTitle || "";
   /// </summary>
   /// Track original Employee number and DOB loaded from DB
   /// </summary>
+  const [originalEmployeeId, setOriginalEmployeeId] = useState("");
+  const { allEmployees, positions } = useEmployeeData();
 
-const [originalEmployeeNumber, setOriginalEmployeeNumber] = useState("");
-const [originalIdNumber, setOriginalIdNumber] = useState("");
+  const { validateEmployee } = useEmployeeValidation();
 
-  const [originalDateOfBirth, setOriginalDateOfBirth] = useState("");
+  const { uploadImage, uploading } = useImageUpload();
+  const [originalTaxNumber, setOriginalTaxNumber] = useState("");
+  const branches = ["Johannesburg", "CapeTown", "UK"];
+  const titles = ["Mr", "Mrs", "Ms", "Dr", "Prof"];
+  const employmentStatuses = ["Permanent", "FixedTerm", "Contract"];
+  const { employee, setEmployee, formErrors, setFormErrors, onInputChange } =
+    useEmployeeForm({
+      employeeId: "",
+      name: "",
+      surname: "",
+      title: "",
+      dateOfBirth: "",
+      idType: "",
+      idNumber: "",
+      passportNumber: "",
+      gender: "",
+      contactNumber: "",
+      nationality: "",
+      citizenship: "",
+      disability: false,
+      disabilityType: "",
+      email: "",
+      physicalAddress: "",
+      city: "",
+      zipCode: "",
+      branch: "",
+      monthlySalary: "",
+      positionTitle: "",
+      jobTitle: "",
+      startDate: "",
+      employeeStatus: "",
+      reportsTo: "",
+      profileImage: "",
+    });
 
-
-  const [employeeData, setEmployeeData] = useState({
-    employeeNumber: "",
-    firstName: "",
-    lastName: "",
-    maidenName: "",
-    title: "",
-    dateOfBirth: "",
-    initials: "",
-    idType: "id",
-    idNumber: "",
-    preferredName: "",
-    gender: "",
-    middleName: "",
-    contactNumber: "",
-    nationality: "",
-    citizenship: "",
-    disability: false,
-    disabilityType: "",
-    email: "",
-    maritalStatus: "",
-    homeAddress: "",
-    city: "",
-    postalCode: "",
-    startDate: "",
-    department: "",
-    jobTitle: "",
-    employeeStatus: "",
-    reportsTo: "",
-    documentPath: "",
-  });
-
-  const getInitials = (firstName, middleName, lastName) => {
-    let initials = "";
-
-    if (firstName) initials += firstName.charAt(0).toUpperCase();
-
-    if (middleName && middleName.trim().toLowerCase() !== "n/a") {
-      initials += middleName.charAt(0).toUpperCase();
-    }
-
-    if (lastName) initials += lastName.charAt(0).toUpperCase();
-
-    return initials;
-  };
   /// </summary>
   /// Load user role and employee data when component mounts or location.state changes - set loading true at the start for all cases
   /// </summary>
   useEffect(() => {
-    setLoading(true);
+    const loadEmployee = async () => {
+      setLoading(true);
+      try {
+        let emp;
 
-    const role = getCurrentUserRole();
-    setUserRole(role);
-
-    const loadEmployeeIfNeeded = async () => {
-      if (!location.state && employeeNumber) {
-        try {
-          const employee = await GetEmployeeByEmployeeNumberAsync(
-            employeeNumber
-          );
-          console.log("Fetched employee:", employee);
-
-          const transformed = {
-            ...employee,
-            dateOfBirth: employee.dateOfBirth
-              ? formatDateForDisplay(employee.dateOfBirth)
-              : "",
-            initials: getInitials(
-              employee.firstName,
-              employee.middleName,
-              employee.lastName
-            ),
-          };
-
-          setEmployeeData(transformed);
-          setOriginalEmployeeNumber(employee.employeeNumber);
-          setOriginalDateOfBirth(employee.dateOfBirth);
-          setOriginalIdNumber(employee.idNumber);
-        } catch (error) {
-          console.error("Failed to load employee", error);
-          toast.error("Could not load employee data.");
-        } finally {
-          setLoading(false);
+        if (location.state) {
+          emp = location.state;
+        } else {
+          emp = await GetEmployeeByEmployeeNumberAsync(employeeId);
         }
-      } else if (location.state) {
-        setEmployeeData(location.state);
-        setOriginalEmployeeNumber(location.state.employeeNumber ?? "");
-        setOriginalDateOfBirth(location.state.dateOfBirth ?? "");
-        setOriginalIdNumber(location.state.idNumber ?? "");
+
+        const idType = emp.idNumber
+          ? "id"
+          : emp.passportNumber
+            ? "passport"
+            : "id";
+
+        setEmployee({
+          employeeId: emp.employeeId || "",
+          title: emp.title || "",
+          name: emp.name || "",
+          surname: emp.surname || "",
+          idType,
+          idNumber: idType === "id" ? emp.idNumber || "" : "",
+          passportNumber: idType === "passport" ? emp.passportNumber || "" : "",
+          nationality: emp.nationality || "",
+          gender: emp.gender || "",
+          dateOfBirth: emp.dateOfBirth || "",
+          contactNumber: emp.contactNumber || "",
+          taxNumber: emp.taxNumber || "",
+          email: emp.email || "",
+          physicalAddress: emp.physicalAddress || "",
+          city: emp.city || "",
+          zipCode: emp.zipCode || "",
+          branch: emp.branch || "",
+          monthlySalary: emp.monthlySalary || "",
+          jobTitle: emp.positionId?.toString() || "",
+          positionTitle: emp.positionTitle || "",
+          startDate: emp.startDate || "",
+          employeeStatus: emp.employmentStatus || "",
+          reportsTo: emp.careerManagerID || "",
+          disability: emp.hasDisability || false,
+          disabilityType: emp.disabilityDescription || "",
+          profileImage: emp.profileImage || "",
+        });
+      } catch (err) {
+        toast.error("Could not load employee");
+        console.error(err);
+      } finally {
         setLoading(false);
       }
     };
 
-    loadEmployeeIfNeeded();
-  }, [location.state, employeeNumber]);
-  useEffect(() => {
-  console.log("Current employee data being viewed/edited:", employeeData);
-}, [employeeData]);
+    loadEmployee();
+  }, [employeeId, location.state, setEmployee]);
 
-
-  useEffect(() => {
-    const initials = getInitials(
-      employeeData.firstName,
-      employeeData.middleName,
-      employeeData.lastName
-    );
-    if (employeeData.initials !== initials) {
-      setEmployeeData((prev) => ({
-        ...prev,
-        initials,
-      }));
-    }
-}, [employeeData.firstName, employeeData.middleName, employeeData.lastName, employeeData.initials]);
-
-useEffect(() => {
-  const gender = employeeData.gender?.trim().toLowerCase() || "";
-  const maritalStatus = employeeData.maritalStatus?.trim().toLowerCase() || "";
-  const maidenName = employeeData.maidenName?.trim() || "";
-
-  if (gender === "female" && maritalStatus === "married") {
-    if (!maidenName || maidenName.toLowerCase() === "n/a") {
-      setFormErrors((prev) => ({
-        ...prev,
-        maidenName: "Maiden Name is required for married women.",
-      }));
-    } else {
-      setFormErrors((prev) => {
-        const { maidenName, ...rest } = prev;
-        return rest;
-      });
-    }
-  } else {
-  /// </summary>
-  /// Only overwrite maidenName if it is empty and editable
-  /// </summary>
-   
-    if (!maidenName || maidenName.toLowerCase() === "n/a") {
-      setEmployeeData((prev) => {
-        if (!prev.maidenName || prev.maidenName.toLowerCase() === "n/a") {
-          return { ...prev, maidenName: "N/A" };
-        }
-        return prev; 
-      });
-    }
-  /// </summary>
-  /// Clear any maidenName form errors
-  /// </summary>
-   
-    setFormErrors((prev) => {
-      const { maidenName, ...rest } = prev;
-      return rest;
-    });
-  }
-}, [employeeData.gender, employeeData.maritalStatus, employeeData.maidenName]);
-
-
-
-  /// </summary>
-  /// Disability validation & styling logic
-  /// </summary>
-  useEffect(() => {
-    if (employeeData.disability) {
-      if (
-        !employeeData.disabilityType ||
-        employeeData.disabilityType === "N/A"
-      ) {
-        setFormErrors((prev) => ({
-          ...prev,
-          disabilityType:
-            "Disability Type is required when Disability is 'Yes'.",
-        }));
-      } else {
-        setFormErrors((prev) => {
-          const { disabilityType, ...rest } = prev;
-          return rest;
-        });
-      }
-    } else {
-      setFormErrors((prev) => {
-        const { disabilityType, ...rest } = prev;
-        return rest;
-      });
-      if (employeeData.disabilityType !== "N/A") {
-        setEmployeeData((prev) => ({
-          ...prev,
-          disabilityType: "N/A",
-        }));
-      }
-    }
-  }, [employeeData.disability, employeeData.disabilityType]);
-
-  useEffect(() => {
-    setEmployeeData((prev) => {
-      const updated = { ...prev };
-
-      if (isEditable) {
-        if (updated.maidenName === "N/A") {
-          updated.maidenName = "";
-        }
-        /// </summary>
-        /// Clear disabilityType if editable and disability is true and disabilityType is "N/A"
-        /// </summary>
-        if (updated.disability && updated.disabilityType === "N/A") {
-          updated.disabilityType = "";
-        }
-      } else {
-        /// </summary>
-        /// Reset disabilityType to "N/A" if not editable and disability is false or disabilityType is empty
-        /// </summary>
-        if (!updated.disability && !updated.disabilityType) {
-          updated.disabilityType = "N/A";
-        }
-      }
-
-      return updated;
-    });
-  }, [isEditable, employeeData.disability]);
-
-  useEffect(() => {
-    if (!employeeData.disability && employeeData.disabilityType !== "N/A") {
-      setEmployeeData((prev) => ({
-        ...prev,
-        disabilityType: "N/A",
-      }));
-    }
-  }, [employeeData.disability, employeeData.disabilityType]);
-
-  if (userRole !== "superuser") {
-    return (
-      <div style={{ padding: 20, color: "red" }}>
-        Access Denied. Only super users can access this page.
-      </div>
-    );
+  if (role !== "superuser") {
+    return <div>Access Denied</div>;
   }
 
-  const handleEditSaveClick = async () => {
+  if (loading) {
+    return <div>Loading employee...</div>;
+  }
+
+  const positionTitle =
+    positions.find((p) => p.positionId === Number(employee.jobTitle))
+      ?.positionTitle || employee.positionTitle;
+
+  /// Image upload
+  const onFileChange = async (e) => {
+    const file = e.target.files[0];
+
+    const url = await uploadImage(file);
+
+    if (url) {
+      setEmployee((prev) => ({
+        ...prev,
+        profileImage: url,
+      }));
+    }
+  };
+
+  
+
+  /// Save
+  const handleSave = async () => {
     if (!isEditable) {
       setIsEditable(true);
       return;
     }
 
     const confirmed = await showConfirmationToast(
-      "Are you sure you want to save changes?"
+      "Are you sure you want to save changes?",
     );
-    if (!confirmed) {
-      setIsEditable(false);
+
+    if (!confirmed) return;
+
+    const errors = validateEmployee(employee);
+    setFormErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      console.error(errors);
+      toast.error("Please fix validation errors");
       return;
     }
-    /// </summary>
-    /// Prevent saving if validation errors exist
-    /// </summary>
-    if (Object.keys(formErrors).length > 0) {
-      toast.error("Please fix validation errors before saving.");
-      return;
-    }
 
-    const idNumberTrimmed = employeeData.idNumber.trim();
-
-    const payload = {
-      ...employeeData,
-      idNumber: idNumberTrimmed,
-      dateOfBirth: originalDateOfBirth,
-
-      startDate: toISOStringSafe(employeeData.startDate),
-    };
+    console.log("Validating employee:", employee);
 
     try {
       setLoading(true);
-      await editEmployee(payload.employeeNumber, payload);
+
+      const payload = {
+        employeeId: employee.employeeId,
+        title: employee.title,
+        name: employee.name,
+        surname: employee.surname,
+        idNumber: employee.idType === "id" ? employee.idNumber : undefined,
+        passportNumber:
+          employee.idType === "passport" ? employee.passportNumber : undefined,
+        nationality: employee.nationality,
+        gender: employee.gender,
+        dateOfBirth: employee.dateOfBirth,
+        contactNumber: employee.contactNumber,
+        taxNumber: employee.taxNumber,
+        email: employee.email,
+        physicalAddress: employee.physicalAddress,
+        city: employee.city,
+        zipCode: employee.zipCode,
+        branch: employee.branch,
+        monthlySalary: Number(employee.monthlySalary),
+        positionId: employee.jobTitle ? Number(employee.jobTitle) : null,
+        employmentStatus: employee.employeeStatus,
+        careerManagerID: employee.reportsTo,
+        hasDisability: employee.disability,
+        disabilityDescription: employee.disabilityType,
+        startDate: employee.startDate,
+        profileImage: employee.profileImage,
+      };
+
+      await editEmployee(payload.employeeId, payload);
 
       toast.success("Employee updated successfully!");
+
       setIsEditable(false);
-      setOriginalIdNumber(payload.idNumber);
-      setOriginalDateOfBirth(payload.dateOfBirth);
-    } catch (error) {
-      const responseData = error.response?.data;
-
-      if (responseData) {
-        const generalMessage = responseData.message || "Validation failed";
-        const errors = responseData.errors;
-
-        setFormErrors({});
-
-        toast.error(generalMessage);
-
-        if (Array.isArray(errors)) {
-          const errorMap = {};
-          errors.forEach(({ field, message }) => {
-            errorMap[field] = message;
-            toast.error(`${field}: ${message}`);
-          });
-          setFormErrors(errorMap);
-        } else if (typeof errors === "object" && errors !== null) {
-          setFormErrors(errors);
-          Object.entries(errors).forEach(([field, message]) => {
-            toast.error(`${field}: ${message}`);
-          });
-        }
+    } catch (err) {
+      if (err.response && err.response.data?.errors) {
+        setFormErrors(err.response.data.errors);
       } else {
-        /// </summary>
-        /// If there is no structured response from server
-        /// </summary>
-
-        toast.error("Could not update employee. Please try again.");
+        toast.error("Failed to update employee");
+        console.error(err);
       }
     } finally {
       setLoading(false);
     }
   };
-  const handleInputChange = (e) => {
-    const { id, value, type, checked } = e.target;
 
-    if (["email", "dateOfBirth", "idNumber"].includes(id)) {
-      return;
-    }
-
-    setEmployeeData((prevData) => {
-      const updatedData = {
-        ...prevData,
-        [id]: type === "checkbox" ? checked : value,
-      };
-
-      if (id === "disability") {
-        updatedData.disability = value === "yes";
-        if (value !== "yes") {
-          updatedData.disabilityType = "N/A";
-        }
-      }
-
-      return updatedData;
-    });
+  const formatCurrency = (value) => {
+    if (!value) return "";
+    return new Intl.NumberFormat("en-ZA", {
+      style: "currency",
+      currency: "ZAR",
+      minimumFractionDigits: 2,
+    }).format(value);
   };
 
   return (
-    <div className="menu-background">
-      
-
-      <div className="edit-employee-heading-row">
-        {[
-          "Personal",
-          "Career",
-          "Leave",
-          "Tax Profile",
-          "Payroll",
-          "Documents",
-        ].map((tab) => (
-          <div
-            key={tab}
-            className={`heading-item ${activeTab === tab ? "selected" : ""}`}
-            onClick={() => setActiveTab(tab)}
-          >
-            {tab}
-          </div>
-        ))}
-      </div>
-
-      <div className="edit-button-container">
-        {!readOnly && (
-          <button
-            className="em-edit-button"
-            onClick={handleEditSaveClick}
-            disabled={
-              loading || (isEditable && Object.keys(formErrors).length > 0)
-            }
-          >
-            {isEditable ? "Save" : "Edit Profile"}
-          </button>
-        )}
-      </div>
-
-      <div className="edit-employee-top-container">
-        <div className="photo-block">
+    <div className="emp-menu-background">
+      <div className="emp-edit-employee-top-container">
+        <div
+          className="emp-photo-block"
+          onClick={() => fileInputRef.current?.click()}
+        >
           <img
-            src={employeeData.documentPath || "/default-profile.png"}
+            src={employee.profileImage || "/default-profile.png"}
             alt="Employee"
           />
+          {uploading && (
+            <div className="emp-uploading-overlay">Uploading...</div>
+          )}
         </div>
-        <div className="photo-text-container">
-          <div className="title">{`${employeeData.firstName} ${employeeData.lastName}`}</div>
-          <div className="subtitle">{employeeData.jobTitle}</div>
+        <input
+          type="file"
+          className="emp-photo-input"
+          onChange={onFileChange}
+          ref={fileInputRef}
+        />
+
+        <div className="emp-photo-text-container">
+          <div className="emp-title">{`${employee.name} ${employee.surname}`}</div>
+          <div className="emp-subtitle">{positionTitle}</div>
+          <div className="emp-subsubtitle">{employee.branch}</div>
+          <div className="emp-edit-employee-heading-row side-tabs">
+            {[
+              "Personal Information",
+              "Payroll Information",
+              "Leave",
+              "Payroll Tools",
+            ].map((tab) => (
+              <div
+                key={tab}
+                className={`emp-heading-item ${activeTab === tab ? "selected" : ""}`}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab}
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="emp-edit-button-top-right">
+          {!readOnly && (
+            <button className="emp-em-edit-button" onClick={handleSave}>
+              {isEditable ? "Save" : "Edit Profile"}
+            </button>
+          )}
         </div>
       </div>
 
-      <div className="edit-employee-form-container">
-        <div className="custom-header">Personal Information</div>
+      <div className="emp-edit-employee-form-container">
+        <div className="emp-custom-header">Personal Information</div>
 
-        <div className="sub-container">
-          <div className="fields-container">
-            {[
-              ["Employee Number*", "employeeNumber"],
-              ["Title", "title"],
-              ["Initials", "initials"],
-              ["ID Number*", "idNumber"],
-              ["Nationality*", "nationality"],
-              ["Citizenship*", "citizenship"],
-            ].map(([label, id]) => (
-              <div className="field" key={id}>
-                <label className="field-label" htmlFor={id}>
-                  {label}
-                </label>
-                <input
-                  className="field-input"
-                  id={id}
-                  type="text"
-                  value={employeeData[id]}
-                  onChange={handleInputChange}
-                  readOnly={id === "idNumber" ? true : !isEditable}
-                />
-              </div>
-            ))}
-          </div>
-
-          <div className="fields-container">
-            {[
-              ["Marital Status*", "maritalStatus"],
-              ["Date of Birth", "dateOfBirth"],
-              ["Preferred Name", "preferredName"],
-              ["Gender", "gender"],
-            ].map(([label, id]) => (
-              <div className="field" key={id}>
-                <label className="field-label" htmlFor={id}>
-                  {label}
-                </label>
-                <input
-                  className="field-input"
-                  id={id}
-                  type="text"
-                  value={
-                    id === "maritalStatus" && employeeData[id]
-                      ? employeeData[id].charAt(0).toUpperCase() +
-                        employeeData[id].slice(1)
-                      : id === "dateOfBirth" && employeeData[id]
-                      ? formatDateForDisplay(employeeData[id])
-                      : employeeData[id] || ""
-                  }
-                  onChange={handleInputChange}
-                  readOnly={id === "dateOfBirth" ? true : !isEditable}
-                  style={
-                    id === "dateOfBirth"
-                      ? { backgroundColor: "#C7D9E5" }
-                      : undefined
-                  }
-                />
-              </div>
-            ))}
-
-            <div className="field">
-              <label className="field-label" htmlFor="disability">
-                Disability
-              </label>
-              <select
-                className="field-input"
-                id="disability"
-                value={employeeData.disability ? "yes" : "no"}
-                onChange={handleInputChange}
-                disabled={!isEditable}
-              >
-                <option value="no">No</option>
-                <option value="yes">Yes</option>
-              </select>
-            </div>
-
-            <div className="field">
-              <label className="field-label" htmlFor="disabilityType">
-                Disability Type
-              </label>
+        <div className="emp-sub-container">
+          {/* ROW 1 */}
+          <div className="emp-fields-container row-5">
+            <div className="emp-field">
+              <label className="emp-field-label">Employee Code*</label>
               <input
-                className="field-input"
-                id="disabilityType"
-                type="text"
-                value={employeeData.disabilityType}
-                onChange={handleInputChange}
-                readOnly={!isEditable || employeeData.disabilityType === "N/A"}
-                style={
-                  /// </summary>
-                  /// Only apply blue background if NOT editable or value is "N/A" and not required
-                  /// </summary>
-                  (!isEditable || employeeData.disabilityType === "N/A") &&
-                  !employeeData.disability
-                    ? { backgroundColor: "#C7D9E5" }
-                    : {}
-                }
+                className="emp-field-input"
+                name="employeeId"
+                value={employee.employeeId || ""}
+                readOnly
               />
             </div>
+
+            <div className="emp-field">
+              <label className="emp-field-label">Title</label>
+              <div className="emp-field-dropdown">
+                <select
+                  className={`emp-field-input ${formErrors.title ? "error" : ""}`}
+                  name="title"
+                  value={employee.title || ""}
+                  onChange={onInputChange}
+                  disabled={!isEditable}
+                >
+                  <option value="">Select Title</option>
+                  {titles.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
+                </select>
+                <img
+                  src="/images/arrow_drop_down_circle.png"
+                  alt="Dropdown icon"
+                  className="empdropdown-icon"
+                />
+              </div>
+              <div className="emp-error-text">{formErrors.title}</div>
+            </div>
+
+            <div className="emp-field">
+              <label className="emp-field-label">ID Number*</label>
+              <input
+                className="emp-field-input"
+                name="idNumber"
+                value={employee.idNumber || ""}
+                readOnly
+              />
+            </div>
+
+            <div className="emp-field">
+              <label className="emp-field-label">Passport Number</label>
+              <input
+                className="emp-field-input"
+                name="passportNumber"
+                value={employee.passportNumber || ""}
+                onChange={onInputChange}
+                readOnly
+              />
+            </div>
+
+            <div className="emp-field">
+              <label className="emp-field-label">Nationality*</label>
+              <input
+                className={`emp-field-input ${formErrors.nationality ? "error" : ""}`}
+                name="nationality"
+                value={employee.nationality || ""}
+                onChange={onInputChange}
+                readOnly
+              />
+            </div>
+            <div className="emp-error-text">{formErrors.nationality}</div>
           </div>
 
-          <div className="fields-container row-3">
+          {/* ROW 2 */}
+          <div className="emp-fields-container row-6">
             {[
-              ["First Name", "firstName"],
-              ["Middle Name", "middleName"],
-              ["Last Name", "lastName"],
+              ["Date of Birth", "dateOfBirth"],
+              ["Gender", "gender"],
             ].map(([label, id]) => (
-              <div className="field" key={id}>
-                <label className="field-label" htmlFor={id}>
-                  {label}
-                </label>
+              <div className="emp-field" key={id}>
+                <label className="emp-field-label">{label}</label>
                 <input
-                  className="field-input"
-                  id={id}
-                  type="text"
-                  value={employeeData[id]}
-                  onChange={handleInputChange}
-                  readOnly={!isEditable}
+                  className="emp-field-input"
+                  name={id}
+                  value={employee[id] || ""}
+                  readOnly
                 />
               </div>
             ))}
-          </div>
-          <div className="fields-container row-3">
-            {[
-              ["Maiden Name", "maidenName"],
-              ["Contact Number*", "contactNumber"],
-              ["Email", "email"],
-            ].map(([label, id]) => (
-              <div className="field" key={id}>
-                <label className="field-label" htmlFor={id}>
-                  {label}
-                  {formErrors[id] && <span style={{ color: "red" }}> *</span>}
-                </label>
 
-                <input
-                  className="field-input"
-                  id={id}
-                  type={id === "email" ? "email" : "text"}
-                  value={employeeData[id]}
-                  onChange={handleInputChange}
-                  readOnly={id === "email" ? true : !isEditable}
-                  style={
-                    (id === "maidenName" &&
-                      (!isEditable || employeeData.maidenName === "N/A")) ||
-                    (id === "disabilityType" &&
-                      (!isEditable || employeeData.disabilityType === "N/A"))
-                      ? { backgroundColor: "#C7D9E5" }
-                      : {}
-                  }
+            <div className="emp-field">
+              <label className="emp-field-label">Disability Status</label>
+              <div className="emp-field-dropdown">
+                <select
+                  className={`emp-field-input ${formErrors.disability ? "error" : ""}`}
+                  name="disability"
+                  value={employee.disability ? "yes" : "no"}
+                  onChange={onInputChange}
+                  disabled={!isEditable}
+                >
+                  <option value="no">No</option>
+                  <option value="yes">Yes</option>
+                </select>
+
+                <img
+                  src="/images/arrow_drop_down_circle.png"
+                  alt="Dropdown icon"
+                  className="empdropdown-icon"
                 />
-
-                {formErrors[id] && (
-                  <div className="error-text" style={{ color: "red" }}>
-                    {formErrors[id]}
-                  </div>
-                )}
               </div>
-            ))}
+              <div className="emp-error-text">{formErrors.disability}</div>
+            </div>
+
+            <div className="emp-field">
+              <label className="emp-field-label">Disability Description</label>
+              <input
+                className={`emp-field-input ${formErrors.disabilityType ? "error" : ""}`}
+                name="disabilityType"
+                value={employee.disabilityType || ""}
+                onChange={onInputChange}
+                readOnly={!employee.disability}
+                placeholder={!employee.disability ? "N/A" : ""}
+              />
+              <div className="emp-error-text">{formErrors.disabilityType}</div>
+            </div>
+          </div>
+
+          {/* ROW 3 */}
+          <div className="emp-fields-container row-3">
+            <div className="emp-field">
+              <label className="emp-field-label">First Name</label>
+              <input
+                className={`emp-field-input ${formErrors.name ? "error" : ""}`}
+                name="name"
+                value={employee.name || ""}
+                onChange={onInputChange}
+                readOnly={!isEditable}
+              />
+              <div className="emp-error-text">{formErrors.name}</div>
+            </div>
+            <div className="emp-field">
+              <label className="emp-field-label">Last Name</label>
+              <input
+                className={`emp-field-input ${formErrors.surname ? "error" : ""}`}
+                name="surname"
+                value={employee.surname || ""}
+                onChange={onInputChange}
+                readOnly={!isEditable}
+              />
+              <div className="emp-error-text">{formErrors.surname}</div>
+            </div>
+          </div>
+
+          {/* ROW 4 */}
+          <div className="emp-fields-container row-3">
+            <div className="emp-field">
+              <label className="emp-field-label">Contact Number*</label>
+              <input
+                className={`emp-field-input ${formErrors.contactNumber ? "error" : ""}`}
+                name="contactNumber"
+                value={employee.contactNumber || ""}
+                onChange={onInputChange}
+                readOnly={!isEditable}
+              />
+              <div className="emp-error-text">{formErrors.contactNumber}</div>
+            </div>
+            <div className="emp-field">
+              <label className="emp-field-label">Email Address</label>
+              <input
+                className={`emp-field-input ${formErrors.email ? "error" : ""}`}
+                name="email"
+                value={employee.email || ""}
+                onChange={onInputChange}
+                readOnly={!isEditable}
+              />
+              <div className="emp-error-text">{formErrors.email}</div>
+            </div>
+          </div>
+
+          {/* ROW 5 */}
+          <div className="emp-fields-container row-3">
+            <div className="emp-field">
+              <label className="emp-field-label">Home Address*</label>
+              <input
+                className={`emp-field-input ${formErrors.physicalAddress ? "error" : ""}`}
+                name="physicalAddress"
+                value={employee.physicalAddress || ""}
+                onChange={onInputChange}
+                readOnly={!isEditable}
+              />
+              <div className="emp-error-text">{formErrors.physicalAddress}</div>
+            </div>
+            <div className="emp-field">
+              <label className="emp-field-label">City</label>
+              <input
+                className={`emp-field-input ${formErrors.city ? "error" : ""}`}
+                name="city"
+                value={employee.city || ""}
+                onChange={onInputChange}
+                readOnly={!isEditable}
+              />
+              <div className="emp-error-text">{formErrors.city}</div>
+            </div>
+          </div>
+
+          {/* ROW 6 */}
+          <div className="emp-fields-container row-4">
+            <div className="emp-field">
+              <label className="emp-field-label">Postal Code</label>
+              <input
+                className={`emp-field-input ${formErrors.zipCode ? "error" : ""}`}
+                name="zipCode"
+                value={employee.zipCode || ""}
+                onChange={onInputChange}
+                readOnly={!isEditable}
+              />
+              <div className="emp-error-text">{formErrors.zipCode}</div>
+            </div>
+
+            <div className="emp-field">
+              <label className="emp-field-label">Monthly Salary</label>
+              <input
+                type="text"
+                className={`emp-field-input ${formErrors.monthlySalary ? "error" : ""}`}
+                name="monthlySalary"
+                value={
+                  isEditable
+                    ? employee.monthlySalary
+                    : formatCurrency(employee.monthlySalary)
+                }
+                onChange={(e) => {
+                  const rawValue = e.target.value.replace(/[^0-9]/g, "");
+                  setEmployee((prev) => ({
+                    ...prev,
+                    monthlySalary: rawValue,
+                  }));
+                }}
+                readOnly={!isEditable}
+              />
+              <div className="emp-error-text">{formErrors.monthlySalary}</div>
+            </div>
+
+            <div className="emp-field">
+              <label className="emp-field-label">Department</label>
+              <div className="emp-field-dropdown">
+                <select
+                  className={`emp-field-input ${formErrors.branch ? "error" : ""}`}
+                  name="branch"
+                  value={employee.branch || ""}
+                  onChange={onInputChange}
+                  disabled={!isEditable}
+                >
+                  <option value="">Select Department</option>
+                  {branches.map((branch) => (
+                    <option key={branch} value={branch}>
+                      {branch}
+                    </option>
+                  ))}
+                </select>
+                <img
+                  src="/images/arrow_drop_down_circle.png"
+                  alt="Dropdown icon"
+                  className="empdropdown-icon"
+                />
+              </div>
+              <div className="emp-error-text">{formErrors.branch}</div>
+            </div>
+          </div>
+
+          {/* ROW 7 */}
+          <div className="emp-fields-container row-4">
+            <div className="emp-field">
+              <label className="emp-field-label">Employment Status</label>
+              <div className="emp-field-dropdown">
+                <select
+                  className={`emp-field-input ${formErrors.employeeStatus ? "error" : ""}`}
+                  name="employeeStatus"
+                  value={employee.employeeStatus || ""}
+                  onChange={onInputChange}
+                  disabled={!isEditable}
+                >
+                  <option value="">Select Status</option>
+                  {employmentStatuses.map((status) => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
+                  ))}
+                </select>
+                <img
+                  src="/images/arrow_drop_down_circle.png"
+                  alt="Dropdown icon"
+                  className="empdropdown-icon"
+                />
+              </div>
+              <div className="emp-error-text">{formErrors.employeeStatus}</div>
+            </div>
+
+            {/* Career Manager DROPDOWN */}
+            <div className="emp-field">
+              <label className="emp-field-label">Career Manager</label>
+              <div className="emp-field-dropdown">
+                <select
+                  className={`emp-field-input ${formErrors.reportsTo ? "error" : ""}`}
+                  name="reportsTo"
+                  value={employee.reportsTo}
+                  onChange={onInputChange}
+                  disabled={!isEditable}
+                >
+                  <option value="">Select Career Manager</option>
+                  {/* Replace this later with real employee list */}
+                  {allEmployees.map((emp) => (
+                    <option key={emp.employeeId} value={emp.employeeId}>
+                      {emp.name} {emp.surname}
+                    </option>
+                  ))}
+                </select>
+                <img
+                  src="/images/arrow_drop_down_circle.png"
+                  alt="Dropdown icon"
+                  className="empdropdown-icon"
+                />
+              </div>
+              <div className="emp-error-text">{formErrors.reportsTo}</div>
+            </div>
           </div>
         </div>
       </div>

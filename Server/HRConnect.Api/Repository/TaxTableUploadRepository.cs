@@ -26,7 +26,7 @@ namespace HRConnect.Api.Repositories
     public async Task<List<TaxTableUpload>> GetAllAsync()
     {
       return await _context.TaxTableUploads
-          .OrderByDescending(x => x.UploadedAt)
+          .OrderByDescending(x => x.EffectiveFrom)
           .ToListAsync();
     }
 

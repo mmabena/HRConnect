@@ -18,6 +18,7 @@ namespace HRConnect.Api.Mappers
                 Surname = employeeModel.Surname,
                 IdNumber = employeeModel.IdNumber,
                 PassportNumber = employeeModel.PassportNumber,
+                Nationality = employeeModel.Nationality,
                 Gender = employeeModel.Gender,
                 ContactNumber = employeeModel.ContactNumber,
                 TaxNumber = employeeModel.TaxNumber,
@@ -32,11 +33,14 @@ namespace HRConnect.Api.Mappers
                 Branch = employeeModel.Branch,
                 MonthlySalary = employeeModel.MonthlySalary,
                 PositionId = employeeModel.PositionId,
+                PositionTitle = employeeModel.Position != null
+                ? employeeModel.Position.PositionTitle : null,
                 EmploymentStatus = employeeModel.EmploymentStatus,
                 CareerManagerID = employeeModel.CareerManagerID,
                 ProfileImage = employeeModel.ProfileImage,
                 CreatedAt = employeeModel.CreatedAt,
-                UpdatedAt = employeeModel.UpdatedAt
+                UpdatedAt = employeeModel.UpdatedAt,
+                IsActive = employeeModel.IsActive,
             };
         }
         public static Employee ToEmployeeFromCreateDTO(this CreateEmployeeRequestDto employeeRequestDto)
@@ -49,6 +53,7 @@ namespace HRConnect.Api.Mappers
                 Surname = employeeRequestDto.Surname,
                 IdNumber = employeeRequestDto.IdNumber,
                 PassportNumber = employeeRequestDto.PassportNumber,
+                Nationality = employeeRequestDto.Nationality!,
                 Gender = employeeRequestDto.Gender!.Value,
                 ContactNumber = employeeRequestDto.ContactNumber,
                 TaxNumber = employeeRequestDto.TaxNumber,
@@ -65,7 +70,9 @@ namespace HRConnect.Api.Mappers
                 PositionId = employeeRequestDto.PositionId,
                 EmploymentStatus = employeeRequestDto.EmploymentStatus,
                 CareerManagerID = employeeRequestDto.CareerManagerID,
-                ProfileImage = employeeRequestDto.ProfileImage
+                ProfileImage = employeeRequestDto.ProfileImage,
+                PensionOptionId = employeeRequestDto.PensionOptionId,
+                IsActive = true
             };
         }
     }

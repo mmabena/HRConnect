@@ -25,7 +25,9 @@ namespace HRConnect.Api.Repository
     /// <returns> A List of all Employees</returns>
     public async Task<List<Employee>> GetAllEmployeesAsync()
     {
-      return await _context.Employees.ToListAsync();
+      return await _context.Employees
+            .Include(e => e.Position)
+            .ToListAsync();
     }
     /// <summary>
     /// Creates a new Employee in the database.
@@ -58,6 +60,7 @@ namespace HRConnect.Api.Repository
     public async Task<Employee?> GetEmployeeByIdAsync(string employeeId)
     {
       return await _context.Employees
+              .Include(e => e.Position)
               .FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
     }
     /// <summary>
@@ -202,10 +205,15 @@ namespace HRConnect.Api.Repository
     /// <param name="contactNumber">The employee contact number</param>
     /// <param name="EmployeeId">The employee identifier to exclude</param>
     /// <returns>The employee object if found, null otherwise</returns>
-    public async Task<Employee?> GetEmployeeByContactNumberAsync(string contactNumber, string EmployeeId)
+    public async Task<Employee?> GetEmployeeByContactNumberAsync(string contactNumber, string employeeId)
     {
       return await _context.Employees
-          .FirstOrDefaultAsync(e => e.ContactNumber == contactNumber && e.EmployeeId != EmployeeId);
+          .FirstOrDefaultAsync(e => e.ContactNumber == contactNumber && e.EmployeeId != employeeId);
+    }
+
+    public async Task<List<Employee>> GetAllEmployeeWithAPensionOption()
+    {
+      return await _context.Employees.Where(e => e.PensionOptionId != null && e.EmploymentStatus == EmploymentStatus.Permanent).ToListAsync();
     }
   }
 }

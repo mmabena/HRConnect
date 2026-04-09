@@ -1,6 +1,6 @@
 ﻿namespace HRConnect.Api.Interfaces
 {
-  using DTOs;
+  using HRConnect.Api.DTOs;
 
   /// <summary>
   /// Defines the contract for medical aid eligibility operations.

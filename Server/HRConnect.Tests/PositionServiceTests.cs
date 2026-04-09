@@ -12,12 +12,22 @@ namespace HRConnect.Tests.Services
   public class PositionServiceTests
   {
     private readonly Mock<IPositionRepository> _positionRepoMock;
+    private readonly Mock<IJobGradeRepository> _jobGradeRepoMock;
+    private readonly Mock<IOccupationalLevelRepository> _occupationalLeveRepoMock;
     private readonly PositionService _positionService;
 
     public PositionServiceTests()
     {
       _positionRepoMock = new Mock<IPositionRepository>();
-      _positionService = new PositionService(_positionRepoMock.Object);
+      _jobGradeRepoMock = new Mock<IJobGradeRepository> ();
+      _occupationalLeveRepoMock = new Mock<IOccupationalLevelRepository> ();
+ 
+
+      _positionService = new PositionService(
+        _positionRepoMock.Object,
+        _jobGradeRepoMock.Object,
+        _occupationalLeveRepoMock.Object
+    );
     }
 
     [Fact]

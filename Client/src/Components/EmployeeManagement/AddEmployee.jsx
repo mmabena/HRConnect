@@ -23,7 +23,7 @@ import {
 
 const getCurrentUserRole = () => "superuser";
 
-const AddEmployee = () => {
+const AddEmployee = ({ closeModal }) => {
   const navigate = useNavigate();
   const [userRole, setUserRole] = useState(null);
   const [formErrors, setFormErrors] = useState({});
@@ -188,7 +188,7 @@ const AddEmployee = () => {
       const freshEmployee = await GetEmployeeByEmployeeNumberAsync(
         saved.employeeNumber
       );
-      navigate("/editEmployee", { state: freshEmployee });
+      closeModal();
     } catch (error) {
       if (error.response?.data) {
         const data = error.response.data;

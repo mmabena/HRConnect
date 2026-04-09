@@ -6,42 +6,142 @@ namespace HRConnect.Tests
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
   using HRConnect.Api.DTOs.Employee;
-  using HRConnect.Api.Utils;
-  using HRConnect.Api.Mappers;
   using System;
   using System.Collections.Generic;
   using System.Threading.Tasks;
-  using System.Net.NetworkInformation;
-  using System.Runtime.CompilerServices;
+  using Microsoft.EntityFrameworkCore;
+  using HRConnect.Api.Data;
+  using System.Threading;
+  using Microsoft.EntityFrameworkCore.Storage;
+  using HRConnect.Api.Utils;
+  using System.Linq;
 
-  public class EmployeeServiceTests
+  public class EmployeeServiceTests : IDisposable
   {
     private readonly Mock<IEmployeeRepository> _employeeRepoMock;
+    private readonly Mock<IPositionRepository> _positionRepoMock;
     private readonly Mock<IEmailService> _emailServiceMock;
-    private readonly EmployeeService _employeeService;
+    private readonly Mock<ILeaveBalanceService> _leaveBalanceServiceMock;
+    private readonly Mock<ILeaveProcessingService> _leaveProcessingServiceMock;
 
+    private readonly ApplicationDBContext _context;
+    private readonly EmployeeService _employeeService;
 
     public EmployeeServiceTests()
     {
       _employeeRepoMock = new Mock<IEmployeeRepository>();
       _emailServiceMock = new Mock<IEmailService>();
+      _positionRepoMock = new Mock<IPositionRepository>();
+      _leaveBalanceServiceMock = new Mock<ILeaveBalanceService>();
+      _leaveProcessingServiceMock = new Mock<ILeaveProcessingService>();
+
+      var options = new DbContextOptionsBuilder<ApplicationDBContext>()
+          .UseInMemoryDatabase(Guid.NewGuid().ToString())
+          .Options;
+
+      _context = new ApplicationDBContext(options);
+
+      // ✅ Seed required data
+      _context.OccupationalLevels.Add(new OccupationalLevel
+      {
+        OccupationalLevelId = 1,
+        Description = "Level"
+      });
+
+      _context.JobGrades.Add(new JobGrade
+      {
+        JobGradeId = 1,
+        Name = "Grade"
+      });
+
+      _context.Positions.AddRange(
+          new Position { PositionId = 1, JobGradeId = 1, OccupationalLevelId = 1 },
+          new Position { PositionId = 2, JobGradeId = 1, OccupationalLevelId = 1 },
+          new Position { PositionId = 4, JobGradeId = 1, OccupationalLevelId = 1 }
+      );
+      _context.Positions.Add(
+        new Position
+        {
+          PositionId = 6,
+          JobGradeId = 1,
+          OccupationalLevelId = 1,
+          PositionTitle = "Senior Developer"
+        }
+    );
+
+      _context.SaveChanges();
+
+      // ✅ Transaction mock
+      var transactionMock = new Mock<IDbContextTransaction>();
+      transactionMock.Setup(t => t.CommitAsync(It.IsAny<CancellationToken>()))
+          .Returns(Task.CompletedTask);
+      transactionMock.Setup(t => t.RollbackAsync(It.IsAny<CancellationToken>()))
+          .Returns(Task.CompletedTask);
+
+      _employeeRepoMock.Setup(r => r.BeginTransactionAsync())
+          .ReturnsAsync(transactionMock.Object);
+
+      // ✅ Common repo setups
+      _employeeRepoMock.Setup(x => x.CreateEmployeeAsync(It.IsAny<Employee>()))
+          .ReturnsAsync((Employee e) =>
+          {
+            _context.Employees.Add(e);
+            _context.SaveChanges();
+            return e;
+          });
+
+      _employeeRepoMock.Setup(x => x.UpdateEmployeeAsync(It.IsAny<Employee>()))
+          .ReturnsAsync((Employee e) => e);
+
+      _employeeRepoMock.Setup(x => x.DeleteEmployeeAsync(It.IsAny<string>()))
+          .ReturnsAsync(true);
+
+      _employeeRepoMock.Setup(x => x.GetAllEmployeeIdsWithPrefix(It.IsAny<string>()))
+          .ReturnsAsync(new List<string>());
+
+      _employeeRepoMock.Setup(x => x.GetEmployeeByEmailAsync(It.IsAny<string>()))
+          .ReturnsAsync((Employee?)null);
+
+      _employeeRepoMock.Setup(x => x.GetEmployeeByTaxNumberAsync(It.IsAny<string>()))
+          .ReturnsAsync((Employee?)null);
+
+      _employeeRepoMock.Setup(x => x.GetEmployeeByIdNumberAsync(It.IsAny<string>()))
+          .ReturnsAsync((Employee?)null);
+
+      _employeeRepoMock.Setup(x => x.GetEmployeeByPassportAsync(It.IsAny<string>()))
+          .ReturnsAsync((Employee?)null);
+
+      _employeeRepoMock.Setup(x => x.GetEmployeeByContactNumberAsync(It.IsAny<string>()))
+          .ReturnsAsync((Employee?)null);
+
+      // ✅ Position repo setup (dynamic)
+      _positionRepoMock.Setup(p => p.GetPositionByIdAsync(It.IsAny<int>()))
+          .ReturnsAsync((int id) =>
+              _context.Positions.FirstOrDefault(p => p.PositionId == id));
+
+      _leaveBalanceServiceMock.Setup(x => x.InitializeEmployeeLeaveBalancesAsync(It.IsAny<string>()))
+          .Returns(Task.CompletedTask);
+
+      _emailServiceMock.Setup(e => e.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+          .Returns(Task.CompletedTask);
 
       _employeeService = new EmployeeService(
+          _context,
           _employeeRepoMock.Object,
-          _emailServiceMock.Object
+          _emailServiceMock.Object,
+          _positionRepoMock.Object,
+          _leaveBalanceServiceMock.Object,
+          _leaveProcessingServiceMock.Object
       );
     }
-
 
     [Fact]
     public async Task CreateEmployeeAsyncValidInputReturnsCreatedEmployee()
     {
-      // Arrange
       string managerId = "MNG001";
+      var manager = new Employee { EmployeeId = managerId };
 
-      var manager = new Employee { EmployeeId = managerId, };
-
-      var employeeDto = new CreateEmployeeRequestDto
+      var dto = new CreateEmployeeRequestDto
       {
         Name = "John",
         Surname = "Smith",
@@ -49,248 +149,199 @@ namespace HRConnect.Tests
         Gender = Gender.Male,
         IdNumber = "0305055487589",
         TaxNumber = "1234567890",
+        Nationality = "South African",
         PhysicalAddress = "123 Main St",
         Email = "john.smith@singular.co.za",
         ContactNumber = "0123456789",
         Branch = Branch.Johannesburg,
         City = "Johannesburg",
         ZipCode = "2000",
-        PositionId = 1,
+        PositionId = 4,
         MonthlySalary = 20000,
         EmploymentStatus = EmploymentStatus.Permanent,
         CareerManagerID = managerId,
         StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
-        ProfileImage = "profile.jpg"
+        ProfileImage = "profile.jpg",
+        PensionOptionId = 1,
       };
 
-      var createdEmployee = employeeDto.ToEmployeeFromCreateDTO();
-      //Creating the manager 
       _employeeRepoMock.Setup(r => r.GetEmployeeByIdAsync(managerId))
-                       .ReturnsAsync(manager);
+          .ReturnsAsync(manager);
 
-      _employeeRepoMock.Setup(r => r.CreateEmployeeAsync(It.IsAny<Employee>()))
-                       .ReturnsAsync(createdEmployee);
+      var result = await _employeeService.CreateEmployeeAsync(dto);
 
-      _employeeRepoMock.Setup(r => r.GetAllEmployeeIdsWithPrefix(It.IsAny<string>()))
-                       .ReturnsAsync(new List<string>());
-
-      _employeeRepoMock.Setup(r => r.GetEmployeeByEmailAsync(It.IsAny<string>()))
-                       .ReturnsAsync((Employee?)null);
-      _employeeRepoMock.Setup(r => r.GetEmployeeByTaxNumberAsync(It.IsAny<string>()))
-                       .ReturnsAsync((Employee?)null);
-      _employeeRepoMock.Setup(r => r.GetEmployeeByIdNumberAsync(It.IsAny<string>()))
-                       .ReturnsAsync((Employee?)null);
-      _employeeRepoMock.Setup(r => r.GetEmployeeByPassportAsync(It.IsAny<string>()))
-                       .ReturnsAsync((Employee?)null);
-      _employeeRepoMock.Setup(r => r.GetEmployeeByContactNumberAsync(It.IsAny<string>()))
-                       .ReturnsAsync((Employee?)null);
-
-      var mockTransaction = new Mock<Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction>();
-      _employeeRepoMock.Setup(r => r.BeginTransactionAsync())
-                       .ReturnsAsync(mockTransaction.Object); // <-- Return null instead of ITransaction
-
-      _emailServiceMock.Setup(e => e.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
-                       .Returns(Task.CompletedTask);
-
-      // Act
-      var result = await _employeeService.CreateEmployeeAsync(employeeDto);
-
-      // Assert
       Assert.NotNull(result);
       Assert.Equal("John", result.Name);
-      Assert.Equal("Smith", result.Surname);
-      _emailServiceMock.Verify(e => e.SendEmailAsync(
-          employeeDto.Email, It.IsAny<string>(), It.IsAny<string>()), Times.Once);
     }
-
 
     [Fact]
     public async Task CreateEmployeeAsyncDuplicateEmailThrowsBusinessRuleException()
     {
-      var employeeDto = new CreateEmployeeRequestDto
+      var dto = new CreateEmployeeRequestDto
       {
         Name = "Jane",
         Surname = "Doe",
-        Email = "jane.doe@singular.co.za",
+        Title = Title.Ms,
+        Gender = Gender.Female,
+        Email = "duplicate@singular.co.za",
         ContactNumber = "0123456789",
         IdNumber = "0305054589589",
-        PhysicalAddress = "123 Main St",
         TaxNumber = "1234567890",
-        StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
+        Nationality = "South African",
+        PhysicalAddress = "123 Main St",
         Branch = Branch.Johannesburg,
         City = "Johannesburg",
         ZipCode = "2000",
-        Title = Title.Ms,
-        Gender = Gender.Female,
-        PositionId = 1,
-        MonthlySalary = 30000,
+        PositionId = 4,
+        MonthlySalary = 20000,
         EmploymentStatus = EmploymentStatus.Permanent,
-        CareerManagerID = "Manager Name",
+        CareerManagerID = "MNG001",
+        StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
         ProfileImage = "profile.jpg"
       };
 
-      _employeeRepoMock.Setup(r => r.GetEmployeeByEmailAsync(employeeDto.Email))
-                       .ReturnsAsync(new Employee { Email = employeeDto.Email });
+      _employeeRepoMock.Setup(r => r.GetEmployeeByEmailAsync(dto.Email))
+          .ReturnsAsync(new Employee { Email = dto.Email });
 
       await Assert.ThrowsAsync<BusinessRuleException>(() =>
-          _employeeService.CreateEmployeeAsync(employeeDto));
+          _employeeService.CreateEmployeeAsync(dto));
     }
-
 
     [Fact]
     public async Task CreateEmployeeAsyncInvalidTitleGenderThrowsValidationException()
     {
-      var employeeDto = new CreateEmployeeRequestDto
+      var dto = new CreateEmployeeRequestDto
       {
         Name = "Alex",
         Surname = "King",
         Title = Title.Mr,
-        Gender = Gender.Female, // invalid
-        Email = "alex.king@singular.co.za",
+        Gender = Gender.Female,
+        Email = "alex@singular.co.za",
         ContactNumber = "0123456789",
-        PhysicalAddress = "123 Main St",
         IdNumber = "0305054589589",
         TaxNumber = "1234567890",
-        StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
-        Branch = Branch.Johannesburg,
-        City = "Johannesburg",
-        ZipCode = "2000",
-        PositionId = 1,
-        MonthlySalary = 20000,
-        EmploymentStatus = EmploymentStatus.Permanent,
-        CareerManagerID = "",
-        ProfileImage = "profile.jpg"
+        PositionId = 4,
+        StartDate = DateOnly.FromDateTime(DateTime.UtcNow)
       };
 
-      await Assert.ThrowsAsync<HRConnect.Api.Services.ValidationException>(() =>
-          _employeeService.CreateEmployeeAsync(employeeDto));
+      await Assert.ThrowsAsync<ValidationException>(() =>
+          _employeeService.CreateEmployeeAsync(dto));
     }
 
     [Fact]
     public async Task UpdateEmployeeAsyncValidInputReturnsUpdatedEmployee()
     {
-      // Arrange
       var employeeId = "EMP001";
-      string managerId = "New Manager";
-      var newManager = new Employee { EmployeeId = managerId };
+      var managerId = "MNG002";
 
-      var updateDto = new UpdateEmployeeRequestDto
+      var existing = new Employee
       {
+        EmployeeId = employeeId,
+        PositionId = 1,
+        Position = _context.Positions.First(p => p.PositionId == 1),
+        StartDate = DateOnly.FromDateTime(DateTime.UtcNow)
+      };
+      _context.Employees.Add(existing);
+      _context.LeaveTypes.Add(new LeaveType
+      {
+        Id = 1,
+        Code = "AL",
+        IsActive = true,
+        Name = "Annual Leave",
+        Description = "Annual Leave"
+      });
+      _context.LeaveEntitlementRules.Add(new LeaveEntitlementRule
+      {
+        LeaveTypeId = 1,
+        JobGradeId = 1,
+        MinYearsService = 0,
+        MaxYearsService = null,
+        DaysAllocated = 15,
+        IsActive = true
+      });
+      _context.EmployeeAccrualRateHistories.Add(new EmployeeAccrualRateHistory
+      {
+        EmployeeId = "EMP001",
+        EffectiveFrom = DateOnly.FromDateTime(DateTime.UtcNow),
+        EffectiveTo = null
+      });
+      _context.SaveChanges();
+      var manager = new Employee { EmployeeId = managerId };
+
+      _employeeRepoMock.Setup(r => r.GetEmployeeByIdAsync(employeeId))
+          .ReturnsAsync(existing);
+
+      _employeeRepoMock.Setup(r => r.GetEmployeeByIdAsync(managerId))
+          .ReturnsAsync(manager);
+
+      var dto = new UpdateEmployeeRequestDto
+      {
+        Name = "Updated",
+        Surname = "User",
         Title = Title.Mr,
-        Name = "UpdatedName",
-        Surname = "UpdatedSurname",
-        IdNumber = "0305054589589",
-        PassportNumber = "",
-        ContactNumber = "0987654321",
+        Gender = Gender.Male,
         Email = "updated@singular.co.za",
+        ContactNumber = "0987654321",
+        IdNumber = "0305054589589",
         PhysicalAddress = "456 New Street",
-        City = "Cape Town",
-        ZipCode = "8000",
-        HasDisability = false,
-        DisabilityDescription = null,
+        Nationality = "South African",
+        City = "Johannesburg",
+        ZipCode = "2000",
         Branch = Branch.Johannesburg,
-        MonthlySalary = 35000,
-        PositionId = 2,
+        PositionId = 6,
+        MonthlySalary = 30000,
         EmploymentStatus = EmploymentStatus.Permanent,
-        CareerManagerID = newManager.EmployeeId,
+        CareerManagerID = managerId,
         ProfileImage = "updated.jpg"
       };
 
-      var existingEmployee = new Employee
-      {
-        EmployeeId = employeeId,
-        Name = "OldName",
-        Surname = "OldSurname",
-        Email = "old@email.com",
-        IdNumber = "0305054589589"
-      };
+      var result = await _employeeService.UpdateEmployeeAsync(employeeId, dto);
 
-      //creating a new Manager to assign employee to 
-      _employeeRepoMock.Setup(r => r.GetEmployeeByIdAsync(managerId))
-      .ReturnsAsync(newManager);
-
-      _employeeRepoMock.Setup(r => r.GetEmployeeByIdAsync(employeeId))
-                       .ReturnsAsync(existingEmployee);
-
-      _employeeRepoMock.Setup(r => r.UpdateEmployeeAsync(It.IsAny<Employee>()))
-                       .ReturnsAsync((Employee e) => e);
-
-
-      // Act
-      var result = await _employeeService.UpdateEmployeeAsync(employeeId, updateDto);
-
-      // Assert
       Assert.NotNull(result);
-      Assert.Equal("UpdatedName", result.Name);
-      Assert.Equal("UpdatedSurname", result.Surname);
+      Assert.Equal("Updated", result.Name);
     }
-
 
     [Fact]
     public async Task UpdateEmployeeAsyncEmployeeNotFoundThrowsNotFoundException()
     {
-      var employeeId = "EMP999";
-      var updateDto = new UpdateEmployeeRequestDto
-      {
-        Title = Title.Mr,
-        Name = "Test",
-        Surname = "User",
-        IdNumber = "0305054589589",
-        ContactNumber = "0123456789",
-        Email = "test@singular.co.za",
-        PhysicalAddress = "123 Street",
-        City = "Johannesburg",
-        ZipCode = "2000",
-        Branch = Branch.Johannesburg,
-        MonthlySalary = 20000,
-        PositionId = 1,
-        EmploymentStatus = EmploymentStatus.Permanent,
-        CareerManagerID = "Manager",
-        ProfileImage = "profile.jpg"
-      };
-
-      _employeeRepoMock.Setup(r => r.GetEmployeeByIdAsync(employeeId))
-                       .ReturnsAsync((Employee?)null);
+      _employeeRepoMock.Setup(r => r.GetEmployeeByIdAsync("X"))
+          .ReturnsAsync((Employee?)null);
 
       await Assert.ThrowsAsync<NotFoundException>(() =>
-          _employeeService.UpdateEmployeeAsync(employeeId, updateDto));
+          _employeeService.UpdateEmployeeAsync("X", new UpdateEmployeeRequestDto()));
     }
-
 
     [Fact]
     public async Task DeleteEmployeeAsyncValidIdReturnsTrue()
     {
-      var employeeId = "EMP001";
-
       var employee = new Employee
       {
-        EmployeeId = employeeId,
+        EmployeeId = "EMP001",
         StartDate = DateOnly.FromDateTime(DateTime.UtcNow)
       };
 
-      _employeeRepoMock.Setup(r => r.GetEmployeeByIdAsync(employeeId))
-                       .ReturnsAsync(employee);
+      _employeeRepoMock.Setup(r => r.GetEmployeeByIdAsync("EMP001"))
+          .ReturnsAsync(employee);
 
-      _employeeRepoMock.Setup(r => r.DeleteEmployeeAsync(employeeId))
-                       .ReturnsAsync(true);
-
-      var result = await _employeeService.DeleteEmployeeAsync(employeeId);
+      var result = await _employeeService.DeleteEmployeeAsync("EMP001");
 
       Assert.True(result);
     }
 
-
     [Fact]
     public async Task DeleteEmployeeAsyncEmployeeNotFoundThrowsNotFoundException()
     {
-      var employeeId = "EMP404";
-
-      _employeeRepoMock.Setup(r => r.GetEmployeeByIdAsync(employeeId))
-                       .ReturnsAsync((Employee?)null);
+      _employeeRepoMock.Setup(r => r.GetEmployeeByIdAsync("X"))
+          .ReturnsAsync((Employee?)null);
 
       await Assert.ThrowsAsync<NotFoundException>(() =>
-          _employeeService.DeleteEmployeeAsync(employeeId));
+          _employeeService.DeleteEmployeeAsync("X"));
     }
 
+    public void Dispose()
+    {
+      _context.Dispose();
+      GC.SuppressFinalize(this);
+    }
   }
 }

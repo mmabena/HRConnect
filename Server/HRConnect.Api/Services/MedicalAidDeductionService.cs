@@ -1,12 +1,12 @@
 namespace HRConnect.Api.Services;
 
-using DTOs.MedicalOption;
-using DTOs.Payroll.PayrollDeduction.MedicalAidDeduction;
-using Interfaces;
-using Mappers;
-using Models.Payroll;
-using Models.PayrollDeduction;
-using Utils.MedicalAidDeduction;
+using HRConnect.Api.DTOs.MedicalOption;
+using HRConnect.Api.DTOs.Payroll.PayrollDeduction.MedicalAidDeduction;
+using HRConnect.Api.Interfaces;
+using HRConnect.Api.Mappers;
+using HRConnect.Api.Models.Payroll;
+using HRConnect.Api.Models.PayrollDeduction;
+using HRConnect.Api.Utils.MedicalAidDeduction;
 
 /// <summary>
 /// Service implementation for managing medical aid deductions.

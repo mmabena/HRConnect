@@ -1,0 +1,49 @@
+.blue { 
+  background-color: var(--accent-blue);
+}
+
+.teal {
+  background-color: var(--teal);
+}
+
+.lime { 
+  background-color: var(--success-color);
+}
+
+.dark-blue{ 
+  background-color: var(--primary-color);
+}
+
+.employee-table-grid {
+  display: grid;
+  grid-template-rows: 59px 68px 68px 68px 68px 68px 68px 68px 64px 64px;
+  grid-template-columns: 137px 258px minmax(0,1fr) minmax(0,1fr) 250px 180px minmax(0,1fr) minmax(0,1fr);
+  /*1 header + 10 rows */
+  width: 1441px;
+  height: 550px;
+  row-gap: 2px;
+  border-radius: 10px 10px 5px 10px;
+  box-sizing: border-box;
+  overflow: hidden;
+  background-color: #f5f5f5;
+}
+
+.table-header-action{
+    display: flex;
+    padding: 10px 10px 10px 62px;
+    align-items: center;
+    gap: 10px;
+    align-self: stretch;
+    grid-row: 1 / span 1;
+    grid-column: 8 / span 1;
+    justify-self: stretch;
+    background-color: var(--primary-color);
+    color: var(--white);
+    font-feature-settings: 'liga' off, 'clig' off;
+    font-family: "Anek Bangla";
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 15px; /* 93.75% */
+    letter-spacing: -0.43px;
+}
