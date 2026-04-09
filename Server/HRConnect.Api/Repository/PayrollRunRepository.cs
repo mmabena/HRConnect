@@ -66,6 +66,7 @@ namespace HRConnect.Api.Repository
     {
       //Update the current run to be marked as Finalised 
       _context.PayrollRuns.Update(payrollRun);
+
       return Task.CompletedTask;
     }
     public async Task<PayrollRun?> GetLastPayrun()

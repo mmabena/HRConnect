@@ -159,7 +159,7 @@ builder.Services.AddQuartz(q =>
   q.AddTrigger(opts => opts
   .ForJob(NotificationJobKey)
   .WithIdentity("NotificationJOb-Trigger")
-  .WithCronSchedule("5,6,7,8,9,10 0/1 * * * ?"));
+  .WithCronSchedule("5,6,7,8,9,10 0/1 * * * ?"));/* 0 0 0 L-5 * ? */
   // 0 -> 0 seconds
   // 0 -> 0 minutes
   // 0 -> 0 hours
