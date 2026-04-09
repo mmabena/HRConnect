@@ -9,7 +9,6 @@ namespace HRConnect.Api.Data
   using AppAny.Quartz.EntityFrameworkCore.Migrations.SqlServer;
   public class ApplicationDBContext(DbContextOptions dbContextOptions) : DbContext(dbContextOptions)
   {
-    public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options) : base(options) { }
 
     public DbSet<User> Users { get; set; }
     public DbSet<Employee> Employees { get; set; }
@@ -55,7 +54,7 @@ namespace HRConnect.Api.Data
       modelBuilder.Entity<Employee>()
           .HasOne(e => e.PensionOption)
           .WithMany(po => po.Employees)
-          .HasForeignKey(e => e.PensionOptionID)
+          .HasForeignKey(e => e.PensionOptionId)
           .OnDelete(DeleteBehavior.Restrict);
 
             // PensionFund -> Employee
@@ -68,7 +67,7 @@ namespace HRConnect.Api.Data
             modelBuilder.Entity<Employee>()
                 .HasOne(e => e.PensionOption)
                 .WithMany(po => po.Employees)
-                .HasForeignKey(e => e.PensionOptionID)
+                .HasForeignKey(e => e.PensionOptionId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Employee -> Position
@@ -220,7 +219,7 @@ namespace HRConnect.Api.Data
         .OnDelete(DeleteBehavior.NoAction);
 
       modelBuilder.Entity<PensionOption>()
-        .HasMany(e => e.Employee)
+        .HasMany(e => e.Employees)
         .WithOne(po => po.PensionOption)
         .HasForeignKey(po => po.PensionOptionId)
         .OnDelete(DeleteBehavior.SetNull);

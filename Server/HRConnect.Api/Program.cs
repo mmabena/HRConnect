@@ -1,3 +1,4 @@
+
 using System.Text;
 using Audit.Core;
 using Audit.EntityFramework;
@@ -29,21 +30,21 @@ using HRConnect.Api.Utils.Notification;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Audit configuration for custom audit capturing
+//Audit configuration for custom audit capturing
 Audit.Core.Configuration.Setup()
   .UseEntityFramework(config => config
       .AuditTypeExplicitMapper(map => map
         .Map<StatutoryContribution, AuditLogs>((entity, audit) =>
-        {
-          audit.EmployeeId = entity.EmployeeId;
-          audit.IdNumber = entity.IdNumber;
-          audit.PassportNumber = entity.PassportNumber;
-          audit.MonthlySalary = entity.MonthlySalary;
-          audit.ProjectedSalary = entity.MonthlySalary - entity.UifEmployeeAmount;
-          audit.UifEmployeeAmount = entity.UifEmployeeAmount;
-          audit.UifEmployerAmount = entity.UifEmployerAmount;
-          audit.EmployerSdlContribution = entity.EmployerSdlContribution;
-        })
+          {
+            audit.EmployeeId = entity.EmployeeId;
+            audit.IdNumber = entity.IdNumber;
+            audit.PassportNumber = entity.PassportNumber;
+            audit.MonthlySalary = entity.MonthlySalary;
+            audit.ProjectedSalary = entity.MonthlySalary - entity.UifEmployeeAmount;
+            audit.UifEmployeeAmount = entity.UifEmployeeAmount;
+            audit.UifEmployerAmount = entity.UifEmployerAmount;
+            audit.EmployerSdlContribution = entity.EmployerSdlContribution;
+          })
         .AuditEntityAction<AuditLogs>((e, entry, audit) =>
         {
           audit.AuditedAt = DateTime.Now;
@@ -51,7 +52,9 @@ Audit.Core.Configuration.Setup()
           audit.TabelName = entry.Name;
         })));
 
-// Controllers and JSON options
+ExcelPackage.License.SetNonCommercialPersonal("YourName");
+
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -59,7 +62,6 @@ builder.Services.AddControllers()
           new System.Text.Json.Serialization.JsonStringEnumConverter()
       );
     });
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -81,10 +83,12 @@ builder.Services.AddSwaggerGen(c =>
   };
 
   c.AddSecurityDefinition("Bearer", securityScheme);
+
   c.AddSecurityRequirement(new OpenApiSecurityRequirement
-  {
+    {
     { securityScheme, Array.Empty<string>() }
-  });
+    });
+
 });
 
 builder.Services.AddOpenApi();
@@ -94,7 +98,6 @@ builder.Services.AddDbContext<ApplicationDBContext>(options =>
       options.AddInterceptors(new AuditSaveChangesInterceptor());
     });
 
-// Authentication & JWT
 builder.Services.AddAuthentication(options =>
 {
   options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -107,10 +110,12 @@ builder.Services.AddAuthentication(options =>
   byte[] keyBytes;
   try
   {
+    // Try to interpret as base64 first
     keyBytes = Convert.FromBase64String(secretValue);
   }
   catch (FormatException)
   {
+    // Fallback to UTF8 bytes if not base64
     keyBytes = Encoding.UTF8.GetBytes(secretValue);
   }
 
@@ -126,13 +131,11 @@ builder.Services.AddAuthentication(options =>
   };
 });
 
-// Authorization policies
 builder.Services.AddAuthorizationBuilder()
     .AddPolicy("SuperUserOnly", policy => policy.RequireRole("SuperUser"))
     .AddPolicy("NormalUserOnly", policy => policy.RequireRole("NormalUser"))
     .AddPolicy("SuperOrNormalUser", policy => policy.RequireRole("SuperUser", "NormalUser"));
 
-// Quartz job scheduling
 builder.Services.AddQuartz(q =>
 {
   var RolloverJobKey = new JobKey("PayrollRolloverJob");
@@ -157,7 +160,7 @@ builder.Services.AddQuartz(q =>
   q.AddTrigger(opts => opts
   .ForJob(NotificationJobKey)
   .WithIdentity("NotificationJOb-Trigger")
-  .WithCronSchedule("5,6,7,8,9,10 0/1 * * * ?"));
+  .WithCronSchedule("0 0 0 1 * ?"));
   // 0 -> 0 seconds
   // 0 -> 0 minutes
   // 0 -> 0 hours
@@ -208,7 +211,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
-builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<HRConnect.Api.Interfaces.IUserService, HRConnect.Api.Services.UserService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ITaxTableUploadService, TaxTableUploadService>();
 builder.Services.AddScoped<ITaxTableUploadRepository, TaxTableUploadRepository>();
@@ -218,18 +221,20 @@ builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
 builder.Services.AddScoped<IPositionRepository, PositionRepository>();
 builder.Services.AddScoped<IPositionService, PositionService>();
 builder.Services.AddScoped<IJobGradeRepository, JobGradeRepository>();
-builder.Services.AddScoped<IJobGradeService, JobGradeService>();
-// builder.Services.AddScoped<ILeaveTypeManagementRepository, LeaveTypeManagementRepository>();
 builder.Services.AddScoped<IOccupationalLevelRepository, OccupationalLevelRepository>();
 builder.Services.AddScoped<IOccupationalLevelService, OccupationalLevelService>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.Services.AuthService>();
 
- 
+// Mpho Mosia - Leave Services 
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<ILeaveBalanceService, LeaveBalanceService>();
 builder.Services.AddScoped<ILeaveProcessingService, LeaveProcessingService>();
 builder.Services.AddScoped<ILeaveRuleService, LeaveRuleService>();
+builder.Services.AddScoped<IPensionFundService, PensionFundService>();
+builder.Services.AddScoped<IEmployeePensionRepository, EmployeePensionRepository>();
+builder.Services.AddScoped<IPensionFundService, PensionFundService>();
 
+builder.Services.AddScoped<IPensionFundRepository, PensionFundRepository>();
 builder.Services.AddScoped<ILeaveTypeManagementService, LeaveTypeManagementService>();
 builder.Services.AddScoped<ILeaveApplicationService, LeaveApplicationService>();
 
@@ -243,8 +248,6 @@ builder.Services.AddScoped<IMedicalOptionRepository, MedicalOptionRepository>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IMedicalOptionService,
   HRConnect.Api.Services.MedicalOptionService>();
 builder.Services.AddScoped<IPensionOptionRepository, PensionOptionRepository>();
-builder.Services.AddScoped<IPensionFundService, PensionFundService>();
-builder.Services.AddScoped<IPensionFundRepository, PensionFundRepository>();
 builder.Services.AddScoped<IEmployeePensionEnrollmentRepository, EmployeePensionEnrollmentRepository>();
 builder.Services.AddTransient<IEmployeePensionEnrollmentService, EmployeePensionEnrollmentService>();
 builder.Services.AddScoped<IPensionDeductionRepository, PensionDeductionRepository>();
@@ -296,7 +299,9 @@ if (app.Environment.IsDevelopment())
   });
 }
 
+// app.UseHttpsRedirection();
 app.UseCors("AllowReact");
+// Adding Global Exception Handler
 app.UseGlobalExceptionHandler();
 app.UseAuthentication();
 app.UseAuthorization();

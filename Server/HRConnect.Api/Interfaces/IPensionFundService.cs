@@ -28,6 +28,6 @@
     decimal CalculatePensionDeduction(decimal monthlySalary, PensionOption pensionOption);
 
     // Employee Selection
-    Task<ServiceResult> RecordEmployeePensionSelectionAsync(string employeeId, int pensionOptionId, CancellationToken cancellationToken);
+    Task<ServiceResult> RecordEmployeePensionSelectionAsync(string employeeId, int PensionOptionId, CancellationToken cancellationToken);
   }
 }

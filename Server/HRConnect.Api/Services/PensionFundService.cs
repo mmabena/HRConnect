@@ -87,11 +87,11 @@
     // Employee Pension Selection
     public async Task<ServiceResult> RecordEmployeePensionSelectionAsync(
      string employeeId,
-     int pensionOptionId,
+     int PensionOptionId,
      CancellationToken cancellationToken)
     {
       Employee? employee = await employeeRepo.GetEmployeeByIdAsync(employeeId, cancellationToken);
-      PensionOption? option = await optionRepo.GetPensionOptionByIdAsync(pensionOptionId, cancellationToken);
+      PensionOption? option = await optionRepo.GetPensionOptionByIdAsync(PensionOptionId, cancellationToken);
 
       if (employee == null || option == null)
         return ServiceResult.Failure("Employee or Pension Option not found.");
@@ -100,7 +100,7 @@
         return ServiceResult.Failure("Only permanent employees may select a pension option.");
 
       // Update employee with chosen option
-      employee.PensionOptionID = option.PensionOptionId;
+      employee.PensionOptionId = option.PensionOptionId;
 
       decimal salary = employee.MonthlySalary;
       decimal contributionAmount = salary * (option.ContributionPercentage / 100);
