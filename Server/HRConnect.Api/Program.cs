@@ -3,7 +3,6 @@ using Audit.Core;
 using Audit.EntityFramework;
 using HRConnect.Api.Data;
 using HRConnect.Api.Interfaces;
-using HRConnect.Api.Interfaces.PensionProjection;
 using HRConnect.Api.Interfaces.Pension;
 using HRConnect.Api.Middleware;
 using HRConnect.Api.Models;
@@ -30,7 +29,7 @@ using HRConnect.Api.Utils.Notification;
 var builder = WebApplication.CreateBuilder(args);
 
 //Audit configuration for custom audit capturing
-Configuration.Setup()
+Audit.Core.Configuration.Setup()
   .UseEntityFramework(config => config
       .AuditTypeExplicitMapper(map => map
         .Map<StatutoryContribution, AuditLogs>((entity, audit) =>

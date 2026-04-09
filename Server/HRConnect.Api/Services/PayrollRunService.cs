@@ -80,7 +80,7 @@ namespace HRConnect.Api.Services
       await _payrollRunRepo.UpdateRun(currentPayRun);
     }
 
-    public async Task AddRecordsCollectionToRunAsync(IList<PayrollRecord> recordsCollection, string employeeId)
+    public async Task AddRecordsCollectionToRunAsync(IList<PayrollRecord> recordsCollection, string? employeeId)
     {
       var payperiod = await _payrollPeriodService.GetLastPeriodAsync();
       if (payperiod == null)
@@ -95,35 +95,9 @@ namespace HRConnect.Api.Services
       )
       {
         record.PayrollRun = currentPayRun;
-        record.EmployeeId = employeeId;
+        record.EmployeeId = employeeId ?? record.EmployeeId;
         currentPayRun.Records.Add(record);
       }
-      await _payrollRunRepo.UpdateRun(currentPayRun);
-    }
-    
-    public async Task AddRecordsCollectionToRunAsync(IList<PayrollRecord> recordsCollection,
-      string? employeeId = null)
-    {
-      var payperiod = await _payrollPeriodService.GetLastPeriodAsync();
-      if (payperiod == null)
-        throw new InvalidDataException("No payroll period found or it is locked");
-
-      var currentPayRun = payperiod.Runs.Where(r => !r.IsLocked).OrderByDescending(r => r.PayrollRunNumber).FirstOrDefault();
-
-      if (currentPayRun == null)
-        throw new InvalidDataException("No current payroll run found or it is locked");
-      
-      //indexer
-      int i = 0;
-      
-      foreach (var record in recordsCollection)
-      {
-        record.PayrollRun = currentPayRun;
-        //record.EmployeeId = employeeId;
-        currentPayRun.Records.Add(record);
-        i++;
-      }
-      // currentPayRun.Records.List<PayrollRecord>.AddRange(recordsCollection);
       await _payrollRunRepo.UpdateRun(currentPayRun);
     }
     
