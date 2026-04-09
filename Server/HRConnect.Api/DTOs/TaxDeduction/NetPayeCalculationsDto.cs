@@ -50,15 +50,9 @@ namespace HRConnect.Api.DTOs.TaxDeduction
   /// </summary>
   public class MedicalTaxCreditBreakdownDto
   {
-    /// <summary>R364 for the principal member. Zero when no medical aid.</summary>
     public decimal PrincipalMemberCredit { get; set; }
-
-    /// <summary>R364 × number of adult dependants.</summary>
     public decimal AdultDependantCredit { get; set; }
-
-    /// <summary>R246 × number of child dependants.</summary>
     public decimal ChildDependantCredit { get; set; }
-
     public int AdultDependantCount { get; set; }
     public int ChildDependantCount { get; set; }
   }
