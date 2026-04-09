@@ -1,15 +1,12 @@
 namespace HRConnect.Api.Utils.Seed
 {
   using HRConnect.Api.Data;
-  using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
   using Microsoft.EntityFrameworkCore;
 
   public class PositionAndLeaveSeed
   {
     private readonly ApplicationDBContext _context;
-    //Repos to add seed value
-    private readonly IPositionRepository _positionRepo;
 
     //Seed Data we need
     private readonly List<JobGrade> _seedJobGrade = new()
@@ -51,26 +48,6 @@ namespace HRConnect.Api.Utils.Seed
           Name="Unskilled",
           IsActive=true
         }
-    };
-
-    private readonly List<Position> _seedPositions = new()
-    {
-      new Position
-      {
-        PositionTitle="Executive",
-        JobGradeId=1,
-        IsActive=true,
-        OccupationalLevelId=1,
-        CreatedDate=new DateTime(2026,1,1)
-      },
-      new Position
-      {
-        PositionTitle="Analyst",
-        JobGradeId=2,
-        IsActive=true,
-        OccupationalLevelId=2,
-        CreatedDate=new DateTime(2026,1,1)
-      }
     };
 
     private readonly List<OccupationalLevel> _seedOccuptationLevel = new()
@@ -170,6 +147,21 @@ namespace HRConnect.Api.Utils.Seed
         IsActive = true
        }
     };
+
+    private readonly List<PensionOption> _seedPensionOptions = new()
+    {
+      new PensionOption
+      {
+        // PensionOptionId=1,
+        ContributionPercentage = 5.00m
+      },
+      new PensionOption
+      {
+        // PensionOptionId=2,
+        ContributionPercentage = 3.00m
+      },
+    };
+
     public PositionAndLeaveSeed(ApplicationDBContext context)
     {
       _context = context;
@@ -181,6 +173,9 @@ namespace HRConnect.Api.Utils.Seed
       await SeedOccuptationLevel();
       await SeedLeaveTypes();
       await SeedLeaveEntitlementRules();
+
+      //temporarily seed pension options 
+      await SeedPensionOptions();
     }
 
     //Seed the Job Grade first using transaction
@@ -198,9 +193,7 @@ namespace HRConnect.Api.Utils.Seed
         await _context.JobGrades.AddRangeAsync(_seedJobGrade);
         _ = await _context.SaveChangesAsync();
 
-        _ = await _context.Database.ExecuteSqlRawAsync(
-          "SET IDENTITY_INSERT JobGrades OFF"
-        );
+        _ = await _context.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT JobGrades OFF");
       }
     }
 
@@ -261,6 +254,23 @@ namespace HRConnect.Api.Utils.Seed
           "SET IDENTITY_INSERT LeaveTypes OFF");
       }
     }
-  }
+    public async Task SeedPensionOptions()
+    {
+      if (!await _context.PensionOptions.AnyAsync())
+      {
+        _ = await _context.Database.ExecuteSqlRawAsync(
+          "SET IDENTITY_INSERT PensionOptions ON"
+         );
+        //reset ID for seeding
+        _ = await _context.Database.ExecuteSqlRawAsync(
+         "DBCC CHECKIDENT ('PensionOptions', RESEED, 0)");
 
+        await _context.PensionOptions.AddRangeAsync(_seedPensionOptions);
+
+        _ = await _context.SaveChangesAsync();
+        _ = await _context.Database.ExecuteSqlRawAsync(
+          "SET IDENTITY_INSERT PensionOptions OFF");
+      }
+    }
+  }
 }
