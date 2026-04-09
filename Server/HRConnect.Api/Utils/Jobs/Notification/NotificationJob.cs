@@ -1,21 +1,58 @@
 namespace HRConnect.Api.Utils.Jobs.Notification
 {
+  using System.Configuration;
+  using FluentValidation;
   using global::Quartz;
   using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Interfaces.Notification;
+  using HRConnect.Api.Models;
+  using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
 
   // Prevent multiple of these jobs from running concurrently
   [DisallowConcurrentExecution]
 
-  public class Notificationjob : IJob
+  public class NotificationJob : IJob
   {
     private readonly IJobScheduleService _jobScheduleService;
-    public Notificationjob(IJobScheduleService jobScheduleService)
+    private readonly INotificationFactory _notificationFactory;
+    private readonly INotificationDispatcher _notificationDispatcher;
+    private static readonly int DAYS_TO_ROLLOVER_NOTIFICATION = 5;
+    public NotificationJob(IJobScheduleService jobScheduleService, INotificationFactory notificationFactory, INotificationDispatcher notificationDispatcher)
     {
       _jobScheduleService = jobScheduleService;
+      _notificationFactory = notificationFactory;
+      _notificationDispatcher = notificationDispatcher;
     }
     public async Task Execute(IJobExecutionContext context)
     {
-      var payrollExecutionDate = await _jobScheduleService.GetNextJobScheduleAsync("PayrollRollover");
+      var payrollExecutionDate = await _jobScheduleService.GetNextJobScheduleAsync("PayrollRolloverJob");
+
+      Console.WriteLine($"NEXT EXECUTION Date for Payroll Rollover job {payrollExecutionDate}");
+
+      if (payrollExecutionDate == null)
+        return; //No days found
+
+      //Swap this in when pushing to main 
+      // int daysUntilRollover = (payrollExecutionDate.Value.Date - DateTime.Now).Days;
+
+      int secondsUntilRollover = (DateTime.Now - payrollExecutionDate.Value).Seconds;
+
+      // Console.WriteLine($"=====DAYS UNTIL Payroll Rollover job {secondsUntilRollover}");
+      if (secondsUntilRollover > 0)
+      {
+        var notification = new Notification
+        {
+          Message = $"Finalise Payroll. Payroll Will Rollover In {secondsUntilRollover}",
+          IsRead = false,
+          Severity = NotificationSeverity.Critical,
+          Type = NotificationType.Payroll,
+          CreatedAt = DateTime.Now,
+          DeliveryChannel = "InApp"
+        };
+        // await _notificationFactory.ProduceNotificationAsync(notification);
+        // await _notificationDispatcher.DispatchNotificationAsync(notification);
+      }
+
     }
 
   }

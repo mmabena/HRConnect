@@ -13,6 +13,7 @@ using HRConnect.Api.Services;
 using HRConnect.Api.Utils;
 using HRConnect.Api.Utils.Jobs.Payroll;
 using HRConnect.Api.Utils.Jobs.Pension;
+using HRConnect.Api.Utils.Jobs.Notification;
 using HRConnect.Api.Utils.Payroll;
 using HRConnect.Api.Utils.Seed;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -22,6 +23,9 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using OfficeOpenXml;
 using Quartz;
+using HRConnect.Api.Interfaces.Notification;
+using HRConnect.Api.Utils.Factories;
+using HRConnect.Api.Utils.Notification;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -89,7 +93,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
     {
-      options.UseSqlServer(builder.Configuration.GetConnectionString("DBeaverConnection"));
+      options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!);
       options.AddInterceptors(new AuditSaveChangesInterceptor());
     });
 
@@ -134,21 +138,28 @@ builder.Services.AddAuthorizationBuilder()
 builder.Services.AddQuartz(q =>
 {
   var RolloverJobKey = new JobKey("PayrollRolloverJob");
+  var NotificationJobKey = new JobKey("NotificationJob");
 
   //Add a service for to run as a background job 
   q.AddJob<PayrollRolloverJob>(opts =>
   opts.WithIdentity(RolloverJobKey)
   .StoreDurably());
 
+  q.AddJob<NotificationJob>(opts =>
+  opts.WithIdentity(NotificationJobKey)
+  .StoreDurably());
   //Triggers that will need to be fired to run background job
   // using Cron Schedule
-  // Second, Minute, Hour, Day of The Month, Month, Day of The Week
   q.AddTrigger(opts => opts
   .ForJob(RolloverJobKey)
   .WithIdentity("PayrollRollover-Trigger")
-  .WithCronSchedule("0 0 0 1 * ?", x =>
+  .WithCronSchedule("10 0/1 * * * ?", x =>
   x.WithMisfireHandlingInstructionFireAndProceed()));
 
+  q.AddTrigger(opts => opts
+  .ForJob(NotificationJobKey)
+  .WithIdentity("NotificationJOb-Trigger")
+  .WithCronSchedule("5,6,7,8,9,10 0/1 * * * ?"));
   // 0 -> 0 seconds
   // 0 -> 0 minutes
   // 0 -> 0 hours
@@ -157,20 +168,20 @@ builder.Services.AddQuartz(q =>
   // ? -> for all days of the week
 
   JobKey employeePensionEnrollmentJob = new("EmployeeEnrollmentJob");
-  _ = q.AddJob<EmployeeEnrollmentJob>(opts =>
-        opts.WithIdentity(employeePensionEnrollmentJob)
-        .StoreDurably());
+  q.AddJob<EmployeeEnrollmentJob>(opts =>
+         opts.WithIdentity(employeePensionEnrollmentJob)
+         .StoreDurably());
 
-  _ = q.AddTrigger(opts => opts
-      .ForJob(employeePensionEnrollmentJob)
-      .StartNow());
+  q.AddTrigger(opts => opts
+       .ForJob(employeePensionEnrollmentJob)
+       .StartNow());
 
   //Adding persistence to quartz to be able to be run in the back
   q.UsePersistentStore(store =>
   {
     store.UseSqlServer(options =>
         {
-          options.ConnectionString = builder.Configuration.GetConnectionString("DBeaverConnection")!;
+          options.ConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
           options.TablePrefix = "quartz.QRTZ_";
         });
     store.UseSerializer<Quartz.Simpl.SystemTextJsonObjectSerializer>();
@@ -239,6 +250,13 @@ builder.Services.AddTransient<IEmployeePensionEnrollmentService, EmployeePension
 builder.Services.AddScoped<IPensionDeductionRepository, PensionDeductionRepository>();
 builder.Services.AddTransient<IPensionDeductionService, PensionDeductionService>();
 builder.Services.AddScoped<ILeaveRuleRepository, LeaveRuleRepository>();
+
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<INotificationFactory, NotificationFactory>();
+builder.Services.AddScoped<INotificationDispatcher, NotificationDispatcher>();
+builder.Services.AddScoped<IJobScheduleService, JobScheduleService>();
+
 builder.Services.AddScoped<PositionAndLeaveSeed>();
 
 builder.Services.AddCors(options =>

@@ -184,7 +184,6 @@ namespace HRConnect.Api.Utils.Seed
       if (!await _context.JobGrades.AnyAsync())
       {
         //Allow explicit insertions with IDs
-        _ = await _context.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT JobGrades ON");
 
         //reset ID for seeding
         _ = await _context.Database.ExecuteSqlRawAsync(
@@ -193,7 +192,6 @@ namespace HRConnect.Api.Utils.Seed
         await _context.JobGrades.AddRangeAsync(_seedJobGrade);
         _ = await _context.SaveChangesAsync();
 
-        _ = await _context.Database.ExecuteSqlRawAsync("SET IDENTITY_INSERT JobGrades OFF");
       }
     }
 
@@ -202,9 +200,6 @@ namespace HRConnect.Api.Utils.Seed
     {
       if (!await _context.OccupationalLevels.AnyAsync())
       {
-        _ = await _context.Database.ExecuteSqlRawAsync(
-          "SET IDENTITY_INSERT OccupationalLevels ON"
-         );
         //reset ID for seeding
         _ = await _context.Database.ExecuteSqlRawAsync(
          "DBCC CHECKIDENT ('OccupationalLevels', RESEED, 0)");
@@ -212,8 +207,6 @@ namespace HRConnect.Api.Utils.Seed
         _context.OccupationalLevels.AddRange(_seedOccuptationLevel);
 
         _ = await _context.SaveChangesAsync();
-        _ = await _context.Database.ExecuteSqlRawAsync(
-          "SET IDENTITY_INSERT OccupationalLevels OFF");
       }
     }
     //Seed LeaveEntitlementRules
@@ -221,9 +214,6 @@ namespace HRConnect.Api.Utils.Seed
     {
       if (!await _context.LeaveEntitlementRules.AnyAsync())
       {
-        _ = await _context.Database.ExecuteSqlRawAsync(
-          "SET IDENTITY_INSERT LeaveEntitlementRules ON"
-         );
         //reset ID for seeding
         _ = await _context.Database.ExecuteSqlRawAsync(
          "DBCC CHECKIDENT ('LeaveEntitlementRules', RESEED, 0)");
@@ -231,8 +221,6 @@ namespace HRConnect.Api.Utils.Seed
         await _context.LeaveEntitlementRules.AddRangeAsync(_seedLeaveEntitlementRules);
 
         _ = await _context.SaveChangesAsync();
-        _ = await _context.Database.ExecuteSqlRawAsync(
-          "SET IDENTITY_INSERT LeaveEntitlementRules OFF");
       }
     }
     //Seed LeaveTypes
@@ -240,9 +228,6 @@ namespace HRConnect.Api.Utils.Seed
     {
       if (!await _context.LeaveTypes.AnyAsync())
       {
-        _ = await _context.Database.ExecuteSqlRawAsync(
-          "SET IDENTITY_INSERT LeaveTypes ON"
-         );
         //reset ID for seeding
         _ = await _context.Database.ExecuteSqlRawAsync(
          "DBCC CHECKIDENT ('LeaveTypes', RESEED, 0)");
@@ -250,17 +235,12 @@ namespace HRConnect.Api.Utils.Seed
         await _context.LeaveTypes.AddRangeAsync(_seedLeaveTypes);
 
         _ = await _context.SaveChangesAsync();
-        _ = await _context.Database.ExecuteSqlRawAsync(
-          "SET IDENTITY_INSERT LeaveTypes OFF");
       }
     }
     public async Task SeedPensionOptions()
     {
       if (!await _context.PensionOptions.AnyAsync())
       {
-        _ = await _context.Database.ExecuteSqlRawAsync(
-          "SET IDENTITY_INSERT PensionOptions ON"
-         );
         //reset ID for seeding
         _ = await _context.Database.ExecuteSqlRawAsync(
          "DBCC CHECKIDENT ('PensionOptions', RESEED, 0)");
@@ -268,8 +248,6 @@ namespace HRConnect.Api.Utils.Seed
         await _context.PensionOptions.AddRangeAsync(_seedPensionOptions);
 
         _ = await _context.SaveChangesAsync();
-        _ = await _context.Database.ExecuteSqlRawAsync(
-          "SET IDENTITY_INSERT PensionOptions OFF");
       }
     }
   }
