@@ -1,6 +1,5 @@
 namespace HRConnect.Api.Models
 {
-
   public class Position
   {
     public int PositionId { get; set; }

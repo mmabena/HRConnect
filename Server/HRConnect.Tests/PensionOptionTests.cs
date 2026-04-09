@@ -11,7 +11,7 @@
       int index = 1;
 
       //Act
-      float result = PensionOption.GetPensionPercentage(index);
+      float result = AvailablePensionOptions.GetPensionPercentage(index);
 
       //Assert
       _ = Assert.IsType<float>(result);
@@ -24,7 +24,7 @@
       int invalidIndex = 0;
 
       //Act & Assert
-      _ = Assert.Throws<IndexOutOfRangeException>(() => PensionOption.GetPensionPercentage(invalidIndex));
+      _ = Assert.Throws<IndexOutOfRangeException>(() => AvailablePensionOptions.GetPensionPercentage(invalidIndex));
     }
   }
 }

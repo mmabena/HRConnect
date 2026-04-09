@@ -16,6 +16,8 @@
   --primary-dark: #001a25;
   --primary-light: #004d6b;
   --white: #fff;
+  --blue: #4F6E78;
+  --light-grey: #9A9A9A;
   --accent-blue: #006088;
   --accent-blue-dark: #004d6b;
   --teal: #01A19A;
@@ -753,11 +755,8 @@ body {
   z-index: 1;
 }
 
-<<<<<<< HEAD
-/* Menu Background */
-=======
+
 /* Edit Employee Background */
->>>>>>> feature/HRC003
 .menu-background {
   position: fixed;
   top: 0;
