@@ -1,0 +1,187 @@
+
+/* Main wrapper around both tables */
+.lt-wrapper {
+  padding: 20px; /* space inside page */
+}
+
+/* Card container (same idea as your global white boxes) */
+.lt-box {
+  background: white; /* white card */
+  border-radius: 10px; /* rounded edges */
+  margin-bottom: 20px; /* spacing between tables */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1); /* soft shadow */
+  overflow: hidden; /* prevents overflow outside rounded edges */
+}
+
+/* Header section (title + button) */
+.lt-header {
+  display: flex; /* put items in a row */
+  justify-content: space-between; /* space between title and button */
+  align-items: center; /* vertical alignment */
+  padding: 15px; /* spacing inside header */
+  font-weight: 600;
+  color: #002D40; /* matches global text */
+  background-color: lightgrey;
+}
+
+/* Add button (matches your green button style) */
+.lt-add-btn {
+  background-color: #638549; /* same as global add button */
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px; /* rounded */
+  cursor: pointer;
+}
+
+/* Table base */
+.lt-table {
+  width: 100%; /* full width */
+  border-collapse: collapse; /* remove gaps */
+}
+
+/* Table headers */
+.lt-table th {
+  background-color: #355867; /* primary color */
+  color: white;
+  padding: 12px;
+  text-align: left;
+}
+
+/* Table cells */
+.lt-table td {
+  padding: 12px;
+  border-bottom: 1px solid #ccc; /* row separator */
+}
+
+/* Code column (blue text like screenshot) */
+.lt-code {
+  color: #006088;
+  font-weight: 600;
+}
+
+/* Inactive code (red) */
+.inactive-code {
+  color: red;
+}
+
+/* Status badge */
+.lt-status {
+  padding: 5px 12px;
+  border-radius: 20px; /* pill shape */
+  font-size: 12px;
+}
+
+/* Active = green */
+.lt-status.active {
+  background-color: #AFBF74;
+  color: #2e3d1f;
+}
+
+/* Inactive = red */
+.lt-status.inactive {
+  background-color: #f4b4b4;
+  color: #8b0000;
+}
+
+/* Actions column layout */
+.lt-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* Action links */
+.lt-actions span {
+  cursor: pointer;
+  color: #006088;
+  text-decoration: underline;
+}
+
+/* Push content slightly down from navbar */
+.menu-background {
+  padding-top: 30px; /* space below navbar */
+}
+
+/* Section holding the button */
+.lt-top-section {
+  display: flex; /* horizontal layout */
+  justify-content: flex-end; /* move button right */
+  margin-bottom: 20px; /* space before table */
+  padding: 0 10px; /* align with table edges */
+}
+
+/* Table container spacing */
+.lt-box {
+  margin-bottom: 25px; /* space between tables */
+}
+.lt-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed; /* 🔥 forces alignment */
+}
+
+/* Define exact column widths */
+.lt-table th:nth-child(1),
+.lt-table td:nth-child(1) {
+  width: 10%;
+}
+
+.lt-table th:nth-child(2),
+.lt-table td:nth-child(2) {
+  width: 20%;
+}
+
+.lt-table th:nth-child(3),
+.lt-table td:nth-child(3) {
+  width: 25%;
+}
+
+.lt-table th:nth-child(4),
+.lt-table td:nth-child(4) {
+  width: 15%;
+}
+
+.lt-table th:nth-child(5),
+.lt-table td:nth-child(5) {
+  width: 15%;
+}
+
+.lt-table th:nth-child(6),
+.lt-table td:nth-child(6) {
+  width: 15%;
+}
+.lt-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-start;
+}
+.lt-table th,
+.lt-table td {
+  text-align: left;
+  vertical-align: middle; /* aligns content nicely */
+}
+.lt-add-btn {
+  background-color: #638549;
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 2%;
+  margin-bottom: 2%;
+}
+.lt-page-container {
+  padding: 0 60px; /* keeps spacing from sides */
+  margin-right: 8%;
+}
+.lt-top-section {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 30px;
+}
+
+/* Make tables align with button */
+.lt-box {
+  width: 100%;
+}

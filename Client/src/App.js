@@ -30,6 +30,7 @@ import ProjectionCalculator from "./Pages/PayrollTools/ProjectionCalculator";
 import PersonalInformation from "./Components/PersonalInformation.jsx";
 import api from "../src/api/api.js";
 import ChangePositionManagement from "./Components/companyManagement/PositionManagement/ChangePositionManagement.jsx";
+import LeaveTables from "./Components/LeaveTypeManagement/LeaveTables";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
@@ -182,6 +183,7 @@ function App() {
           />
           <Route path="/userManagement" element={<UserManagement />} />
           <Route path="/taxTableManagement" element={<TaxTableManagement />} />
+          <Route path="/leaveManagement" element={<LeaveTables />} />
           <Route path="/taxTableUpload" element={<TaxTableUpload />} />
           <Route path="/positionManagement" element={<PositionManagement />} />
           <Route

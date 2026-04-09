@@ -101,6 +101,7 @@ namespace HRConnect.Api.Data
           .HasOne(r => r.JobGrade)
           .WithMany(j => j.LeaveEntitlementRules)
           .HasForeignKey(r => r.JobGradeId)
+          .IsRequired(false)
           .OnDelete(DeleteBehavior.Restrict);
 
 

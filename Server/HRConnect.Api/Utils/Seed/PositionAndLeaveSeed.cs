@@ -67,34 +67,77 @@ namespace HRConnect.Api.Utils.Seed
     };
 
     private readonly List<LeaveEntitlementRule> _seedLeaveEntitlementRules = new()
-    {
-    // <3 years
-    new LeaveEntitlementRule {  LeaveTypeId = 1, JobGradeId = 2, MinYearsService = 0, MaxYearsService = 2.99m, DaysAllocated = 15, IsActive = true },
-    new LeaveEntitlementRule {  LeaveTypeId = 1, JobGradeId = 3, MinYearsService = 0, MaxYearsService = 2.99m, DaysAllocated = 15, IsActive = true },
-    new LeaveEntitlementRule {  LeaveTypeId = 1, JobGradeId = 4, MinYearsService = 0, MaxYearsService = 2.99m, DaysAllocated = 15, IsActive = true },
-    new LeaveEntitlementRule {  LeaveTypeId = 1, JobGradeId = 6, MinYearsService = 0, MaxYearsService = 2.99m, DaysAllocated = 15, IsActive = true },
+{
+    // ================= ANNUAL LEAVE =================
 
-    // 3-5 years
-    new LeaveEntitlementRule {  LeaveTypeId = 1, JobGradeId = 2, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 18, IsActive = true },
-    new LeaveEntitlementRule {  LeaveTypeId = 1, JobGradeId = 3, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 18, IsActive = true },
-    new LeaveEntitlementRule {  LeaveTypeId = 1, JobGradeId = 4, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 18, IsActive = true },
-    new LeaveEntitlementRule {  LeaveTypeId = 1, JobGradeId = 6, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 18, IsActive = true },
+    // <3 years (Unskilled–Middle: 15)
+    new LeaveEntitlementRule { LeaveTypeId = 1, JobGradeId = 2, MinYearsService = 0, MaxYearsService = 2.99m, DaysAllocated = 15, IsActive = true },
+    new LeaveEntitlementRule { LeaveTypeId = 1, JobGradeId = 3, MinYearsService = 0, MaxYearsService = 2.99m, DaysAllocated = 15, IsActive = true },
+    new LeaveEntitlementRule { LeaveTypeId = 1, JobGradeId = 4, MinYearsService = 0, MaxYearsService = 2.99m, DaysAllocated = 15, IsActive = true },
+    new LeaveEntitlementRule { LeaveTypeId = 1, JobGradeId = 6, MinYearsService = 0, MaxYearsService = 2.99m, DaysAllocated = 15, IsActive = true },
+
+    // <3 years (Senior Management)
+    new LeaveEntitlementRule { LeaveTypeId = 1, JobGradeId = 5, MinYearsService = 0, MaxYearsService = 2.99m, DaysAllocated = 18, IsActive = true },
+
+    // <3 years (Executive Director)
+    new LeaveEntitlementRule { LeaveTypeId = 1, JobGradeId = 1, MinYearsService = 0, MaxYearsService = 2.99m, DaysAllocated = 22, IsActive = true },
+
+    // 3–5 years
+    new LeaveEntitlementRule { LeaveTypeId = 1, JobGradeId = 2, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 18, IsActive = true },
+    new LeaveEntitlementRule { LeaveTypeId = 1, JobGradeId = 3, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 18, IsActive = true },
+    new LeaveEntitlementRule { LeaveTypeId = 1, JobGradeId = 4, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 18, IsActive = true },
+    new LeaveEntitlementRule { LeaveTypeId = 1, JobGradeId = 6, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 18, IsActive = true },
+
+    // Senior Management
+    new LeaveEntitlementRule { LeaveTypeId = 1, JobGradeId = 5, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 21, IsActive = true },
+
+    // Executive Director
+    new LeaveEntitlementRule { LeaveTypeId = 1, JobGradeId = 1, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 25, IsActive = true },
 
     // >5 years
-    new LeaveEntitlementRule {  LeaveTypeId = 1, JobGradeId = 2, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 20, IsActive = true },
-    new LeaveEntitlementRule { LeaveTypeId=1, JobGradeId = 3, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 20, IsActive = true },
-    new LeaveEntitlementRule {  LeaveTypeId = 1, JobGradeId = 4, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 20, IsActive = true },
-    new LeaveEntitlementRule {  LeaveTypeId = 1, JobGradeId = 6, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 20, IsActive = true },
+    new LeaveEntitlementRule { LeaveTypeId = 1, JobGradeId = 2, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 20, IsActive = true },
+    new LeaveEntitlementRule { LeaveTypeId = 1, JobGradeId = 3, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 20, IsActive = true },
+    new LeaveEntitlementRule { LeaveTypeId = 1, JobGradeId = 4, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 20, IsActive = true },
+    new LeaveEntitlementRule { LeaveTypeId = 1, JobGradeId = 6, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 20, IsActive = true },
 
-    // GROUP B (5)
-    new LeaveEntitlementRule {  LeaveTypeId = 1, JobGradeId = 5, MinYearsService = 0, MaxYearsService = 2.99m, DaysAllocated = 18, IsActive = true },
-    new LeaveEntitlementRule {  LeaveTypeId = 1, JobGradeId = 5, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 21, IsActive = true },
-    new LeaveEntitlementRule {  LeaveTypeId = 1, JobGradeId = 5, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 23, IsActive = true },
+    // Senior Management
+    new LeaveEntitlementRule { LeaveTypeId = 1, JobGradeId = 5, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 23, IsActive = true },
 
-    // GROUP C (1)
-    new LeaveEntitlementRule {  LeaveTypeId = 1, JobGradeId = 1, MinYearsService = 0, MaxYearsService = 2.99m, DaysAllocated = 22, IsActive = true },
-    new LeaveEntitlementRule {  LeaveTypeId = 2, JobGradeId = 1, MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 25, IsActive = true },
-    new LeaveEntitlementRule {  LeaveTypeId = 1, JobGradeId = 1, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 27, IsActive = true }
+    // Executive Director
+    new LeaveEntitlementRule { LeaveTypeId = 1, JobGradeId = 1, MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 27, IsActive = true },
+
+   //SICK LEAVE
+    new LeaveEntitlementRule
+    {
+        LeaveTypeId = 2,
+        JobGradeId = null,
+        MinYearsService = 0,
+        MaxYearsService = null,
+        DaysAllocated = 30,
+        IsActive = true
+    },
+    
+    //MATERNITY LEAVE
+    new LeaveEntitlementRule
+    {
+        LeaveTypeId = 3,
+        JobGradeId = null,
+        MinYearsService = 0,
+        MaxYearsService = null,
+        DaysAllocated = 120,
+        IsActive = true
+    },
+    
+    //FAMILY RESPONSIBILITY
+    new LeaveEntitlementRule
+    {
+        LeaveTypeId = 4,
+        JobGradeId = null,
+        MinYearsService = 0,
+        MaxYearsService = null,
+        DaysAllocated = 3,
+        IsActive = true
+    }
     };
     private readonly List<LeaveType> _seedLeaveTypes = new()
     {
