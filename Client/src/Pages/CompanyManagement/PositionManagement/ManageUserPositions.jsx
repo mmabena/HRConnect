@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from "react";
 import CompanyManagementNavBar from "../../../Components/companyManagement/companyManagementNavBar";
 import { useNavigate, useLocation } from "react-router-dom";
-import { editEmployee } from "../../../api/Employee";
+import { editEmployee, fetchAllEmployees,showConfirmationToast } from "../../../api/Employee";
 import api from "../../../api/api";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
+
+import usePositions from "../../../hooks/usePositions";
+import usePagination from "../../../hooks/usePagination";
+import useDateTime from "../../../hooks/useDateTime";
 
 const ManageUserPositions = ({ title }) => {
   const [employees, setEmployees] = useState([]);
@@ -202,6 +206,11 @@ const ManageUserPositions = ({ title }) => {
       toast.error("Please select a position.");
       return;
     }
+     const confirmed = await showConfirmationToast(
+    "Are you sure you want to save changes?",
+  );
+
+  if (!confirmed) return;
 
     try {
       const updatePromises = selectedIds
@@ -209,35 +218,33 @@ const ManageUserPositions = ({ title }) => {
           const emp = employees.find(
             (e) => e.employeeId.toString() === employeeId,
           );
+
           if (!emp) return null;
 
-          //Send full employee object with updated positionId
           const updatedEmp = {
-            ...emp,
+            employeeId: emp.employeeId,
             positionId: Number(selectedPosition),
-            nationality: emp.nationality || "Not specified", // required field
-            title: emp.title || "Mr/Ms", // fill if missing
-            name: emp.name || "",
-            surname: emp.surname || "",
-            idNumber: emp.idNumber || "",
-            passportNumber: emp.passportNumber || "",
-            gender: emp.gender || "Male",
-            contactNumber: emp.contactNumber || "",
-            taxNumber: emp.taxNumber || "",
-            email: emp.email || "",
-            physicalAddress: emp.physicalAddress || "",
-            city: emp.city || "",
-            zipCode: emp.zipCode || "",
-            hasDisability: emp.hasDisability || false,
-            disabilityDescription: emp.disabilityDescription || "",
-            dateOfBirth:
-              emp.dateOfBirth || new Date().toISOString().split("T")[0],
-            startDate: emp.startDate || new Date().toISOString().split("T")[0],
-            branch: emp.branch || "",
-            monthlySalary: emp.monthlySalary || 0,
-            employmentStatus: emp.employmentStatus || "Permanent",
-            careerManagerID: emp.careerManagerID || "",
-            profileImage: emp.profileImage || "",
+            title: emp.title,
+            name: emp.name,
+            surname: emp.surname,
+            idNumber: emp.idNumber,
+            passportNumber: emp.passportNumber,
+            gender: emp.gender,
+            contactNumber: emp.contactNumber,
+            taxNumber: emp.taxNumber,
+            email: emp.email,
+            city: emp.city,
+            zipCode: emp.zipCode,
+            branch: emp.branch,
+            monthlySalary: emp.monthlySalary,
+            employmentStatus: emp.employmentStatus,
+            careerManagerID: emp.careerManagerID,
+            profileImage: emp.profileImage,
+            hasDisability: emp.hasDisability,
+            disabilityDescription: emp.disabilityDescription,
+            dateOfBirth: emp.dateOfBirth,
+            startDate: emp.startDate,
+            nationality: emp.nationality,
           };
 
           return editEmployee(emp.employeeId, updatedEmp);
@@ -248,24 +255,40 @@ const ManageUserPositions = ({ title }) => {
 
       toast.success("Positions updated successfully.");
 
+      //KEY FIX: Update UI immediately WITHOUT refetch
       setEmployees((prev) =>
-        prev.map((emp) =>
-          selectedIds.includes(emp.employeeId.toString())
-            ? { ...emp, positionId: Number(selectedPosition) }
-            : emp,
-        ),
+        prev.map((emp) => {
+          if (selectedIds.includes(emp.employeeId.toString())) {
+            const newPosition = positions.find(
+              (p) => p.positionId === Number(selectedPosition),
+            );
+
+            return {
+              ...emp,
+              positionId: Number(selectedPosition),
+
+              //THIS is what makes UI update instantly
+              position: newPosition
+                ? {
+                    ...newPosition,
+                  }
+                : emp.position,
+            };
+          }
+          return emp;
+        }),
       );
 
       setSelectedEmployees({});
+      setSelectedPosition("");
     } catch (error) {
       console.error(
         "Failed to update positions:",
         error.response || error.message,
       );
-      toast.error("Failed to save changes. Check console for details.");
+      toast.error("Failed to save changes.");
     }
   };
-
   if (loading) return <h3>Loading...</h3>;
   if (!hasAccess) return <h2>Access Denied. SuperUser only.</h2>;
 
@@ -329,7 +352,7 @@ const ManageUserPositions = ({ title }) => {
         </div>
 
         {/* Employee Table */}
-           <div className="manage-positions"></div>
+        <div className="manage-positions"></div>
         <table className="positions-table">
           <thead>
             <tr>
@@ -358,9 +381,7 @@ const ManageUserPositions = ({ title }) => {
           <tbody>
             {currentEmployees.length === 0 ? (
               <tr>
-                <td >
-                  No users found.
-                </td>
+                <td>No users found.</td>
               </tr>
             ) : (
               currentEmployees.map((employee) => (
@@ -382,7 +403,12 @@ const ManageUserPositions = ({ title }) => {
 
                   <td>{employee.branch || "N/A"}</td>
                   <td>{positionMap[employee.positionId] || "N/A"}</td>
-                <td>{positionMap[selectedPosition] || "-"}</td>
+
+                  <td>
+                    {selectedEmployees[employee.employeeId]
+                      ? positionMap[selectedPosition] || "-"
+                      : positionMap[employee.positionId] || "N/A"}
+                  </td>
                 </tr>
               ))
             )}
@@ -390,52 +416,53 @@ const ManageUserPositions = ({ title }) => {
         </table>
 
         {/* Pagination */}
-{/* Pagination */}
-{employees.length > itemsPerPage && (
-  <div className="pagination-placeholder">
-    <div className="pagination-wrapper">
-      <div className="pagination-right">
-        <img
-          src="/images/arrow_drop_down_circle.png"
-          alt="Previous"
-          className="pagination-arrow prev"
-          onClick={handlePrev}
-          style={{
-            transform: "rotate(90deg)",
-            cursor: currentPage > 1 ? "pointer" : "not-allowed",
-            opacity: currentPage > 1 ? 1 : 0.4,
-          }}
-        />
+        {/* Pagination */}
+        {employees.length > itemsPerPage && (
+          <div className="pagination-placeholder">
+            <div className="pagination-wrapper">
+              <div className="pagination-right">
+                <img
+                  src="/images/arrow_drop_down_circle.png"
+                  alt="Previous"
+                  className="pagination-arrow prev"
+                  onClick={handlePrev}
+                  style={{
+                    transform: "rotate(90deg)",
+                    cursor: currentPage > 1 ? "pointer" : "not-allowed",
+                    opacity: currentPage > 1 ? 1 : 0.4,
+                  }}
+                />
 
-        <div className="page-numbers">
-          {Array.from({ length: totalPages }, (_, i) => (
-            <button
-              key={i + 1}
-              className={`page-number ${
-                currentPage === i + 1 ? "active-page" : ""
-              }`}
-              onClick={() => handlePageClick(i + 1)}
-            >
-              {i + 1}
-            </button>
-          ))}
-        </div>
+                <div className="page-numbers">
+                  {Array.from({ length: totalPages }, (_, i) => (
+                    <button
+                      key={i + 1}
+                      className={`page-number ${
+                        currentPage === i + 1 ? "active-page" : ""
+                      }`}
+                      onClick={() => handlePageClick(i + 1)}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                </div>
 
-        <img
-          src="/images/arrow_drop_down_circle.png"
-          alt="Next"
-          className="pagination-arrow next"
-          onClick={handleNext}
-          style={{
-            transform: "rotate(-90deg)",
-            cursor: currentPage < totalPages ? "pointer" : "not-allowed",
-            opacity: currentPage < totalPages ? 1 : 0.4,
-          }}
-        />
-      </div>
-    </div>
-  </div>
-)}
+                <img
+                  src="/images/arrow_drop_down_circle.png"
+                  alt="Next"
+                  className="pagination-arrow next"
+                  onClick={handleNext}
+                  style={{
+                    transform: "rotate(-90deg)",
+                    cursor:
+                      currentPage < totalPages ? "pointer" : "not-allowed",
+                    opacity: currentPage < totalPages ? 1 : 0.4,
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </header>
   );

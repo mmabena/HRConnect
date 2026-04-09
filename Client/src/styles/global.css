@@ -15,6 +15,8 @@
   --primary-dark: #001a25;
   --primary-light: #004d6b;
   --white: #fff;
+  --blue: #4F6E78;
+  --light-grey: #9A9A9A;
   --accent-blue: #006088;
   --accent-blue-dark: #004d6b;
   --teal: #01a19a;
@@ -765,7 +767,12 @@ body {
   z-index: 1;
 }
 
+<<<<<<< HEAD
 /* Menu Background */
+=======
+
+/* Edit Employee Background */
+>>>>>>> 2d29c060b2df8fb6c53a2e8bcd8ab465575ff17a
 .menu-background {
   position: fixed;
   top: 0;

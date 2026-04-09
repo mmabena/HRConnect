@@ -20,10 +20,21 @@ namespace HRConnect.Api.Services
 
     public class PositionService : IPositionService
     {
+        /// <summary>
+        /// Handles business logic related to position operations
+        /// This service acts as a bridge between the controller and Repository layers.
+        /// This is responsible for validation, mapping, and enforcing business rules.
+        /// </summary>
         private readonly IPositionRepository _positionRepo;
         private readonly IJobGradeRepository _jobGradeRepo;
         private readonly IOccupationalLevelRepository _occupationalLevelRepo;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PositionService"/> class.
+        /// </summary>
+        /// <param name="positionRepo">Repository for position data access.</param>
+        /// <param name="jobGradeRepo">Repository for job grade data access.</param>
+        /// <param name="occupationalLevelRepo">Repository for occupational level data access.</param>
         public PositionService(IPositionRepository positionRepo, IJobGradeRepository jobGradeRepo, IOccupationalLevelRepository occupationalLevelRepo)
         {
             _positionRepo = positionRepo;
@@ -31,9 +42,11 @@ namespace HRConnect.Api.Services
             _occupationalLevelRepo = occupationalLevelRepo;
         }
 
-        // ----------------------
-        // GET ALL
-        // ----------------------
+
+        /// <summary>
+        /// Retrieves all positions from the system.
+        /// </summary>
+        /// <returns>A list of all positions ordered by Position ID.</returns>
         public async Task<List<PositionDto>> GetAllPositionsAsync()
         {
             var positions = await _positionRepo.GetAllPositionsAsync();
@@ -43,9 +56,11 @@ namespace HRConnect.Api.Services
                 .ToList();
         }
 
-        // ----------------------
-        // GET BY ID
-        // ----------------------
+
+        /// <summary>
+        /// Retrieves all positions from the system.
+        /// </summary>
+        /// <returns>A list of all positions ordered by Position ID.</returns>
         public async Task<PositionDto?> GetPositionByIdAsync(int id)
         {
             var position = await _positionRepo.GetPositionByIdAsync(id);
@@ -53,9 +68,13 @@ namespace HRConnect.Api.Services
             return MapToPositionDto(position);
         }
 
-        // ----------------------
-        // GET /api/positions/title
-        // ----------------------
+
+        /// <summary>
+        /// Retrieves a position by its title.
+        /// </summary>
+        /// <param name="title">The title of the position.</param>
+        /// <returns>The position if found; otherwise null.</returns>
+        /// <exception cref="ArgumentException">Thrown when the title is null or empty.</exception>
         public async Task<PositionDto?> GetPositionByTitleAsync(string title)
         {
             if (string.IsNullOrWhiteSpace(title))
@@ -67,9 +86,14 @@ namespace HRConnect.Api.Services
             return MapToPositionDto(position);
         }
 
-        // ----------------------
-        // post/Aapi/positions
-        // ----------------------
+
+        /// <summary>
+        /// Creates a new position after validating input data.
+        /// </summary>
+        /// <param name="createPositionDto">The data required to create a position.</param>
+        /// <returns>The newly created position.</returns>
+        /// <exception cref="ArgumentException">Thrown when required fields are invalid.</exception>
+        /// <exception cref="DomainException">Thrown when a position with the same title already exists.</exception>
         public async Task<PositionDto> AddPositionAsync(CreatePositionDto createPositionDto)
         {
             ValidateCreateDto(createPositionDto);
@@ -97,9 +121,16 @@ namespace HRConnect.Api.Services
         }
 
 
-        // ----------------------
-        // UPDATE
-        // ----------------------
+
+        /// <summary>
+        /// Updates an existing position after validating input and business rules.
+        /// </summary>
+        /// <param name="id">The position identifier.</param>
+        /// <param name="updatePositionDto">The updated position data.</param>
+        /// <returns>The updated position if successful; otherwise null.</returns>
+        /// <exception cref="KeyNotFoundException">Thrown when the position does not exist.</exception>
+        /// <exception cref="InvalidOperationException">Thrown when assigning invalid or inactive related entities.</exception>
+        /// <exception cref="DomainException">Thrown when a duplicate position title exists.</exception>
         public async Task<PositionDto?> UpdatePositionAsync(int id, UpdatePositionDto updatePositionDto)
         {
 
@@ -156,9 +187,12 @@ namespace HRConnect.Api.Services
         }
 
 
-        // ----------------------
-        // PRIVATE HELPERS
-        // ----------------------
+
+        /// <summary>
+        /// Maps a Position entity to a PositionDto.
+        /// </summary>
+        /// <param name="p">The position entity.</param>
+        /// <returns>A mapped PositionDto object.</returns>
         private static PositionDto MapToPositionDto(Position p)
         {
             return new PositionDto
@@ -182,12 +216,23 @@ namespace HRConnect.Api.Services
             };
         }
 
+        /// <summary>
+        /// Validates the input data for updating a position.
+        /// </summary>
+        /// <param name="dto">The update position DTO.</param>
+        /// <exception cref="ArgumentException">Thrown when required fields are missing or invalid.</exception>
         private static void ValidateCreateDto(CreatePositionDto dto)
         {
             if (string.IsNullOrWhiteSpace(dto.PositionTitle))
                 throw new ArgumentException("Position title is required.");
         }
 
+        /// <summary>
+        /// Ensures that the position title is unique.
+        /// </summary>
+        /// <param name="title">The position title.</param>
+        /// <param name="excludeId">Optional ID to exclude during update.</param>
+        /// <exception cref="ArgumentException">Thrown when a duplicate title exists.</exception>
         private static void ValidateUpdateDto(UpdatePositionDto dto)
         {
             if (string.IsNullOrWhiteSpace(dto.PositionTitle))
