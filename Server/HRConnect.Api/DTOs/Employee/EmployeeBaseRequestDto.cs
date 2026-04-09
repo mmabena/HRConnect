@@ -21,7 +21,7 @@ namespace HRConnect.Api.DTOs.Employee
     public string ZipCode { get; set; } = string.Empty;
     public bool HasDisability { get; set; }
     public string? DisabilityDescription { get; set; }
-    public int PensionOptionId { get; set; }
+    public int? PensionOptionId { get; set; }
     public DateOnly DateOfBirth { get; set; }
     public DateOnly StartDate { get; set; }
     public Branch Branch { get; set; }

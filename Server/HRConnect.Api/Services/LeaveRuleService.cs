@@ -35,7 +35,6 @@ namespace HRConnect.Api.Services
       if (request.NewDaysAllocated < 0)
         throw new InvalidOperationException("Days allocated cannot be negative.");
 
-      //Get LeaveEntitlementRule by Id
       var rule = await _context.LeaveEntitlementRules
           .Include(r => r.LeaveType)
           .FirstOrDefaultAsync(r => r.Id == request.RuleId);
@@ -49,7 +48,7 @@ namespace HRConnect.Api.Services
       if (rule.MaxYearsService.HasValue &&
           rule.MaxYearsService < rule.MinYearsService)
         throw new InvalidOperationException("MaxYearsService cannot be less than MinYearsService.");
-      //Get employee by jobgradeId using LeaveEntitlmentRule
+
       var employees = await _context.Employees
           .Include(e => e.Position)
           .Include(e => e.LeaveBalances)

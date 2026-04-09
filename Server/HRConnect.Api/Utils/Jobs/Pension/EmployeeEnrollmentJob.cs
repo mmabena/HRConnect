@@ -2,7 +2,6 @@
 {
   using System.Threading.Tasks;
   using Quartz;
-  using HRConnect.Api.Services;
   using HRConnect.Api.Interfaces.Pension;
 
   public class EmployeeEnrollmentJob(IServiceProvider serviceProvider) : IJob
