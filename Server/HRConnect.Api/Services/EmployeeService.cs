@@ -156,7 +156,10 @@ namespace HRConnect.Api.Services
 
       var positionChanged = existingEmployee.PositionId != employeeDto.PositionId;
 
-      var position = await _positionRepo.GetPositionByIdAsync(employeeDto.PositionId);
+     var position = await _context.Positions
+    .Include(p => p.JobGrade)
+    .FirstOrDefaultAsync(p => p.PositionId == employeeDto.PositionId);
+
       if (position == null)
         throw new ValidationException($"Position with ID {employeeDto.PositionId} does not exist.");
 
@@ -210,9 +213,13 @@ namespace HRConnect.Api.Services
         var fullEmployee = await _context.Employees
             .Include(e => e.Position)
                 .ThenInclude(p => p.JobGrade)
-            .FirstAsync(e => e.EmployeeId == employeeId);
+            .FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
 
-        // GET ANNUAL LEAVE TYPE
+        if (fullEmployee == null)
+        {
+          throw new NotFoundException("Employee not found for after update.");
+        }
+    
         var annualLeave = await _context.LeaveTypes
             .FirstAsync(l => l.Code == "AL" && l.IsActive);
 
@@ -247,16 +254,16 @@ namespace HRConnect.Api.Services
         await _context.SaveChangesAsync(); // IMPORTANT
 
         // KEEP YOUR EXISTING LOGIC
-        await _leaveBalanceService.RecalculateAnnualLeaveAsync(employeeId);
-        await _leaveProcessingService.RecalculateAllSickLeaveAsync();
-        await _leaveProcessingService.RecalculateAllFamilyResponsibilityLeaveAsync();
+        //await _leaveBalanceService.RecalculateAnnualLeaveAsync(employeeId);
+        //await _leaveProcessingService.RecalculateAllSickLeaveAsync();
+        //await _leaveProcessingService.RecalculateAllFamilyResponsibilityLeaveAsync();
 
         var employeeWithBalances = await _context.Employees
             .Include(e => e.LeaveBalances)
             .ThenInclude(lb => lb.LeaveType)
             .FirstAsync(e => e.EmployeeId == employeeId);
-            var annualBalance = employeeWithBalances?.LeaveBalances
-            ?.FirstOrDefault(lb => lb.LeaveType.Code == "AL");
+        var annualBalance = employeeWithBalances?.LeaveBalances
+        ?.FirstOrDefault(lb => lb.LeaveType.Code == "AL");
 
         try
         {
