@@ -39,6 +39,7 @@ namespace HRConnect.Api.Data
     public DbSet<PensionDeduction> PensionDeductions { get; set; }
     public DbSet<MedicalAidDeduction> MedicalAidDeductions { get; set; }
     public DbSet<Notification> Notifications { get; set; }
+    public DbSet<FinalTaxDeduction> FinalTaxDeductions { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
       base.OnModelCreating(modelBuilder);
@@ -144,6 +145,53 @@ namespace HRConnect.Api.Data
         entity.Property(e => e.EffectiveTo);
       });
 
+      //TaxDeduction after pensionable salary and medical credits are applied
+      modelBuilder.Entity<FinalTaxDeduction>(entity =>
+{
+    entity.ToTable("FinalTaxDeductions");
+
+    entity.Property(e => e.PayRunId).IsRequired();
+
+    entity.Property(e => e.Name).IsRequired();
+    entity.Property(e => e.Surname).IsRequired();
+
+    entity.Property(e => e.IdNumber).IsRequired();
+    entity.Property(e => e.PassportNumber);
+
+    entity.Property(e => e.TaxYear).IsRequired();
+
+    entity.Property(e => e.PensionableSalary)
+        .HasPrecision(18, 2)
+        .IsRequired();
+
+    entity.Property(e => e.MedicalAidMembers).IsRequired();
+    entity.Property(e => e.MedicalAidDependants).IsRequired();
+    entity.Property(e => e.MedicalAidChildren).IsRequired();
+
+    entity.Property(e => e.MedicalTaxCredit)
+        .HasPrecision(18, 2)
+        .IsRequired();
+
+    entity.Property(e => e.PensionContribution)
+        .HasPrecision(18, 2)
+        .IsRequired();
+
+    entity.Property(e => e.TaxableIncome)
+        .HasPrecision(18, 2)
+        .IsRequired();
+
+    entity.Property(e => e.TaxDeductionAmount)
+        .HasPrecision(18, 2)
+        .IsRequired();
+
+    entity.Property(e => e.NetSalary)
+        .HasPrecision(18, 2)
+        .IsRequired();
+
+    entity.Property(e => e.TaxCode).IsRequired();
+});
+      
+      
       // StatutoryContributionType with default contribution percentages mandated by law
       modelBuilder.Entity<StatutoryContributionType>().Property(e => e.EmployeeRate)
         .HasColumnType("decimal(18,4)")

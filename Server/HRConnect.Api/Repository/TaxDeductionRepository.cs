@@ -6,7 +6,8 @@ namespace HRConnect.Api.Repositories
   using System.Collections.Generic;
   using System.Linq;
   using System.Threading.Tasks;
-
+  using HRConnect.Api.Models.PayrollDeduction;
+  
   /// <summary>
   /// Repository implementation for EF Core access to TaxDeductions and related TaxTableUploads.
   /// </summary>
@@ -61,6 +62,31 @@ namespace HRConnect.Api.Repositories
     public async Task SaveChangesAsync()
     {
       await _context.SaveChangesAsync();
+    }
+
+    public async Task<Employee?> GetEmployeeByIdAsync(int employeeId)
+    {
+      return await _context.Employees
+          .FirstOrDefaultAsync(e => e.Id == employeeId);
+    }
+
+    public async Task<PensionDeduction?> GetPensionByEmployeeIdAsync(int employeeId)
+    {
+      return await _context.PensionDeductions
+          .FirstOrDefaultAsync(p => p.EmployeeId == employeeId);
+    }
+
+    public async Task AddFinalTaxDeductionAsync(FinalTaxDeduction deduction)
+    {
+      await _context.FinalTaxDeductions.AddAsync(deduction);
+    }
+
+    public async Task<FinalTaxDeduction?> GetExistingFinalTaxAsync(int employeeId, int payRunId)
+    {
+      return await _context.FinalTaxDeductions
+          .FirstOrDefaultAsync(x =>
+              x.EmployeeId == employeeId &&
+              x.PayRunId == payRunId);
     }
   }
 }

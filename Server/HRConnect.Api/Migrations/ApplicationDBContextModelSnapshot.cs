@@ -603,7 +603,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("EmployeeId");
 
-                    b.ToTable("AnnualLeaveAccrualHistories", (string)null);
+                    b.ToTable("AnnualLeaveAccrualHistories");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.AuditLogs", b =>
@@ -659,7 +659,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("AuditId");
 
-                    b.ToTable("AuditLogs", (string)null);
+                    b.ToTable("AuditLogs");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.Employee", b =>
@@ -773,7 +773,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("PositionId");
 
-                    b.ToTable("Employees", (string)null);
+                    b.ToTable("Employees");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.EmployeeAccrualRateHistory", b =>
@@ -816,7 +816,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("PositionId");
 
-                    b.ToTable("EmployeeAccrualRateHistories", (string)null);
+                    b.ToTable("EmployeeAccrualRateHistories");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.EmployeeLeaveBalance", b =>
@@ -870,7 +870,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("LeaveTypeId");
 
-                    b.ToTable("EmployeeLeaveBalances", (string)null);
+                    b.ToTable("EmployeeLeaveBalances");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.JobGrade", b =>
@@ -896,7 +896,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("JobGradeId");
 
-                    b.ToTable("JobGrades", (string)null);
+                    b.ToTable("JobGrades");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.LeaveApplication", b =>
@@ -960,7 +960,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("LeaveTypeId");
 
-                    b.ToTable("LeaveApplications", (string)null);
+                    b.ToTable("LeaveApplications");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.LeaveEntitlementRule", b =>
@@ -995,7 +995,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("LeaveTypeId");
 
-                    b.ToTable("LeaveEntitlementRules", (string)null);
+                    b.ToTable("LeaveEntitlementRules");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.LeaveType", b =>
@@ -1053,7 +1053,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("LeaveTypes", (string)null);
+                    b.ToTable("LeaveTypes");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.MedicalOption", b =>
@@ -1115,7 +1115,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("MedicalOptionCategoryId");
 
-                    b.ToTable("MedicalOptions", (string)null);
+                    b.ToTable("MedicalOptions");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.MedicalOptionCategory", b =>
@@ -1133,7 +1133,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("MedicalOptionCategoryId");
 
-                    b.ToTable("MedicalOptionCategories", (string)null);
+                    b.ToTable("MedicalOptionCategories");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.Notification", b =>
@@ -1175,7 +1175,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("NotificationId");
 
-                    b.ToTable("Notifications", (string)null);
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.OccupationalLevel", b =>
@@ -1204,7 +1204,7 @@ namespace HRConnect.Api.Migrations
                     b.HasIndex("Description")
                         .IsUnique();
 
-                    b.ToTable("OccupationalLevels", (string)null);
+                    b.ToTable("OccupationalLevels");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.PasswordHistory", b =>
@@ -1227,7 +1227,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("PasswordHistories", (string)null);
+                    b.ToTable("PasswordHistories");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.PasswordResetPin", b =>
@@ -1260,7 +1260,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("PasswordResetPins", (string)null);
+                    b.ToTable("PasswordResetPins");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.Payroll.PayrollPeriod", b =>
@@ -1286,7 +1286,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("PayrollPeriodId");
 
-                    b.ToTable("PayrollPeriods", (string)null);
+                    b.ToTable("PayrollPeriods");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.Payroll.PayrollRecord", b =>
@@ -1349,7 +1349,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("PeriodId");
 
-                    b.ToTable("PayrollRuns", (string)null);
+                    b.ToTable("PayrollRuns");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.Pension.EmployeePensionEnrollment", b =>
@@ -1393,7 +1393,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("PensionOptionId");
 
-                    b.ToTable("EmployeePensionEnrollments", (string)null);
+                    b.ToTable("EmployeePensionEnrollments");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.PensionOption", b =>
@@ -1409,7 +1409,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("PensionOptionId");
 
-                    b.ToTable("PensionOptions", (string)null);
+                    b.ToTable("PensionOptions");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.Position", b =>
@@ -1448,7 +1448,7 @@ namespace HRConnect.Api.Migrations
                     b.HasIndex("PositionTitle")
                         .IsUnique();
 
-                    b.ToTable("Positions", (string)null);
+                    b.ToTable("Positions");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.StatutoryContributionType", b =>
@@ -1492,7 +1492,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("StatutoryContributionTypes", (string)null);
+                    b.ToTable("StatutoryContributionTypes");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.TaxDeduction", b =>
@@ -1594,7 +1594,72 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction.FinalTaxDeduction", b =>
+                {
+                    b.HasBaseType("HRConnect.Api.Models.Payroll.PayrollRecord");
+
+                    b.Property<string>("IdNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("MedicalAidChildren")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MedicalAidDependants")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MedicalAidMembers")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("MedicalTaxCredit")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("NetSalary")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("PassportNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PayRunId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("PensionContribution")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("PensionableSalary")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Surname")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TaxCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("TaxDeductionAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("TaxYear")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TaxableIncome")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.ToTable("FinalTaxDeductions", (string)null);
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction.MedicalAidDeduction", b =>
