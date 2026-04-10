@@ -6,10 +6,7 @@ namespace HRConnect.Api.Interfaces.Notification
   {
     Task CreateAndDispatchAsync(Notification notification);
     Task CreateOrEnsureExistsAsync(Notification notification);
-    Task<IList<NotificationDto>> GetAllEmployeeNotificationsByTypeAsync(NotificationType type, string employeeId);
-    //Critical,Warning,Information
-    Task<IList<NotificationDto>> GetAllEmployeeNotificationsBySeverityAsync(string employeeId,
-    NotificationSeverity severity);
-
+    Task<IEnumerable<NotificationDto>> GetAllEmployeeNotificationsBySeverityAsync(NotificationSeverity severity, string employeeId);
+    Task<IEnumerable<NotificationDto>> GetAllEmployeeNotificationsByTypeAsync(NotificationType type, string employeeId);
   }
 }

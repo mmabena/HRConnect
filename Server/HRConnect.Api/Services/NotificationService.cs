@@ -3,6 +3,7 @@ namespace HRConnect.Api.Services
   using HRConnect.Api.Models;
   using System.Threading.Tasks;
   using HRConnect.Api.Interfaces.Notification;
+  using HRConnect.Api.DTOs.Notification;
   using HRConnect.Api.Utils.Notification;
   public class NotificationService : INotificationService
   {
@@ -13,15 +14,24 @@ namespace HRConnect.Api.Services
       _notificationRepository = notificationRepository;
       _notificationDispatcher = notificationDispatcher;
     }
-    public async Task GetEmployeeNotificationByTypeAsync(NotificationType type, string employeeId)
+    public async Task<IEnumerable<NotificationDto>> GetAllEmployeeNotificationsByTypeAsync(NotificationType type, string employeeId)
     {
+      var notifications = await _notificationRepository.GetAllEmployeeNotificationsByTypeAsync(type, employeeId);
 
+      return notifications;
     }
+    public async Task<IEnumerable<NotificationDto>> GetAllEmployeeNotificationsBySeverityAsync(NotificationSeverity severity, string employeeId)
+    {
+      var notifications = await _notificationRepository.GetAllEmployeeNotificationsBySeverityAsync(employeeId, severity);
+
+      return notifications;
+    }
+
     public async Task CreateAndDispatchAsync(Notification notification)
     {
       //Ensure that we don't have duplicate notifications before storing
       //Alternatively filter in a range of DueDates and CreatedDates
-      var notificationExists = await _notificationRepository.ExistsAsync(notification.Type, notification.DueDate, notification.CreatedAt);
+      var notificationExists = await _notificationRepository.ExistsAsync(notification.Type, notification.EmployeeId, notification.Message, notification.Severity);
 
       if (notificationExists == null)
       {
@@ -31,6 +41,9 @@ namespace HRConnect.Api.Services
       //create and store the notification
       notification.CreatedAt = DateTime.Now;
       await _notificationRepository.AddNotificationAsync(notification);
+
+      //Dispatch all notifications
+      await _notificationDispatcher.DispatchNotificationAsync(notification);
     }
 
     public async Task CreateOrEnsureExistsAsync(Notification notification)
@@ -39,8 +52,7 @@ namespace HRConnect.Api.Services
       if (isPesistent)
       {
         //Find if it already exists 
-        var existing = await _notificationRepository.ExistsAsync(notification.Type
-        , notification.EmployeeId);
+        var existing = await _notificationRepository.ExistsAsync(notification.Type, notification.EmployeeId, notification.Message, notification.Severity);
 
         if (existing != null)
         {
@@ -51,6 +63,9 @@ namespace HRConnect.Api.Services
       }
       //For other general notifications or it does not exist
       await _notificationRepository.AddNotificationAsync(notification);
+
+      //Dispatch all notifications
+      await _notificationDispatcher.DispatchNotificationAsync(notification);
     }
   }
 }
