@@ -65,7 +65,7 @@ namespace HRConnect.Api.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateLeaveTypeRequest request)
             => Ok(await _service.UpdateLeaveTypeAsync(id, request));
-        
+
         [HttpGet("employees")]
         public async Task<IActionResult> GetEmployeesWithLeave()
         {

@@ -1,20 +1,15 @@
 namespace HRConnect.Api.Data
 {
   using HRConnect.Api.Models;
-  using HRConnect.Api.Data;
-  using HRConnect.Api.Utils.PositionAndLeaveSeed;
   using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Models.PayrollDeduction;
   using HRConnect.Api.Models.Pension;
-  using HRConnect.Api.Models.Payroll;
-  using HRConnect.Api.Models.PayrollDeduction;
   using Microsoft.EntityFrameworkCore;
   using AppAny.Quartz.EntityFrameworkCore.Migrations;
   using AppAny.Quartz.EntityFrameworkCore.Migrations.SqlServer;
   public class ApplicationDBContext(DbContextOptions dbContextOptions) : DbContext(dbContextOptions)
   {
     public DbSet<User> Users { get; set; }
-    public DbSet<BankingDetails> BankingDetails { get; set; }
     public DbSet<Employee> Employees { get; set; }
     public DbSet<Position> Positions { get; set; }
     public DbSet<JobGrade> JobGrades { get; set; }
@@ -149,8 +144,6 @@ namespace HRConnect.Api.Data
         entity.Property(e => e.EffectiveTo);
       });
 
-
-
       // StatutoryContributionType with default contribution percentages mandated by law
       modelBuilder.Entity<StatutoryContributionType>().Property(e => e.EmployeeRate)
         .HasColumnType("decimal(18,4)")
@@ -187,8 +180,6 @@ namespace HRConnect.Api.Data
       modelBuilder.Entity<PayrollPeriod>().Property(p => p.IsLocked).IsConcurrencyToken();
       modelBuilder.Entity<PayrollRecord>().Property(p => p.IsLocked).IsConcurrencyToken();
 
-
-
       // Medical Aid Deduction Delete Nehavior
       modelBuilder.Entity<MedicalAidDeduction>()
         .HasOne(m => m.MedicalOption)
@@ -223,7 +214,6 @@ namespace HRConnect.Api.Data
         .IsRequired();
 
 
-
       modelBuilder.Entity<EmployeePensionEnrollment>().HasOne<PayrollRun>()
       .WithMany()
       .HasForeignKey(t => t.PayrollRunId)
@@ -234,20 +224,7 @@ namespace HRConnect.Api.Data
           .HasConversion<string>();
       modelBuilder.Entity<Notification>().Property(n => n.Type)
       .HasConversion<string>();
-
-
-     
-
-
-      // SEED DATA: (Position, Job Grade, Occupational Level, Leave Types)
-      modelBuilder.Entity<JobGrade>().HasData(SeedData.GetJobGrades());
-      modelBuilder.Entity<OccupationalLevel>().HasData(SeedData.GetOccupationalLevels());
-      modelBuilder.Entity<Position>().HasData(SeedData.GetPositions());
-      modelBuilder.Entity<LeaveType>().HasData(SeedData.GetLeaveTypes());
-      modelBuilder.Entity<LeaveEntitlementRule>().HasData(SeedData.GetLeaveEntitlementRules());
     }
-
-
 
     //Override 'SaveChangesAsync' for Payroll Records to enforce locked records on a payroll run 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -273,7 +250,5 @@ namespace HRConnect.Api.Data
       }
       return await base.SaveChangesAsync(cancellationToken);
     }
-
   }
-
 }
