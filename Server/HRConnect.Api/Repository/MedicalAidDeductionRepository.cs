@@ -34,7 +34,7 @@ namespace HRConnect.Api.Repository
         .AsNoTracking()
         .Include(p => p.PayrollRun)
         .Where(p => p.EmployeeId == employeeId && p.PayrollRun.PayrollRunId != null &&
-        p.PayrollRun.IsFinalised == false && p.PayrollRun.IsLocked == false)
+        !p.PayrollRun.IsFinalised && !p.PayrollRun.IsLocked)
         .ToListAsync();
     }
 
@@ -179,7 +179,7 @@ namespace HRConnect.Api.Repository
       return await _context.MedicalAidDeductions
         .AsNoTracking()
         .Include(p => p.PayrollRun)
-        .Where(p => p.Id != null && p.PayrollRun.PayrollRunId != null &&
+        .Where(p => p.Id > 0 && p.PayrollRun.PayrollRunId > 0 &&
         p.PayrollRun.IsFinalised && p.PayrollRun.IsLocked)
         .ToListAsync();
     }
