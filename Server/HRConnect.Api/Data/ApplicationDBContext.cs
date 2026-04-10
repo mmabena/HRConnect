@@ -3,6 +3,7 @@ namespace HRConnect.Api.Data
   using HRConnect.Api.Models;
   using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Models.PayrollDeduction;
+  using HRConnect.Api.Models.CompanyContributions;
   using HRConnect.Api.Models.Pension;
   using Microsoft.EntityFrameworkCore;
   using AppAny.Quartz.EntityFrameworkCore.Migrations;
@@ -37,6 +38,8 @@ namespace HRConnect.Api.Data
     public DbSet<PensionOption> PensionOptions { get; set; }
     public DbSet<EmployeePensionEnrollment> EmployeePensionEnrollments { get; set; }
     public DbSet<PensionDeduction> PensionDeductions { get; set; }
+    public DbSet<CompanyContribution> CompanyContributions { get; set; }
+    public DbSet<EmployeeCompanyContribution> EmployeeCompanyContributions { get; set; }
     public DbSet<MedicalAidDeduction> MedicalAidDeductions { get; set; }
     public DbSet<Notification> Notifications { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -103,6 +106,26 @@ namespace HRConnect.Api.Data
           .HasForeignKey(r => r.JobGradeId)
           .OnDelete(DeleteBehavior.Restrict);
 
+      modelBuilder.Entity<CompanyContribution>()
+    .Property(c => c.Percentage)
+    .HasColumnType("decimal(10,6)");
+
+      modelBuilder.Entity<EmployeeCompanyContribution>()
+          .Property(e => e.DeathPercentage)
+          .HasColumnType("decimal(10,6)");
+
+      modelBuilder.Entity<EmployeeCompanyContribution>()
+          .Property(e => e.DisabilityPercentage)
+          .HasColumnType("decimal(10,6)");
+
+      modelBuilder.Entity<EmployeeCompanyContribution>()
+          .Property(e => e.DeathAmount)
+          .HasColumnType("decimal(18,2)");
+
+      modelBuilder.Entity<EmployeeCompanyContribution>()
+          .Property(e => e.DisabilityAmount)
+          .HasColumnType("decimal(18,2)");
+
 
       // INJECTED FIX: Prevent multiple cascade paths
       modelBuilder.Entity<EmployeeAccrualRateHistory>()
@@ -163,6 +186,7 @@ namespace HRConnect.Api.Data
       //EF needs to know derived types
       modelBuilder.Entity<PensionDeduction>().ToTable("PensionDeductions");
       modelBuilder.Entity<MedicalAidDeduction>().ToTable("MedicalAidDeductions");
+      modelBuilder.Entity<EmployeeCompanyContribution>().ToTable("EmployeeCompanyContributions");
       modelBuilder.Entity<StatutoryContribution>().ToTable("StatutoryContributions");
 
       modelBuilder.Entity<PayrollRun>(b =>
