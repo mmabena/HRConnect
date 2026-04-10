@@ -3,24 +3,25 @@ import { getLeaveTypes } from "../../api/leaveTypeApi";
 import "./leave-tables.css";
 import "../../Components/MenuBar/MenuBar.css";
 import NavBar from "../NavBar";
+import AddLeaveTypeModal from "./AddLeaveTypeModal";
+
 
 const LeaveTables = () => {
   const [active, setActive] = useState([]);
   const [inactive, setInactive] = useState([]);
+  const [showModal, setShowModal] = useState(false);
 
   const splitData = (data) => {
     setActive(data.filter(x => x.isActive));
     setInactive(data.filter(x => !x.isActive));
   };
+const fetchData = async () => {
+  const data = await getLeaveTypes();
+  console.log("LEAVE TYPES DATA:", data);
+  splitData(data);
+};
+
 useEffect(() => {
-  const fetchData = async () => {
-    const data = await getLeaveTypes();
-
-    console.log("LEAVE TYPES DATA:", data); 
-
-    splitData(data);
-  };
-
   fetchData();
 }, []);
 
@@ -54,7 +55,9 @@ useEffect(() => {
 
 
     <div className="lt-top-section">
-      <button className="lt-add-btn">+ Add Leave Type</button>
+      <button className="lt-add-btn" onClick={() => setShowModal(true)}>
+          + Add Leave Type
+      </button>
     </div>
 
      {/* ================= ACTIVE TABLE ================= */}
@@ -110,6 +113,7 @@ useEffect(() => {
               <th>Name</th>
               <th>Description</th>
               <th>Leave Entitlement</th>
+              <th>Status</th>
               <th>Comment</th>
             </tr>
           </thead>
@@ -121,6 +125,9 @@ useEffect(() => {
                 <td>{item.name}</td>
                 <td>{item.description || "-"}</td>
                 <td>{getEntitlement(item.rules)}</td>
+                <td>
+                  <span className="lt-status inactive">Inactive</span>
+                </td>
                 <td>-</td>
               </tr>
             ))}
@@ -128,6 +135,11 @@ useEffect(() => {
         </table>
       </div>
   </div> 
+  <AddLeaveTypeModal
+  isOpen={showModal}
+  onClose={() => setShowModal(false)}
+  onSuccess={fetchData}
+/>
     </div>
   );
 };

@@ -4,7 +4,7 @@
   padding: 20px; /* space inside page */
 }
 
-/* Card container (same idea as your global white boxes) */
+/* Card container */
 .lt-box {
   background: white; /* white card */
   border-radius: 10px; /* rounded edges */
@@ -20,13 +20,13 @@
   align-items: center; /* vertical alignment */
   padding: 15px; /* spacing inside header */
   font-weight: 600;
-  color: #002D40; /* matches global text */
+  color: #002D40;
   background-color: lightgrey;
 }
 
 /* Add button (matches your green button style) */
 .lt-add-btn {
-  background-color: #638549; /* same as global add button */
+  background-color: #90e975; /* same as global add button */
   color: white;
   border: none;
   padding: 8px 16px;
@@ -50,7 +50,7 @@
 
 /* Table cells */
 .lt-table td {
-  padding: 12px;
+  padding: 17px;
   border-bottom: 1px solid #ccc; /* row separator */
 }
 
@@ -94,7 +94,6 @@
 .lt-actions span {
   cursor: pointer;
   color: #006088;
-  text-decoration: underline;
 }
 
 /* Push content slightly down from navbar */
@@ -112,47 +111,15 @@
 
 /* Table container spacing */
 .lt-box {
-  margin-bottom: 25px; /* space between tables */
+  margin-bottom: 60px; /* space between tables */
 }
 .lt-table {
   width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed; /* 🔥 forces alignment */
 }
 
-/* Define exact column widths */
-.lt-table th:nth-child(1),
-.lt-table td:nth-child(1) {
-  width: 10%;
-}
-
-.lt-table th:nth-child(2),
-.lt-table td:nth-child(2) {
-  width: 20%;
-}
-
-.lt-table th:nth-child(3),
-.lt-table td:nth-child(3) {
-  width: 25%;
-}
-
-.lt-table th:nth-child(4),
-.lt-table td:nth-child(4) {
-  width: 15%;
-}
-
-.lt-table th:nth-child(5),
-.lt-table td:nth-child(5) {
-  width: 15%;
-}
-
-.lt-table th:nth-child(6),
-.lt-table td:nth-child(6) {
-  width: 15%;
-}
 .lt-actions {
   display: flex;
-  gap: 12px;
+  gap: 50px;
   justify-content: flex-start;
 }
 .lt-table th,
@@ -184,4 +151,25 @@
 /* Make tables align with button */
 .lt-box {
   width: 100%;
+}
+
+/* Container for logo text */
+.logo-container {
+  text-align: center; /* center horizontally */
+  margin-bottom: 10px; /* space before title */
+}
+
+/* "singular" bold part */
+.logo-bold {
+  font-weight: 700;
+  color: #002D40; /* match your theme */
+  font-size: 20px;
+}
+
+/* "express" light part */
+.logo-light {
+  font-weight: 300;
+  color: #638549; /* accent color */
+  font-size: 20px;
+  margin-left: 4px; /* small spacing between words */
 }

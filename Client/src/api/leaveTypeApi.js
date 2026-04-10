@@ -15,4 +15,21 @@ export const getLeaveTypes = async () => {
     console.error("Error fetching leave types:", error);
     return [];
   }
+
+};
+
+export const createLeaveType = async (data) => {
+  try {
+    const response = await axios.post(BASE_URL, data, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "application/json"
+      }
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Error creating leave type:", error);
+    throw error;
+  }
 };
