@@ -5,67 +5,75 @@ namespace HRConnect.Api.Services
     using HRConnect.Api.Interfaces;
     using HRConnect.Api.Models.CompanyContributions;
     using HRConnect.Api.DTOs.CompanyContribution;
+    using HRConnect.Api.Mappers;
 
     public class CompanyContributionService : ICompanyContributionService
     {
-        private readonly ICompanyContributionRepository _repo;
+        private readonly ICompanyContributionRepository _companyContributionRepo;
 
-        public CompanyContributionService(ICompanyContributionRepository repo)
+        public CompanyContributionService(ICompanyContributionRepository companyContributionRepo)
         {
-            _repo = repo;
+            _companyContributionRepo = companyContributionRepo;
         }
+        /// <summary>
+        /// Retrieves all company contribution definitions.
+        /// </summary>
+        /// <returns>List of company contribution definitions.</returns>
 
         public async Task<List<CompanyContributionDto>> GetAllCompanyContributionAsync()
         {
-            var list = await _repo.GetAllAsync();
+            var list = await _companyContributionRepo.GetAllAsync();
 
-            var result = new List<CompanyContributionDto>();
+            var companyContributions = new List<CompanyContributionDto>();
 
-            foreach (var item in list)
+            foreach (var contributions in list)
             {
-                result.Add(Map(item));
+                companyContributions.Add(contributions.ToCompanyContributionDto());
             }
 
-            return result;
+            return companyContributions;
         }
-
+        /// <summary>
+        /// Retrieves a single company contribution by ID.
+        /// </summary>
+        /// <returns>A company contribution definition or null if not found.</returns>
         public async Task<CompanyContributionDto?> GetCompanyContributionByIdAsync(int id)
         {
-            var item = await _repo.GetByIdAsync(id);
-            if (item == null) return null;
+            var contributions = await _companyContributionRepo.GetByIdAsync(id);
+            if (contributions == null) return null;
 
-            return Map(item);
+            return contributions.ToCompanyContributionDto();
         }
-
+        /// <summary>
+        /// Creates a new company contribution rule.
+        /// </summary>
+        /// <param name="companyContributionModel">The company contribution model to create.</param>
+        /// <returns>The created company contribution definition.</returns>
         public async Task<CompanyContributionDto> CreateCompanyContributionAsync(CompanyContribution companyContributionModel)
         {
-            var created = await _repo.CreateCompanyContributionAsync(companyContributionModel);
-            return Map(created!);
+            var createdContribution = await _companyContributionRepo.CreateCompanyContributionAsync(companyContributionModel);
+            return createdContribution.ToCompanyContributionDto();
         }
 
+        /// <summary>
+        /// Updates an existing company contribution rule.
+        /// </summary>
+        /// <param name="companyContributionModel">The company contribution model to update.</param>
+        /// <returns>The updated company contribution definition.</returns>
         public async Task<CompanyContributionDto> UpdateCompanyContributionAsync(CompanyContribution companyContributionModel)
         {
-            var updated = await _repo.UpdateCompanyContributionAsync(companyContributionModel);
-            return Map(updated!);
+            var updatedContribution = await _companyContributionRepo.UpdateCompanyContributionAsync(companyContributionModel);
+            return updatedContribution.ToCompanyContributionDto();
         }
 
+        /// <summary>
+        /// Deletes a company contribution rule.
+        /// </summary>
+        /// <param name="id">The ID of the company contribution to delete.</param>
         public async Task DeleteAsync(int id)
         {
-            await _repo.DeleteAsync(id);
+            await _companyContributionRepo.DeleteAsync(id);
         }
-
-        private static CompanyContributionDto Map(CompanyContribution c)
-        {
-            return new CompanyContributionDto
-            {
-                CompanyContributionId = c.CompanyContributionId,
-                Code = c.Code,
-                ShortDescription = c.ShortDescription,
-                LongDescription = c.LongDescription,
-                TaxCode = c.TaxCode,
-                Percentage = c.Percentage,
-                IsActive = c.IsActive
-            };
-        }
+        
     }
 }

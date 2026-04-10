@@ -4,7 +4,6 @@ namespace HRConnect.Api.Interfaces
     using System.Threading.Tasks;
     using HRConnect.Api.Models.CompanyContributions;
     using HRConnect.Api.DTOs.CompanyContribution;
-
     public interface ICompanyContributionRepository
     {
         Task<List<CompanyContribution>> GetAllAsync();
@@ -12,5 +11,6 @@ namespace HRConnect.Api.Interfaces
         Task<CompanyContribution?> CreateCompanyContributionAsync(CompanyContribution companyContributionModel);
         Task<CompanyContribution?> UpdateCompanyContributionAsync(CompanyContribution companyContributionModel);
         Task DeleteAsync(int id);
+        
     }
 }

@@ -3,7 +3,7 @@ namespace HRConnect.Api.Controllers
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Authorization; // ✅ FIX
+    using Microsoft.AspNetCore.Authorization;
     using HRConnect.Api.Interfaces;
     using HRConnect.Api.DTOs.CompanyContribution;
     using HRConnect.Api.Models.CompanyContributions;
