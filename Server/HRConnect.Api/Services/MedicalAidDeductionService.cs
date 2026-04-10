@@ -509,7 +509,7 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
     int currentMonth = DateTime.Now.Month;
     int currentYear = DateTime.Now.Year;
     
-    // get all deductions from the previous run
+    // Get all deductions from the previous run
     var currentRun = await _payrollRunService.GetCurrentRunAsync();
     if (currentRun == null)
       throw new InvalidDataException("No current payroll run found");
@@ -522,7 +522,7 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
     if (previousDeductions == null || previousDeductions.Count == 0)
       throw new InvalidDataException("No previous Medical Aid Deductions found on the previous Run");
     
-    //TODO :  Roll over the deductions
+    //Roll over the deductions
     var filteredPreviousDeductions = previousDeductions
       .Where(p => (p.TerminationDate == null ||
                   (p.TerminationDate.Value.Month > currentMonth &&
@@ -530,8 +530,6 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
                   !p.IsActive
                   )
       .OrderBy(p => p.Id)
-      
-      //.Update(p => p.PayrollRunId = currentRun.PayrollRunId)
       .ToList();
     
     var recordsToRollover = new List<PayrollRecord>();
@@ -541,10 +539,7 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
     
     foreach (var previousDeduction in filteredPreviousDeductions)
     {
-      //recordsToRollover.Add(filteredPreviousDeduction);
-      //employeeIds.Add(filteredPreviousDeduction.EmployeeId);
-      
-      // Create a new instance - don't reuse the locked one
+      // Create a new instance
       var newDeduction = new MedicalAidDeduction
       {
         EmployeeId = previousDeduction.EmployeeId,
@@ -568,7 +563,7 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
         TerminationDate = previousDeduction.TerminationDate,
         TerminationReason = previousDeduction.TerminationReason,
         UpdatedDate = previousDeduction.UpdatedDate,
-        // Don't set: PayrollRunId, UpdatedDate, TerminationDate, TerminationReason - these are handled by the rollover process
+
         OptionName = previousDeduction.OptionName,
         OptionCategoryName = previousDeduction.OptionCategoryName,
         PayrollRunId = currentRun.PayrollRunId  // Set to NEW run ID
