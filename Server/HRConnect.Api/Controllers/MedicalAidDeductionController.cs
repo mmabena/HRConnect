@@ -44,7 +44,7 @@ public class MedicalAidDeductionController : ControllerBase
     /// This endpoint retrieves deductions from finalized and locked payroll runs only.
     /// Currently authorization is commented out for testing purposes.
     /// </remarks>
-    [HttpGet("deductions/active/all")]
+    [HttpGet("active/all")]
     [Authorize(Roles = "SuperUser")]
     public async Task<IActionResult> GetAllMedicalDeductions()
     {
@@ -52,7 +52,7 @@ public class MedicalAidDeductionController : ControllerBase
       return Ok(deductions);
     }
 
-  [HttpGet("deductions/inactive/all")]
+  [HttpGet("inactive/all")]
   [Authorize(Roles = "SuperUser")]
   public async Task<IActionResult> GetAllLockedMedicalDeductions()
   {
