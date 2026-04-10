@@ -269,17 +269,20 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
     if(updatePayload == null) 
       throw new ArgumentNullException(nameof(updatePayload), "Update request cannot be empty");
 
-    if (updatePayload.MedicalOptionId == null || updatePayload.MedicalOptionId <= 0)
+    if (updatePayload.MedicalOptionId <= 0)
       throw new ArgumentException(
         "Medical option ID must be a valid positive integer, and cannot be null");
     
-    if (updatePayload.MedicalCategoryId == null || updatePayload.MedicalCategoryId <= 0)
+    if (updatePayload.MedicalCategoryId <= 0 || updatePayload.MedicalCategoryId == null )
       throw new ArgumentException(
         "Medical category ID must be a valid positive integer, and cannot be null");
-    if (updatePayload.OptionName.ToString().Trim().Length < 0)
+    if (updatePayload.OptionName.ToString() == null || updatePayload.OptionName.ToString() == "" || 
+        updatePayload.OptionName.ToString().Trim().Length < 0)
       throw new ArgumentException("Option name cannot be empty");
 
-    if (updatePayload.OptionCategory.ToString().Trim().Length < 0)
+    if (updatePayload.OptionCategory.ToString().Trim() == null || 
+        updatePayload.OptionCategory.ToString().Trim() == "" || 
+        updatePayload.OptionCategory.ToString().Trim().Length < 0)
       throw new ArgumentException("Option category cannot be empty");
     
     if (updatePayload.PrincipalCount < 0 || updatePayload.AdultCount < 0 || updatePayload.ChildrenCount < 0)
