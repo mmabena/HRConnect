@@ -9,7 +9,7 @@ namespace HRConnect.Api.Mappers
     {
       return new MedicalAidDeduction
       {
-        Id = dto.MedicalAidDeductionId,
+        
         PayrollRunId = dto.PayrollRunId,
         EmployeeId = dto.EmployeeId,
         Name = dto.Name,

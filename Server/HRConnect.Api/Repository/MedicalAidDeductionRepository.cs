@@ -33,7 +33,8 @@ namespace HRConnect.Api.Repository
       return await _context.MedicalAidDeductions
         .AsNoTracking()
         .Include(p => p.PayrollRun)
-        .Where(p => p.EmployeeId == employeeId && p.PayrollRun.PayrollRunId != null && p.PayrollRun.IsFinalised == false && p.PayrollRun.IsLocked == false)
+        .Where(p => p.EmployeeId == employeeId && p.PayrollRun.PayrollRunId != null &&
+        p.PayrollRun.IsFinalised == false && p.PayrollRun.IsLocked == false)
         .ToListAsync();
     }
 
@@ -46,7 +47,8 @@ namespace HRConnect.Api.Repository
       return await _context.MedicalAidDeductions
         .AsNoTracking()
         .Include(p => p.PayrollRun)
-        .Where(p => p.Id != null && p.PayrollRun.PayrollRunId != null && p.PayrollRun.IsFinalised == true && p.PayrollRun.IsLocked == true)
+        .Where(p => p.Id != null && p.PayrollRun.PayrollRunId != null &&
+        !p.PayrollRun.IsFinalised && !p.PayrollRun.IsLocked)
         .ToListAsync();
     }
 
@@ -170,6 +172,16 @@ namespace HRConnect.Api.Repository
     public async Task SaveChangesAsync()
     {
       await _context.SaveChangesAsync();
+    }
+
+    public async Task<IReadOnlyList<MedicalAidDeduction>> GetAllLockedMedicalAidDeductionsAsync()
+    {
+      return await _context.MedicalAidDeductions
+        .AsNoTracking()
+        .Include(p => p.PayrollRun)
+        .Where(p => p.Id != null && p.PayrollRun.PayrollRunId != null &&
+        p.PayrollRun.IsFinalised && p.PayrollRun.IsLocked)
+        .ToListAsync();
     }
   }
 }

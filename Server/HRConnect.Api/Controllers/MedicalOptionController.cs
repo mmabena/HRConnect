@@ -220,7 +220,7 @@ namespace HRConnect.Api.Controllers
     /// <remarks>
     /// This is a testing endpoint used to verify database state and for debugging purposes.
     /// </remarks>
-    [HttpGet("db-copy")]
+    [HttpGet("snapshot")]
     [Authorize(Roles = "SuperUser")]
     public async Task<IActionResult> GetCurrentDBCopy()
     {

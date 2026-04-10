@@ -33,7 +33,7 @@ public class MedicalAidDeductionController : ControllerBase
     }
 
     /// <summary>
-    /// Retrieves all medical aid deductions from finalized payroll runs.
+    /// Retrieves all active and unlocked medical aid deductions from the unfinalized payroll run.
     /// </summary>
     /// <returns>A collection of all medical aid deductions.</returns>
     /// <response code="200">Returns all medical aid deductions successfully.</response>
@@ -44,7 +44,7 @@ public class MedicalAidDeductionController : ControllerBase
     /// This endpoint retrieves deductions from finalized and locked payroll runs only.
     /// Currently authorization is commented out for testing purposes.
     /// </remarks>
-    [HttpGet("all")]
+    [HttpGet("deductions/active/all")]
     [Authorize(Roles = "SuperUser")]
     public async Task<IActionResult> GetAllMedicalDeductions()
     {
@@ -52,19 +52,27 @@ public class MedicalAidDeductionController : ControllerBase
       return Ok(deductions);
     }
 
-    /// <summary>
-    /// Retrieves medical aid deductions for a specific employee from active payroll runs.
-    /// </summary>
-    /// <param name="id">The unique identifier of the employee.</param>
-    /// <returns>A collection of medical aid deductions for the specified employee.</returns>
-    /// <response code="200">Returns employee deductions successfully.</response>
-    /// <response code="401">Unauthorized - user is not authenticated.</response>
-    /// <response code="403">Forbidden - user does not have SuperUser role.</response>
-    /// <response code="500">Internal server error.</response>
-    /// <remarks>
-    /// Only retrieves deductions from non-finalized, non-locked payroll runs.
-    /// </remarks>
-    [HttpGet("employee/{id}")]
+  [HttpGet("deductions/inactive/all")]
+  [Authorize(Roles = "SuperUser")]
+  public async Task<IActionResult> GetAllLockedMedicalDeductions()
+  {
+    var deductions = await _medicalAidDeductionService.GetAllLockedMedicalAidDeductions();
+    return Ok(deductions);
+  }
+
+  /// <summary>
+  /// Retrieves medical aid deductions for a specific employee from active payroll runs.
+  /// </summary>
+  /// <param name="id">The unique identifier of the employee.</param>
+  /// <returns>A collection of medical aid deductions for the specified employee.</returns>
+  /// <response code="200">Returns employee deductions successfully.</response>
+  /// <response code="401">Unauthorized - user is not authenticated.</response>
+  /// <response code="403">Forbidden - user does not have SuperUser role.</response>
+  /// <response code="500">Internal server error.</response>
+  /// <remarks>
+  /// Only retrieves deductions from non-finalized, non-locked payroll runs.
+  /// </remarks>
+  [HttpGet("employee/{id}")]
     [Authorize(Roles = "SuperUser")]
     public async Task<IActionResult> GetEmployeeMedicalAidDeductionById([FromRoute] string id)
     {

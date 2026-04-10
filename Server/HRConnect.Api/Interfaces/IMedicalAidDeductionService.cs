@@ -18,6 +18,8 @@ namespace HRConnect.Api.Interfaces
     /// </summary>
     Task<IReadOnlyList<MedicalAidDeduction>> GetAllMedicalAidDeductions();
 
+    Task<IReadOnlyList<MedicalAidDeduction>> GetAllLockedMedicalAidDeductions();
+
     /// <summary>
     /// Add a new medical aid deduction for an employee with selected option details.
     /// </summary>
