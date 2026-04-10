@@ -457,6 +457,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
           )}
           
           {/* Document Management */}
+          {/*
           {permissions.isAdmin && (
             <li>
               <div className="menu-item-wrapper">
@@ -469,7 +470,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
               </div>
             </li>
           )}
-
+          */}
           {/* Admin tools (SuperUser only) */}
           {permissions.isAdmin && (
             <li>
