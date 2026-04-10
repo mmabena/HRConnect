@@ -13,6 +13,10 @@ namespace HRConnect.Api.Services
       _notificationRepository = notificationRepository;
       _notificationDispatcher = notificationDispatcher;
     }
+    public async Task GetEmployeeNotificationByTypeAsync(NotificationType type, string employeeId)
+    {
+
+    }
     public async Task CreateAndDispatchAsync(Notification notification)
     {
       //Ensure that we don't have duplicate notifications before storing
@@ -35,7 +39,8 @@ namespace HRConnect.Api.Services
       if (isPesistent)
       {
         //Find if it already exists 
-        var existing = await _notificationRepository.ExistsAsync(notification.Type, notification.DueDate, notification.CreatedAt);
+        var existing = await _notificationRepository.ExistsAsync(notification.Type
+        , notification.EmployeeId);
 
         if (existing != null)
         {
@@ -43,9 +48,9 @@ namespace HRConnect.Api.Services
           notification.IsRead = false;
           return;
         }
-
-        //For other general notifications
       }
+      //For other general notifications or it does not exist
+      await _notificationRepository.AddNotificationAsync(notification);
     }
   }
 }
