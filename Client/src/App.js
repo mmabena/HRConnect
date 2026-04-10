@@ -21,7 +21,7 @@ import CompanyManagement from "./companyManagement.js";
 import CompanyContribution from "./Components/CompanyContribution/CompanyContribution";
 import Profile from "./Components/MyProfile";
 import CompensationPlanning from "./Components/CompensationPlanning";
-import TaxTableManagement from "./Components/companyManagement/TaxTableManagement/TaxTableManagement";
+import TaxTableManagement from "./Components/companyManagement/TaxTableManagement/TaxTableManagement.jsx";
 import ChangePassword from "./Components/ChangePassword";
 import TaxTableUpload from "./Components/companyManagement/TaxTableManagement/TaxTableUpload.jsx";
 import MenuBar from "./Components/MenuBar/MenuBar";
