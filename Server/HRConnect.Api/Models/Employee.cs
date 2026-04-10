@@ -4,7 +4,7 @@ namespace HRConnect.Api.Models
   using System.Collections.Generic;
   using System.ComponentModel.DataAnnotations;
   using System.ComponentModel.DataAnnotations.Schema;
-
+  using HRConnect.Api.Models.Payroll.Earnings;
   using HRConnect.Api.Models.Pension;
 
   public enum Gender
@@ -133,5 +133,6 @@ namespace HRConnect.Api.Models
         = new List<AnnualLeaveAccrualHistory>();
     public PensionOption? PensionOption { get; set; }
     public ICollection<EmployeePensionEnrollment> EmployeePensionEnrollment { get; set; } = [];
+    public ICollection<EmployeePayrollEarning> EmployeePayrollEarning { get; set; } = [];
   }
 }

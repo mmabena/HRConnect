@@ -257,6 +257,7 @@ builder.Services.AddScoped<INotificationDispatcher, NotificationDispatcher>();
 builder.Services.AddScoped<IJobScheduleService, JobScheduleService>();
 
 builder.Services.AddScoped<PositionAndLeaveSeed>();
+builder.Services.AddScoped<IPayrollEarningRepository, PayrollEarningRepository>();
 
 builder.Services.AddCors(options =>
 {

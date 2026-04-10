@@ -7,6 +7,8 @@ namespace HRConnect.Api.Data
   using Microsoft.EntityFrameworkCore;
   using AppAny.Quartz.EntityFrameworkCore.Migrations;
   using AppAny.Quartz.EntityFrameworkCore.Migrations.SqlServer;
+  using HRConnect.Api.Models.Payroll.Earnings;
+
   public class ApplicationDBContext(DbContextOptions dbContextOptions) : DbContext(dbContextOptions)
   {
     public DbSet<User> Users { get; set; }
@@ -39,6 +41,8 @@ namespace HRConnect.Api.Data
     public DbSet<PensionDeduction> PensionDeductions { get; set; }
     public DbSet<MedicalAidDeduction> MedicalAidDeductions { get; set; }
     public DbSet<Notification> Notifications { get; set; }
+    public DbSet<PayrollEarning> PayrollEarnings { get; set; }
+    public DbSet<EmployeePayrollEarning> EmployeePayrollEarnings { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
       base.OnModelCreating(modelBuilder);
@@ -224,6 +228,27 @@ namespace HRConnect.Api.Data
           .HasConversion<string>();
       modelBuilder.Entity<Notification>().Property(n => n.Type)
       .HasConversion<string>();
+
+      //Im here---------------------------------------------------------------------------------------------------------------------------------
+      modelBuilder.Entity<Employee>()
+        .HasMany(epre => epre.EmployeePayrollEarning)
+        .WithOne(e => e.Employee)
+        .HasForeignKey(e => e.EmployeeId)
+        .OnDelete(DeleteBehavior.Cascade)
+        .IsRequired();
+
+      modelBuilder.Entity<PayrollEarning>()
+        .HasMany(epre => epre.EmployeePayrollEarning)
+        .WithOne(pre => pre.PayrollEarning)
+        .HasForeignKey(pre => pre.PayrollEarningId)
+        .OnDelete(DeleteBehavior.Cascade)
+        .IsRequired();
+
+      modelBuilder.Entity<EmployeePayrollEarning>()
+        .HasOne<PayrollRun>()
+        .WithMany()
+        .HasForeignKey(epe => epe.PayrollRunId)
+        .HasPrincipalKey(p => p.PayrollRunId);
     }
 
     //Override 'SaveChangesAsync' for Payroll Records to enforce locked records on a payroll run 
