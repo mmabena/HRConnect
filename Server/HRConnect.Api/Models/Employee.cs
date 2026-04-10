@@ -101,6 +101,8 @@ namespace HRConnect.Api.Models
 
     public Position? Position { get; set; }
 
+    public BankingDetails? BankingDetails { get; set; }
+
     [Required]
     public EmploymentStatus EmploymentStatus { get; set; }
 

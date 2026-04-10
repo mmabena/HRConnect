@@ -1,6 +1,7 @@
 namespace HRConnect.Api.Data
 {
   using HRConnect.Api.Models;
+  using HRConnect.Api.Data;
   using HRConnect.Api.Utils.PositionAndLeaveSeed;
   using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Models.PayrollDeduction;
@@ -13,6 +14,7 @@ namespace HRConnect.Api.Data
   public class ApplicationDBContext(DbContextOptions dbContextOptions) : DbContext(dbContextOptions)
   {
     public DbSet<User> Users { get; set; }
+    public DbSet<BankingDetails> BankingDetails { get; set; }
     public DbSet<Employee> Employees { get; set; }
     public DbSet<Position> Positions { get; set; }
     public DbSet<JobGrade> JobGrades { get; set; }
