@@ -149,25 +149,27 @@ namespace HRConnect.Api.Services
     }
 
     /// <summary>
-    /// MIGHT CHANGE
+    /// Generates the final tax deduction for an employee based on their 
+    /// remuneration, age, pension contributions, and medical credits.
     /// </summary>
     /// <param name="request"></param>
+    /// <param name="email"></param>
     /// <returns></returns>
+    /// <exception cref="KeyNotFoundException"></exception>
+    /// <exception cref="InvalidOperationException"></exception>
     public async Task<FinalTaxDeduction> GenerateTaxAsync(
       TaxCalculationDto request,
       string email)
     {
-      // 👤 Get employee from email
+
       var employee = await _repository.GetEmployeeByEmailAsync(email);
       if (employee == null)
         throw new KeyNotFoundException("Employee not found");
 
-      // 🧾 Get active payroll run
       var payrollRun = await _repository.GetActivePayrollRunAsync();
       if (payrollRun == null)
         throw new KeyNotFoundException("No active payroll run");
 
-      // 🔒 Check lock
       var existing = await _repository.GetExistingFinalTaxAsync(
           employee.EmployeeId,
           payrollRun.PayrollRunId);
@@ -175,12 +177,10 @@ namespace HRConnect.Api.Services
       if (existing?.IsLocked == true)
         throw new InvalidOperationException("Payroll is locked");
 
-      // 💰 Pension
       var pension = await _repository.GetPensionByEmployeeIdAsync(employee.EmployeeId);
       if (pension == null)
         throw new KeyNotFoundException("Pension record not found");
 
-      // 🎂 Age calculation (DateOnly safe)
       var today = DateOnly.FromDateTime(DateTime.Today);
 
       int age = today.Year - employee.DateOfBirth.Year;
@@ -188,20 +188,16 @@ namespace HRConnect.Api.Services
       if (employee.DateOfBirth > today.AddYears(-age))
         age--;
 
-      // 💸 Pension contribution
       decimal pensionContribution =
           pension.PensionableSalary *
           (pension.PendsionCategoryPercentage / 100m);
 
-      // 📊 Taxable income
       decimal taxableIncome =
           pension.PensionableSalary - pensionContribution;
 
-      // 🧮 Tax
       decimal taxBeforeCredits =
           await CalculateTaxAsync(taxableIncome, age);
 
-      // 🏥 Medical
       decimal medicalCredit =
           (request.MedicalAidMembers * 364m) +
           (request.MedicalAidDependants * 364m) +
@@ -254,11 +250,13 @@ namespace HRConnect.Api.Services
       return record;
     }
 
-
-
-
-
-
+    /// <summary>
+    /// Generates a unique tax code based on employee ID, payroll run ID, and tax year.
+    /// </summary>
+    /// <param name="employeeId"></param>
+    /// <param name="payrollRunId"></param>
+    /// <param name="taxYear"></param>
+    /// <returns></returns>
     private string GenerateTaxCode(string employeeId, int payrollRunId, int taxYear)
     {
       return $"TX-{taxYear}-{payrollRunId}-{employeeId}";
