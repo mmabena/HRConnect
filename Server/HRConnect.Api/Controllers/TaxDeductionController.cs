@@ -50,15 +50,22 @@ namespace HRConnect.Api.Controllers
     }
 
     /// <summary>
-    /// Calculates tax including pension and medical credits
+    /// Calculates the finaltax including pension and medical credits
     /// </summary>
     [HttpPost("generate")]
     public async Task<ActionResult<FinalTaxDeduction>> GenerateTax(
-     [FromBody] TaxCalculationDto request)
+    [FromBody] TaxCalculationDto request)
     {
       try
       {
-        var result = await _taxDeductionService.GenerateTaxAsync(request);
+        var email = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+         ?? User.FindFirst("sub")?.Value;
+
+        if (string.IsNullOrEmpty(email))
+          return Unauthorized("User not logged in");
+
+        var result = await _taxDeductionService.GenerateTaxAsync(request, email);
+
         return Ok(result);
       }
       catch (Exception ex)

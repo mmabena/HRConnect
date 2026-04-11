@@ -1,6 +1,7 @@
 namespace HRConnect.Api.Repositories
 {
   using HRConnect.Api.Models;
+  using HRConnect.Api.Models.Payroll;
   using System;
   using System.Collections.Generic;
   using System.Threading.Tasks;
@@ -18,9 +19,10 @@ namespace HRConnect.Api.Repositories
     Task DeactivateTaxTableUploadsAsync(List<TaxTableUpload> uploads);
     Task SaveChangesAsync();
 
-    Task<Employee?> GetEmployeeByIdAsync(int employeeId);
-    Task<PensionDeduction?> GetPensionByEmployeeIdAsync(int employeeId);
+    Task<Employee?> GetEmployeeByEmailAsync(string email);
+    Task<PayrollRun?> GetActivePayrollRunAsync();
+    Task<PensionDeduction?> GetPensionByEmployeeIdAsync(string employeeId);
     Task AddFinalTaxDeductionAsync(FinalTaxDeduction deduction);
-    Task<FinalTaxDeduction?> GetExistingFinalTaxAsync(int employeeId, int payRunId);
+    Task<FinalTaxDeduction?> GetExistingFinalTaxAsync(string employeeId, int payRunId);
   }
 }

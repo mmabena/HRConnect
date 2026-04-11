@@ -7,7 +7,8 @@ namespace HRConnect.Api.Repositories
   using System.Linq;
   using System.Threading.Tasks;
   using HRConnect.Api.Models.PayrollDeduction;
-  
+  using HRConnect.Api.Models.Payroll;
+
   /// <summary>
   /// Repository implementation for EF Core access to TaxDeductions and related TaxTableUploads.
   /// </summary>
@@ -64,13 +65,7 @@ namespace HRConnect.Api.Repositories
       await _context.SaveChangesAsync();
     }
 
-    public async Task<Employee?> GetEmployeeByIdAsync(int employeeId)
-    {
-      return await _context.Employees
-          .FirstOrDefaultAsync(e => e.Id == employeeId);
-    }
-
-    public async Task<PensionDeduction?> GetPensionByEmployeeIdAsync(int employeeId)
+    public async Task<PensionDeduction?> GetPensionByEmployeeIdAsync(string employeeId)
     {
       return await _context.PensionDeductions
           .FirstOrDefaultAsync(p => p.EmployeeId == employeeId);
@@ -81,12 +76,24 @@ namespace HRConnect.Api.Repositories
       await _context.FinalTaxDeductions.AddAsync(deduction);
     }
 
-    public async Task<FinalTaxDeduction?> GetExistingFinalTaxAsync(int employeeId, int payRunId)
+    public async Task<FinalTaxDeduction?> GetExistingFinalTaxAsync(string employeeId, int payRunId)
     {
       return await _context.FinalTaxDeductions
           .FirstOrDefaultAsync(x =>
               x.EmployeeId == employeeId &&
-              x.PayRunId == payRunId);
+              x.PayrollRunId == payRunId);
+    }
+
+    public async Task<Employee?> GetEmployeeByEmailAsync(string email)
+    {
+      return await _context.Employees
+          .FirstOrDefaultAsync(x => x.Email == email);
+    }
+
+    public async Task<PayrollRun?> GetActivePayrollRunAsync()
+    {
+      return await _context.PayrollRuns
+          .FirstOrDefaultAsync(x => !x.IsLocked && !x.IsFinalised);
     }
   }
 }

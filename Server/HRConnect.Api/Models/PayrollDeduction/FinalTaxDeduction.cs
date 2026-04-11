@@ -11,7 +11,6 @@ namespace HRConnect.Api.Models.PayrollDeduction
   public class FinalTaxDeduction : PayrollRecord
   {
     public int Id { get; set; }
-    public int PayRunId { get; set; }
 
     public string Name { get; set; } = string.Empty;
     public string Surname { get; set; } = string.Empty;
@@ -44,8 +43,6 @@ namespace HRConnect.Api.Models.PayrollDeduction
     public decimal NetSalary { get; set; }
 
     public string TaxCode { get; set; } = string.Empty;
-
-    public bool IsLocked { get; set; }
 
   }
 }

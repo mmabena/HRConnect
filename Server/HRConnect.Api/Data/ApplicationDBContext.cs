@@ -150,8 +150,6 @@ namespace HRConnect.Api.Data
 {
     entity.ToTable("FinalTaxDeductions");
 
-    entity.Property(e => e.PayRunId).IsRequired();
-
     entity.Property(e => e.Name).IsRequired();
     entity.Property(e => e.Surname).IsRequired();
 

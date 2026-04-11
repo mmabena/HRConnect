@@ -14,6 +14,7 @@ namespace HRConnect.Api.Interfaces
     Task<decimal> CalculateTaxAsync(decimal remuneration, int age);
     Task<List<TaxDeductionDto>> GetAllTaxDeductionsAsync(int taxYear);
     Task UpdateTaxDeductionAsync(UpdateTaxDeductionDto dto);
-    Task<FinalTaxDeduction> GenerateTaxAsync(TaxCalculationDto  request);
+   Task<FinalTaxDeduction> GenerateTaxAsync( TaxCalculationDto request, string email);
+   
   }
 }
