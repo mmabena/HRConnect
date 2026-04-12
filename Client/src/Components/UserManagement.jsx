@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import Profile from "./MyProfile";
 import ActionsModal from "./ActionModal"; // Import the new ActionsModal
 import { fetchUsersAndRoles, updateUser } from "../api/UserManagement";
+import { resolveRole } from "../utils/roleUtils";
 import {
   FaUser,
   FaUsers,
@@ -42,8 +43,9 @@ const UserManagement = () => {
         setRoles(roles || []);
         const mappedUsers = (users || []).map((user) => ({
           ...user,
-          name: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
-          role: roles.find((r) => r.roleId === user.roleId)?.name || "Unknown Role",
+          //name: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
+          name: user.name || user.email,
+          role: user.role || roles.find((r) => r.roleId === user.roleId)?.name || "Unknown Role",
           status: user.status === USER_STATUS.ACTIVE ? "Active" : "Inactive",
           statusValue: user.status,
         }));
@@ -181,18 +183,16 @@ const UserManagement = () => {
       <div className="grey-box">
         <div className="top-bar-container">
           <div
-            className={`top-bar clickable-tab ${
-              activeTab === "myProfile" ? "active-tab" : ""
-            }`}
+            className={`top-bar clickable-tab ${activeTab === "myProfile" ? "active-tab" : ""
+              }`}
             onClick={() => setActiveTab("myProfile")}
           >
             <FaUser size={20} />
             <h3>My Profile</h3>
           </div>
           <div
-            className={`top-bar clickable-tab ${
-              activeTab === "userProfile" ? "active-tab" : ""
-            }`}
+            className={`top-bar clickable-tab ${activeTab === "userProfile" ? "active-tab" : ""
+              }`}
             onClick={() => setActiveTab("userProfile")}
           >
             <FaUser size={20} />

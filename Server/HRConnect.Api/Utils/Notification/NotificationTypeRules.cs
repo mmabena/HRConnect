@@ -1,7 +1,5 @@
 namespace HRConnect.Api.Utils.Notification
 {
-  using FluentValidation;
-
   using HRConnect.Api.Models;
 
   public static class NotificationTypeRules

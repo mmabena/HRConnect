@@ -40,7 +40,8 @@ namespace HRConnect.Api.Repository
       (n.Type == type) &&
       (n.Message == message) &&
       (n.EmployeeId == employeeId) &&
-      (n.Severity == severity))
+      (n.Severity == severity) &&
+      n.IsRead == false)//Avoid to duplicate unread messages
       .FirstOrDefaultAsync();
     }
     public async Task<bool> MarkAsReadAsync(Notification notification)

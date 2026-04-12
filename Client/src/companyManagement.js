@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { getCompany, deleteCompany, getCompanyById } from './Components/Services/companyService.js';
 import CompanyManagementUI from './Components/companyManagement/companyManagementUI.jsx';
 
-function companyManagement() {
+function CompanyManagement() {
   const navigate = useNavigate();
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
@@ -100,4 +100,4 @@ function companyManagement() {
   );
 }
 
-export default companyManagement;
+export default CompanyManagement;

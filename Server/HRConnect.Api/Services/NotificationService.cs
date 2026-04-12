@@ -48,7 +48,7 @@ namespace HRConnect.Api.Services
 
     public async Task CreateOrEnsureExistsAsync(Notification notification)
     {
-      bool isPesistent = NotificationTypeRules.ShouldPersist(notification.Type);
+      bool isPesistent = NotificationTypeRules.ShouldPersist(notification.Severity);
       if (isPesistent)
       {
         //Find if it already exists 

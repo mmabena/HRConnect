@@ -25,11 +25,12 @@ import TaxTableManagement from "./Components/companyManagement/TaxTableManagemen
 import ChangePassword from "./Components/ChangePassword";
 import TaxTableUpload from "./Components/companyManagement/TaxTableManagement/TaxTableUpload.jsx";
 import MenuBar from "./Components/MenuBar/MenuBar";
-import ManageUserPositions from   "./Pages/CompanyManagement/PositionManagement/ManageUserPositions.jsx";
+import ManageUserPositions from "./Pages/CompanyManagement/PositionManagement/ManageUserPositions.jsx";
 import ProjectionCalculator from "./Pages/PayrollTools/ProjectionCalculator";
 import PersonalInformation from "./Components/PersonalInformation.jsx";
 import api from "../src/api/api.js";
 import ChangePositionManagement from "./Components/companyManagement/PositionManagement/ChangePositionManagement.jsx";
+import { resolveRole } from "./utils/roleUtils.js";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
@@ -196,9 +197,9 @@ function App() {
             path="/viewPositionManagement/:id"
             element={<ViewPositionManagement />}
           />
-            <Route path="/changePositionManagement" element={<ChangePositionManagement />} />
+          <Route path="/changePositionManagement" element={<ChangePositionManagement />} />
           <Route path="/manageUserPosition" element={<ManageUserPositions />} />
-          
+
           <Route
             path="/company-contribution"
             element={<CompanyContribution />}
@@ -220,7 +221,7 @@ function App() {
             element={<ProjectionCalculator />}
           />
           <Route path="/changeposition" element={<ChangePositionManagement />} />
-          <Route path="/manageUserPosition" element={<ManageUserPositions/>} />
+          <Route path="/manageUserPosition" element={<ManageUserPositions />} />
           <Route path="/personal" element={<PersonalInformation />} />
         </Routes>
       </div>

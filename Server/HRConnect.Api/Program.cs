@@ -281,11 +281,16 @@ using (var scope = app.Services.CreateScope())
 
 using (var scope = app.Services.CreateScope())
 {
+  var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+  await userService.SyncEmployeeUserAsync();
+}
+
+using (var scope = app.Services.CreateScope())
+{
   var seeder = scope.ServiceProvider.GetRequiredService<PositionAndLeaveSeed>();
 
   await seeder.SeedAsync();
 }
-
 
 if (app.Environment.IsDevelopment())
 {

@@ -10,9 +10,9 @@ namespace HRConnect.Api.Services
   using HRConnect.Api.Utils;
   using System.Globalization;
   using HRConnect.Api.Mappers;
-  using System.Data.Common;
-  using System.Runtime.InteropServices;
+  using System.Security.Cryptography;
   using HRConnect.Api.Data;
+  using Microsoft.AspNetCore.Identity;
   using Microsoft.EntityFrameworkCore;
 
   //Inline Custom Exceptions for better error handling and clarity
@@ -43,7 +43,19 @@ namespace HRConnect.Api.Services
     private readonly IEmailService _emailService;
     private readonly ILeaveBalanceService _leaveBalanceService;
     private readonly ILeaveProcessingService _leaveProcessingService;
-    public EmployeeService(ApplicationDBContext context, IEmployeeRepository employeeRepo, IEmailService emailService, IPositionRepository positionRepo, ILeaveBalanceService leaveBalanceService, ILeaveProcessingService leaveProcessingService)
+    private readonly IPasswordHasher<User> _passwordHasher;
+    //These are valid characters for the a password hash
+    private static readonly char[] UpperCaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
+    private static readonly char[] LowerCaseChars = "abcdefghijklmnopqrstuvwxyz".ToCharArray();
+    private static readonly char[] DigitChars = "1234567890".ToCharArray();
+    private static readonly char[] SpecialChars = "!@#$%^&*".ToCharArray();
+    private static readonly char[] AllPossibleChars = UpperCaseChars
+      .Concat(LowerCaseChars)
+      .Concat(DigitChars)
+      .Concat(SpecialChars)
+      .ToArray();
+    public EmployeeService(ApplicationDBContext context, IEmployeeRepository employeeRepo, IEmailService emailService, IPositionRepository positionRepo, ILeaveBalanceService leaveBalanceService, ILeaveProcessingService leaveProcessingService,
+      IPasswordHasher<User> passwordHasher)
     {
       _context = context;
       _employeeRepo = employeeRepo;
@@ -51,6 +63,7 @@ namespace HRConnect.Api.Services
       _positionRepo = positionRepo;
       _leaveBalanceService = leaveBalanceService;
       _leaveProcessingService = leaveProcessingService;
+      _passwordHasher = passwordHasher;
     }
     /// <summary>
     /// Retrieves all employees from the repository.
@@ -120,6 +133,7 @@ namespace HRConnect.Api.Services
       try
       {
         var createdEmployee = await _employeeRepo.CreateEmployeeAsync(new_employee);
+        await EnsureUserRecordAsync(createdEmployee);
         // Initialize leave balances for the new employee 
         await _leaveBalanceService.InitializeEmployeeLeaveBalancesAsync(createdEmployee.EmployeeId);
         await _leaveBalanceService.RecalculateAnnualLeaveAsync(createdEmployee.EmployeeId);
@@ -147,6 +161,7 @@ namespace HRConnect.Api.Services
       var existingEmployee = await _employeeRepo.GetEmployeeByIdAsync(employeeId);
       if (existingEmployee == null)
         throw new NotFoundException("Employee not found");
+      var previousEmail = existingEmployee.Email;
 
       ValidateCommonFields(employeeDto);
       ValidateUpdate(employeeDto);
@@ -183,7 +198,10 @@ namespace HRConnect.Api.Services
       existingEmployee.IsActive = employeeDto.IsActive;
 
       var updatedEmployee = await _employeeRepo.UpdateEmployeeAsync(existingEmployee);
-
+      if (updatedEmployee != null)
+      {
+        await EnsureUserRecordAsync(updatedEmployee, previousEmail);
+      }
       // Position change requires recalculation of leave balances and notification email
       if (positionChanged)
       {
@@ -255,8 +273,8 @@ namespace HRConnect.Api.Services
             .Include(e => e.LeaveBalances)
             .ThenInclude(lb => lb.LeaveType)
             .FirstAsync(e => e.EmployeeId == employeeId);
-            var annualBalance = employeeWithBalances?.LeaveBalances
-            ?.FirstOrDefault(lb => lb.LeaveType.Code == "AL");
+        var annualBalance = employeeWithBalances?.LeaveBalances
+        ?.FirstOrDefault(lb => lb.LeaveType.Code == "AL");
 
         try
         {
@@ -348,10 +366,52 @@ namespace HRConnect.Api.Services
                 Your employee ID: {employee.EmployeeId}
                 Position: {employee.PositionId}
                 Branch: {employee.Branch}
-                
+                Your HRConnect user account has been created with the default NormalUser role.
+                Use the Forgot Password flow on the login page to set your password before first sign-in.
                 We are glad to have you onboard. :-)";
 
       await _emailService.SendEmailAsync(employee.Email, subject, body);
+    }
+
+    private async Task EnsureUserRecordAsync(Employee employee, string? previousEmail = null)
+    {
+      var currentEmail = employee.Email;
+      User? user = null;
+
+      if (!string.IsNullOrWhiteSpace(previousEmail))
+      {
+        user = await _context.Users.FirstOrDefaultAsync(existingUser => existingUser.Email == previousEmail);
+
+        if (user != null && !string.Equals(previousEmail, currentEmail, StringComparison.OrdinalIgnoreCase))
+        {
+          var isEmailUsedByAnotherUser = await _context.Users.AnyAsync(existingUser =>
+              existingUser.UserId != user.UserId && existingUser.Email == currentEmail);
+
+          if (isEmailUsedByAnotherUser)
+            throw new BusinessRuleException($"A user with the email '{currentEmail}' already exists.");
+
+          user.Email = currentEmail;
+          await _context.SaveChangesAsync();
+          return;
+        }
+      }
+
+      user ??= await _context.Users.FirstOrDefaultAsync(existingUser => existingUser.Email == currentEmail);
+      if (user != null)
+        return;
+
+      var newUser = new User
+      {
+        Email = currentEmail,
+        Role = UserRole.NormalUser,
+        CreatedAt = DateTime.Now
+      };
+
+
+      newUser.PasswordHash = _passwordHasher.HashPassword(newUser, GenerateTemporaryPassword());
+
+      await _context.Users.AddAsync(newUser);
+      await _context.SaveChangesAsync();
     }
     /// <summary>
     /// Extracts Date of Birth and Gender from the provided ID Number.
@@ -474,5 +534,32 @@ namespace HRConnect.Api.Services
       return Math.Round(totalDays / 365.25m, 2);
     }
 
+    private static string GenerateTemporaryPassword()
+    {
+      var passwordChars = new List<char>
+      {
+        GenerateRandomCharacter(UpperCaseChars),
+        GenerateRandomCharacter(LowerCaseChars),
+        GenerateRandomCharacter(DigitChars),
+        GenerateRandomCharacter(SpecialChars),
+      };
+
+      while (passwordChars.Count < 12)
+      {
+        passwordChars.Add(GenerateRandomCharacter(AllPossibleChars));
+      }
+
+      for (int i = passwordChars.Count - 1; i > 0; --i)
+      {
+        var swapIndex = RandomNumberGenerator.GetInt32(i + 1);
+        (passwordChars[i], passwordChars[swapIndex]) = (passwordChars[swapIndex], passwordChars[i]);
+      }
+      return new string(passwordChars.ToArray());
+    }
+
+    private static char GenerateRandomCharacter(char[] alphabet)
+    {
+      return alphabet[RandomNumberGenerator.GetInt32(alphabet.Length)];
+    }
   }
 }

@@ -1,13 +1,31 @@
 const BASE_URL = "http://localhost:5147/api";
 
-export const fetchUsersAndRoles = async () => {
+export const getAuthHeaders = () => {
   const token = localStorage.getItem("token");
-  if (!token) throw new Error("No authentication token found");
 
-  const headers = {
+  if (!token) {
+    throw new Error("No authentication token found")
+  };
+
+  return {
     Authorization: `Bearer ${token}`,
     "Content-Type": "application/json",
   };
+};
+
+export const fetchRoles = async () => {
+  const response = await fetch(`${BASE_URL}/user/roles`, {
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch roles: ${response.status}`)
+  }
+  return await response.json();
+};
+
+export const fetchUsersAndRoles = async () => {
+  const headers = getAuthHeaders();
 
   try {
     const [usersResponse, rolesResponse] = await Promise.all([
@@ -32,6 +50,20 @@ export const fetchUsersAndRoles = async () => {
   }
 };
 
+export const updateUserRole = async (userId, roleId) => {
+  const response = await fetch(`${BASE_URL}/user/${userId}/role`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ roleId })
+  });
+
+  if (!response.ok) {
+    const errorMessage = await response.json();
+    throw new Error(errorMessage || `Failed to update user role: ${response.status}`);
+  }
+
+  return await response.json();
+};
 export const updateUser = async (userId, userData) => {
   const token = localStorage.getItem("token");
   if (!token) throw new Error("No authentication token found");
