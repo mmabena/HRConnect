@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   FaUser,
   FaEdit,
@@ -47,11 +47,24 @@ const Profile = () => {
     },
     profilePicture: null,
   });
-  
-  //Use Effect to load user data
-  const mapUserToProfileData=()=>{
 
+  //Use Effect to load user data
+  const mapUserToProfileData = (employee) => {
+    //Map the employee from the localStorage profileData fields
+    return {
+      firstName: employee.name || "Miriam",
+      lastName: employee.surname || "Phily",
+      email: employee.email || "mphily@singular.co.za",
+      phone: employee.contactNumber || "+27 11 123 4567",
+      address: employee.address || "123 Main Street, Johannesburg, Gauteng",
+      dateOfBirth: employee.dateOfBirth || "1985-06-15",
+      position: employee.position || "Software Engineer",
+      employeeId: employee.employeeId || "EMP001",
+      dateJoined: employee.startDate || "2020-03-15",
+      manager: employee.careerManager || "John Smith",
+    }
   };
+
   useEffect(() => {
     const currentEmployee = localStorage.getItem("currentEmployee");
     console.log(localStorage);
@@ -60,8 +73,9 @@ const Profile = () => {
         const parsedEmployee = JSON.parse(currentEmployee);
         setProfileData((prev) => ({
           ...prev,
-          ...parsedEmployee,
+          ...mapUserToProfileData(parsedEmployee),
         }));
+        // setProfileData(mapUserToProfileData((parsedEmployee)))
         console.log("Loaded employee data from localStorage:", parsedEmployee);
       } catch (error) {
         console.error("Error parsing currentEmployee from localStorage:", error);
