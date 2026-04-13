@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRConnect.Api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20260409173236_InitialCreate")]
+    [Migration("20260413090841_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -1434,6 +1434,46 @@ namespace HRConnect.Api.Migrations
                     b.ToTable("EmployeePensionEnrollments");
                 });
 
+            modelBuilder.Entity("HRConnect.Api.Models.PensionFund", b =>
+                {
+                    b.Property<int>("PensionFundId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PensionFundId"));
+
+                    b.Property<decimal>("ContributionAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("ContributionPercentage")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("EmployeeId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("EmployeeName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("MonthlySalary")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("PensionOptionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TaxCode")
+                        .HasColumnType("int");
+
+                    b.HasKey("PensionFundId");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.HasIndex("PensionOptionId");
+
+                    b.ToTable("PensionFunds");
+                });
+
             modelBuilder.Entity("HRConnect.Api.Models.PensionOption", b =>
                 {
                     b.Property<int>("PensionOptionId")
@@ -1961,7 +2001,7 @@ namespace HRConnect.Api.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("HRConnect.Api.Models.PensionOption", "PensionOption")
-                        .WithMany("Employee")
+                        .WithMany("Employees")
                         .HasForeignKey("PensionOptionId")
                         .OnDelete(DeleteBehavior.SetNull);
 
@@ -2112,6 +2152,25 @@ namespace HRConnect.Api.Migrations
                     b.Navigation("PensionOption");
                 });
 
+            modelBuilder.Entity("HRConnect.Api.Models.PensionFund", b =>
+                {
+                    b.HasOne("HRConnect.Api.Models.Employee", "Employee")
+                        .WithMany("PensionFunds")
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("HRConnect.Api.Models.PensionOption", "PensionOptions")
+                        .WithMany()
+                        .HasForeignKey("PensionOptionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Employee");
+
+                    b.Navigation("PensionOptions");
+                });
+
             modelBuilder.Entity("HRConnect.Api.Models.Position", b =>
                 {
                     b.HasOne("HRConnect.Api.Models.JobGrade", "JobGrade")
@@ -2187,6 +2246,8 @@ namespace HRConnect.Api.Migrations
 
                     b.Navigation("LeaveBalances");
 
+                    b.Navigation("PensionFunds");
+
                     b.Navigation("Subordinates");
                 });
 
@@ -2224,9 +2285,9 @@ namespace HRConnect.Api.Migrations
 
             modelBuilder.Entity("HRConnect.Api.Models.PensionOption", b =>
                 {
-                    b.Navigation("Employee");
-
                     b.Navigation("EmployeePensionEnrollment");
+
+                    b.Navigation("Employees");
 
                     b.Navigation("PensionDeduction");
                 });

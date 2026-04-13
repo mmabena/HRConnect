@@ -1672,6 +1672,47 @@ namespace HRConnect.Api.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("HRConnect.Api.Models.CompanyContributions.EmployeeCompanyContribution", b =>
+                {
+                    b.HasBaseType("HRConnect.Api.Models.Payroll.PayrollRecord");
+
+                    b.Property<int>("Age")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("DeathAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("DeathPercentage")
+                        .HasColumnType("decimal(10,6)");
+
+                    b.Property<decimal>("DisabilityAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("DisabilityPercentage")
+                        .HasColumnType("decimal(10,6)");
+
+                    b.Property<string>("IdNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PassportNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Salary")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Surname")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.ToTable("EmployeeCompanyContributions", (string)null);
+                });
+
             modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction.MedicalAidDeduction", b =>
                 {
                     b.HasBaseType("HRConnect.Api.Models.Payroll.PayrollRecord");

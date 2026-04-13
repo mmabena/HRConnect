@@ -9,14 +9,13 @@ namespace HRConnect.Api.Migrations
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
-        {
-
+        {   
+      /*This is to bring migrations back in line with one another*/
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-
         }
     }
 }
