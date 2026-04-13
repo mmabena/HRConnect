@@ -204,6 +204,9 @@ function App() {
             path="/viewPositionManagement/:id"
             element={<ViewPositionManagement />}
           />
+            <Route path="/changePositionManagement" element={<ChangePositionManagement />} />
+          <Route path="/manageUserPosition" element={<ManageUserPositions />} />
+          
           <Route
             path="/company-contribution"
             element={<CompanyContribution />}

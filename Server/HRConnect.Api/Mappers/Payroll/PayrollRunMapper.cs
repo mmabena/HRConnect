@@ -6,11 +6,17 @@ namespace HRConnect.Api.Mappers.Payroll
   {
     public static PayrollRunDto ToPayrollRunDto(this PayrollRun runModel)
     {
-      return new PayrollRunDto { };
+      return new PayrollRunDto
+      {
+        PeriodId = runModel.PeriodId,
+        // Period = runModel.Period,
+        PeriodDate = runModel.PeriodDate,
+        IsFinalised = runModel.IsFinalised,
+        FinalisedDate = runModel.FinalisedDate,
+        PayrollRunNumber = runModel.PayrollRunNumber,
+        Records = runModel.Records
+      };
     }
-    public static PayrollRun ToPayrollRunFromDto(this PayrollRunDto dto)
-    {
-      return new PayrollRun { };
-    }
+
   }
 }

@@ -8,6 +8,11 @@
   margin-top: -25px; /* small space below input */
   text-align: left; /* align text to the left */
 }
+.position-page-numbers {
+  display: flex;
+   align-items: center;
+  gap: 6px;
+}
 
 /* Dropdown icon styling */
 .apm-dropdown-icon {
@@ -99,6 +104,7 @@
   transition:
     background-color 0.2s,
     border-color 0.2s;
+    
 }
 
 .checkbox-cell input[type="checkbox"]:checked {
@@ -106,15 +112,15 @@
   border-color: #a0a0a0;
 }
 .checkbox-cell input[type="checkbox"]:checked::after {
-  content: "";
+ content: "";
   position: absolute;
-  left: 4px;
-  top: 0px;
+  left: 50%;
+  top: 50%;
   width: 4px;
   height: 8px;
   border: solid white;
   border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
+    transform: translate(-50%, -60%) rotate(45deg);
 }
 /*Company Management Section*/
 /* Wrapper for table to apply rounded borders */
@@ -459,6 +465,13 @@
   font-size: 14px;
   white-space: nowrap;
 }
+.position-pagination-right {
+  display: flex;
+  align-items: center;
+  margin-left:510px;
+  gap: 10px;
+}
+
 
 .hidden-date-picker {
   position: absolute;
@@ -473,6 +486,7 @@
   display: flex;
   padding: 0.5rem 0.5rem;
   font-size: 14px;
+  color: black;
   border-radius: 5px;
   background-color: transparent;
   cursor: text;
@@ -658,17 +672,19 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 /* Checkbox alignment */
-.checkbox-cell-position {
+.checkbox-cell-position-edit {
+  
   padding-left: 0;
   padding: 15px;
   font-size: 14px;
+  color:#0e2d36;
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
 /* Optional: consistent checkbox style */
-.checkbox-cell-position input[type="checkbox"] {
+.checkbox-cell-position-edit input[type="checkbox"], .checkbox-cell input[type="checkbox"] {
   appearance: none;
   -webkit-appearance: none;
   width: 16px;
@@ -684,21 +700,22 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     border-color 0.2s;
 }
 
-.checkbox-cell-position input[type="checkbox"]:checked {
+.checkbox-cell-position-edit input[type="checkbox"]:checked, .checkbox-cell input[type="checkbox"]:checked {
+   
   background-color: #355867;
   border-color: #a0a0a0;
 }
 
-.checkbox-cell-position input[type="checkbox"]:checked::after {
+.checkbox-cell-position-edit input[type="checkbox"]:checked::after {
   content: "";
   position: absolute;
-  left: 4px;
-  top: 0px;
+  left: 50%;
+  top: 50%;
   width: 4px;
   height: 8px;
   border: solid white;
   border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
+    transform: translate(-40%, -60%) rotate(45deg);
 }
 
 /* Reserve space for conditional link so container doesn't jump */

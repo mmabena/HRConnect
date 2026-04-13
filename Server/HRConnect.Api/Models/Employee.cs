@@ -1,131 +1,140 @@
 namespace HRConnect.Api.Models
 {
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
-    using System.ComponentModel.DataAnnotations.Schema;
+  using System;
+  using System.Collections.Generic;
+  using System.ComponentModel.DataAnnotations;
+  using System.ComponentModel.DataAnnotations.Schema;
 
-    public enum Gender
-    {
-        Male,
-        Female
-    }
+  using HRConnect.Api.Models.Pension;
 
-    public enum Title
-    {
-        Mr,
-        Mrs,
-        Ms,
-        Dr,
-        Prof
-    }
+  public enum Gender
+  {
+    Male,
+    Female
+  }
 
-    public enum Branch
-    {
-        Johannesburg,
-        CapeTown,
-        UK
-    }
+  public enum Title
+  {
+    Mr,
+    Mrs,
+    Ms,
+    Dr,
+    Prof
+  }
 
-    public enum EmploymentStatus
-    {
-        Permanent,
-        FixedTerm,
-        Contract
-    }
+  public enum Branch
+  {
+    Johannesburg,
+    CapeTown,
+    UK
+  }
 
-    public class Employee
-    {
-        [Required]
-        public string EmployeeId { get; set; } = string.Empty;
+  public enum EmploymentStatus
+  {
+    Permanent,
+    FixedTerm,
+    Contract
+  }
 
-        [Required]
-        public Title Title { get; set; }
+  public class Employee
+  {
+    [Required]
+    public string EmployeeId { get; set; } = string.Empty;
 
-        [Required]
-        public string Name { get; set; } = string.Empty;
+    [Required]
+    public Title Title { get; set; }
 
-        [Required]
-        public string Surname { get; set; } = string.Empty;
+    [Required]
+    public string Name { get; set; } = string.Empty;
 
-        [StringLength(13)]
-        public string? IdNumber { get; set; } = string.Empty;
+    [Required]
+    public string Surname { get; set; } = string.Empty;
 
-        public string? PassportNumber { get; set; } = string.Empty;
+    [StringLength(13)]
+    public string? IdNumber { get; set; } = string.Empty;
 
-        public string Nationality { get; set; } = string.Empty;
+    public string? PassportNumber { get; set; } = string.Empty;
 
-        [Required]
-        public Gender Gender { get; set; }
+    public string Nationality { get; set; } = string.Empty;
 
-        [Required]
-        [StringLength(10)]
-        public string ContactNumber { get; set; } = string.Empty;
+    [Required]
+    public Gender Gender { get; set; }
 
-        [Required]
-        [StringLength(10)]
-        public string TaxNumber { get; set; } = string.Empty;
+    [Required]
+    [StringLength(10)]
+    public string ContactNumber { get; set; } = string.Empty;
 
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; } = string.Empty;
+    [Required]
+    [StringLength(10)]
+    public string TaxNumber { get; set; } = string.Empty;
 
-        [Required]
-        public string PhysicalAddress { get; set; } = string.Empty;
+    [Required]
+    [EmailAddress]
+    public string Email { get; set; } = string.Empty;
 
-        [Required]
-        public string City { get; set; } = string.Empty;
+    [Required]
+    public string PhysicalAddress { get; set; } = string.Empty;
 
-        [Required]
-        public string ZipCode { get; set; } = string.Empty;
+    [Required]
+    public string City { get; set; } = string.Empty;
 
-        public bool HasDisability { get; set; }
-        public string? DisabilityDescription { get; set; }
+    [Required]
+    public string ZipCode { get; set; } = string.Empty;
 
-        public DateOnly DateOfBirth { get; set; }
+    public bool HasDisability { get; set; }
+    public string? DisabilityDescription { get; set; }
 
-        [Required]
-        public DateOnly StartDate { get; set; }
+    public DateOnly DateOfBirth { get; set; }
 
-        [Required]
-        public Branch Branch { get; set; }
+    [Required]
+    public DateOnly StartDate { get; set; }
 
-        [Required]
-        [Column(TypeName = "decimal(18,2)")]
-        public decimal MonthlySalary { get; set; }
+    [Required]
+    public Branch Branch { get; set; }
 
-        [Required]
-        public int PositionId { get; set; }
+    [Required]
+    [Column(TypeName = "decimal(18,2)")]
+    public decimal MonthlySalary { get; set; }
 
-        public Position? Position { get; set; }
+    [Required]
+    public int PositionId { get; set; }
 
-        [Required]
-        public EmploymentStatus EmploymentStatus { get; set; }
+    public Position? Position { get; set; }
 
-        public string? CareerManagerID { get; set; }
+    [Required]
+    public EmploymentStatus EmploymentStatus { get; set; }
 
-        [ForeignKey(nameof(CareerManagerID))]
-        public Employee? CareerManager { get; set; }
+    public string? CareerManagerID { get; set; }
 
-        [Required]
-        public string? ProfileImage { get; set; } = string.Empty;
+    [ForeignKey(nameof(CareerManagerID))]
+    public Employee? CareerManager { get; set; }
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    [Required]
+    public string? ProfileImage { get; set; } = string.Empty;
 
-        public ICollection<Employee>? Subordinates { get; set; }
+    public int? PensionOptionId { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public bool IsActive { get; set; } = true;
 
-        // FROM YOUR MPHO
-        public ICollection<EmployeeLeaveBalance> LeaveBalances { get; set; }
-            = new List<EmployeeLeaveBalance>();
+    public ICollection<Employee>? Subordinates { get; set; }
 
-        public ICollection<LeaveApplication> LeaveApplications { get; set; }
-            = new List<LeaveApplication>();
+    
+    public ICollection<EmployeeLeaveBalance> LeaveBalances { get; set; }
+        = new List<EmployeeLeaveBalance>();
 
-        public ICollection<EmployeeAccrualRateHistory> AccrualRateHistory { get; set; }
-            = new List<EmployeeAccrualRateHistory>();
+    public ICollection<LeaveApplication> LeaveApplications { get; set; }
+        = new List<LeaveApplication>();
 
-        public ICollection<AnnualLeaveAccrualHistory> AnnualLeaveAccrualHistories { get; set; }
-            = new List<AnnualLeaveAccrualHistory>();
+    public ICollection<EmployeeAccrualRateHistory> AccrualRateHistory { get; set; }
+        = new List<EmployeeAccrualRateHistory>();
+
+    public ICollection<AnnualLeaveAccrualHistory> AnnualLeaveAccrualHistories { get; set; }
+        = new List<AnnualLeaveAccrualHistory>();
+ 
+    public ICollection<EmployeePensionEnrollment> EmployeePensionEnrollment { get; set; } = [];
+        public PensionOption? PensionOption { get; set; }
+        public ICollection<PensionFund>? PensionFunds { get; set; }             // navigation
+
     }
 }

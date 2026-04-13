@@ -72,11 +72,6 @@ namespace HRConnect.Api.Services
     public async Task<List<EmployeeDto>> GetAllEmployeesAsync()
     {
       var employees = await _employeeRepo.GetAllEmployeesAsync();
-      // Mpho Mosia - Recalculate leave balances for all employees before returning the list
-      foreach (var emp in employees)
-      {
-        await _leaveBalanceService.RecalculateAnnualLeaveAsync(emp.EmployeeId);
-      }
 
       await _leaveProcessingService.RecalculateAllSickLeaveAsync();
       await _leaveProcessingService.RecalculateAllFamilyResponsibilityLeaveAsync();
@@ -91,10 +86,8 @@ namespace HRConnect.Api.Services
     public async Task<EmployeeDto?> GetEmployeeByIdAsync(string employeeId)
     {
 
-      // Mpho Mosia - Recalculate leave balances for the employee before returning the data
+      //Recalculate leave balances for the employee before returning the data
       await _leaveBalanceService.RecalculateAnnualLeaveAsync(employeeId);
-      await _leaveProcessingService.RecalculateAllSickLeaveAsync();
-      await _leaveProcessingService.RecalculateAllFamilyResponsibilityLeaveAsync();
 
       var employee = await _employeeRepo.GetEmployeeByIdAsync(employeeId);
       return employee?.ToEmployeeDto();
@@ -141,7 +134,7 @@ namespace HRConnect.Api.Services
       {
         var createdEmployee = await _employeeRepo.CreateEmployeeAsync(new_employee);
         await EnsureUserRecordAsync(createdEmployee);
-        // Initialize leave balances for the new employee -> Mpho Mosia
+        // Initialize leave balances for the new employee.
         await _leaveBalanceService.InitializeEmployeeLeaveBalancesAsync(createdEmployee.EmployeeId);
         await _leaveBalanceService.RecalculateAnnualLeaveAsync(createdEmployee.EmployeeId);
         // Send welcome email notification
@@ -174,7 +167,7 @@ namespace HRConnect.Api.Services
       ValidateUpdate(employeeDto);
       await CheckDuplicateOnUpdate(employeeId, employeeDto);
       ValidateTitleAndGender(employeeDto);
-      ValidateTitleAndGender(employeeDto);
+      ExtractIdInfo(employeeDto);
 
       var positionChanged = existingEmployee.PositionId != employeeDto.PositionId;
 
@@ -191,6 +184,9 @@ namespace HRConnect.Api.Services
       existingEmployee.Name = employeeDto.Name;
       existingEmployee.Surname = employeeDto.Surname;
       existingEmployee.ContactNumber = employeeDto.ContactNumber;
+      existingEmployee.IdNumber = employeeDto.IdNumber;
+      existingEmployee.PassportNumber = employeeDto.PassportNumber;
+      existingEmployee.DateOfBirth = employeeDto.DateOfBirth;
       existingEmployee.Email = employeeDto.Email;
       existingEmployee.City = employeeDto.City;
       existingEmployee.ZipCode = employeeDto.ZipCode;
@@ -198,10 +194,12 @@ namespace HRConnect.Api.Services
       existingEmployee.PositionId = employeeDto.PositionId;
       existingEmployee.MonthlySalary = employeeDto.MonthlySalary;
       existingEmployee.CareerManagerID = employeeDto.CareerManagerID;
+      existingEmployee.EmploymentStatus = employeeDto.EmploymentStatus;
       existingEmployee.ProfileImage = employeeDto.ProfileImage;
       existingEmployee.HasDisability = employeeDto.HasDisability;
       existingEmployee.DisabilityDescription = employeeDto.DisabilityDescription;
       existingEmployee.UpdatedAt = DateTime.UtcNow;
+      existingEmployee.IsActive = employeeDto.IsActive;
 
       var updatedEmployee = await _employeeRepo.UpdateEmployeeAsync(existingEmployee);
       if (updatedEmployee != null)
@@ -214,7 +212,7 @@ namespace HRConnect.Api.Services
       {
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
-        // 🔥 GET CURRENT ACTIVE SEGMENT
+        // GET CURRENT ACTIVE SEGMENT
         var currentSegment = await _context.EmployeeAccrualRateHistories
             .Where(x => x.EmployeeId == employeeId && x.EffectiveTo == null)
             .FirstOrDefaultAsync();
@@ -231,29 +229,31 @@ namespace HRConnect.Api.Services
           }
         }
 
-        // 🔥 LOAD FULL EMPLOYEE WITH POSITION + JOBGRADE
+        // LOAD FULL EMPLOYEE WITH POSITION + JOBGRADE
         var fullEmployee = await _context.Employees
             .Include(e => e.Position)
                 .ThenInclude(p => p.JobGrade)
             .FirstAsync(e => e.EmployeeId == employeeId);
 
-        // 🔥 GET ANNUAL LEAVE TYPE
+        // GET ANNUAL LEAVE TYPE
         var annualLeave = await _context.LeaveTypes
             .FirstAsync(l => l.Code == "AL" && l.IsActive);
 
-        // 🔥 CALCULATE YEARS OF SERVICE
+        // CALCULATE YEARS OF SERVICE
         var yearsOfService = CalculateYearsOfService(fullEmployee.StartDate);
 
-        // 🔥 GET ENTITLEMENT RULE
+        //GET ENTITLEMENT RULE
         var newRule = await _context.LeaveEntitlementRules
-            .FirstAsync(r =>
-                r.LeaveTypeId == annualLeave.Id &&
-                r.JobGradeId == fullEmployee.Position.JobGradeId &&
-                r.MinYearsService <= yearsOfService &&
-                (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
-                r.IsActive);
+     .Where(r =>
+         r.LeaveTypeId == annualLeave.Id &&
+         r.JobGradeId == fullEmployee.Position.JobGradeId &&
+         r.MinYearsService <= yearsOfService &&
+         (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
+         r.IsActive)
+     .OrderByDescending(r => r.MinYearsService)
+     .FirstAsync();
 
-        // 🔥 INSERT NEW ACCRUAL HISTORY RECORD
+        // INSERT NEW ACCRUAL HISTORY RECORD
         await _context.EmployeeAccrualRateHistories.AddAsync(
             new EmployeeAccrualRateHistory
             {
@@ -267,16 +267,18 @@ namespace HRConnect.Api.Services
               CreatedDate = DateTime.UtcNow
             });
 
-        await _context.SaveChangesAsync(); // 🔥 IMPORTANT
+        await _context.SaveChangesAsync(); // IMPORTANT
 
         // KEEP YOUR EXISTING LOGIC
         await _leaveBalanceService.RecalculateAnnualLeaveAsync(employeeId);
         await _leaveProcessingService.RecalculateAllSickLeaveAsync();
         await _leaveProcessingService.RecalculateAllFamilyResponsibilityLeaveAsync();
 
-        var employeeWithBalances = await _employeeRepo.GetEmployeeByIdAsync(employeeId);
-
-        var annualBalance = employeeWithBalances?.LeaveBalances
+        var employeeWithBalances = await _context.Employees
+            .Include(e => e.LeaveBalances)
+            .ThenInclude(lb => lb.LeaveType)
+            .FirstAsync(e => e.EmployeeId == employeeId);
+            var annualBalance = employeeWithBalances?.LeaveBalances
             ?.FirstOrDefault(lb => lb.LeaveType.Code == "AL");
 
         try
@@ -425,13 +427,13 @@ namespace HRConnect.Api.Services
     /// </summary>
     /// <param name="employeeRequestDto">The employee creation request DTO</param>
     /// <returns>Validation error if ID information is invalid</returns>
-    private static void ExtractIdInfo(CreateEmployeeRequestDto employeeRequestDto)
+    private static void ExtractIdInfo(EmployeeBaseRequestDto employeeRequestDto)
     {
       if (string.IsNullOrWhiteSpace(employeeRequestDto.IdNumber)) return;
 
       var employeeInfo = IdNumberValidator.ParseIdNumber(employeeRequestDto.IdNumber);
 
-      EnsureEmployeeMeetsAgePolicy(employeeInfo.DateOfBirth, employeeRequestDto.EmploymentStatus);
+      //EnsureEmployeeMeetsAgePolicy(employeeInfo.DateOfBirth, employeeRequestDto.EmploymentStatus);
 
       employeeRequestDto.Gender = employeeInfo.Gender;
       employeeRequestDto.DateOfBirth = employeeInfo.DateOfBirth;
@@ -517,7 +519,7 @@ namespace HRConnect.Api.Services
         EmployeeValidationHelpers.ValidateGender(employeeRequestDto.Gender);
       }
     }
-    // <summary>
+    /// <summary>
     /// Performs additional validation rules specific to employee updates.
     /// </summary>
     /// <param name="employeeRequestDto">The employee update request DTO</param>
