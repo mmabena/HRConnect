@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
+import { resolveRole } from "../../utils/roleUtils";
+import api from "../../api/api";
 
 const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   const [reportOpen, setReportOpen] = useState(false);
@@ -34,12 +36,12 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // FIX: Access the role directly from the currentUser object
-  const role = currentUser?.role?.toLowerCase();
+ const resolvedRole=resolveRole(currentUser);
+ const role=resolveRole.key??currentUser?.role?.toLowerCase();
 
   const permissions = {
-    isAdmin: ["admin", "superuser"].includes(role),
-    isNormalUser: role === "normaluser"
+    isAdmin:resolvedRole.isSuperUser || role==="admin",
+    isNormalUser:resolvedRole.isNormalUser,
   };
 
   const isEmployeeManagementPage =
@@ -49,11 +51,12 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
 
   const isUserManagementPage = location.pathname.startsWith("/userManagement");
 
-  const baseUrl = process.env.REACT_APP_API_BASE_URL;
+  const baseUrl =api.defaults.baseURL;// process.env.REACT_APP_API_BASE_URL;
 
   useEffect(() => {
     console.log("MenuBar user role:", role);
-  }, [currentUser, role]);
+    console.log(`BASE_URL ${baseUrl}`);
+  }, [baseUrl, role]);
 
   useEffect(() => {
     if (!role) return;
@@ -648,7 +651,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
               {displayName}
             </div>
             <div className="user-job-title">
-              {currentUser?.jobTitle}
+              {currentUser?.role}
             </div>
           </div>
         </div>

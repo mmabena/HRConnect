@@ -61,16 +61,20 @@ function App() {
         });
 
         const employee = empResp.data;
+        const resolvedRole=resolveRole(parsedUser?.User||parsedUser);
 
         const mergedUser = {
           ...parsedUser,
+          role:resolveRole.roleName||parsedUser?.role,
+          roleId:resolvedRole.roleId,
           username: `${employee.name} ${employee.surname}`,
           jobTitle: employee.positionTitle,
           employmentStatus: employee.employmentStatus,
           dateOfBirth: employee.dateOfBirth,
           profileImage: employee.profileImage,
         };
-
+        //Store the current employee in the localStorage 
+        localStorage.setItem("currentEmployee",JSON.stringify(employee));
         setCurrentUser(mergedUser);
         localStorage.setItem("currentUser", JSON.stringify(mergedUser));
       } catch (error) {
@@ -115,8 +119,12 @@ function App() {
         console.warn("Employee endpoint not accessible for this role");
       }
 
+      const resolvedRole=resolveRole(backendUserData);
+
       const mergedUser = {
         ...backendUserData,
+        role:resolvedRole.roleName||backendUserData.role,
+        roleId:resolvedRole.roleId,
         username: employee
           ? `${employee.name} ${employee.surname}`
           : backendUserData.email,

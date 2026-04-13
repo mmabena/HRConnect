@@ -36,8 +36,8 @@ const ActionsModal = ({ isOpen, onClose, user, onSuccess }) => {
   // When user changes, set role and status explicitly as numbers
   useEffect(() => {
     if (user) {
-      const normalizedRoles = resolveRole(user);
-      setSelectedRole(normalizedRoles.roleId != null ? normalizedRoles.roleId : "",);
+     const normalizedUserRole = resolveRole(user);
+      setSelectedRole(normalizedUserRole.roleId != null ? normalizedUserRole.roleId : "",);
       // Backend expects 0 or 1 exactly; coerce here safely
       setShowDropdowns(false);
     }

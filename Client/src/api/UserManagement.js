@@ -21,6 +21,7 @@ export const fetchRoles = async () => {
   if (!response.ok) {
     throw new Error(`Failed to fetch roles: ${response.status}`)
   }
+
   return await response.json();
 };
 
@@ -30,7 +31,7 @@ export const fetchUsersAndRoles = async () => {
   try {
     const [usersResponse, rolesResponse] = await Promise.all([
       fetch(`${BASE_URL}/user`, { headers }),
-      fetch(`${BASE_URL}/roles`, { headers }),
+      fetch(`${BASE_URL}/user/roles`, { headers }),
     ]);
 
     if (!usersResponse.ok) {
