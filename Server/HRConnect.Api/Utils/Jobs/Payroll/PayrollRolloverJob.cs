@@ -6,6 +6,7 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
   using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Models.PayrollDeduction;
   using HRConnect.Api.Models.Pension;
+  using Microsoft.Extensions.DependencyInjection;
   using HRConnect.Api.Services;
 
   /// <summary>
@@ -76,6 +77,14 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
       newPeriod.Runs.Add(newPayrun);
 
       _ = await _payrollRunRepo.CreatePayrollRunAsync(newPayrun);
+
+      using (var scope = _serviceProvider.CreateScope())
+      {
+        var allocationService = scope.ServiceProvider
+            .GetRequiredService<ICompanyContributionAllocationService>();
+
+        await allocationService.AllocateAsync(newPayrun.PayrollRunId);
+      }
       return newPeriod;
     }
 
@@ -93,6 +102,16 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
 
       payrollPeriod.Runs.Add(newRun);
       await _payrollRunRepo.CreatePayrollRunAsync(newRun);
+
+      using (var scope = _serviceProvider.CreateScope())
+      {
+        var allocationService = scope.ServiceProvider
+            .GetRequiredService<ICompanyContributionAllocationService>();
+
+        await allocationService.AllocateAsync(newRun.PayrollRunId);
+      }
+
+
     }
 
     public async Task Execute(IJobExecutionContext context)
