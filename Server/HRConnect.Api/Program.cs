@@ -1,3 +1,4 @@
+
 using System.Text;
 using Audit.Core;
 using Audit.EntityFramework;
@@ -225,8 +226,6 @@ builder.Services.AddScoped<ICompanyContributionAllocationService, CompanyContrib
 builder.Services.AddScoped<ICompanyContributionRepository, CompanyContributionRepository>();
 builder.Services.AddScoped<ICompanyContributionService, CompanyContributionService>();
 builder.Services.AddScoped<IJobGradeRepository, JobGradeRepository>();
-builder.Services.AddScoped<IJobGradeService, JobGradeService>();
-// builder.Services.AddScoped<ILeaveTypeManagementRepository, LeaveTypeManagementRepository>();
 builder.Services.AddScoped<IOccupationalLevelRepository, OccupationalLevelRepository>();
 builder.Services.AddScoped<IOccupationalLevelService, OccupationalLevelService>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.Services.AuthService>();
@@ -236,7 +235,11 @@ builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<ILeaveBalanceService, LeaveBalanceService>();
 builder.Services.AddScoped<ILeaveProcessingService, LeaveProcessingService>();
 builder.Services.AddScoped<ILeaveRuleService, LeaveRuleService>();
+builder.Services.AddScoped<IPensionFundService, PensionFundService>();
+builder.Services.AddScoped<IEmployeePensionRepository, EmployeePensionRepository>();
+builder.Services.AddScoped<IPensionFundService, PensionFundService>();
 
+builder.Services.AddScoped<IPensionFundRepository, PensionFundRepository>();
 builder.Services.AddScoped<ILeaveTypeManagementService, LeaveTypeManagementService>();
 builder.Services.AddScoped<ILeaveApplicationService, LeaveApplicationService>();
 
@@ -311,3 +314,4 @@ app.UseAuthorization();
 app.UseMiddleware<ExceptionMiddleware>();
 app.MapControllers();
 app.Run();
+

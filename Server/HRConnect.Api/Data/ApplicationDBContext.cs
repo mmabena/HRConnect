@@ -10,6 +10,7 @@ namespace HRConnect.Api.Data
   using AppAny.Quartz.EntityFrameworkCore.Migrations.SqlServer;
   public class ApplicationDBContext(DbContextOptions dbContextOptions) : DbContext(dbContextOptions)
   {
+
     public DbSet<User> Users { get; set; }
     public DbSet<Employee> Employees { get; set; }
     public DbSet<Position> Positions { get; set; }
@@ -28,8 +29,9 @@ namespace HRConnect.Api.Data
     public DbSet<PayrollPeriod> PayrollPeriods { get; set; }
     public DbSet<PayrollRun> PayrollRuns { get; set; }
     public DbSet<PayrollRecord> PayrollRecords { get; set; }
-    // LEAVE SYSTEM
-    public DbSet<LeaveType> LeaveTypes { get; set; }
+    public DbSet<PensionFund> PensionFunds { get; set; }
+        // LEAVE SYSTEM
+        public DbSet<LeaveType> LeaveTypes { get; set; }
     public DbSet<LeaveEntitlementRule> LeaveEntitlementRules { get; set; }
     public DbSet<EmployeeLeaveBalance> EmployeeLeaveBalances { get; set; }
     public DbSet<LeaveApplication> LeaveApplications { get; set; }
@@ -53,10 +55,31 @@ namespace HRConnect.Api.Data
 
       // ================= MAIN CONFIG =================
       modelBuilder.Entity<Employee>()
+          .HasOne(e => e.PensionOption)
+          .WithMany(po => po.Employees)
+          .HasForeignKey(e => e.PensionOptionId)
+          .OnDelete(DeleteBehavior.Restrict);
+
+            // PensionFund -> Employee
+            modelBuilder.Entity<PensionFund>()
+                .HasOne(pf => pf.Employee)
+                .WithMany(e => e.PensionFunds)
+                .HasForeignKey(pf => pf.EmployeeId)
+                .OnDelete(DeleteBehavior.Restrict);
+            // Employee -> PensionOption relationship
+            modelBuilder.Entity<Employee>()
+                .HasOne(e => e.PensionOption)
+                .WithMany(po => po.Employees)
+                .HasForeignKey(e => e.PensionOptionId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Employee -> Position
+            modelBuilder.Entity<Employee>()
           .HasOne(e => e.Position)
           .WithMany(p => p.Employees)
           .HasForeignKey(e => e.PositionId);
 
+      // Employee -> CareerManager
       modelBuilder.Entity<Employee>()
           .HasOne(e => e.CareerManager)
           .WithMany(e => e.Subordinates)
@@ -175,14 +198,16 @@ namespace HRConnect.Api.Data
         entity.Property(e => e.EffectiveTo);
       });
 
-      // StatutoryContributionType with default contribution percentages mandated by law
+      // StatutoryContributionType defaults
       modelBuilder.Entity<StatutoryContributionType>().Property(e => e.EmployeeRate)
         .HasColumnType("decimal(18,4)")
         .HasDefaultValue(0.01m);
 
       modelBuilder.Entity<StatutoryContributionType>().Property(e => e.EmployerRate)
-        .HasColumnType("decimal(18,4)")
-        .HasDefaultValue(0.01m);
+          .HasColumnType("decimal(18,4)")
+          .HasDefaultValue(0.01m);
+
+      // Payroll relationships
 
       modelBuilder.Entity<PayrollPeriod>().HasMany(p => p.Runs)
       .WithOne(r => r.Period)
@@ -226,7 +251,7 @@ namespace HRConnect.Api.Data
         .OnDelete(DeleteBehavior.NoAction);
 
       modelBuilder.Entity<PensionOption>()
-        .HasMany(e => e.Employee)
+        .HasMany(e => e.Employees)
         .WithOne(po => po.PensionOption)
         .HasForeignKey(po => po.PensionOptionId)
         .OnDelete(DeleteBehavior.SetNull);
@@ -280,6 +305,7 @@ namespace HRConnect.Api.Data
           throw new InvalidOperationException("Record/Run under Hard Lock. Cannot be modified");
         }
       }
+
       return await base.SaveChangesAsync(cancellationToken);
     }
   }
