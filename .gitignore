@@ -162,3 +162,5 @@ GeneratedClients/
 
 !trusted-dev-cert.pfx
 /Server/.todo/tasks.json
+Client/package-lock.json
+package-lock.json
