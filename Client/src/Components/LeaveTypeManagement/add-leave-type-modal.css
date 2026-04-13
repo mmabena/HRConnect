@@ -157,3 +157,10 @@ position: relative; /* for absolute positioning of errors */
   left: 43px;
   
 }
+.modal-dropdown {
+  border: none;
+  border-bottom: 2px solid #355867;
+  padding: 8px;
+  outline: none;
+  background: transparent;
+}

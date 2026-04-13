@@ -33,3 +33,40 @@ export const createLeaveType = async (data) => {
     throw error;
   }
 };
+// UPDATE LEAVE TYPE (non-annual)
+export const updateLeaveType = async (id, data) => {
+  try {
+    const response = await axios.put(`${BASE_URL}/${id}`, data, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "application/json"
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating leave type:", error);
+    throw error;
+  }
+};
+
+// UPDATE RULE (annual leave)
+export const updateLeaveRule = async (ruleId, newDays) => {
+  try {
+    const response = await axios.put(
+      `http://localhost:5147/api/leave-rules/${ruleId}`,
+      {
+        ruleId,
+        newDaysAllocated: newDays
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating rule:", error);
+    throw error;
+  }
+};

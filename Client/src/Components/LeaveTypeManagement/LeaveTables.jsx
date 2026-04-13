@@ -4,12 +4,15 @@ import "./leave-tables.css";
 import "../../Components/MenuBar/MenuBar.css";
 import NavBar from "../NavBar";
 import AddLeaveTypeModal from "./AddLeaveTypeModal";
+import EditLeaveTypeModal from "./EditLeaveTypeModal";
 
 
 const LeaveTables = () => {
   const [active, setActive] = useState([]);
   const [inactive, setInactive] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
+  const [selectedLeaveId, setSelectedLeaveId] = useState("");
 
   const splitData = (data) => {
     setActive(data.filter(x => x.isActive));
@@ -92,7 +95,12 @@ useEffect(() => {
 
                 <td className="lt-actions">
                   <span>View</span>
-                  <span>Edit</span>
+                  <span onClick={() => {
+                    setSelectedLeaveId(item.id);
+                    setShowEdit(true);
+                  }}>
+                    Edit
+                  </span>
                 </td>
               </tr>
             ))}
@@ -139,8 +147,17 @@ useEffect(() => {
   isOpen={showModal}
   onClose={() => setShowModal(false)}
   onSuccess={fetchData}
-/>
+  />
+  
+  <EditLeaveTypeModal
+  isOpen={showEdit}
+  onClose={() => setShowEdit(false)}
+  leaveTypes={[...active, ...inactive]}
+  selectedId={selectedLeaveId}   
+  onSuccess={fetchData}
+  />
     </div>
+    
   );
 };
 export default LeaveTables;
