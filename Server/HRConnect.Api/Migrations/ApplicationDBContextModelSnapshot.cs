@@ -1335,7 +1335,7 @@ namespace HRConnect.Api.Migrations
 
                     b.Property<string>("EmployeeId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<bool>("IsLocked")
                         .IsConcurrencyToken()
@@ -1346,7 +1346,8 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PayrollRunId");
+                    b.HasIndex("PayrollRunId", "EmployeeId")
+                        .IsUnique();
 
                     b.ToTable((string)null);
 

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRConnect.Api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20260409173236_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260413110947_CleanPayrollFix")]
+    partial class CleanPayrollFix
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1338,7 +1338,7 @@ namespace HRConnect.Api.Migrations
 
                     b.Property<string>("EmployeeId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<bool>("IsLocked")
                         .IsConcurrencyToken()
@@ -1349,7 +1349,8 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PayrollRunId");
+                    b.HasIndex("PayrollRunId", "EmployeeId")
+                        .IsUnique();
 
                     b.ToTable((string)null);
 

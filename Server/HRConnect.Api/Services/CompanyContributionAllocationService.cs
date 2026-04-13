@@ -34,7 +34,7 @@ namespace HRConnect.Api.Services
             var existingEmployeeIds = await _context.EmployeeCompanyContributions
                 .Where(e => e.PayrollRunId == payrollRunId)
                 .Select(e => e.EmployeeId)
-                .ToListAsync();
+                .ToHashSetAsync();
 
 
             var contributions = await _context.CompanyContributions
@@ -43,7 +43,7 @@ namespace HRConnect.Api.Services
 
             var death = contributions.FirstOrDefault(c => c.Code == "DEATHBEN");
             var disability = contributions.FirstOrDefault(c => c.Code == "DISABILITY");
-            
+
             var today = DateOnly.FromDateTime(DateTime.Today);
 
             var employees = await _context.Employees
@@ -51,7 +51,7 @@ namespace HRConnect.Api.Services
                 .ToListAsync();
 
             var payrollRecords = new List<PayrollRecord>();
-            var newRecords  = new List<EmployeeCompanyContribution>();
+            var newRecords = new List<EmployeeCompanyContribution>();
 
             foreach (var emp in employees)
             {
@@ -94,8 +94,9 @@ namespace HRConnect.Api.Services
             }
 
             if (newRecords.Count > 0)
-            await _CompanyContributionRepo.AddRangeAsync(newRecords);
-
+            {
+                await _CompanyContributionRepo.AddRangeAsync(newRecords);  
+            }
             return payrollRecords;
         }
     }
