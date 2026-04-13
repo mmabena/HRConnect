@@ -214,8 +214,8 @@ builder.Services.AddScoped<IJobGradeService, JobGradeService>();
 builder.Services.AddScoped<IOccupationalLevelRepository, OccupationalLevelRepository>();
 builder.Services.AddScoped<IOccupationalLevelService, OccupationalLevelService>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.Services.AuthService>();
-builder.Services.AddScoped<IBankingDetailsRepository, BankingDetailsRepository>();
-builder.Services.AddScoped<IBankingDetailsService, BankingDetailsService>();
+builder.Services.AddScoped<IBankingDetailRepository, BankingDetailRepository>();
+builder.Services.AddScoped<IBankingDetailService, BankingDetailService>();
 
 // Mpho Mosia - Leave Services 
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();

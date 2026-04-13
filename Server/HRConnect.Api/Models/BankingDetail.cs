@@ -19,17 +19,25 @@ namespace HRConnect.Api.Models
         Nedbank,
         StandardBank,
 
-
     }
-    public class BankingDetails
+
+    public enum AccountType
+    {
+        Savings,
+        Current,
+        Business
+    }
+    public class BankingDetail
     {
         [Key]
         public int BankingDetailsId { get; set; }
-       
-       public int TempEmployeeId { get; set; } 
-        [Required]
-        public string Name { get; set; } = string.Empty;
 
+        public string EmployeeId { get; set; }
+
+        public Employee Employee { get; set; } = null!;
+       
+       [Required]
+        public string Name { get; set; } = string.Empty;
         [Required]
         public string Surname { get; set; } = string.Empty;
 
@@ -40,11 +48,13 @@ namespace HRConnect.Api.Models
         public string? PassportNumber { get; set; } = string.Empty;
 
         [Required]
-        public string BankName { get; set; } = string.Empty;
+        public BankName BankName { get; set; } 
         [Required]
         public string AccountNumber { get; set; } = string.Empty;
+
+        public AccountType AccountType { get; set; } 
         public string BranchCode { get; set; } = string.Empty;
-        public decimal? NetSalry { get; set; }
+        public decimal? NetSalary { get; set; }
         public bool IsActive { get; set; }
          public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;

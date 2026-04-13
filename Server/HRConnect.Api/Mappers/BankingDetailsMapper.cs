@@ -1,37 +1,55 @@
 namespace HRConnect.Api.Mappers
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
     using HRConnect.Api.DTOs.BankingDetails;
     using HRConnect.Api.Models;
 
     public static class BankingDetailsMapper
     {
-        public static BankingDetails ToBankingDetails(this CreateBankingDetailsDto createBankingDetailsDto)
+        // CREATE → ENTITY
+        public static BankingDetail ToBankingDetails(this CreateBankingDetailDto dto)
         {
-            return new BankingDetails
+            return new BankingDetail
             {
-                BankName = createBankingDetailsDto.BankName,
-                AccountNumber = createBankingDetailsDto.AccountNumber,
-                BranchCode = createBankingDetailsDto.BranchCode,
-                IsActive = true, // Set default value for IsActive
-                CreatedAt = DateTime.UtcNow
+                Name = dto.Name,
+                Surname = dto.Surname,
+                IdNumber = dto.IdNumber,
+                PassportNumber = dto.PassportNumber,
+
+                BankName = dto.BankName,
+                AccountType = dto.AccountType,
+
+                AccountNumber = dto.AccountNumber,
+                BranchCode = dto.BranchCode,
+
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
             };
         }
 
-        public static BankingDetailsDto ToBankingDetailsDto(this BankingDetails bankingDetails)
+        // ENTITY → DTO
+        public static BankingDetailDto ToBankingDetailDto(this BankingDetail entity)
         {
-            return new BankingDetailsDto
+            return new BankingDetailDto
             {
-                BankingDetailsId = bankingDetails.BankingDetailsId,
-                BankName = bankingDetails.BankName,
-                AccountNumber = bankingDetails.AccountNumber,
-                BranchCode = bankingDetails.BranchCode,
-                CreatedAt = bankingDetails.CreatedAt,
-                UpdatedAt = bankingDetails.UpdatedAt,
-                IsActive = bankingDetails.IsActive
+                BankingDetailsId = entity.BankingDetailsId,
+                Name = entity.Name,
+                Surname = entity.Surname,
+                IdNumber = entity.IdNumber,
+                PassportNumber = entity.PassportNumber,
+
+                BankName = entity.BankName,
+                AccountType = entity.AccountType,
+
+                AccountNumber = entity.AccountNumber,
+                BranchCode = entity.BranchCode,
+
+                NetSalary = entity.NetSalary,
+                IsActive = entity.IsActive,
+
+                CreatedAt = entity.CreatedAt,
+                UpdatedAt = entity.UpdatedAt
             };
         }
     }

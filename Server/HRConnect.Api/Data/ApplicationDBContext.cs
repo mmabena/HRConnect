@@ -11,6 +11,7 @@ namespace HRConnect.Api.Data
   {
     public DbSet<User> Users { get; set; }
     public DbSet<Employee> Employees { get; set; }
+    public DbSet<BankingDetail> BankingDetails { get; set; }
     public DbSet<Position> Positions { get; set; }
     public DbSet<JobGrade> JobGrades { get; set; }
     public DbSet<OccupationalLevel> OccupationalLevels { get; set; }
@@ -59,6 +60,12 @@ namespace HRConnect.Api.Data
           .WithMany(e => e.Subordinates)
           .HasForeignKey(e => e.CareerManagerID)
           .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<Employee>()
+        .HasOne(e => e.BankingDetail)
+        .WithOne(b => b.Employee)
+        .HasForeignKey<BankingDetail>(b => b.EmployeeId)
+        .OnDelete(DeleteBehavior.Cascade);
 
       modelBuilder.Entity<Position>()
           .HasOne(p => p.OccupationalLevels)
