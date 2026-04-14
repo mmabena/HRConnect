@@ -21,7 +21,7 @@ namespace HRConnect.Api.Models.PayrollDeduction
     public int TaxYear { get; set; }
 
     [Column(TypeName = "decimal(18,2)")]
-    public decimal PensionableSalary { get; set; }
+    public decimal MonthlySalary { get; set; }
 
     public int MedicalAidMembers { get; set; }
     public int MedicalAidDependants { get; set; }

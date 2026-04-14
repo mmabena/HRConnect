@@ -87,9 +87,6 @@ namespace HRConnect.Api.Services
       }
       else
       {
-        // High-earner fallback calculation
-        // [45% x (actual monthly remuneration - R156,328)] + age-specific base
-        decimal monthlyRemuneration = remuneration / 12;
 
         decimal baseAmount = age switch
         {
@@ -98,7 +95,7 @@ namespace HRConnect.Api.Services
           _ => 53432m
         };
 
-        decimal excess = Math.Max(0, monthlyRemuneration - 156_328m / 12); // Monthly threshold
+        decimal excess = Math.Max(0, remuneration - 156_328m / 12);
         decimal tax = baseAmount + (0.45m * excess);
 
         // Disregard cents (round down)
@@ -164,22 +161,30 @@ namespace HRConnect.Api.Services
 
       var employee = await _repository.GetEmployeeByEmailAsync(email);
       if (employee == null)
+      {
         throw new KeyNotFoundException("Employee not found");
+      }
 
       var payrollRun = await _repository.GetActivePayrollRunAsync();
       if (payrollRun == null)
+      {
         throw new KeyNotFoundException("No active payroll run");
+      }
 
-      var existing = await _repository.GetExistingFinalTaxAsync(
-          employee.EmployeeId,
-          payrollRun.PayrollRunId);
+      var existing = await _repository.GetExistingFinalTaxAsync( employee.EmployeeId,
+        payrollRun.PayrollRunId);
+          
 
       if (existing?.IsLocked == true)
+      {
         throw new InvalidOperationException("Payroll is locked");
+      }
 
       var pension = await _repository.GetPensionByEmployeeIdAsync(employee.EmployeeId);
       if (pension == null)
+      {
         throw new KeyNotFoundException("Pension record not found");
+      }
 
       var today = DateOnly.FromDateTime(DateTime.Today);
 
@@ -188,27 +193,29 @@ namespace HRConnect.Api.Services
       if (employee.DateOfBirth > today.AddYears(-age))
         age--;
 
-      decimal pensionContribution =
-          pension.PensionableSalary *
-          (pension.PendsionCategoryPercentage / 100m);
+      decimal monthlySalary = employee.MonthlySalary;
 
-      decimal taxableIncome =
-          pension.PensionableSalary - pensionContribution;
+      decimal pensionContribution = pension.TotalPensionContribution;
+
+      decimal taxableIncome = monthlySalary - pensionContribution;
 
       decimal taxBeforeCredits =
           await CalculateTaxAsync(taxableIncome, age);
 
-      decimal medicalCredit =
-          (request.MedicalAidMembers * 364m) +
-          (request.MedicalAidDependants * 364m) +
-          (request.MedicalAidChildren * 246m);
+      bool hasMedicalAid = request.MedicalAidMembers > 0
+                        || request.MedicalAidDependants > 0
+                        || request.MedicalAidChildren > 0;
+
+      decimal medicalCredit = hasMedicalAid
+          ? 364m +                                                   
+            (Math.Max(0, request.MedicalAidMembers - 1) * 364m) +  
+            (request.MedicalAidDependants * 364m) +                 
+            (request.MedicalAidChildren * 246m)                     
+          : 0m;
 
       decimal finalTax = Math.Max(0, taxBeforeCredits - medicalCredit);
 
-      decimal netSalary =
-          pension.PensionableSalary
-          - pensionContribution
-          - finalTax;
+      decimal netSalary = monthlySalary - pensionContribution - finalTax;
 
       int taxYear = DateTime.Now.Year;
 
@@ -224,7 +231,8 @@ namespace HRConnect.Api.Services
 
         TaxYear = taxYear,
 
-        PensionableSalary = pension.PensionableSalary,
+        MonthlySalary = monthlySalary ,   // ✅ gross
+        TaxableIncome = taxableIncome,
         PensionContribution = pensionContribution,
 
         MedicalAidMembers = request.MedicalAidMembers,
@@ -232,7 +240,6 @@ namespace HRConnect.Api.Services
         MedicalAidChildren = request.MedicalAidChildren,
         MedicalTaxCredit = medicalCredit,
 
-        TaxableIncome = taxableIncome,
         TaxDeductionAmount = finalTax,
         NetSalary = netSalary,
 

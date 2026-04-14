@@ -158,7 +158,7 @@ namespace HRConnect.Api.Data
 
         entity.Property(e => e.TaxYear).IsRequired();
 
-        entity.Property(e => e.PensionableSalary)
+        entity.Property(e => e.MonthlySalary)
             .HasPrecision(18, 2)
             .IsRequired();
 
