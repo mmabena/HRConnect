@@ -34,7 +34,7 @@ namespace HRConnect.Api.Models.PayrollDeduction
     public decimal PensionContribution { get; set; }
 
     [Column(TypeName = "decimal(18,2)")]
-    public decimal TaxableIncome { get; set; }
+    public decimal PensionableIncome { get; set; }
 
     [Column(TypeName = "decimal(18,2)")]
     public decimal TaxDeductionAmount { get; set; }

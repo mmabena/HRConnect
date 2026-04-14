@@ -197,10 +197,10 @@ namespace HRConnect.Api.Services
 
       decimal pensionContribution = pension.TotalPensionContribution;
 
-      decimal taxableIncome = monthlySalary - pensionContribution;
+      decimal pensionableIncome = monthlySalary - pensionContribution;
 
       decimal taxBeforeCredits =
-          await CalculateTaxAsync(taxableIncome, age);
+          await CalculateTaxAsync(pensionableIncome, age);
 
       bool hasMedicalAid = request.MedicalAidMembers > 0
                         || request.MedicalAidDependants > 0
@@ -232,7 +232,7 @@ namespace HRConnect.Api.Services
         TaxYear = taxYear,
 
         MonthlySalary = monthlySalary ,   // ✅ gross
-        TaxableIncome = taxableIncome,
+        PensionableIncome = pensionableIncome,
         PensionContribution = pensionContribution,
 
         MedicalAidMembers = request.MedicalAidMembers,

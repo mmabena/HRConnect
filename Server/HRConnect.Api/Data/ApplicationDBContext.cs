@@ -174,7 +174,7 @@ namespace HRConnect.Api.Data
             .HasPrecision(18, 2)
             .IsRequired();
 
-        entity.Property(e => e.TaxableIncome)
+        entity.Property(e => e.PensionableIncome)
             .HasPrecision(18, 2)
             .IsRequired();
 

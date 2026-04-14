@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRConnect.Api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20260411164728_RemoveDuplicatePayRunId")]
-    partial class RemoveDuplicatePayRunId
+    [Migration("20260414094228_RenamingFinalTaxDeduction")]
+    partial class RenamingFinalTaxDeduction
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1621,6 +1621,10 @@ namespace HRConnect.Api.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<decimal>("MonthlySalary")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -1636,7 +1640,7 @@ namespace HRConnect.Api.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("PensionableSalary")
+                    b.Property<decimal>("PensionableIncome")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
@@ -1654,10 +1658,6 @@ namespace HRConnect.Api.Migrations
 
                     b.Property<int>("TaxYear")
                         .HasColumnType("int");
-
-                    b.Property<decimal>("TaxableIncome")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
 
                     b.ToTable("FinalTaxDeductions", (string)null);
                 });

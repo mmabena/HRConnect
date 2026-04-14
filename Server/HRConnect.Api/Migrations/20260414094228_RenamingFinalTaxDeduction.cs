@@ -5,25 +5,24 @@
 namespace HRConnect.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class RemoveDuplicatePayRunId : Migration
+    public partial class RenamingFinalTaxDeduction : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "PayRunId",
-                table: "FinalTaxDeductions");
+            migrationBuilder.RenameColumn(
+                name: "TaxableIncome",
+                table: "FinalTaxDeductions",
+                newName: "PensionableIncome");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
-                name: "PayRunId",
+            migrationBuilder.RenameColumn(
+                name: "PensionableIncome",
                 table: "FinalTaxDeductions",
-                type: "int",
-                nullable: false,
-                defaultValue: 0);
+                newName: "TaxableIncome");
         }
     }
 }

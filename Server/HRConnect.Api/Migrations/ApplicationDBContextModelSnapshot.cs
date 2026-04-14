@@ -1637,6 +1637,10 @@ namespace HRConnect.Api.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<decimal>("PensionableIncome")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("Surname")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -1651,10 +1655,6 @@ namespace HRConnect.Api.Migrations
 
                     b.Property<int>("TaxYear")
                         .HasColumnType("int");
-
-                    b.Property<decimal>("TaxableIncome")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
 
                     b.ToTable("FinalTaxDeductions", (string)null);
                 });
