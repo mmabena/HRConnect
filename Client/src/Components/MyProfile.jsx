@@ -75,7 +75,7 @@ const Profile = () => {
           ...prev,
           ...mapUserToProfileData(parsedEmployee),
         }));
-        // setProfileData(mapUserToProfileData((parsedEmployee)))
+        setProfileData(mapUserToProfileData((parsedEmployee)))
         console.log("Loaded employee data from localStorage:", parsedEmployee);
       } catch (error) {
         console.error("Error parsing currentEmployee from localStorage:", error);

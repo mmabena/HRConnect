@@ -5,8 +5,6 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
   using HRConnect.Api.Interfaces.Pension;
   using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Models.PayrollDeduction;
-  using HRConnect.Api.Models.Pension;
-  using HRConnect.Api.Services;
 
   /// <summary>
   /// Payroll Rollover Job class to handle the locking, rolling over and 
@@ -36,7 +34,7 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
     private readonly Func<DateTime> _now;
     public PayrollRolloverJob(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService, IServiceProvider serviceProvider,
       IEmployeePensionEnrollmentService employeePensionEnrollmentService,
-      IReportsService reportsService, Func<DateTime> now = null)
+      IReportsService reportsService, Func<DateTime>? now = null)
     {
       _payrollRunRepo = payrollRunRepo;
       _payrollPeriodService = payrollPeriodService;

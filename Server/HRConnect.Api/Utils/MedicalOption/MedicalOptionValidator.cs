@@ -548,7 +548,7 @@
         if (current.salaryBracketMax.HasValue && next.salaryBracketMin.HasValue ||
             !(next is null))
         {
-          if (next.salaryBracketMin <= current.salaryBracketMax.Value)
+          if (next.salaryBracketMin <= current.salaryBracketMax!.Value)
             return false;
         }
       }
@@ -678,23 +678,23 @@
       {
         // Risk + MSA should equal Total
         var adultTotal = entity.MonthlyRiskContributionAdult +
-                         entity.MonthlyMsaContributionAdult.Value;
+                         entity.MonthlyMsaContributionAdult!.Value;
         var childTotal = entity.MonthlyRiskContributionChild +
-                         entity.MonthlyMsaContributionChild.Value;
+                         entity.MonthlyMsaContributionChild!.Value;
 
-        if (Math.Abs((decimal)(adultTotal
+        if (Math.Abs((decimal)(adultTotal!
                                - entity.TotalMonthlyContributionsAdult)) > tolerance)
           return false;
 
-        if (Math.Abs((decimal)(childTotal
+        if (Math.Abs((decimal)(childTotal!
                                - entity.TotalMonthlyContributionsChild)) > tolerance)
           return false;
 
         if (hasPrincipal)
         {
-          var principalTotal = entity.MonthlyRiskContributionPrincipal.Value +
-                               entity.MonthlyMsaContributionPrincipal.Value;
-          if (Math.Abs(principalTotal - entity.TotalMonthlyContributionsPrincipal.Value) >
+          var principalTotal = entity.MonthlyRiskContributionPrincipal!.Value +
+                               entity.MonthlyMsaContributionPrincipal!.Value;
+          if (Math.Abs(principalTotal - entity.TotalMonthlyContributionsPrincipal!.Value) >
               tolerance)
             return false;
         }
@@ -702,19 +702,19 @@
       else
       {
         // Risk should equal Total when no MSA
-        if (Math.Abs((decimal)(entity.MonthlyRiskContributionAdult
+        if (Math.Abs((decimal)(entity.MonthlyRiskContributionAdult!
                                - entity.TotalMonthlyContributionsAdult)) >
             tolerance)
           return false;
 
-        if (Math.Abs((decimal)(entity.MonthlyRiskContributionChild
+        if (Math.Abs((decimal)(entity.MonthlyRiskContributionChild!
                                - entity.TotalMonthlyContributionsChild)) >
             tolerance)
           return false;
 
         if (hasPrincipal &&
-            Math.Abs(entity.MonthlyRiskContributionPrincipal.Value -
-                     entity.TotalMonthlyContributionsPrincipal.Value) > tolerance)
+            Math.Abs(entity.MonthlyRiskContributionPrincipal!.Value -
+                     entity.TotalMonthlyContributionsPrincipal!.Value) > tolerance)
           return false;
       }
 
@@ -1266,7 +1266,7 @@
       UpdateMedicalOptionVariantsDto opt2)
     {
       // Principal Total
-      if ((decimal)opt1.TotalMonthlyContributionsPrincipal != opt2.TotalMonthlyContributionsPrincipal)
+      if ((decimal)opt1.TotalMonthlyContributionsPrincipal! != opt2.TotalMonthlyContributionsPrincipal)
         return false;
 
       // Adult Total  
@@ -1429,7 +1429,7 @@
         var isRestricted = Enum.IsDefined(typeof(NoUpdateOnMedicalOptionCategory),
           categoryInfo.MedicalOptionCategoryName);
         // Store Category Name
-        _globalCategoryName = variantInfo.CategoryName;
+        _globalCategoryName = variantInfo.CategoryName!;
         if (isRestricted)
         {
           // Check for salary bracket updates in payload
@@ -1878,7 +1878,7 @@
       const decimal tolerance = 0.01m;
 
       // Adult: Risk should equal Total
-      if (Math.Abs((decimal)(entity.MonthlyRiskContributionAdult - entity.TotalMonthlyContributionsAdult)) > tolerance)
+      if (Math.Abs((decimal)(entity.MonthlyRiskContributionAdult! - entity.TotalMonthlyContributionsAdult)) > tolerance)
       {
         result.IsValid = false;
         result.ErrorMessage = "Adult: Risk contribution must equal Total contribution for Network Choice variant";
@@ -1886,7 +1886,7 @@
       }
 
       // Child: Risk should equal Total
-      if (Math.Abs((decimal)(entity.MonthlyRiskContributionChild - entity.TotalMonthlyContributionsChild)) > tolerance)
+      if (Math.Abs((decimal)(entity.MonthlyRiskContributionChild! - entity.TotalMonthlyContributionsChild)) > tolerance)
       {
         result.IsValid = false;
         result.ErrorMessage = "Child: Risk contribution must equal Total contribution for Network Choice variant";
@@ -1921,7 +1921,7 @@
       const decimal tolerance = 0.01m;
 
       // Adult: Risk should equal Total
-      if (Math.Abs((decimal)(entity.MonthlyRiskContributionAdult - entity.TotalMonthlyContributionsAdult)) > tolerance)
+      if (Math.Abs((decimal)(entity.MonthlyRiskContributionAdult! - entity.TotalMonthlyContributionsAdult)) > tolerance)
       {
         result.IsValid = false;
         result.ErrorMessage = "Adult: Risk contribution must equal Total contribution for Risk-only variant";
@@ -1929,7 +1929,7 @@
       }
 
       // Child: Risk should equal Total
-      if (Math.Abs((decimal)(entity.MonthlyRiskContributionChild - entity.TotalMonthlyContributionsChild)) > tolerance)
+      if (Math.Abs((decimal)(entity.MonthlyRiskContributionChild! - entity.TotalMonthlyContributionsChild)) > tolerance)
       {
         result.IsValid = false;
         result.ErrorMessage = "Child: Risk contribution must equal Total contribution for Risk-only variant";
@@ -1961,8 +1961,8 @@
       const decimal tolerance = 0.01m;
 
       // Adult: Risk + MSA should equal Total
-      var adultTotal = entity.MonthlyRiskContributionAdult + entity.MonthlyMsaContributionAdult.Value;
-      if (Math.Abs((decimal)(adultTotal - entity.TotalMonthlyContributionsAdult)) > tolerance)
+      var adultTotal = entity.MonthlyRiskContributionAdult + entity.MonthlyMsaContributionAdult!.Value;
+      if (Math.Abs((decimal)(adultTotal! - entity.TotalMonthlyContributionsAdult)) > tolerance)
       {
         result.IsValid = false;
         result.ErrorMessage = "Adult: Risk + MSA contributions must equal Total contribution for MSA-only variant";
@@ -1970,8 +1970,8 @@
       }
 
       // Child: Risk + MSA should equal Total
-      var childTotal = entity.MonthlyRiskContributionChild + entity.MonthlyMsaContributionChild.Value;
-      if (Math.Abs((decimal)(childTotal - entity.TotalMonthlyContributionsChild)) > tolerance)
+      var childTotal = entity.MonthlyRiskContributionChild + entity.MonthlyMsaContributionChild!.Value;
+      if (Math.Abs((decimal)(childTotal! - entity.TotalMonthlyContributionsChild)) > tolerance)
       {
         result.IsValid = false;
         result.ErrorMessage = "Child: Risk + MSA contributions must equal Total contribution for MSA-only variant";
@@ -1991,8 +1991,8 @@
       const decimal tolerance = 0.01m;
 
       // Adult: Risk + MSA should equal Total
-      var adultTotal = entity.MonthlyRiskContributionAdult + entity.MonthlyMsaContributionAdult.Value;
-      if (Math.Abs((decimal)(adultTotal - entity.TotalMonthlyContributionsAdult)) > tolerance)
+      var adultTotal = entity.MonthlyRiskContributionAdult + entity.MonthlyMsaContributionAdult!.Value;
+      if (Math.Abs((decimal)(adultTotal! - entity.TotalMonthlyContributionsAdult)) > tolerance)
       {
         result.IsValid = false;
         result.ErrorMessage = "Adult: Risk + MSA contributions must equal Total contribution for MSA + Principal variant";
@@ -2000,8 +2000,8 @@
       }
 
       // Child: Risk + MSA should equal Total
-      var childTotal = entity.MonthlyRiskContributionChild + entity.MonthlyMsaContributionChild.Value;
-      if (Math.Abs((decimal)(childTotal - entity.TotalMonthlyContributionsChild)) > tolerance)
+      var childTotal = entity.MonthlyRiskContributionChild + entity.MonthlyMsaContributionChild!.Value;
+      if (Math.Abs((decimal)(childTotal! - entity.TotalMonthlyContributionsChild)) > tolerance)
       {
         result.IsValid = false;
         result.ErrorMessage = "Child: Risk + MSA contributions must equal Total contribution for MSA + Principal variant";
