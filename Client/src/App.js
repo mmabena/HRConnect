@@ -30,6 +30,8 @@ import ProjectionCalculator from "./Pages/PayrollTools/ProjectionCalculator";
 import PersonalInformation from "./Components/PersonalInformation.jsx";
 import api from "../src/api/api.js";
 import ChangePositionManagement from "./Components/companyManagement/PositionManagement/ChangePositionManagement.jsx";
+import MedicalAidOptionsManagement
+    from "./Pages/PayrollManagement/Deductions/MedicalAid/MedicalAidOptionsManagement/MedicalAidOptionsManagement";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
@@ -198,7 +200,19 @@ function App() {
           />
             <Route path="/changePositionManagement" element={<ChangePositionManagement />} />
           <Route path="/manageUserPosition" element={<ManageUserPositions />} />
-          
+
+          {/* Payroll Management Routes */}
+          {/* Earnings */}
+
+          {/* Deductions */}
+            {/* Pension Fund */}
+
+            {/* Medical Aid */}
+              {/* Medical Aid Option Management */}
+          <Route path="/medical-aid-options-management" element={<MedicalAidOptionsManagement />} />
+              {/* Medical Aid Deductions Management */}
+
+          {/* Company Contributions */}
           <Route
             path="/company-contribution"
             element={<CompanyContribution />}
@@ -207,6 +221,7 @@ function App() {
             path="/compensationPlanning"
             element={<CompensationPlanning />}
           />
+
           <Route
             path="/changePassword"
             element={<ChangePassword currentUser={currentUser} />}
