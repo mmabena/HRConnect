@@ -164,6 +164,7 @@ function App() {
     <div className="App">
       <MenuBar currentUser={currentUser} onLogout={handleLogout} />
       <div>
+
         <ToastContainer position="top-right" autoClose={3000} />
         <Routes>
           <Route path="/dashboard" element={<div>Welcome to Dashboard</div>} />

@@ -6,107 +6,51 @@ export const medicalOptionServics = {
   // GETS
   // Get Options grouped by Category
   getAllOptionsGroupedByCategory: async () => {
-    //wrap around a try-catch block
-    try{
-      const response =  await api.get(`${basePath}/categories`);
-      return response.data;
-    }
-    catch(error) {
-      throw error;
-    }
+    const response =  await api.get(`${basePath}/categories`);
+    return response.data;
   },
   getAllMedicalOptionsCategories: async () =>
   {
-    try{
-      const response =  await api.get(`${basePath}/categories/all`);
-      return response.data;
-    }
-    catch (error) {
-      throw error;
-    }
+    const response =  await api.get(`${basePath}/categories/all`);
+    return response.data;
   },
   getMedicalOptionsSnapshot: async () => {
-    try{
-      const response = await api.get(`${basePath}/snapshot`);
-      return response.data;
-    }
-    catch (error) {
-      throw error;
-    }
+    const response = await api.get(`${basePath}/snapshot`);
+    return response.data;
   },
   getCategoryById: async (id) => {
-    try{
-      const response = await api.get(`${basePath}/${id}/category`);
-      return response.data;
-    }
-    catch(error) {
-      throw error;
-    }
+    const response = await api.get(`${basePath}/${id}/category`);
+    return response.data;
   },
   getMedicalOptionsByCategoryId: async (id) => {
-    try{
-      const response = await api.get(`${basePath}/${id}/category/options`);
-      return response.data;
-    }
-    catch (error){
-      throw error;
-    }
+    const response = await api.get(`${basePath}/${id}/category/options`);
+    return response.data;
   },
   getMedicalOptionsSalaryBracketMatchingEmployeeSalary: async (salaryAmount) => {
-    try{
-      const response = await api.get(`${basePath}/options/${salaryAmount}/salary-brakcet`);
-      return response.data;
-    }
-    catch (error) {
-      throw error;
-    }
+    const response = await api.get(`${basePath}/options/${salaryAmount}/salary-brakcet`);
+    return response.data;
   },
   getMemberEligibilityOptionsByEmployeeId: async (employeeId) => {
-    try{
-      const response =  await api.get(`${basePath}/eligible/${employeeId}`);
-      return response.data;
-    }
-    catch (error) {
-      throw error;
-    }
+    const response =  await api.get(`${basePath}/eligible/${employeeId}`);
+    return response.data;
   },
   // POSTS
   createMedicalOptionCategory: async (request) => {
-    try{
-      const response =  await api.post(`${basePath}/categories`, request);
-      return response.data;
-    }
-    catch (error) {
-      throw error;
-    }
+    const response =  await api.post(`${basePath}/categories`, request);
+    return response.data;
   },
-  createMedicalOptionCategoryOptionsByCategoryId: async (categoryId,request) => {
-    try{
-      const response = await api.post(`${basePath}/${categoryId}/category/options`, request);
-      return response.data;
-    }
-    catch (error) {
-      throw error;
-    }
+  createBulkMedicalOptionCategoryOptionsByCategoryId: async (categoryId,request) => {
+    const response = await api.post(`${basePath}/${categoryId}/category/options`, request);
+    return response.data;
   },
   //PUTS
   updateCategoryById: async (categoryId, request) => {
-    try{
-      const response = await api.put(`${basePath}/${categoryId}/category`, request);
-      return response.data;
-    }
-    catch (error) {
-      throw error;
-    }
+    const response = await api.put(`${basePath}/${categoryId}/category`, request);
+    return response.data;
   },
   updateBulkMedicalOptionsByCategoryId: async (categoryId, bulkRequest) => {
-    try{
-      const response = await api.put(`${basePath}/${categoryId}/variants`, bulkRequest);
-      return response.data;
-    }
-    catch (error) {
-      throw error;
-    }
+    const response = await api.put(`${basePath}/${categoryId}/variants`, bulkRequest);
+    return response.data;
   }
 };
 
