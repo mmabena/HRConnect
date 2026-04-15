@@ -56,12 +56,20 @@ const Profile = () => {
       lastName: employee.surname || "Phily",
       email: employee.email || "mphily@singular.co.za",
       phone: employee.contactNumber || "+27 11 123 4567",
-      address: employee.address || "123 Main Street, Johannesburg, Gauteng",
+      address: employee.physicalAddress || "123 Main Street, Johannesburg, Gauteng",
       dateOfBirth: employee.dateOfBirth || "1985-06-15",
       position: employee.position || "Software Engineer",
       employeeId: employee.employeeId || "EMP001",
       dateJoined: employee.startDate || "2020-03-15",
       manager: employee.careerManager || "John Smith",
+      bio:employee?.bio||"Experienced software engineer with expertise in React and Node.js development.",
+      emergencyContact: employee?.emergencyContact||{
+      name: "John Phily",
+      relationship: "Spouse",
+      phone: "+27 11 987 6543",
+    },
+    profilePicture: null,
+
     }
   };
 
@@ -72,8 +80,8 @@ const Profile = () => {
       try {
         const parsedEmployee = JSON.parse(currentEmployee);
         setProfileData((prev) => ({
-          ...prev,
-          ...mapUserToProfileData(parsedEmployee),
+            ...prev,
+            ...mapUserToProfileData(parsedEmployee),
         }));
         setProfileData(mapUserToProfileData((parsedEmployee)))
         console.log("Loaded employee data from localStorage:", parsedEmployee);

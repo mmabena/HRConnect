@@ -36,8 +36,8 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
- const resolvedRole=resolveRole(currentUser);
- const role=resolveRole.key??currentUser?.role?.toLowerCase();
+  const  resolvedRole=resolveRole(currentUser);
+  const role=resolveRole.key??currentUser?.role?.toLowerCase();
 
   const permissions = {
     isAdmin:resolvedRole.isSuperUser || role==="admin",
@@ -86,7 +86,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
       const token = localStorage.getItem('token');
       const email = JSON.parse(localStorage.getItem('currentUser')).email;
       const decodedTokenEmail = jwtDecode(token).sub;
-      if (decodedTokenEmail == email) {
+      if (decodedTokenEmail === email) {
         try {
           axios.get(`${baseUrl}/employee/email/${email}`, {
               headers: {
@@ -114,7 +114,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
         console.error("User data may have changed without authorization");
       }
     }
-  }, [])
+  }, [baseUrl])
 
   const calculateAge = (dateOfBirth) => {
         let today = new Date();
