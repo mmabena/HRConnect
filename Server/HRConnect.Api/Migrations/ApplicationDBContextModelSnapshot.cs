@@ -674,11 +674,13 @@ namespace HRConnect.Api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("AccountType")
-                        .HasColumnType("int");
+                    b.Property<string>("AccountType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("BankName")
-                        .HasColumnType("int");
+                    b.Property<string>("BankName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("BranchCode")
                         .IsRequired()
@@ -729,7 +731,7 @@ namespace HRConnect.Api.Migrations
                     b.Property<string>("EmployeeId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("BankingDetailsId")
+                    b.Property<int?>("BankingDetailsId")
                         .HasColumnType("int");
 
                     b.Property<string>("Branch")

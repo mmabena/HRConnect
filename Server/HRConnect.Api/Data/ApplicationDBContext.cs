@@ -61,11 +61,14 @@ namespace HRConnect.Api.Data
           .HasForeignKey(e => e.CareerManagerID)
           .OnDelete(DeleteBehavior.Restrict);
 
-    modelBuilder.Entity<Employee>()
-        .HasOne(e => e.BankingDetail)
-        .WithOne(b => b.Employee)
-        .HasForeignKey<BankingDetail>(b => b.EmployeeId)
-        .OnDelete(DeleteBehavior.Cascade);
+      modelBuilder.Entity<Employee>()
+          .HasOne(e => e.BankingDetail)
+          .WithOne(b => b.Employee)
+          .HasForeignKey<BankingDetail>(b => b.EmployeeId)
+          .OnDelete(DeleteBehavior.Cascade);
+
+     
+
 
       modelBuilder.Entity<Position>()
           .HasOne(p => p.OccupationalLevels)
@@ -85,6 +88,8 @@ namespace HRConnect.Api.Data
       modelBuilder.Entity<Employee>().Property(e => e.Gender).HasConversion<string>();
       modelBuilder.Entity<Employee>().Property(e => e.Branch).HasConversion<string>();
       modelBuilder.Entity<Employee>().Property(e => e.EmploymentStatus).HasConversion<string>();
+      modelBuilder.Entity<BankingDetail>().Property(b => b.BankName).HasConversion<string>();
+      modelBuilder.Entity<BankingDetail>().Property(b => b.AccountType).HasConversion<string>();
 
       modelBuilder.Entity<Employee>()
               .HasMany(e => e.LeaveBalances)

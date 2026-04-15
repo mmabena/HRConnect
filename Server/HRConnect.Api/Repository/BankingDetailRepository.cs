@@ -23,10 +23,10 @@ namespace HRConnect.Api.Repository
         /// </summary>
         /// <param name="employeeId">The ID of the employee for whom to retrieve banking details.</param>
         /// <returns>The banking detail record if found; otherwise, null.</returns>
-        public async Task<BankingDetail> GetBankingDetailsByEmployeeIdAsync(string employeeId)
+        public async Task<BankingDetail> GetBankingDetailsByEmployeeIdAsync(string EmployeeId)
         {
             return await _context.BankingDetails
-                .FirstOrDefaultAsync(b => b.EmployeeId == employeeId);
+                .FirstOrDefaultAsync(b => b.EmployeeId == EmployeeId);
         }
 
         /// <summary>

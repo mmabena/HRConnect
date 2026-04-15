@@ -103,6 +103,7 @@ namespace HRConnect.Api.Models
 
     public int BankingDetailsId { get; set; }
 
+    [ForeignKey(nameof(BankingDetailsId))]
     public BankingDetail? BankingDetail { get; set; }
 
     [Required]

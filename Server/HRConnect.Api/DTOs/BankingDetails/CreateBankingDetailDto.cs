@@ -5,7 +5,7 @@ namespace HRConnect.Api.DTOs.BankingDetails
     using HRConnect.Api.Models;
     public class CreateBankingDetailDto
     {
-      
+        public string EmployeeId { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public string Surname { get; set; } = string.Empty;
         public string IdNumber { get; set; } = string.Empty;
