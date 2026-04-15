@@ -137,7 +137,7 @@ namespace HRConnect.Tests
     {
       decimal highSalary = 500000;
 
-      decimal monthlyRem = Math.Max(0, highSalary / 12 - 156_328 / 12);
+      decimal monthlyRem = Math.Max(0, highSalary - 156_328 / 12);
       decimal expectedTax = Math.Floor(54481 + 0.45m * monthlyRem);
 
       var tax = await _service.CalculateTaxAsync(highSalary, 30);
@@ -149,7 +149,7 @@ namespace HRConnect.Tests
     {
       decimal highSalary = 500000;
 
-      decimal monthlyRem = Math.Max(0, highSalary / 12 - 156_328 / 12);
+      decimal monthlyRem = Math.Max(0, highSalary - 156_328 / 12);
       decimal expectedTax = Math.Floor(53694 + 0.45m * monthlyRem);
 
       var tax = await _service.CalculateTaxAsync(highSalary, 70);
@@ -161,8 +161,8 @@ namespace HRConnect.Tests
     {
       decimal highSalary = 500000;
 
-       decimal monthlyRem = Math.Max(0, highSalary / 12 - 156_328 / 12);
-      decimal expectedTax = Math.Floor(53694 + 0.45m * monthlyRem);
+       decimal monthlyRem = Math.Max(0, highSalary - 156_328 / 12);
+      decimal expectedTax = Math.Floor(53432m + 0.45m * monthlyRem);
 
       var tax = await _service.CalculateTaxAsync(highSalary, 80);
       Assert.Equal(expectedTax, tax);

@@ -22,7 +22,6 @@ namespace HRConnect.Api.Services
   using HRConnect.Api.Models.Payroll;
 
 
-
   /// <summary>
   /// This service is responsible for handling tax deduction operations which includes:
   /// calculations of tax based on remuneration and age,
@@ -171,9 +170,14 @@ namespace HRConnect.Api.Services
         throw new KeyNotFoundException("No active payroll run");
       }
 
-      var existing = await _repository.GetExistingFinalTaxAsync( employee.EmployeeId,
+      if (payrollRun.IsFinalised)
+      {
+        throw new InvalidOperationException("Payroll run has been finalised. Recalculation is blocked.");
+      }
+
+      var existing = await _repository.GetExistingFinalTaxAsync(employee.EmployeeId,
         payrollRun.PayrollRunId);
-          
+
 
       if (existing?.IsLocked == true)
       {
@@ -207,10 +211,10 @@ namespace HRConnect.Api.Services
                         || request.MedicalAidChildren > 0;
 
       decimal medicalCredit = hasMedicalAid
-          ? 364m +                                                   
-            (Math.Max(0, request.MedicalAidMembers - 1) * 364m) +  
-            (request.MedicalAidDependants * 364m) +                 
-            (request.MedicalAidChildren * 246m)                     
+          ? 364m +
+            (Math.Max(0, request.MedicalAidMembers - 1) * 364m) +
+            (request.MedicalAidDependants * 364m) +
+            (request.MedicalAidChildren * 246m)
           : 0m;
 
       decimal finalTax = Math.Max(0, taxBeforeCredits - medicalCredit);
@@ -231,7 +235,7 @@ namespace HRConnect.Api.Services
 
         TaxYear = taxYear,
 
-        MonthlySalary = monthlySalary ,   // ✅ gross
+        MonthlySalary = monthlySalary,   // ✅ gross
         PensionableIncome = pensionableIncome,
         PensionContribution = pensionContribution,
 
