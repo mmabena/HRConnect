@@ -70,6 +70,13 @@ namespace HRConnect.Api.Controllers
 
             return Ok(updatedEmployee);
         }
+        [HttpGet("company/{companyId}")]
+        [Authorize(Roles = "SuperUser")]
+        public async Task<IActionResult> GetAllEmployeesByCompany(string companyId)
+        {
+            var employees = await _employeeService.GetAllEmployeesByCompanyAsync(companyId);
+            return Ok(employees);
+        }
 
         // INJECTED: Update leave usage
         [HttpPut("update-used-days")]

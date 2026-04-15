@@ -662,6 +662,55 @@ namespace HRConnect.Api.Migrations
                     b.ToTable("AuditLogs");
                 });
 
+            modelBuilder.Entity("HRConnect.Api.Models.Company", b =>
+                {
+                    b.Property<string>("CompanyId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("CompanyAddress")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CompanyName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ContactNumber")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("RegistrationNumber")
+                        .IsRequired()
+                        .HasMaxLength(14)
+                        .HasColumnType("nvarchar(14)");
+
+                    b.Property<string>("UIFNumber")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("VATNumber")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("CompanyId");
+
+                    b.HasIndex("CompanyId")
+                        .IsUnique();
+
+                    b.HasIndex("RegistrationNumber")
+                        .IsUnique();
+
+                    b.HasIndex("UIFNumber")
+                        .IsUnique();
+
+                    b.HasIndex("VATNumber")
+                        .IsUnique()
+                        .HasFilter("[VATNumber] IS NOT NULL");
+
+                    b.ToTable("Companies");
+                });
+
             modelBuilder.Entity("HRConnect.Api.Models.CompanyContributions.CompanyContribution", b =>
                 {
                     b.Property<int>("CompanyContributionId")
@@ -712,6 +761,10 @@ namespace HRConnect.Api.Migrations
                     b.Property<string>("City")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CompanyId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ContactNumber")
                         .IsRequired()
@@ -803,6 +856,8 @@ namespace HRConnect.Api.Migrations
                     b.HasKey("EmployeeId");
 
                     b.HasIndex("CareerManagerID");
+
+                    b.HasIndex("CompanyId");
 
                     b.HasIndex("PensionOptionId");
 
@@ -1997,6 +2052,12 @@ namespace HRConnect.Api.Migrations
                         .HasForeignKey("CareerManagerID")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("HRConnect.Api.Models.Company", "Company")
+                        .WithMany("Employees")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("HRConnect.Api.Models.PensionOption", "PensionOption")
                         .WithMany("Employees")
                         .HasForeignKey("PensionOptionId")
@@ -2009,6 +2070,8 @@ namespace HRConnect.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("CareerManager");
+
+                    b.Navigation("Company");
 
                     b.Navigation("PensionOption");
 
@@ -2229,6 +2292,11 @@ namespace HRConnect.Api.Migrations
                     b.Navigation("SimplePropertyTriggers");
 
                     b.Navigation("SimpleTriggers");
+                });
+
+            modelBuilder.Entity("HRConnect.Api.Models.Company", b =>
+                {
+                    b.Navigation("Employees");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.Employee", b =>

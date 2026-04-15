@@ -36,6 +36,7 @@ namespace HRConnect.Api.Mappers
                 PositionTitle = employeeModel.Position != null
                 ? employeeModel.Position.PositionTitle : null,
                 EmploymentStatus = employeeModel.EmploymentStatus,
+                CompanyId = employeeModel.CompanyId,
                 CareerManagerID = employeeModel.CareerManagerID,
                 ProfileImage = employeeModel.ProfileImage,
                 CreatedAt = employeeModel.CreatedAt,
@@ -71,6 +72,7 @@ namespace HRConnect.Api.Mappers
                 EmploymentStatus = employeeRequestDto.EmploymentStatus,
                 CareerManagerID = employeeRequestDto.CareerManagerID,
                 ProfileImage = employeeRequestDto.ProfileImage,
+                CompanyId = employeeRequestDto.CompanyId,
                 PensionOptionId = employeeRequestDto.PensionOptionId,
                 IsActive = true
             };

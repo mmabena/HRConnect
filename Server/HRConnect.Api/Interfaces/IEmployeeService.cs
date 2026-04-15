@@ -9,7 +9,7 @@ namespace HRConnect.Api.Interfaces
         Task<List<EmployeeDto>> GetAllEmployeesAsync();
 
         Task<EmployeeDto?> GetEmployeeByIdAsync(string employeeId);
-
+        Task<List<EmployeeDto>> GetAllEmployeesByCompanyAsync(string companyId);
         Task<EmployeeDto> CreateEmployeeAsync(CreateEmployeeRequestDto employeeRequestDto);
 
         Task<EmployeeDto?> UpdateEmployeeAsync(string employeeId, UpdateEmployeeRequestDto employeeDto);

@@ -15,6 +15,7 @@ namespace HRConnect.Api.Data
     public DbSet<Employee> Employees { get; set; }
     public DbSet<Position> Positions { get; set; }
     public DbSet<JobGrade> JobGrades { get; set; }
+    public DbSet<Company> Companies { get; set; }
     public DbSet<OccupationalLevel> OccupationalLevels { get; set; }
     public DbSet<PasswordResetPin> PasswordResetPins { get; set; }
     public DbSet<PasswordHistory> PasswordHistories { get; set; }
@@ -120,6 +121,28 @@ namespace HRConnect.Api.Data
           .WithOne(l => l.Employee)
           .HasForeignKey(l => l.EmployeeId)
           .OnDelete(DeleteBehavior.Cascade);
+
+      modelBuilder.Entity<Employee>()
+          .HasOne(e => e.Company)
+          .WithMany(c => c.Employees)
+          .HasForeignKey(e => e.CompanyId)
+          .OnDelete(DeleteBehavior.Restrict);
+
+      modelBuilder.Entity<Company>()
+          .HasIndex(c => c.CompanyId)
+          .IsUnique();
+
+      modelBuilder.Entity<Company>()
+          .HasIndex(c => c.RegistrationNumber)
+          .IsUnique();
+
+      modelBuilder.Entity<Company>()
+          .HasIndex(c => c.UIFNumber)
+          .IsUnique();
+
+      modelBuilder.Entity<Company>()
+          .HasIndex(c => c.VATNumber)
+          .IsUnique();
 
       modelBuilder.Entity<EmployeeLeaveBalance>()
           .HasOne(lb => lb.LeaveType)

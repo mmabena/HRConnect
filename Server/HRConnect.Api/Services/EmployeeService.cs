@@ -40,15 +40,17 @@ namespace HRConnect.Api.Services
     private readonly ApplicationDBContext _context; // For direct DB access in complex operations
     private readonly IEmployeeRepository _employeeRepo;
     private readonly IPositionRepository _positionRepo;
+    private readonly ICompanyRepository _companyRepo;
     private readonly IEmailService _emailService;
     private readonly ILeaveBalanceService _leaveBalanceService;
     private readonly ILeaveProcessingService _leaveProcessingService;
-    public EmployeeService(ApplicationDBContext context, IEmployeeRepository employeeRepo, IEmailService emailService, IPositionRepository positionRepo, ILeaveBalanceService leaveBalanceService, ILeaveProcessingService leaveProcessingService)
+    public EmployeeService(ApplicationDBContext context, IEmployeeRepository employeeRepo, IEmailService emailService, IPositionRepository positionRepo, ILeaveBalanceService leaveBalanceService, ILeaveProcessingService leaveProcessingService, ICompanyRepository companyRepo)
     {
       _context = context;
       _employeeRepo = employeeRepo;
       _emailService = emailService;
       _positionRepo = positionRepo;
+      _companyRepo = companyRepo;
       _leaveBalanceService = leaveBalanceService;
       _leaveProcessingService = leaveProcessingService;
     }
@@ -79,6 +81,11 @@ namespace HRConnect.Api.Services
       var employee = await _employeeRepo.GetEmployeeByIdAsync(employeeId);
       return employee?.ToEmployeeDto();
     }
+    public async Task<List<EmployeeDto>> GetAllEmployeesByCompanyAsync(string companyId)
+    {
+      var employees = await _employeeRepo.GetAllEmployeeByCompanyAsync(companyId);
+      return employees.Select(e => e.ToEmployeeDto()).ToList();
+    }
 
     public async Task<EmployeeDto?> GetEmployeeByEmailAsync(string employeeEmail)
     {
@@ -107,6 +114,10 @@ namespace HRConnect.Api.Services
       ValidateTitleAndGender(employeeRequestDto);
       employeeRequestDto.EmployeeId = await GenerateUniqueEmpId(employeeRequestDto.Surname);
 
+      var company = await _companyRepo.GetCompanyByIdAsync(employeeRequestDto.CompanyId);
+      if (company == null)
+        throw new ValidationException($"Company with ID {employeeRequestDto.CompanyId} does not exist.");
+
       var position = await _positionRepo.GetPositionByIdAsync(employeeRequestDto.PositionId);
       if (position == null)
         throw new ValidationException($"Position with ID {employeeRequestDto.PositionId} does not exist.");
@@ -115,6 +126,10 @@ namespace HRConnect.Api.Services
 
       new_employee.PositionId = position.PositionId;
       new_employee.Position = position;
+
+      new_employee.CompanyId = company.CompanyId;
+      new_employee.Company = company;
+
 
       using var transaction = await _employeeRepo.BeginTransactionAsync();
       try
@@ -160,8 +175,15 @@ namespace HRConnect.Api.Services
       if (position == null)
         throw new ValidationException($"Position with ID {employeeDto.PositionId} does not exist.");
 
+      var company = await _companyRepo.GetCompanyByIdAsync(employeeDto.CompanyId);
+      if (company == null)
+        throw new ValidationException($"Company with ID {employeeDto.CompanyId} does not exist.");
+
       existingEmployee.PositionId = position.PositionId;
       existingEmployee.Position = position;
+
+      existingEmployee.CompanyId = company.CompanyId;
+      existingEmployee.Company = company;
 
       await ValidateCareerManagerAsync(employeeId, employeeDto.CareerManagerID);
 
@@ -177,6 +199,7 @@ namespace HRConnect.Api.Services
       existingEmployee.ZipCode = employeeDto.ZipCode;
       existingEmployee.Branch = employeeDto.Branch;
       existingEmployee.PositionId = employeeDto.PositionId;
+      existingEmployee.CompanyId = employeeDto.CompanyId;
       existingEmployee.MonthlySalary = employeeDto.MonthlySalary;
       existingEmployee.CareerManagerID = employeeDto.CareerManagerID;
       existingEmployee.EmploymentStatus = employeeDto.EmploymentStatus;
