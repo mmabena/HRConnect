@@ -17,6 +17,10 @@ namespace HRConnect.Api.Services
   using System.Linq.Expressions;
   using System.Data.Common;
   using HRConnect.Api.Mappers;
+  using HRConnect.Api.DTOs.TaxDeduction;
+  using HRConnect.Api.Models.PayrollDeduction;
+  using HRConnect.Api.Models.Payroll;
+
 
   /// <summary>
   /// This service is responsible for handling tax deduction operations which includes:
@@ -27,11 +31,11 @@ namespace HRConnect.Api.Services
   public class TaxDeductionService : ITaxDeductionService
   {
     private readonly ITaxDeductionRepository _repository;
-
     /// <summary>
     /// Initializes a new instance of <see cref="TaxDeductionService"/> with the specified repository.
     /// </summary>
     /// <param name="repository">this is the repository instance for tax deductions</param>
+    /// <param name="context">this is the application database context</param>
     public TaxDeductionService(ITaxDeductionRepository repository)
     {
       _repository = repository;
@@ -82,9 +86,6 @@ namespace HRConnect.Api.Services
       }
       else
       {
-        // High-earner fallback calculation
-        // [45% x (actual monthly remuneration - R156,328)] + age-specific base
-        decimal monthlyRemuneration = remuneration / 12;
 
         decimal baseAmount = age switch
         {
@@ -93,7 +94,7 @@ namespace HRConnect.Api.Services
           _ => 53432m
         };
 
-        decimal excess = Math.Max(0, monthlyRemuneration - 156_328m / 12); // Monthly threshold
+        decimal excess = Math.Max(0, remuneration - 156_328m / 12);
         decimal tax = baseAmount + (0.45m * excess);
 
         // Disregard cents (round down)
@@ -142,5 +143,135 @@ namespace HRConnect.Api.Services
 
       await _repository.SaveChangesAsync();
     }
+
+    /// <summary>
+    /// Generates the final tax deduction for an employee based on their 
+    /// remuneration, age, pension contributions, and medical credits.
+    /// </summary>
+    /// <param name="request"></param>
+    /// <param name="email"></param>
+    /// <returns></returns>
+    /// <exception cref="KeyNotFoundException"></exception>
+    /// <exception cref="InvalidOperationException"></exception>
+    public async Task<FinalTaxDeduction> GenerateTaxAsync(
+      TaxCalculationDto request,
+      string email)
+    {
+
+      var employee = await _repository.GetEmployeeByEmailAsync(email);
+      if (employee == null)
+      {
+        throw new KeyNotFoundException("Employee not found");
+      }
+
+      var payrollRun = await _repository.GetActivePayrollRunAsync();
+      if (payrollRun == null)
+      {
+        throw new KeyNotFoundException("No active payroll run");
+      }
+
+      if (payrollRun.IsFinalised)
+      {
+        throw new InvalidOperationException("Payroll run has been finalised. Recalculation is blocked.");
+      }
+
+      var existing = await _repository.GetExistingFinalTaxAsync(employee.EmployeeId,
+        payrollRun.PayrollRunId);
+
+
+      if (existing?.IsLocked == true)
+      {
+        throw new InvalidOperationException("Payroll is locked");
+      }
+
+      var pension = await _repository.GetPensionByEmployeeIdAsync(employee.EmployeeId);
+      if (pension == null)
+      {
+        throw new KeyNotFoundException("Pension record not found");
+      }
+
+      var today = DateOnly.FromDateTime(DateTime.Today);
+
+      int age = today.Year - employee.DateOfBirth.Year;
+
+      if (employee.DateOfBirth > today.AddYears(-age))
+        age--;
+
+      decimal monthlySalary = employee.MonthlySalary;
+
+      decimal pensionContribution = pension.TotalPensionContribution;
+
+      decimal pensionableIncome = monthlySalary - pensionContribution;
+
+      decimal taxBeforeCredits =
+          await CalculateTaxAsync(pensionableIncome, age);
+
+      bool hasMedicalAid = request.MedicalAidMembers > 0
+                        || request.MedicalAidDependants > 0
+                        || request.MedicalAidChildren > 0;
+
+      decimal medicalCredit = hasMedicalAid
+          ? 364m +
+            (Math.Max(0, request.MedicalAidMembers - 1) * 364m) +
+            (request.MedicalAidDependants * 364m) +
+            (request.MedicalAidChildren * 246m)
+          : 0m;
+
+      decimal finalTax = Math.Max(0, taxBeforeCredits - medicalCredit);
+
+      decimal netSalary = monthlySalary - pensionContribution - finalTax;
+
+      int taxYear = DateTime.Now.Year;
+
+      var record = new FinalTaxDeduction
+      {
+        PayrollRunId = payrollRun.PayrollRunId,
+        EmployeeId = employee.EmployeeId,
+
+        Name = employee.Name,
+        Surname = employee.Surname,
+        IdNumber = employee.IdNumber,
+        PassportNumber = employee.PassportNumber,
+
+        TaxYear = taxYear,
+
+        MonthlySalary = monthlySalary,   // ✅ gross
+        PensionableIncome = pensionableIncome,
+        PensionContribution = pensionContribution,
+
+        MedicalAidMembers = request.MedicalAidMembers,
+        MedicalAidDependants = request.MedicalAidDependants,
+        MedicalAidChildren = request.MedicalAidChildren,
+        MedicalTaxCredit = medicalCredit,
+
+        TaxDeductionAmount = finalTax,
+        NetSalary = netSalary,
+
+        TaxCode = GenerateTaxCode(
+              employee.EmployeeId,
+              payrollRun.PayrollRunId,
+              taxYear),
+
+        IsLocked = false
+      };
+
+      await _repository.AddFinalTaxDeductionAsync(record);
+      await _repository.SaveChangesAsync();
+
+      return record;
+    }
+
+    /// <summary>
+    /// Generates a unique tax code based on employee ID, payroll run ID, and tax year.
+    /// </summary>
+    /// <param name="employeeId"></param>
+    /// <param name="payrollRunId"></param>
+    /// <param name="taxYear"></param>
+    /// <returns></returns>
+    private string GenerateTaxCode(string employeeId, int payrollRunId, int taxYear)
+    {
+      return $"TX-{taxYear}-{payrollRunId}-{employeeId}";
+    }
   }
+
 }

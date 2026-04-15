@@ -151,6 +151,7 @@
   border-radius: 15px; /* rounded corners for the container */
   overflow: hidden; /* ensures corners clip content */
 }
+
 .positions-table th,
 .positions-table td {
   padding: 20px 10px;
@@ -453,7 +454,6 @@
   font-family: "Instrument Sans", sans-serif;
   text-align: left;
 }
-
 
 .title-placeholder-add.inside-input {
   position: absolute;

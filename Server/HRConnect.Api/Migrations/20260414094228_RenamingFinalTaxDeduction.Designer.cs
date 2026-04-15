@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRConnect.Api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20260401125543_SeedDataPositionAndLeave")]
-    partial class SeedDataPositionAndLeave
+    [Migration("20260414094228_RenamingFinalTaxDeduction")]
+    partial class RenamingFinalTaxDeduction
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -900,56 +900,6 @@ namespace HRConnect.Api.Migrations
                     b.HasKey("JobGradeId");
 
                     b.ToTable("JobGrades");
-
-                    b.HasData(
-                        new
-                        {
-                            JobGradeId = 1,
-                            CreatedDate = new DateTime(2026, 2, 11, 14, 33, 32, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            Name = "Executive Director",
-                            UpdatedDate = new DateTime(2026, 2, 27, 10, 15, 8, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            JobGradeId = 2,
-                            CreatedDate = new DateTime(2026, 2, 12, 7, 14, 45, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            Name = "Junior Management",
-                            UpdatedDate = new DateTime(2026, 2, 27, 6, 41, 39, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            JobGradeId = 3,
-                            CreatedDate = new DateTime(2026, 2, 12, 7, 15, 20, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            Name = "Middle Management",
-                            UpdatedDate = new DateTime(2026, 2, 12, 7, 15, 20, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            JobGradeId = 4,
-                            CreatedDate = new DateTime(2026, 2, 12, 7, 15, 39, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            Name = "Skilled/Semi Skilled",
-                            UpdatedDate = new DateTime(2026, 2, 12, 7, 15, 39, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            JobGradeId = 5,
-                            CreatedDate = new DateTime(2026, 2, 12, 7, 15, 54, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            Name = "Top/Senior Management",
-                            UpdatedDate = new DateTime(2026, 2, 12, 7, 15, 54, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            JobGradeId = 6,
-                            CreatedDate = new DateTime(2026, 2, 12, 7, 16, 8, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            Name = "Unskilled",
-                            UpdatedDate = new DateTime(2026, 2, 12, 7, 16, 8, 0, DateTimeKind.Unspecified)
-                        });
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.LeaveApplication", b =>
@@ -1049,182 +999,6 @@ namespace HRConnect.Api.Migrations
                     b.HasIndex("LeaveTypeId");
 
                     b.ToTable("LeaveEntitlementRules");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            DaysAllocated = 15m,
-                            IsActive = true,
-                            JobGradeId = 2,
-                            LeaveTypeId = 1,
-                            MaxYearsService = 2.99m,
-                            MinYearsService = 0m
-                        },
-                        new
-                        {
-                            Id = 2,
-                            DaysAllocated = 15m,
-                            IsActive = true,
-                            JobGradeId = 3,
-                            LeaveTypeId = 1,
-                            MaxYearsService = 2.99m,
-                            MinYearsService = 0m
-                        },
-                        new
-                        {
-                            Id = 3,
-                            DaysAllocated = 15m,
-                            IsActive = true,
-                            JobGradeId = 4,
-                            LeaveTypeId = 1,
-                            MaxYearsService = 2.99m,
-                            MinYearsService = 0m
-                        },
-                        new
-                        {
-                            Id = 4,
-                            DaysAllocated = 15m,
-                            IsActive = true,
-                            JobGradeId = 6,
-                            LeaveTypeId = 1,
-                            MaxYearsService = 2.99m,
-                            MinYearsService = 0m
-                        },
-                        new
-                        {
-                            Id = 5,
-                            DaysAllocated = 18m,
-                            IsActive = true,
-                            JobGradeId = 2,
-                            LeaveTypeId = 1,
-                            MaxYearsService = 5m,
-                            MinYearsService = 3m
-                        },
-                        new
-                        {
-                            Id = 6,
-                            DaysAllocated = 18m,
-                            IsActive = true,
-                            JobGradeId = 3,
-                            LeaveTypeId = 1,
-                            MaxYearsService = 5m,
-                            MinYearsService = 3m
-                        },
-                        new
-                        {
-                            Id = 7,
-                            DaysAllocated = 18m,
-                            IsActive = true,
-                            JobGradeId = 4,
-                            LeaveTypeId = 1,
-                            MaxYearsService = 5m,
-                            MinYearsService = 3m
-                        },
-                        new
-                        {
-                            Id = 8,
-                            DaysAllocated = 18m,
-                            IsActive = true,
-                            JobGradeId = 6,
-                            LeaveTypeId = 1,
-                            MaxYearsService = 5m,
-                            MinYearsService = 3m
-                        },
-                        new
-                        {
-                            Id = 9,
-                            DaysAllocated = 20m,
-                            IsActive = true,
-                            JobGradeId = 2,
-                            LeaveTypeId = 1,
-                            MinYearsService = 5.01m
-                        },
-                        new
-                        {
-                            Id = 10,
-                            DaysAllocated = 20m,
-                            IsActive = true,
-                            JobGradeId = 3,
-                            LeaveTypeId = 1,
-                            MinYearsService = 5.01m
-                        },
-                        new
-                        {
-                            Id = 11,
-                            DaysAllocated = 20m,
-                            IsActive = true,
-                            JobGradeId = 4,
-                            LeaveTypeId = 1,
-                            MinYearsService = 5.01m
-                        },
-                        new
-                        {
-                            Id = 12,
-                            DaysAllocated = 20m,
-                            IsActive = true,
-                            JobGradeId = 6,
-                            LeaveTypeId = 1,
-                            MinYearsService = 5.01m
-                        },
-                        new
-                        {
-                            Id = 13,
-                            DaysAllocated = 18m,
-                            IsActive = true,
-                            JobGradeId = 5,
-                            LeaveTypeId = 1,
-                            MaxYearsService = 2.99m,
-                            MinYearsService = 0m
-                        },
-                        new
-                        {
-                            Id = 14,
-                            DaysAllocated = 21m,
-                            IsActive = true,
-                            JobGradeId = 5,
-                            LeaveTypeId = 1,
-                            MaxYearsService = 5m,
-                            MinYearsService = 3m
-                        },
-                        new
-                        {
-                            Id = 15,
-                            DaysAllocated = 23m,
-                            IsActive = true,
-                            JobGradeId = 5,
-                            LeaveTypeId = 1,
-                            MinYearsService = 5.01m
-                        },
-                        new
-                        {
-                            Id = 16,
-                            DaysAllocated = 22m,
-                            IsActive = true,
-                            JobGradeId = 1,
-                            LeaveTypeId = 1,
-                            MaxYearsService = 2.99m,
-                            MinYearsService = 0m
-                        },
-                        new
-                        {
-                            Id = 17,
-                            DaysAllocated = 25m,
-                            IsActive = true,
-                            JobGradeId = 1,
-                            LeaveTypeId = 1,
-                            MaxYearsService = 5m,
-                            MinYearsService = 3m
-                        },
-                        new
-                        {
-                            Id = 18,
-                            DaysAllocated = 27m,
-                            IsActive = true,
-                            JobGradeId = 1,
-                            LeaveTypeId = 1,
-                            MinYearsService = 5.01m
-                        });
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.LeaveType", b =>
@@ -1283,57 +1057,6 @@ namespace HRConnect.Api.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("LeaveTypes");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CarryoverExpiryDay = 1,
-                            CarryoverExpiryMonth = 1,
-                            CarryoverNotificationDay = 1,
-                            CarryoverNotificationMonth = 12,
-                            Code = "AL",
-                            Description = "Annual Leave Policy",
-                            FemaleOnly = false,
-                            IsActive = true,
-                            IsRollingWindow = false,
-                            MaxCarryoverDays = 5,
-                            Name = "Annual Leave",
-                            ResetDay = 1,
-                            ResetMonth = 1
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Code = "SL",
-                            Description = "Sick Leave Policy",
-                            FemaleOnly = false,
-                            IsActive = true,
-                            IsRollingWindow = true,
-                            Name = "Sick Leave",
-                            RollingMonths = 36
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Code = "ML",
-                            Description = "Maternity Leave Policy",
-                            FemaleOnly = true,
-                            IsActive = true,
-                            IsRollingWindow = false,
-                            Name = "Maternity Leave"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Code = "FRL",
-                            Description = "Family Responsibility Policy",
-                            FemaleOnly = false,
-                            IsActive = true,
-                            IsRollingWindow = true,
-                            Name = "Family Responsibility Leave",
-                            RollingMonths = 12
-                        });
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.MedicalOption", b =>
@@ -1485,56 +1208,6 @@ namespace HRConnect.Api.Migrations
                         .IsUnique();
 
                     b.ToTable("OccupationalLevels");
-
-                    b.HasData(
-                        new
-                        {
-                            OccupationalLevelId = 1,
-                            CreatedDate = new DateTime(2026, 2, 12, 12, 26, 22, 0, DateTimeKind.Unspecified),
-                            Description = "Top management",
-                            IsActive = true,
-                            UpdatedDate = new DateTime(2026, 2, 23, 13, 45, 35, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            OccupationalLevelId = 2,
-                            CreatedDate = new DateTime(2026, 2, 12, 12, 31, 7, 0, DateTimeKind.Unspecified),
-                            Description = "Skilled technical and academically qualified workers, junior management, supervisors, foremen and superintendents",
-                            IsActive = true,
-                            UpdatedDate = new DateTime(2026, 2, 23, 13, 51, 57, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            OccupationalLevelId = 3,
-                            CreatedDate = new DateTime(2026, 2, 12, 12, 26, 59, 0, DateTimeKind.Unspecified),
-                            Description = "Semi-skilled and discretionary decision making",
-                            IsActive = true,
-                            UpdatedDate = new DateTime(2026, 2, 23, 13, 52, 19, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            OccupationalLevelId = 4,
-                            CreatedDate = new DateTime(2026, 2, 13, 12, 54, 57, 0, DateTimeKind.Unspecified),
-                            Description = "Professionally qualified, experienced specialists, and mid-management",
-                            IsActive = true,
-                            UpdatedDate = new DateTime(2026, 2, 23, 13, 52, 42, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            OccupationalLevelId = 5,
-                            CreatedDate = new DateTime(2026, 2, 12, 12, 29, 24, 0, DateTimeKind.Unspecified),
-                            Description = "Senior management",
-                            IsActive = true,
-                            UpdatedDate = new DateTime(2026, 2, 23, 13, 53, 2, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            OccupationalLevelId = 6,
-                            CreatedDate = new DateTime(2026, 2, 12, 12, 30, 2, 0, DateTimeKind.Unspecified),
-                            Description = "Unskilled and defined decision making",
-                            IsActive = true,
-                            UpdatedDate = new DateTime(2026, 2, 23, 13, 53, 25, 0, DateTimeKind.Unspecified)
-                        });
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.PasswordHistory", b =>
@@ -1779,218 +1452,6 @@ namespace HRConnect.Api.Migrations
                         .IsUnique();
 
                     b.ToTable("Positions");
-
-                    b.HasData(
-                        new
-                        {
-                            PositionId = 1,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            JobGradeId = 1,
-                            OccupationalLevelId = 1,
-                            PositionTitle = "Chief Financial Officer",
-                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            PositionId = 2,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            JobGradeId = 1,
-                            OccupationalLevelId = 1,
-                            PositionTitle = "Chief Operating Officer",
-                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            PositionId = 3,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            JobGradeId = 1,
-                            OccupationalLevelId = 1,
-                            PositionTitle = "Officer",
-                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            PositionId = 4,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            JobGradeId = 1,
-                            OccupationalLevelId = 1,
-                            PositionTitle = "Executive",
-                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            PositionId = 5,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            JobGradeId = 1,
-                            OccupationalLevelId = 1,
-                            PositionTitle = "Founder",
-                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            PositionId = 6,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            JobGradeId = 1,
-                            OccupationalLevelId = 1,
-                            PositionTitle = "Head: Financial Services",
-                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            PositionId = 7,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            JobGradeId = 2,
-                            OccupationalLevelId = 2,
-                            PositionTitle = "Accountant",
-                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            PositionId = 8,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            JobGradeId = 2,
-                            OccupationalLevelId = 2,
-                            PositionTitle = "Admin Manager",
-                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            PositionId = 9,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            JobGradeId = 2,
-                            OccupationalLevelId = 2,
-                            PositionTitle = "Analyst",
-                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            PositionId = 10,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            JobGradeId = 2,
-                            OccupationalLevelId = 2,
-                            PositionTitle = "Associate Data Analyst",
-                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            PositionId = 11,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            JobGradeId = 2,
-                            OccupationalLevelId = 2,
-                            PositionTitle = "Associate Project Analyst",
-                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            PositionId = 12,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            JobGradeId = 2,
-                            OccupationalLevelId = 2,
-                            PositionTitle = "Associate Software Engineer",
-                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            PositionId = 13,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            JobGradeId = 2,
-                            OccupationalLevelId = 2,
-                            PositionTitle = "Bookkeeper",
-                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            PositionId = 14,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            JobGradeId = 2,
-                            OccupationalLevelId = 3,
-                            PositionTitle = "Client Liason Manager",
-                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            PositionId = 17,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            JobGradeId = 2,
-                            OccupationalLevelId = 2,
-                            PositionTitle = "Data Analyst",
-                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            PositionId = 18,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            JobGradeId = 2,
-                            OccupationalLevelId = 4,
-                            PositionTitle = "Finance Administrator",
-                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            PositionId = 19,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            JobGradeId = 2,
-                            OccupationalLevelId = 2,
-                            PositionTitle = "Finance Agent 1",
-                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            PositionId = 20,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            JobGradeId = 2,
-                            OccupationalLevelId = 2,
-                            PositionTitle = "Finance Agent 2",
-                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            PositionId = 21,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            JobGradeId = 2,
-                            OccupationalLevelId = 2,
-                            PositionTitle = "Finance Agent 3",
-                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            PositionId = 22,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            JobGradeId = 2,
-                            OccupationalLevelId = 2,
-                            PositionTitle = "Finance Supervisor",
-                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            PositionId = 23,
-                            CreatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            JobGradeId = 2,
-                            OccupationalLevelId = 2,
-                            PositionTitle = "INACTIVE Software Developer",
-                            UpdatedDate = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        });
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.StatutoryContributionType", b =>
@@ -2137,6 +1598,68 @@ namespace HRConnect.Api.Migrations
                     b.HasKey("UserId");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction.FinalTaxDeduction", b =>
+                {
+                    b.HasBaseType("HRConnect.Api.Models.Payroll.PayrollRecord");
+
+                    b.Property<string>("IdNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("MedicalAidChildren")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MedicalAidDependants")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MedicalAidMembers")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("MedicalTaxCredit")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("MonthlySalary")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("NetSalary")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("PassportNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("PensionContribution")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("PensionableIncome")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Surname")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TaxCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("TaxDeductionAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("TaxYear")
+                        .HasColumnType("int");
+
+                    b.ToTable("FinalTaxDeductions", (string)null);
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction.MedicalAidDeduction", b =>

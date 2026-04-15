@@ -2,7 +2,8 @@ import "./MenuBar.css";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-import axios from "axios";
+import api from "../../../src/api/api.js";
+import { fetchNotifications } from "../../Pages/NotificationPage/notificationsApi.js";
 
 const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   const [reportOpen, setReportOpen] = useState(false);
@@ -16,14 +17,17 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   const [manualReportToggle, setManualReportToggle] = useState(false);
   const [manualAdminToggle, setManualAdminToggle] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-  
-  //displaying user initials
-  const displayName =
-  currentUser?.username ||
-  currentUser?.email ||
-  "User";
+  const [activeIndex, setActiveIndex] = useState(null);
+
+  const [notifications, setNotifications] = useState([]);
+  const [bellCount, setBellCount] = useState(0);
+  // FIX: Access the role directly from the currentUser object
+  const role = currentUser?.role?.toLowerCase();
+
+  const displayName = currentUser?.username || currentUser?.email || "User";
   const [canProjectPension, setCanProjectPension] = useState(false);
 
+  //displaying user initials
   const initials = displayName
     .split(" ")
     .map(name => name.charAt(0))
@@ -34,8 +38,14 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // FIX: Access the role directly from the currentUser object
-  const role = currentUser?.role?.toLowerCase();
+  const isActive = (paths) => {
+    return paths.some((path) => location.pathname.startsWith(path));
+  };
+
+  const handleHeadingClick = (index, toggleFunction) => {
+    setActiveIndex((prev) => (prev === index ? null : index));
+    toggleFunction(); // keeps your existing toggle working
+  };
 
   const permissions = {
     isAdmin: ["admin", "superuser"].includes(role),
@@ -43,6 +53,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   };
 
   const isEmployeeManagementPage =
+    location.pathname.startsWith("/employeeList") ||
     location.pathname.startsWith("/addEmployee") ||
     location.pathname.startsWith("/employeeList") ||
     location.pathname.startsWith("/editEmployee");
@@ -50,6 +61,33 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   const isUserManagementPage = location.pathname.startsWith("/userManagement");
 
   const baseUrl = process.env.REACT_APP_API_BASE_URL;
+  
+  // This loads all notifications from the database
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadNotifications = async () => {
+      try {
+        if (!role) return;
+
+        const data = await fetchNotifications(role);
+
+        if (!cancelled) {
+          setNotifications(data);
+          setBellCount(data.filter((n) => !n.read).length);
+        }
+      } catch (err) {
+        console.error("Failed to load notifications:", err);
+        if (!cancelled) setBellCount(0);
+      }
+    };
+
+    loadNotifications();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [role]);
 
   useEffect(() => {
     console.log("MenuBar user role:", role);
@@ -85,9 +123,26 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
       const decodedTokenEmail = jwtDecode(token).sub;
       if (decodedTokenEmail == email) {
         try {
-          axios.get(`${baseUrl}/employee/email/${email}`, {
+          api.get(`${baseUrl}/employee/email/${email}`, {
               headers: {
-                  "Authorization": `Bearer ${token}`
+                Authorization: `Bearer ${token}`,
+              },
+            })
+            .then((response) => {
+              if (response.status === 200) {
+                const employementStatus = response.data.employmentStatus;
+                const employeeAge = response.data.dateOfBirth;
+
+                if (
+                  employementStatus === "Permanent" &&
+                  calculateAge(employeeAge) < 65
+                ) {
+                  setCanProjectPension(true);
+                  console.log("Employee date of birth:", employeeAge);
+                  console.log("Employment status:", employementStatus);
+                }
+              } else {
+                console.error("Unexpeted status:", response.status);
               }
           })
           .then(response => {
@@ -193,9 +248,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   };
 
   const menuPaths = {
-    0: [
-      "/personal",
-    ],
+    0: ["/personal"],
     1: [
       "/employeeList",
       "/terminateemployee",
@@ -239,7 +292,8 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                 alt="Personal icon"
                 className="menu-icon"
               />
-              <span className="menu-heading">Personal Information</span>
+              <span className="menu-heading" 
+              onClick={() => handleSubmenuClick("/personal")}>Personal Information</span>
             </div>
           </li>
 
@@ -606,11 +660,35 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
       </div>
       
       <div className="menu-footer">
-        <img
-          src="/images/setitngs_icon.png"
-          alt="Settings icon"
-          className="menu-icon"
-        />
+        <div className="menu-icon-wrapper">
+          <div className="menu-icon-wrapper">
+            <img
+              src="/images/bell.svg"
+              alt="Bell icon"
+              className="menu-icon"
+              onClick={() => {
+                navigate("/notifications", { state: { role: role } });
+              }}
+            />
+
+            {/* Dynamic unread badge */}
+            {bellCount > 0 && (
+              <span
+                className="notification-badge"
+                data-count={bellCount > 99 ? "99+" : bellCount}
+              >
+                {bellCount > 99 ? "99+" : bellCount}
+              </span>
+            )}
+          </div>
+
+          <img
+            src="/images/setitngs_icon.png"
+            alt="Settings icon"
+            className="menu-icon"
+          />
+        </div>
+
         {/* Container for user details */}
         <div className="user-details-container">
           <div className="menu-initials-circle" onClick={(e) => {

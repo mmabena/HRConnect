@@ -162,7 +162,7 @@ function AddCompanyUI({ formState, handlers, config }) {
               <p className="right-frame-bottom-text">
                 <span className="align-right">Privacy Policy | Terms & Conditions</span>
                 <br />
-                <span className="align-left">Copyright © 2025 Singular Systems. All rights reserved.</span>
+                <span className="align-left">Copyright © 2026 Singular Systems. All rights reserved.</span>
               </p>
             </div>
           </div>

@@ -13,6 +13,8 @@ namespace HRConnect.Api.Utils.Factories
     public async Task ProduceNotificationAsync(Notification notification)
     {
       throw new NotImplementedException();
+
+      //Dispatch a notification once created
     }
   }
 }

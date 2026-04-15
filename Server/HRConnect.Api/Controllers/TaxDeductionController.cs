@@ -8,6 +8,11 @@ namespace HRConnect.Api.Controllers
   using HRConnect.Api.DTOs;
   using HRConnect.Api.Interfaces;
   using Microsoft.AspNetCore.Authorization;
+  using HRConnect.Api.DTOs.TaxDeduction;
+  using HRConnect.Api.Models.PayrollDeduction;
+  using HRConnect.Api.Data;
+  using Microsoft.EntityFrameworkCore;
+  using System.Security.Claims;
 
   [ApiController]
   [Route("api/tax-deductions")]
@@ -26,10 +31,10 @@ namespace HRConnect.Api.Controllers
     }
 
     /// <summary>
-    /// Calculates the tax payable based on remuneration and age
+    /// Calculates the tax payable based on tax year, remuneration and age
     /// </summary>
     [HttpGet("calculate")]
-    public async Task<ActionResult<decimal>> CalculateTax([FromQuery] decimal remuneration,[FromQuery] int age)
+    public async Task<ActionResult<decimal>> CalculateTax([FromQuery] decimal remuneration, [FromQuery] int age)
     {
       try
       {
@@ -39,6 +44,31 @@ namespace HRConnect.Api.Controllers
         return Ok(tax);
       }
       catch (ArgumentException ex)
+      {
+        return BadRequest(ex.Message);
+      }
+    }
+
+    /// <summary>
+    /// Calculates the finaltax including pension and medical credits
+    /// </summary>
+    [HttpPost("generate")]
+    public async Task<ActionResult<FinalTaxDeduction>> GenerateTax(
+    [FromBody] TaxCalculationDto request)
+    {
+      try
+      {
+        var email = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+         ?? User.FindFirst("sub")?.Value;
+
+        if (string.IsNullOrEmpty(email))
+          return Unauthorized("User not logged in");
+
+        var result = await _taxDeductionService.GenerateTaxAsync(request, email);
+
+        return Ok(result);
+      }
+      catch (Exception ex)
       {
         return BadRequest(ex.Message);
       }

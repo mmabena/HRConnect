@@ -2,6 +2,8 @@ namespace HRConnect.Api.Interfaces
 {
   using HRConnect.Api.DTOs;
   using HRConnect.Api.Models;
+  using HRConnect.Api.DTOs.TaxDeduction;
+  using HRConnect.Api.Models.PayrollDeduction;
 
   /// <summary>
   /// Defines operations related to tax deductions, including
@@ -12,6 +14,7 @@ namespace HRConnect.Api.Interfaces
     Task<decimal> CalculateTaxAsync(decimal remuneration, int age);
     Task<List<TaxDeductionDto>> GetAllTaxDeductionsAsync(int taxYear);
     Task UpdateTaxDeductionAsync(UpdateTaxDeductionDto dto);
-    
+    Task<FinalTaxDeduction> GenerateTaxAsync(TaxCalculationDto request, string email);
+
   }
 }

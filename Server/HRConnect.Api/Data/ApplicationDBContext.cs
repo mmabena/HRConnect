@@ -1,12 +1,9 @@
 namespace HRConnect.Api.Data
 {
   using HRConnect.Api.Models;
-  using HRConnect.Api.Utils.PositionAndLeaveSeed;
   using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Models.PayrollDeduction;
   using HRConnect.Api.Models.Pension;
-  using HRConnect.Api.Models.Payroll;
-  using HRConnect.Api.Models.PayrollDeduction;
   using Microsoft.EntityFrameworkCore;
   using AppAny.Quartz.EntityFrameworkCore.Migrations;
   using AppAny.Quartz.EntityFrameworkCore.Migrations.SqlServer;
@@ -42,6 +39,7 @@ namespace HRConnect.Api.Data
     public DbSet<PensionDeduction> PensionDeductions { get; set; }
     public DbSet<MedicalAidDeduction> MedicalAidDeductions { get; set; }
     public DbSet<Notification> Notifications { get; set; }
+    public DbSet<FinalTaxDeduction> FinalTaxDeductions { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
       base.OnModelCreating(modelBuilder);
@@ -147,6 +145,49 @@ namespace HRConnect.Api.Data
         entity.Property(e => e.EffectiveTo);
       });
 
+      // FinalTaxDeduction
+      modelBuilder.Entity<FinalTaxDeduction>(entity =>
+      {
+        entity.ToTable("FinalTaxDeductions");
+
+        entity.Property(e => e.Name).IsRequired();
+        entity.Property(e => e.Surname).IsRequired();
+
+        entity.Property(e => e.IdNumber).IsRequired();
+        entity.Property(e => e.PassportNumber);
+
+        entity.Property(e => e.TaxYear).IsRequired();
+
+        entity.Property(e => e.MonthlySalary)
+            .HasPrecision(18, 2)
+            .IsRequired();
+
+        entity.Property(e => e.MedicalAidMembers).IsRequired();
+        entity.Property(e => e.MedicalAidDependants).IsRequired();
+        entity.Property(e => e.MedicalAidChildren).IsRequired();
+
+        entity.Property(e => e.MedicalTaxCredit)
+            .HasPrecision(18, 2)
+            .IsRequired();
+
+        entity.Property(e => e.PensionContribution)
+            .HasPrecision(18, 2)
+            .IsRequired();
+
+        entity.Property(e => e.PensionableIncome)
+            .HasPrecision(18, 2)
+            .IsRequired();
+
+        entity.Property(e => e.TaxDeductionAmount)
+            .HasPrecision(18, 2)
+            .IsRequired();
+
+        entity.Property(e => e.NetSalary)
+            .HasPrecision(18, 2)
+            .IsRequired();
+
+        entity.Property(e => e.TaxCode).IsRequired();
+      });
 
 
       // StatutoryContributionType with default contribution percentages mandated by law
@@ -185,8 +226,6 @@ namespace HRConnect.Api.Data
       modelBuilder.Entity<PayrollPeriod>().Property(p => p.IsLocked).IsConcurrencyToken();
       modelBuilder.Entity<PayrollRecord>().Property(p => p.IsLocked).IsConcurrencyToken();
 
-
-
       // Medical Aid Deduction Delete Nehavior
       modelBuilder.Entity<MedicalAidDeduction>()
         .HasOne(m => m.MedicalOption)
@@ -221,7 +260,6 @@ namespace HRConnect.Api.Data
         .IsRequired();
 
 
-
       modelBuilder.Entity<EmployeePensionEnrollment>().HasOne<PayrollRun>()
       .WithMany()
       .HasForeignKey(t => t.PayrollRunId)
@@ -232,27 +270,7 @@ namespace HRConnect.Api.Data
           .HasConversion<string>();
       modelBuilder.Entity<Notification>().Property(n => n.Type)
       .HasConversion<string>();
-
-
-      modelBuilder.Entity<OccupationalLevel>().HasData(
-          new OccupationalLevel { OccupationalLevelId = 1, Description = "Top Management", IsActive = true, CreatedDate = new DateTime(2026, 1, 1), UpdatedDate = new DateTime(2026, 1, 1) },
-          new OccupationalLevel { OccupationalLevelId = 2, Description = "", IsActive = true, CreatedDate = new DateTime(2026, 1, 1), UpdatedDate = new DateTime(2026, 1, 1) },
-          new OccupationalLevel { OccupationalLevelId = 3, Description = "Middle Management", IsActive = true, CreatedDate = new DateTime(2026, 1, 1), UpdatedDate = new DateTime(2026, 1, 1) },
-          new OccupationalLevel { OccupationalLevelId = 4, Description = "Junior Management", IsActive = true, CreatedDate = new DateTime(2026, 1, 1), UpdatedDate = new DateTime(2026, 1, 1) },
-          new OccupationalLevel { OccupationalLevelId = 5, Description = "Skilled", IsActive = true, CreatedDate = new DateTime(2026, 1, 1), UpdatedDate = new DateTime(2026, 1, 1) },
-          new OccupationalLevel { OccupationalLevelId = 6, Description = "Unskilled", IsActive = true, CreatedDate = new DateTime(2026, 1, 1), UpdatedDate = new DateTime(2026, 1, 1) }
-      );
-
-
-      // SEED DATA: (Position, Job Grade, Occupational Level, Leave Types)
-      modelBuilder.Entity<JobGrade>().HasData(SeedData.GetJobGrades());
-      modelBuilder.Entity<OccupationalLevel>().HasData(SeedData.GetOccupationalLevels());
-      modelBuilder.Entity<Position>().HasData(SeedData.GetPositions());
-      modelBuilder.Entity<LeaveType>().HasData(SeedData.GetLeaveTypes());
-      modelBuilder.Entity<LeaveEntitlementRule>().HasData(SeedData.GetLeaveEntitlementRules());
     }
-
-
 
     //Override 'SaveChangesAsync' for Payroll Records to enforce locked records on a payroll run 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -278,7 +296,5 @@ namespace HRConnect.Api.Data
       }
       return await base.SaveChangesAsync(cancellationToken);
     }
-
   }
-
 }

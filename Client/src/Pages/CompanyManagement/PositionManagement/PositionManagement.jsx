@@ -2,9 +2,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import NavBar from "../../../Components/NavBar.jsx";
 
-import AddPositionManagement from "../../../Components/companyManagement/PositionManagement/AddPositionManagment";
-import EditPositionManagement from "../../../Components/companyManagement/PositionManagement/EditPositionManagement";
-import ChangePositionManagement from "../../../Components/companyManagement/PositionManagement/ChangePositionManagement";
+import AddPositionManagement from "../../../Components/companyManagement/PositionManagement/AddPositionManagment.jsx";
+import EditPositionManagement from "../../../Components/companyManagement/PositionManagement/EditPositionManagement.jsx";
+import ChangePositionManagement from "../../../Components/companyManagement/PositionManagement/ChangePositionManagement.jsx";
 
 import usePositions from "../../../hooks/usePositions";
 import usePagination from "../../../hooks/usePagination";
@@ -40,6 +40,7 @@ const PositionManagement = ({ title }) => {
   const [activeTab, setActiveTab] = useState("Position Management");
 
   const pageOptions = [10, 15, 20, 25];
+
 
 
 

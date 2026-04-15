@@ -14,22 +14,23 @@ import EmployeeList from "./Pages/EmployeeManagement/EmployeeList";
 import AddEmployeeModal from "./Components/EmployeeManagement/AddEmployeeModal";
 import UserManagement from "./Components/UserManagement";
 import ViewPositionManagement from "./Components/ViewPositionManagement";
+import TaxTableUpload from "./Components/companyManagement/TaxTableManagement/TaxTableUpload.jsx";
 import EditPositionManagement from "./Components/companyManagement/PositionManagement/EditPositionManagement.jsx";
 import AddPositionManagement from "./Components/companyManagement/PositionManagement/AddPositionManagment.jsx";
 import PositionManagement from "./Pages/CompanyManagement/PositionManagement/PositionManagement";
-import CompanyManagement from "./companyManagement.js";
+import ChangePositionManagement from "./Components/companyManagement/PositionManagement/ChangePositionManagement.jsx";
+import CompanyManagement from "./companyManagement";
 import CompanyContribution from "./Components/CompanyContribution/CompanyContribution";
 import Profile from "./Components/MyProfile";
 import CompensationPlanning from "./Components/CompensationPlanning";
-import TaxTableManagement from "./Components/companyManagement/TaxTableManagement/TaxTableManagement";
+import TaxTableManagement from "./Components/companyManagement/TaxTableManagement/TaxTableManagement.jsx";
 import ChangePassword from "./Components/ChangePassword";
-import TaxTableUpload from "./Components/companyManagement/TaxTableManagement/TaxTableUpload.jsx";
 import MenuBar from "./Components/MenuBar/MenuBar";
-import ManageUserPositions from   "./Pages/CompanyManagement/PositionManagement/ManageUserPositions.jsx";
+import ManageUserPositions from "./Pages/CompanyManagement/PositionManagement/ManageUserPositions.jsx";
 import ProjectionCalculator from "./Pages/PayrollTools/ProjectionCalculator";
 import PersonalInformation from "./Components/PersonalInformation.jsx";
+import NotificationPage from "./Pages/NotificationPage/NotificationPage.jsx";
 import api from "../src/api/api.js";
-import ChangePositionManagement from "./Components/companyManagement/PositionManagement/ChangePositionManagement.jsx";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
@@ -222,6 +223,7 @@ function App() {
           <Route path="/changeposition" element={<ChangePositionManagement />} />
           <Route path="/manageUserPosition" element={<ManageUserPositions/>} />
           <Route path="/personal" element={<PersonalInformation />} />
+          <Route path="/notifications" element={<NotificationPage />} />
         </Routes>
       </div>
     </div>

@@ -35,7 +35,7 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
     //This makes mocking and using testing time-related edge cases a lot easier
     private readonly Func<DateTime> _now;
     public PayrollRolloverJob(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService, IServiceProvider serviceProvider,
-      IEmployeePensionEnrollmentService employeePensionEnrollmentService, IPensionDeductionService pensionDeductionService,
+      IEmployeePensionEnrollmentService employeePensionEnrollmentService,
       IReportsService reportsService, Func<DateTime> now = null)
     {
       _payrollRunRepo = payrollRunRepo;

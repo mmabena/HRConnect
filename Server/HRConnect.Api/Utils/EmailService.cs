@@ -17,16 +17,10 @@ namespace HRConnect.Api.Utils
 
     public EmailService(IConfiguration configuration)
     {
-      string? sendGridApiKey = configuration["SendGrid:ApiKey"];
-      _fromEmail = configuration["SendGrid:FromEmail"] ?? "noreply@hrconnect.com";
-      _fromName = configuration["SendGrid:FromName"] ?? "HRConnect Team";
-
-      if (string.IsNullOrWhiteSpace(sendGridApiKey))
-      {
-        throw new InvalidOperationException("SendGrid API key is not configured.");
-      }
-
-      _client = new SendGridClient(sendGridApiKey);
+      string apiKey = configuration["SendGrid:ApiKey"];
+      _client = new SendGridClient(apiKey);
+      _fromEmail = configuration["SendGrid:FromEmail"] ?? "ochimerema@gmail.com";
+      _fromName = configuration["SendGrid:FromName"] ?? "HRConnects";
     }
 
     public async Task SendEmailAsync(string recipientEmail, string subject, string body)

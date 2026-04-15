@@ -4,7 +4,7 @@ import "./TaxTableUpload.css";
 import TaxTableUpload from "./TaxTableUpload.jsx";
 import NavBar from "../../NavBar.jsx";
 
-function TaxTableManagement({ currentUser }) {
+function TaxTableManagement() {
   const [activeTable, setActiveTable] = useState(null);
   const [futureTable, setFutureTable] = useState(null);
   const [previousTables, setPreviousTables] = useState([]);
