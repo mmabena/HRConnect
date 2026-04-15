@@ -265,7 +265,8 @@ export const MedicalAidOptionsProvider = ({children}) => {
       // use effect to reflect changes
     }
     catch(error){
-
+      setError(error || "Failed to update medical aid option category by category");
+      console.error('Error updating medical aid option category by id: ', error);
     }
     finally{
       setLoading(false);
@@ -279,7 +280,7 @@ export const MedicalAidOptionsProvider = ({children}) => {
       eligibleOptionsForEmployee,
       loading,
       error,
-      // CallbackFunctions
+      // Callback Functions
       getAllOptionsGroupedByCategory,
       getAllMedicalOptionsCategories,
       getCategoryById,
