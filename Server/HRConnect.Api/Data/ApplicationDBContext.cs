@@ -101,6 +101,14 @@ namespace HRConnect.Api.Data
           .HasIndex(o => o.Description)
           .IsUnique();
 
+      modelBuilder.Entity<PayrollRecord>()
+      .HasIndex(x => new { x.PayrollRunId, x.EmployeeId })
+      .IsUnique();
+
+      modelBuilder.Entity<PayrollRecord>()
+      .HasIndex(x => new { x.PayrollRunId, x.EmployeeId })
+      .IsUnique();
+
       modelBuilder.Entity<Employee>().Property(e => e.Title).HasConversion<string>();
       modelBuilder.Entity<Employee>().Property(e => e.Gender).HasConversion<string>();
       modelBuilder.Entity<Employee>().Property(e => e.Branch).HasConversion<string>();
@@ -123,6 +131,10 @@ namespace HRConnect.Api.Data
           .WithMany()
           .HasForeignKey(lb => lb.LeaveTypeId)
           .OnDelete(DeleteBehavior.Restrict);
+
+      modelBuilder.Entity<EmployeeCompanyContribution>()
+    .HasIndex(e => new { e.PayrollRunId, e.EmployeeId })
+    .IsUnique();
 
       modelBuilder.Entity<LeaveEntitlementRule>()
           .HasOne(r => r.JobGrade)

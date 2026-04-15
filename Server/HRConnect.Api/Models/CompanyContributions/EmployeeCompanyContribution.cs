@@ -2,6 +2,7 @@ namespace HRConnect.Api.Models.CompanyContributions
 {
     using HRConnect.Api.Models.Payroll;
     using System.ComponentModel.DataAnnotations.Schema;
+    
     public class EmployeeCompanyContribution : PayrollRecord
     {
         public string Name { get; set; } = string.Empty;
