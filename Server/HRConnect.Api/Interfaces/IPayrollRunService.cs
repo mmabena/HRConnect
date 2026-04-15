@@ -44,7 +44,7 @@ namespace HRConnect.Api.Interfaces
     /// <exception cref="InvalidDataException">Invalid Type Expected 'PayrollRecord'
     /// </exception>
     Task AddRecordToCurrentRunAsync(PayrollRecord payrollRecord, string employeeId);
-
+    Task AddRecordsCollectionToRunAsync(IList<PayrollRecord> recordsCollection, string? employeeId);
     // Task<IEnumerable<PayrollRun?>> GetAllPayRecordsFromPayRunAsync(int payrollRunNumber);
     Task LockAllOlderPayrollRuns();
   }

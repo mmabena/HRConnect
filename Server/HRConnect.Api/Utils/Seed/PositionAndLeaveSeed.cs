@@ -173,9 +173,6 @@ namespace HRConnect.Api.Utils.Seed
       await SeedOccuptationLevel();
       await SeedLeaveTypes();
       await SeedLeaveEntitlementRules();
-
-      //temporarily seed pension options 
-      await SeedPensionOptions();
     }
 
     //Seed the Job Grade first using transaction

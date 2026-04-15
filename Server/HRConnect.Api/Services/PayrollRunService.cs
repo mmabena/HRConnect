@@ -9,11 +9,13 @@ namespace HRConnect.Api.Services
   {
     private readonly IPayrollRunRepository _payrollRunRepo;
     private readonly IPayrollPeriodService _payrollPeriodService;
+    private readonly ICompanyContributionAllocationService _allocationService;
 
-    public PayrollRunService(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService)
+    public PayrollRunService(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService, ICompanyContributionAllocationService allocationService)
     {
       _payrollRunRepo = payrollRunRepo;
       _payrollPeriodService = payrollPeriodService;
+      _allocationService = allocationService;
     }
 
     public async Task<PayrollRunDto?> GetPayrunByRunNumberAsync(int payrollRunNumber)
@@ -49,6 +51,12 @@ namespace HRConnect.Api.Services
     {
       var payrun = await _payrollRunRepo.GetCurrentRunAsync();
 
+      var contributionRecords =
+      await _allocationService.AllocateAsync(payrun.PayrollRunId);
+
+      if (contributionRecords.Count > 0)
+        await AddRecordsCollectionToRunAsync(contributionRecords, null);
+
       return payrun!;
     }
     /// <summary>
@@ -80,7 +88,7 @@ namespace HRConnect.Api.Services
       await _payrollRunRepo.UpdateRun(currentPayRun);
     }
 
-    public async Task AddRecordsCollectionToRunAsync(IList<PayrollRecord> recordsCollection, string employeeId)
+    public async Task AddRecordsCollectionToRunAsync(IList<PayrollRecord> recordsCollection, string? employeeId)
     {
       var payperiod = await _payrollPeriodService.GetLastPeriodAsync();
       if (payperiod == null)
@@ -95,7 +103,10 @@ namespace HRConnect.Api.Services
       )
       {
         record.PayrollRun = currentPayRun;
-        record.EmployeeId = employeeId;
+        if (!string.IsNullOrWhiteSpace(employeeId))
+        {
+          record.EmployeeId = employeeId;
+        }
         currentPayRun.Records.Add(record);
       }
       await _payrollRunRepo.UpdateRun(currentPayRun);
