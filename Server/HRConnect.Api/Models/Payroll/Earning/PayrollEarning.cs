@@ -1,4 +1,4 @@
-﻿namespace HRConnect.Api.Models.Payroll.Earnings
+﻿namespace HRConnect.Api.Models.Payroll.Earning
 {
   using System.ComponentModel.DataAnnotations.Schema;
 
@@ -16,6 +16,5 @@
     public bool CanProRata { get; set; }
     public bool IsOnGoing { get; set; }
     public bool IsActive { get; set; }
-    public ICollection<EmployeePayrollEarning> EmployeePayrollEarning { get; set; } = [];
   }
 }

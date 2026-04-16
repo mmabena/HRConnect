@@ -1,4 +1,4 @@
-﻿namespace HRConnect.Api.DTOs.Payroll.Earnings
+﻿namespace HRConnect.Api.DTOs.Payroll.Earning
 {
   public class PayrollEarningDto
   {
@@ -8,6 +8,7 @@
     public bool Taxable { get; set; }
     public int TaxCode { get; set; }
     public decimal? TaxPercentage { get; set; }
+    public decimal? OvertimeHourMultiplier { get; set; }
     public bool CanProRata { get; set; }
     public bool IsOnGoing { get; set; }
     public bool IsActive { get; set; }

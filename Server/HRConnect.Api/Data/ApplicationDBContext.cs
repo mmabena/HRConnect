@@ -7,7 +7,7 @@ namespace HRConnect.Api.Data
   using Microsoft.EntityFrameworkCore;
   using AppAny.Quartz.EntityFrameworkCore.Migrations;
   using AppAny.Quartz.EntityFrameworkCore.Migrations.SqlServer;
-  using HRConnect.Api.Models.Payroll.Earnings;
+  using HRConnect.Api.Models.Payroll.Earning;
 
   public class ApplicationDBContext(DbContextOptions dbContextOptions) : DbContext(dbContextOptions)
   {
@@ -42,7 +42,6 @@ namespace HRConnect.Api.Data
     public DbSet<MedicalAidDeduction> MedicalAidDeductions { get; set; }
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<PayrollEarning> PayrollEarnings { get; set; }
-    public DbSet<EmployeePayrollEarning> EmployeePayrollEarnings { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
       base.OnModelCreating(modelBuilder);
@@ -228,27 +227,6 @@ namespace HRConnect.Api.Data
           .HasConversion<string>();
       modelBuilder.Entity<Notification>().Property(n => n.Type)
       .HasConversion<string>();
-
-      //Im here---------------------------------------------------------------------------------------------------------------------------------
-      modelBuilder.Entity<Employee>()
-        .HasMany(epre => epre.EmployeePayrollEarning)
-        .WithOne(e => e.Employee)
-        .HasForeignKey(e => e.EmployeeId)
-        .OnDelete(DeleteBehavior.Cascade)
-        .IsRequired();
-
-      modelBuilder.Entity<PayrollEarning>()
-        .HasMany(epre => epre.EmployeePayrollEarning)
-        .WithOne(pre => pre.PayrollEarning)
-        .HasForeignKey(pre => pre.PayrollEarningId)
-        .OnDelete(DeleteBehavior.Cascade)
-        .IsRequired();
-
-      modelBuilder.Entity<EmployeePayrollEarning>()
-        .HasOne<PayrollRun>()
-        .WithMany()
-        .HasForeignKey(epe => epe.PayrollRunId)
-        .HasPrincipalKey(p => p.PayrollRunId);
     }
 
     //Override 'SaveChangesAsync' for Payroll Records to enforce locked records on a payroll run 
@@ -261,8 +239,7 @@ namespace HRConnect.Api.Data
             e.Entity is PayrollPeriod ||
             e.Entity is PayrollRun ||
             e.Entity is PayrollRecord ||
-            e.Entity is EmployeePensionEnrollment ||
-            e.Entity is EmployeePayrollEarning
+            e.Entity is EmployeePensionEnrollment
             ));
 
       foreach (var e in modifiedRecords)

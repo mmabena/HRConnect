@@ -1,7 +1,7 @@
-﻿namespace HRConnect.Api.Mappers.Payroll.Earnings
+﻿namespace HRConnect.Api.Mappers.Payroll.Earning
 {
-  using HRConnect.Api.DTOs.Payroll.Earnings;
-  using HRConnect.Api.Models.Payroll.Earnings;
+  using HRConnect.Api.DTOs.Payroll.Earning;
+  using HRConnect.Api.Models.Payroll.Earning;
 
   public static class PayrollEarningMapper
   {
@@ -15,6 +15,7 @@
         Taxable = payrollEarning.Taxable,
         TaxCode = payrollEarning.TaxCode,
         TaxPercentage = payrollEarning.TaxPercentage,
+        OvertimeHourMultiplier = payrollEarning.OvertimeHourMultiplier,
         CanProRata = payrollEarning.CanProRata,
         IsOnGoing = payrollEarning.IsOnGoing,
         IsActive = payrollEarning.IsActive

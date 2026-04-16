@@ -2,6 +2,7 @@ namespace HRConnect.Api.Utils.Seed
 {
   using HRConnect.Api.Data;
   using HRConnect.Api.Models;
+  using HRConnect.Api.Models.Payroll.Earning;
   using Microsoft.EntityFrameworkCore;
 
   public class PositionAndLeaveSeed
@@ -162,6 +163,20 @@ namespace HRConnect.Api.Utils.Seed
       },
     };
 
+    private readonly PayrollEarning payrollEarning = new()
+    {
+      PayrollEarningId = GenerateUnqiueCode.GenerateStringCode("PRE", []),
+      ShortDescription = "Basic salary",
+      LongDescription = "Employee monthly salary",
+      Taxable = true,
+      TaxCode = 3601,
+      TaxPercentage = 100m,
+      OvertimeHourMultiplier = null,
+      CanProRata = true,
+      IsOnGoing = true,
+      IsActive = true
+    };
+
     public PositionAndLeaveSeed(ApplicationDBContext context)
     {
       _context = context;
@@ -173,6 +188,7 @@ namespace HRConnect.Api.Utils.Seed
       await SeedOccuptationLevel();
       await SeedLeaveTypes();
       await SeedLeaveEntitlementRules();
+      await SeedPayrollEarnings();
 
       //temporarily seed pension options 
       await SeedPensionOptions();
@@ -247,6 +263,15 @@ namespace HRConnect.Api.Utils.Seed
 
         await _context.PensionOptions.AddRangeAsync(_seedPensionOptions);
 
+        _ = await _context.SaveChangesAsync();
+      }
+    }
+
+    public async Task SeedPayrollEarnings()
+    {
+      if (!await _context.PayrollEarnings.AnyAsync())
+      {
+        _ = await _context.PayrollEarnings.AddAsync(payrollEarning);
         _ = await _context.SaveChangesAsync();
       }
     }
