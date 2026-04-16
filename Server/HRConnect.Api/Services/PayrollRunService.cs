@@ -51,12 +51,6 @@ namespace HRConnect.Api.Services
     {
       var payrun = await _payrollRunRepo.GetCurrentRunAsync();
 
-      var contributionRecords =
-      await _allocationService.AllocateAsync(payrun.PayrollRunId);
-
-      if (contributionRecords.Count > 0)
-        await AddRecordsCollectionToRunAsync(contributionRecords, null);
-
       return payrun!;
     }
     /// <summary>
@@ -81,6 +75,12 @@ namespace HRConnect.Api.Services
       if (currentPayRun == null)
         throw new InvalidDataException("No current payroll run found or it is locked");
 
+      var exists = currentPayRun.Records
+      .Any(r => r.EmployeeId == employeeId);
+
+      if (exists)
+        return;
+
       payrollRecord.PayrollRun = currentPayRun;
       payrollRecord.EmployeeId = employeeId;
       currentPayRun.Records.Add(payrollRecord);
@@ -99,14 +99,21 @@ namespace HRConnect.Api.Services
       if (currentPayRun == null)
         throw new InvalidDataException("No current payroll run found or it is locked");
 
-      foreach (var record in recordsCollection
-      )
+      foreach (var record in recordsCollection)
       {
+        var empId = !string.IsNullOrWhiteSpace(employeeId)
+        ? employeeId
+        : record.EmployeeId;
+
+        var exists = currentPayRun.Records
+        .Any(r => r.PayrollRunId == currentPayRun.PayrollRunId
+       && r.EmployeeId == empId);
+
+        if (exists)
+          continue;
+          
         record.PayrollRun = currentPayRun;
-        if (!string.IsNullOrWhiteSpace(employeeId))
-        {
-          record.EmployeeId = employeeId;
-        }
+        record.EmployeeId = empId;
         currentPayRun.Records.Add(record);
       }
       await _payrollRunRepo.UpdateRun(currentPayRun);

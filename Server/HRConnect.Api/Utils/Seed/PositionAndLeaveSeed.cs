@@ -2,6 +2,8 @@ namespace HRConnect.Api.Utils.Seed
 {
   using HRConnect.Api.Data;
   using HRConnect.Api.Models;
+  using HRConnect.Api.Models.CompanyContributions;
+  using HRConnect.Api.Models.Payroll.Earning;
   using Microsoft.EntityFrameworkCore;
 
   public class PositionAndLeaveSeed
@@ -64,6 +66,30 @@ namespace HRConnect.Api.Utils.Seed
         Description="Senior Management",
         IsActive=true
       }
+    };
+
+    private readonly List<CompanyContribution> _seedCompanyContributions = new()
+    {
+        new CompanyContribution
+        {
+            //CompanyContributionId = 1,
+            Code = "DEATHBEN",
+            ShortDescription = "Death Benefit",
+            LongDescription = "Death Benefit Contribution",
+            TaxCode = "3801",
+            Percentage = 0.005650m,
+            IsActive = true
+        },
+        new CompanyContribution
+        {
+            //CompanyContributionId = 2,
+            Code = "DISABILITY",
+            ShortDescription = "Disability",
+            LongDescription = "Disability Contribution",
+            TaxCode = "3801",
+            Percentage = 0.004820m,
+            IsActive = true
+        }
     };
 
     private readonly List<LeaveEntitlementRule> _seedLeaveEntitlementRules = new()
@@ -162,6 +188,20 @@ namespace HRConnect.Api.Utils.Seed
       },
     };
 
+    private readonly PayrollEarning payrollEarning = new()
+    {
+      PayrollEarningId = GenerateUnqiueCode.GenerateStringCode("PRE", []),
+      ShortDescription = "Basic salary",
+      LongDescription = "Employee monthly salary",
+      Taxable = true,
+      TaxCode = 3601,
+      TaxPercentage = 100m,
+      OvertimeHourMultiplier = null,
+      CanProRata = true,
+      IsOnGoing = true,
+      IsActive = true
+    };
+
     public PositionAndLeaveSeed(ApplicationDBContext context)
     {
       _context = context;
@@ -173,6 +213,12 @@ namespace HRConnect.Api.Utils.Seed
       await SeedOccuptationLevel();
       await SeedLeaveTypes();
       await SeedLeaveEntitlementRules();
+      //temporarily seed company contributions 
+      await SeedCompanyContributions();
+      await SeedPayrollEarnings();
+
+      //temporarily seed pension options 
+      await SeedPensionOptions();
     }
 
     //Seed the Job Grade first using transaction
@@ -220,6 +266,20 @@ namespace HRConnect.Api.Utils.Seed
         _ = await _context.SaveChangesAsync();
       }
     }
+
+    public async Task SeedCompanyContributions()
+    {
+      if (!await _context.CompanyContributions.AnyAsync())
+      {
+          // reset identity
+          _ = await _context.Database.ExecuteSqlRawAsync(
+              "DBCC CHECKIDENT ('CompanyContributions', RESEED, 0)");
+  
+          await _context.CompanyContributions.AddRangeAsync(_seedCompanyContributions);
+  
+          _ = await _context.SaveChangesAsync();
+      }
+    }
     //Seed LeaveTypes
     public async Task SeedLeaveTypes()
     {
@@ -244,6 +304,15 @@ namespace HRConnect.Api.Utils.Seed
 
         await _context.PensionOptions.AddRangeAsync(_seedPensionOptions);
 
+        _ = await _context.SaveChangesAsync();
+      }
+    }
+
+    public async Task SeedPayrollEarnings()
+    {
+      if (!await _context.PayrollEarnings.AnyAsync())
+      {
+        _ = await _context.PayrollEarnings.AddAsync(payrollEarning);
         _ = await _context.SaveChangesAsync();
       }
     }
