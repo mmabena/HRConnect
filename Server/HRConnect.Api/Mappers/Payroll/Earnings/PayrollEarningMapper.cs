@@ -14,7 +14,9 @@
         LongDescription = payrollEarning.LongDescription,
         Taxable = payrollEarning.Taxable,
         TaxCode = payrollEarning.TaxCode,
+        TaxPercentage = payrollEarning.TaxPercentage,
         CanProRata = payrollEarning.CanProRata,
+        IsOnGoing = payrollEarning.IsOnGoing,
         IsActive = payrollEarning.IsActive
       };
     }
@@ -28,9 +30,11 @@
         LongDescription = payrollEarningAddDto.LongDescription,
         Taxable = payrollEarningAddDto.Taxable,
         TaxCode = payrollEarningAddDto.TaxCode,
-        HourlyRate = payrollEarningAddDto.HourlyRate,
+        TaxPercentage = payrollEarningAddDto.TaxPercentage,
+        OvertimeHourMultiplier = payrollEarningAddDto.OvertimeHourMultiplier,
         CanProRata = payrollEarningAddDto.CanProRata,
-        IsActive = payrollEarningAddDto.IsActive
+        IsOnGoing = payrollEarningAddDto.IsOnGoing,
+        IsActive = true
       };
     }
   }

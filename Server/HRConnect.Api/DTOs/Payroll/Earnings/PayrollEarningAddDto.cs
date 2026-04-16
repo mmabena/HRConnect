@@ -2,12 +2,13 @@
 {
   public class PayrollEarningAddDto
   {
-    public string ShortDescription { get; set; } = string.Empty;
-    public string LongDescription { get; set; } = string.Empty;
+    public required string ShortDescription { get; set; }
+    public required string LongDescription { get; set; }
     public bool Taxable { get; set; }
     public int TaxCode { get; set; }
-    public decimal? HourlyRate { get; set; }
+    public decimal? TaxPercentage { get; set; }
+    public decimal? OvertimeHourMultiplier { get; set; }
     public bool CanProRata { get; set; }
-    public bool IsActive { get; set; }
+    public bool IsOnGoing { get; set; }
   }
 }

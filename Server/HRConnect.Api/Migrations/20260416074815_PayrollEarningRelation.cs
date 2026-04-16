@@ -5,7 +5,7 @@
 namespace HRConnect.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class EmployeePayrollEarningsRelation : Migration
+    public partial class PayrollEarningRelation : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -19,8 +19,10 @@ namespace HRConnect.Api.Migrations
                     LongDescription = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Taxable = table.Column<bool>(type: "bit", nullable: false),
                     TaxCode = table.Column<int>(type: "int", nullable: false),
-                    HourlyRate = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    TaxPercentage = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    OvertimeHourMultiplier = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
                     CanProRata = table.Column<bool>(type: "bit", nullable: false),
+                    IsOnGoing = table.Column<bool>(type: "bit", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -36,8 +38,8 @@ namespace HRConnect.Api.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     EmployeeId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     PayrollEarningId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Taxable = table.Column<bool>(type: "bit", nullable: false),
                     TaxCode = table.Column<int>(type: "int", nullable: false),
+                    OverTimeHoursWorked = table.Column<int>(type: "int", nullable: true),
                     Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     PayrollRunId = table.Column<int>(type: "int", nullable: false),
                     IsLocked = table.Column<bool>(type: "bit", nullable: false)

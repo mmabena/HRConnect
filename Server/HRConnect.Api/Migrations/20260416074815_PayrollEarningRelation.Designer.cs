@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRConnect.Api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20260410115749_EmployeePayrollEarningsRelation")]
-    partial class EmployeePayrollEarningsRelation
+    [Migration("20260416074815_PayrollEarningRelation")]
+    partial class PayrollEarningRelation
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1284,6 +1284,9 @@ namespace HRConnect.Api.Migrations
                     b.Property<bool>("IsLocked")
                         .HasColumnType("bit");
 
+                    b.Property<int?>("OverTimeHoursWorked")
+                        .HasColumnType("int");
+
                     b.Property<string>("PayrollEarningId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -1293,9 +1296,6 @@ namespace HRConnect.Api.Migrations
 
                     b.Property<int>("TaxCode")
                         .HasColumnType("int");
-
-                    b.Property<bool>("Taxable")
-                        .HasColumnType("bit");
 
                     b.HasKey("EmployeePayrollEarningId");
 
@@ -1316,15 +1316,18 @@ namespace HRConnect.Api.Migrations
                     b.Property<bool>("CanProRata")
                         .HasColumnType("bit");
 
-                    b.Property<decimal?>("HourlyRate")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsOnGoing")
                         .HasColumnType("bit");
 
                     b.Property<string>("LongDescription")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("OvertimeHourMultiplier")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("ShortDescription")
                         .IsRequired()
@@ -1332,6 +1335,9 @@ namespace HRConnect.Api.Migrations
 
                     b.Property<int>("TaxCode")
                         .HasColumnType("int");
+
+                    b.Property<decimal?>("TaxPercentage")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<bool>("Taxable")
                         .HasColumnType("bit");

@@ -4,21 +4,27 @@
 
   public static class GenerateUnqiueCode
   {
-    public static string GenerateStringCode(string inputData, List<string> matchingCodes)
+    public static string GenerateStringCode(string prefix, List<string> matchingCodes)
     {
+      string codePrefix = char.IsDigit(prefix[0])
+                ? "XXX"
+                : ((prefix.Length >= 3)
+                    ? prefix[..3].ToUpper(CultureInfo.InvariantCulture)
+                    : prefix.ToUpper(CultureInfo.InvariantCulture).PadRight(3, 'X'));
       int nextNum = 1;
-      string prefix = (inputData.Length >= 3) ? inputData[..3].ToUpper(CultureInfo.InvariantCulture)
-        : inputData.ToUpper(CultureInfo.InvariantCulture).PadRight(3, 'X');
 
-      if ((matchingCodes != null) && (matchingCodes.Count > 0))
+      bool prefixExists = matchingCodes.Any(code => code.StartsWith(codePrefix, StringComparison.InvariantCultureIgnoreCase));
+
+      if (matchingCodes != null && matchingCodes.Count > 0 && prefixExists)
       {
         int maxNum = matchingCodes.Max(code =>
         {
           return code.Length > prefix.Length && int.TryParse(code.AsSpan(prefix.Length), out int num) ? num : 0;
         });
+        nextNum = maxNum + 1;
       }
 
-
+      return $"{codePrefix}{nextNum:D3}";
     }
   }
 }

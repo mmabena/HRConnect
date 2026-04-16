@@ -10,8 +10,11 @@
     public bool Taxable { get; set; }
     public int TaxCode { get; set; }
     [Column(TypeName = "decimal(18,2)")]
-    public decimal? HourlyRate { get; set; }
+    public decimal? TaxPercentage { get; set; }
+    [Column(TypeName = "decimal(18,2)")]
+    public decimal? OvertimeHourMultiplier { get; set; }
     public bool CanProRata { get; set; }
+    public bool IsOnGoing { get; set; }
     public bool IsActive { get; set; }
     public ICollection<EmployeePayrollEarning> EmployeePayrollEarning { get; set; } = [];
   }

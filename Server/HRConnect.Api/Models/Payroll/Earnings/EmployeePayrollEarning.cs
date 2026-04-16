@@ -7,8 +7,8 @@
     public int EmployeePayrollEarningId { get; set; }
     public required string EmployeeId { get; set; }
     public required string PayrollEarningId { get; set; }
-    public bool Taxable { get; set; }
     public int TaxCode { get; set; }
+    public int? OverTimeHoursWorked { get; set; }
     [Column(TypeName = "decimal(18,2)")]
     public decimal Amount { get; set; }
     public int PayrollRunId { get; set; }

@@ -12,7 +12,8 @@
   using HRConnect.Api.Models.PayrollDeduction;
   using HRConnect.Api.Models.Pension;
   using HRConnect.Api.Utils;
-  using HRConnect.Api.Utils.Pension.ValidationHelpers;
+  //using HRConnect.Api.Utils.Pension.ValidationHelpers;
+  using HRConnect.Api.Utils.ValidationHelpers.Pension;
   using HRConnect.Api.Utils.Jobs.Pension;
   using Quartz;
 
