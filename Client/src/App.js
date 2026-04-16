@@ -30,6 +30,7 @@ import ProjectionCalculator from "./Pages/PayrollTools/ProjectionCalculator";
 import PersonalInformation from "./Components/PersonalInformation.jsx";
 import api from "../src/api/api.js";
 import ChangePositionManagement from "./Components/companyManagement/PositionManagement/ChangePositionManagement.jsx";
+import BankingDetailsModal from "./Components/BankingManagement/BankingDetailsModal.jsx";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
@@ -167,6 +168,7 @@ function App() {
           <Route path="/dashboard" element={<div>Welcome to Dashboard</div>} />
           <Route path="/addEmployee" element={<AddEmployee />} />
           <Route path="/addEmployeeModal" element={<AddEmployeeModal />} />
+          <Route path="/bankingDetailsModal" element={<BankingDetailsModal />} />
           <Route path="/editEmployee" element={<EditEmployee />} />
           <Route
             path="/editEmployee/:employeeNumber"
@@ -176,6 +178,7 @@ function App() {
           <Route path="/companyManagement" element={<CompanyManagement />} />
           <Route path="/editCompany/:id" element={<EditCompany />} />
           <Route path="/employeeList" element={<EmployeeList />} />
+          
           <Route
             path="/company-contribution"
             element={<CompanyContribution />}

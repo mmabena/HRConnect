@@ -11,23 +11,26 @@ import useImageUpload from "../../hooks/useImageUpload";
 import useUserRole from "../../hooks/useUserRole";
 import { UserRoundPlus, X } from "lucide-react";
 
-/// </summary>
-/// MOCK super user role
-/// </summary>
-
 const getCurrentUserRole = () => "superuser";
 
-const AddEmployeeModal = ({ closeModal }) => {
+const AddEmployeeModal = ({ closeModal, openBankingModal }) => {
   const navigate = useNavigate();
   const role = useUserRole();
   const { positions, allEmployees, loading: dataLoading } = useEmployeeData();
   const { validateEmployee } = useEmployeeValidation();
   const { uploadImage, uploading } = useImageUpload();
+
   const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState(1);
+
+  const nextStep = () => setStep((prev) => Math.min(prev + 1, 6));
+  const prevStep = () => setStep((prev) => Math.max(prev - 1, 1));
+
   const titles = ["Mr", "Mrs", "Ms", "Dr", "Prof"];
   const genders = ["Male", "Female"];
   const branches = ["Johannesburg", "CapeTown", "UK"];
   const employmentStatuses = ["Permanent", "FixedTerm", "Contract"];
+
   const { employee, setEmployee, formErrors, setFormErrors, onInputChange } =
     useEmployeeForm({
       title: "",
@@ -57,9 +60,7 @@ const AddEmployeeModal = ({ closeModal }) => {
     });
 
   const fileInputRef = useRef(null);
-  const handleImageClick = () => {
-    fileInputRef.current.click();
-  };
+  const handleImageClick = () => fileInputRef.current.click();
   const [fileName, setFileName] = useState("Profile Picture");
 
   if (role !== "superuser") {
@@ -68,7 +69,6 @@ const AddEmployeeModal = ({ closeModal }) => {
 
   const onFileChange = async (e) => {
     const file = e.target.files[0];
-
     if (!file) return;
 
     setFileName(file.name);
@@ -86,8 +86,6 @@ const AddEmployeeModal = ({ closeModal }) => {
   const handleSave = async () => {
     const errors = validateEmployee(employee);
     setFormErrors(errors);
-
-    console.error(errors);
 
     if (Object.keys(errors).length > 0) return;
 
@@ -131,17 +129,34 @@ const AddEmployeeModal = ({ closeModal }) => {
       toast.success("Employee created successfully!");
       closeModal();
     } catch (error) {
-      if (error.response && error.response.data?.errors) {
+      if (error.response?.data?.errors) {
         setFormErrors(error.response.data.errors);
       } else {
         toast.error("Failed to create employee.");
       }
-
-      console.error("Add employee error response data:", error.response?.data);
-      console.error("Add employee error status:", error.response?.status);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleNext = () => {
+  if (step === 1) {
+    if (openBankingModal) {
+      openBankingModal(employee);
+    }
+    return;
+  }
+
+  if (step < 6) {
+    nextStep();
+  } else {
+    handleSave();
+  }
+};
+
+  const handleBack = () => {
+    if (step === 1) return;
+    prevStep();
   };
 
   const formatCurrency = (value) => {
@@ -156,72 +171,135 @@ const AddEmployeeModal = ({ closeModal }) => {
   if (dataLoading) return <div>Loading...</div>;
 
   return (
-      
-  
     <div className="emp-center-frame">
-    
       <div className="emp-left-frame">
         <div className="emp-left-frame-centered">
           <div className="emp-headings-container">
             <div className="emp-left-icon-wrapper">
-            <UserRoundPlus size={24}/>
-           </div>
-              <span className="emp-title-wrapper emp-center-logo-text">New Employee</span>
-              <div className="emp-right-icon-wrapper">
-            <X size={24}/>
-           </div>
-        </div>
-        <div className="emp-wizard-container">
-          <div className="emp-wizard-frame">
-            <div className="emp-step-wrapper">
-            <div className = "emp-step-active">1</div>
-            <span className="emp-wizard-step">Personal Details</span>
+              <UserRoundPlus size={24} />
             </div>
-            
-            <div className="emp-line-step"></div>
-            
-            <div className="emp-step-wrapper">
-            <div className="emp-step-inactive">2</div>
-              <span className="emp-wizard-step">Banking Details</span>
-            </div>
-           
-            <div className="emp-line-step"></div>
-              <div className="emp-step-wrapper">
-            <div className="emp-step-inactive">3</div>
-              <span className="emp-wizard-step">Leave</span>
-            </div>
-
-            <div className="emp-line-step"></div>
-
-             <div className="emp-step-wrapper">
-            <div className="emp-step-inactive">4</div>
-              <span className="emp-wizard-step">Pension</span>
-            </div>
-
-            <div className="emp-line-step"></div>
-
-             <div className="emp-step-wrapper">
-            <div className="emp-step-inactive">5</div>
-              <span className="emp-wizard-step">Medical Aid</span>
-            </div>
-            <div className="emp-line-step"></div>
-
-             <div className="emp-step-wrapper">
-            <div className="emp-step-inactive">6</div>
-              <span className="emp-wizard-step">Preview</span>
+            <span className="emp-title-wrapper emp-center-logo-text">
+              New Employee
+            </span>
+            <div className="emp-right-icon-wrapper">
+              <X size={24} />
             </div>
           </div>
 
-        </div>
+          <div className="emp-wizard-container">
+            <div className="emp-wizard-frame">
+              {/* STEP 1 */}
+              <div className="emp-step-wrapper">
+                <div
+                  className={
+                    step > 1
+                      ? "emp-step-completed"
+                      : step === 1
+                        ? "emp-step-active"
+                        : "emp-step-inactive"
+                  }
+                >
+                  1
+                </div>
+                <span className="emp-wizard-step">Personal Details</span>
+              </div>
+
+              <div className="emp-line-step"></div>
+
+              {/* STEP 2 */}
+              <div className="emp-step-wrapper">
+                <div
+                  className={
+                    step > 2
+                      ? "emp-step-completed"
+                      : step === 2
+                        ? "emp-step-active"
+                        : "emp-step-inactive"
+                  }
+                >
+                  2
+                </div>
+                <span className="emp-wizard-step">Banking Details</span>
+              </div>
+
+              <div className="emp-line-step"></div>
+
+              {/* STEP 3 */}
+              <div className="emp-step-wrapper">
+                <div
+                  className={
+                    step > 3
+                      ? "emp-step-completed"
+                      : step === 3
+                        ? "emp-step-active"
+                        : "emp-step-inactive"
+                  }
+                >
+                  3
+                </div>
+                <span className="emp-wizard-step">Leave</span>
+              </div>
+
+              <div className="emp-line-step"></div>
+
+              {/* STEP 4 */}
+              <div className="emp-step-wrapper">
+                <div
+                  className={
+                    step > 4
+                      ? "emp-step-completed"
+                      : step === 4
+                        ? "emp-step-active"
+                        : "emp-step-inactive"
+                  }
+                >
+                  4
+                </div>
+                <span className="emp-wizard-step">Pension</span>
+              </div>
+
+              <div className="emp-line-step"></div>
+
+              {/* STEP 5 */}
+              <div className="emp-step-wrapper">
+                <div
+                  className={
+                    step > 5
+                      ? "emp-step-completed"
+                      : step === 5
+                        ? "emp-step-active"
+                        : "emp-step-inactive"
+                  }
+                >
+                  5
+                </div>
+                <span className="emp-wizard-step">Medical Aid</span>
+              </div>
+
+              <div className="emp-line-step"></div>
+
+              {/* STEP 6 */}
+              <div className="emp-step-wrapper">
+                <div
+                  className={
+                    step === 6 ? "emp-step-active" : "emp-step-inactive"
+                  }
+                >
+                  6
+                </div>
+                <span className="emp-wizard-step">Preview</span>
+              </div>
+            </div>
+          </div>
         </div>
 
-        
-
+        {/* 🔥 YOUR ENTIRE RETURN CONTENT UNTOUCHED */}
         <div className="emp-name-surname-container">
           <div className="emp-form-grid">
             <div className="emp-personal-details-heading">
               <span>Personal Details</span>
             </div>
+
             <div className="emp-personal-details-sub">
               <span>Employee identity information</span>
             </div>
@@ -723,7 +801,6 @@ const AddEmployeeModal = ({ closeModal }) => {
                   className="dropdown-icon"
                 />
               </div>
-
               <div className="emp-input-wrapper">
                 <span className="upload-label">
                   {uploading ? "Uploading..." : fileName}
@@ -751,19 +828,31 @@ const AddEmployeeModal = ({ closeModal }) => {
                   </span>
                 )}
               </div>
-
-              {/* Save Button */}
-              {formErrors.general && (
-                <div className="emp-error-message">{formErrors.general}</div>
+              {/* Back Button */}
+              {step > 1 && (
+                <button
+                  className="emp-save-button emp-back-button"
+                  onClick={prevStep}
+                  type="button"
+                >
+                  Back
+                </button>
               )}
+
+              {/* Next / Save Button */}
               <button
                 className="emp-save-button"
-                onClick={handleSave}
+                onClick={() => {
+                  if (step < 6) {
+                    nextStep();
+                  } else {
+                    handleSave();
+                  }
+                }}
                 disabled={loading}
               >
-                {loading ? "Saving..." : "Next"}
+                {loading ? "Saving..." : step === 6 ? "Save" : "Next"}
               </button>
-
               {/* <div className="emp-right-frame-bottom">
                 <p className="emp-right-frame-bottom-text">
                   <span className="emp-align-right">

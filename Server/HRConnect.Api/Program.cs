@@ -281,5 +281,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseMiddleware<ExceptionMiddleware>();
 app.MapControllers();
-app.MapHub<UserPositionHub>("/userPositionHub");
+app.MapHub<UserPositionHub>("/UserPositionHub");
 app.Run();
