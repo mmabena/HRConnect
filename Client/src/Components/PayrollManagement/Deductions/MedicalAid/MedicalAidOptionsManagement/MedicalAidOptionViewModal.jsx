@@ -9,7 +9,7 @@ function MedicalAidOptionViewModal({isOpen,onClose, title, data = []}) {
     useEffect(() => {
         if(!isOpen) return;
 
-        const handleEscKeyDown = (evt) => e.Key === "Escape" && onClose();
+        const handleEscKeyDown = (evt) => evt.Key === "Escape" && onClose();
         document.addEventListener("keydown", handleEscKeyDown);
         return () => document.removeEventListener("keydown", handleEscKeyDown);
     },[isOpen,onClose]);
@@ -40,7 +40,7 @@ function MedicalAidOptionViewModal({isOpen,onClose, title, data = []}) {
     // Render outside #root so inert doesn't block the modal
     return ReactDOM.createPortal(
         <div
-          className="medicalAidOptions-ModalOverlay"
+          className="menu-background"
           onClick={onClose}
         >
           <div

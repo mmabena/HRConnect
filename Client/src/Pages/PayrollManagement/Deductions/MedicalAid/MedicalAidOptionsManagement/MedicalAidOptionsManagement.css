@@ -1,0 +1,30 @@
+﻿/* Custom Css for the Medical Aid Management Screen */
+
+.medical-aid-management-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: var(--border-radius-small);
+  overflow: hidden;
+}
+
+.medical-aid-management-table th,
+.medical-aid-management-table td {
+  padding: 12px;
+  text-align: left;
+}
+
+.medical-aid-management-table th {
+  background-color: var(--primary-color);
+  color: white;
+  font-weight: 600;
+  font-family: 'Anek Bangla', 'sans-serif';
+}
+
+.medical-aid-management-table tbody tr {
+  border-bottom: 1px solid var(--primary-color);
+}
+.medical-aid-management-table tbody tr:hover {
+    background-color: #f5f5f5;
+}
