@@ -20,6 +20,8 @@ namespace HRConnect.Api.Services
   using HRConnect.Api.DTOs.TaxDeduction;
   using HRConnect.Api.Models.PayrollDeduction;
   using HRConnect.Api.Models.Payroll;
+  using HRConnect.Api.Utils;
+
 
 
   /// <summary>
@@ -31,14 +33,19 @@ namespace HRConnect.Api.Services
   public class TaxDeductionService : ITaxDeductionService
   {
     private readonly ITaxDeductionRepository _repository;
+    private readonly StatutoryContributionsCalculator _deductionsCalculator;
+    private readonly IPayrollRunService _payrollRunService;
     /// <summary>
     /// Initializes a new instance of <see cref="TaxDeductionService"/> with the specified repository.
     /// </summary>
     /// <param name="repository">this is the repository instance for tax deductions</param>
     /// <param name="context">this is the application database context</param>
-    public TaxDeductionService(ITaxDeductionRepository repository)
+    public TaxDeductionService(ITaxDeductionRepository repository, IPayrollRunService
+    payrollRunService)
     {
       _repository = repository;
+      _deductionsCalculator = new StatutoryContributionsCalculator();
+      _payrollRunService = payrollRunService;
     }
 
     /// <summary>
@@ -164,7 +171,7 @@ namespace HRConnect.Api.Services
         throw new KeyNotFoundException("Employee not found");
       }
 
-      var payrollRun = await _repository.GetActivePayrollRunAsync();
+      var payrollRun = await _payrollRunService.GetCurrentRunAsync();
       if (payrollRun == null)
       {
         throw new KeyNotFoundException("No active payroll run");
@@ -172,11 +179,6 @@ namespace HRConnect.Api.Services
       if (payrollRun.IsFinalised)
       {
         throw new InvalidOperationException("Payroll month is finalised. Recalculation is blocked.");
-      }
-
-      if (payrollRun.IsFinalised)
-      {
-        throw new InvalidOperationException("Payroll run has been finalised. Recalculation is blocked.");
       }
 
       var existing = await _repository.GetExistingFinalTaxAsync(employee.EmployeeId,
@@ -223,9 +225,7 @@ namespace HRConnect.Api.Services
 
       decimal finalTax = Math.Max(0, taxBeforeCredits - medicalCredit);
 
-      decimal uifEmployee = CalculateUifEmployee(monthlySalary);
-      decimal uifEmployer = CalculateUifEmployer(monthlySalary);
-      decimal sdl = CalculateSdl(monthlySalary);
+      decimal uifEmployee = _deductionsCalculator.CalculateUifEmployee(monthlySalary);
 
       decimal netSalary = monthlySalary - pensionContribution - finalTax - uifEmployee;
 
@@ -233,9 +233,6 @@ namespace HRConnect.Api.Services
 
       var record = new FinalTaxDeduction
       {
-        PayrollRunId = payrollRun.PayrollRunId,
-        EmployeeId = employee.EmployeeId,
-
         Name = employee.Name,
         Surname = employee.Surname,
         IdNumber = employee.IdNumber,
@@ -253,9 +250,6 @@ namespace HRConnect.Api.Services
         MedicalTaxCredit = medicalCredit,
 
         TaxDeductionAmount = finalTax,
-        UifEmployeeAmount = uifEmployee,
-        UifEmployerAmount = uifEmployer,
-        SdlAmount = sdl,
         NetSalary = netSalary,
 
         TaxCode = GenerateTaxCode(
@@ -267,6 +261,7 @@ namespace HRConnect.Api.Services
       };
 
       await _repository.AddFinalTaxDeductionAsync(record);
+      await _payrollRunService.AddRecordToCurrentRunAsync(record, employee.EmployeeId);
       await _repository.SaveChangesAsync();
 
       return record;
@@ -303,30 +298,6 @@ namespace HRConnect.Api.Services
       if (monthlySalary <= 0) return 0;
       decimal contribution = monthlySalary * UifRate;
       return contribution > UifCap ? UifCap : contribution;
-    }
-
-    /// <summary>
-    /// Calculates the UIF employer contribution based on the monthly salary,
-    /// ensuring it does not exceed the UIF cap.
-    /// </summary>
-    /// <param name="monthlySalary"></param>
-    /// <returns></returns>
-    private decimal CalculateUifEmployer(decimal monthlySalary)
-    {
-      if (monthlySalary <= 0) return 0;
-      decimal contribution = monthlySalary * UifRate;
-      return contribution > UifCap ? UifCap : contribution;
-    }
-
-    /// <summary>
-    /// Calculates the SDL amount based on the monthly salary.
-    /// </summary>
-    /// <param name="monthlySalary"></param>
-    /// <returns></returns>
-    private decimal CalculateSdl(decimal monthlySalary)
-    {
-      if (monthlySalary <= 0) return 0;
-      return monthlySalary * SdlRate;
     }
   }
 }

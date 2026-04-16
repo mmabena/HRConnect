@@ -10,7 +10,7 @@ namespace HRConnect.Api.Models.PayrollDeduction
 {
   public class FinalTaxDeduction : PayrollRecord
   {
-    public int Id { get; set; }
+   // public int Id { get; set; }
 
     public string Name { get; set; } = string.Empty;
     public string Surname { get; set; } = string.Empty;
@@ -38,15 +38,6 @@ namespace HRConnect.Api.Models.PayrollDeduction
 
     [Column(TypeName = "decimal(18,2)")]
     public decimal TaxDeductionAmount { get; set; }
-
-    [Column(TypeName = "decimal(18,2)")]
-    public decimal UifEmployeeAmount { get; set; }
-
-    [Column(TypeName = "decimal(18,2)")]
-    public decimal UifEmployerAmount { get; set; }
-
-    [Column(TypeName = "decimal(18,2)")]
-    public decimal SdlAmount { get; set; }
 
     [Column(TypeName = "decimal(18,2)")]
     public decimal NetSalary { get; set; }

@@ -182,18 +182,6 @@ namespace HRConnect.Api.Data
             .HasPrecision(18, 2)
             .IsRequired();
 
-        entity.Property(e => e.UifEmployeeAmount)
-            .HasPrecision(18, 2)
-            .IsRequired();
-            
-        entity.Property(e => e.UifEmployerAmount)
-            .HasPrecision(18, 2)  
-            .IsRequired();
-
-        entity.Property(e => e.SdlAmount)
-            .HasPrecision(18, 2)
-            .IsRequired();
-
         entity.Property(e => e.NetSalary)
             .HasPrecision(18, 2)
             .IsRequired();
@@ -222,6 +210,7 @@ namespace HRConnect.Api.Data
       modelBuilder.Entity<PensionDeduction>().ToTable("PensionDeductions");
       modelBuilder.Entity<MedicalAidDeduction>().ToTable("MedicalAidDeductions");
       modelBuilder.Entity<StatutoryContribution>().ToTable("StatutoryContributions");
+      modelBuilder.Entity<FinalTaxDeduction>().ToTable("FinalTaxDeductions");
 
       modelBuilder.Entity<PayrollRun>(b =>
         {
