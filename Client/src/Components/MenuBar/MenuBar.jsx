@@ -14,7 +14,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   const [payrollOpen, setPayrollOpen] = useState(false);
   const [leaveOpen, setLeaveOpen] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
-  const [payinfoOpen, setPayInfoOpen] = useState(false);
+  const [payInfoOpen, setPayInfoOpen] = useState(false);
   const [manualReportToggle, setManualReportToggle] = useState(false);
   const [manualAdminToggle, setManualAdminToggle] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -35,7 +35,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   
   const navigate = useNavigate();
   const location = useLocation();
-
+  
   const  resolvedRole=resolveRole(currentUser);
   const role=resolveRole.key??currentUser?.role?.toLowerCase();
 
@@ -59,6 +59,8 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   }, [baseUrl, role]);
 
   useEffect(() => {
+    console.log(`LOCATION`);
+    console.log(location)
     if (!role) return;
 
     if (isEmployeeManagementPage && !manualReportToggle) {
@@ -513,15 +515,15 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                 />
                 <span className="menu-heading">
                   Payroll Information
-                  <span className="menu-dropdown">{payinfoOpen ? "▲" : "▼"}</span>
+                  <span className="menu-dropdown">{payInfoOpen ? "▲" : "▼"}</span>
                 </span>
               </div>
-              {payinfoOpen && (
+              {payInfoOpen && (
                 <ul className="submenu show">
                   <li>
                     <span
                       className="menu-subitem"
-                      onClick={() => handleSubmenuClick("/payslips")}
+                      onClick={() => handleSubmenuClick("/payslip")}
                     >
                       Payslips
                     </span>

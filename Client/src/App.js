@@ -232,7 +232,7 @@ function App() {
           <Route path="/changeposition" element={<ChangePositionManagement />} />
           <Route path="/manageUserPosition" element={<ManageUserPositions />} />
           <Route path="/personal" element={<PersonalInformation />} />
-          <Route path="/payslip" element={<Payslip/>} />
+          <Route path="/payslip" element= {<Payslip/>}/>
         </Routes>
       </div>
     </div>

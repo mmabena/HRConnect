@@ -20,22 +20,23 @@ const usePayrollPeriod=(locationKey)=>{
         setError(null);
 
         try{
-        const data=await getAllPayrollPeriod({signal});
+          const data=await getAllPayrollPeriod({signal});
         
-        if(!signal.aborted)
-            setPayrollPeriod(data);
+          if(!signal.aborted){
+              setPayrollPeriod(data);
+          }
         }
         catch(err)
         {
-            if(err.name==="CanceledError")  
-               return; /*Error From Controller*/
-            
-            
-            setError(`Failed To Fetch Payroll Periods: ${err.response.data}`);
+            if(err.name==="CanceledError")  {
+              return; /*Error From Controller*/
+            }
+          setError(`Failed To Fetch Payroll Periods: ${err.response.data}`);
         }
         finally{
-            if(!signal.aborted)
+            if(!signal.aborted){
                 setLoading(false);
+            }
         }
     };
 
@@ -43,8 +44,8 @@ const usePayrollPeriod=(locationKey)=>{
         const controller=new AbortController();
 
         loadPayrollPeriod(controller.signal);
-        
-        return ()=>{
+ 
+        return () => {
             controller.abort();
         }
     },[locationKey]);
