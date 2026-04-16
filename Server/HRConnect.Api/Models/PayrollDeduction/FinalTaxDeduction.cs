@@ -40,6 +40,15 @@ namespace HRConnect.Api.Models.PayrollDeduction
     public decimal TaxDeductionAmount { get; set; }
 
     [Column(TypeName = "decimal(18,2)")]
+    public decimal UifEmployeeAmount { get; set; }
+
+    [Column(TypeName = "decimal(18,2)")]
+    public decimal UifEmployerAmount { get; set; }
+
+    [Column(TypeName = "decimal(18,2)")]
+    public decimal SdlAmount { get; set; }
+
+    [Column(TypeName = "decimal(18,2)")]
     public decimal NetSalary { get; set; }
 
     public string TaxCode { get; set; } = string.Empty;

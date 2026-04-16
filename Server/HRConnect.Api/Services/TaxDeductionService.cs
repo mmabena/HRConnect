@@ -169,6 +169,10 @@ namespace HRConnect.Api.Services
       {
         throw new KeyNotFoundException("No active payroll run");
       }
+      if (payrollRun.IsFinalised)
+      {
+        throw new InvalidOperationException("Payroll month is finalised. Recalculation is blocked.");
+      }
 
       if (payrollRun.IsFinalised)
       {
@@ -219,7 +223,11 @@ namespace HRConnect.Api.Services
 
       decimal finalTax = Math.Max(0, taxBeforeCredits - medicalCredit);
 
-      decimal netSalary = monthlySalary - pensionContribution - finalTax;
+      decimal uifEmployee = CalculateUifEmployee(monthlySalary);
+      decimal uifEmployer = CalculateUifEmployer(monthlySalary);
+      decimal sdl = CalculateSdl(monthlySalary);
+
+      decimal netSalary = monthlySalary - pensionContribution - finalTax - uifEmployee;
 
       int taxYear = DateTime.Now.Year;
 
@@ -245,6 +253,9 @@ namespace HRConnect.Api.Services
         MedicalTaxCredit = medicalCredit,
 
         TaxDeductionAmount = finalTax,
+        UifEmployeeAmount = uifEmployee,
+        UifEmployerAmount = uifEmployer,
+        SdlAmount = sdl,
         NetSalary = netSalary,
 
         TaxCode = GenerateTaxCode(
@@ -272,6 +283,50 @@ namespace HRConnect.Api.Services
     {
       return $"TX-{taxYear}-{payrollRunId}-{employeeId}";
     }
-  }
 
+    /// <summary>
+    /// Calculates the UIF contributions for both employee and employer, 
+    /// as well as the SDL amount based on the monthly salary.
+    /// </summary>
+    private const decimal UifRate = 0.01m;
+    private const decimal UifCap = 177.12m;
+    private const decimal SdlRate = 0.01m;
+
+    /// <summary>
+    /// Calculates the UIF employee contribution based on the monthly salary,
+    /// ensuring it does not exceed the UIF cap.
+    /// </summary>
+    /// <param name="monthlySalary"></param>
+    /// <returns></returns>
+    private decimal CalculateUifEmployee(decimal monthlySalary)
+    {
+      if (monthlySalary <= 0) return 0;
+      decimal contribution = monthlySalary * UifRate;
+      return contribution > UifCap ? UifCap : contribution;
+    }
+
+    /// <summary>
+    /// Calculates the UIF employer contribution based on the monthly salary,
+    /// ensuring it does not exceed the UIF cap.
+    /// </summary>
+    /// <param name="monthlySalary"></param>
+    /// <returns></returns>
+    private decimal CalculateUifEmployer(decimal monthlySalary)
+    {
+      if (monthlySalary <= 0) return 0;
+      decimal contribution = monthlySalary * UifRate;
+      return contribution > UifCap ? UifCap : contribution;
+    }
+
+    /// <summary>
+    /// Calculates the SDL amount based on the monthly salary.
+    /// </summary>
+    /// <param name="monthlySalary"></param>
+    /// <returns></returns>
+    private decimal CalculateSdl(decimal monthlySalary)
+    {
+      if (monthlySalary <= 0) return 0;
+      return monthlySalary * SdlRate;
+    }
+  }
 }

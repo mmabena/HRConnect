@@ -182,6 +182,18 @@ namespace HRConnect.Api.Data
             .HasPrecision(18, 2)
             .IsRequired();
 
+        entity.Property(e => e.UifEmployeeAmount)
+            .HasPrecision(18, 2)
+            .IsRequired();
+            
+        entity.Property(e => e.UifEmployerAmount)
+            .HasPrecision(18, 2)  
+            .IsRequired();
+
+        entity.Property(e => e.SdlAmount)
+            .HasPrecision(18, 2)
+            .IsRequired();
+
         entity.Property(e => e.NetSalary)
             .HasPrecision(18, 2)
             .IsRequired();
