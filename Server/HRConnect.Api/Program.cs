@@ -27,6 +27,7 @@ using Quartz;
 using HRConnect.Api.Interfaces.Notification;
 using HRConnect.Api.Utils.Factories;
 using HRConnect.Api.Utils.Notification;
+using HRConnect.Api.Interfaces.Payroll.Earning;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -266,6 +267,8 @@ builder.Services.AddScoped<INotificationDispatcher, NotificationDispatcher>();
 builder.Services.AddScoped<IJobScheduleService, JobScheduleService>();
 
 builder.Services.AddScoped<PositionAndLeaveSeed>();
+builder.Services.AddScoped<IPayrollEarningRepository, PayrollEarningRepository>();
+builder.Services.AddScoped<IPayrollEarningService, PayrollEarningService>();
 
 builder.Services.AddCors(options =>
 {

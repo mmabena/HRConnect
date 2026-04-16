@@ -8,6 +8,8 @@ namespace HRConnect.Api.Data
   using Microsoft.EntityFrameworkCore;
   using AppAny.Quartz.EntityFrameworkCore.Migrations;
   using AppAny.Quartz.EntityFrameworkCore.Migrations.SqlServer;
+  using HRConnect.Api.Models.Payroll.Earning;
+
   public class ApplicationDBContext(DbContextOptions dbContextOptions) : DbContext(dbContextOptions)
   {
 
@@ -44,6 +46,7 @@ namespace HRConnect.Api.Data
     public DbSet<EmployeeCompanyContribution> EmployeeCompanyContributions { get; set; }
     public DbSet<MedicalAidDeduction> MedicalAidDeductions { get; set; }
     public DbSet<Notification> Notifications { get; set; }
+    public DbSet<PayrollEarning> PayrollEarnings { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
       base.OnModelCreating(modelBuilder);

@@ -4,7 +4,7 @@ namespace HRConnect.Api.Models
   using System.Collections.Generic;
   using System.ComponentModel.DataAnnotations;
   using System.ComponentModel.DataAnnotations.Schema;
-
+  using HRConnect.Api.Models.Payroll.Earning;
   using HRConnect.Api.Models.Pension;
 
   public enum Gender
