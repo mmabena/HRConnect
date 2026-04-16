@@ -899,6 +899,29 @@ namespace HRConnect.Api.Migrations
                     b.ToTable("JobGrades");
                 });
 
+            modelBuilder.Entity("HRConnect.Api.Models.JobGradeGroupMap", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("GroupKey")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("JobGradeId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JobGradeId", "GroupKey")
+                        .IsUnique();
+
+                    b.ToTable("JobGradeGroupMaps");
+                });
+
             modelBuilder.Entity("HRConnect.Api.Models.LeaveApplication", b =>
                 {
                     b.Property<int>("Id")
@@ -974,11 +997,12 @@ namespace HRConnect.Api.Migrations
                     b.Property<decimal>("DaysAllocated")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("GroupKey")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
-
-                    b.Property<int?>("JobGradeId")
-                        .HasColumnType("int");
 
                     b.Property<int>("LeaveTypeId")
                         .HasColumnType("int");
@@ -990,8 +1014,6 @@ namespace HRConnect.Api.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("JobGradeId");
 
                     b.HasIndex("LeaveTypeId");
 
@@ -1937,6 +1959,17 @@ namespace HRConnect.Api.Migrations
                     b.Navigation("LeaveType");
                 });
 
+            modelBuilder.Entity("HRConnect.Api.Models.JobGradeGroupMap", b =>
+                {
+                    b.HasOne("HRConnect.Api.Models.JobGrade", "JobGrade")
+                        .WithMany()
+                        .HasForeignKey("JobGradeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("JobGrade");
+                });
+
             modelBuilder.Entity("HRConnect.Api.Models.LeaveApplication", b =>
                 {
                     b.HasOne("HRConnect.Api.Models.Employee", "Employee")
@@ -1958,18 +1991,11 @@ namespace HRConnect.Api.Migrations
 
             modelBuilder.Entity("HRConnect.Api.Models.LeaveEntitlementRule", b =>
                 {
-                    b.HasOne("HRConnect.Api.Models.JobGrade", "JobGrade")
-                        .WithMany("LeaveEntitlementRules")
-                        .HasForeignKey("JobGradeId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("HRConnect.Api.Models.LeaveType", "LeaveType")
                         .WithMany("EntitlementRules")
                         .HasForeignKey("LeaveTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("JobGrade");
 
                     b.Navigation("LeaveType");
                 });
@@ -2112,8 +2138,6 @@ namespace HRConnect.Api.Migrations
 
             modelBuilder.Entity("HRConnect.Api.Models.JobGrade", b =>
                 {
-                    b.Navigation("LeaveEntitlementRules");
-
                     b.Navigation("Positions");
                 });
 

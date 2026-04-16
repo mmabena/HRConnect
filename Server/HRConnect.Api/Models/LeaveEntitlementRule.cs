@@ -8,8 +8,7 @@ namespace HRConnect.Api.Models
     public int LeaveTypeId { get; set; }
     public LeaveType LeaveType { get; set; } = null!;
 
-    public int? JobGradeId { get; set; }
-    public JobGrade? JobGrade { get; set; }
+    public string GroupKey { get; set; } = null!;
 
     public decimal MinYearsService { get; set; }
     public decimal? MaxYearsService { get; set; }

@@ -6,6 +6,7 @@ namespace HRConnect.Api.Services
     using HRConnect.Api.Models;
     using Microsoft.EntityFrameworkCore;
     using HRConnect.Api.Utils;
+    using System.Globalization;
 
     public class LeaveBalanceService : ILeaveBalanceService
     {
@@ -35,6 +36,14 @@ namespace HRConnect.Api.Services
             if (employee == null)
                 throw new InvalidOperationException("Employee not found.");
 
+            var groupKey = await _context.JobGradeGroupMaps
+                .Where(x => x.JobGradeId == employee.Position.JobGradeId)
+                .Select(x => x.GroupKey)
+                .FirstOrDefaultAsync();
+
+            if (groupKey == null)
+                throw new InvalidOperationException("JobGrade not mapped to any group.");
+
             var yearsOfService = CalculateYearsOfService(employee.StartDate);
 
             var leaveTypes = await _context.LeaveTypes
@@ -43,11 +52,9 @@ namespace HRConnect.Api.Services
 
             foreach (var leaveType in leaveTypes)
             {
-                // Skip gender-restricted leave
                 if (leaveType.FemaleOnly && employee.Gender != Gender.Female)
                     continue;
 
-                // Skip if already exists
                 if (employee.LeaveBalances.Any(b => b.LeaveTypeId == leaveType.Id))
                     continue;
 
@@ -56,7 +63,7 @@ namespace HRConnect.Api.Services
                     var rule = await _context.LeaveEntitlementRules
                         .Where(r =>
                             r.LeaveTypeId == leaveType.Id &&
-                            r.JobGradeId == employee.Position.JobGradeId &&
+                            r.GroupKey == groupKey &&
                             r.MinYearsService <= yearsOfService &&
                             (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
                             r.IsActive)
@@ -81,20 +88,12 @@ namespace HRConnect.Api.Services
                     await _context.EmployeeLeaveBalances.AddAsync(annualBalance);
                     await _context.SaveChangesAsync();
 
-                    // Backfill accrual history
                     await BackfillHistoricalAnnualAccrualAsync(employee);
-
-                    // Ensure accrual segment exists
-                    var hasSegment = await _context.EmployeeAccrualRateHistories
-                        .AnyAsync(s => s.EmployeeId == employee.EmployeeId);
-
-                    if (!hasSegment)
-                    {
-                        await CreateInitialAccrualSegmentAsync(employee);
-                    }
+                    await CreateInitialAccrualSegmentAsync(employee);
 
                     continue;
                 }
+
                 if (leaveType.Code == "SL")
                 {
                     var sickBalance = new EmployeeLeaveBalance
@@ -112,6 +111,7 @@ namespace HRConnect.Api.Services
                     await RecalculateSickLeaveAsync(employee.EmployeeId);
                     continue;
                 }
+
                 if (leaveType.Code == "FRL")
                 {
                     var frlBalance = new EmployeeLeaveBalance
@@ -131,16 +131,11 @@ namespace HRConnect.Api.Services
                     continue;
                 }
 
-                var defaultBalance = new EmployeeLeaveBalance
+                await _context.EmployeeLeaveBalances.AddAsync(new EmployeeLeaveBalance
                 {
                     EmployeeId = employee.EmployeeId,
-                    LeaveTypeId = leaveType.Id,
-                    AccruedDays = 0,
-                    TakenDays = 0,
-                    AvailableDays = 0
-                };
-
-                await _context.EmployeeLeaveBalances.AddAsync(defaultBalance);
+                    LeaveTypeId = leaveType.Id
+                });
             }
 
             await _context.SaveChangesAsync();
@@ -472,11 +467,18 @@ namespace HRConnect.Api.Services
                     DaysWorked = totalDaysWorked
                 };
             }
+            var groupKey = await _context.JobGradeGroupMaps
+                .Where(x => x.JobGradeId == employee.Position.JobGradeId)
+                .Select(x => x.GroupKey)
+                .FirstOrDefaultAsync();
+
+            if (groupKey == null)
+                throw new InvalidOperationException("JobGrade not mapped.");
 
             var rules = await _context.LeaveEntitlementRules
                 .Where(r =>
                     r.LeaveTypeId == annualLeave.Id &&
-                    r.JobGradeId == employee.Position.JobGradeId &&
+                    r.GroupKey == groupKey &&
                     r.IsActive)
                 .OrderBy(r => r.MinYearsService)
                 .ToListAsync();
@@ -589,6 +591,14 @@ namespace HRConnect.Api.Services
             if (employee.StartDate.Year >= currentYear)
                 return;
 
+            var groupKey = await _context.JobGradeGroupMaps
+                .Where(x => x.JobGradeId == employee.Position.JobGradeId)
+                .Select(x => x.GroupKey)
+                .FirstOrDefaultAsync();
+
+            if (groupKey == null)
+                throw new InvalidOperationException("JobGrade not mapped.");
+
             var annualLeave = await _context.LeaveTypes
                 .FirstAsync(l => l.Code == "AL" && l.IsActive);
 
@@ -597,10 +607,6 @@ namespace HRConnect.Api.Services
                     b.EmployeeId == employee.EmployeeId &&
                     b.LeaveTypeId == annualLeave.Id);
 
-            await _context.Entry(employee)
-                .Reference(e => e.Position)
-                .LoadAsync();
-
             var endOfPreviousYearDate = new DateTime(currentYear - 1, 12, 31);
 
             var yearsOfService = (decimal)((endOfPreviousYearDate - employee.StartDate.ToDateTime(TimeOnly.MinValue)).TotalDays / 365.25);
@@ -608,14 +614,12 @@ namespace HRConnect.Api.Services
             var rule = await _context.LeaveEntitlementRules
                 .Where(r =>
                     r.LeaveTypeId == annualLeave.Id &&
-                    r.JobGradeId == employee.Position.JobGradeId &&
+                    r.GroupKey == groupKey &&
                     r.MinYearsService <= yearsOfService &&
                     (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
                     r.IsActive)
                 .OrderByDescending(r => r.MinYearsService)
                 .FirstAsync();
-
-            var endOfPreviousYear = new DateOnly(currentYear - 1, 12, 31);
 
             decimal accrued = rule.DaysAllocated;
 
@@ -636,9 +640,7 @@ namespace HRConnect.Api.Services
                     {
                         EmployeeId = employee.EmployeeId,
                         Year = yearToClose,
-                        OpeningBalance = 0,
                         Accrued = accrued,
-                        Used = 0,
                         Forfeited = forfeited,
                         ClosingBalance = carryover,
                         CreatedDate = DateTime.UtcNow
@@ -656,11 +658,19 @@ namespace HRConnect.Api.Services
         /// <returns></returns>
         private async Task CreateInitialAccrualSegmentAsync(Employee employee)
         {
-            bool exists = await _context.EmployeeAccrualRateHistories
+            var exists = await _context.EmployeeAccrualRateHistories
                 .AnyAsync(s => s.EmployeeId == employee.EmployeeId);
 
             if (exists)
                 return;
+
+            var groupKey = await _context.JobGradeGroupMaps
+                .Where(x => x.JobGradeId == employee.Position.JobGradeId)
+                .Select(x => x.GroupKey)
+                .FirstOrDefaultAsync();
+
+            if (groupKey == null)
+                throw new InvalidOperationException("JobGrade not mapped.");
 
             var annualLeave = await _context.LeaveTypes
                 .FirstAsync(l => l.Code == "AL" && l.IsActive);
@@ -669,21 +679,13 @@ namespace HRConnect.Api.Services
 
             var rule = await _context.LeaveEntitlementRules
                 .Where(r =>
-                r.LeaveTypeId == annualLeave.Id &&
-                r.JobGradeId == employee.Position.JobGradeId &&
-                r.MinYearsService <= yearsOfService &&
-                (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
-                r.IsActive)
+                    r.LeaveTypeId == annualLeave.Id &&
+                    r.GroupKey == groupKey &&
+                    r.MinYearsService <= yearsOfService &&
+                    (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
+                    r.IsActive)
                 .OrderByDescending(r => r.MinYearsService)
                 .FirstAsync();
-
-            await _context.Entry(employee)
-                .Reference(e => e.Position)
-                .LoadAsync();
-
-            await _context.Entry(employee.Position)
-                .Reference(p => p.JobGrade)
-                .LoadAsync();
 
             await _context.EmployeeAccrualRateHistories.AddAsync(
                 new EmployeeAccrualRateHistory
@@ -694,7 +696,6 @@ namespace HRConnect.Api.Services
                     AnnualEntitlement = rule.DaysAllocated,
                     DailyRate = (rule.DaysAllocated / 12m) / 21.67m,
                     EffectiveFrom = employee.StartDate,
-                    EffectiveTo = null,
                     CreatedDate = DateTime.UtcNow
                 });
 

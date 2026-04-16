@@ -39,6 +39,7 @@ namespace HRConnect.Api.Data
     public DbSet<PensionDeduction> PensionDeductions { get; set; }
     public DbSet<MedicalAidDeduction> MedicalAidDeductions { get; set; }
     public DbSet<Notification> Notifications { get; set; }
+    public DbSet<JobGradeGroupMap> JobGradeGroupMaps { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
       base.OnModelCreating(modelBuilder);
@@ -97,13 +98,6 @@ namespace HRConnect.Api.Data
           .HasForeignKey(lb => lb.LeaveTypeId)
           .OnDelete(DeleteBehavior.Restrict);
 
-      modelBuilder.Entity<LeaveEntitlementRule>()
-          .HasOne(r => r.JobGrade)
-          .WithMany(j => j.LeaveEntitlementRules)
-          .HasForeignKey(r => r.JobGradeId)
-          .IsRequired(false)
-          .OnDelete(DeleteBehavior.Restrict);
-
 
       // INJECTED FIX: Prevent multiple cascade paths
       modelBuilder.Entity<EmployeeAccrualRateHistory>()
@@ -117,6 +111,16 @@ namespace HRConnect.Api.Data
           .WithMany()
           .HasForeignKey(e => e.PositionId)
           .OnDelete(DeleteBehavior.Restrict);
+
+      modelBuilder.Entity<JobGradeGroupMap>()
+          .HasOne(x => x.JobGrade)
+          .WithMany()
+          .HasForeignKey(x => x.JobGradeId)
+          .OnDelete(DeleteBehavior.Cascade);
+
+      modelBuilder.Entity<JobGradeGroupMap>()
+          .HasIndex(x => new { x.JobGradeId, x.GroupKey })
+          .IsUnique();
 
       // TaxDeduction
       modelBuilder.Entity<TaxDeduction>(entity =>

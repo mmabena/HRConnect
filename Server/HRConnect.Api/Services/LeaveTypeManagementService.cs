@@ -136,6 +136,18 @@ namespace HRConnect.Api.Services
             if (existingCodes.Any(x => string.Equals(x, request.Code, StringComparison.OrdinalIgnoreCase)))
                 errors.Add($"Leave type code '{request.Code}' already exists.");
 
+            // VALIDATE GROUP KEYS EXIST IN DB
+            var validGroupKeys = await _context.JobGradeGroupMaps
+                .Select(x => x.GroupKey)
+                .Distinct()
+                .ToListAsync();
+
+            foreach (var rule in request.Rules)
+            {
+                if (!validGroupKeys.Contains(rule.GroupKey))
+                    errors.Add($"Invalid GroupKey: {rule.GroupKey}");
+            }
+
             if (errors.Count > 0)
                 throw new InvalidOperationException(string.Join(" | ", errors));
 
@@ -156,11 +168,10 @@ namespace HRConnect.Api.Services
             var rules = request.Rules.Select(rule => new LeaveEntitlementRule
             {
                 LeaveTypeId = leaveType.Id,
-                JobGradeId = rule.JobGradeId,
+                GroupKey = rule.GroupKey,
                 MinYearsService = rule.MinYearsService,
                 MaxYearsService = rule.MaxYearsService,
-                DaysAllocated = rule.DaysAllocated,
-                IsActive = true
+                DaysAllocated = rule.DaysAllocated
             }).ToList();
 
             await _context.LeaveEntitlementRules.AddRangeAsync(rules);
@@ -203,6 +214,18 @@ namespace HRConnect.Api.Services
             if (existingNames.Any(x => string.Equals(x, request.Name, StringComparison.OrdinalIgnoreCase)))
                 errors.Add($"Leave type name '{request.Name}' already exists.");
 
+            // VALIDATE GROUP KEYS
+            var validGroupKeys = await _context.JobGradeGroupMaps
+                .Select(x => x.GroupKey)
+                .Distinct()
+                .ToListAsync();
+
+            foreach (var rule in request.Rules)
+            {
+                if (!validGroupKeys.Contains(rule.GroupKey))
+                    errors.Add($"Invalid GroupKey: {rule.GroupKey}");
+            }
+
             if (errors.Count > 0)
                 throw new InvalidOperationException(string.Join(" | ", errors));
 
@@ -211,21 +234,25 @@ namespace HRConnect.Api.Services
             leaveType.Name = request.Name;
             leaveType.Description = request.Description;
             leaveType.FemaleOnly = request.FemaleOnly;
+            leaveType.IsActive = request.IsActive;
 
-            _context.LeaveEntitlementRules.RemoveRange(leaveType.EntitlementRules);
-
-            var rules = request.Rules.Select(rule => new LeaveEntitlementRule
+            foreach (var existingRule in leaveType.EntitlementRules)
             {
-                LeaveTypeId = leaveType.Id,
-                JobGradeId = rule.JobGradeId,
-                MinYearsService = rule.MinYearsService,
-                MaxYearsService = rule.MaxYearsService,
-                DaysAllocated = rule.DaysAllocated,
-                IsActive = true
-            }).ToList();
+                var updatedRule = request.Rules.FirstOrDefault(r =>
+                    r.GroupKey == existingRule.GroupKey &&
+                    r.MinYearsService == existingRule.MinYearsService
+                );
 
-            await _context.LeaveEntitlementRules.AddRangeAsync(rules);
+                if (updatedRule != null)
+                {
+                    existingRule.MinYearsService = updatedRule.MinYearsService;
+                    existingRule.MaxYearsService = updatedRule.MaxYearsService;
+                    existingRule.DaysAllocated = updatedRule.DaysAllocated;
+                }
+            }
+
             await _context.SaveChangesAsync();
+
             var employees = await _context.Employees
                 .Select(e => e.EmployeeId)
                 .ToListAsync();
@@ -253,20 +280,17 @@ namespace HRConnect.Api.Services
             foreach (var rule in rules)
             {
                 if (rule.MinYearsService < 0)
-                    errors.Add($"MinYearsService cannot be negative for JobGrade {rule.JobGradeId}.");
+                    errors.Add($"MinYearsService cannot be negative for group {rule.GroupKey}.");
 
                 if (rule.MaxYearsService.HasValue &&
                     rule.MaxYearsService.Value < rule.MinYearsService)
-                    errors.Add($"MaxYearsService cannot be less than MinYearsService for JobGrade {rule.JobGradeId}.");
+                    errors.Add($"MaxYearsService cannot be less than MinYearsService for group {rule.GroupKey}.");
 
                 if (rule.DaysAllocated <= 0)
-                    errors.Add($"DaysAllocated must be greater than zero for JobGrade {rule.JobGradeId}.");
+                    errors.Add($"DaysAllocated must be greater than zero for group {rule.GroupKey}.");
             }
 
-            var grouped = rules.GroupBy(r =>
-          (r.JobGradeId.HasValue && new[] { 2, 3, 4, 6 }.Contains(r.JobGradeId.Value))
-              ? 1
-              : r.JobGradeId);
+            var grouped = rules.GroupBy(r => r.GroupKey);
 
             foreach (var group in grouped)
             {
@@ -281,18 +305,18 @@ namespace HRConnect.Api.Services
 
                     if (!current.MaxYearsService.HasValue)
                     {
-                        errors.Add($"Rule for JobGrade {group.Key} cannot have unlimited MaxYearsService when additional rules exist.");
+                        errors.Add($"Rule for group {group.Key} cannot have unlimited MaxYearsService when additional rules exist.");
                         continue;
                     }
 
                     if (next.MinYearsService <= current.MaxYearsService.Value)
                     {
-                        errors.Add($"Overlapping service ranges detected for JobGrade {group.Key}.");
+                        errors.Add($"Overlapping service ranges detected for group {group.Key}.");
                     }
 
                     if (next.MinYearsService > current.MaxYearsService.Value + 0.01m)
                     {
-                        errors.Add($"Gap detected in service ranges for JobGrade {group.Key}. Ranges must be continuous.");
+                        errors.Add($"Gap detected in service ranges for group {group.Key}. Ranges must be continuous.");
                     }
                 }
             }
@@ -318,7 +342,7 @@ namespace HRConnect.Api.Services
                 IsActive = l.IsActive,
                 Rules = l.EntitlementRules.Select(r => new LeaveEntitlementRuleSummary
                 {
-                    JobGradeId = r.JobGradeId,
+                    GroupKey = r.GroupKey,
                     MinYearsService = r.MinYearsService,
                     MaxYearsService = r.MaxYearsService,
                     DaysAllocated = r.DaysAllocated

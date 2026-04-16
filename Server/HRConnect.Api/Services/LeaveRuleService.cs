@@ -22,14 +22,7 @@ namespace HRConnect.Api.Services
             _emailService = emailService;
             _leaveBalanceService = leaveBalanceService;
         }
-        /// <summary>
-        /// Updates the leave entitlement rule and recalculates the leave balances for all affected employees, sending notification emails about the change.
-        /// The method validates the input, checks for any conflicts with existing leave balances, and applies the new entitlement to all employees who fall under the rule's criteria, ensuring that no employee's entitlement is reduced below their already taken days.
-        /// After updating the rule, it triggers a recalculation of leave balances for all affected employees and sends them an email notification about the change in their leave policy.
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        /// <exception cref="InvalidOperationException"></exception>
+
         public async Task UpdateLeaveEntitlementRuleAsync(UpdateLeaveRuleRequest request)
         {
             if (request.NewDaysAllocated < 0)
@@ -49,30 +42,16 @@ namespace HRConnect.Api.Services
                 rule.MaxYearsService < rule.MinYearsService)
                 throw new InvalidOperationException("MaxYearsService cannot be less than MinYearsService.");
 
+            // FIXED: DB-DRIVEN GROUP FILTER
             var employees = await _context.Employees
                 .Include(e => e.Position)
                 .Include(e => e.LeaveBalances)
                 .Where(e =>
-    //UNIVERSAL RULE (NULL) → applies to ALL employees
-    (rule.JobGradeId == null)
-
-    ||
-
-    //YOUR EXISTING GROUP LOGIC (UNCHANGED)
-    (
-        new[] { 2, 3, 4, 6 }.Contains(e.Position.JobGradeId) &&
-        rule.JobGradeId.HasValue &&
-        new[] { 2, 3, 4, 6 }.Contains(rule.JobGradeId.Value)
-    )
-
-    ||
-
-    //EXACT MATCH
-    (
-        rule.JobGradeId.HasValue &&
-        e.Position.JobGradeId == rule.JobGradeId.Value
-    )
-)
+                    rule.GroupKey == "ALL" ||
+                    _context.JobGradeGroupMaps
+                        .Any(m => m.JobGradeId == e.Position.JobGradeId &&
+                                  m.GroupKey == rule.GroupKey)
+                )
                 .ToListAsync();
 
             foreach (var employee in employees)
@@ -103,13 +82,7 @@ namespace HRConnect.Api.Services
 
             await RecalculateEmployeesForRuleChangeAsync(rule.Id);
         }
-        /// <summary>
-        /// Recalculates the leave balances for all employees affected by a change in a leave entitlement rule, 
-        /// based on their tenure and the new entitlement, and sends notification emails about the change.  
-        /// </summary>
-        /// <param name="ruleId"></param>
-        /// <returns></returns>
-        /// <exception cref="InvalidOperationException"></exception>
+
         public async Task RecalculateEmployeesForRuleChangeAsync(int ruleId)
         {
             var rule = await _context.LeaveEntitlementRules
@@ -119,30 +92,16 @@ namespace HRConnect.Api.Services
             if (rule == null)
                 throw new InvalidOperationException("Rule not found.");
 
+            // 🔥 FIXED: DB-DRIVEN GROUP FILTER
             var employees = await _context.Employees
                 .Include(e => e.Position)
                 .Include(e => e.LeaveBalances)
-                    .ThenInclude(lb => lb.LeaveType)
+                .ThenInclude(lb => lb.LeaveType)
                 .Where(e =>
-            //UNIVERSAL RULE applies to ALL employees
-            (rule.JobGradeId == null)
-
-            ||
-
-            // EXISTING GROUP LOGIC
-            (
-                new[] { 2, 3, 4, 6 }.Contains(e.Position.JobGradeId) &&
-                rule.JobGradeId.HasValue &&
-                new[] { 2, 3, 4, 6 }.Contains(rule.JobGradeId.Value)
-            )
-
-            ||
-
-            // EXACT MATCH
-            (
-                rule.JobGradeId.HasValue &&
-                e.Position.JobGradeId == rule.JobGradeId.Value
-            )
+                    rule.GroupKey == "ALL" ||
+                    _context.JobGradeGroupMaps
+                        .Any(m => m.JobGradeId == e.Position.JobGradeId &&
+                                  m.GroupKey == rule.GroupKey)
                 )
                 .ToListAsync();
 
@@ -177,7 +136,7 @@ namespace HRConnect.Api.Services
                     segment.AnnualEntitlement = rule.DaysAllocated;
                     segment.DailyRate = (rule.DaysAllocated / 12m) / 21.67m;
                 }
-                await _context.SaveChangesAsync();
+
                 await _leaveBalanceService.RecalculateAnnualLeaveAsync(employee.EmployeeId);
 
                 var updatedBalance = employee.LeaveBalances
@@ -187,10 +146,10 @@ namespace HRConnect.Api.Services
                     continue;
 
                 var emailBody = EmailTemplates.GenerateRuleChangeEmail(
-                     employee,
-                     rule.DaysAllocated,
-                     updatedBalance.AvailableDays
-                 );
+                    employee,
+                    rule.DaysAllocated,
+                    updatedBalance.AvailableDays
+                );
 
                 await _emailService.SendEmailAsync(
                     employee.Email,
@@ -201,13 +160,6 @@ namespace HRConnect.Api.Services
 
             await _context.SaveChangesAsync();
         }
-        /// <summary>
-        /// Calculates the years of service for an employee based on their start date, 
-        /// used for determining leave entitlements under different rules. 
-        /// The calculation accounts for leap years by using an average year length of 365.25 days.
-        /// </summary>
-        /// <param name="startDate"></param>
-        /// <returns></returns>
         private decimal CalculateYearsOfService(DateOnly startDate)
         {
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
