@@ -215,17 +215,17 @@ namespace HRConnect.Api.Utils.Seed
 
         var rules = new List<LeaveEntitlementRule>
     {
-        new LeaveEntitlementRule { LeaveType = annual, GroupKey = "GROUP_A", MinYearsService = 0, MaxYearsService = 2.99m, DaysAllocated = 15, IsActive = true },
-        new LeaveEntitlementRule { LeaveType = annual, GroupKey = "SENIOR", MinYearsService = 0, MaxYearsService = 2.99m, DaysAllocated = 18, IsActive = true },
-        new LeaveEntitlementRule { LeaveType = annual, GroupKey = "EXECUTIVE", MinYearsService = 0, MaxYearsService = 2.99m, DaysAllocated = 22, IsActive = true },
+        new LeaveEntitlementRule { LeaveType = annual, GroupKey = "GROUP_A", MinYearsService = 0, MaxYearsService = 3, DaysAllocated = 15, IsActive = true },
+        new LeaveEntitlementRule { LeaveType = annual, GroupKey = "SENIOR", MinYearsService = 0, MaxYearsService = 3, DaysAllocated = 18, IsActive = true },
+        new LeaveEntitlementRule { LeaveType = annual, GroupKey = "EXECUTIVE", MinYearsService = 0, MaxYearsService = 3, DaysAllocated = 22, IsActive = true },
 
         new LeaveEntitlementRule { LeaveType = annual, GroupKey = "GROUP_A", MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 18, IsActive = true },
         new LeaveEntitlementRule { LeaveType = annual, GroupKey = "SENIOR", MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 21, IsActive = true },
         new LeaveEntitlementRule { LeaveType = annual, GroupKey = "EXECUTIVE", MinYearsService = 3, MaxYearsService = 5, DaysAllocated = 25, IsActive = true },
 
-        new LeaveEntitlementRule { LeaveType = annual, GroupKey = "GROUP_A", MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 20, IsActive = true },
-        new LeaveEntitlementRule { LeaveType = annual, GroupKey = "SENIOR", MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 23, IsActive = true },
-        new LeaveEntitlementRule { LeaveType = annual, GroupKey = "EXECUTIVE", MinYearsService = 5.01m, MaxYearsService = null, DaysAllocated = 27, IsActive = true },
+        new LeaveEntitlementRule { LeaveType = annual, GroupKey = "GROUP_A", MinYearsService = 5, MaxYearsService = null, DaysAllocated = 20, IsActive = true },
+        new LeaveEntitlementRule { LeaveType = annual, GroupKey = "SENIOR", MinYearsService = 5, MaxYearsService = null, DaysAllocated = 23, IsActive = true },
+        new LeaveEntitlementRule { LeaveType = annual, GroupKey = "EXECUTIVE", MinYearsService = 5, MaxYearsService = null, DaysAllocated = 27, IsActive = true },
 
         new LeaveEntitlementRule { LeaveType = sick, GroupKey = "ALL", MinYearsService = 0, MaxYearsService = null, DaysAllocated = 30, IsActive = true },
         new LeaveEntitlementRule { LeaveType = maternity, GroupKey = "ALL", MinYearsService = 0, MaxYearsService = null, DaysAllocated = 120, IsActive = true },

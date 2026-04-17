@@ -65,7 +65,7 @@ namespace HRConnect.Api.Services
                             r.LeaveTypeId == leaveType.Id &&
                             r.GroupKey == groupKey &&
                             r.MinYearsService <= yearsOfService &&
-                            (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
+                            (r.MaxYearsService == null || yearsOfService < r.MaxYearsService) &&
                             r.IsActive)
                         .OrderByDescending(r => r.MinYearsService)
                         .FirstOrDefaultAsync();
@@ -500,8 +500,8 @@ namespace HRConnect.Api.Services
                     (periodStart.DayNumber - employee.StartDate.DayNumber) / 365.25m;
 
                 var rule = rules.First(r =>
-                    r.MinYearsService <= yearsOfService &&
-                    (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService));
+                r.MinYearsService <= yearsOfService &&
+                (r.MaxYearsService == null || yearsOfService < r.MaxYearsService));
 
                 int workingDays = WorkingDayCalculator.CountWorkingDays(
                     periodStart,
@@ -615,8 +615,7 @@ namespace HRConnect.Api.Services
                 .Where(r =>
                     r.LeaveTypeId == annualLeave.Id &&
                     r.GroupKey == groupKey &&
-                    r.MinYearsService <= yearsOfService &&
-                    (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
+                    (r.MaxYearsService == null || yearsOfService < r.MaxYearsService) &&
                     r.IsActive)
                 .OrderByDescending(r => r.MinYearsService)
                 .FirstAsync();
@@ -682,7 +681,7 @@ namespace HRConnect.Api.Services
                     r.LeaveTypeId == annualLeave.Id &&
                     r.GroupKey == groupKey &&
                     r.MinYearsService <= yearsOfService &&
-                    (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
+                    (r.MaxYearsService == null || yearsOfService < r.MaxYearsService) &&
                     r.IsActive)
                 .OrderByDescending(r => r.MinYearsService)
                 .FirstAsync();
@@ -700,6 +699,12 @@ namespace HRConnect.Api.Services
                 });
 
             await _context.SaveChangesAsync();
+        }
+        public async Task RecalculateFamilyResponsibilityLeaveBulkAsync(List<string> employeeIds)
+        {
+            await Task.WhenAll(employeeIds.Select(id =>
+                RecalculateFamilyResponsibilityLeaveAsync(id)
+            ));
         }
     }
 }

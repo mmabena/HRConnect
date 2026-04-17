@@ -46,7 +46,9 @@ namespace HRConnect.Api.Services
                     FullName = e.Name + " " + e.Surname,
                     Email = e.Email,
                     Position = e.Position.PositionTitle,
-                    LeaveBalances = e.LeaveBalances.Select(lb => new LeaveBalanceSummary
+                    LeaveBalances = e.LeaveBalances.
+                    Where(lb => lb.LeaveType.IsActive)
+                    .Select(lb => new LeaveBalanceSummary
                     {
                         LeaveType = lb.LeaveType.Name,
                         AccruedDays = lb.AccruedDays,
@@ -73,7 +75,9 @@ namespace HRConnect.Api.Services
                 FullName = e.Name + " " + e.Surname,
                 Email = e.Email,
                 Position = e.Position.PositionTitle,
-                LeaveBalances = e.LeaveBalances.Select(lb => new LeaveBalanceSummary
+                LeaveBalances = e.LeaveBalances
+                .Where(lb => lb.LeaveType.IsActive)
+                .Select(lb => new LeaveBalanceSummary
                 {
                     LeaveType = lb.LeaveType.Name,
                     AccruedDays = lb.AccruedDays,
@@ -231,28 +235,32 @@ namespace HRConnect.Api.Services
 
             ValidateRules(request.Rules);
 
+            // UPDATE LEAVE TYPE
             leaveType.Name = request.Name;
             leaveType.Description = request.Description;
             leaveType.FemaleOnly = request.FemaleOnly;
             leaveType.IsActive = request.IsActive;
 
-            foreach (var existingRule in leaveType.EntitlementRules)
-            {
-                var updatedRule = request.Rules.FirstOrDefault(r =>
-                    r.GroupKey == existingRule.GroupKey &&
-                    r.MinYearsService == existingRule.MinYearsService
-                );
+            // REMOVE OLD RULES
+            _context.LeaveEntitlementRules.RemoveRange(leaveType.EntitlementRules);
 
-                if (updatedRule != null)
-                {
-                    existingRule.MinYearsService = updatedRule.MinYearsService;
-                    existingRule.MaxYearsService = updatedRule.MaxYearsService;
-                    existingRule.DaysAllocated = updatedRule.DaysAllocated;
-                }
-            }
+            // ADD NEW RULES CLEANLY
+            var newRules = request.Rules.Select(r => new LeaveEntitlementRule
+            {
+                LeaveTypeId = leaveType.Id,
+                GroupKey = r.GroupKey,
+                MinYearsService = r.MinYearsService,
+                MaxYearsService = r.MaxYearsService,
+                DaysAllocated = r.DaysAllocated,
+                IsActive = true
+            }).ToList();
+
+            await _context.LeaveEntitlementRules.AddRangeAsync(newRules);
 
             await _context.SaveChangesAsync();
 
+
+            //RECALCULATE EMPLOYEES
             var employees = await _context.Employees
                 .Select(e => e.EmployeeId)
                 .ToListAsync();
@@ -309,12 +317,12 @@ namespace HRConnect.Api.Services
                         continue;
                     }
 
-                    if (next.MinYearsService <= current.MaxYearsService.Value)
+                    if (next.MinYearsService < current.MaxYearsService.Value)
                     {
                         errors.Add($"Overlapping service ranges detected for group {group.Key}.");
                     }
 
-                    if (next.MinYearsService > current.MaxYearsService.Value + 0.01m)
+                    if (next.MinYearsService > current.MaxYearsService.Value)
                     {
                         errors.Add($"Gap detected in service ranges for group {group.Key}. Ranges must be continuous.");
                     }
@@ -340,7 +348,9 @@ namespace HRConnect.Api.Services
                 Description = l.Description,
                 FemaleOnly = l.FemaleOnly,
                 IsActive = l.IsActive,
-                Rules = l.EntitlementRules.Select(r => new LeaveEntitlementRuleSummary
+                Rules = l.EntitlementRules
+                .Where(r => r.IsActive)
+                .Select(r => new LeaveEntitlementRuleSummary
                 {
                     GroupKey = r.GroupKey,
                     MinYearsService = r.MinYearsService,

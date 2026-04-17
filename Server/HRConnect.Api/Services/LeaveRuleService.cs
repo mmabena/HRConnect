@@ -49,9 +49,9 @@ namespace HRConnect.Api.Services
                 .Where(e =>
                     rule.GroupKey == "ALL" ||
                     _context.JobGradeGroupMaps
-                        .Any(m => m.JobGradeId == e.Position.JobGradeId &&
-                                  m.GroupKey == rule.GroupKey)
-                )
+                    .Where(m => m.GroupKey == rule.GroupKey)
+                    .Select(m => m.JobGradeId)
+                    .Contains(e.Position.JobGradeId))
                 .ToListAsync();
 
             foreach (var employee in employees)
@@ -62,7 +62,7 @@ namespace HRConnect.Api.Services
                     continue;
 
                 if (rule.MaxYearsService.HasValue &&
-                    years > rule.MaxYearsService.Value)
+                    years >= rule.MaxYearsService.Value)
                     continue;
 
                 var balance = employee.LeaveBalances
@@ -92,7 +92,7 @@ namespace HRConnect.Api.Services
             if (rule == null)
                 throw new InvalidOperationException("Rule not found.");
 
-            // 🔥 FIXED: DB-DRIVEN GROUP FILTER
+            //  DB-DRIVEN GROUP FILTER
             var employees = await _context.Employees
                 .Include(e => e.Position)
                 .Include(e => e.LeaveBalances)
@@ -100,9 +100,9 @@ namespace HRConnect.Api.Services
                 .Where(e =>
                     rule.GroupKey == "ALL" ||
                     _context.JobGradeGroupMaps
-                        .Any(m => m.JobGradeId == e.Position.JobGradeId &&
-                                  m.GroupKey == rule.GroupKey)
-                )
+                .Where(m => m.GroupKey == rule.GroupKey)
+                .Select(m => m.JobGradeId)
+                .Contains(e.Position.JobGradeId))
                 .ToListAsync();
 
             var employeeIds = employees.Select(e => e.EmployeeId).ToList();
@@ -111,52 +111,54 @@ namespace HRConnect.Api.Services
                 .Where(x => employeeIds.Contains(x.EmployeeId) && x.EffectiveTo == null)
                 .ToListAsync();
 
-            foreach (var employee in employees)
+            var tasks = employees.Select(async employee =>
+        {
+            var years = CalculateYearsOfService(employee.StartDate);
+
+            if (years < rule.MinYearsService)
+                return;
+
+            if (rule.MaxYearsService.HasValue &&
+                years >= rule.MaxYearsService.Value)
+                return;
+
+            var balance = employee.LeaveBalances
+                .FirstOrDefault(lb => lb.LeaveTypeId == rule.LeaveTypeId);
+
+            if (balance == null)
+                return;
+
+            var segment = segments
+                .FirstOrDefault(x => x.EmployeeId == employee.EmployeeId);
+
+            if (segment != null)
             {
-                var years = CalculateYearsOfService(employee.StartDate);
-
-                if (years < rule.MinYearsService)
-                    continue;
-
-                if (rule.MaxYearsService.HasValue &&
-                    years > rule.MaxYearsService.Value)
-                    continue;
-
-                var balance = employee.LeaveBalances
-                    .FirstOrDefault(lb => lb.LeaveTypeId == rule.LeaveTypeId);
-
-                if (balance == null)
-                    continue;
-
-                var segment = segments
-                    .FirstOrDefault(x => x.EmployeeId == employee.EmployeeId);
-
-                if (segment != null)
-                {
-                    segment.AnnualEntitlement = rule.DaysAllocated;
-                    segment.DailyRate = (rule.DaysAllocated / 12m) / 21.67m;
-                }
-
-                await _leaveBalanceService.RecalculateAnnualLeaveAsync(employee.EmployeeId);
-
-                var updatedBalance = employee.LeaveBalances
-                    .FirstOrDefault(lb => lb.LeaveTypeId == rule.LeaveTypeId);
-
-                if (updatedBalance == null)
-                    continue;
-
-                var emailBody = EmailTemplates.GenerateRuleChangeEmail(
-                    employee,
-                    rule.DaysAllocated,
-                    updatedBalance.AvailableDays
-                );
-
-                await _emailService.SendEmailAsync(
-                    employee.Email,
-                    "Leave Policy Updated",
-                    emailBody
-                );
+                segment.AnnualEntitlement = rule.DaysAllocated;
+                segment.DailyRate = (rule.DaysAllocated / 12m) / 21.67m;
             }
+
+            await _leaveBalanceService.RecalculateAnnualLeaveAsync(employee.EmployeeId);
+
+            var updatedBalance = employee.LeaveBalances
+                .FirstOrDefault(lb => lb.LeaveTypeId == rule.LeaveTypeId);
+
+            if (updatedBalance == null)
+                return;
+
+            var emailBody = EmailTemplates.GenerateRuleChangeEmail(
+                employee,
+                rule.DaysAllocated,
+                updatedBalance.AvailableDays
+            );
+
+            await _emailService.SendEmailAsync(
+                employee.Email,
+                "Leave Policy Updated",
+                emailBody
+            );
+        });
+
+            await Task.WhenAll(tasks);
 
             await _context.SaveChangesAsync();
         }
