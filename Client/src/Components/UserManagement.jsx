@@ -2,7 +2,9 @@ import React, { useState, useEffect } from "react";
 // Removed MenuBar import
 import Profile from "./MyProfile";
 import ActionsModal from "./ActionModal"; // Import the new ActionsModal
-import { fetchUsersAndRoles, updateUser } from "../api/UserManagement";
+import { fetchUsersAndRoles, updateUserRole } from "../api/UserManagement";
+import { getStoredUserRole } from "../utils/roleUtils";
+import { resolveRole } from "../utils/roleUtils";
 import {
   FaUser,
   FaUsers,
@@ -33,34 +35,32 @@ const UserManagement = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [loggedInUser, setLoggedInUser] = useState(null);
 
+  const loadData = async () => {
+    try {
+      setIsLoading(true);
+      const { users, roles } = await fetchUsersAndRoles();
+
+      setRoles(roles || []);
+      const mappedUsers = (users || []).map((user) => ({
+        ...user,
+        name: user.name || user.email,
+        role: user.role || roles.find((r) => Number(r.roleId) === Number(user.roleId))?.name || "Unknown Role",
+        status: "Active",
+        statusValue: USER_STATUS.ACTIVE,
+      }));
+
+      setUsers(mappedUsers);
+      setLoggedInUser(mappedUsers[0] || null);
+      setCurrentUserRole(getStoredUserRole().roleName || "User");
+    } catch (error) {
+      console.error("Failed to load data:", error);
+      alert("Failed to load user data. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        setIsLoading(true);
-        const { users, roles } = await fetchUsersAndRoles();
-
-        setRoles(roles || []);
-        const mappedUsers = (users || []).map((user) => ({
-          ...user,
-          name: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
-          role: roles.find((r) => r.roleId === user.roleId)?.name || "Unknown Role",
-          status: user.status === USER_STATUS.ACTIVE ? "Active" : "Inactive",
-          statusValue: user.status,
-        }));
-
-        setUsers(mappedUsers);
-        if (mappedUsers.length > 0) {
-          setLoggedInUser(mappedUsers[0]);
-          setCurrentUserRole(mappedUsers[0].role || "User");
-        }
-      } catch (error) {
-        console.error("Failed to load data:", error);
-        alert("Failed to load user data. Please try again.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     loadData();
   }, []);
 
@@ -81,7 +81,7 @@ const UserManagement = () => {
     }
     const user = users[selectedUserIndex];
     if (user) {
-      setEditRole(user.roleId || ""); // store roleId for select value
+      setEditRole(user.roleId ?? "");
       setEditStatus(Number(user.statusValue));
       setShowEditEmployeeModal(true);
       handleCloseActions();
@@ -91,24 +91,21 @@ const UserManagement = () => {
   const saveEmployeeDetails = async () => {
     try {
       const user = users[selectedUserIndex];
-      const selectedRole = roles.find((r) => r.roleId === editRole || r.name === editRole);
+      const normalizedEditRole = resolveRole(editRole);
+      const selectedRole = roles.find(
+        (r) => Number(r.roleId) === normalizedEditRole.roleId,
+      );
 
       if (!user || !selectedRole) throw new Error("Invalid user or role");
 
-      await updateUser(user.userId, {
-        roleId: selectedRole.roleId,
-        status: editStatus,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-      });
+      await updateUserRole(user.userId, selectedRole.roleId);
 
       const updatedUsers = [...users];
       updatedUsers[selectedUserIndex] = {
         ...user,
         role: selectedRole.name,
-        status: editStatus === USER_STATUS.ACTIVE ? "Active" : "Inactive",
-        statusValue: editStatus,
+        status: "Active",
+        statusValue: USER_STATUS.ACTIVE,
         roleId: selectedRole.roleId,
       };
       setUsers(updatedUsers);
@@ -125,10 +122,9 @@ const UserManagement = () => {
       const user = users[selectedUserIndex];
       if (!user) throw new Error("Invalid user");
 
-      await updateUser(user.userId, {
-        ...user,
-        ...updatedData,
-      });
+      if (updatedData.roleId != null) {
+        await updateUserRole(user.userId, updatedData.roleId);
+      }
 
       const updatedUsers = [...users];
       updatedUsers[selectedUserIndex] = {
@@ -264,8 +260,8 @@ const UserManagement = () => {
             onClose={handleCloseActions}
             user={selectedUserIndex !== null ? users[selectedUserIndex] : null}
             onSuccess={() => {
+              loadData();
               handleCloseActions();
-              // Optionally reload users if needed here
             }}
           />
 
@@ -289,7 +285,7 @@ const UserManagement = () => {
                     <label>Role</label>
                     <select
                       value={editRole}
-                      onChange={(e) => setEditRole(e.target.value)}
+                      onChange={(e) => setEditRole(Number(e.target.value))}
                       disabled={!hasAdminRights(currentUserRole)}
                     >
                       {/* Use roleId as value */}

@@ -13,6 +13,7 @@ namespace HRConnect.Tests
     using HRConnect.Api.Utils;
     using HRConnect.Api.DTOs.Employee;
     using HRConnect.Api.Repository;
+    using Microsoft.AspNetCore.Identity;
 
     public class LeaveBalanceServiceTests
     {
@@ -53,7 +54,8 @@ namespace HRConnect.Tests
                 positionRepo,
                 CreateLeaveBalanceService(context),
                 CreateLeaveProcessingService(context),
-                companyRepo
+                companyRepo,
+                new PasswordHasher<User>()
             );
         }
 

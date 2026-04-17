@@ -7,7 +7,6 @@
   using System.Threading.Tasks;
   using Api.Mappers;
   using Api.Utils.MedicalOption;
-  using HRConnect.Api.Utils.MedicalOption;
   using HRConnect.Api.DTOs.MedicalOption;
   using HRConnect.Api.Models;
   using HRConnect.Api.Interfaces;
@@ -47,7 +46,7 @@
     public void ConstructorWithNullRepositoryShouldThrowArgumentNullException()
     {
       // Act & Assert
-      Assert.Throws<ArgumentNullException>(() => new MedicalOptionService(null));
+      Assert.Throws<ArgumentNullException>(() => new MedicalOptionService(null!));
     }
 
     #endregion
@@ -467,7 +466,7 @@
           });
     
       _mockRepository.Setup(r => r.GetAllOptionsUnderCategoryAsync(categoryId))
-          .ReturnsAsync(dbData);
+          .ReturnsAsync(dbData.Cast<MedicalOptionDto?>().ToList());
     
       _mockRepository.Setup(r => r.BulkUpdateByCategoryIdAsync(categoryId, bulkUpdateDto))
           .ReturnsAsync(updatedOptions);
@@ -505,8 +504,8 @@
       var categoryId = 1;
 
       // Act & Assert
-      var exception = await Assert.ThrowsAsync<ArgumentException>(
-          () => _service.BulkUpdateMedicalOptionsByCategoryAsync(categoryId, null));
+        var exception = await Assert.ThrowsAsync<ArgumentException>(
+          () => _service.BulkUpdateMedicalOptionsByCategoryAsync(categoryId, null!));
       Assert.Contains("Bulk update data cannot be null or empty", exception.Message);
     }
 
@@ -545,8 +544,8 @@
           }
       };
 
-      _mockRepository.Setup(r => r.GetAllOptionsUnderCategoryAsync(categoryId))
-          .ReturnsAsync(dbData);
+        _mockRepository.Setup(r => r.GetAllOptionsUnderCategoryAsync(categoryId))
+          .ReturnsAsync(dbData.Cast<MedicalOptionDto?>().ToList());
 
       // Act & Assert
       var exception = await Assert.ThrowsAsync<Api.Middleware.ValidationException>(
@@ -582,7 +581,7 @@
       };
 
       _mockRepository.Setup(r => r.GetAllOptionsUnderCategoryAsync(categoryId))
-        .ReturnsAsync(dbData);
+        .ReturnsAsync(dbData.Cast<MedicalOptionDto?>().ToList());
 
       // Act & Assert
       var exception = await Assert.ThrowsAsync<Api.Middleware.ValidationException>(
@@ -628,8 +627,8 @@
       // Create a date within update period (Nov 15, 2024)
       var testDate = new DateTime(2024, 11, 15, 12, 0, 0);
       
-      _mockRepository.Setup(r => r.GetAllOptionsUnderCategoryAsync(categoryId))
-          .ReturnsAsync(dbData);
+        _mockRepository.Setup(r => r.GetAllOptionsUnderCategoryAsync(categoryId))
+          .ReturnsAsync(dbData.Cast<MedicalOptionDto?>().ToList());
 
       // Act & Assert
       var exception = await Assert.ThrowsAsync<Api.Middleware.ValidationException>(

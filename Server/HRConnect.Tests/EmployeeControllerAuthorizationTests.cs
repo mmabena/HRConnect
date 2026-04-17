@@ -10,7 +10,6 @@ namespace HRConnect.Tests
     using HRConnect.Api.DTOs.Employee;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using HRConnect.Api.Interfaces;
     public class EmployeeControllerAuthorizationTests
     {
         private static EmployeeController CreateControllerWithRole(string role)

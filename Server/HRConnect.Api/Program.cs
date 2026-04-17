@@ -297,6 +297,11 @@ using (var scope = app.Services.CreateScope())
   await seeder.SeedAsync();
 }
 
+using (var scope = app.Services.CreateScope())
+{
+  var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+  await userService.SyncEmployeeUsersAsync();
+}
 
 if (app.Environment.IsDevelopment())
 {

@@ -15,6 +15,7 @@ namespace HRConnect.Tests
     using HRConnect.Api.Utils;
     using System.Threading;
     using Microsoft.EntityFrameworkCore.Storage;
+    using Microsoft.AspNetCore.Identity;
 
     public class EmployeeServiceBusinessTests
     {
@@ -106,7 +107,8 @@ namespace HRConnect.Tests
                 positionRepoMock.Object,
                 GetBalanceService(db),
                 GetProcessingService(db),
-                companyRepoMock.Object
+                companyRepoMock.Object,
+                new PasswordHasher<User>()
             );
         }
 

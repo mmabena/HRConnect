@@ -23,13 +23,14 @@ import Profile from "./Components/MyProfile";
 import CompensationPlanning from "./Components/CompensationPlanning";
 import TaxTableManagement from "./Components/companyManagement/TaxTableManagement/TaxTableManagement";
 import ChangePassword from "./Components/ChangePassword";
-import TaxTableUpload from "./Components/companyManagement/TaxTableManagement/TaxTableUpload.jsx";
+import TaxTableUpload from "./Components/companyManagement/TaxTableManagement/TaxTableUpload";
 import MenuBar from "./Components/MenuBar/MenuBar";
 import ManageUserPositions from   "./Pages/CompanyManagement/PositionManagement/ManageUserPositions.jsx";
 import ProjectionCalculator from "./Pages/PayrollTools/ProjectionCalculator";
 import PersonalInformation from "./Components/PersonalInformation.jsx";
 import api from "../src/api/api.js";
 import ChangePositionManagement from "./Components/companyManagement/PositionManagement/ChangePositionManagement.jsx";
+import { resolveRole } from "./utils/roleUtils";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
@@ -60,9 +61,12 @@ function App() {
         });
 
         const employee = empResp.data;
+        const resolvedRole = resolveRole(parsedUser?.user || parsedUser);
 
         const mergedUser = {
           ...parsedUser,
+          role: resolvedRole.roleName || parsedUser?.role,
+          roleId: resolvedRole.roleId,
           username: `${employee.name} ${employee.surname}`,
           jobTitle: employee.positionTitle,
           employmentStatus: employee.employmentStatus,
@@ -114,8 +118,12 @@ function App() {
         console.warn("Employee endpoint not accessible for this role");
       }
 
+      const resolvedRole = resolveRole(backendUserData);
+
       const mergedUser = {
         ...backendUserData,
+        role: resolvedRole.roleName || backendUserData.role,
+        roleId: resolvedRole.roleId,
         username: employee
           ? `${employee.name} ${employee.surname}`
           : backendUserData.email,

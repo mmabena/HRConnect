@@ -2,7 +2,8 @@ import "./MenuBar.css";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-import axios from "axios";
+import api from "../../../src/api/api.js";
+import { resolveRole } from "../../utils/roleUtils";
 
 const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   const [reportOpen, setReportOpen] = useState(false);
@@ -34,12 +35,21 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // FIX: Access the role directly from the currentUser object
-  const role = currentUser?.role?.toLowerCase();
+  const isActive = (paths) => {
+    return paths.some((path) => location.pathname.startsWith(path));
+  };
+
+  const handleHeadingClick = (index, toggleFunction) => {
+    setActiveIndex((prev) => (prev === index ? null : index));
+    toggleFunction(); // keeps your existing toggle working
+  };
+
+  const resolvedRole = resolveRole(currentUser);
+  const role = resolvedRole.key ?? currentUser?.role?.toLowerCase();
 
   const permissions = {
-    isAdmin: ["admin", "superuser"].includes(role),
-    isNormalUser: role === "normaluser"
+    isAdmin: resolvedRole.isSuperUser || role === "admin",
+    isNormalUser: resolvedRole.isNormalUser,
   };
 
   const isEmployeeManagementPage =
