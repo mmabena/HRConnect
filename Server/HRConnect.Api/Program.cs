@@ -26,7 +26,7 @@ using Quartz;
 using HRConnect.Api.Interfaces.Notification;
 using HRConnect.Api.Utils.Factories;
 using HRConnect.Api.Utils.Notification;
-using HRConnect.Api.Interfaces.Payroll.Earnings;
+using HRConnect.Api.Interfaces.Payroll.Earning;
 
 var builder = WebApplication.CreateBuilder(args);
 

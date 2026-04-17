@@ -7,7 +7,7 @@ namespace HRConnect.Api.Data
   using Microsoft.EntityFrameworkCore;
   using AppAny.Quartz.EntityFrameworkCore.Migrations;
   using AppAny.Quartz.EntityFrameworkCore.Migrations.SqlServer;
-  using HRConnect.Api.Models.Payroll.Earnings;
+  using HRConnect.Api.Models.Payroll.Earning;
 
   public class ApplicationDBContext(DbContextOptions dbContextOptions) : DbContext(dbContextOptions)
   {

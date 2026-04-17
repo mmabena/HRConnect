@@ -1,6 +1,6 @@
-﻿namespace HRConnect.Api.Interfaces.Payroll.Earnings
+﻿namespace HRConnect.Api.Interfaces.Payroll.Earning
 {
-  using HRConnect.Api.DTOs.Payroll.Earnings;
+  using HRConnect.Api.DTOs.Payroll.Earning;
 
   public interface IEmployeePayrollEarningService
   {

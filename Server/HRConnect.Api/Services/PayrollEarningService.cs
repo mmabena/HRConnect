@@ -2,13 +2,13 @@
 {
   using System.Collections.Generic;
   using System.Threading.Tasks;
-  using HRConnect.Api.DTOs.Payroll.Earnings;
+  using HRConnect.Api.DTOs.Payroll.Earning;
   using HRConnect.Api.Interfaces;
-  using HRConnect.Api.Interfaces.Payroll.Earnings;
-  using HRConnect.Api.Mappers.Payroll.Earnings;
-  using HRConnect.Api.Models.Payroll.Earnings;
+  using HRConnect.Api.Interfaces.Payroll.Earning;
+  using HRConnect.Api.Mappers.Payroll.Earning;
+  using HRConnect.Api.Models.Payroll.Earning;
   using HRConnect.Api.Utils;
-  using HRConnect.Api.Utils.ValidationHelpers.PayrollEarnings;
+  using HRConnect.Api.Utils.ValidationHelpers.PayrollEarning;
 
   public class PayrollEarningService(IPayrollEarningRepository payrollEarningRepository) : IPayrollEarningService
   {

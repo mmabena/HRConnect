@@ -4,7 +4,7 @@
   using System.Threading.Tasks;
   using HRConnect.Api.Data;
   using HRConnect.Api.Interfaces;
-  using HRConnect.Api.Models.Payroll.Earnings;
+  using HRConnect.Api.Models.Payroll.Earning;
   using Microsoft.EntityFrameworkCore;
 
   public class EmployeePayrollEarningRepository(ApplicationDBContext context) : IEmployeePayrollEarningRepository

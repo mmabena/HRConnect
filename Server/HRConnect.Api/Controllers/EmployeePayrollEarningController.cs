@@ -1,7 +1,7 @@
 ﻿namespace HRConnect.Api.Controllers
 {
-  using HRConnect.Api.DTOs.Payroll.Earnings;
-  using HRConnect.Api.Interfaces.Payroll.Earnings;
+  using HRConnect.Api.DTOs.Payroll.Earning;
+  using HRConnect.Api.Interfaces.Payroll.Earning;
   using Microsoft.AspNetCore.Authorization;
   using Microsoft.AspNetCore.Mvc;
 

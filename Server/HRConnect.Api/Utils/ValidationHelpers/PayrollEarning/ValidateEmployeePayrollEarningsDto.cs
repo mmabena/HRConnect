@@ -1,7 +1,7 @@
-﻿namespace HRConnect.Api.Utils.ValidationHelpers.PayrollEarnings
+﻿namespace HRConnect.Api.Utils.ValidationHelpers.PayrollEarning
 {
   using System.ComponentModel.DataAnnotations;
-  using HRConnect.Api.DTOs.Payroll.Earnings;
+  using HRConnect.Api.DTOs.Payroll.Earning;
 
   public static class ValidateEmployeePayrollEarningsDto
   {

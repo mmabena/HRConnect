@@ -1,4 +1,4 @@
-﻿namespace HRConnect.Api.DTOs.Payroll.Earnings
+﻿namespace HRConnect.Api.DTOs.Payroll.Earning
 {
   public class PayrollEarningAddDto
   {

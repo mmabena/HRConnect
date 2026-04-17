@@ -1,4 +1,4 @@
-﻿namespace HRConnect.Api.Models.Payroll.Earnings
+﻿namespace HRConnect.Api.Models.Payroll.Earning
 {
   using System.ComponentModel.DataAnnotations.Schema;
 

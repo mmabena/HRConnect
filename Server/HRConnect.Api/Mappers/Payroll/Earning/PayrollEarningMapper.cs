@@ -1,7 +1,7 @@
-﻿namespace HRConnect.Api.Mappers.Payroll.Earnings
+﻿namespace HRConnect.Api.Mappers.Payroll.Earning
 {
-  using HRConnect.Api.DTOs.Payroll.Earnings;
-  using HRConnect.Api.Models.Payroll.Earnings;
+  using HRConnect.Api.DTOs.Payroll.Earning;
+  using HRConnect.Api.Models.Payroll.Earning;
 
   public static class PayrollEarningMapper
   {

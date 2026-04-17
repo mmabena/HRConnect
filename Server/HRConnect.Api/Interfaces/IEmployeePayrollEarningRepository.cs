@@ -1,6 +1,6 @@
 ﻿namespace HRConnect.Api.Interfaces
 {
-  using HRConnect.Api.Models.Payroll.Earnings;
+  using HRConnect.Api.Models.Payroll.Earning;
 
   public interface IEmployeePayrollEarningRepository
   {
