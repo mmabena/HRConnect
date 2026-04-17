@@ -20,6 +20,8 @@ namespace HRConnect.Api.Services
   using HRConnect.Api.DTOs.TaxDeduction;
   using HRConnect.Api.Models.PayrollDeduction;
   using HRConnect.Api.Models.Payroll;
+  using HRConnect.Api.Utils;
+
 
 
   /// <summary>
@@ -31,14 +33,19 @@ namespace HRConnect.Api.Services
   public class TaxDeductionService : ITaxDeductionService
   {
     private readonly ITaxDeductionRepository _repository;
+    private readonly StatutoryContributionsCalculator _deductionsCalculator;
+    private readonly IPayrollRunService _payrollRunService;
     /// <summary>
     /// Initializes a new instance of <see cref="TaxDeductionService"/> with the specified repository.
     /// </summary>
     /// <param name="repository">this is the repository instance for tax deductions</param>
     /// <param name="context">this is the application database context</param>
-    public TaxDeductionService(ITaxDeductionRepository repository)
+    public TaxDeductionService(ITaxDeductionRepository repository, IPayrollRunService
+    payrollRunService)
     {
       _repository = repository;
+      _deductionsCalculator = new StatutoryContributionsCalculator();
+      _payrollRunService = payrollRunService;
     }
 
     /// <summary>
@@ -164,15 +171,14 @@ namespace HRConnect.Api.Services
         throw new KeyNotFoundException("Employee not found");
       }
 
-      var payrollRun = await _repository.GetActivePayrollRunAsync();
+      var payrollRun = await _payrollRunService.GetCurrentRunAsync();
       if (payrollRun == null)
       {
         throw new KeyNotFoundException("No active payroll run");
       }
-
       if (payrollRun.IsFinalised)
       {
-        throw new InvalidOperationException("Payroll run has been finalised. Recalculation is blocked.");
+        throw new InvalidOperationException("Payroll month is finalised. Recalculation is blocked.");
       }
 
       var existing = await _repository.GetExistingFinalTaxAsync(employee.EmployeeId,
@@ -219,15 +225,14 @@ namespace HRConnect.Api.Services
 
       decimal finalTax = Math.Max(0, taxBeforeCredits - medicalCredit);
 
-      decimal netSalary = monthlySalary - pensionContribution - finalTax;
+      decimal uifEmployee = _deductionsCalculator.CalculateUifEmployee(monthlySalary);
+
+      decimal netSalary = monthlySalary - pensionContribution - finalTax - uifEmployee;
 
       int taxYear = DateTime.Now.Year;
 
       var record = new FinalTaxDeduction
       {
-        PayrollRunId = payrollRun.PayrollRunId,
-        EmployeeId = employee.EmployeeId,
-
         Name = employee.Name,
         Surname = employee.Surname,
         IdNumber = employee.IdNumber,
@@ -256,6 +261,7 @@ namespace HRConnect.Api.Services
       };
 
       await _repository.AddFinalTaxDeductionAsync(record);
+      await _payrollRunService.AddRecordToCurrentRunAsync(record, employee.EmployeeId);
       await _repository.SaveChangesAsync();
 
       return record;
@@ -272,6 +278,26 @@ namespace HRConnect.Api.Services
     {
       return $"TX-{taxYear}-{payrollRunId}-{employeeId}";
     }
-  }
 
+    /// <summary>
+    /// Calculates the UIF contributions for both employee and employer, 
+    /// as well as the SDL amount based on the monthly salary.
+    /// </summary>
+    private const decimal UifRate = 0.01m;
+    private const decimal UifCap = 177.12m;
+    private const decimal SdlRate = 0.01m;
+
+    /// <summary>
+    /// Calculates the UIF employee contribution based on the monthly salary,
+    /// ensuring it does not exceed the UIF cap.
+    /// </summary>
+    /// <param name="monthlySalary"></param>
+    /// <returns></returns>
+    private decimal CalculateUifEmployee(decimal monthlySalary)
+    {
+      if (monthlySalary <= 0) return 0;
+      decimal contribution = monthlySalary * UifRate;
+      return contribution > UifCap ? UifCap : contribution;
+    }
+  }
 }

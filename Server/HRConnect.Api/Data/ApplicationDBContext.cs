@@ -271,6 +271,7 @@ namespace HRConnect.Api.Data
       modelBuilder.Entity<MedicalAidDeduction>().ToTable("MedicalAidDeductions");
       modelBuilder.Entity<EmployeeCompanyContribution>().ToTable("EmployeeCompanyContributions");
       modelBuilder.Entity<StatutoryContribution>().ToTable("StatutoryContributions");
+      modelBuilder.Entity<FinalTaxDeduction>().ToTable("FinalTaxDeductions");
 
       modelBuilder.Entity<PayrollRun>(b =>
         {

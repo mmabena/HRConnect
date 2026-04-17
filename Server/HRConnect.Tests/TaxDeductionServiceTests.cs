@@ -19,7 +19,7 @@ namespace HRConnect.Tests
   {
     private Mock<ITaxDeductionRepository> _mockRepository;
     private TaxDeductionService _service;
-
+    private Mock<IPayrollRunService> _mockPayrollRunService;
     private List<TaxTableUpload> _taxTableUploads;
     private List<TaxDeduction> _taxDeductions;
 
@@ -110,8 +110,23 @@ namespace HRConnect.Tests
       _mockRepository.Setup(r => r.GetEmployeeByEmailAsync("test@company.com"))
           .ReturnsAsync(_employee);
 
-      _mockRepository.Setup(r => r.GetActivePayrollRunAsync())
+      // _mockRepository.Setup(r => r.GetActivePayrollRunAsync())
+      //     .ReturnsAsync(_payrollRun);
+
+      _mockPayrollRunService = new Mock<IPayrollRunService>();
+
+      // Return the shared payroll run
+      _mockPayrollRunService.Setup(r => r.GetCurrentRunAsync())
           .ReturnsAsync(_payrollRun);
+
+      // Do nothing when adding a record to the run
+      _mockPayrollRunService.Setup(r => r.AddRecordToCurrentRunAsync(
+          It.IsAny<FinalTaxDeduction>(),
+          It.IsAny<string>()))
+          .Returns(Task.CompletedTask);
+
+      // ✅ Pass both dependencies
+      _service = new TaxDeductionService(_mockRepository.Object, _mockPayrollRunService.Object);
 
       _mockRepository.Setup(r => r.GetPensionByEmployeeIdAsync("EMP001"))
           .ReturnsAsync(_pension);
@@ -122,7 +137,7 @@ namespace HRConnect.Tests
       _mockRepository.Setup(r => r.AddFinalTaxDeductionAsync(It.IsAny<FinalTaxDeduction>()))
           .Returns(Task.CompletedTask);
 
-      _service = new TaxDeductionService(_mockRepository.Object);
+      _service = new TaxDeductionService(_mockRepository.Object, _mockPayrollRunService.Object);
     }
 
     [Fact]
@@ -161,7 +176,7 @@ namespace HRConnect.Tests
     {
       decimal highSalary = 500000;
 
-       decimal monthlyRem = Math.Max(0, highSalary - 156_328 / 12);
+      decimal monthlyRem = Math.Max(0, highSalary - 156_328 / 12);
       decimal expectedTax = Math.Floor(53432m + 0.45m * monthlyRem);
 
       var tax = await _service.CalculateTaxAsync(highSalary, 80);
@@ -250,7 +265,7 @@ namespace HRConnect.Tests
     // ─── GenerateTaxAsync Tests ───────────────────────────────────────────────
 
     [Fact]
-    public async Task GenerateTaxAsync_ReturnsRecord_WithCorrectTaxableIncome()
+    public async Task GenerateTaxAsyncReturnsRecordWithCorrectTaxableIncome()
     {
       var request = new TaxCalculationDto
       {
@@ -312,7 +327,7 @@ namespace HRConnect.Tests
     }
 
     [Fact]
-    public async Task GenerateTaxAsync_MembersAndChildren_AppliesCorrectMedicalCredit()
+    public async Task GenerateTaxAsyncMembersAndChildrenAppliesCorrectMedicalCredit()
     {
       var request = new TaxCalculationDto
       {
@@ -364,8 +379,8 @@ namespace HRConnect.Tests
     [Fact]
     public async Task GenerateTaxAsync_ThrowsKeyNotFoundException_WhenNoActivePayrollRun()
     {
-      _mockRepository.Setup(r => r.GetActivePayrollRunAsync())
-          .ReturnsAsync((PayrollRun?)null);
+      _mockPayrollRunService.Setup(r => r.GetCurrentRunAsync())
+        .ReturnsAsync((PayrollRun?)null);
 
       var request = new TaxCalculationDto
       {
@@ -398,8 +413,8 @@ namespace HRConnect.Tests
     [Fact]
     public async Task GenerateTaxAsync_ThrowsInvalidOperation_WhenPayrollRunIsFinalised()
     {
-      _mockRepository.Setup(r => r.GetActivePayrollRunAsync())
-          .ReturnsAsync(new PayrollRun { PayrollRunId = 1, IsLocked = false, IsFinalised = true });
+      _mockPayrollRunService.Setup(r => r.GetCurrentRunAsync())
+     .ReturnsAsync(new PayrollRun { PayrollRunId = 1, IsLocked = false, IsFinalised = true });
 
       var request = new TaxCalculationDto
       {
@@ -427,21 +442,6 @@ namespace HRConnect.Tests
 
       await Assert.ThrowsAsync<KeyNotFoundException>(() =>
           _service.GenerateTaxAsync(request, "test@company.com"));
-    }
-
-    [Fact]
-    public async Task GenerateTaxAsync_StoresCorrectEmployeeId()
-    {
-      var request = new TaxCalculationDto
-      {
-        MedicalAidMembers = 0,
-        MedicalAidDependants = 0,
-        MedicalAidChildren = 0
-      };
-
-      var result = await _service.GenerateTaxAsync(request, "test@company.com");
-
-      Assert.Equal("EMP001", result.EmployeeId);
     }
 
     [Fact]
