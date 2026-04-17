@@ -4,11 +4,9 @@
   using HRConnect.Api.Data;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
-  using HRConnect.Api.Data;
   using Microsoft.EntityFrameworkCore;
   using System.Collections.Generic;
   using System.Threading;
-  using System.Threading.Tasks;
 
   public class PensionOptionRepository(ApplicationDBContext context) : IPensionOptionRepository
   {
@@ -38,19 +36,19 @@
 
       return ServiceResult.Success("Pension option updated successfully.");
     }
-        private readonly ApplicationDBContext _context = context;
+    private readonly ApplicationDBContext _context = context;
 
-        ///<summary>
-        ///Get pension option by ud
-        ///</summary>
-        ///<param name="id">Pension Option Id</param>
-        ///<returns>
-        ///Pension option with the specified id
-        ///</returns>
-        public async Task<decimal> GetPensionOptionPercentageByIdAsync(int id)
-        {
-            return await _context.PensionOptions.Where(po => po.PensionOptionId == id)
-              .Select(po => po.ContributionPercentage).FirstOrDefaultAsync();
-        }
+    ///<summary>
+    ///Get pension option by ud
+    ///</summary>
+    ///<param name="id">Pension Option Id</param>
+    ///<returns>
+    ///Pension option with the specified id
+    ///</returns>
+    public async Task<decimal> GetPensionOptionPercentageByIdAsync(int id)
+    {
+      return await _context.PensionOptions.Where(po => po.PensionOptionId == id)
+        .Select(po => po.ContributionPercentage).FirstOrDefaultAsync();
     }
+  }
 }

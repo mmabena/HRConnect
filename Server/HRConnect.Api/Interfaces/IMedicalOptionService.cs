@@ -1,4 +1,4 @@
-﻿ namespace HRConnect.Api.Interfaces
+﻿namespace HRConnect.Api.Interfaces
 {
   using HRConnect.Api.DTOs.MedicalOption;
 
@@ -218,5 +218,5 @@
     /// </example>
     public Task<IReadOnlyList<MedicalOptionDto>> BulkUpdateMedicalOptionsByCategoryAsync(
       int categoryId, IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto, DateTime? testDate = null);
-  }  
+  }
 }

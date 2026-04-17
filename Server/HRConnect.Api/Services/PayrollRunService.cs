@@ -111,7 +111,7 @@ namespace HRConnect.Api.Services
 
         if (exists)
           continue;
-          
+
         record.PayrollRun = currentPayRun;
         record.EmployeeId = empId;
         currentPayRun.Records.Add(record);

@@ -22,6 +22,7 @@ namespace HRConnect.Tests
     private readonly Mock<IPositionRepository> _positionRepoMock;
     private readonly Mock<IEmailService> _emailServiceMock;
     private readonly Mock<ILeaveBalanceService> _leaveBalanceServiceMock;
+    private readonly Mock<ICompanyRepository> _companyRepoMock;
     private readonly Mock<ILeaveProcessingService> _leaveProcessingServiceMock;
 
     private readonly ApplicationDBContext _context;
@@ -32,6 +33,7 @@ namespace HRConnect.Tests
       _employeeRepoMock = new Mock<IEmployeeRepository>();
       _emailServiceMock = new Mock<IEmailService>();
       _positionRepoMock = new Mock<IPositionRepository>();
+      _companyRepoMock = new Mock<ICompanyRepository>();
       _leaveBalanceServiceMock = new Mock<ILeaveBalanceService>();
       _leaveProcessingServiceMock = new Mock<ILeaveProcessingService>();
 
@@ -70,7 +72,7 @@ namespace HRConnect.Tests
 
       _context.SaveChanges();
 
-      
+
       var transactionMock = new Mock<IDbContextTransaction>();
       transactionMock.Setup(t => t.CommitAsync(It.IsAny<CancellationToken>()))
           .Returns(Task.CompletedTask);
@@ -113,6 +115,10 @@ namespace HRConnect.Tests
       _employeeRepoMock.Setup(x => x.GetEmployeeByContactNumberAsync(It.IsAny<string>()))
           .ReturnsAsync((Employee?)null);
 
+      _companyRepoMock
+          .Setup(x => x.GetCompanyByIdAsync(It.IsAny<string>()))
+          .ReturnsAsync(new Company { CompanyId = "COMP001" });
+
       // Position repo setup (dynamic)
       _positionRepoMock.Setup(p => p.GetPositionByIdAsync(It.IsAny<int>()))
           .ReturnsAsync((int id) =>
@@ -130,7 +136,8 @@ namespace HRConnect.Tests
           _emailServiceMock.Object,
           _positionRepoMock.Object,
           _leaveBalanceServiceMock.Object,
-          _leaveProcessingServiceMock.Object
+          _leaveProcessingServiceMock.Object,
+          _companyRepoMock.Object
       );
     }
 

@@ -12,7 +12,7 @@ namespace HRConnect.Api.Repositories
     Task<List<TaxTableUpload>> GetActiveTaxTableUploadsAsync();
     Task<List<TaxTableUpload>> GetAllAsync();
     Task<TaxTableUpload?> GetActiveByYearAsync(int taxYear);
-    Task AddTaxTableUploadAsync(TaxTableUpload upload); 
+    Task AddTaxTableUploadAsync(TaxTableUpload upload);
     Task DeactivateTaxTableUploadsAsync(List<TaxTableUpload> uploads);
     Task SaveChangesAsync();
   }

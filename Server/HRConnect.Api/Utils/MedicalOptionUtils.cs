@@ -12,7 +12,7 @@
     public static string OptionNameFormatter(string optionName)
     {
       // Remove trailing digit only
-      return TrailingDigitRegex().Replace(optionName, ""); 
+      return TrailingDigitRegex().Replace(optionName, "");
     }
-  } 
+  }
 }

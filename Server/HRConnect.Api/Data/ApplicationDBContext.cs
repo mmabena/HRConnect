@@ -31,8 +31,8 @@ namespace HRConnect.Api.Data
     public DbSet<PayrollRun> PayrollRuns { get; set; }
     public DbSet<PayrollRecord> PayrollRecords { get; set; }
     public DbSet<PensionFund> PensionFunds { get; set; }
-        // LEAVE SYSTEM
-        public DbSet<LeaveType> LeaveTypes { get; set; }
+    // LEAVE SYSTEM
+    public DbSet<LeaveType> LeaveTypes { get; set; }
     public DbSet<LeaveEntitlementRule> LeaveEntitlementRules { get; set; }
     public DbSet<EmployeeLeaveBalance> EmployeeLeaveBalances { get; set; }
     public DbSet<LeaveApplication> LeaveApplications { get; set; }
@@ -61,24 +61,24 @@ namespace HRConnect.Api.Data
           .HasForeignKey(e => e.PensionOptionId)
           .OnDelete(DeleteBehavior.Restrict);
 
-            // PensionFund -> Employee
-            modelBuilder.Entity<PensionFund>()
-                .HasOne(pf => pf.Employee)
-                .WithMany(e => e.PensionFunds)
-                .HasForeignKey(pf => pf.EmployeeId)
-                .OnDelete(DeleteBehavior.Restrict);
-            // Employee -> PensionOption relationship
-            modelBuilder.Entity<Employee>()
-                .HasOne(e => e.PensionOption)
-                .WithMany(po => po.Employees)
-                .HasForeignKey(e => e.PensionOptionId)
-                .OnDelete(DeleteBehavior.Restrict);
+      // PensionFund -> Employee
+      modelBuilder.Entity<PensionFund>()
+          .HasOne(pf => pf.Employee)
+          .WithMany(e => e.PensionFunds)
+          .HasForeignKey(pf => pf.EmployeeId)
+          .OnDelete(DeleteBehavior.Restrict);
+      // Employee -> PensionOption relationship
+      modelBuilder.Entity<Employee>()
+          .HasOne(e => e.PensionOption)
+          .WithMany(po => po.Employees)
+          .HasForeignKey(e => e.PensionOptionId)
+          .OnDelete(DeleteBehavior.Restrict);
 
-            // Employee -> Position
-            modelBuilder.Entity<Employee>()
-          .HasOne(e => e.Position)
-          .WithMany(p => p.Employees)
-          .HasForeignKey(e => e.PositionId);
+      // Employee -> Position
+      modelBuilder.Entity<Employee>()
+    .HasOne(e => e.Position)
+    .WithMany(p => p.Employees)
+    .HasForeignKey(e => e.PositionId);
 
       // Employee -> CareerManager
       modelBuilder.Entity<Employee>()

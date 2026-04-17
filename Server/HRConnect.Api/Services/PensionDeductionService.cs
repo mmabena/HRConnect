@@ -13,7 +13,7 @@
   using HRConnect.Api.Utils.Pension.ValidationHelpers;
 
   public class PensionDeductionService(IPensionDeductionRepository pensionDeductionRepository,
-    IEmployeeRepository employeeRepository, IEmployeePensionEnrollmentRepository employeePensionEnrollmentRepository, 
+    IEmployeeRepository employeeRepository, IEmployeePensionEnrollmentRepository employeePensionEnrollmentRepository,
     IPensionOptionRepository pensionOptionRepository, IPayrollRunRepository payrollRunRepository, IPayrollRunService payrollRunService) : IPensionDeductionService
   {
     private readonly IPensionDeductionRepository _pensionDeductionRepository = pensionDeductionRepository;

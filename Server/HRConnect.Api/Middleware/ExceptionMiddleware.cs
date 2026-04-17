@@ -62,7 +62,7 @@ namespace HRConnect.Api.Middleware
 
       await context.Response.WriteAsync(JsonSerializer.Serialize(response));
     }
-  ///<summary>
+    ///<summary>
     ///Maps an exception message to the corresponding API field name so that the frontend
     ///can associate the error message with the correct form input field.
     ///</summary>
@@ -98,13 +98,13 @@ namespace HRConnect.Api.Middleware
         errors["lastName"] = message;
       else if (message.Contains("name", StringComparison.OrdinalIgnoreCase))
         errors["firstName"] = message;
-        else if (message.Contains("zipCode", StringComparison.OrdinalIgnoreCase))
+      else if (message.Contains("zipCode", StringComparison.OrdinalIgnoreCase))
         errors["zipCode"] = message;
       else if (message.Contains("title", StringComparison.OrdinalIgnoreCase))
         errors["title"] = message;
-        else if (message.Contains("city", StringComparison.OrdinalIgnoreCase))
+      else if (message.Contains("city", StringComparison.OrdinalIgnoreCase))
         errors["city"] = message;
-        else if (message.Contains("disabilityType", StringComparison.OrdinalIgnoreCase))
+      else if (message.Contains("disabilityType", StringComparison.OrdinalIgnoreCase))
         errors["disabilityType"] = message;
       else
         errors["general"] = message;

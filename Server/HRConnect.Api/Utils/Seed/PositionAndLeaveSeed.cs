@@ -254,13 +254,13 @@ namespace HRConnect.Api.Utils.Seed
     {
       if (!await _context.CompanyContributions.AnyAsync())
       {
-          // reset identity
-          _ = await _context.Database.ExecuteSqlRawAsync(
-              "DBCC CHECKIDENT ('CompanyContributions', RESEED, 0)");
-  
-          await _context.CompanyContributions.AddRangeAsync(_seedCompanyContributions);
-  
-          _ = await _context.SaveChangesAsync();
+        // reset identity
+        _ = await _context.Database.ExecuteSqlRawAsync(
+            "DBCC CHECKIDENT ('CompanyContributions', RESEED, 0)");
+
+        await _context.CompanyContributions.AddRangeAsync(_seedCompanyContributions);
+
+        _ = await _context.SaveChangesAsync();
       }
     }
     //Seed LeaveTypes

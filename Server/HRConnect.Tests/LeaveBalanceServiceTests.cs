@@ -44,6 +44,7 @@ namespace HRConnect.Tests
         {
             var employeeRepo = new EmployeeRepository(context);
             var positionRepo = new PositionRepository(context);
+            var companyRepo = new CompanyRepository(context);
 
             return new EmployeeService(
                 context,
@@ -51,7 +52,8 @@ namespace HRConnect.Tests
                 new FakeEmailService(),
                 positionRepo,
                 CreateLeaveBalanceService(context),
-                CreateLeaveProcessingService(context)
+                CreateLeaveProcessingService(context),
+                companyRepo
             );
         }
 
@@ -169,6 +171,12 @@ namespace HRConnect.Tests
                 new JobGrade { JobGradeId = 1, Name = "G1" },
                 new JobGrade { JobGradeId = 2, Name = "G2" });
 
+            context.Companies.Add(new Company
+            {
+                CompanyId = "COMP001",
+                CompanyName = "Test Company"
+            });
+
             context.OccupationalLevels.Add(new OccupationalLevel { OccupationalLevelId = 1, Description = "Level 1" });
 
             context.Positions.AddRange(
@@ -183,6 +191,7 @@ namespace HRConnect.Tests
                 StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
                 Email = "test@singular.co.za",
                 Name = "Test",
+                CompanyId = "COMP001",
                 Surname = "User",
                 ContactNumber = "0123456789",
                 Nationality = "South African"
@@ -237,6 +246,7 @@ namespace HRConnect.Tests
                 Email = "test@singular.co.za",
                 ContactNumber = "0123456789",
                 City = "Johannesburg",
+                CompanyId = "COMP001",
                 ZipCode = "2000",
                 IdNumber = "0305055400089",
                 Nationality = "South African",

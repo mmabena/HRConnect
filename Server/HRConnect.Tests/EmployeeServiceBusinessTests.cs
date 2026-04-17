@@ -47,6 +47,7 @@ namespace HRConnect.Tests
         {
             var employeeRepoMock = new Mock<IEmployeeRepository>();
             var positionRepoMock = new Mock<IPositionRepository>();
+            var companyRepoMock = new Mock<ICompanyRepository>();
             var transactionMock = new Mock<Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction>();
 
             transactionMock.Setup(t => t.CommitAsync(It.IsAny<CancellationToken>()))
@@ -57,6 +58,8 @@ namespace HRConnect.Tests
 
             employeeRepoMock.Setup(x => x.BeginTransactionAsync())
                 .ReturnsAsync(transactionMock.Object);
+
+            
 
             // 🔥 FIX 1: RETURN DATA FROM DB
             employeeRepoMock.Setup(x => x.GetEmployeeByIdAsync(It.IsAny<string>()))
@@ -92,13 +95,18 @@ namespace HRConnect.Tests
             positionRepoMock.Setup(x => x.GetPositionByIdAsync(It.IsAny<int>()))
                 .ReturnsAsync((int id) => db.Positions.FirstOrDefault(p => p.PositionId == id));
 
+            companyRepoMock
+                .Setup(x => x.GetCompanyByIdAsync(It.IsAny<string>()))
+                .ReturnsAsync(new Company { CompanyId = "COMP001" });
+
             return new EmployeeService(
                 db,
                 employeeRepoMock.Object,
                 email,
                 positionRepoMock.Object,
                 GetBalanceService(db),
-                GetProcessingService(db)
+                GetProcessingService(db),
+                companyRepoMock.Object
             );
         }
 

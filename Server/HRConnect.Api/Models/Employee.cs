@@ -121,7 +121,7 @@ namespace HRConnect.Api.Models
 
     public ICollection<Employee>? Subordinates { get; set; }
 
-    
+
     public ICollection<EmployeeLeaveBalance> LeaveBalances { get; set; }
         = new List<EmployeeLeaveBalance>();
 
@@ -133,10 +133,10 @@ namespace HRConnect.Api.Models
 
     public ICollection<AnnualLeaveAccrualHistory> AnnualLeaveAccrualHistories { get; set; }
         = new List<AnnualLeaveAccrualHistory>();
- 
-    public ICollection<EmployeePensionEnrollment> EmployeePensionEnrollment { get; set; } = [];
-        public PensionOption? PensionOption { get; set; }
-        public ICollection<PensionFund>? PensionFunds { get; set; }             // navigation
 
-    }
+    public ICollection<EmployeePensionEnrollment> EmployeePensionEnrollment { get; set; } = [];
+    public PensionOption? PensionOption { get; set; }
+    public ICollection<PensionFund>? PensionFunds { get; set; }             // navigation
+
+  }
 }

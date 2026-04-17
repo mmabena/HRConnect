@@ -282,8 +282,8 @@ namespace HRConnect.Api.Services
             .Include(e => e.LeaveBalances)
             .ThenInclude(lb => lb.LeaveType)
             .FirstAsync(e => e.EmployeeId == employeeId);
-            var annualBalance = employeeWithBalances?.LeaveBalances
-            ?.FirstOrDefault(lb => lb.LeaveType.Code == "AL");
+        var annualBalance = employeeWithBalances?.LeaveBalances
+        ?.FirstOrDefault(lb => lb.LeaveType.Code == "AL");
 
         try
         {

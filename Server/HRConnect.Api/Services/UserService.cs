@@ -104,5 +104,5 @@ namespace HRConnect.Api.Services
       await _userRepo.UpdateUserAsync(user.UserId, user);
       return true;
     }
-    }
+  }
 }

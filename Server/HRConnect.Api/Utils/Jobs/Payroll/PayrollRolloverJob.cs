@@ -82,7 +82,7 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
       newPeriod.Runs.Add(newPayrun);
 
       await _payrollRunRepo.CreatePayrollRunAsync(newPayrun);
-      
+
       return newPeriod;
     }
 
