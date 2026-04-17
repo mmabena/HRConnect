@@ -19,7 +19,7 @@ namespace HRConnect.Api.Mappers
                 BankName = dto.BankName,
                 AccountType = dto.AccountType,
 
-                AccountNumber = dto.AccountNumber,
+                AccountNumberEncrypted = dto.AccountNumber,
                 BranchCode = dto.BranchCode,
 
                 IsActive = true,
@@ -42,7 +42,7 @@ namespace HRConnect.Api.Mappers
                 BankName = entity.BankName,
                 AccountType = entity.AccountType,
 
-                AccountNumber = entity.AccountNumber,
+                AccountNumberEncrypted = entity.AccountNumberEncrypted,
                 BranchCode = entity.BranchCode,
 
                 NetSalary = entity.NetSalary,

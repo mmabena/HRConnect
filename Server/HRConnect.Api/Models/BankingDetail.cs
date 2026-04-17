@@ -24,6 +24,7 @@ namespace HRConnect.Api.Models
     public enum AccountType
     {
         Savings,
+        Cheque,
         Current,
         Business
     }
@@ -32,31 +33,33 @@ namespace HRConnect.Api.Models
         [Key]
         public int BankingDetailsId { get; set; }
 
+        [Required]
         public string EmployeeId { get; set; }
 
         public Employee Employee { get; set; } = null!;
-       
-       [Required]
+
+        [Required]
         public string Name { get; set; } = string.Empty;
         [Required]
         public string Surname { get; set; } = string.Empty;
 
         [StringLength(13)]
         public string? IdNumber { get; set; } = string.Empty;
-
-        [Required]
         public string? PassportNumber { get; set; } = string.Empty;
 
         [Required]
-        public BankName BankName { get; set; } 
+        public BankName BankName { get; set; }
         [Required]
-        public string AccountNumber { get; set; } = string.Empty;
-
-        public AccountType AccountType { get; set; } 
+        public string AccountNumberEncrypted { get; set; } = string.Empty;
+        [Required]
+        public AccountType AccountType { get; set; }
+        [Required]
         public string BranchCode { get; set; } = string.Empty;
+        public bool IsLocked { get; set; } = false;
+        public DateTime? LockedAt { get; set; }
         public decimal? NetSalary { get; set; }
         public bool IsActive { get; set; }
-         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     }
 }

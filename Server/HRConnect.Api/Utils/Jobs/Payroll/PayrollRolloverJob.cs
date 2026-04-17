@@ -7,6 +7,7 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
   using HRConnect.Api.Models.PayrollDeduction;
   using HRConnect.Api.Models.Pension;
   using HRConnect.Api.Services;
+  using HRConnect.Api.Utils;
 
   /// <summary>
   /// Payroll Rollover Job class to handle the locking, rolling over and 
@@ -30,13 +31,14 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
     private readonly IEmployeePensionEnrollmentService _employeePensionEnrollmentService;
     private readonly IServiceProvider _serviceProvider;
     private readonly IReportsService _reportsService;
+    private readonly IBankingDetailService _bankingDetailService;
     private static readonly int MAX_RUNS = 12;
 
     //This makes mocking and using testing time-related edge cases a lot easier
     private readonly Func<DateTime> _now;
     public PayrollRolloverJob(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService, IServiceProvider serviceProvider,
       IEmployeePensionEnrollmentService employeePensionEnrollmentService,
-      IReportsService reportsService, Func<DateTime> now = null)
+      IReportsService reportsService, IBankingDetailService bankingDetailService, Func<DateTime> now = null)
     {
       _payrollRunRepo = payrollRunRepo;
       _payrollPeriodService = payrollPeriodService;
@@ -44,6 +46,7 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
       _now = now ?? (() => DateTime.Now);
       _serviceProvider = serviceProvider;
       _employeePensionEnrollmentService = employeePensionEnrollmentService;
+      _bankingDetailService = bankingDetailService;
     }
     /// <summary>
     /// Rolls over to a new period <see cref="PayrollPeriod"/> and creates and new valid payroll run <see cref="PayrollRun"/>  
@@ -167,6 +170,10 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
         {
           await RolloverPayrollRun(payperiod, nextRun);
         }
+        // Lock all banking details on payroll rollover to prevent changes to banking details while payroll runs are active
+        await _bankingDetailService.LockAllBankingDetailsAsync();
+
+
       }
       catch (InvalidOperationException ex)
       {

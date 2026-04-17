@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import "./BankingDetailsModal.css";
+import { ArrowRight, Upload, UserRoundPlus, X } from "lucide-react";
+
 
 const BankingDetailsModal = ({ employee, setEmployee, formErrors, setFormErrors, onNext, onBack }) => {
   
@@ -39,9 +41,63 @@ const BankingDetailsModal = ({ employee, setEmployee, formErrors, setFormErrors,
     onNext(); // move to Leave step
   };
 
-  return (
-    <div className="emp-name-surname-container">
-      <div className="emp-form-grid">
+return (
+    <div className="emp-center-frame">
+      <div className="emp-left-frame">
+        <div className="emp-left-frame-centered">
+          <div className="emp-headings-container">
+            <div className="emp-left-icon-wrapper">
+              <UserRoundPlus size={24} />
+            </div> 
+            <span className="emp-title-wrapper emp-center-logo-text">
+              New Employee
+            </span>
+            <div className="emp-right-icon-wrapper">
+              <X size={24} />
+            </div>
+          </div>
+          <div className="emp-wizard-container">
+            <div className="emp-wizard-frame">
+              <div className="emp-step-wrapper">
+                <div className="emp-step-active">1</div>
+                <span className="emp-wizard-step">Personal Details</span>
+              </div>
+
+              <div className="emp-line-step"></div>
+
+              <div className="emp-step-wrapper">
+                <div className="emp-step-inactive">2</div>
+                <span className="emp-wizard-step">Banking Details</span>
+              </div>
+
+              <div className="emp-line-step"></div>
+              <div className="emp-step-wrapper">
+                <div className="emp-step-inactive">3</div>
+                <span className="emp-wizard-step">Leave</span>
+              </div>
+
+              <div className="emp-line-step"></div>
+
+              <div className="emp-step-wrapper">
+                <div className="emp-step-inactive">4</div>
+                <span className="emp-wizard-step">Pension</span>
+              </div>
+
+              <div className="emp-line-step"></div>
+
+              <div className="emp-step-wrapper">
+                <div className="emp-step-inactive">5</div>
+                <span className="emp-wizard-step">Medical Aid</span>
+              </div>
+              <div className="emp-line-step"></div>
+
+              <div className="emp-step-wrapper">
+                <div className="emp-step-inactive">6</div>
+                <span className="emp-wizard-step">Preview</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <div className="emp-personal-details-heading">
           <span>Banking Details</span>

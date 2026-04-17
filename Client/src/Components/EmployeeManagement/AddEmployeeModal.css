@@ -74,13 +74,13 @@
 
 
 .emp-left-frame {
-   width: 100%;
+  width: 100%;
   height: 100%;
-  padding: 50px;
+  padding: 50px 50px 50px 100px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
   position: relative;
+  bottom: 40px;
 
 }
 
@@ -105,7 +105,7 @@
 .emp-right-frame {
   width: 100%;
   height: 100%;
-  padding: 50px;
+  padding: 102px 50px 50px 50px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -113,7 +113,7 @@
 }
 
 .emp-right-form-container {
-  width: 360px;
+  width: 444px;
   display: flex;
   flex-direction: column;
   gap: 26px;
@@ -196,7 +196,7 @@
 
 .emp-headings-container {
   position: relative;
-  bottom: 38%;
+  bottom: 10%;
   background-color: var(--primary-color);
   display: flex;
   width: 1250px;
@@ -204,18 +204,18 @@
   padding: 10px 52px;
   align-items: center;
   gap: 20px;
-  right: 6%;
+  right: 10%;
 }
 
 .emp-wizard-container {
   position: relative;
-  bottom: 38%;
+  bottom: 10%;
   width: 1250px;
   height: 76px;
   display: flex;
   padding: 25px 0 25px 20px;
   border-bottom: 1px solid var(--baby-blue);
-  right: 4%;
+  right: 8%;
   
 }
 
@@ -262,6 +262,16 @@
   background:rgba(53, 88, 103, 0.23);
   color: var(--primary-color) !important;
   border: 1px solid var(--blue);
+}
+.emp-step-content {
+  opacity: 0;
+  transform: translateX(20px);
+  transition: all 0.3s ease;
+}
+
+.emp-step-content.active {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .emp-wizard-step{
@@ -361,7 +371,7 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: 360px;
+  max-width: 444px;
   gap: 23px;
   border-radius: 5px;
 
@@ -499,10 +509,9 @@ option:checked {
 
 .upload-label {
   position: relative;
-  right: 36%;
   font-family: 'Anek Bangla';
   font-size: 16px;
-  color: var(--text-primary);
+  color: var(--primary-color);
   height: 33px;
   border: none;
   outline: none;
@@ -511,15 +520,45 @@ option:checked {
 
 }
 
+.upload-container{
+  display: flex;
+  width: 434px;
+  height: 93px;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  border-radius: 5px;
+  border: 2px dashed var(--primary-color);
+  background: rgba(53, 88, 103, 0.05);
+  
+}
+
 .upload-icon {
   position: absolute;
-  right: 12px;
-  top: 50%;
+  display: flex;
+  top: 53px;
   transform: translateY(-50%);
   width: 20px;
   height: 20px;
   cursor: pointer;
+  color: var(--primary-color);
 }
+
+.upload-text {
+  width: 187px;
+  height: 43px;
+  flex-shrink: 0;
+  color: var(--add-button);
+  font-family: "Anek Bangla";
+  font-style: normal;
+  font-weight: 400;
+  line-height: 24px; 
+  margin-top: 30px;
+  font-family: 'Anek Bangla';
+  font-size: 14px;    
+}
+
+
 
 
 /* .emp-name-input-col{
@@ -657,28 +696,59 @@ option:checked {
   padding-bottom: 5px;
 } */
 
+
 .emp-save-button {
-  font-family: 'Instrument Sans', sans-serif;
-  width: 360px;
-  height: 37px;
-  background-color: var(--primary-color);
-  border: none;
-  border-radius: 10px;
-  padding: 0 39px;
+  position: relative;
   display: flex;
+  width: 187px;
+  height: 47px;
+  padding: 0 10px 0px 10px;
   justify-content: center;
   align-items: center;
+  left:59%;
+
+
+  color: var(--white);
+  text-align: center;
+  font-family: "Anek Bangla", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: 0.32px;
+
+  border: 1px solid var(--light-grey);
+  opacity: 0.9;
+  background: var(--primary-color);
+
+  background-color: var(--primary-color);
+  border-radius: 10px;
+  display: flex;
   gap: 10px;
-  color: white;
   font-size: 16px;
-  font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  margin-top: 25px;
+  margin-top: 85px;
 }
 
 .emp-save-button:hover {
   background-color: var(--primary-light);
+}
+
+.save-button-icon{
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  
+}
+
+.emp-upload-wrapper{
+  display: flex;
+  width: 444px;
+  height: 132px;
+  padding: 0 5px 5px 5px;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
 .emp-menu-background {
@@ -781,7 +851,7 @@ option:checked {
 .emp-form-grid {
   display: flex;
   height: 600px;
-  width: 360px;
+  width: 444px;
   flex-direction: column;
   align-items: flex-start;
   gap: 17px;

@@ -16,6 +16,15 @@ namespace HRConnect.Api.Repository
         }
 
         /// <summary>
+        /// Retrieves all banking details from the database.
+        /// </summary>
+        /// <returns> A list of all banking details.</returns>
+        public async Task<List<BankingDetail>> GetAllBankingDetailsAsync()
+        {
+            return await _context.BankingDetails.ToListAsync();
+        }
+
+        /// <summary>
         /// Retrieves the banking details of a temporary employee by their employee ID.
         ///  This method queries the database for a BankingDetail record that matches the provided employee ID.
         ///  If a matching record is found, it is returned; otherwise, null is returned. 
@@ -53,6 +62,18 @@ namespace HRConnect.Api.Repository
             return bankingDetails;
         }
 
+        /// <summary>
+        /// Locks all banking details records in the database by setting the IsLocked property to true and updating the LockedAt timestamp.
+        /// This method uses the ExecuteUpdateAsync method to perform a bulk update on all records where
+        /// </summary>
+        /// <returns>The task representing the asynchronous operation.</returns>
+        public async Task LockBankingDetailsAsync()
+        {
+            await _context.BankingDetails
+            .where (b => !b.IsLocked)
+            .ExecuteUpdateAsync(b => b.SetProperty(bd => bd.IsLocked, true)
+            .SetProperty(bd => bd.LockedAt, DateTime.UtcNow));
+        }
 
     }
 

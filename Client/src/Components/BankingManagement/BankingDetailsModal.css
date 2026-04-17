@@ -51,23 +51,5 @@
   }
 }
 
-.emp-center-frame {
-  grid-template-rows: repeat(1,minmax(0,1fr));
-  grid-template-columns: repeat(2,minmax(0,1fr));
-  width: 1186px;
-  max-height: 843px;
-  margin-left:375px;
-  height: 100%;
-  border-radius: 10px;
-  display: grid;
-  background: linear-gradient(135deg,
-      #EEEEF1,
-      #EFF1F3,
-      #E7EAEB,
-      #D6D6D9,
-      #C4C4C5);
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  z-index: 1;
-}
+
 

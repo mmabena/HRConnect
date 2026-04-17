@@ -6,9 +6,10 @@ namespace HRConnect.Api.Services
 
     public interface IBankingDetailService
     {
-
+        Task <List<BankingDetailDto>> GetAllBankingDetailsAsync();
         Task<BankingDetailDto> GetBankingDetailsAsync(string EmployeeId);
         Task<BankingDetailDto> CreateBankingDetailsAsync(CreateBankingDetailDto createBankingDetailsDto);
         Task<BankingDetailDto> UpdateBankingDetailsAsync(string EmployeeId, UpdateBankingDetailDto updatebankingDetailsDto);
+        Task LockAllBankingDetailsAsync();
     }
 }   
