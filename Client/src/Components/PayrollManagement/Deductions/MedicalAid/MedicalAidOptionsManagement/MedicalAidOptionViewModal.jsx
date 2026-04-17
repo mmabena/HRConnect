@@ -1,9 +1,87 @@
-﻿import {Children, useEffect} from 'react';
+﻿import {useEffect} from 'react';
 import ReactDOM from 'react-dom';
+import './MedicalAidOptionViewModal.css';
 
 function MedicalAidOptionViewModal({isOpen,onClose, title, data = []}) {
-    // Getting the Columns
-    const columns = data.length > 0 ? Object.keys(data[0]) : [];
+    // Getting the Columns || no need need to explicitly define them so that i can render them with custom logic
+    const viewColumns = [
+        {
+            header: "Option Name", key: "medicalOptionName", width: 1, render: () => {
+
+            }
+        },
+        {
+            header: "Category", key: "medicalOptionCategoryId", width: 1, render: () => {
+
+            }
+        },
+        {
+            header: "Min Salary", key: "salarybracketMin", width: 1, render: () => {
+
+            }
+        },
+        {
+            header: "Maximum Salary", key: "salarybracketMax", width: 1, render: () => {
+
+            }
+        },
+        {
+            header: "MSA principal", key: "monthlyMSAContributionPrincipal", width: 1, render: () => {
+
+            }
+        },
+        {
+            header: "MSA adult", key: "monthlyMSAContributionAdult", width: 1, render: () => {
+
+            }
+        },
+        {
+            header: "MSA Child", key: "monthlyMSAContributionChild", width: 1, render: () => {
+
+            }
+        },
+        {
+            header: "Risk Principal", key: "monthlyRiskContributionPrincipal", width: 1, render: () => {
+
+            }
+        },
+        {
+            header: "Risk Adult", key: "monthlyRiskContributionAdult", width: 1, render: () => {
+
+            }
+        },
+        {
+            header: "Risk Child", key: "monthlyRiskContributionChild", width: 1, render: () => {
+
+            }
+        },
+        {
+            header: "Risk Child2", key: "monthlyRiskContributionChild2", width: 1, render: () => {
+
+            }
+        },
+        {
+            header: "Total Principal", key: "totalMonthlyContributionsPrincipal", width: 1, render: () => {
+
+            }
+        },
+        {
+            header: "Total Adult", key: "totalMonthlyContributionsAdult", width: 1, render: () => {
+
+            }
+        },
+        {
+            header: "Total Child", key: "totalMonthlyContributionsChild", width: 1, render: () => {
+
+            }
+        },
+        {
+            header: "Total Child2", key: "totalMonthlyContributionsChild2", width: 1, render: () => {
+
+            }
+        }
+    ];
+
 
     // Close on Escape Key
     useEffect(() => {
@@ -40,20 +118,20 @@ function MedicalAidOptionViewModal({isOpen,onClose, title, data = []}) {
     // Render outside #root so inert doesn't block the modal
     return ReactDOM.createPortal(
         <div
-          className="menu-background"
+            className="medicalaid-menu-background"
           onClick={onClose}
         >
           <div
-            className="medicalAidOptions-modalContent model-wide"
+              className="model-wrapper"
             onClick={(e) => e.stopPropagation()}
           >
 
             {/* Header */}
             <div
-              className="medicalAidOptions-header">
-              <h2 id="modal-title">{title}</h2>
+                className="modal-header-container">
+                <div className="modal-header-main-text">{title}</div>
               <button
-                className="medicalAidOptions-modalClose"
+                  className="modal-button-close"
                 onClick={onClose}
                 aria-label="Close">
                   &times;
@@ -72,13 +150,15 @@ function MedicalAidOptionViewModal({isOpen,onClose, title, data = []}) {
                 </p>
                 ) : (
                   <table
-                    className="medicalAidOptions-modalViewTable">
-                    <thead>
+                      className="modal-view-table">
+                      <thead className="modal-view-table-header">
                       <tr>
-                        {columns.map((col) => (
-                          <th key={col}>
+                          {viewColumns.map((col) => (
+                              <th
+                                  key={col}
+                                  className="model-view-table-header-cell">
                               {/* Convert camelCase/snake_case keys into readable labels */}
-                              {formatHeader(col)}
+                                  {formatHeader(col.header)}
                           </th>
                         ))}
                       </tr>
@@ -86,7 +166,7 @@ function MedicalAidOptionViewModal({isOpen,onClose, title, data = []}) {
                     <tbody>
                     {data.map((row, rowIndex) => (
                       <tr key={row.id ?? rowIndex}>
-                          {columns.map((col) => (
+                          {viewColumns.map((col) => (
                             <td key={col}>
                                 {/* Handles nested objects/arrays */}
                                 {formatCell(row[col])}
@@ -124,7 +204,7 @@ function MedicalAidOptionViewModal({isOpen,onClose, title, data = []}) {
 function formatHeader(key) {
   return key
     .replace(/_/g, " ")                       // Replaces underscores with spaces (for snake_case)
-    .replace(/([A-Z]])/g, " $1")              // Adds space before capital letters (for camelCase)
+      .replace(/([A-Z]]) /g, " $1")              // Adds space before capital letters (for camelCase)
     .replace(/^\w/, (c) => c.toUpperCase())   // Capitalize first Letter
     .trim();                                  // Trim out trailing spaces and whitspaces
 }

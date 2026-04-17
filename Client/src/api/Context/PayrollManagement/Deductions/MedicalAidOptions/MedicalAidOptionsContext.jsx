@@ -1,4 +1,4 @@
-﻿import { createContext, useContext, useCallback, useEffect, useMemo, useState } from "react";
+﻿import {createContext, useCallback, useContext, useState} from "react";
 import medicalOptionServices from '../../../../../Components/Services/medicalOptionServices.js';
 import MedicalAidOptionsValidator from '../../../../../utils/medicalAidOptionsValidator'
 
@@ -31,7 +31,7 @@ export const MedicalAidOptionsProvider = ({children}) => {
       const data = await medicalOptionServices.getAllOptionsGroupedByCategory();
       const response = Array.isArray(data) ? data : Array.isArray(data.data) ? data.data : [];
       setMedicalAidOptions(response);
-      return data
+        return response;
     }
     catch(error){
       setError(error || "Failed to fetch grouped medical aid options");
@@ -48,9 +48,10 @@ export const MedicalAidOptionsProvider = ({children}) => {
       setError(null);
 
       //make api service call
-      const data = medicalOptionServices.getAllMedicalOptionsCategories();
-      const response = Array.isArray(data) ? data : Array.isArray(data.data) ? data.data : [];
+        const data = await medicalOptionServices.getAllMedicalOptionsCategories();
+        const response = Array.isArray(data) ? data.flat() : Array.isArray(data.data) ? data.data.flat() : [];
       setMedicalAidOptionsCategories(response);
+        return response;
     }
     catch(error){
       setError(error || "Failed to fetch all medical aid option categories");
@@ -58,6 +59,24 @@ export const MedicalAidOptionsProvider = ({children}) => {
     }
     finally{
         setLoading(false);
+    }
+  }, []);
+
+    const getMedicalOptionsSnapshot = useCallback(async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const data = await medicalOptionServices.getMedicalOptionsSnapshot();
+            console.log('Dump from Context : ', data);
+            const response = Array.isArray(data) ? data.flat() : Array.isArray(data.data) ? data.data.flat() : [];
+            setMedicalAidOptions(response);
+            return response;
+        } catch (error) {
+            setError(error || "Failed to fetch medical aid options snapshot");
+            console.error('Error retrieving medical options data : ', error);
+        } finally {
+            setLoading(false);
     }
   }, []);
 
@@ -77,6 +96,7 @@ export const MedicalAidOptionsProvider = ({children}) => {
       const data = await medicalOptionServices.getCategoryById(sanitized);
       const response = Array.isArray(data) ? data : Array.isArray(data.data) ? data.data : [];
       setMedicalAidOptionsCategories(response);
+        return response;
     }
     catch(error){
       setError(error || "Failed to fetch medical aid option category by id");
@@ -103,6 +123,7 @@ export const MedicalAidOptionsProvider = ({children}) => {
       const data = await medicalOptionServices.getMedicalOptionsByCategoryId(sanitized);
       const response = Array.isArray(data) ? data : Array.isArray(data.data) ? data.data : [];
       setMedicalAidOptions(response);
+        return response;
     }
     catch (error){
       setError(error || "Failed to fetch medical aid options category by id: ', error);")
@@ -129,6 +150,7 @@ export const MedicalAidOptionsProvider = ({children}) => {
       const data = await medicalOptionServices.getMedicalOptionsSalaryBracketMatchingEmployeeSalary(sanitized);
       const response = Array.isArray(data) ? data : Array.isArray(data.data) ? data.data : [];
       setSalaryBasedOptions(response);
+        return response;
     }
     catch(error){
       setError(error || "Failed to fetch medical aid options matching employee salary");
@@ -154,6 +176,7 @@ export const MedicalAidOptionsProvider = ({children}) => {
       const data =  await medicalOptionServices.getMemberEligibilityOptionsByEmployeeId(sanitized);
       const response = Array.isArray(data) ? data : Array.isArray(data.data) ? data.data : [];
       setEligibleOptionsForEmployee(response);
+        return response;
     }
     catch(error){
       setError(error || "Failed to fetch eligible medical aid options for employee");
@@ -180,6 +203,7 @@ export const MedicalAidOptionsProvider = ({children}) => {
       const data = medicalOptionServices.createMedicalOptionCategory(sanitizedRequest.data);
       const response = Array.isArray(data) ? data : Array.isArray(data.data) ? data.data : [];
       setMedicalAidOptionsCategories(response);
+        return response;
     }
     catch(error){
       setError(error || "Failed to create medical aid option category");
@@ -207,6 +231,7 @@ export const MedicalAidOptionsProvider = ({children}) => {
       const data = medicalOptionServices.createBulkMedicalOptionCategoryOptionsByCategoryId(sanitizedId, sanitizedRequest.data);
       const response = Array.isArray(data) ? data : Array.isArray(data.data) ? data.data : [];
       //setMedicalAidOptions(response);
+        return response;
     }
     catch(error){
       setError(error || "Failed to create bulk medical aid options by category");
@@ -235,6 +260,7 @@ export const MedicalAidOptionsProvider = ({children}) => {
       const data = medicalOptionServices.updateCategoryById(sanitizedId, sanitizedRequest.data);
       const response = Array.isArray(data) ? data : Array.isArray(data.data) ? data.data : [];
       //setMedicalAidOptionsCategories(response);
+        return response;
 
     }
     catch(error){
@@ -263,6 +289,7 @@ export const MedicalAidOptionsProvider = ({children}) => {
       const data = medicalOptionServices.updateBulkMedicalOptionsByCategoryId(sanitizedId, sanitizedRequest.data);
       const response = Array.isArray(data) ? data : Array.isArray(data.data) ? data.data : [];
       // use effect to reflect changes
+        return response;
     }
     catch(error){
       setError(error || "Failed to update medical aid option category by category");
@@ -283,6 +310,7 @@ export const MedicalAidOptionsProvider = ({children}) => {
       // Callback Functions
       getAllOptionsGroupedByCategory,
       getAllMedicalOptionsCategories,
+      getMedicalOptionsSnapshot,
       getCategoryById,
       getMedicalOptionsByCategoryId,
       getMedicalOptionsSalaryBracketMatchingEmployeeSalary,

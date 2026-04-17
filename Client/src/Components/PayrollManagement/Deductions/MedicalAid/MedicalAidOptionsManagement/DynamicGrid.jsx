@@ -1,4 +1,4 @@
-﻿import React, {useState} from 'react';
+﻿import React from 'react';
 import './DynamicGrid.css';
 import useLocalCurrencyFormat from "../../../../../hooks/useLocalCurrencyFormat";
 
@@ -43,44 +43,46 @@ const DynamicGrid = ({
     return pages;
   };
 
+    const gridTemplateColumns = columns.map(col => `${col.width}fr`).join(' ');
+
   return(
     <div className="dynamic-grid-container">
       <div className="grid-wrapper">
-        {/* Header Grid */}
-        <div className="grid-header">
-          {columns.map((col) => (
-            <div
-              key={col}
-              className="grid-header-cell"
-              data-width={col.width || 1}
-            >
-              {col.header}
-            </div>
-            ))}
-        </div>
+          {/* Grid Table */}
+          <table className="grid-table">
+              <thead>
+              {/* Table Header Grid */}
+              <tr className="grid-header-row">
+                  {columns.map((col) => (
+                      <th className="grid-header-cell">
+                          {col.header}
+                      </th>
+                  ))}
+              </tr>
+              </thead>
 
-        {/* GGrid Body */}
-        <div className="grid-body">
-          {data.map((row, rowIndex) => (
-            <div
-              key={row.id || rowIndex}
-              className={`grid-row ${onRowClick ? 'grid-row-clickable' : ''}`}
-              onClick={() => onRowClick && onRowClick(row)}
-            >
-              {columns.map((col) => (
-                <div
-                  key={`${rowIndex}-${col.key}`}
-                  className={`grid-cell grid-col-${col.key}`}
-                >
-                  {col.render
-                    ? col.render(row[col.key], row)
-                    : row[col.key]
-                  }
-                </div>
+              {/* Table body */}
+              <tbody>
+              {data.map((row, rowIndex) => (
+                  <tr
+                      key={row.id || rowIndex}
+                      className="grid-row"
+                      onClick={() => onRowClick && onRowClick(row)}
+                  >
+                      {columns.map((col) => (
+                          <td
+                              key={`${rowIndex}-${col.key}`}
+                              className="grid-cell"
+                          >
+                              {col.render
+                                  ? col.render(row[col.key], row)
+                                  : row[col.key]}
+                          </td>
+                      ))}
+                  </tr>
               ))}
-            </div>
-          ))}
-        </div>
+              </tbody>
+          </table>
       </div>
 
       {/* Grid - Pagination */}

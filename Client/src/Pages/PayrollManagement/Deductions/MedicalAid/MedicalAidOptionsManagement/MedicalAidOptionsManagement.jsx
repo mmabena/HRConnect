@@ -1,16 +1,16 @@
-﻿import react, {useEffect, useState} from 'react';
-import medicalOptionServices, {medicalOptionService} from '../../../../../Components/Services/medicalOptionServices';
+﻿import {useEffect, useState} from 'react';
 import {
-    MedicalAidOptionsProvider
+    useMedicalAidOptionContext
 } from "../../../../../api/Context/PayrollManagement/Deductions/MedicalAidOptions/MedicalAidOptionsContext";
-import NavBar from "../../../../../Components/NavBar.jsx";
 import {toast} from "react-toastify";
 import '../../../../../Components/MenuBar/MenuBar.css';
 import MedicalAidOptionViewModal
     from "../../../../../Components/PayrollManagement/Deductions/MedicalAid/MedicalAidOptionsManagement/MedicalAidOptionViewModal";
-import DynamicGrid from '../../../../../Components/PayrollManagement/Deductions/MedicalAid/MedicalAidOptionsManagement/DynamicGrid';
+import DynamicGrid
+    from '../../../../../Components/PayrollManagement/Deductions/MedicalAid/MedicalAidOptionsManagement/DynamicGrid';
 import useEmpPagination from "../../../../../hooks/useEmpPagination";
 import useLocalCurrencyFormat from "../../../../../hooks/useLocalCurrencyFormat";
+import './MedicalAidOptionsManagement.css';
 
 const MedicalAidOptionsManagement = () => {
   const [medicalOptions, setMedicalOptions] = useState([]);
@@ -25,7 +25,7 @@ const MedicalAidOptionsManagement = () => {
 
     // Handler to open modal
     const handleViewRecord = (rowData) => {
-        setModalData(rowData || []);  // Set data if you have row data
+        setModalData([rowData] || []);  // Set data if you have row data
         setIsModalOpen(true);
     };
 
@@ -46,6 +46,25 @@ const MedicalAidOptionsManagement = () => {
     const {
       toLocalCurrency
     } = useLocalCurrencyFormat();
+
+    const {
+        medicalAidOptions,
+        medicalAidOptionsCategories,
+        salaryBasedOptions,
+        eligibleOptionsForEmployee,
+        // Callback Functions
+        getAllOptionsGroupedByCategory,
+        getAllMedicalOptionsCategories,
+        getMedicalOptionsSnapshot,
+        getCategoryById,
+        getMedicalOptionsByCategoryId,
+        getMedicalOptionsSalaryBracketMatchingEmployeeSalary,
+        getMemberEligibilityOptionsByEmployeeId,
+        createMedicalOptionCategory,
+        createBulkMedicalOptionCategoryOptionsByCategoryId,
+        updateCategoryById,
+        updateBulkMedicalOptionsByCategoryId,
+    } = useMedicalAidOptionContext();
 
     const columns = [
       {header: "Option Name", key: "medicalOptionName", width: 1},
@@ -70,7 +89,7 @@ const MedicalAidOptionsManagement = () => {
       {header: "Income Category Salary", key: "salaryBracket", width: 1,
         render: (value, row) => {
           const min = toLocalCurrency(row.salaryBracketMin,"en-ZA");
-          const max = toLocalCurrency(row.salaryBracketMax, "en-ZA");
+            const max = row.salaryBracketMax;
 
           // if max is null/undefined, render as uncapped with "+"
           if(max === null || max === undefined) {
@@ -80,7 +99,7 @@ const MedicalAidOptionsManagement = () => {
               return 'N/A';
           }
           //otherwise show capped range
-          return `${min} - ${max}`;
+            return `${min} - ${toLocalCurrency(max, "en-ZA")}`;
         }},
       {header: "Principal", key: "totalMonthlyContributionsPrincipal", width:1 ,
         render: (value) => toLocalCurrency(value,"en-ZA")},
@@ -92,11 +111,19 @@ const MedicalAidOptionsManagement = () => {
         render: (value) => toLocalCurrency(value,"en-ZA")},
       {header: "Actions", key: "actions", width:2,
         render: (value, row) => (
+            <div className='edicalaid-options-actions-container'>
           <button
-            className="secondary-btn"
-              onClick={() => handleViewRecord(row)}>
-                View
+              className="medicalaid-options-borderless-button"
+              onClick={() => handleViewRecord(row)}
+          >
+              View
           </button>
+                <button
+                    className="medicalaid-options-borderless-button"
+                >
+                    Edit
+                </button>
+            </div>
         )},
   ];
 
@@ -105,17 +132,17 @@ const MedicalAidOptionsManagement = () => {
     const initializeOptions = async () => {
       try{
         console.log("-----------=: Initialization of Medical options And Categories on mount :=------------");
-        const data = await medicalOptionServices.getMedicalOptionsSnapshot();
-        const categoryData = await medicalOptionServices.getAllMedicalOptionsCategories();
+          const data = await getMedicalOptionsSnapshot();
+          const categoryData = await getAllMedicalOptionsCategories();
         setInitialized(true);
         console.log("-----------=: Medical Aid Options And Categories Data loaded :=------------");
         console.log("-----------=: Dump Options :=-----------");
         console.log(data);
         console.log("-----------=: Dump Options :=-----------");
-        console.log(categoryData.flat());
+          console.log(categoryData);
         //set global data
         setMedicalOptions(data);
-        setMedicalOptionsCategory(categoryData.flat());
+          setMedicalOptionsCategory(categoryData);
       }
       catch (error) {
         console.error(`-----------=: Error Caught :=------------\n\n${error}`);
@@ -159,13 +186,21 @@ const MedicalAidOptionsManagement = () => {
 
   // Row Click event handler
   const handleRowClick = (row) => {
-      <MedicalAidOptionViewModal isOpen={true} title="test" />
+      handleCloseModal(row);
   };
 
 
   return (
     <div className="menu-background">
       <div className="wrapper-container">
+
+          {/* Modal component -  */}
+          <MedicalAidOptionViewModal
+              isOpen={isModalOpen}
+              onClose={handleCloseModal}
+              title="Medical Aid Options"
+              data={modalData}/>
+
           <div className="singular-staff-heading-container">
             Deductions
 
@@ -176,9 +211,7 @@ const MedicalAidOptionsManagement = () => {
               <div className="small-box">
                   Time
               </div>
-                <button className="btn-secondary" onClick={handleViewRecord}>Click Me!</button>
             </div>
-
           </div>
 
           <div className="cm-navbar-container">
@@ -194,21 +227,6 @@ const MedicalAidOptionsManagement = () => {
                   {tab.label}
               </div>
             ))}
-
-
-          <button className="button-view" onClick={handleViewRecord}>
-            View
-          </button>
-
-              {/* Modal component - placed in the render */}
-              <MedicalAidOptionViewModal
-                  isOpen={isModalOpen}
-                  onClose={handleCloseModal}
-                  title="Medical Aid Options"
-                  data={medicalOptions}
-              />
-
-
           </div>
 
           <div className="dynamic-grid-container">
@@ -222,9 +240,6 @@ const MedicalAidOptionsManagement = () => {
                   onPageChange={setActivePage}
               />
           </div>
-
-
-
       </div>
     </div>
   );
