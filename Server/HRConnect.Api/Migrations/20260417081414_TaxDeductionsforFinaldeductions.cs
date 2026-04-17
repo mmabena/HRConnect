@@ -5,7 +5,7 @@
 namespace HRConnect.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class AddUifSdlAndFixColumns : Migration
+    public partial class TaxDeductionsforFinaldeductions : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,7 +17,7 @@ namespace HRConnect.Api.Migrations
                     Id = table.Column<int>(type: "int", nullable: false, defaultValueSql: "NEXT VALUE FOR [PayrollRecordSequence]"),
                     PayrollRunId = table.Column<int>(type: "int", nullable: false),
                     IsLocked = table.Column<bool>(type: "bit", nullable: false),
-                    EmployeeId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    EmployeeId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Surname = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IdNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -31,9 +31,6 @@ namespace HRConnect.Api.Migrations
                     PensionContribution = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     PensionableIncome = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     TaxDeductionAmount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    UifEmployeeAmount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    UifEmployerAmount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    SdlAmount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     NetSalary = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     TaxCode = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
@@ -48,10 +45,13 @@ namespace HRConnect.Api.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            
             migrationBuilder.CreateIndex(
-                name: "IX_FinalTaxDeductions_PayrollRunId",
+                name: "IX_FinalTaxDeductions_PayrollRunId_EmployeeId",
                 table: "FinalTaxDeductions",
-                column: "PayrollRunId");
+                columns: new[] { "PayrollRunId", "EmployeeId" },
+                unique: true);
+
         }
 
         /// <inheritdoc />
@@ -59,6 +59,7 @@ namespace HRConnect.Api.Migrations
         {
             migrationBuilder.DropTable(
                 name: "FinalTaxDeductions");
+
         }
     }
 }
