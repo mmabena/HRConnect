@@ -1,4 +1,4 @@
-﻿namespace HRConnect.Api.Services
+namespace HRConnect.Api.Services
 {
   using System.Collections.Generic;
   using System.Threading.Tasks;
@@ -99,8 +99,7 @@
         .GetByEmployeeIdAndIsNotLockedAsync(pensionDeductionUpdateDto.EmployeeId);
 
       decimal pensionOptionPercentage = await
-        GetEmployeePensionOptionPercentageAsync(pensionDeductionUpdateDto.PensionOptionId ?? (int)existingEmployee.PensionOptionId!);
-      ValidatePensionDeductionDtos.ValidateVoluntaryContribution((decimal)pensionDeductionUpdateDto.VoluntaryContribution!, existingEmployee.MonthlySalary, pensionOptionPercentage);
+        GetEmployeePensionOptionPercentageAsync(pensionDeductionUpdateDto.PensionOptionId ?? (int)existingEmployee.PensionOptionId!); ValidatePensionDeductionDtos.ValidateVoluntaryContribution((decimal)pensionDeductionUpdateDto.VoluntaryContribution!, existingEmployee.MonthlySalary, pensionOptionPercentage);
 
       if (employeePensionDeduction != null)
       {
@@ -154,13 +153,13 @@
     ///<summary>
     ///Auxilary function to get pension option percentage by pension option id
     ///</summary>
-    ///<param name="pensionOptionId">Pension Option Id</param>
+    ///<param name="PensionOptionId">Pension Option Id</param>
     ///<returns>
     ///Pension option percentage for a given pension option id
     ///</returns
-    private async Task<decimal> GetEmployeePensionOptionPercentageAsync(int pensionOptionId)
+    private async Task<decimal> GetEmployeePensionOptionPercentageAsync(int PensionOptionId)
     {
-      decimal? employeePensionOption = await _pensionOptionRepository.GetPensionOptionPercentageByIdAsync(pensionOptionId);
+      decimal? employeePensionOption = await _pensionOptionRepository.GetPensionOptionPercentageByIdAsync(PensionOptionId);
       return employeePensionOption ?? throw new NotFoundException("Pension option not found");
     }
 

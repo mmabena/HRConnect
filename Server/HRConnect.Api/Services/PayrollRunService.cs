@@ -9,11 +9,13 @@ namespace HRConnect.Api.Services
   {
     private readonly IPayrollRunRepository _payrollRunRepo;
     private readonly IPayrollPeriodService _payrollPeriodService;
+    private readonly ICompanyContributionAllocationService _allocationService;
 
-    public PayrollRunService(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService)
+    public PayrollRunService(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService, ICompanyContributionAllocationService allocationService)
     {
       _payrollRunRepo = payrollRunRepo;
       _payrollPeriodService = payrollPeriodService;
+      _allocationService = allocationService;
     }
 
     public async Task<PayrollRunDto?> GetPayrunByRunNumberAsync(int payrollRunNumber)
@@ -73,6 +75,12 @@ namespace HRConnect.Api.Services
       if (currentPayRun == null)
         throw new InvalidDataException("No current payroll run found or it is locked");
 
+      var exists = currentPayRun.Records
+      .Any(r => r.EmployeeId == employeeId);
+
+      if (exists)
+        return;
+
       payrollRecord.PayrollRun = currentPayRun;
       payrollRecord.EmployeeId = employeeId;
       currentPayRun.Records.Add(payrollRecord);
@@ -80,7 +88,7 @@ namespace HRConnect.Api.Services
       await _payrollRunRepo.UpdateRun(currentPayRun);
     }
 
-    public async Task AddRecordsCollectionToRunAsync(IList<PayrollRecord> recordsCollection, string employeeId)
+    public async Task AddRecordsCollectionToRunAsync(IList<PayrollRecord> recordsCollection, string? employeeId)
     {
       var payperiod = await _payrollPeriodService.GetLastPeriodAsync();
       if (payperiod == null)
@@ -91,11 +99,21 @@ namespace HRConnect.Api.Services
       if (currentPayRun == null)
         throw new InvalidDataException("No current payroll run found or it is locked");
 
-      foreach (var record in recordsCollection
-      )
+      foreach (var record in recordsCollection)
       {
+        var empId = !string.IsNullOrWhiteSpace(employeeId)
+        ? employeeId
+        : record.EmployeeId;
+
+        var exists = currentPayRun.Records
+        .Any(r => r.PayrollRunId == currentPayRun.PayrollRunId
+       && r.EmployeeId == empId);
+
+        if (exists)
+          continue;
+          
         record.PayrollRun = currentPayRun;
-        record.EmployeeId = employeeId;
+        record.EmployeeId = empId;
         currentPayRun.Records.Add(record);
       }
       await _payrollRunRepo.UpdateRun(currentPayRun);

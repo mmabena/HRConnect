@@ -167,7 +167,7 @@ namespace HRConnect.Api.Services
       ValidateUpdate(employeeDto);
       await CheckDuplicateOnUpdate(employeeId, employeeDto);
       ValidateTitleAndGender(employeeDto);
-      ValidateTitleAndGender(employeeDto);
+      ExtractIdInfo(employeeDto);
 
       var positionChanged = existingEmployee.PositionId != employeeDto.PositionId;
 
@@ -184,6 +184,9 @@ namespace HRConnect.Api.Services
       existingEmployee.Name = employeeDto.Name;
       existingEmployee.Surname = employeeDto.Surname;
       existingEmployee.ContactNumber = employeeDto.ContactNumber;
+      existingEmployee.IdNumber = employeeDto.IdNumber;
+      existingEmployee.PassportNumber = employeeDto.PassportNumber;
+      existingEmployee.DateOfBirth = employeeDto.DateOfBirth;
       existingEmployee.Email = employeeDto.Email;
       existingEmployee.City = employeeDto.City;
       existingEmployee.ZipCode = employeeDto.ZipCode;
@@ -191,6 +194,7 @@ namespace HRConnect.Api.Services
       existingEmployee.PositionId = employeeDto.PositionId;
       existingEmployee.MonthlySalary = employeeDto.MonthlySalary;
       existingEmployee.CareerManagerID = employeeDto.CareerManagerID;
+      existingEmployee.EmploymentStatus = employeeDto.EmploymentStatus;
       existingEmployee.ProfileImage = employeeDto.ProfileImage;
       existingEmployee.HasDisability = employeeDto.HasDisability;
       existingEmployee.DisabilityDescription = employeeDto.DisabilityDescription;
@@ -418,13 +422,13 @@ namespace HRConnect.Api.Services
     /// </summary>
     /// <param name="employeeRequestDto">The employee creation request DTO</param>
     /// <returns>Validation error if ID information is invalid</returns>
-    private static void ExtractIdInfo(CreateEmployeeRequestDto employeeRequestDto)
+    private static void ExtractIdInfo(EmployeeBaseRequestDto employeeRequestDto)
     {
       if (string.IsNullOrWhiteSpace(employeeRequestDto.IdNumber)) return;
 
       var employeeInfo = IdNumberValidator.ParseIdNumber(employeeRequestDto.IdNumber);
 
-      EnsureEmployeeMeetsAgePolicy(employeeInfo.DateOfBirth, employeeRequestDto.EmploymentStatus);
+      //EnsureEmployeeMeetsAgePolicy(employeeInfo.DateOfBirth, employeeRequestDto.EmploymentStatus);
 
       employeeRequestDto.Gender = employeeInfo.Gender;
       employeeRequestDto.DateOfBirth = employeeInfo.DateOfBirth;
