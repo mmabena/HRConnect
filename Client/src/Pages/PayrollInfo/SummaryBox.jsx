@@ -1,6 +1,6 @@
 import "./Payslip.css"
 
-const SummaryBox = ({ title, amount, subtext }) => {
+const SummaryBox = ({ title, amount, subtext,className }) => {
 
 
   const formatCurrency = (val) => {
@@ -11,9 +11,9 @@ const SummaryBox = ({ title, amount, subtext }) => {
   };
 
   return (
-    <div className="summary-box">
+    <div className={`summary-box`}>
       <p className="summary-title">{title}</p>
-      <h2 className="summary-amount">{formatCurrency(amount)}</h2>
+      <h2 className={`summary-amount  ${className||""}`}>{formatCurrency(amount)}</h2>
       <p className="summary-subtext">{subtext}</p>
     </div>
   );

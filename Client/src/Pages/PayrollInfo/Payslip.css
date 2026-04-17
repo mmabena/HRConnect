@@ -1,21 +1,25 @@
 .payslips-summary-container{
-width: 1445px;
-height:113px;
+display: flex;
+flex-direction: row;
+justify-content: space-between;
+align-items: center;
+width: 100%;
+height: auto;
 }
 
 /*Summary Box*/
 .summary-box{
-
-/* Auto layout */
+  text-align:left;
 display: flex;
 flex-direction: column;
 align-items: flex-start;
-padding: 20px 28px 23px;
-gap: 11px;
+padding: 20px 28px 23px 20px;
+gap: 5px;
 
+flex: 1;
+margin: 0 10px;
 width: 440px;
 height: 110px;
-
 background: rgba(79, 110, 120, 0.1);
 border-radius: 10px;
 
@@ -23,53 +27,40 @@ border-radius: 10px;
 flex: none;
 order: 0;
 flex-grow: 0;
-};
+}
 
 /* GROSS EARNINGS */
 .summary-title{
-width: 384px;
+width: 380px;
 height: 15px;
-
 font-family: 'Anek Bangla';
 font-style: normal;
 font-weight: 500;
 font-size: 16px;
-line-height: 15px;
+line-height: 17px;
 /* identical to box height, or 94% */
 letter-spacing: -0.43px;
 
-color: #9A9A9A;
-
-
-/* Inside auto layout */
+/* Inside auto layo:waut */
 flex: none;
 order: 0;
 align-self: stretch;
 flex-grow: 0;
-};
+
+}
 
 /* R 48 026,00 */
-color: ;
 .summary-amount{
 width: 384px;
 height: 15px;
-
 font-family: 'Anek Bangla';
 font-style: normal;
 font-weight: 500;
 font-size: 20px;
-line-height: 15px;
+/* line-height: 15px; */
 /* identical to box height, or 75% */
 letter-spacing: -0.43px;
-/* color:var(--error-color); */
-color:#638549;
-
-/* Inside auto layout */
-flex: none;
-order: 1;
-align-self: stretch;
-flex-grow: 0;
-};
+}
 
 /* Before deductions */
 .summary-subtext{
@@ -80,7 +71,6 @@ font-family: 'Anek Bangla';
 font-style: normal;
 font-weight: 400;
 font-size: 16px;
-line-height: 15px;
 /* identical to box height, or 94% */
 letter-spacing: -0.43px;
 color: #355867;
@@ -90,41 +80,39 @@ flex: none;
 order: 2;
 align-self: stretch;
 flex-grow: 0;
-};
+}
 
-/* .payslips-summary-frame{ */
-/*   width: 1402px; */
-/*   height: 110px; */
-/*   position: absolute;   /* Needed for top/left to apply / */
-/*   top: -3px; */
-/*   left: 50px; */
-/*   display: flex;        /* Needed for gap to apply / */
-/*   gap: 41px; */
-/*   transform: rotate(0deg); */
-/*   opacity: 1; */
-/* } */
 
+.gross {
+  color:var(--success-text-color);
+}
+.deductions {
+  color:var(--error-color);
+}
+.net{
+  color:var(--primary-color);
+}
 .summary-subtext {
   font-family: "Anek Bangla", sans-serif;
   font-weight: 400;          /* Normal weight */
   font-style: normal;        /* "Regular" in Figma = normal */
   font-size: 16px;
-  line-height: 15px;         /* Explicit line height */
+  line-height: 55px;
   letter-spacing: -0.43px;
+  color:var(--primary-color);
 }
-/*Summary Boxes*/
 
+/*Summary Boxes*/
 .list-heading-row{
   cursor: pointer;
   display: flex;
   align-items: flex-start;
   gap: 45px;
-  padding: 5px 0px;/*60px for padding to the left*/
+  padding: 5px 60px;/*60px for padding to the left*/
   min-height: 58px;
   box-sizing: border-box;
   width: 1441px;
-
-};
+}
 .heading-item {
   /* width: 83px; */
   height: 30px;
@@ -138,112 +126,44 @@ flex-grow: 0;
   align-items: center;
   justify-content: center;
   white-space: nowrap;
-};
+}
 
-
-/* Frame 46600 */
-.payslips-summary-frame{
-/* Auto layout */
+.payslip-summary-frame{
 display: flex;
 flex-direction: row;
 align-items: center;
 padding: 0px;
-gap: 41px;
+gap:11px;
 
-position: absolute;
-width: 1402px;
+/* position: absolute; */
+width: 1450px;
 height: 110px;
-left: 50px;
-top: -3px;
+/* left: 50px; */
+/* top: -3px; */
 }
 
+/* Titles */
 
-/* Frame 46565 */
-
-/* Auto layout */
+/* Frame 46596 */
+.filter-header-row{
 display: flex;
-flex-direction: column;
-align-items: flex-start;
-padding: 20px 28px 23px;
-gap: 11px;
+flex-direction: row;
+align-items: center;
+padding: 11px 25px;
+gap: 10px;
 
-width: 440px;
-height: 110px;
+width: 1380px;
+height: 64px;
 
 background: rgba(79, 110, 120, 0.1);
 border-radius: 10px;
 
 /* Inside auto layout */
 flex: none;
-order: 2;
-flex-grow: 0;
-
-
-/* NET PAY */
-
-width: 384px;
-height: 15px;
-
-font-family: 'Anek Bangla';
-font-style: normal;
-font-weight: 500;
-font-size: 16px;
-line-height: 15px;
-/* identical to box height, or 94% */
-letter-spacing: -0.43px;
-
-color: #9A9A9A;
-
-
-/* Inside auto layout */
-flex: none;
 order: 0;
-align-self: stretch;
 flex-grow: 0;
+margin-left:-45px;
+margin-bottom:25px;
+}
 
-
-/* R 35 189,00 */
-
-width: 384px;
-height: 15px;
-
-font-family: 'Anek Bangla';
-font-style: normal;
-font-weight: 500;
-font-size: 20px;
-line-height: 15px;
-/* identical to box height, or 75% */
-letter-spacing: -0.43px;
-
-color: #355867;
-
-
-/* Inside auto layout */
-flex: none;
-order: 1;
-align-self: stretch;
-flex-grow: 0;
-
-
-/* deposited to account */
-
-width: 384px;
-height: 15px;
-
-font-family: 'Anek Bangla';
-font-style: normal;
-font-weight: 400;
-font-size: 16px;
-line-height: 15px;
-/* identical to box height, or 94% */
-letter-spacing: -0.43px;
-
-color: #355867;
-
-
-/* Inside auto layout */
-flex: none;
-order: 2;
-align-self: stretch;
-flex-grow: 0;
 

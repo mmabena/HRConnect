@@ -7,7 +7,7 @@ import SummaryBox from "../PayrollInfo/SummaryBox.jsx"
 // import "../../Cmponents/MenuBar/MenuBar.css";
 
 const tabs = [
-  { label: "Personal Information", value: "Personal" },
+//   { label: "Personal Information", value: "Personal" },
   { label: "Payroll Information", value: "Payroll" },
   { label: "Leave", value: "Leave" },
   { label: "Payroll Tools", value: "Tools" }
@@ -20,7 +20,10 @@ const Payslip = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedTab, setSelectedTab] = useState("Payroll");
 
-  const { payrollPeriods, loading, error } = usePayrollPeriod(location.key);
+  const { payrollPeriod:payrollPeriods, loading, error } = usePayrollPeriod(location.pathname);
+
+payrollPeriods.map((p)=>{console.log(`PayrollPeriod:`);
+console.log(p)}) ;
 
   //Pagination  
   const {
@@ -70,18 +73,25 @@ const Payslip = () => {
           ))}
 
         </div>
+
+          <div className="filter-header-row">
+
+          </div>
         {/* Payslip Summary Tables*/}
         <div className="payslip-summary-container">
-          <div class="payslip-summary-frame">
+          <div className="payslip-summary-frame" >
             <SummaryBox
+              className="gross"
               title="Gross Earnings"
               amount={48026}
               subtext="Before Deductions" />
             <SummaryBox
+              className="deductions"
               title="Deductions"
               amount={`-${12837}`}
               subtext="Deductions debiting" />
             <SummaryBox
+              className="net"
               title="Net Pay"
               amount={35189}
               subtext="Deposited to account" />
@@ -89,14 +99,11 @@ const Payslip = () => {
         </div>
         <div className="content-container">
           <div className="employee-table-grid">
-            <div className="table-header">Employee Code</div>
-            <div className="table-header">Name & Surname</div>
-            <div className="table-header">Job Title</div>
-            <div className="table-header">Contact Number</div>
-            <div className="table-header">Email</div>
-            <div className="table-header">Employment Status</div>
-            <div className="table-header">Branch</div>
-            <div className="table-header-action">Action</div>
+            <div className="table-header">Period</div>
+            <div className="table-header">Gross Earnings</div>
+            <div className="table-header">Deductions</div>
+            <div className="table-header">Net Pay</div>
+            <div className="table-header">Actions</div>
 
             {loading && <div className="loading-row">Loading payslips...</div>}
 
@@ -127,11 +134,8 @@ const Payslip = () => {
                     <span className="name-text">{`${emp.name} ${emp.surname}`}</span>
                   </div>
 
-                  <div className="table-cell">{emp.positionTitle}</div>
-                  <div className="table-cell">{emp.contactNumber}</div>
-                  <div className="table-cell">{emp.email}</div>
-                  <div className="table-cell">{emp.employmentStatus}</div>
-                  <div className="table-cell">{emp.branch}</div>
+                  {/* <div className="table-cell">{emp.positionTitle}</div> */}
+
 
                 </React.Fragment>
               ))}
