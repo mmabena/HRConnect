@@ -1,4 +1,4 @@
-import React,{useState}from "react";
+import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import usePagination from "../../hooks/usePagination.js";
 import usePayrollPeriod from "../../hooks/usePayroll.js";
@@ -6,49 +6,49 @@ import "./Payslip.css"
 import SummaryBox from "../PayrollInfo/SummaryBox.jsx"
 // import "../../Cmponents/MenuBar/MenuBar.css";
 
-    const tabs=[
-      {label:"Personal Information",value:"Personal"},
-      {label:"Payroll Information",value:"Payroll"},
-      {label:"Leave",value:"Leave"},
-      {label: "Payroll Tools",value:"Tools"}
-    ];
+const tabs = [
+  { label: "Personal Information", value: "Personal" },
+  { label: "Payroll Information", value: "Payroll" },
+  { label: "Leave", value: "Leave" },
+  { label: "Payroll Tools", value: "Tools" }
+];
 
 const Payslip = () => {
 
-    const navigate=useNavigate();
-    const location=useLocation();
-    const [showModal,setShowModal]=useState(false);
-    const [selectedTab,setSelectedTab]=useState("Payroll");
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [showModal, setShowModal] = useState(false);
+  const [selectedTab, setSelectedTab] = useState("Payroll");
 
-    const {payrollPeriods,loading,error}=usePayrollPeriod(location.key);
+  const { payrollPeriods, loading, error } = usePayrollPeriod(location.key);
 
-     //Pagination  
-    const{
-        currentPage,
-        //itemsPerPage,
-        totalPages,
-        // currentItems,
-        setCurrentPage,
-        handlePrev,
-        handleNext,
-        handlePageClick,
-        currentItems,
-      // changeItemsPerPage,
+  //Pagination  
+  const {
+    currentPage,
+    //itemsPerPage,
+    totalPages,
+    // currentItems,
+    setCurrentPage,
+    handlePrev,
+    handleNext,
+    handlePageClick,
+    currentItems,
+    // changeItemsPerPage,
 
-    } = usePagination();
+  } = usePagination();
 
 
-    //use this to view a payroll
-    const handleViewPayrollClick=()=>{
-        setShowModal(true);
-    }
-    const handleItemsPerPageChange=(option)=>{
-        // setItemsPerPage(option);
-        setCurrentPage(1);
-    }
-    return(
+  //use this to view a payroll
+  const handleViewPayrollClick = () => {
+    setShowModal(true);
+  }
+  const handleItemsPerPageChange = (option) => {
+    // setItemsPerPage(option);
+    setCurrentPage(1);
+  }
+  return (
 
-  <div className="menu-background">
+    <div className="menu-background">
       <div className="menu-bar"></div>
 
       <div className="wrapper-container">
@@ -58,27 +58,34 @@ const Payslip = () => {
           {tabs.map((tab) => (
             <div
               key={tab.value}
-              className={`heading-item ${
-                selectedTab === tab.value ? "selected" : ""
-              }`}
+              className={`heading-item ${selectedTab === tab.value ? "selected" : ""
+                }`}
               onClick={() => {
-                setSelectedTab(tab.value); 
+                setSelectedTab(tab.value);
                 // setActivePage(1); 
-              }} 
+              }}
             >
               {tab.label}
             </div>
           ))}
 
         </div>
-          {/* Payslip Summary Tables*/} 
+        {/* Payslip Summary Tables*/}
         <div className="payslip-summary-container">
-         <div class="payslip-summary-frame">
-            <SummaryBox 
-             title="Gross Earnings"
-            amount={48026}
-            subtext="Before Deductions"/>
-          </div> 
+          <div class="payslip-summary-frame">
+            <SummaryBox
+              title="Gross Earnings"
+              amount={48026}
+              subtext="Before Deductions" />
+            <SummaryBox
+              title="Deductions"
+              amount={`-${12837}`}
+              subtext="Deductions debiting" />
+            <SummaryBox
+              title="Net Pay"
+              amount={35189}
+              subtext="Deposited to account" />
+          </div>
         </div>
         <div className="content-container">
           <div className="employee-table-grid">
@@ -134,6 +141,6 @@ const Payslip = () => {
 
     </div>
 
-    );
+  );
 };
 export default Payslip
