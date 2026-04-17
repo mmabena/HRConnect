@@ -36,7 +36,7 @@ const Profile = () => {
     dateOfBirth: "1985-06-15",
     position: "Software Engineer",
     department: "Information Technology",
-    employeeId: "EMP001",
+    // employeeId: "EMP001",
     dateJoined: "2020-03-15",
     manager: "John Smith",
     bio: "Experienced software engineer with expertise in React and Node.js development.",

@@ -653,6 +653,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
               {displayName}
             </div>
             <div className="user-job-title">
+    {/*Create positions endpoint*/} 
               {currentUser?.role}
             </div>
           </div>
