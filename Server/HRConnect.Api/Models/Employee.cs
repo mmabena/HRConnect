@@ -136,5 +136,7 @@ namespace HRConnect.Api.Models
         public PensionOption? PensionOption { get; set; }
         public ICollection<PensionFund>? PensionFunds { get; set; }             // navigation
 
-    }
+    public ICollection<EmployeePayrollEarning> EmployeePayrollEarning { get; set; } = [];
+
+  }
 }
