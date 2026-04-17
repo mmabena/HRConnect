@@ -234,13 +234,13 @@
     ///<summary>
     ///Get pension option percentage for a given pension option id
     ///</summary>
-    ///<param name="pensionOptionId">Pension's Id</param>
+    ///<param name="PensionOptionId">Pension's Id</param>
     ///<returns>
     ///Pension option percentage for a given pension option id
     ///</returns>
-    private async Task<decimal> GetEmployeePensionOptionPercentageAsync(int pensionOptionId)
+    private async Task<decimal> GetEmployeePensionOptionPercentageAsync(int PensionOptionId)
     {
-      decimal? employeePensionOption = await _pensionOptionRepository.GetPensionOptionPercentageByIdAsync(pensionOptionId);
+      decimal? employeePensionOption = await _pensionOptionRepository.GetPensionOptionPercentageByIdAsync(PensionOptionId);
       return employeePensionOption ?? throw new NotFoundException("Pension option not found");
     }
 

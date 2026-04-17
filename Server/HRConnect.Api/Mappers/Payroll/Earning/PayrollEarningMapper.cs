@@ -15,6 +15,7 @@
         Taxable = payrollEarning.Taxable,
         TaxCode = payrollEarning.TaxCode,
         TaxPercentage = payrollEarning.TaxPercentage,
+        OvertimeHourMultiplier = payrollEarning.OvertimeHourMultiplier,
         CanProRata = payrollEarning.CanProRata,
         IsOnGoing = payrollEarning.IsOnGoing,
         IsActive = payrollEarning.IsActive
