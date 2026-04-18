@@ -161,10 +161,9 @@ namespace HRConnect.Api.Services
     /// <exception cref="KeyNotFoundException"></exception>
     /// <exception cref="InvalidOperationException"></exception>
     public async Task<FinalTaxDeduction> GenerateTaxAsync(
-      TaxCalculationDto request,
-      string email)
+     TaxCalculationDto request,
+     string email)
     {
-
       var employee = await _repository.GetEmployeeByEmailAsync(email);
       if (employee == null)
       {
@@ -181,15 +180,6 @@ namespace HRConnect.Api.Services
         throw new InvalidOperationException("Payroll month is finalised. Recalculation is blocked.");
       }
 
-      var existing = await _repository.GetExistingFinalTaxAsync(employee.EmployeeId,
-        payrollRun.PayrollRunId);
-
-
-      if (existing?.IsLocked == true)
-      {
-        throw new InvalidOperationException("Payroll is locked");
-      }
-
       var pension = await _repository.GetPensionByEmployeeIdAsync(employee.EmployeeId);
       if (pension == null)
       {
@@ -197,22 +187,17 @@ namespace HRConnect.Api.Services
       }
 
       var today = DateOnly.FromDateTime(DateTime.Today);
-
       int age = today.Year - employee.DateOfBirth.Year;
+      if (employee.DateOfBirth > today.AddYears(-age)) age--;
 
-      if (employee.DateOfBirth > today.AddYears(-age))
-        age--;
 
       decimal monthlySalary = employee.MonthlySalary;
-
       decimal pensionContribution = pension.TotalPensionContribution;
-
       decimal pensionableIncome = monthlySalary - pensionContribution;
 
-      decimal taxBeforeCredits =
-          await CalculateTaxAsync(pensionableIncome, age);
+      decimal taxBeforeCredits = await CalculateTaxAsync(pensionableIncome, age);
 
-      bool hasMedicalAid = request.MedicalAidMembers > 0
+      bool hasMedicalAid = request.MedicalAidMembers > 1
                         || request.MedicalAidDependants > 0
                         || request.MedicalAidChildren > 0;
 
@@ -224,15 +209,43 @@ namespace HRConnect.Api.Services
           : 0m;
 
       decimal finalTax = Math.Max(0, taxBeforeCredits - medicalCredit);
-
       decimal uifEmployee = _deductionsCalculator.CalculateUifEmployee(monthlySalary);
-
       decimal netSalary = monthlySalary - pensionContribution - finalTax - uifEmployee;
-
       int taxYear = DateTime.Now.Year;
+
+      // Check for existing record AFTER calculations so it can update
+      var existing = await _repository.GetExistingFinalTaxAsync(
+          employee.EmployeeId,
+          payrollRun.PayrollRunId);
+
+      /// If a record already exists for this employee and payroll run, 
+      /// update it instead of creating a new one.
+      if (existing != null)
+      {
+        if (existing.IsLocked)
+          throw new InvalidOperationException("Payroll is locked. Cannot recalculate.");
+
+        // Update existing record instead of inserting duplicate
+        existing.MonthlySalary = monthlySalary;
+        existing.PensionableIncome = pensionableIncome;
+        existing.PensionContribution = pensionContribution;
+        existing.MedicalAidMembers = request.MedicalAidMembers;
+        existing.MedicalAidDependants = request.MedicalAidDependants;
+        existing.MedicalAidChildren = request.MedicalAidChildren;
+        existing.MedicalTaxCredit = medicalCredit;
+        existing.TaxDeductionAmount = finalTax;
+        existing.NetSalary = netSalary;
+        existing.TaxCode = GenerateTaxCode(employee.EmployeeId, payrollRun.PayrollRunId, taxYear);
+
+        await _repository.SaveChangesAsync();
+        return existing;
+      }
 
       var record = new FinalTaxDeduction
       {
+        PayrollRunId = payrollRun.PayrollRunId,
+        EmployeeId = employee.EmployeeId,
+
         Name = employee.Name,
         Surname = employee.Surname,
         IdNumber = employee.IdNumber,
@@ -240,7 +253,7 @@ namespace HRConnect.Api.Services
 
         TaxYear = taxYear,
 
-        MonthlySalary = monthlySalary,   // ✅ gross
+        MonthlySalary = monthlySalary,
         PensionableIncome = pensionableIncome,
         PensionContribution = pensionContribution,
 
@@ -252,11 +265,7 @@ namespace HRConnect.Api.Services
         TaxDeductionAmount = finalTax,
         NetSalary = netSalary,
 
-        TaxCode = GenerateTaxCode(
-              employee.EmployeeId,
-              payrollRun.PayrollRunId,
-              taxYear),
-
+        TaxCode = GenerateTaxCode(employee.EmployeeId, payrollRun.PayrollRunId, taxYear),
         IsLocked = false
       };
 

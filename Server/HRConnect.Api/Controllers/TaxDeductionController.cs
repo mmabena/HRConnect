@@ -16,7 +16,7 @@ namespace HRConnect.Api.Controllers
 
   [ApiController]
   [Route("api/tax-deductions")]
-  [Authorize(Roles = "SuperUser")]
+  [Authorize(Roles = "SuperUser,NormalUser")] 
   public class TaxDeductionController : ControllerBase
   {
     private readonly ITaxDeductionService _taxDeductionService;
