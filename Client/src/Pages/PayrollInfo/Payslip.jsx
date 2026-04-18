@@ -7,7 +7,7 @@ import SummaryBox from "../PayrollInfo/SummaryBox.jsx"
 // import "../../Cmponents/MenuBar/MenuBar.css";
 
 const tabs = [
-//   { label: "Personal Information", value: "Personal" },
+  //   { label: "Personal Information", value: "Personal" },
   { label: "Payroll Information", value: "Payroll" },
   { label: "Leave", value: "Leave" },
   { label: "Payroll Tools", value: "Tools" }
@@ -20,17 +20,18 @@ const Payslip = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedTab, setSelectedTab] = useState("Payroll");
 
-  const { payrollPeriod:payrollPeriods, loading, error } = usePayrollPeriod(location.pathname);
+  const { payrollPeriod: payrollPeriods, loading, error } = usePayrollPeriod(location.pathname);
 
-payrollPeriods.map((p)=>{console.log(`PayrollPeriod:`);
-console.log(p)}) ;
+  payrollPeriods.map((p) => {
+    console.log(`PayrollPeriod:`);
+    console.log(p)
+  });
 
   //Pagination  
   const {
     currentPage,
     //itemsPerPage,
     totalPages,
-    // currentItems,
     setCurrentPage,
     handlePrev,
     handleNext,
@@ -74,9 +75,9 @@ console.log(p)}) ;
 
         </div>
 
-          <div className="filter-header-row">
+        <div className="filter-header-row">
 
-          </div>
+        </div>
         {/* Payslip Summary Tables*/}
         <div className="payslip-summary-container">
           <div className="payslip-summary-frame" >
@@ -105,41 +106,38 @@ console.log(p)}) ;
             <div className="table-header">Net Pay</div>
             <div className="table-header">Actions</div>
 
-            {loading && <div className="loading-row">Loading payslips...</div>}
+          </div>
+          {loading && <div className="loading-row">Loading payslips...</div>}
 
-            {error && <div className="error-row">{error}</div>}
+          {error && <div className="error-row">{error}</div>}
 
-            {!loading && !error && currentItems.length === 0 && (
-              <div className="no-data-row">No payslips found.</div>
-            )}
+          {!loading && !error && currentItems.length === 0 && (
+            <div className="no-data-row">No payslips found.</div>
+          )}
 
-            {!loading &&
-              !error &&
-              currentItems.map((emp, index) => (
-                <React.Fragment key={emp.employeeId}>
-                  <div className="table-cell">{emp.employeeId}</div>
+          {!loading &&
+            !error &&
+            currentItems.map((p, index) => (
+              <React.Fragment key={p.employeeId}>
+                <div className="table-cell">{p.employeeId}</div>
 
-                  <div className="table-cell name-surname-cell">
-                    <div
-                      className={`initials-circle`}
-                    >
-                      {(
-                        emp.initials ||
-                        `${(emp.name || "").charAt(0)}${(
-                          emp.surname || ""
-                        ).charAt(0)}`
-                      ).toUpperCase()}
-                    </div>
-
-                    <span className="name-text">{`${emp.name} ${emp.surname}`}</span>
+                <div className="table-cell name-surname-cell">
+                  <div
+                    className={`initials-circle`}
+                  >
+                    {(
+                      p.initials ||
+                      `${(p.name || "").charAt(0)}${(
+                        p.surname || ""
+                      ).charAt(0)}`
+                    ).toUpperCase()}
                   </div>
 
-                  {/* <div className="table-cell">{emp.positionTitle}</div> */}
+                  <span className="name-text">{`${p.name} ${p.surname}`}</span>
+                </div>
 
-
-                </React.Fragment>
-              ))}
-          </div>
+              </React.Fragment>
+            ))}
         </div>
       </div>
 
