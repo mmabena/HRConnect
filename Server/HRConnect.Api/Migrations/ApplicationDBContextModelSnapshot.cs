@@ -1263,6 +1263,45 @@ namespace HRConnect.Api.Migrations
                     b.ToTable("PasswordResetPins", (string)null);
                 });
 
+            modelBuilder.Entity("HRConnect.Api.Models.Payroll.Earning.PayrollEarning", b =>
+                {
+                    b.Property<string>("PayrollEarningId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("CanProRata")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsOnGoing")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LongDescription")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("OvertimeHourMultiplier")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("ShortDescription")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TaxCode")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("TaxPercentage")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("Taxable")
+                        .HasColumnType("bit");
+
+                    b.HasKey("PayrollEarningId");
+
+                    b.ToTable("PayrollEarnings", (string)null);
+                });
+
             modelBuilder.Entity("HRConnect.Api.Models.Payroll.PayrollPeriod", b =>
                 {
                     b.Property<int>("PayrollPeriodId")

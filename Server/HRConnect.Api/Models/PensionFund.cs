@@ -1,0 +1,27 @@
+﻿namespace HRConnect.Api.Models
+{
+  using System.ComponentModel.DataAnnotations;
+
+  public class PensionFund
+  {
+    [Key]
+    public int PensionFundId { get; set; }
+
+    public string EmployeeId { get; set; }=string.Empty;
+
+    public string EmployeeName { get; set; }= string.Empty;
+
+    public decimal MonthlySalary { get; set; }
+
+    public decimal ContributionPercentage { get; set; }
+
+    public decimal ContributionAmount { get; set; }
+
+    public int TaxCode { get; set; } = 4001;
+
+    public int PensionOptionId { get; set; }
+    public PensionOption? PensionOptions { get; set; }
+    public Employee? Employee { get; set; }
+   // public ICollection<Employee>? Employees { get; set; }
+  }
+}

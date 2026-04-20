@@ -41,7 +41,6 @@ namespace HRConnect.Tests
 
       _context = new ApplicationDBContext(options);
 
-      // ✅ Seed required data
       _context.OccupationalLevels.Add(new OccupationalLevel
       {
         OccupationalLevelId = 1,
@@ -71,7 +70,7 @@ namespace HRConnect.Tests
 
       _context.SaveChanges();
 
-      // ✅ Transaction mock
+      
       var transactionMock = new Mock<IDbContextTransaction>();
       transactionMock.Setup(t => t.CommitAsync(It.IsAny<CancellationToken>()))
           .Returns(Task.CompletedTask);
@@ -81,7 +80,7 @@ namespace HRConnect.Tests
       _employeeRepoMock.Setup(r => r.BeginTransactionAsync())
           .ReturnsAsync(transactionMock.Object);
 
-      // ✅ Common repo setups
+
       _employeeRepoMock.Setup(x => x.CreateEmployeeAsync(It.IsAny<Employee>()))
           .ReturnsAsync((Employee e) =>
           {
@@ -114,7 +113,7 @@ namespace HRConnect.Tests
       _employeeRepoMock.Setup(x => x.GetEmployeeByContactNumberAsync(It.IsAny<string>()))
           .ReturnsAsync((Employee?)null);
 
-      // ✅ Position repo setup (dynamic)
+      // Position repo setup (dynamic)
       _positionRepoMock.Setup(p => p.GetPositionByIdAsync(It.IsAny<int>()))
           .ReturnsAsync((int id) =>
               _context.Positions.FirstOrDefault(p => p.PositionId == id));

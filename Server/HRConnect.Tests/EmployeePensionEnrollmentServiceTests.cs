@@ -1,6 +1,5 @@
 ﻿namespace HRConnect.Tests
 {
-  using HRConnect.Api.Data;
   using HRConnect.Api.DTOs.Employee.Pension;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
@@ -8,7 +7,6 @@
   using HRConnect.Api.Models.PayrollDeduction;
   using HRConnect.Api.Models.Pension;
   using HRConnect.Api.Services;
-  using Microsoft.EntityFrameworkCore;
   using Moq;
   using Quartz;
 
@@ -31,15 +29,6 @@
       _pensionDeductionRepositoryMock = new Mock<IPensionDeductionRepository>();
       _pensionOptionRepositoryMock = new Mock<IPensionOptionRepository>();
       _scheduler = new Mock<ISchedulerFactory>();
-      /*DbContextOptions<ApplicationDBContext> options = new DbContextOptionsBuilder<ApplicationDBContext>()
-        .UseInMemoryDatabase("TestDb")
-        .Options;
-      using var _context = new ApplicationDBContext(options);
-
-      _ = _context.PensionOptions.Add(new PensionOption
-      {
-        ContributionPercentage = 2.50M
-      });*/
 
       _employeePensionEnrollmentServiceMock = new EmployeePensionEnrollmentService(
         _employeePensionEnrollmentRepositoryMock.Object,
