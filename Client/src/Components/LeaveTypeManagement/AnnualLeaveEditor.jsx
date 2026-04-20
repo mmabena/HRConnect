@@ -1,43 +1,20 @@
 import { useState } from "react";
 import "./annual-editor.css";
-import { updateLeaveRule } from "../../api/leaveTypeApi";
+import { updateLeaveType } from "../../api/leaveTypeApi";
 
-const AnnualLeaveEditor = ({ leaveType }) => {
+const AnnualLeaveEditor = ({ leaveType, onSuccess, onClose, isEditing, setIsEditing }) => {
 
   const [activeTab, setActiveTab] = useState("groupA");
   const [editedRules, setEditedRules] = useState({});
   const [customRules, setCustomRules] = useState([]);
 
-  /* GROUP RULES PROPERLY */
   const buildGroupedRules = () => {
-
-    const groupA = leaveType.rules.filter(r =>
-      [2, 3, 4, 6].includes(r.jobGradeId)
-    );
-
-    const uniqueGroupA = Object.values(
-      groupA.reduce((acc, rule) => {
-        const key = `${rule.minYearsService}-${rule.maxYearsService}`;
-
-        if (!acc[key]) {
-          acc[key] = {
-            ...rule,
-            ruleIds: [rule.id]
-          };
-        } else {
-          acc[key].ruleIds.push(rule.id);
-        }
-
-        return acc;
-      }, {})
-    );
-
-    return {
-      groupA: uniqueGroupA,
-      senior: leaveType.rules.filter(r => r.jobGradeId === 5),
-      executive: leaveType.rules.filter(r => r.jobGradeId === 1)
-    };
+  return {
+    groupA: leaveType.rules.filter(r => r.groupKey === "GROUP_A"),
+    senior: leaveType.rules.filter(r => r.groupKey === "SENIOR"),
+    executive: leaveType.rules.filter(r => r.groupKey === "EXECUTIVE")
   };
+};
 
   const grouped = buildGroupedRules();
 
@@ -50,52 +27,116 @@ const AnnualLeaveEditor = ({ leaveType }) => {
 
   const currentRules = [...baseRules, ...customRules];
 
-  /* HANDLE CHANGE */
-  const handleChange = (ruleIds, value) => {
-
-    const updates = {};
-
-    ruleIds.forEach(id => {
-      updates[id] = value;
-    });
-
-    setEditedRules(prev => ({
-      ...prev,
-      ...updates
-    }));
-  };
-
-  /* ADD RANGE */
-  const handleAddRange = () => {
-    setCustomRules(prev => [
-      ...prev,
-      {
-        id: "new-" + Date.now(),
-        minYearsService: 0,
-        maxYearsService: 0,
-        daysAllocated: 0,
-        ruleIds: []
-      }
-    ]);
-  };
-  const handleRemoveRange = (id) => {
-  setCustomRules(prev => prev.filter(r => r.id !== id));
+  // EACH FIELD UPDATES ONLY ITS OWN RULE 
+  const handleFieldChange = (ruleKey, field, value) => {
+  setEditedRules(prev => ({
+    ...prev,
+    [ruleKey]: {
+      ...prev[ruleKey],
+      [field]: value
+    }
+  }));
 };
 
-  /* SAVE */
-  const handleSave = async () => {
-    try {
-      for (const ruleId in editedRules) {
-        await updateLeaveRule(ruleId, Number(editedRules[ruleId]));
-      }
+  /* ADD RANGE (UNCHANGED) */
+ const handleAddRange = () => {
 
-      alert("Rules updated successfully");
+  const groupKey =
+    activeTab === "groupA"
+      ? "GROUP_A"
+      : activeTab === "senior"
+      ? "SENIOR"
+      : "EXECUTIVE";
 
-    } catch (err) {
-      console.error(err);
-      alert("Failed to update rules");
+  setCustomRules(prev => [
+    ...prev,
+    {
+      id: "new-" + Date.now(),
+      groupKey: groupKey,             
+      minYearsService: 0,
+      maxYearsService: null,
+      daysAllocated: 0
     }
+  ]);
+};
+
+  const handleRemoveRange = (id) => {
+    setCustomRules(prev => prev.filter(r => r.id !== id));
   };
+
+  /* SAVE */
+ const handleSave = async () => {
+  try {
+
+  const allRules = [...leaveType.rules, ...customRules];
+
+const finalRules = allRules.map((r, index) => {
+  const ruleKey = r.id?.startsWith("new-")
+    ? r.id
+    : `${r.groupKey}-${r.minYearsService}`;
+
+  const edited = editedRules[ruleKey];
+
+  const min = edited?.minYearsService !== undefined
+  ? Number(edited.minYearsService)
+  : r.minYearsService;
+
+  const max = edited?.maxYearsService !== undefined
+  ? (edited.maxYearsService === "" ? null : Number(edited.maxYearsService))
+  : r.maxYearsService;
+
+  const days = edited?.daysAllocated !== undefined
+  ? Number(edited.daysAllocated)
+  : r.daysAllocated;
+
+  return {
+    groupKey: r.groupKey,
+    minYearsService: Number(min.toFixed(2)),
+    maxYearsService: max !== null ? Number(max.toFixed(2)) : null,
+    daysAllocated: Number(days.toFixed(2))
+  };
+});
+
+    // GROUP + SORT + CLEAN
+    const grouped = {};
+
+    finalRules.forEach(r => {
+      if (!grouped[r.groupKey]) grouped[r.groupKey] = [];
+      grouped[r.groupKey].push(r);
+    });
+
+    Object.keys(grouped).forEach(key => {
+      grouped[key] = grouped[key]
+        .sort((a, b) => a.minYearsService - b.minYearsService)
+        .filter((r, i, arr) =>
+          i === arr.findIndex(x =>
+            x.minYearsService === r.minYearsService &&
+            x.maxYearsService === r.maxYearsService
+          )
+        );
+    });
+
+    const cleanedRules = Object.values(grouped).flat();
+
+    console.log("FINAL PAYLOAD:", JSON.stringify(cleanedRules, null, 2));
+
+    await updateLeaveType(leaveType.id, {
+      name: leaveType.name,
+      description: leaveType.description,
+      femaleOnly: leaveType.femaleOnly,
+      isActive: leaveType.isActive,
+      rules: cleanedRules
+    });
+
+    onSuccess();
+    onClose();
+
+  } catch (err) {
+    console.error(err);
+    console.log("BACKEND ERROR:", err.response?.data);
+    alert("Failed to update leave type");
+  }
+};
 
   return (
     <div className="annual-wrapper">
@@ -127,75 +168,95 @@ const AnnualLeaveEditor = ({ leaveType }) => {
       {/* RULE TABLE */}
       <div className="rule-box">
 
-  <div className="rule-header">
-    <span>Min Years</span>
-    <span>Max Years</span>
-    <span>Leave Days</span>
-  </div>
+        <div className="rule-header">
+          <span>Min Years</span>
+          <span>Max Years</span>
+          <span>Leave Days</span>
+        </div>
 
-  {/* SCROLLABLE BODY */}
-  <div className="rule-body">
+        <div className="rule-body">
 
-    {currentRules.map((r) => {
-      const firstRuleId = r.ruleIds?.[0] || r.id;
-      const newValue = editedRules[firstRuleId];
+          {currentRules.map((r, index) => {
 
-      return (
-        <div key={r.id} className="rule-row">
+            const ruleKey = r.id?.startsWith("new-")
+                ? r.id
+                : `${r.groupKey}-${r.minYearsService}`;
+            const edited = editedRules[ruleKey] || {};
 
-          <input
-            value={r.minYearsService}
-            onChange={(e) => {
-              r.minYearsService = e.target.value;
-            }}
-          />
+            return (
+              <div key={ruleKey} className="rule-row">
 
-          <input
-            value={r.maxYearsService ?? ""}
-            onChange={(e) => {
-              r.maxYearsService = e.target.value;
-            }}
-          />
+                {/* MIN YEARS */}
+                <input
+                disabled={!isEditing}
+                  value={
+                    edited.minYearsService !== undefined
+                      ? edited.minYearsService
+                      : r.minYearsService
+                  }
+                  onChange={(e) =>
+                    handleFieldChange(ruleKey, "minYearsService", e.target.value)
+                  }
+                />
 
-          <div className="days-edit">
-            <input
-              value={newValue ?? r.daysAllocated}
-              onChange={(e) =>
-                handleChange(r.ruleIds || [r.id], e.target.value)
-              }
-            />
+                {/* MAX YEARS */}
+                <input
+                disabled={!isEditing}
+                  value={
+                    edited.maxYearsService !== undefined
+                      ? edited.maxYearsService
+                      : (r.maxYearsService ?? "")
+                  }
+                  onChange={(e) =>
+                    handleFieldChange(ruleKey, "maxYearsService", e.target.value)
+                  }
+                />
 
-            {newValue && Number(newValue) !== r.daysAllocated && (
-              <span className="diff">
-                {r.daysAllocated} → {newValue}
-              </span>
-            )}
+                {/* DAYS */}
+                <div className="days-edit">
+                  <input
+                  disabled={!isEditing}
+                    value={
+                      edited.daysAllocated !== undefined
+                        ? edited.daysAllocated
+                        : r.daysAllocated
+                    }
+                    onChange={(e) =>
+                      handleFieldChange(ruleKey, "daysAllocated", e.target.value)
+                    }
+                  />
 
-            {/* REMOVE BUTTON (only for new ranges) */}
-            {String(r.id).startsWith("new-") && (
-              <button
-                className="remove-range"
-                onClick={() => handleRemoveRange(r.id)}
-              >
-                ✕
-              </button>
-            )}
-          </div>
+                  {edited.daysAllocated &&
+                    Number(edited.daysAllocated) !== r.daysAllocated && (
+                      <span className="diff">
+                        {r.daysAllocated} → {edited.daysAllocated}
+                      </span>
+                    )}
+
+                  {isEditing && r.id?.startsWith("new-") && (
+                    <button
+                      className="remove-range"
+                      onClick={() => handleRemoveRange(r.id)}
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+
+              </div>
+            );
+          })}
 
         </div>
-      );
-    })}
 
-  </div>
+        {isEditing && (
+            <button className="add-range" onClick={handleAddRange}>
+              + Add Range
+            </button>
+        )}
+      </div>
 
-  {/* ADD RANGE BUTTON */}
-  <button className="add-range" onClick={handleAddRange}>
-    + Add Range
-  </button>
-
-</div>
-
-      {/* IMPACT */}
+      {/* IMPACT BOX (UNCHANGED) */}
       <div className="impact-box">
         {Object.keys(editedRules).length > 0
           ? "Changes detected. Employees will be recalculated."
@@ -204,14 +265,30 @@ const AnnualLeaveEditor = ({ leaveType }) => {
 
       {/* ACTIONS */}
       <div className="actions">
-        <button className="cancel">
-          Cancel
-        </button>
 
-        <button className="next" onClick={handleSave}>
-          Next: View Affected Employees
-        </button>
-      </div>
+  {!isEditing ? (
+    <>
+      <button className="cancel" onClick={onClose}>
+        Back
+      </button>
+
+      <button className="next" onClick={() => setIsEditing(true)}>
+        Edit
+      </button>
+    </>
+  ) : (
+    <>
+      <button className="cancel" onClick={() => setIsEditing(false)}>
+        Cancel
+      </button>
+
+      <button className="next" onClick={handleSave}>
+        Save Changes
+      </button>
+    </>
+  )}
+
+</div>
 
     </div>
   );

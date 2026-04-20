@@ -70,3 +70,17 @@ export const updateLeaveRule = async (ruleId, newDays) => {
     throw error;
   }
 };
+
+export const toggleLeaveTypeStatus = async (id) => {
+  const response = await axios.patch(
+    `http://localhost:5147/api/leave-types/${id}/status`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`
+      }
+    }
+  );
+
+  return response.data;
+};

@@ -5,6 +5,8 @@ import "../../Components/MenuBar/MenuBar.css";
 import NavBar from "../NavBar";
 import AddLeaveTypeModal from "./AddLeaveTypeModal";
 import EditLeaveTypeModal from "./EditLeaveTypeModal";
+import { toggleLeaveTypeStatus } from "../../api/leaveTypeApi";
+import ConfirmStatusModal from "./ConfirmStatusModal";
 
 
 const LeaveTables = () => {
@@ -13,6 +15,9 @@ const LeaveTables = () => {
   const [showModal, setShowModal] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [selectedLeaveId, setSelectedLeaveId] = useState("");
+  const [isViewMode, setIsViewMode] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
 
   const splitData = (data) => {
     setActive(data.filter(x => x.isActive));
@@ -28,12 +33,38 @@ useEffect(() => {
   fetchData();
 }, []);
 
+const handleToggleClick = (item) => {
+  setSelectedItem(item);
+  setConfirmOpen(true);
+};
+
+const confirmToggle = async () => {
+  try {
+    const result = await toggleLeaveTypeStatus(selectedItem.id);
+
+    if (result.isActive) {
+      setActive(prev => [...prev, selectedItem]);
+      setInactive(prev => prev.filter(x => x.id !== selectedItem.id));
+    } else {
+      setInactive(prev => [...prev, selectedItem]);
+      setActive(prev => prev.filter(x => x.id !== selectedItem.id));
+    }
+
+    setConfirmOpen(false);
+    setSelectedItem(null);
+
+  } catch (err) {
+    console.error("Status change failed:", err);
+  }
+};
+
   // Handles entitlement display logic
   const getEntitlement = (rules) => {
   if (!rules || rules.length === 0) return "-";
 
   // Get unique days values
-  const uniqueDays = [...new Set(rules.map(r => r.daysAllocated))];
+  const activeRules = rules.filter(r => r.isActive !== false);
+  const uniqueDays = [...new Set(activeRules.map(r => r.daysAllocated))];
 
   // If all rules have SAME value → show it
   if (uniqueDays.length === 1) {
@@ -90,13 +121,26 @@ useEffect(() => {
                 <td>{getEntitlement(item.rules)}</td>
 
                 <td>
-                  <span className="lt-status active">Active</span>
+                  <span
+                    className="lt-status active"
+                    onClick={() => handleToggleClick(item)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    Active
+                  </span>
                 </td>
 
                 <td className="lt-actions">
-                  <span>View</span>
+                  <span onClick={() => {
+                      setSelectedLeaveId(item.id);
+                      setIsViewMode(true);
+                      setShowEdit(true);
+                    }}>
+                      View
+                    </span>
                   <span onClick={() => {
                     setSelectedLeaveId(item.id);
+                    setIsViewMode(false);
                     setShowEdit(true);
                   }}>
                     Edit
@@ -134,7 +178,13 @@ useEffect(() => {
                 <td>{item.description || "-"}</td>
                 <td>{getEntitlement(item.rules)}</td>
                 <td>
-                  <span className="lt-status inactive">Inactive</span>
+                  <span
+                    className="lt-status inactive"
+                    onClick={() => handleToggleClick(item)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    Inactive
+                  </span>
                 </td>
                 <td>-</td>
               </tr>
@@ -153,9 +203,16 @@ useEffect(() => {
   isOpen={showEdit}
   onClose={() => setShowEdit(false)}
   leaveTypes={[...active, ...inactive]}
-  selectedId={selectedLeaveId}   
+  selectedId={selectedLeaveId}
   onSuccess={fetchData}
-  />
+  isViewMode={isViewMode}
+/>
+<ConfirmStatusModal
+  isOpen={confirmOpen}
+  onClose={() => setConfirmOpen(false)}
+  onConfirm={confirmToggle}
+  isActive={selectedItem?.isActive}
+/>
     </div>
     
   );

@@ -8,11 +8,13 @@ const EditLeaveTypeModal = ({
   onClose,
   leaveTypes,
   onSuccess,
-  selectedId: initialSelectedId 
+  selectedId,
+  isViewMode
 }) => {
 
-  const [selectedId, setSelectedId] = useState(initialSelectedId || "");
   const [selected, setSelected] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  
 
   const [form, setForm] = useState({
     description: "",
@@ -20,10 +22,14 @@ const EditLeaveTypeModal = ({
     days: ""
   });
 
+useEffect(() => {
+  setIsEditing(!isViewMode);
+}, [isViewMode]);
 
-
-  // 🔥 when dropdown changes
+  // LOAD SELECTED LEAVE TYPE
   useEffect(() => {
+    if (!selectedId) return;
+
     const lt = leaveTypes.find(x => x.id === Number(selectedId));
     setSelected(lt);
 
@@ -36,44 +42,48 @@ const EditLeaveTypeModal = ({
         days: uniqueDays.length === 1 ? uniqueDays[0] : ""
       });
     }
+
   }, [selectedId, leaveTypes]);
-  useEffect(() => {
-  if (initialSelectedId) {
-    setSelectedId(initialSelectedId);
-  }
-}, [initialSelectedId]);
-    if (!isOpen) return null;
-  const handleSubmit = async () => {
-  try {
-    await updateLeaveType(selected.id, {
-      name: selected.name, // required by backend
-      description: form.description,
-      femaleOnly: form.femaleOnly,
-      rules: [
-        {
-          jobGradeId: null,
-          minYearsService: 0,
-          maxYearsService: null,
-          daysAllocated: parseFloat(form.days)
-        }
-      ]
-    });
 
-    onSuccess(); // refresh table
-    onClose();   // close modal
+  if (!isOpen) return null;
 
-  } catch (err) {
-    console.error("Update failed:", err);
-  }
-};
-
-  // 🔥 handle form changes
+  //HANDLE INPUT CHANGE
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+
     setForm({
       ...form,
       [name]: type === "checkbox" ? checked : value
     });
+  };
+ if (!form.days || isNaN(form.days)) {
+  alert("Please enter valid leave days");
+  return;
+}
+  // SAVE NON-ANNUAL
+  const handleSubmit = async () => {
+    try {
+      await updateLeaveType(selected.id, {
+        name: selected.name,
+        description: form.description,
+        femaleOnly: form.femaleOnly,
+       rules: selected.rules.map(r => ({
+            groupKey: r.groupKey,
+            minYearsService: r.minYearsService,
+            maxYearsService: r.maxYearsService,
+            daysAllocated:
+              form.days !== "" && !isNaN(form.days)
+                ? parseFloat(form.days)
+                : r.daysAllocated
+          }))
+      });
+
+      onSuccess();
+      onClose();
+
+    } catch (err) {
+      console.error("Update failed:", err);
+    }
   };
 
   return (
@@ -86,61 +96,81 @@ const EditLeaveTypeModal = ({
           <span className="logo-light">express</span>
         </div>
 
-        <h2 className="modal-title">Edit Leave Type</h2>
-
-        {/* 🔥 DROPDOWN */}
-        <select
-          className="modal-dropdown"
-          value={selectedId}
-          onChange={(e) => setSelectedId(e.target.value)}
-        >
-          <option value="">Select Leave Type</option>
-          {leaveTypes.map(lt => (
-            <option key={lt.id} value={lt.id}>
-              {lt.name}
-            </option>
-          ))}
-        </select>
+        <h2 className="modal-title">
+  {isEditing
+    ? `Edit ${selected?.name}`
+    : `View ${selected?.name}`
+  }
+</h2>
 
         {/* ================= NON-ANNUAL ================= */}
         {selected && selected.code !== "AL" && (
-          <>
-            <input value={selected.name} disabled />
-            <input value={selected.code} disabled />
+  <>
+    <input value={selected.name} disabled />
+    <input value={selected.code} disabled />
 
-            <input
-              name="description"
-              value={form.description}
-              onChange={handleChange}
-              placeholder="Description"
-            />
+    <input
+      name="description"
+      value={form.description}
+      onChange={handleChange}
+      placeholder="Description"
+      disabled={!isEditing}
+    />
 
-            <input
-              name="days"
-              value={form.days}
-              onChange={handleChange}
-              placeholder="Leave Entitlement"
-            />
+    <input
+      name="days"
+      value={form.days}
+      onChange={handleChange}
+      placeholder="Leave Entitlement"
+      disabled={!isEditing}
+    />
 
-            <label className="checkbox">
-              <input
-                type="checkbox"
-                name="femaleOnly"
-                checked={form.femaleOnly}
-                onChange={handleChange}
-              />
-              Female Only
-            </label>
+    <label className="checkbox">
+      <input
+        type="checkbox"
+        name="femaleOnly"
+        checked={form.femaleOnly}
+        onChange={handleChange}
+        disabled={!isEditing}
+      />
+      Female Only
+    </label>
 
-            <button className="modal-btn" onClick={handleSubmit}>
-              Save
-            </button>
-          </>
-        )}
+    <div className="actions">
+      {!isEditing ? (
+        <>
+          <button className="cancel" onClick={onClose}>
+            Back
+          </button>
+
+          <button className="next" onClick={() => setIsEditing(true)}>
+            Edit
+          </button>
+        </>
+      ) : (
+        <>
+          <button className="cancel" onClick={() => setIsEditing(false)}>
+            Cancel
+          </button>
+
+          <button className="next" onClick={handleSubmit}>
+            Save Changes
+          </button>
+        </>
+      )}
+    </div>
+  </>
+)}
 
         {/* ================= ANNUAL LEAVE ================= */}
         {selected && selected.code === "AL" && (
-          <AnnualLeaveEditor leaveType={selected} />
+          <AnnualLeaveEditor
+            leaveType={selected}
+            onSuccess={onSuccess}
+            onClose={onClose}
+            isEditing={isEditing}
+            setIsEditing={setIsEditing}
+          />
         )}
 
       </div>

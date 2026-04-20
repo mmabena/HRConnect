@@ -65,7 +65,7 @@ const AddLeaveTypeModal = ({ isOpen, onClose, onSuccess }) => {
         femaleOnly: form.femaleOnly,
         rules: [
           {
-            jobGradeId: null,
+            groupKey: "ALL",
             minYearsService: 0,
             maxYearsService: null,
             daysAllocated: parseFloat(form.days)
@@ -92,7 +92,7 @@ const AddLeaveTypeModal = ({ isOpen, onClose, onSuccess }) => {
       if (err.response?.data) {
   let message = err.response.data;
 
-  // 🔥 Convert object → string safely
+  // Convert object → string safely
   if (typeof message === "object") {
     message = message.title || JSON.stringify(message);
   }
