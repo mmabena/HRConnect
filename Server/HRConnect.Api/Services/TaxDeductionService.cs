@@ -197,7 +197,7 @@ namespace HRConnect.Api.Services
 
       decimal taxBeforeCredits = await CalculateTaxAsync(pensionableIncome, age);
 
-      bool hasMedicalAid = request.MedicalAidMembers > 1
+      bool hasMedicalAid = request.MedicalAidMembers > 0
                         || request.MedicalAidDependants > 0
                         || request.MedicalAidChildren > 0;
 
