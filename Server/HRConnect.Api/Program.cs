@@ -25,6 +25,7 @@ using Quartz;
 using HRConnect.Api.Interfaces.Notification;
 using HRConnect.Api.Utils.Factories;
 using HRConnect.Api.Utils.Notification;
+using HRConnect.Api.Interfaces.Payroll.Earning;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -92,7 +93,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
     {
-      options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!);
+      options.UseSqlServer(builder.Configuration.GetConnectionString("TertiaryConnection")!);
       options.AddInterceptors(new AuditSaveChangesInterceptor());
     });
 
@@ -180,7 +181,7 @@ builder.Services.AddQuartz(q =>
   {
     store.UseSqlServer(options =>
         {
-          options.ConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
+          options.ConnectionString = builder.Configuration.GetConnectionString("TertiaryConnection")!;
           options.TablePrefix = "quartz.QRTZ_";
         });
     store.UseSerializer<Quartz.Simpl.SystemTextJsonObjectSerializer>();
@@ -209,7 +210,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
-builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<HRConnect.Api.Interfaces.IUserService, HRConnect.Api.Services.UserService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ITaxTableUploadService, TaxTableUploadService>();
 builder.Services.AddScoped<ITaxTableUploadRepository, TaxTableUploadRepository>();
@@ -218,9 +219,12 @@ builder.Services.AddScoped<ITaxDeductionRepository, TaxDeductionRepository>();
 builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
 builder.Services.AddScoped<IPositionRepository, PositionRepository>();
 builder.Services.AddScoped<IPositionService, PositionService>();
+builder.Services.AddScoped<ICompanyContributionRepository, CompanyContributionRepository>();
+builder.Services.AddScoped<IEmployeeCompanyContributionRepository, EmployeeCompanyContributionRepository>();
+builder.Services.AddScoped<ICompanyContributionAllocationService, CompanyContributionAllocationService>();
+builder.Services.AddScoped<ICompanyContributionRepository, CompanyContributionRepository>();
+builder.Services.AddScoped<ICompanyContributionService, CompanyContributionService>();
 builder.Services.AddScoped<IJobGradeRepository, JobGradeRepository>();
-builder.Services.AddScoped<IJobGradeService, JobGradeService>();
-// builder.Services.AddScoped<ILeaveTypeManagementRepository, LeaveTypeManagementRepository>();
 builder.Services.AddScoped<IOccupationalLevelRepository, OccupationalLevelRepository>();
 builder.Services.AddScoped<IOccupationalLevelService, OccupationalLevelService>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.Services.AuthService>();
@@ -230,13 +234,18 @@ builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<ILeaveBalanceService, LeaveBalanceService>();
 builder.Services.AddScoped<ILeaveProcessingService, LeaveProcessingService>();
 builder.Services.AddScoped<ILeaveRuleService, LeaveRuleService>();
+builder.Services.AddScoped<IPensionFundService, PensionFundService>();
+builder.Services.AddScoped<IEmployeePensionRepository, EmployeePensionRepository>();
+builder.Services.AddScoped<IPensionFundService, PensionFundService>();
 
+builder.Services.AddScoped<IPensionFundRepository, PensionFundRepository>();
 builder.Services.AddScoped<ILeaveTypeManagementService, LeaveTypeManagementService>();
 builder.Services.AddScoped<ILeaveApplicationService, LeaveApplicationService>();
 
 builder.Services.AddHostedService<LeaveAutomationBackgroundService>();
 
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+builder.Services.AddScoped<IEmployeeCompanyContributionService, EmployeeCompanyContributionService>();
 builder.Services.AddScoped<IStatutoryContributionRepository, StatutoryContributionRepository>();
 builder.Services.AddScoped<IStatutoryContributionService, StatutoryContributionService>();
 builder.Services.AddTransient<IPensionProjectionService, PensionProjectionService>();
@@ -256,6 +265,8 @@ builder.Services.AddScoped<INotificationDispatcher, NotificationDispatcher>();
 builder.Services.AddScoped<IJobScheduleService, JobScheduleService>();
 
 builder.Services.AddScoped<PositionAndLeaveSeed>();
+builder.Services.AddScoped<IPayrollEarningRepository, PayrollEarningRepository>();
+builder.Services.AddScoped<IPayrollEarningService, PayrollEarningService>();
 
 builder.Services.AddScoped<IMedicalOptionService,
   MedicalOptionService>();
