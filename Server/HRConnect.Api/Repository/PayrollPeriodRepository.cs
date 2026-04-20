@@ -53,7 +53,7 @@ namespace HRConnect.Api.Repository
         var periods = await _context.PayrollPeriods
          .Include(p => p.Runs)
          .ThenInclude(r => r.Records)
-         .AsSplitQuery()
+          .AsSplitQuery()
          .ToListAsync();
 
         await transaction.CommitAsync();
@@ -75,26 +75,34 @@ namespace HRConnect.Api.Repository
 
     public async Task<PayrollPeriod?> GetLastPeriodAsync()
     {
-      using var transaction = await _context.Database.BeginTransactionAsync();
-      try
+      // using var transaction = await _context.Database.BeginTransactionAsync();
+      // try
       {
         var periods = await _context.PayrollPeriods
               .Where(p => !p.IsLocked)//filter out early to prevent hogging up memory usage
               .OrderByDescending(p => p.PayrollPeriodId)
               .Include(p => p.Runs)
               .ThenInclude(r => r.Records)
-              .AsSplitQuery() //prevent what is called 'Cartesian Explosion' (we have 3 record types so far to query)
+                          //.AsSplitQuery() //prevent what is called 'Cartesian Explosion' (we have 3 record types so far to query)
             .FirstOrDefaultAsync();
 
-        await transaction.CommitAsync();
+        // await transaction.CommitAsync();
         return periods;
       }
-      catch (DbException ex)
-      {
-        await transaction.RollbackAsync();
-        Console.WriteLine($"Failed Database Transaction With :{ex}");
-        throw;
-      }
+      // catch (DbUpdateException ex)
+      // {
+      //   Console.WriteLine($"Failed Database Transaction With InnerException:{ex.InnerException?.Message}");
+      //   foreach (var e in ex.Entries)
+      //     Console.WriteLine($"FAILED ENTITY IS {e.Entity.GetType().Name}");
+
+      //   throw;
+      // }
+      // catch (DbException ex)
+      // {
+      //   await transaction.RollbackAsync();
+      //   Console.WriteLine($"Failed Database Transaction With InnerException:{ex.InnerException?.Message}");
+      //   throw;
+      // }
     }
 
     public async Task<PayrollPeriod?> GetLastPeriodForRollOver()

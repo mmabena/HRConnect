@@ -75,12 +75,12 @@ namespace HRConnect.Api.Services
       if (currentPayRun == null)
         throw new InvalidDataException("No current payroll run found or it is locked");
 
-      var exists = currentPayRun.Records
-      .Any(r => r.EmployeeId == employeeId);
-
-      if (exists)
-        return;
-
+      // var exists = currentPayRun.Records
+      // .Any(r => r.EmployeeId == employeeId);
+      //
+      // if (exists)
+      //   return;
+      //
       payrollRecord.PayrollRun = currentPayRun;
       payrollRecord.EmployeeId = employeeId;
       currentPayRun.Records.Add(payrollRecord);
@@ -111,8 +111,9 @@ namespace HRConnect.Api.Services
 
         if (exists)
           continue;
-          
+
         record.PayrollRun = currentPayRun;
+        record.PayrollRunId = currentPayRun.PayrollRunId;
         record.EmployeeId = empId;
         currentPayRun.Records.Add(record);
       }

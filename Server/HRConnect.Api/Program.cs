@@ -94,7 +94,19 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
     {
-      options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!);
+      options.UseSqlServer(builder.Configuration.GetConnectionString("DBeaverConnection")!)
+      .EnableSensitiveDataLogging()
+      .LogTo(msg =>
+      {
+        if (msg.Contains("CommandExecuting"))
+          Console.ForegroundColor = ConsoleColor.Yellow;
+        else if (msg.Contains("CommandExecuted"))
+          Console.ForegroundColor = ConsoleColor.Green;
+        else if (msg.Contains("Error"))
+          Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine($"=============\nLOGGING SQL :{msg}");
+        Console.ResetColor();
+      }, LogLevel.Information); //Enables SQL logging to terminal
       options.AddInterceptors(new AuditSaveChangesInterceptor());
     });
 
@@ -182,7 +194,7 @@ builder.Services.AddQuartz(q =>
   {
     store.UseSqlServer(options =>
         {
-          options.ConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
+          options.ConnectionString = builder.Configuration.GetConnectionString("DBeaverConnection")!;
           options.TablePrefix = "quartz.QRTZ_";
         });
     store.UseSerializer<Quartz.Simpl.SystemTextJsonObjectSerializer>();
@@ -321,4 +333,3 @@ app.UseAuthorization();
 app.UseMiddleware<ExceptionMiddleware>();
 app.MapControllers();
 app.Run();
-
