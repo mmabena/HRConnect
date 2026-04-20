@@ -22,10 +22,20 @@ const Payslip = () => {
 
   const { payrollPeriod: payrollPeriods, loading, error } = usePayrollPeriod(location.pathname);
 
-  payrollPeriods.map((p) => {
-    console.log(`PayrollPeriod:`);
-    console.log(p)
-  });
+  const finaliseRuns = payrollPeriods.flatMap(p =>
+    p.runs.filter(r => r.isFinalised)
+      .map(r => ({
+        id: r.payrollRunNumber,
+        month: new Date(r.finalisedDate).toLocaleDateString('en-ZA', {
+          month: 'long',
+          year: 'numeric'
+        })/*,
+        //get all employee deductions and earnings
+        gross: getGrossSalaryFromEmpId(r.records,'earning')
+        deductions:getAllDeductionsFromEmpId(r.records,'deduction')
+        */
+      }))
+  )
 
   //Pagination  
   const {
@@ -79,7 +89,7 @@ const Payslip = () => {
 
         </div>
         {/* Payslip Summary Tables*/}
-        <div className="payslip-summary-container">
+        <div className="payslip-summary-container" >
           <div className="payslip-summary-frame" >
             <SummaryBox
               className="gross"
@@ -97,51 +107,62 @@ const Payslip = () => {
               amount={35189}
               subtext="Deposited to account" />
           </div>
-        </div>
+        </div >
         <div className="content-container">
-          <div className="employee-table-grid">
-            <div className="table-header">Period</div>
-            <div className="table-header">Gross Earnings</div>
-            <div className="table-header">Deductions</div>
-            <div className="table-header">Net Pay</div>
-            <div className="table-header">Actions</div>
+          {/*Table header*/}
+          <table className="payslip-table">
+            <thead>
+              <tr className="table-ribbon">
+                My Payroll History
+              </tr>
+              <tr className="table-header">
+                <th>Period</th>
+                <th>Gross Earnings</th>
+                <th>Deductions</th>
+                <th>Net Pay</th>
+                <th className="text-right">Actions</th>
+              </tr>
+            </thead>
+            {/*Table Body*/}
+            <tbody>
+              {loading && <div className="loading-row">Loading payslips...</div>}
 
-          </div>
-          {loading && <div className="loading-row">Loading payslips...</div>}
+              {error && <div className="error-row">{error}</div>}
 
-          {error && <div className="error-row">{error}</div>}
+              {!loading && !error && currentItems.length === 0 && (
+                <div className="no-data-row">No payslips found.</div>
+              )}
 
-          {!loading && !error && currentItems.length === 0 && (
-            <div className="no-data-row">No payslips found.</div>
-          )}
+              {!loading &&
+                !error &&
+                finaliseRuns.map((p, index) => (
+                  <React.Fragment key={p.employeeId}>
+                    <div className="table-cell">{p.employeeId}</div>
 
-          {!loading &&
-            !error &&
-            currentItems.map((p, index) => (
-              <React.Fragment key={p.employeeId}>
-                <div className="table-cell">{p.employeeId}</div>
+                    <div className="table-cell name-surname-cell">
+                      <div
+                        className={`initials-circle`}
+                      >
+                        {(
+                          p.initials ||
+                          `${(p.name || "").charAt(0)}${(
+                            p.surname || ""
+                          ).charAt(0)}`
+                        ).toUpperCase()}
+                      </div>
 
-                <div className="table-cell name-surname-cell">
-                  <div
-                    className={`initials-circle`}
-                  >
-                    {(
-                      p.initials ||
-                      `${(p.name || "").charAt(0)}${(
-                        p.surname || ""
-                      ).charAt(0)}`
-                    ).toUpperCase()}
-                  </div>
+                      <span className="name-text">{`${p.name} ${p.surname}`}</span>
+                    </div>
 
-                  <span className="name-text">{`${p.name} ${p.surname}`}</span>
-                </div>
+                  </React.Fragment>
+                ))}
+            </tbody>
 
-              </React.Fragment>
-            ))}
+          </table>
         </div>
-      </div>
+      </div >
 
-    </div>
+    </div >
 
   );
 };
