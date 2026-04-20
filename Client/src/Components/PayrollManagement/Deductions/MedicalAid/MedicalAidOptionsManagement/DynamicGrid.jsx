@@ -43,7 +43,7 @@ const DynamicGrid = ({
     return pages;
   };
 
-    const gridTemplateColumns = columns.map(col => `${col.width}fr`).join(' ');
+
 
   return(
     <div className="dynamic-grid-container">

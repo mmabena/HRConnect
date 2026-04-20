@@ -1,24 +1,100 @@
-﻿import {useEffect} from 'react';
+﻿import {useEffect, useState} from 'react';
 import ReactDOM from 'react-dom';
 import './MedicalAidOptionViewModal.css';
+import useLocalCurrencyFormat from "../../../../../hooks/useLocalCurrencyFormat";
 
-function MedicalAidOptionViewModal({isOpen,onClose, title, data = []}) {
+function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categories = []}) {
+    // TODO : Prepare the data/transform to use within the model, with all it's category's relatives
+    /*
+    * Transform the flat data into a grouped structure by category
+    * Pass all options in the selected category to the modal (not just one row)
+    * Add a dropdown in the modal to select which category to view
+    * Display grouped data showing option names and salary brackets per category
+    * */
+
+    //==== Work Area for proposed solution
+    // Step 3 : Update MedicalAidOptionViewModal to accept and use categories
+    const [selectedCategoryId,setSelectedCategoryId] = useState(null);
+
+
+    // Step1 : Transform the flat data into a grouped structure by category || Data transformer helper function
+    const groupedOptionsByCategory = (options, categories) => {
+      const grouped = {};
+
+      options.forEach(option => {
+        const categoryId = option.medicalOptionCategoryId;
+        const category = categories.find(cat => cat.medicalOptionCategoryId === categoryId);
+        const categoryName = category?.medicalOptionCategoryName || 'Unknown';
+
+        if(!grouped[categoryId]){
+          grouped[categoryId] = {
+            categoryId,
+            categoryName,
+            options: []
+          };
+        }
+
+        grouped[categoryId].options.push(option);
+      });
+      return Object.values(grouped);
+    };
+
+    // Group data by category (Part of Part 3)
+    const groupedData = groupedOptionsByCategory(data, categories);
+    // Set default category on data load
+    useEffect(() => {
+      if(groupedData.length > 0 && !selectedCategoryId){
+        setSelectedCategoryId(groupedData[0].categoryId);
+      }
+    },[groupedData, selectedCategoryId]);
+
+    // Get the currently selected category's options
+    const selectedCategory = groupedData.find(cat => cat.categoryId === selectedCategoryId);
+    const displayData = selectedCategory?.options || [];
+
+
+    // Step 4 : Add the dropdown in the modal body (before the table)
+
+    //==== End Work Area for proposed solution
+
+
+
+
+
+
+
+
+    const {
+        toLocalCurrency
+    } = useLocalCurrencyFormat();
     // Getting the Columns || no need need to explicitly define them so that i can render them with custom logic
     const viewColumns = [
         {
-            header: "Option Name", key: "medicalOptionName", width: 1, render: () => {
+            header: "Medical Option", key: "medicalOptionName", width: 1, render: () => {
+
+            }
+        },
+        {// Header Title
+            header: "Medical Option Category", key: "medicalOptionCategoryId", width: 1, render: () => {
 
             }
         },
         {
-            header: "Category", key: "medicalOptionCategoryId", width: 1, render: () => {
+            header: "Income Salary", key: "incomeCategory", width: 1,
+              render: (value, row) => {
+                  const min = row.salaryBracketMin;
+                  const max = row.salaryBracketMax;
 
-            }
-        },
-        {
-            header: "Min Salary", key: "salarybracketMin", width: 1, render: () => {
-
-            }
+                  // if max is null/undefined, render as uncapped with "+"
+                  if((max === null || max === undefined) && (min > 0 && (min !== undefined || true)) ) {
+                      return `${toLocalCurrency(min, "en-ZA")} +`;
+                  }
+                  if((max === undefined || max === null) && (min === undefined || min === null || min === 0)) {
+                      return 'N/A';
+                  }
+                  //otherwise show capped range
+                  return `${toLocalCurrency(min, "en-ZA")} - ${toLocalCurrency(max, "en-ZA")}`;
+              }
         },
         {
             header: "Maximum Salary", key: "salarybracketMax", width: 1, render: () => {
@@ -149,6 +225,31 @@ function MedicalAidOptionViewModal({isOpen,onClose, title, data = []}) {
                   No data available.
                 </p>
                 ) : (
+                  <>
+
+                  {/*
+                  // Step 4:Add the dropdown in the modal body (before the table)
+                  Category Selector Dropdown */}
+                  {groupedData.length > 0 && (
+                    <div className="category-selector">
+                      <label htmlFor="category-dropdown">Select Category:</label>
+                      <select
+                        id="category-dropdown"
+                        value={selectedCategoryId || ''}
+                        onChange={(e) => setSelectedCategoryId(Number(e.target.value))}
+                        className="category-dropdown"
+                      >
+                        {groupedData.map(category => (
+                          <option
+                            key={category.categoryId}
+                            value={category.categoryId}> {/*can change the caegory from int to string here*/}
+                              {category.categoryName} ({category.options.length} options)
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
                   <table
                       className="modal-view-table">
                       <thead className="modal-view-table-header">
@@ -164,12 +265,13 @@ function MedicalAidOptionViewModal({isOpen,onClose, title, data = []}) {
                       </tr>
                     </thead>
                     <tbody>
-                    {data.map((row, rowIndex) => (
+                    {/* Step 5: Display the data || update the table to render to use 'displayData' instead of 'data' */}
+                    {displayData.map((row, rowIndex) => (
                       <tr key={row.id ?? rowIndex}>
                           {viewColumns.map((col) => (
                             <td key={col}>
                                 {/* Handles nested objects/arrays */}
-                                {formatCell(row[col])}
+                                {col.render ? col.render(row[col.key], row) : formatCell(row[col.key])}
                             </td>
                           ))}
                       </tr>
@@ -177,6 +279,7 @@ function MedicalAidOptionViewModal({isOpen,onClose, title, data = []}) {
                     </tbody>
 
                   </table>
+            </>
                 )}
             </div>
 
