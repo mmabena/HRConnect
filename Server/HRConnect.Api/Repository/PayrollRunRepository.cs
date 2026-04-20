@@ -38,11 +38,14 @@ namespace HRConnect.Api.Repository
 
     public async Task<PayrollRun?> GetRunByDateAsync(int payrollRunNumber, DateTime startDate, DateTime endDate)
     {
-      var run = await _context.PayrollRuns.Include(r => r.Period).Where(r =>
+      var run = await _context.PayrollRuns
+      .Where(r =>
           (r.PayrollRunNumber == payrollRunNumber) &&
           (r.Period.EndDate >= startDate) &&
           (r.Period.StartDate <= endDate))
-        .Include(r => r.Records)//I do not know if this is necessary 
+        .Include(r => r.Period)
+        .Include(r => r.Records)
+        .AsSplitQuery()
         .FirstOrDefaultAsync();
 
 

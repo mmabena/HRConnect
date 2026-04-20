@@ -40,7 +40,7 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
     private readonly Func<DateTime> _now;
     public PayrollRolloverJob(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService, IServiceProvider serviceProvider,
       IEmployeePensionEnrollmentService employeePensionEnrollmentService,
-      IReportsService reportsService, ApplicationDBContext context, Func<DateTime> now = null)
+      IReportsService reportsService, ApplicationDBContext context, Func<DateTime>? now = null)
     {
       _payrollRunRepo = payrollRunRepo;
       _payrollPeriodService = payrollPeriodService;

@@ -36,20 +36,20 @@ Audit.Core.Configuration.Setup()
       .AuditTypeExplicitMapper(map => map
         .Map<StatutoryContribution, AuditLogs>((entity, audit) =>
           {
-              audit.EmployeeId = entity.EmployeeId;
-              audit.IdNumber = entity.IdNumber;
-              audit.PassportNumber = entity.PassportNumber;
-              audit.MonthlySalary = entity.MonthlySalary;
-              audit.ProjectedSalary = entity.MonthlySalary - entity.UifEmployeeAmount;
-              audit.UifEmployeeAmount = entity.UifEmployeeAmount;
-              audit.UifEmployerAmount = entity.UifEmployerAmount;
-              audit.EmployerSdlContribution = entity.EmployerSdlContribution;
+            audit.EmployeeId = entity.EmployeeId;
+            audit.IdNumber = entity.IdNumber;
+            audit.PassportNumber = entity.PassportNumber;
+            audit.MonthlySalary = entity.MonthlySalary;
+            audit.ProjectedSalary = entity.MonthlySalary - entity.UifEmployeeAmount;
+            audit.UifEmployeeAmount = entity.UifEmployeeAmount;
+            audit.UifEmployerAmount = entity.UifEmployerAmount;
+            audit.EmployerSdlContribution = entity.EmployerSdlContribution;
           })
         .AuditEntityAction<AuditLogs>((e, entry, audit) =>
         {
-            audit.AuditedAt = DateTime.Now;
-            audit.AuditAction = entry.Action;
-            audit.TabelName = entry.Name;
+          audit.AuditedAt = DateTime.Now;
+          audit.AuditAction = entry.Action;
+          audit.TabelName = entry.Name;
         })));
 
 ExcelPackage.License.SetNonCommercialPersonal("YourName");
@@ -58,33 +58,33 @@ ExcelPackage.License.SetNonCommercialPersonal("YourName");
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        options.JsonSerializerOptions.Converters.Add(
-            new System.Text.Json.Serialization.JsonStringEnumConverter()
-        );
+      options.JsonSerializerOptions.Converters.Add(
+          new System.Text.Json.Serialization.JsonStringEnumConverter()
+      );
     });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "HRConnect.Api", Version = "v1" });
+  c.SwaggerDoc("v1", new OpenApiInfo { Title = "HRConnect.Api", Version = "v1" });
 
-    var securityScheme = new OpenApiSecurityScheme
+  var securityScheme = new OpenApiSecurityScheme
+  {
+    Name = "Authorization",
+    Type = SecuritySchemeType.Http,
+    Scheme = "bearer",
+    BearerFormat = "JWT",
+    In = ParameterLocation.Header,
+    Description = "Enter 'Bearer' [space] and then your JWT token.",
+    Reference = new OpenApiReference
     {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "Enter 'Bearer' [space] and then your JWT token.",
-        Reference = new OpenApiReference
-        {
-            Type = ReferenceType.SecurityScheme,
-            Id = "Bearer"
-        }
-    };
+      Type = ReferenceType.SecurityScheme,
+      Id = "Bearer"
+    }
+  };
 
-    c.AddSecurityDefinition("Bearer", securityScheme);
+  c.AddSecurityDefinition("Bearer", securityScheme);
 
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+  c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
     { securityScheme, Array.Empty<string>() }
     });
@@ -94,53 +94,53 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
     {
-        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!)
-        .EnableSensitiveDataLogging()
-        .LogTo(msg =>
-        {
-            if (msg.Contains("CommandExecuting"))
-                Console.ForegroundColor = ConsoleColor.Yellow;
-            else if (msg.Contains("CommandExecuted"))
-                Console.ForegroundColor = ConsoleColor.Green;
-            else if (msg.Contains("Error"))
-                Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"=============\nLOGGING SQL :{msg}");
-            Console.ResetColor();
-        }, LogLevel.Information); //Enables SQL logging to terminal
-        options.AddInterceptors(new AuditSaveChangesInterceptor());
+      options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!)
+      .EnableSensitiveDataLogging()
+      .LogTo(msg =>
+      {
+        if (msg.Contains("CommandExecuting"))
+          Console.ForegroundColor = ConsoleColor.Yellow;
+        else if (msg.Contains("CommandExecuted"))
+          Console.ForegroundColor = ConsoleColor.Green;
+        else if (msg.Contains("Error"))
+          Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine($"=============\nLOGGING SQL :{msg}");
+        Console.ResetColor();
+      }, LogLevel.Information); //Enables SQL logging to terminal
+      options.AddInterceptors(new AuditSaveChangesInterceptor());
     });
 
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+  options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+  options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
 .AddJwtBearer(options =>
 {
-    var jwt = builder.Configuration.GetSection("JwtSettings");
-    var secretValue = jwt["Secret"] ?? string.Empty;
-    byte[] keyBytes;
-    try
-    {
-        // Try to interpret as base64 first
-        keyBytes = Convert.FromBase64String(secretValue);
-    }
-    catch (FormatException)
-    {
-        // Fallback to UTF8 bytes if not base64
-        keyBytes = Encoding.UTF8.GetBytes(secretValue);
-    }
+  var jwt = builder.Configuration.GetSection("JwtSettings");
+  var secretValue = jwt["Secret"] ?? string.Empty;
+  byte[] keyBytes;
+  try
+  {
+    // Try to interpret as base64 first
+    keyBytes = Convert.FromBase64String(secretValue);
+  }
+  catch (FormatException)
+  {
+    // Fallback to UTF8 bytes if not base64
+    keyBytes = Encoding.UTF8.GetBytes(secretValue);
+  }
 
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = jwt["Issuer"],
-        ValidAudience = jwt["Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(keyBytes)
-    };
+  options.TokenValidationParameters = new TokenValidationParameters
+  {
+    ValidateIssuer = true,
+    ValidateAudience = true,
+    ValidateLifetime = true,
+    ValidateIssuerSigningKey = true,
+    ValidIssuer = jwt["Issuer"],
+    ValidAudience = jwt["Audience"],
+    IssuerSigningKey = new SymmetricSecurityKey(keyBytes)
+  };
 });
 
 builder.Services.AddAuthorizationBuilder()
@@ -150,61 +150,61 @@ builder.Services.AddAuthorizationBuilder()
 
 builder.Services.AddQuartz(q =>
 {
-    var RolloverJobKey = new JobKey("PayrollRolloverJob");
-    var NotificationJobKey = new JobKey("NotificationJob");
+  var RolloverJobKey = new JobKey("PayrollRolloverJob");
+  var NotificationJobKey = new JobKey("NotificationJob");
 
-    //Add a service for to run as a background job 
-    q.AddJob<PayrollRolloverJob>(opts =>
-    opts.WithIdentity(RolloverJobKey)
-    .StoreDurably());
+  //Add a service for to run as a background job 
+  q.AddJob<PayrollRolloverJob>(opts =>
+  opts.WithIdentity(RolloverJobKey)
+  .StoreDurably());
 
-    q.AddJob<NotificationJob>(opts =>
-    opts.WithIdentity(NotificationJobKey)
-    .StoreDurably());
-    //Triggers that will need to be fired to run background job
-    // using Cron Schedule
-    q.AddTrigger(opts => opts
-    .ForJob(RolloverJobKey)
-    .WithIdentity("PayrollRollover-Trigger")
-    .WithCronSchedule("10 0/1 * * * ?", x =>
-    x.WithMisfireHandlingInstructionFireAndProceed()));
+  q.AddJob<NotificationJob>(opts =>
+  opts.WithIdentity(NotificationJobKey)
+  .StoreDurably());
+  //Triggers that will need to be fired to run background job
+  // using Cron Schedule
+  q.AddTrigger(opts => opts
+  .ForJob(RolloverJobKey)
+  .WithIdentity("PayrollRollover-Trigger")
+  .WithCronSchedule("0 0 0 1 * ?", x =>
+  x.WithMisfireHandlingInstructionFireAndProceed()));
 
-    q.AddTrigger(opts => opts
-    .ForJob(NotificationJobKey)
-    .WithIdentity("NotificationJOb-Trigger")
-    .WithCronSchedule("10 0/1 * * * ?"));
-    // 0 -> 0 seconds
-    // 0 -> 0 minutes
-    // 0 -> 0 hours
-    // 1 -> first day of the month 
-    // * -> for any/every month 
-    // ? -> for all days of the week
+  q.AddTrigger(opts => opts
+  .ForJob(NotificationJobKey)
+  .WithIdentity("NotificationJOb-Trigger")
+  .WithCronSchedule("0 0 0 1 * ?"));
+  // 0 -> 0 seconds
+  // 0 -> 0 minutes
+  // 0 -> 0 hours
+  // 1 -> first day of the month 
+  // * -> for any/every month 
+  // ? -> for all days of the week
 
-    JobKey employeePensionEnrollmentJob = new("EmployeeEnrollmentJob");
-    q.AddJob<EmployeeEnrollmentJob>(opts =>
-           opts.WithIdentity(employeePensionEnrollmentJob)
-           .StoreDurably());
+  JobKey employeePensionEnrollmentJob = new("EmployeeEnrollmentJob");
+  q.AddJob<EmployeeEnrollmentJob>(opts =>
+         opts.WithIdentity(employeePensionEnrollmentJob)
+         .StoreDurably());
 
-    q.AddTrigger(opts => opts
-         .ForJob(employeePensionEnrollmentJob)
-         .StartNow());
+  q.AddTrigger(opts => opts
+       .ForJob(employeePensionEnrollmentJob)
+       .StartNow());
 
-    //Adding persistence to quartz to be able to be run in the back
-    q.UsePersistentStore(store =>
-    {
-        store.UseSqlServer(options =>
-          {
-              options.ConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
-              options.TablePrefix = "quartz.QRTZ_";
-          });
-        store.UseSerializer<Quartz.Simpl.SystemTextJsonObjectSerializer>();
-        store.UseProperties = true;
-    });
+  //Adding persistence to quartz to be able to be run in the back
+  q.UsePersistentStore(store =>
+  {
+    store.UseSqlServer(options =>
+        {
+          options.ConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
+          options.TablePrefix = "quartz.QRTZ_";
+        });
+    store.UseSerializer<Quartz.Simpl.SystemTextJsonObjectSerializer>();
+    store.UseProperties = true;
+  });
 });
 
 builder.Services.AddQuartzHostedService(q =>
 {
-    q.WaitForJobsToComplete = true;
+  q.WaitForJobsToComplete = true;
 });
 
 builder.Configuration.AddUserSecrets<Program>();
@@ -283,12 +283,12 @@ builder.Services.AddScoped<IPayrollEarningService, PayrollEarningService>();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowReact",
-        policy => policy
-            .WithOrigins("http://localhost:3000", "http://localhost:5147")
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials());
+  options.AddPolicy("AllowReact",
+      policy => policy
+          .WithOrigins("http://localhost:3000", "http://localhost:5147")
+          .AllowAnyHeader()
+          .AllowAnyMethod()
+          .AllowCredentials());
 });
 
 var app = builder.Build();
@@ -296,32 +296,32 @@ var app = builder.Build();
 //Automatically create payroll run on app start up
 using (var scope = app.Services.CreateScope())
 {
-    var initialiser = scope.ServiceProvider.GetRequiredService<PayrollInit>();
+  var initialiser = scope.ServiceProvider.GetRequiredService<PayrollInit>();
 
-    //initialise a payperiod and payrun on app start up
-    await initialiser.InitialisePayrollPeriod();
+  //initialise a payperiod and payrun on app start up
+  await initialiser.InitialisePayrollPeriod();
 }
 
 using (var scope = app.Services.CreateScope())
 {
-    var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
-    await userService.SyncEmployeeUserAsync();
+  var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+  await userService.SyncEmployeeUserAsync();
 }
 
 using (var scope = app.Services.CreateScope())
 {
-    var seeder = scope.ServiceProvider.GetRequiredService<PositionAndLeaveSeed>();
+  var seeder = scope.ServiceProvider.GetRequiredService<PositionAndLeaveSeed>();
 
-    await seeder.SeedAsync();
+  await seeder.SeedAsync();
 }
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "HRConnect.Api v1");
-    });
+  app.UseSwagger();
+  app.UseSwaggerUI(c =>
+  {
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "HRConnect.Api v1");
+  });
 }
 
 // app.UseHttpsRedirection();
