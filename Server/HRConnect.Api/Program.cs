@@ -15,7 +15,6 @@ using HRConnect.Api.Utils.Jobs.Payroll;
 using HRConnect.Api.Utils.Jobs.Pension;
 using HRConnect.Api.Utils.Jobs.Notification;
 using HRConnect.Api.Utils.Payroll;
-using HRConnect.Api.Utils.Seed;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -265,7 +264,6 @@ builder.Services.AddScoped<INotificationFactory, NotificationFactory>();
 builder.Services.AddScoped<INotificationDispatcher, NotificationDispatcher>();
 builder.Services.AddScoped<IJobScheduleService, JobScheduleService>();
 
-builder.Services.AddScoped<PositionAndLeaveSeed>();
 builder.Services.AddScoped<IPayrollEarningRepository, PayrollEarningRepository>();
 builder.Services.AddScoped<IPayrollEarningService, PayrollEarningService>();
 
