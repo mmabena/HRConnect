@@ -104,9 +104,7 @@ const EmployeeList = () => {
                     value={searchQuery}
                     onChange={(e) => {
                       setSearchQuery(e.target.value);
-                      /// </summary>
                       setActivePage(1); /// reset page on search
-                      /// </summary>
                     }}
                   />
                 </div>

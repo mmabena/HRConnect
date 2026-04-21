@@ -95,7 +95,7 @@
             FirstName = existingEmployee.Name,
             LastName = existingEmployee.Surname,
             DateJoinedCompany = existingEmployee.StartDate,
-            IdNumber = existingEmployee.IdNumber,
+            IdNumber = existingEmployee.IdNumber!,
             Passport = existingEmployee.PassportNumber,
             TaxNumber = existingEmployee.TaxNumber,
             PensionableSalary = existingEmployee.MonthlySalary,
@@ -108,7 +108,7 @@
               employeePensionEnrollment.VoluntaryContribution),
             EmailAddress = existingEmployee.Email,
             PhysicalAddress = existingEmployee.PhysicalAddress,
-            PayrollRunId = currentPayrollRunId.PayrollRunId,
+            PayrollRunId = currentPayrollRunId!.PayrollRunId,
             CreatedDate = employeePensionEnrollment.EffectiveDate,
             IsActive = true
           };

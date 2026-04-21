@@ -13,7 +13,7 @@ import "./Components/MenuBar/MenuBar.css";
 import EmployeeList from "./Pages/EmployeeManagement/EmployeeList";
 import Payslip from "./Pages/PayrollInfo/Payslip"
 import AddEmployeeModal from "./Components/EmployeeManagement/AddEmployeeModal";
-import UserManagement from "./Components/UserManagement";
+import UserManagement from "./Components/UserManagement/UserManagement.jsx";
 import ViewPositionManagement from "./Components/ViewPositionManagement";
 import EditPositionManagement from "./Components/companyManagement/PositionManagement/EditPositionManagement.jsx";
 import AddPositionManagement from "./Components/companyManagement/PositionManagement/AddPositionManagment.jsx";

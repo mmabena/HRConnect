@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
-// Removed MenuBar import
-import Profile from "./MyProfile";
-import ActionsModal from "./ActionModal"; // Import the new ActionsModal
-import { fetchUsersAndRoles, updateUserRole } from "../api/UserManagement";
-import { getStoredUserRole } from "../utils/roleUtils";
-import { resolveRole } from "../utils/roleUtils";
+import ActionsModal from "../ActionModal"; // Import the new ActionsModal
+import { fetchUsersAndRoles, updateUserRole } from "../../api/UserManagement";
+import {fetchAllEmployees} from '../../api/Employee.js'
+import { getStoredUserRole } from "../../utils/roleUtils";
+import { resolveRole } from "../../utils/roleUtils.js";
 import {
   FaUser,
   FaUsers,
@@ -25,7 +24,7 @@ const USER_STATUS = {
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
-  const [activeTab, setActiveTab] = useState("myProfile");
+  const [activeTab, setActiveTab] = useState("userProfile");
   const [currentUserRole, setCurrentUserRole] = useState("User");
   const [selectedUserIndex, setSelectedUserIndex] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -39,16 +38,18 @@ const UserManagement = () => {
       try {
         setIsLoading(true);
         const { users, roles } = await fetchUsersAndRoles();
+        const employees=await fetchAllEmployees();
 
         setRoles(roles || []);
-        const mappedUsers = (users || []).map((user) => ({
+        const mappedUsers = (users || []).map((user) => {
+           const employee=employees.find(e=>e.email==user.email)
+          console.log(employee)
+          return{
           ...user,
-          //name: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
-          name: user.name || user.email,
+          name: `${employee.name} ${employee.surname}` || user.email,
           role: user.role || roles.find((r) => Number(r.roleId) === Number(user.roleId))?.name || "Unknown Role",
-        //   status: user.status === USER_STATUS.ACTIVE ? "Active" : "Inactive",
           status:"Active",
-          statusValue: USER_STATUS.ACTIVE, }));
+          statusValue: USER_STATUS.ACTIVE, }});
 
         setUsers(mappedUsers);
           setLoggedInUser(mappedUsers[0]||null);
@@ -93,7 +94,6 @@ const UserManagement = () => {
   const saveEmployeeDetails = async () => {
     try {
       const user = users[selectedUserIndex];
-      //const selectedRole = roles.find((r) => r.roleId === editRole || r.name === editRole);
       const normalizedEditRole=resolveRole(editRole);
 
       const selectedRole=roles.find(
@@ -101,7 +101,6 @@ const UserManagement = () => {
       );
 
       await updateUserRole(user.userId, selectedRole.roleId);
-    //   if (!user || !selectedRole) throw new Error("Invalid user or role");
 
       await updatedUsers(user.userId, {
         roleId: selectedRole.roleId,
@@ -133,10 +132,6 @@ const UserManagement = () => {
       const user = users[selectedUserIndex];
       if (!user) throw new Error("Invalid user");
 
-    //   await updateUser(user.userId, {
-    //     ...user,
-    //     ...updatedData,
-    //   });
     if(updatedData.roleId !=null)
         await updateUserRole(user.userId,updatedData.roleId);
 
@@ -186,49 +181,32 @@ const UserManagement = () => {
       <div className="top-bar">
         <FaUsers size={25} />
         <h2>User Management</h2>
-      </div>
-
-      <div className="grey-box">
-        <div className="top-bar-container">
-          <div
-            className={`top-bar clickable-tab ${activeTab === "myProfile" ? "active-tab" : ""
-              }`}
-            onClick={() => setActiveTab("myProfile")}
-          >
-            <FaUser size={20} />
-            <h3>My Profile</h3>
-          </div>
-          <div
-            className={`top-bar clickable-tab ${activeTab === "userProfile" ? "active-tab" : ""
-              }`}
-            onClick={() => setActiveTab("userProfile")}
-          >
-            <FaUser size={20} />
-            <h3>User Profiles</h3>
-          </div>
+        <div className="search-bar" style={{ marginLeft: 'auto' }}>
+          <input
+            type="text"
+            placeholder=" Search users..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
       </div>
 
-      {activeTab === "myProfile" && <Profile />}
-
       {activeTab === "userProfile" && (
         <>
-          <div className="user-table">
-            <div className="search-bar">
-              <input
-                type="text"
-                placeholder=" Search users..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
+
             <table className="styled-table">
               <thead>
+                  <tr className="table-ribbon">
+                  <th colSpan="4" className="ribbon-title">
+                  <p className="title">
+                    User Profiles
+                  </p>
+                   </th>
+                  </tr>
                 <tr>
                   <th>User</th>
                   <th>Email</th>
                   <th>Role</th>
-                  <th>Status</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -247,25 +225,20 @@ const UserManagement = () => {
                         <FaUserLock /> {user.role || "Unknown Role"}
                       </span>
                     </td>
-                    <td>
-                      <span className={`status-badge ${user.status.toLowerCase()}`}>
-                        {user.status === "Active" ? <FaCheckCircle /> : <FaTimesCircle />}
-                        {user.status}
-                      </span>
-                    </td>
+
                     <td className="action-buttons">
                       <button
                         className="actions-trigger-btn"
                         onClick={() => handleShowActions(idx)}
                       >
-                        <FaEllipsisV /> Actions
+                        <FaEllipsisV /> 
+                  Actions
                       </button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
 
           <ActionsModal
             isOpen={selectedUserIndex !== null}

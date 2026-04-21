@@ -45,7 +45,7 @@ namespace HRConnect.Api.Services
             EmployeeId = e.EmployeeId,
             FullName = e.Name + " " + e.Surname,
             Email = e.Email,
-            Position = e.Position.PositionTitle,
+            Position = e.Position!.PositionTitle,
             LeaveBalances = e.LeaveBalances.Select(lb => new LeaveBalanceSummary
             {
               LeaveType = lb.LeaveType.Name,
@@ -72,7 +72,7 @@ namespace HRConnect.Api.Services
         EmployeeId = e.EmployeeId,
         FullName = e.Name + " " + e.Surname,
         Email = e.Email,
-        Position = e.Position.PositionTitle,
+        Position = e.Position!.PositionTitle,
         LeaveBalances = e.LeaveBalances.Select(lb => new LeaveBalanceSummary
         {
           LeaveType = lb.LeaveType.Name,
@@ -145,7 +145,7 @@ namespace HRConnect.Api.Services
       {
         Name = request.Name,
         Code = request.Code,
-        Description = request.Description,
+        Description = request.Description!,
         FemaleOnly = request.FemaleOnly,
         IsActive = true
       };
@@ -209,7 +209,7 @@ namespace HRConnect.Api.Services
       ValidateRules(request.Rules);
 
       leaveType.Name = request.Name;
-      leaveType.Description = request.Description;
+      leaveType.Description = request.Description!;
       leaveType.FemaleOnly = request.FemaleOnly;
 
       _context.LeaveEntitlementRules.RemoveRange(leaveType.EntitlementRules);
