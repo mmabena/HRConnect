@@ -11,6 +11,7 @@ import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 import "./Components/MenuBar/MenuBar.css";
 import EmployeeList from "./Pages/EmployeeManagement/EmployeeList";
+import Payslip from "./Pages/PayrollInfo/Payslip"
 import AddEmployeeModal from "./Components/EmployeeManagement/AddEmployeeModal";
 import UserManagement from "./Components/UserManagement";
 import ViewPositionManagement from "./Components/ViewPositionManagement";
@@ -25,11 +26,12 @@ import TaxTableManagement from "./Components/companyManagement/TaxTableManagemen
 import ChangePassword from "./Components/ChangePassword";
 import TaxTableUpload from "./Components/companyManagement/TaxTableManagement/TaxTableUpload.jsx";
 import MenuBar from "./Components/MenuBar/MenuBar";
-import ManageUserPositions from   "./Pages/CompanyManagement/PositionManagement/ManageUserPositions.jsx";
+import ManageUserPositions from "./Pages/CompanyManagement/PositionManagement/ManageUserPositions.jsx";
 import ProjectionCalculator from "./Pages/PayrollTools/ProjectionCalculator";
 import PersonalInformation from "./Components/PersonalInformation.jsx";
 import api from "../src/api/api.js";
 import ChangePositionManagement from "./Components/companyManagement/PositionManagement/ChangePositionManagement.jsx";
+import { resolveRole } from "./utils/roleUtils.js";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
@@ -60,16 +62,20 @@ function App() {
         });
 
         const employee = empResp.data;
+        const resolvedRole=resolveRole(parsedUser?.User||parsedUser);
 
         const mergedUser = {
           ...parsedUser,
+          role:resolveRole.roleName||parsedUser?.role,
+          roleId:resolvedRole.roleId,
           username: `${employee.name} ${employee.surname}`,
           jobTitle: employee.positionTitle,
           employmentStatus: employee.employmentStatus,
           dateOfBirth: employee.dateOfBirth,
           profileImage: employee.profileImage,
         };
-
+        //Store the current employee in the localStorage 
+        localStorage.setItem("currentEmployee",JSON.stringify(employee));
         setCurrentUser(mergedUser);
         localStorage.setItem("currentUser", JSON.stringify(mergedUser));
       } catch (error) {
@@ -114,8 +120,12 @@ function App() {
         console.warn("Employee endpoint not accessible for this role");
       }
 
+      const resolvedRole=resolveRole(backendUserData);
+
       const mergedUser = {
         ...backendUserData,
+        role:resolvedRole.roleName||backendUserData.role,
+        roleId:resolvedRole.roleId,
         username: employee
           ? `${employee.name} ${employee.surname}`
           : backendUserData.email,
@@ -196,9 +206,9 @@ function App() {
             path="/viewPositionManagement/:id"
             element={<ViewPositionManagement />}
           />
-            <Route path="/changePositionManagement" element={<ChangePositionManagement />} />
+          <Route path="/changePositionManagement" element={<ChangePositionManagement />} />
           <Route path="/manageUserPosition" element={<ManageUserPositions />} />
-          
+
           <Route
             path="/company-contribution"
             element={<CompanyContribution />}
@@ -220,8 +230,9 @@ function App() {
             element={<ProjectionCalculator />}
           />
           <Route path="/changeposition" element={<ChangePositionManagement />} />
-          <Route path="/manageUserPosition" element={<ManageUserPositions/>} />
+          <Route path="/manageUserPosition" element={<ManageUserPositions />} />
           <Route path="/personal" element={<PersonalInformation />} />
+          <Route path="/payslip" element= {<Payslip/>}/>
         </Routes>
       </div>
     </div>

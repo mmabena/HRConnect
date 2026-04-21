@@ -3,7 +3,6 @@ using System.Text;
 using Audit.Core;
 using Audit.EntityFramework;
 using HRConnect.Api.Data;
-// using Resend;
 using HRConnect.Api.Interfaces;
 using HRConnect.Api.Interfaces.Pension;
 using HRConnect.Api.Middleware;
@@ -16,7 +15,6 @@ using HRConnect.Api.Utils.Jobs.Payroll;
 using HRConnect.Api.Utils.Jobs.Pension;
 using HRConnect.Api.Utils.Jobs.Notification;
 using HRConnect.Api.Utils.Payroll;
-using HRConnect.Api.Utils.Seed;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -155,13 +153,13 @@ builder.Services.AddQuartz(q =>
   q.AddTrigger(opts => opts
   .ForJob(RolloverJobKey)
   .WithIdentity("PayrollRollover-Trigger")
-  .WithCronSchedule("10 0/1 * * * ?", x =>
+  .WithCronSchedule("0 0 0 1 * ?", x =>
   x.WithMisfireHandlingInstructionFireAndProceed()));
 
   q.AddTrigger(opts => opts
   .ForJob(NotificationJobKey)
   .WithIdentity("NotificationJOb-Trigger")
-  .WithCronSchedule("10 0/1 * * * ?"));
+  .WithCronSchedule("0 0 0 1 * ?"));
   // 0 -> 0 seconds
   // 0 -> 0 minutes
   // 0 -> 0 hours
@@ -227,11 +225,11 @@ builder.Services.AddScoped<ICompanyContributionAllocationService, CompanyContrib
 builder.Services.AddScoped<ICompanyContributionRepository, CompanyContributionRepository>();
 builder.Services.AddScoped<ICompanyContributionService, CompanyContributionService>();
 builder.Services.AddScoped<IJobGradeRepository, JobGradeRepository>();
+builder.Services.AddScoped<IJobGradeService, JobGradeService>();
 builder.Services.AddScoped<IOccupationalLevelRepository, OccupationalLevelRepository>();
 builder.Services.AddScoped<IOccupationalLevelService, OccupationalLevelService>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.Services.AuthService>();
 
-// Mpho Mosia - Leave Services 
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<ILeaveBalanceService, LeaveBalanceService>();
 builder.Services.AddScoped<ILeaveProcessingService, LeaveProcessingService>();
@@ -266,7 +264,6 @@ builder.Services.AddScoped<INotificationFactory, NotificationFactory>();
 builder.Services.AddScoped<INotificationDispatcher, NotificationDispatcher>();
 builder.Services.AddScoped<IJobScheduleService, JobScheduleService>();
 
-builder.Services.AddScoped<PositionAndLeaveSeed>();
 builder.Services.AddScoped<IPayrollEarningRepository, PayrollEarningRepository>();
 builder.Services.AddScoped<IPayrollEarningService, PayrollEarningService>();
 
@@ -293,11 +290,9 @@ using (var scope = app.Services.CreateScope())
 
 using (var scope = app.Services.CreateScope())
 {
-  var seeder = scope.ServiceProvider.GetRequiredService<PositionAndLeaveSeed>();
-
-  await seeder.SeedAsync();
+  var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+  await userService.SyncEmployeeUserAsync();
 }
-
 
 if (app.Environment.IsDevelopment())
 {
@@ -317,4 +312,3 @@ app.UseAuthorization();
 app.UseMiddleware<ExceptionMiddleware>();
 app.MapControllers();
 app.Run();
-

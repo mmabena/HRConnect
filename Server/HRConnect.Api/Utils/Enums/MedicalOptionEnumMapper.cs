@@ -334,7 +334,9 @@
         var t when t == typeof(Double) =>
           DoubleMappings.TryGetValue(categoryName, out var @double) ? (T)(object)@double : null,
         var t when t == typeof(Alliance) =>
-          AllianceMappings.TryGetValue(categoryName, out var alliance) ? (T)(object)alliance : null
+          AllianceMappings.TryGetValue(categoryName, out var alliance) ? (T)(object)alliance : null,
+        //every other possible case 
+        _ => null
       };
     }
 
