@@ -80,15 +80,23 @@
     flex-grow: 0;
 }
 
+table, thead, tbody, td {
+    border: 1px solid;
+}
 .modal-view-table {
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 13px;
+    line-height: 19px;
 }
 
 .model-view-table-row {
-    background: white;
-    border-bottom: 1px solid #eee;
+    background: blueviolet;
+    border-bottom: 1px solid black;
     transition: background-color 0.2s ease;
 }
 
@@ -97,8 +105,8 @@
     text-align: left;
     font-size: 13px;
     font-weight: 600;
-    color: white;
-    word-break: break-word;
+    color: deeppink;
+    word-break: keep-all;
 }
 
 @keyframes fadeIn {
@@ -140,6 +148,37 @@
 }
 
 .category-dropdown:focus {
+    outline: none;
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
+
+.income-bracket-selector {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.income-bracket-selector label {
+    font-weight: 600;
+    color: #333;
+}
+
+.income-bracket-dropdown {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    min-width: 250px;
+    background: white;
+    cursor: pointer;
+}
+
+.income-bracket-dropdown:focus {
     outline: none;
     border-color: #4a90e2;
     box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);

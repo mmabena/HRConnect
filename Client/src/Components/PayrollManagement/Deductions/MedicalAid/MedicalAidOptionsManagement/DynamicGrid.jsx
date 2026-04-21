@@ -1,6 +1,5 @@
 ﻿import React from 'react';
 import './DynamicGrid.css';
-import useLocalCurrencyFormat from "../../../../../hooks/useLocalCurrencyFormat";
 
 const DynamicGrid = ({
   data,
@@ -12,9 +11,7 @@ const DynamicGrid = ({
   totalPages,
   onPageChange
 }) => {
-  const {
-      toLocalCurrency
-  } = useLocalCurrencyFormat();
+
   if (loading) return <div className="grid-loading">Loading ...</div>;
   if (error) return <div className="grid-error">Error loading data</div>;
   if (data.length === 0) return <div className="grid-empty">No data available</div>

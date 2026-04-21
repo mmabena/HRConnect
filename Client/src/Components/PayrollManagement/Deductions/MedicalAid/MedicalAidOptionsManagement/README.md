@@ -409,7 +409,7 @@ Table renders displayData
 
 - React (useState, useEffect)
 - ReactDOM (createPortal)
-- useLocalCurrencyFormat (custom hook)
+- toLocalCurrency (custom hook)
 
 ## Version History
 

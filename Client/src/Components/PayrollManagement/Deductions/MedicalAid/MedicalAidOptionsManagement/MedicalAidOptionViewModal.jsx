@@ -1,9 +1,12 @@
-﻿import {useEffect, useState} from 'react';
+import {useEffect, useState} from 'react';
 import ReactDOM from 'react-dom';
 import './MedicalAidOptionViewModal.css';
-import useLocalCurrencyFormat from "../../../../../hooks/useLocalCurrencyFormat";
+import formatToLocalCurrency from "../../../../../utils/formatToLocalCurrency";
+import formatSalaryBracket from "../../../../../utils/formatSalaryBracket";
+import Divider from './Divider';
 
-function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categories = []}) {
+
+function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categories = [], categoryArray = []}) {
     // TODO : Prepare the data/transform to use within the model, with all it's category's relatives
     /*
     * Transform the flat data into a grouped structure by category
@@ -14,8 +17,21 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
 
     //==== Work Area for proposed solution
     // Step 3 : Update MedicalAidOptionViewModal to accept and use categories
-    const [selectedCategoryId,setSelectedCategoryId] = useState(null);
+    const [selectedOptionId,setSelectedOptionId] = useState(null);
+    const [categoryNameList, setCategoryNameList] = useState(null);
+    const [categoryIncomeBrackets, setCategoryIncomeBrackets] = useState(null);
+    const [selectedIncomeBracket, setSelectedIncomeBracket] = useState(null);
+    const [isEditing, setIsEditing] = useState(false);
 
+    const onEditClick = () => {
+        (!isEditing) ?
+            setIsEditing(true) :
+            setIsEditing(false);
+    }
+
+    useEffect(() => {
+      setCategoryNameList(categoryArray);
+    },[categoryArray]);
 
     // Step1 : Transform the flat data into a grouped structure by category || Data transformer helper function
     const groupedOptionsByCategory = (options, categories) => {
@@ -24,16 +40,24 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
       options.forEach(option => {
         const categoryId = option.medicalOptionCategoryId;
         const category = categories.find(cat => cat.medicalOptionCategoryId === categoryId);
-        const categoryName = category?.medicalOptionCategoryName || 'Unknown';
+        const categoryName = category.medicalOptionCategoryName;
+        const minimumSalary = option.salaryBracketMin;
+        const maximumSalary = option.salaryBracketMax;
+        const optionSalaryBracket = formatSalaryBracket(minimumSalary, maximumSalary, formatToLocalCurrency);
 
-        if(!grouped[categoryId]){
+
+
+
+          if(!grouped[categoryId]){
           grouped[categoryId] = {
             categoryId,
             categoryName,
+            incomeBrackets: [],
             options: []
           };
         }
 
+        grouped[categoryId].incomeBrackets.push(optionSalaryBracket);
         grouped[categoryId].options.push(option);
       });
       return Object.values(grouped);
@@ -41,16 +65,41 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
 
     // Group data by category (Part of Part 3)
     const groupedData = groupedOptionsByCategory(data, categories);
+
+    // Flatten all options with category info for dropdown
+    const flattenedOptions = groupedData.flatMap(category =>
+    category.options.map(option => ({
+        ...option,
+        categoryName: category.categoryName ? category.categoryName : category.categoryId
+    }))
+    );
+
     // Set default category on data load
     useEffect(() => {
-      if(groupedData.length > 0 && !selectedCategoryId){
-        setSelectedCategoryId(groupedData[0].categoryId);
+      if(groupedData.length > 0 && !selectedOptionId){
+        setSelectedOptionId(flattenedOptions[0].medicalOptionId);
       }
-    },[groupedData, selectedCategoryId]);
+    },[flattenedOptions, selectedOptionId]);
 
-    // Get the currently selected category's options
-    const selectedCategory = groupedData.find(cat => cat.categoryId === selectedCategoryId);
-    const displayData = selectedCategory?.options || [];
+// Get the currently selected option
+    const displayData = selectedOptionId ? flattenedOptions.filter(option => option.medicalOptionId === selectedOptionId) : [];
+// Get the currently selected category's Income Brackets
+    useEffect(()=>{
+      // If the grouped data is not null, then proceed with extracting the income brackets for that category group
+      if(groupedData.length > 0){
+        const allIncomeBrackets = groupedData.map(category => category.incomeBrackets);
+        const flattenedBrackets = allIncomeBrackets.flat();
+        setCategoryIncomeBrackets(flattenedBrackets);
+
+        const allIncomeBrackets2 = groupedData.reduce((acc, category) => {
+          acc[category.categoryId] = category.incomeBrackets;
+          return acc;
+        },{});
+        console.log(":=------------------ Start of Income Bracket Dump ------------------=:");
+        console.log(allIncomeBrackets2);
+        console.log(":=------------------ End of Dump ------------------=:");
+      }
+    },[groupedData])
 
 
     // Step 4 : Add the dropdown in the modal body (before the table)
@@ -61,12 +110,76 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
 
 
 
+    const headerColumnNames = [
+      {
+        header: "Component", key:"component", render: () => {
+
+        }
+      },
+      {
+        header: "Principal" , key: "principal", render: () => {
+
+        }
+      },
+      {
+        header: "Adult" , key: "adult", render: () => {
+
+        }
+      },
+      {
+        header: "Child" , key: "child", render: () => {
+
+        }
+      }
+    ];
+
+    const componentTypeNames = [
+      {
+        header: "Monthly Risk Contribution", key: "monthlyRiskContribution", render: () => {
+
+        }
+      },
+      {
+        header: "Risk Allocation", key: "riskAllocation", render: () => {
+
+        }
+      },
+      {
+        header: "Monthly Saving Account (MSA)", key: "monthlySavingAccount", render: () => {
+
+        }
+      },
+      {
+        header: "MSA Allocation", key: "msaAllocation", render: () => {
+
+        }
+      },
+    ];
+
+    const totalDeductionsHeaderNames = [
+      {
+        header: "Principal", key:"principal", render: () => {
+
+        }
+      },
+        {
+            header: "Adult", key: "adult", render: () => {
+
+            }
+        },
+        {
+            header: "1st Child", key: "firstChild", render: () => {
+
+            }
+        },
+        {
+            header: "2nd Child +", key: "children", render: () => {
+
+            }
+        },
+    ];
 
 
-
-    const {
-        toLocalCurrency
-    } = useLocalCurrencyFormat();
     // Getting the Columns || no need need to explicitly define them so that i can render them with custom logic
     const viewColumns = [
         {
@@ -85,15 +198,9 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
                   const min = row.salaryBracketMin;
                   const max = row.salaryBracketMax;
 
-                  // if max is null/undefined, render as uncapped with "+"
-                  if((max === null || max === undefined) && (min > 0 && (min !== undefined || true)) ) {
-                      return `${toLocalCurrency(min, "en-ZA")} +`;
-                  }
-                  if((max === undefined || max === null) && (min === undefined || min === null || min === 0)) {
-                      return 'N/A';
-                  }
-                  //otherwise show capped range
-                  return `${toLocalCurrency(min, "en-ZA")} - ${toLocalCurrency(max, "en-ZA")}`;
+                  const newFormat = formatSalaryBracket(min,max, formatToLocalCurrency);
+
+                  return newFormat;
               }
         },
         {
@@ -230,34 +337,80 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
                   {/*
                   // Step 4:Add the dropdown in the modal body (before the table)
                   Category Selector Dropdown */}
-                  {groupedData.length > 0 && (
+                  {flattenedOptions.length > 0 && (
                     <div className="category-selector">
-                      <label htmlFor="category-dropdown">Select Category:</label>
+                      <label htmlFor="category-dropdown">MEDICAL OPTION</label>
                       <select
                         id="category-dropdown"
-                        value={selectedCategoryId || ''}
-                        onChange={(e) => setSelectedCategoryId(Number(e.target.value))}
+                        value={selectedOptionId || ''}
+                        onChange={(e) => setSelectedOptionId(Number(e.target.value))}
                         className="category-dropdown"
                       >
-                        {groupedData.map(category => (
+                        {flattenedOptions.map(option => (
                           <option
-                            key={category.categoryId}
-                            value={category.categoryId}> {/*can change the caegory from int to string here*/}
-                              {category.categoryName} ({category.options.length} options)
+                            key={option.categoryId}
+                            value={option.medicalOptionId}> {/*can change the category from int to string here*/}
+                              {option.medicalOptionName}
                           </option>
                         ))}
                       </select>
                     </div>
+
+
                   )}
+
+                  {categoryIncomeBrackets && categoryIncomeBrackets.length > 0 && (
+
+
+                      (!isEditing)  ? (
+                        <div className="income-bracket-selector">
+                          <label htmlFor="income-bracket-dropdown">INCOME CATEGORY</label>
+                          <p>NOTHING TO DISPLAY PAL :)</p>
+                        </div>
+                      ) : (
+                        <div className="income-bracket-selector">
+                          <label htmlFor="income-bracket-dropdown">INCOME CATEGORY</label>
+
+                          <select
+                            id="income-bracket-dropdown"
+                            value={selectedIncomeBracket || ''}
+                            onChange={(e) => setSelectedIncomeBracket(e.target.value)}
+                            className="income-bracket-dropdown"
+                          >
+                            <option value="">
+                            </option>
+                            {[...new Set(categoryIncomeBrackets)].map((bracket, index) => (
+                              <option
+                                key={index}
+                                value={bracket}
+                              >
+                                {bracket}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )
+
+                  )}
+                  <div className="section-divider">
+                    <p>
+                      MONTHLY CONTRIBUTION BREAKDOWN
+                    </p>
+                    <Divider />
+                  </div>
 
                   <table
                       className="modal-view-table">
                       <thead className="modal-view-table-header">
                       <tr>
-                          {viewColumns.map((col) => (
+
+                          {headerColumnNames.map((col, colIndex) => (
                               <th
-                                  key={col}
-                                  className="model-view-table-header-cell">
+                                className="model-view-table-header-cell">
+                                <tr key={col.key ?? colIndex}>
+
+
+                                </tr>
                               {/* Convert camelCase/snake_case keys into readable labels */}
                                   {formatHeader(col.header)}
                           </th>
@@ -265,26 +418,37 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
                       </tr>
                     </thead>
                     <tbody>
-                    {/* Step 5: Display the data || update the table to render to use 'displayData' instead of 'data' */}
                     {displayData.map((row, rowIndex) => (
-                      <tr key={row.id ?? rowIndex}>
-                          {viewColumns.map((col) => (
-                            <td key={col}>
-                                {/* Handles nested objects/arrays */}
-                                {col.render ? col.render(row[col.key], row) : formatCell(row[col.key])}
-                            </td>
-                          ))}
-                      </tr>
+                        <tr key={row.id ?? rowIndex}>
+                            {viewColumns.map((col) => (
+                                <td key={col}>
+                                    {/* Handles nested objects/arrays */}
+                                    {col.render ? col.render(row[col.key], row) : formatCell(row[col.key])}
+                                </td>
+                            ))}
+                        </tr>
                     ))}
                     </tbody>
 
                   </table>
+                      <div className="section-divider">
+                          <p>
+                              TOTAL MONTHLY DEDUCTION
+                          </p>
+                          <Divider />
+                      </div>
+                      {/* Sections that hold the total monthly deduction (dynmically calculated) */}
+
+                      <Divider />
+                      {/* Footer */}
             </>
                 )}
             </div>
 
-            {/* Footer */}
-            <hr className="medicalAidOptions-horizontal-line" />
+
+
+
+
 
             <div
               className="medicalAidOptions-modalFooter">
@@ -292,8 +456,15 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
                 className="btn btn-secondary"
                 onClick={onClose}
               >
-                Close
+                Cancel
               </button>
+              <button
+                  className="btn btn-secondary"
+                  onClick={onEditClick}
+              >
+               Edit Plan
+              </button>
+
             </div>
 
           </div>

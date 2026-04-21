@@ -9,7 +9,8 @@ import MedicalAidOptionViewModal
 import DynamicGrid
     from '../../../../../Components/PayrollManagement/Deductions/MedicalAid/MedicalAidOptionsManagement/DynamicGrid';
 import useEmpPagination from "../../../../../hooks/useEmpPagination";
-import useLocalCurrencyFormat from "../../../../../hooks/useLocalCurrencyFormat";
+import formatToLocalCurrency from "../../../../../utils/formatToLocalCurrency";
+import formatSalaryBracket from "../../../../../utils/formatSalaryBracket";
 import './MedicalAidOptionsManagement.css';
 
 const MedicalAidOptionsManagement = () => {
@@ -48,10 +49,6 @@ const MedicalAidOptionsManagement = () => {
         totalPages,
         itemsPerPage
     } = useEmpPagination(medicalOptions, 10);
-
-    const {
-      toLocalCurrency
-    } = useLocalCurrencyFormat();
 
     const {
         medicalAidOptions,
@@ -103,15 +100,10 @@ const MedicalAidOptionsManagement = () => {
           render: (value, row) => {
             const min = row.salaryBracketMin;
             const max = row.salaryBracketMax;
-            // if max is null/undefined, render as uncapped with "+"
-            if((max === null || max === undefined) && (min > 0 && (min !== undefined || true)) ) {
-              return `${toLocalCurrency(min, "en-ZA")} +`;
-            }
-            if((max === undefined || max === null) && (min === undefined || min === null || min === 0)) {
-              return 'N/A';
-            }
-            //otherwise show capped range
-            return `${toLocalCurrency(min, "en-ZA")} - ${toLocalCurrency(max, "en-ZA")}`;
+
+            const newFormat = formatSalaryBracket(min,max, formatToLocalCurrency);
+
+            return newFormat;
           }
       },
       {
@@ -120,20 +112,20 @@ const MedicalAidOptionsManagement = () => {
             const principalAmount = row.totalMonthlyContributionsPrincipal;
 
             if (principalAmount === null || principalAmount === undefined){
-              return toLocalCurrency(row.totalMonthlyContributionsAdult, "en-ZA");
+              return formatToLocalCurrency(row.totalMonthlyContributionsAdult, "en-ZA");
             }
 
             //else return the principal value
-            return toLocalCurrency(principalAmount, "en-ZA");
+            return formatToLocalCurrency(principalAmount, "en-ZA");
           }
       },
       {
         header: "Adult", key: "totalMonthlyContributionsAdult", width:1 ,
-          render: (value) => toLocalCurrency(value,"en-ZA")
+          render: (value) => formatToLocalCurrency(value,"en-ZA")
       },
       {
         header: "1st Child", key: "totalMonthlyContributionsChild", width:1 ,
-          render: (value) => toLocalCurrency(value,"en-ZA")
+          render: (value) => formatToLocalCurrency(value,"en-ZA")
       },
       {
         header: "2nd Child +", key: "totalMonthlyContributionsChild2", width:1 ,
@@ -142,14 +134,14 @@ const MedicalAidOptionsManagement = () => {
 
             if(amount === null)
             {
-              return toLocalCurrency(row.totalMonthlyContributionsChild, "en-ZA");
+              return formatToLocalCurrency(row.totalMonthlyContributionsChild, "en-ZA");
             }
             if(amount === 0)
             {
               return "FREE";
             }
 
-            return toLocalCurrency(amount, "en-ZA");
+            return formatToLocalCurrency(amount, "en-ZA");
           }
       },
       {
@@ -184,7 +176,7 @@ const MedicalAidOptionsManagement = () => {
             console.log(categoryData);
           //set global data
           setMedicalOptions(data);
-            setMedicalOptionsCategory(categoryData);
+          setMedicalOptionsCategory(categoryData);
         }
         catch (error) {
           console.error(`-----------=: Error Caught :=------------\n\n${error}`);
@@ -242,7 +234,9 @@ const MedicalAidOptionsManagement = () => {
                 onClose={handleCloseModal}
                 title="Medical Aid Options"
                 data={modalData}
-                categories={medicalOptionsCategory}/>
+                categories={medicalOptionsCategory}
+                categoryArray={medicalOptionsCategory}
+            />
     
             <div className="singular-staff-heading-container">
               Deductions

@@ -1,0 +1,9 @@
+﻿.divider {
+  border: none;
+  border-top: 1px solid gray;
+  margin: 16px 0;
+}
+
+.divier-dashed {
+  border-top-style: dashed;
+}
