@@ -16,10 +16,7 @@ import {
   convertDDMMYYYYtoISO,
   GetEmployeeByEmployeeNumberAsync,
 } from "../../api/Employee";
-
-/// </summary>
-/// MOCK super user role
-/// </summary>
+import { getStoredUserRole } from "../../utils/roleUtils";
 
 const getCurrentUserRole = () => "superuser";
 
@@ -68,6 +65,7 @@ const AddEmployee = ({ closeModal }) => {
   });
 
   useEffect(() => {
+    setUserRole(getStoredUserRole().key);
     setUserRole(getCurrentUserRole());
     const fetchEmployees = async () => {
       try {

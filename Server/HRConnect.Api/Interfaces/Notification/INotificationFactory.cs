@@ -1,6 +1,6 @@
 namespace HRConnect.Api.Interfaces.Notification
 {
-  using HRConnect.Api.Models;
+  using HRConnect.Api.DTOs.Notification;
   /// <summary>
   /// Producer interface to be able to create a notifications
   ///This is a event-Based Design instead of just CRUD-Designs 
@@ -15,6 +15,6 @@ namespace HRConnect.Api.Interfaces.Notification
     /// This method should be called based on the event that triggers or 'produces' a notification
     /// </summary>
     /// <param name="notification">Notification to publish to the database</param>
-    Task ProduceNotificationAsync(Notification notification);
+    Task ProduceNotificationAsync(CreateNotificationDto notification);
   }
 }
