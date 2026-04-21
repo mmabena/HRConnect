@@ -296,13 +296,6 @@ using (var scope = app.Services.CreateScope())
   await userService.SyncEmployeeUserAsync();
 }
 
-using (var scope = app.Services.CreateScope())
-{
-  var seeder = scope.ServiceProvider.GetRequiredService<PositionAndLeaveSeed>();
-
-  await seeder.SeedAsync();
-}
-
 if (app.Environment.IsDevelopment())
 {
   app.UseSwagger();
