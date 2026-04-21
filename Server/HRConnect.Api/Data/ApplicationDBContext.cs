@@ -67,7 +67,7 @@ namespace HRConnect.Api.Data
           .HasForeignKey<BankingDetail>(b => b.EmployeeId)
           .OnDelete(DeleteBehavior.Cascade);
 
-     
+
 
 
       modelBuilder.Entity<Position>()
@@ -230,6 +230,11 @@ namespace HRConnect.Api.Data
       .WithMany()
       .HasForeignKey(t => t.PayrollRunId)
       .HasPrincipalKey(p => p.PayrollRunId);
+
+
+      modelBuilder.Entity<BankingDetail>()
+    .HasIndex(b => b.AccountNumberSearchHash)
+    .IsUnique();
 
       //Notifaction Configurations
       modelBuilder.Entity<Notification>().Property(n => n.Severity)

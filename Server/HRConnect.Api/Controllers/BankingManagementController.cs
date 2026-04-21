@@ -18,21 +18,39 @@ namespace HRConnect.Api.Controllers
             _bankingDetailService = bankingDetailService;
         }
 
-        [HttpPost("CreateBankingDetails")]
+        // ======================================================
+        // CREATE
+        // ======================================================
+        [HttpPost]
         [Authorize(Roles = "SuperUser")]
         public async Task<IActionResult> CreateBankingDetails([FromBody] CreateBankingDetailDto dto)
         {
             try
             {
+                if (dto == null)
+                    return BadRequest("Request body cannot be null.");
+
                 var result = await _bankingDetailService.CreateBankingDetailsAsync(dto);
-                return CreatedAtAction(nameof(GetBankingDetails), new { employeeId = result.BankingDetailsId }, result);
+
+                return Ok(result);
             }
-            catch (Exception)
+            catch (ValidationException ex)
             {
-                return StatusCode(500, "An error occurred while creating banking details.");
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "An error occurred while creating banking details.",
+                    error = ex.Message
+                });
             }
         }
 
+        // ======================================================
+        // UPDATE
+        // ======================================================
         [HttpPut("{EmployeeId}")]
         [Authorize(Roles = "SuperUser")]
         public async Task<IActionResult> UpdateBankingDetails(string EmployeeId, [FromBody] UpdateBankingDetailDto dto)
@@ -44,6 +62,36 @@ namespace HRConnect.Api.Controllers
 
                 var result = await _bankingDetailService.UpdateBankingDetailsAsync(EmployeeId, dto);
 
+                return Ok(result);
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "An error occurred while updating banking details.",
+                    error = ex.Message
+                });
+            }
+        }
+
+        // ======================================================
+        // GET BY EMPLOYEE ID
+        // ======================================================
+        [HttpGet("{EmployeeId}")]
+        public async Task<IActionResult> GetBankingDetailsByEmployeeId([FromRoute] string EmployeeId)
+        {
+            try
+            {
+                var result = await _bankingDetailService.GetBankingDetailsByEmployeeIdAsync(EmployeeId);
+
                 if (result == null)
                     return NotFound($"Banking details not found for employee ID: {EmployeeId}");
 
@@ -53,39 +101,14 @@ namespace HRConnect.Api.Controllers
             {
                 return NotFound(ex.Message);
             }
-            catch (ValidationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
             catch (Exception ex)
             {
-
                 return StatusCode(500, new
                 {
-                    message = "An error occurred while updating banking details.",
-                    error = ex.Message,
-                    detail = ex.InnerException?.Message
+                    message = "An error occurred while retrieving banking details.",
+                    error = ex.Message
                 });
             }
         }
-
-        [HttpGet("{EmployeeId}")]
-        public async Task<IActionResult> GetBankingDetails([FromRoute] string EmployeeId)
-        {
-            try
-            {
-                var result = await _bankingDetailService.GetBankingDetailsAsync(EmployeeId);
-                return Ok(result);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-        }
-
     }
 }

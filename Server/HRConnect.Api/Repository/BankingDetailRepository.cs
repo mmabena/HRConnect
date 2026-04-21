@@ -1,9 +1,11 @@
 namespace HRConnect.Api.Repository
 {
+    using System.Linq.Expressions;
     using HRConnect.Api.Data;
     using HRConnect.Api.Interfaces;
     using HRConnect.Api.Models;
     using Microsoft.EntityFrameworkCore;
+    using System.Linq.Expressions;
 
     public class BankingDetailRepository : IBankingDetailRepository
     {
@@ -32,7 +34,7 @@ namespace HRConnect.Api.Repository
         /// </summary>
         /// <param name="employeeId">The ID of the employee for whom to retrieve banking details.</param>
         /// <returns>The banking detail record if found; otherwise, null.</returns>
-        public async Task<BankingDetail> GetBankingDetailsByEmployeeIdAsync(string EmployeeId)
+        public async Task<BankingDetail?> GetBankingDetailsByEmployeeIdAsync(string EmployeeId)
         {
             return await _context.BankingDetails
                 .FirstOrDefaultAsync(b => b.EmployeeId == EmployeeId);
@@ -70,9 +72,14 @@ namespace HRConnect.Api.Repository
         public async Task LockBankingDetailsAsync()
         {
             await _context.BankingDetails
-            .where (b => !b.IsLocked)
+            .Where (b => !b.IsLocked)
             .ExecuteUpdateAsync(b => b.SetProperty(bd => bd.IsLocked, true)
             .SetProperty(bd => bd.LockedAt, DateTime.UtcNow));
+        }
+
+      public async Task<bool> AnyAsync(Expression<Func<BankingDetail, bool>> predicate)
+        {
+            return await _context.BankingDetails.AnyAsync(predicate);
         }
 
     }

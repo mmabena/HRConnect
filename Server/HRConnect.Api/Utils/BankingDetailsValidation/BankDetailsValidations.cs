@@ -1,4 +1,4 @@
-namespace HRConnect.Api.Utils
+namespace HRConnect.Api.Utils.BankingDetailsValidation
 {
     using System;
     using System.Globalization;

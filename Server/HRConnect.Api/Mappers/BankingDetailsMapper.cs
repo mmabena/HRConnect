@@ -7,7 +7,7 @@ namespace HRConnect.Api.Mappers
     public static class BankingDetailsMapper
     {
         // CREATE → ENTITY
-        public static BankingDetail ToBankingDetails(this CreateBankingDetailDto dto)
+        public static BankingDetail ToBankingDetails(this CreateBankingDetailDto dto, string encryptedAccount, string hash, string last4)
         {
             return new BankingDetail
             {
@@ -19,7 +19,9 @@ namespace HRConnect.Api.Mappers
                 BankName = dto.BankName,
                 AccountType = dto.AccountType,
 
-                AccountNumberEncrypted = dto.AccountNumber,
+                AccountNumberEncrypted = encryptedAccount,
+                AccountNumberSearchHash = hash,
+                AccountNumberLast4Digits = last4,
                 BranchCode = dto.BranchCode,
 
                 IsActive = true,
@@ -28,7 +30,7 @@ namespace HRConnect.Api.Mappers
             };
         }
 
-        // ENTITY → DTO
+
         public static BankingDetailDto ToBankingDetailDto(this BankingDetail entity)
         {
             return new BankingDetailDto
@@ -42,7 +44,9 @@ namespace HRConnect.Api.Mappers
                 BankName = entity.BankName,
                 AccountType = entity.AccountType,
 
-                AccountNumberEncrypted = entity.AccountNumberEncrypted,
+                // For security reasons, we do not return the actual account number.
+                //  Instead, we return a masked version or simply indicate that it exists.
+             AccountNumber = "**** **** " + entity.AccountNumberLast4Digits,
                 BranchCode = entity.BranchCode,
 
                 NetSalary = entity.NetSalary,

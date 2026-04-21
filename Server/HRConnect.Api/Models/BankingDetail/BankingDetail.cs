@@ -12,13 +12,14 @@ namespace HRConnect.Api.Models
         AfricanBank,
         BidvestBank,
         Capitec,
-        DiscoverBank,
+        DiscoveryBank,
         FNB,
         GrindrodBank,
         Investec,
         Nedbank,
         StandardBank,
-
+        TymeBank
+        
     }
 
     public enum AccountType
@@ -51,11 +52,15 @@ namespace HRConnect.Api.Models
         public BankName BankName { get; set; }
         [Required]
         public string AccountNumberEncrypted { get; set; } = string.Empty;
+
+        public string AccountNumberSearchHash { get; set; } = string.Empty;
+
+        public string AccountNumberLast4Digits { get; set; } = string.Empty;
         [Required]
         public AccountType AccountType { get; set; }
         [Required]
         public string BranchCode { get; set; } = string.Empty;
-        public bool IsLocked { get; set; } = false;
+        public bool IsLocked { get; set; } 
         public DateTime? LockedAt { get; set; }
         public decimal? NetSalary { get; set; }
         public bool IsActive { get; set; }

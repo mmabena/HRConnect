@@ -670,9 +670,17 @@ namespace HRConnect.Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BankingDetailsId"));
 
-                    b.Property<string>("AccountNumber")
+                    b.Property<string>("AccountNumberEncrypted")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AccountNumberLast4Digits")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AccountNumberSearchHash")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("AccountType")
                         .IsRequired()
@@ -700,6 +708,12 @@ namespace HRConnect.Api.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsLocked")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LockedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -708,7 +722,6 @@ namespace HRConnect.Api.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("PassportNumber")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Surname")
@@ -719,6 +732,9 @@ namespace HRConnect.Api.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("BankingDetailsId");
+
+                    b.HasIndex("AccountNumberSearchHash")
+                        .IsUnique();
 
                     b.HasIndex("EmployeeId")
                         .IsUnique();
@@ -731,7 +747,7 @@ namespace HRConnect.Api.Migrations
                     b.Property<string>("EmployeeId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int?>("BankingDetailsId")
+                    b.Property<int>("BankingDetailsId")
                         .HasColumnType("int");
 
                     b.Property<string>("Branch")

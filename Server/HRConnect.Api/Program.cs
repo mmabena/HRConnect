@@ -12,8 +12,11 @@ using HRConnect.Api.Repository;
 using HRConnect.Api.Services;
 using HRConnect.Api.Hubs;
 using HRConnect.Api.Utils;
+using HRConnect.Api.Utils.Security;
 using HRConnect.Api.Utils.Jobs.Payroll;
 using HRConnect.Api.Utils.Jobs.Pension;
+using HRConnect.Api.Utils.BankingDetailsValidation;
+using HRConnect.Api.Utils.Settings;
 using HRConnect.Api.Utils.Payroll;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -184,6 +187,9 @@ builder.Services.AddQuartzHostedService(q =>
   q.WaitForJobsToComplete = true;
 });
 
+builder.Services.Configure<EncryptionSettings>(
+  builder.Configuration.GetSection("EncryptionSettings"));
+
 builder.Configuration.AddUserSecrets<Program>();
 builder.Services.AddSingleton(provider =>
   provider.GetRequiredService<ISchedulerFactory>().GetScheduler().GetAwaiter().GetResult());
@@ -217,6 +223,9 @@ builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.
 builder.Services.AddScoped<IBankingDetailRepository, BankingDetailRepository>();
 builder.Services.AddScoped<IBankingDetailService, BankingDetailService>();
 
+// Register the encryption service as a singleton since it does not maintain any state and can be shared across the application.
+builder.Services.AddSingleton<IEncryptionService, EncryptionService>();
+
 // Mpho Mosia - Leave Services 
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<ILeaveBalanceService, LeaveBalanceService>();
@@ -241,6 +250,8 @@ builder.Services.AddTransient<IEmployeePensionEnrollmentService, EmployeePension
 builder.Services.AddScoped<IPensionDeductionRepository, PensionDeductionRepository>();
 builder.Services.AddTransient<IPensionDeductionService, PensionDeductionService>();
 builder.Services.AddSignalR();
+builder.Services.AddSingleton<HashingHelper>();
+
 
 
 builder.Services.AddCors(options =>
