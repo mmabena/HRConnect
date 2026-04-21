@@ -145,6 +145,7 @@ namespace HRConnect.Api.Services
                 .Select(x => x.GroupKey)
                 .Distinct()
                 .ToListAsync();
+            validGroupKeys.Add("ALL");
 
             foreach (var rule in request.Rules)
             {
@@ -223,6 +224,7 @@ namespace HRConnect.Api.Services
                 .Select(x => x.GroupKey)
                 .Distinct()
                 .ToListAsync();
+            validGroupKeys.Add("ALL");
 
             foreach (var rule in request.Rules)
             {
@@ -259,16 +261,11 @@ namespace HRConnect.Api.Services
 
             await _context.SaveChangesAsync();
 
-
-            //RECALCULATE EMPLOYEES
-            var employees = await _context.Employees
+            var employeeIds = await _context.Employees
                 .Select(e => e.EmployeeId)
                 .ToListAsync();
 
-            foreach (var empId in employees)
-            {
-                await _leaveBalanceService.RecalculateAnnualLeaveAsync(empId);
-            }
+            await _leaveBalanceService.RecalculateAnnualLeaveBulkAsync(employeeIds);
 
             return await GetLeaveTypeByIdAsync(leaveType.Id);
         }

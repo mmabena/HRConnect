@@ -111,54 +111,52 @@ namespace HRConnect.Api.Services
                 .Where(x => employeeIds.Contains(x.EmployeeId) && x.EffectiveTo == null)
                 .ToListAsync();
 
-            var tasks = employees.Select(async employee =>
-        {
-            var years = CalculateYearsOfService(employee.StartDate);
-
-            if (years < rule.MinYearsService)
-                return;
-
-            if (rule.MaxYearsService.HasValue &&
-                years >= rule.MaxYearsService.Value)
-                return;
-
-            var balance = employee.LeaveBalances
-                .FirstOrDefault(lb => lb.LeaveTypeId == rule.LeaveTypeId);
-
-            if (balance == null)
-                return;
-
-            var segment = segments
-                .FirstOrDefault(x => x.EmployeeId == employee.EmployeeId);
-
-            if (segment != null)
+            foreach (var employee in employees)
             {
-                segment.AnnualEntitlement = rule.DaysAllocated;
-                segment.DailyRate = (rule.DaysAllocated / 12m) / 21.67m;
+                var years = CalculateYearsOfService(employee.StartDate);
+
+                if (years < rule.MinYearsService)
+                    continue;
+
+                if (rule.MaxYearsService.HasValue &&
+                    years >= rule.MaxYearsService.Value)
+                    continue;
+
+                var balance = employee.LeaveBalances
+                    .FirstOrDefault(lb => lb.LeaveTypeId == rule.LeaveTypeId);
+
+                if (balance == null)
+                    continue;
+
+                var segment = segments
+                    .FirstOrDefault(x => x.EmployeeId == employee.EmployeeId);
+
+                if (segment != null)
+                {
+                    segment.AnnualEntitlement = rule.DaysAllocated;
+                    segment.DailyRate = (rule.DaysAllocated / 12m) / 21.67m;
+                }
+
+                await _leaveBalanceService.RecalculateAnnualLeaveAsync(employee.EmployeeId);
+
+                var updatedBalance = employee.LeaveBalances
+                    .FirstOrDefault(lb => lb.LeaveTypeId == rule.LeaveTypeId);
+
+                if (updatedBalance == null)
+                    continue;
+
+                var emailBody = EmailTemplates.GenerateRuleChangeEmail(
+                    employee,
+                    rule.DaysAllocated,
+                    updatedBalance.AvailableDays
+                );
+
+                await _emailService.SendEmailAsync(
+                    employee.Email,
+                    "Leave Policy Updated",
+                    emailBody
+                );
             }
-
-            await _leaveBalanceService.RecalculateAnnualLeaveAsync(employee.EmployeeId);
-
-            var updatedBalance = employee.LeaveBalances
-                .FirstOrDefault(lb => lb.LeaveTypeId == rule.LeaveTypeId);
-
-            if (updatedBalance == null)
-                return;
-
-            var emailBody = EmailTemplates.GenerateRuleChangeEmail(
-                employee,
-                rule.DaysAllocated,
-                updatedBalance.AvailableDays
-            );
-
-            await _emailService.SendEmailAsync(
-                employee.Email,
-                "Leave Policy Updated",
-                emailBody
-            );
-        });
-
-            await Task.WhenAll(tasks);
 
             await _context.SaveChangesAsync();
         }

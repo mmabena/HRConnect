@@ -56,35 +56,59 @@ useEffect(() => {
       [name]: type === "checkbox" ? checked : value
     });
   };
- if (!form.days || isNaN(form.days)) {
-  alert("Please enter valid leave days");
-  return;
-}
   // SAVE NON-ANNUAL
   const handleSubmit = async () => {
-    try {
-      await updateLeaveType(selected.id, {
-        name: selected.name,
-        description: form.description,
-        femaleOnly: form.femaleOnly,
-       rules: selected.rules.map(r => ({
-            groupKey: r.groupKey,
-            minYearsService: r.minYearsService,
-            maxYearsService: r.maxYearsService,
-            daysAllocated:
-              form.days !== "" && !isNaN(form.days)
-                ? parseFloat(form.days)
-                : r.daysAllocated
-          }))
-      });
+  try {
 
-      onSuccess();
-      onClose();
-
-    } catch (err) {
-      console.error("Update failed:", err);
+    if (selected.code !== "AL") {
+      if (!form.days || isNaN(form.days) || Number(form.days) <= 0) {
+        alert("Please enter valid leave days");
+        return;
+      }
     }
-  };
+    console.log("PAYLOAD:", {
+  name: selected.name,
+  description: form.description,
+  femaleOnly: form.femaleOnly,
+  isActive: selected.isActive,
+  rules:
+    selected.code === "AL"
+      ? selected.rules
+      : [
+          {
+            groupKey: "ALL",
+            minYearsService: 0,
+            maxYearsService: null,
+            daysAllocated: parseFloat(form.days)
+          }
+        ]
+});
+
+    await updateLeaveType(selected.id, {
+      name: selected.name,
+      description: form.description,
+      femaleOnly: form.femaleOnly,
+      isActive: selected.isActive,
+      rules:
+        selected.code === "AL"
+          ? selected.rules
+          : [
+              {
+                groupKey: "ALL",
+                minYearsService: 0,
+                maxYearsService: null,
+                daysAllocated: parseFloat(form.days)
+              }
+            ]
+    });
+
+    onSuccess();
+    onClose();
+
+  } catch (err) {
+    console.error("FULL ERROR:", err.response?.data || err);
+  }
+};
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -133,7 +157,7 @@ useEffect(() => {
         onChange={handleChange}
         disabled={!isEditing}
       />
-      Female Only
+      <span className="female">Female Only</span>
     </label>
 
     <div className="actions">
@@ -158,6 +182,7 @@ useEffect(() => {
           </button>
         </>
       )}
+      
     </div>
   </>
 )}

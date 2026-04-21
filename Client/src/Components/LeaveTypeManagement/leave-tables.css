@@ -44,14 +44,26 @@
 .lt-table th {
   background-color: #355867; /* primary color */
   color: white;
-  padding: 12px;
+  padding: 17px;
   text-align: left;
 }
 
 /* Table cells */
 .lt-table td {
-  padding: 17px;
-  border-bottom: 1px solid #ccc; /* row separator */
+  padding: 20px;
+  border-bottom: 1px solid #ccc;
+}
+.lt-name{
+  color: #002D40;
+}
+.lt-description{
+  color: #002D40;
+}
+.lt-entitlement{
+  color: #002D40;
+}
+.lt-comment{
+  color: #002D40;
 }
 
 /* Code column (blue text like screenshot) */
@@ -67,33 +79,30 @@
 
 /* Status badge */
 .lt-status {
-  padding: 5px 12px;
   border-radius: 20px; /* pill shape */
-  font-size: 12px;
 }
-
-/* Active = green */
-.lt-status.active {
-  background-color: #AFBF74;
-  color: #2e3d1f;
-}
-
-/* Inactive = red */
-.lt-status.inactive {
-  background-color: #f4b4b4;
-  color: #8b0000;
-}
-
 /* Actions column layout */
 .lt-actions {
   display: flex;
   gap: 10px;
+  align-items: center;
+  
 }
 
 /* Action links */
 .lt-actions span {
   cursor: pointer;
   color: #006088;
+}
+.divider {
+  color: #999;
+  position: relative;
+  left: -45px;
+}
+.edit-table-actions{
+  position: relative;
+  right: 89px;
+  bottom: -1px;
 }
 
 /* Push content slightly down from navbar */
@@ -172,4 +181,27 @@
   color: #638549; /* accent color */
   font-size: 20px;
   margin-left: 4px; /* small spacing between words */
+}
+.lt-status {
+  align-items: center;
+
+  font-size: 13px;
+  padding: 4px 12px;
+  cursor: pointer;
+  white-space: nowrap;    /* prevents wrapping */
+}
+.lt-status.active {
+  background: rgba(99, 133, 73, 0.35);
+  color: #559c0e;
+}
+.lt-status.inactive {
+  background: rgba(232, 49, 49, 0.35);
+  color: #8b0000;
+}
+.status-dot {
+  height: 10px;
+  width: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  
 }

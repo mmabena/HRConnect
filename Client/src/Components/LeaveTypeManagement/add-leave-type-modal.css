@@ -3,8 +3,6 @@
   position: fixed; /* stays on screen */
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
   background: rgba(0,0,0,0.4); /* dark transparent */
   display: flex;
   justify-content: center; /* center horizontally */
@@ -17,56 +15,103 @@
   background: white;
   padding: 35px;
   border-radius: 12px;
-  width: 500px;
-  height: 660px;
+  width: 600px;
+  height: 820px;
   display: flex;
   flex-direction: column;
-  gap: 30px; /* tighter spacing between elements */
+  align-items: center;
+  gap: 35px; /* tighter spacing between elements */
 position: relative; /* for absolute positioning of errors */
 }
 
 /* Modal title */
 .modal-title {
+  width: 100%;
+  height: 26px;
+
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 30px;
+  line-height: 26px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
+
   color: #002D40;
-  margin-top: 0px;
-  font-size: 22px;
+
+  margin-top: 20px;
 }
 
 /* Input fields */
 .modal-card input {
+  box-sizing: border-box;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0px 5px 5px;
+  gap: 5px;
+
+  width: 430px;
+  height: 31px;
+
   border: none;
-  border-bottom: 2px solid #355867; /* underline style */
-  padding: 8px;
-  outline: none; /* remove default outline */
+  border-bottom: 2.3px solid #006088;
+  border-radius: 5px;
+
+  outline: none;
+  margin-bottom: 20px;
 }
 .modal-card input {
-  margin-bottom: 10px; /* 🔥 controls spacing between inputs */
+  color: #002D40;
+}
+.modal-card input::placeholder {
+  color: #002D40;
+  opacity: 0.9; /* keeps it lighter than actual text */
 }
 /* Checkbox layout */
 .checkbox {
   display: flex;
   align-items: center;
-  gap: 5px;
-  
+  gap: 8px;
+
+  width: 430px;
+}
+
+.checkbox input {
+  width: 18px;
+  height: 18px;
+  position: relative;
+  top: -10px; /* vertically center with text */
+}
+
+.female {
+  font-size: 16px;
+  font-weight: 400;
+  color: #002D40;
+  position: relative;
+  top: -21px; /* vertically center with text */
 }
 
 /* Save button */
 .modal-btn {
-  background-color: #355867;
+  background-color: #002D40;
   color: white;
   border: none;
   padding: 8px;
   border-radius: 8px;
-  margin-bottom: 0%;
-  margin-top: 0%;
   cursor: pointer;
+  position: relative;
+  top: -20px;
+  width: 430px; 
 }
 
 .right-frame-bottom-text {
   margin-top: 30px;
   font-size: 11px;
-  color: #355867;
+  color: #002D40;
   line-height: 1.6;
 }
 
@@ -104,14 +149,13 @@ position: relative; /* for absolute positioning of errors */
 .modal-card .logo-bold {
   font-weight: 700;
   color: #002D40;
-  font-size: 30px;
+  font-size: 35px;
 }
-
 /* "express" */
 .modal-card .logo-light {
   font-weight: 300;
-  color: #002D40;
-  font-size: 30px;
+  color: #006088;
+  font-size: 35px;
   margin-left: 0;
 }
 .pipe {
@@ -121,46 +165,82 @@ position: relative; /* for absolute positioning of errors */
 .modal-card input {
   position: relative;
 }
-.female {
-  font-size: 14px;
-  font-weight: 500;
-  position: relative;
-  top: -5px; /* aligns text better with checkbox */
-}
 
 /* Error text floats under input WITHOUT affecting layout */
 .error-text {
   position: absolute;
-  font-size: 11px;
+  font-size: 12px;
   color: red;
   margin-top: 2px;
 }
 
 /* Position each error manually (aligned under inputs) */
 .modal-card input:nth-of-type(1) + .error-text {
-  top: 190px;
-  left: 43px;
+  top: 220px;
+  left: calc(50% - 215px);
 }
 
 .modal-card input:nth-of-type(2) + .error-text {
-  top: 263px;
-  left: 43px;
+  top: 310px;
+  left: calc(50% - 215px);
 }
 
 .modal-card input:nth-of-type(3) + .error-text {
-  top: 335px;
-  left: 43px;
+  top: 395px;
+  left: calc(50% - 215px);
 }
 
 .modal-card input:nth-of-type(4) + .error-text {
-  top: 410px;
-  left: 43px;
+  top: 480px;
+  left: calc(50% - 215px);
   
 }
 .modal-dropdown {
   border: none;
-  border-bottom: 2px solid #355867;
+  border-bottom: 2px solid  #002D40;
   padding: 8px;
   outline: none;
   background: transparent;
+}
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 15px; /* space between buttons */
+  margin-top: 20px;
+}
+.cancel {
+  box-sizing: border-box;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 193px;
+  height: 37px;
+
+  background: rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(154, 154, 154, 0.55);
+  border-radius: 5px;
+
+  color: #002D40;
+  cursor: pointer;
+}
+.next {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 250px;
+  height: 37px;
+
+  background: #355867;
+  border: none;
+  border-radius: 5px;
+
+  color: white;
+  cursor: pointer;
+}
+.femaleOnly {
+  position: relative;
+  top: -22px; /* vertically center with text */
 }

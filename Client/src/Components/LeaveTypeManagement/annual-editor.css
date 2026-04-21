@@ -1,35 +1,45 @@
 /* ================= MAIN WRAPPER ================= */
 .annual-wrapper {
   width: 100%;
-  max-width: 620px;
+  max-width: 100%;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 20px;
 }
 
 
 /* ================= TABS ================= */
 .tabs {
+  box-sizing: border-box;
+
   display: flex;
-  width: 100%;
-  border: 1px solid #cfd8dc;
-  border-radius: 8px;
+  justify-content: center;
+  align-items: center;
+  height: 57px;
+
+  border: 1px solid rgba(53, 88, 103, 0.39);
+  border-radius: 5px;
+
   overflow: hidden;
 }
 
 .tabs button {
   flex: 1;
-  padding: 10px;
-  background: #f4f6f7;
+
+  height: 100%;
+
   border: none;
-  cursor: pointer;
-  font-size: 13px;
+  background: #ffffff;
+
+  font-size: 14px;
   color: #355867;
+
+  cursor: pointer;
 }
 
 .tabs button.active {
-  background: #cfd8dc;
+  background: rgba(53, 88, 103, 0.15);
   font-weight: 600;
 }
 
@@ -42,7 +52,7 @@
   width: 100%;
   box-sizing: border-box;
   padding: 15px;
-  height: 250px;           /* FIXED height */
+  min-height: 250px;           /* MIN height */
   display: flex;
   flex-direction: column;
 }
@@ -60,19 +70,26 @@
 .rule-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-bottom: 10px;
+  gap: 40px;
 }
 
 .rule-row input {
-  width: 100%;
-  padding: 8px;
-  border-radius: 6px;
-  border: 1px solid #cfd8dc;
-  text-align: center;
-  font-size: 13px;
   box-sizing: border-box;
-  background: #fff;
+
+  width: 100%;
+  height: 40px;
+
+  padding: 10px;
+
+  border: 1px solid rgba(53, 88, 103, 0.37);
+  border-radius: 5px;
+
+  background: #ffffff;
+
+  font-size: 14px;
+  color: #002D40;
+
+  text-align: center;
 }
 .rule-body {
   height: 220px;
@@ -144,9 +161,10 @@
 
 /* ================= IMPACT ================= */
 .impact-box {
-  border: 1px solid #cfd8dc;
+  border: 1px solid rgba(53, 88, 103, 0.35);
   border-radius: 8px;
-  padding: 12px;
+  height: 95px;
+  padding: 40px;
   margin-top: 10px;
   font-size: 13px;
   color: #355867;

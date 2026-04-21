@@ -50,6 +50,8 @@ namespace HRConnect.Api.Services
                 .Where(l => l.IsActive)
                 .ToListAsync();
 
+            var balancesToAdd = new List<EmployeeLeaveBalance>();
+
             foreach (var leaveType in leaveTypes)
             {
                 if (leaveType.FemaleOnly && employee.Gender != Gender.Female)
@@ -84,9 +86,7 @@ namespace HRConnect.Api.Services
                         ForfeitedDays = 0,
                         LastResetYear = DateTime.UtcNow.Year
                     };
-
-                    await _context.EmployeeLeaveBalances.AddAsync(annualBalance);
-                    await _context.SaveChangesAsync();
+                    balancesToAdd.Add(annualBalance);
 
                     await BackfillHistoricalAnnualAccrualAsync(employee);
                     await CreateInitialAccrualSegmentAsync(employee);
@@ -105,8 +105,7 @@ namespace HRConnect.Api.Services
                         AvailableDays = 30
                     };
 
-                    await _context.EmployeeLeaveBalances.AddAsync(sickBalance);
-                    await _context.SaveChangesAsync();
+                    balancesToAdd.Add(sickBalance);
 
                     await RecalculateSickLeaveAsync(employee.EmployeeId);
                     continue;
@@ -124,20 +123,20 @@ namespace HRConnect.Api.Services
                         LastResetYear = DateTime.UtcNow.Year
                     };
 
-                    await _context.EmployeeLeaveBalances.AddAsync(frlBalance);
-                    await _context.SaveChangesAsync();
+                    balancesToAdd.Add(frlBalance);
 
                     await RecalculateFamilyResponsibilityLeaveAsync(employee.EmployeeId);
                     continue;
                 }
 
-                await _context.EmployeeLeaveBalances.AddAsync(new EmployeeLeaveBalance
+                balancesToAdd.Add(new EmployeeLeaveBalance
                 {
                     EmployeeId = employee.EmployeeId,
                     LeaveTypeId = leaveType.Id
                 });
             }
 
+            _context.EmployeeLeaveBalances.AddRangeAsync(balancesToAdd);
             await _context.SaveChangesAsync();
         }
         /// <summary>
@@ -702,9 +701,17 @@ namespace HRConnect.Api.Services
         }
         public async Task RecalculateFamilyResponsibilityLeaveBulkAsync(List<string> employeeIds)
         {
-            await Task.WhenAll(employeeIds.Select(id =>
-                RecalculateFamilyResponsibilityLeaveAsync(id)
-            ));
+            foreach (var id in employeeIds)
+            {
+                await RecalculateFamilyResponsibilityLeaveAsync(id);
+            }
+        }
+        public async Task RecalculateAnnualLeaveBulkAsync(List<string> employeeIds)
+        {
+            foreach (var id in employeeIds)
+            {
+                await RecalculateAnnualLeaveAsync(id);
+            }
         }
     }
 }

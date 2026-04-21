@@ -68,7 +68,7 @@ namespace HRConnect.Api.Controllers
                 .ToListAsync();
 
             var invalidKeys = request.Rules
-                .Where(r => !validGroupKeys.Contains(r.GroupKey))
+                .Where(r => r.GroupKey != "ALL" && !validGroupKeys.Contains(r.GroupKey))
                 .Select(r => r.GroupKey)
                 .Distinct()
                 .ToList();
@@ -97,7 +97,7 @@ namespace HRConnect.Api.Controllers
                 .ToListAsync();
 
             var invalidKeys = request.Rules
-                .Where(r => !validGroupKeys.Contains(r.GroupKey))
+                .Where(r => r.GroupKey != "ALL" && !validGroupKeys.Contains(r.GroupKey))
                 .Select(r => r.GroupKey)
                 .Distinct()
                 .ToList();
@@ -130,6 +130,20 @@ namespace HRConnect.Api.Controllers
                 return NotFound("Employee not found");
 
             return Ok(result);
+        }
+        [HttpPatch("{id}/status")]
+        public async Task<IActionResult> ToggleStatus(int id)
+        {
+            var leaveType = await _context.LeaveTypes.FindAsync(id);
+
+            if (leaveType == null)
+                return NotFound();
+
+            leaveType.IsActive = !leaveType.IsActive;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { leaveType.Id, leaveType.IsActive });
         }
     }
 }

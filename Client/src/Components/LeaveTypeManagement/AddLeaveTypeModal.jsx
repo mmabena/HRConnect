@@ -166,7 +166,7 @@ const AddLeaveTypeModal = ({ isOpen, onClose, onSuccess }) => {
             checked={form.femaleOnly}
             onChange={handleChange}
           />
-          <label className="female">Female Only</label>
+          <span className="female">Female Only</span>
         </label>
         {apiError && <div className="api-error">{apiError}</div>}
 

@@ -82,8 +82,13 @@ namespace HRConnect.Api.Services
         }
 
         // Run once every 24 hours (Midnight precise)
-        var nextRun = DateTime.Now.Date.AddDays(1);
-        var delay = nextRun - DateTime.Now;
+        var now = DateTime.UtcNow;
+        var nextRun = now.Date.AddDays(1);
+        var delay = nextRun - now;
+
+        if (delay < TimeSpan.Zero)
+          delay = TimeSpan.FromHours(24);
+
 
         await Task.Delay(delay, stoppingToken);
 

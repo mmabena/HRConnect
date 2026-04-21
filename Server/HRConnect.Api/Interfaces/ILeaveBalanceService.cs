@@ -14,5 +14,6 @@ namespace HRConnect.Api.Interfaces
         Task ResetMaternityLeaveForNewPregnancy(string employeeId);
         Task<LeaveProjectionResponse> ProjectAnnualLeaveAsync(string employeeId, DateOnly projectionDate);
         Task RecalculateFamilyResponsibilityLeaveBulkAsync(List<string> employeeIds);
+        Task RecalculateAnnualLeaveBulkAsync(List<string> employeeIds);
     }
 }

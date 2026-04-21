@@ -34,11 +34,10 @@ namespace HRConnect.Api.Services
 
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
-            await Task.WhenAll(employees.Select(e =>
-            _leaveBalanceService.RecalculateSickLeaveAsync(e.EmployeeId)
-            ));
-
-            await _context.SaveChangesAsync();
+            foreach (var employee in employees)
+            {
+                await _leaveBalanceService.RecalculateSickLeaveAsync(employee.EmployeeId);
+            }
         }
         /// <summary>
         /// Recalculates the family responsibility leave balance for all employees based on their work anniversary and the applicable policy.

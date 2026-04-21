@@ -7,6 +7,7 @@ import AddLeaveTypeModal from "./AddLeaveTypeModal";
 import EditLeaveTypeModal from "./EditLeaveTypeModal";
 import { toggleLeaveTypeStatus } from "../../api/leaveTypeApi";
 import ConfirmStatusModal from "./ConfirmStatusModal";
+import { Dot } from 'lucide-react';
 
 
 const LeaveTables = () => {
@@ -116,36 +117,42 @@ const confirmToggle = async () => {
             {active.map(item => (
               <tr key={item.id}>
                 <td className="lt-code">{item.code}</td>
-                <td>{item.name}</td>
-                <td>{item.description || "-"}</td>
-                <td>{getEntitlement(item.rules)}</td>
+                <td className="lt-name">{item.name}</td>
+                <td className="lt-description">{item.description || "-"}</td>
+                <td className="lt-entitlement">{getEntitlement(item.rules)}</td>
 
                 <td>
                   <span
                     className="lt-status active"
                     onClick={() => handleToggleClick(item)}
-                    style={{ cursor: "pointer" }}
                   >
-                    Active
+                    <Dot className="status-dot" /> Active
                   </span>
                 </td>
 
                 <td className="lt-actions">
-                  <span onClick={() => {
-                      setSelectedLeaveId(item.id);
-                      setIsViewMode(true);
-                      setShowEdit(true);
-                    }}>
-                      View
-                    </span>
-                  <span onClick={() => {
-                    setSelectedLeaveId(item.id);
-                    setIsViewMode(false);
-                    setShowEdit(true);
-                  }}>
-                    Edit
-                  </span>
-                </td>
+  <span
+    onClick={() => {
+      setSelectedLeaveId(item.id);
+      setIsViewMode(true);
+      setShowEdit(true);
+    }}
+  >
+    View
+  </span>
+
+  <span className="divider">|</span>
+
+  <span className="edit-table-actions"
+    onClick={() => {
+      setSelectedLeaveId(item.id);
+      setIsViewMode(false);
+      setShowEdit(true);
+    }}
+  >
+    Edit
+  </span>
+</td>
               </tr>
             ))}
           </tbody>
@@ -174,19 +181,18 @@ const confirmToggle = async () => {
             {inactive.map(item => (
               <tr key={item.id}>
                 <td className="lt-code inactive-code">{item.code}</td>
-                <td>{item.name}</td>
-                <td>{item.description || "-"}</td>
-                <td>{getEntitlement(item.rules)}</td>
+                <td className="lt-name">{item.name}</td>
+                <td className="lt-description">{item.description || "-"}</td>
+                <td className="lt-entitlement">{getEntitlement(item.rules)}</td>
                 <td>
                   <span
                     className="lt-status inactive"
                     onClick={() => handleToggleClick(item)}
-                    style={{ cursor: "pointer" }}
                   >
-                    Inactive
+                    <Dot className="status-dot" /> Inactive
                   </span>
                 </td>
-                <td>-</td>
+                <td className="lt-comment">-</td>
               </tr>
             ))}
           </tbody>
