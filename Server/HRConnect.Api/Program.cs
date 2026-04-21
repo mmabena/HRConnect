@@ -94,19 +94,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
     {
-      options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!)
-      .EnableSensitiveDataLogging()
-      .LogTo(msg =>
-      {
-        if (msg.Contains("CommandExecuting"))
-          Console.ForegroundColor = ConsoleColor.Yellow;
-        else if (msg.Contains("CommandExecuted"))
-          Console.ForegroundColor = ConsoleColor.Green;
-        else if (msg.Contains("Error"))
-          Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine($"=============\nLOGGING SQL :{msg}");
-        Console.ResetColor();
-      }, LogLevel.Information); //Enables SQL logging to terminal
+      options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!);
       options.AddInterceptors(new AuditSaveChangesInterceptor());
     });
 
