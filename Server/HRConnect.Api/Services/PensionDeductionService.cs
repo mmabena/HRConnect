@@ -1,4 +1,4 @@
-﻿namespace HRConnect.Api.Services
+namespace HRConnect.Api.Services
 {
   using System.Collections.Generic;
   using System.Threading.Tasks;
@@ -13,7 +13,7 @@
   using HRConnect.Api.Utils.Pension.ValidationHelpers;
 
   public class PensionDeductionService(IPensionDeductionRepository pensionDeductionRepository,
-    IEmployeeRepository employeeRepository, IEmployeePensionEnrollmentRepository employeePensionEnrollmentRepository, 
+    IEmployeeRepository employeeRepository, IEmployeePensionEnrollmentRepository employeePensionEnrollmentRepository,
     IPensionOptionRepository pensionOptionRepository, IPayrollRunRepository payrollRunRepository, IPayrollRunService payrollRunService) : IPensionDeductionService
   {
     private readonly IPensionDeductionRepository _pensionDeductionRepository = pensionDeductionRepository;
@@ -99,8 +99,7 @@
         .GetByEmployeeIdAndIsNotLockedAsync(pensionDeductionUpdateDto.EmployeeId);
 
       decimal pensionOptionPercentage = await
-        GetEmployeePensionOptionPercentageAsync(pensionDeductionUpdateDto.PensionOptionId ?? (int)existingEmployee.PensionOptionId);
-      ValidatePensionDeductionDtos.ValidateVoluntaryContribution((decimal)pensionDeductionUpdateDto.VoluntaryContribution, existingEmployee.MonthlySalary, pensionOptionPercentage);
+        GetEmployeePensionOptionPercentageAsync(pensionDeductionUpdateDto.PensionOptionId ?? (int)existingEmployee.PensionOptionId!); ValidatePensionDeductionDtos.ValidateVoluntaryContribution((decimal)pensionDeductionUpdateDto.VoluntaryContribution!, existingEmployee.MonthlySalary, pensionOptionPercentage);
 
       if (employeePensionDeduction != null)
       {
@@ -209,7 +208,7 @@
           FirstName = existingEmployee.Name,
           LastName = existingEmployee.Surname,
           DateJoinedCompany = existingEmployee.StartDate,
-          IdNumber = existingEmployee.IdNumber,
+          IdNumber = existingEmployee.IdNumber!,
           Passport = existingEmployee.PassportNumber,
           TaxNumber = existingEmployee.TaxNumber,
           PensionableSalary = existingEmployee.MonthlySalary,
@@ -222,7 +221,7 @@
             (decimal)existEmployeesPensionEnrollment.VoluntaryContribution),
           EmailAddress = existingEmployee.Email,
           PhysicalAddress = existingEmployee.PhysicalAddress,
-          PayrollRunId = currentPayrollRunId.PayrollRunId,
+          PayrollRunId = currentPayrollRunId!.PayrollRunId,
           CreatedDate = existEmployeesPensionEnrollment.EffectiveDate,
           IsActive = true
         };
@@ -275,7 +274,7 @@
         Employee? employee = await _employeeRepository.GetEmployeeByIdAsync(enrollment.EmployeeId);
         if (employee != null && employee.IsActive)
         {
-          decimal pensionCategoryPercentage = await _pensionOptionRepository.GetPensionOptionPercentageByIdAsync((int)employee.PensionOptionId);
+          decimal pensionCategoryPercentage = await _pensionOptionRepository.GetPensionOptionPercentageByIdAsync((int)employee.PensionOptionId!);
 
           PensionDeduction pensionDeduction = new()
           {
@@ -283,7 +282,7 @@
             FirstName = employee.Name,
             LastName = employee.Surname,
             DateJoinedCompany = employee.StartDate,
-            IdNumber = employee.IdNumber,
+            IdNumber = employee.IdNumber!,
             Passport = employee.PassportNumber,
             TaxNumber = employee.TaxNumber,
             PensionableSalary = employee.MonthlySalary,

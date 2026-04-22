@@ -32,8 +32,8 @@ namespace HRConnect.Api.Data
     public DbSet<PayrollRun> PayrollRuns { get; set; }
     public DbSet<PayrollRecord> PayrollRecords { get; set; }
     public DbSet<PensionFund> PensionFunds { get; set; }
-        // LEAVE SYSTEM
-        public DbSet<LeaveType> LeaveTypes { get; set; }
+    // LEAVE SYSTEM
+    public DbSet<LeaveType> LeaveTypes { get; set; }
     public DbSet<LeaveEntitlementRule> LeaveEntitlementRules { get; set; }
     public DbSet<EmployeeLeaveBalance> EmployeeLeaveBalances { get; set; }
     public DbSet<LeaveApplication> LeaveApplications { get; set; }
@@ -63,24 +63,24 @@ namespace HRConnect.Api.Data
           .HasForeignKey(e => e.PensionOptionId)
           .OnDelete(DeleteBehavior.Restrict);
 
-            // PensionFund -> Employee
-            modelBuilder.Entity<PensionFund>()
-                .HasOne(pf => pf.Employee)
-                .WithMany(e => e.PensionFunds)
-                .HasForeignKey(pf => pf.EmployeeId)
-                .OnDelete(DeleteBehavior.Restrict);
-            // Employee -> PensionOption relationship
-            modelBuilder.Entity<Employee>()
-                .HasOne(e => e.PensionOption)
-                .WithMany(po => po.Employees)
-                .HasForeignKey(e => e.PensionOptionId)
-                .OnDelete(DeleteBehavior.Restrict);
+      // PensionFund -> Employee
+      modelBuilder.Entity<PensionFund>()
+          .HasOne(pf => pf.Employee)
+          .WithMany(e => e.PensionFunds)
+          .HasForeignKey(pf => pf.EmployeeId)
+          .OnDelete(DeleteBehavior.Restrict);
+      // Employee -> PensionOption relationship
+      modelBuilder.Entity<Employee>()
+          .HasOne(e => e.PensionOption)
+          .WithMany(po => po.Employees)
+          .HasForeignKey(e => e.PensionOptionId)
+          .OnDelete(DeleteBehavior.Restrict);
 
-            // Employee -> Position
-            modelBuilder.Entity<Employee>()
-          .HasOne(e => e.Position)
-          .WithMany(p => p.Employees)
-          .HasForeignKey(e => e.PositionId);
+      // Employee -> Position
+      modelBuilder.Entity<Employee>()
+    .HasOne(e => e.Position)
+    .WithMany(p => p.Employees)
+    .HasForeignKey(e => e.PositionId);
 
       // Employee -> CareerManager
       modelBuilder.Entity<Employee>()
@@ -102,10 +102,6 @@ namespace HRConnect.Api.Data
       modelBuilder.Entity<OccupationalLevel>()
           .HasIndex(o => o.Description)
           .IsUnique();
-
-      modelBuilder.Entity<PayrollRecord>()
-      .HasIndex(x => new { x.PayrollRunId, x.EmployeeId })
-      .IsUnique();
 
       modelBuilder.Entity<Employee>().Property(e => e.Title).HasConversion<string>();
       modelBuilder.Entity<Employee>().Property(e => e.Gender).HasConversion<string>();
@@ -130,9 +126,9 @@ namespace HRConnect.Api.Data
           .HasForeignKey(lb => lb.LeaveTypeId)
           .OnDelete(DeleteBehavior.Restrict);
 
-      modelBuilder.Entity<EmployeeCompanyContribution>()
-    .HasIndex(e => new { e.PayrollRunId, e.EmployeeId })
-    .IsUnique();
+      //   modelBuilder.Entity<EmployeeCompanyContribution>()
+      // .HasIndex(e => new { e.PayrollRunId, e.EmployeeId })
+      // .IsUnique();
 
       modelBuilder.Entity<LeaveEntitlementRule>()
           .HasOne(r => r.JobGrade)
