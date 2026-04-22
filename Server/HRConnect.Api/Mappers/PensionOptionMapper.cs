@@ -5,7 +5,7 @@
 
   public static class PensionOptionMapper
   {
-    public static PensionOptionDto ToDto(PensionOption entity)
+    public static PensionOptionDto? ToDto(PensionOption entity)
     {
       return entity == null
           ? null
@@ -16,7 +16,7 @@
           };
     }
 
-    public static PensionOption ToEntity(PensionOptionDto dto)
+    public static PensionOption? ToEntity(PensionOptionDto dto)
     {
       return dto == null
           ? null

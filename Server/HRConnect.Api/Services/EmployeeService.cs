@@ -230,7 +230,7 @@ namespace HRConnect.Api.Services
 
         // LOAD FULL EMPLOYEE WITH POSITION + JOBGRADE
         var fullEmployee = await _context.Employees
-            .Include(e => e.Position)
+            .Include(e => e.Position!)
                 .ThenInclude(p => p.JobGrade)
             .FirstAsync(e => e.EmployeeId == employeeId);
 
@@ -245,7 +245,7 @@ namespace HRConnect.Api.Services
         var newRule = await _context.LeaveEntitlementRules
      .Where(r =>
          r.LeaveTypeId == annualLeave.Id &&
-         r.JobGradeId == fullEmployee.Position.JobGradeId &&
+         r.JobGradeId == fullEmployee.Position!.JobGradeId &&
          r.MinYearsService <= yearsOfService &&
          (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
          r.IsActive)
@@ -258,7 +258,7 @@ namespace HRConnect.Api.Services
             {
               EmployeeId = employeeId,
               PositionId = fullEmployee.PositionId,
-              PositionName = fullEmployee.Position.PositionTitle,
+              PositionName = fullEmployee.Position!.PositionTitle,
               AnnualEntitlement = newRule.DaysAllocated,
               DailyRate = (newRule.DaysAllocated / 12m) / 21.67m,
               EffectiveFrom = today,

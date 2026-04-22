@@ -53,10 +53,10 @@ namespace HRConnect.Api.Services
           .Include(e => e.Position)
           .Include(e => e.LeaveBalances)
           .Where(e =>
-              (new[] { 2, 3, 4, 6 }.Contains(e.Position.JobGradeId) &&
+              (new[] { 2, 3, 4, 6 }.Contains(e.Position!.JobGradeId) &&
                new[] { 2, 3, 4, 6 }.Contains(rule.JobGradeId))
               ||
-              e.Position.JobGradeId == rule.JobGradeId)
+              e.Position!.JobGradeId == rule.JobGradeId)
           .ToListAsync();
 
       foreach (var employee in employees)
@@ -108,7 +108,7 @@ namespace HRConnect.Api.Services
           .Include(e => e.LeaveBalances)
               .ThenInclude(lb => lb.LeaveType)
           .Where(e =>
-              (new[] { 2, 3, 4, 6 }.Contains(e.Position.JobGradeId) &&
+              (new[] { 2, 3, 4, 6 }.Contains(e.Position!.JobGradeId) &&
                new[] { 2, 3, 4, 6 }.Contains(rule.JobGradeId))
               ||
               e.Position.JobGradeId == rule.JobGradeId)
@@ -117,7 +117,7 @@ namespace HRConnect.Api.Services
       var employeeIds = employees.Select(e => e.EmployeeId).ToList();
 
       var segments = await _context.EmployeeAccrualRateHistories
-          .Where(x => employeeIds.Contains(x.EmployeeId) && x.EffectiveTo == null)
+          .Where(x => employeeIds.Contains(x.EmployeeId!) && x.EffectiveTo == null)
           .ToListAsync();
 
       foreach (var employee in employees)

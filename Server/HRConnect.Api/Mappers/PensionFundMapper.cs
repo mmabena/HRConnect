@@ -25,8 +25,8 @@
       return new PensionFund
       {
         PensionFundId = dto.PensionFundId,
-        EmployeeId = dto.EmployeeId,
-        EmployeeName = dto.EmployeeName,
+        EmployeeId = dto.EmployeeId!,
+        EmployeeName = dto.EmployeeName!,
         MonthlySalary = dto.MonthlySalary,
         ContributionPercentage = dto.ContributionPercentage,
         ContributionAmount = dto.ContributionAmount,

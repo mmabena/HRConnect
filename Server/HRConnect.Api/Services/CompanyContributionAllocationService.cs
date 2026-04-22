@@ -77,8 +77,8 @@ namespace HRConnect.Api.Services
 
                     Name = emp.Name,
                     Surname = emp.Surname,
-                    IdNumber = emp.IdNumber,
-                    PassportNumber = emp.PassportNumber,
+                    IdNumber = emp.IdNumber!,
+                    PassportNumber = emp.PassportNumber!,
                     Age = age,
                     Salary = salary,
 

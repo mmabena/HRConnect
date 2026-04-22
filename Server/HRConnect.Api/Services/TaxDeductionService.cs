@@ -23,7 +23,6 @@ namespace HRConnect.Api.Services
   using HRConnect.Api.Utils;
 
 
-
   /// <summary>
   /// This service is responsible for handling tax deduction operations which includes:
   /// calculations of tax based on remuneration and age,
@@ -248,7 +247,7 @@ namespace HRConnect.Api.Services
 
         Name = employee.Name,
         Surname = employee.Surname,
-        IdNumber = employee.IdNumber,
+        IdNumber = employee.IdNumber!,
         PassportNumber = employee.PassportNumber,
 
         TaxYear = taxYear,

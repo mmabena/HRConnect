@@ -4,11 +4,9 @@
   using HRConnect.Api.Data;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
-  using HRConnect.Api.Data;
   using Microsoft.EntityFrameworkCore;
   using System.Collections.Generic;
   using System.Threading;
-  using System.Threading.Tasks;
 
   public class PensionOptionRepository(ApplicationDBContext context) : IPensionOptionRepository
   {
