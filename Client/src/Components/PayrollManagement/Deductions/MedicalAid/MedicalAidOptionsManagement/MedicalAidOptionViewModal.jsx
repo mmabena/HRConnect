@@ -1,9 +1,11 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useMemo, useState} from 'react';
 import ReactDOM from 'react-dom';
 import './MedicalAidOptionViewModal.css';
 import formatToLocalCurrency from "../../../../../utils/formatToLocalCurrency";
 import formatSalaryBracket from "../../../../../utils/formatSalaryBracket";
+import medicalAidOptionDynamicCalculator from "../../../../../utils/medicalAidOptionDynamicCalculator";
 import Divider from './Divider';
+import DynamicGrid from './DynamicGrid';
 
 
 function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categories = [], categoryArray = []}) {
@@ -22,6 +24,17 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
     const [categoryIncomeBrackets, setCategoryIncomeBrackets] = useState(null);
     const [selectedIncomeBracket, setSelectedIncomeBracket] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
+    //const [editedPayload, setEditedPayload] = useMemo([]);
+    const [riskAllocationsCollection, setRiskAllocationCollection] = useState([]);
+    const [msaAllocationsCollection, setMsaAllocationCollection] = useState([]);
+
+    const {
+      calculatePrincipalTotal,
+      calculateAdultTotal,
+      calcculateChildTotal,
+      calculateChild2Total
+    } = medicalAidOptionDynamicCalculator(formatToLocalCurrency);
+
 
     const onEditClick = () => {
         (!isEditing) ?
@@ -64,15 +77,27 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
     };
 
     // Group data by category (Part of Part 3)
-    const groupedData = groupedOptionsByCategory(data, categories);
+    //const groupedData = groupedOptionsByCategory(data, categories);
 
     // Flatten all options with category info for dropdown
-    const flattenedOptions = groupedData.flatMap(category =>
+    /*const flattenedOptions = groupedData.flatMap(category =>
     category.options.map(option => ({
         ...option,
         categoryName: category.categoryName ? category.categoryName : category.categoryId
     }))
-    );
+    );*/
+
+    // the above have been replaced with the following that useMemo() for performance efficiency:
+    const groupedData = useMemo(()=>
+        groupedOptionsByCategory(data, categories),[data, categories]);
+
+    const flattenedOptions = useMemo(() =>
+      groupedData.flatMap(category =>
+        category.options.map(option => ({
+          ...option,
+          categoryName: category.categoryName ? category.categoryName : category.categoryId
+        }))),[groupedData]);
+
 
     // Set default category on data load
     useEffect(() => {
@@ -81,8 +106,15 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
       }
     },[flattenedOptions, selectedOptionId]);
 
+    // Extract the currently selected option => to get the calc values to use
+
 // Get the currently selected option
-    const displayData = selectedOptionId ? flattenedOptions.filter(option => option.medicalOptionId === selectedOptionId) : [];
+//    const displayData = selectedOptionId ? flattenedOptions.filter(option => option.medicalOptionId === selectedOptionId) : [];
+// Above has been replaced with a logic that uses useMemo() for performance efficiency
+const displayData = useMemo(() =>
+    selectedOptionId ? flattenedOptions.filter(option => option.medicalOptionId == selectedOptionId) : []
+    ,[flattenedOptions, selectedOptionId]);
+
 // Get the currently selected category's Income Brackets
     useEffect(()=>{
       // If the grouped data is not null, then proceed with extracting the income brackets for that category group
@@ -133,136 +165,113 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
       }
     ];
 
-    const componentTypeNames = [
-      {
-        header: "Monthly Risk Contribution", key: "monthlyRiskContribution", render: () => {
-
-        }
-      },
-      {
-        header: "Risk Allocation", key: "riskAllocation", render: () => {
-
-        }
-      },
-      {
-        header: "Monthly Saving Account (MSA)", key: "monthlySavingAccount", render: () => {
-
-        }
-      },
-      {
-        header: "MSA Allocation", key: "msaAllocation", render: () => {
-
-        }
-      },
-    ];
-
     const totalDeductionsHeaderNames = [
       {
-        header: "Principal", key:"principal", render: () => {
+        header: "Principal", key:"principal", render: (value, row) => {
 
         }
       },
-        {
-            header: "Adult", key: "adult", render: () => {
+      {
+        header: "Adult", key: "adult", render: (value, row) => {
 
-            }
-        },
-        {
-            header: "1st Child", key: "firstChild", render: () => {
+        }
+      },
+      {
+        header: "1st Child", key: "firstChild", render: (value, row) => {
 
-            }
-        },
-        {
-            header: "2nd Child +", key: "children", render: () => {
+        }
+      },
+      {
+        header: "2nd Child +", key: "children", render: (value, row) => {
 
-            }
-        },
+        }
+      },
     ];
 
 
-    // Getting the Columns || no need need to explicitly define them so that i can render them with custom logic
+    // Getting the Columns || no need to explicitly define them so that i can render them with custom logic
     const viewColumns = [
-        {
-            header: "Medical Option", key: "medicalOptionName", width: 1, render: () => {
+      {
+        header: "Medical Option", key: "medicalOptionName", width: 1, render: (value, row) => {
 
-            }
-        },
-        {// Header Title
-            header: "Medical Option Category", key: "medicalOptionCategoryId", width: 1, render: () => {
-
-            }
-        },
-        {
-            header: "Income Salary", key: "incomeCategory", width: 1,
-              render: (value, row) => {
-                  const min = row.salaryBracketMin;
-                  const max = row.salaryBracketMax;
-
-                  const newFormat = formatSalaryBracket(min,max, formatToLocalCurrency);
-
-                  return newFormat;
-              }
-        },
-        {
-            header: "Maximum Salary", key: "salarybracketMax", width: 1, render: () => {
-
-            }
-        },
-        {
-            header: "MSA principal", key: "monthlyMSAContributionPrincipal", width: 1, render: () => {
-
-            }
-        },
-        {
-            header: "MSA adult", key: "monthlyMSAContributionAdult", width: 1, render: () => {
-
-            }
-        },
-        {
-            header: "MSA Child", key: "monthlyMSAContributionChild", width: 1, render: () => {
-
-            }
-        },
-        {
-            header: "Risk Principal", key: "monthlyRiskContributionPrincipal", width: 1, render: () => {
-
-            }
-        },
-        {
-            header: "Risk Adult", key: "monthlyRiskContributionAdult", width: 1, render: () => {
-
-            }
-        },
-        {
-            header: "Risk Child", key: "monthlyRiskContributionChild", width: 1, render: () => {
-
-            }
-        },
-        {
-            header: "Risk Child2", key: "monthlyRiskContributionChild2", width: 1, render: () => {
-
-            }
-        },
-        {
-            header: "Total Principal", key: "totalMonthlyContributionsPrincipal", width: 1, render: () => {
-
-            }
-        },
-        {
-            header: "Total Adult", key: "totalMonthlyContributionsAdult", width: 1, render: () => {
-
-            }
-        },
-        {
-            header: "Total Child", key: "totalMonthlyContributionsChild", width: 1, render: () => {
-
-            }
-        },
-        {
-            header: "Total Child2", key: "totalMonthlyContributionsChild2", width: 1, render: () => {
-
-            }
         }
+      },
+      {// Header Title
+        header: "Medical Option Category", key: "medicalOptionCategoryId", width: 1, render: (value, row) => {
+
+        }
+      },
+      {
+        header: "Income Salary", key: "incomeCategory", width: 1,
+          render: (value, row) => {
+              const min = row.salaryBracketMin;
+              const max = row.salaryBracketMax;
+
+              const newFormat = formatSalaryBracket(min,max, formatToLocalCurrency);
+
+              return newFormat;
+          }
+      },
+      {
+        header: "Maximum Salary", key: "salarybracketMax", width: 1, render: (value, row) => {
+
+        }
+      },
+      {
+        header: "MSA principal", key: "monthlyMSAContributionPrincipal", width: 1, render: (value, row) => {
+
+        }
+      },
+      {
+        header: "MSA adult", key: "monthlyMSAContributionAdult", width: 1, render: (value, row) => {
+
+        }
+      },
+      {
+        header: "MSA Child", key: "monthlyMSAContributionChild", width: 1, render: (value, row) => {
+
+        }
+      },
+      {
+        header: "Risk Principal", key: "monthlyRiskContributionPrincipal", width: 1, render: (value, row) => {
+
+        }
+      },
+      {
+        header: "Risk Adult", key: "monthlyRiskContributionAdult", width: 1, render: (value, row) => {
+
+        }
+      },
+      {
+        header: "Risk Child", key: "monthlyRiskContributionChild", width: 1, render: (value, row) => {
+
+        }
+      },
+      {
+        header: "Risk Child2", key: "monthlyRiskContributionChild2", width: 1, render: (value, row) => {
+
+        }
+      },
+      {
+        header: "Total Principal", key: "totalMonthlyContributionsPrincipal", width: 1, render: (value, row) => {
+
+        }
+      },
+      {
+        header: "Total Adult", key: "totalMonthlyContributionsAdult", width: 1, render: (value, row) => {
+
+        }
+      },
+      {
+        header: "Total Child", key: "totalMonthlyContributionsChild", width: 1, render: (value, row) => {
+
+        }
+      },
+      {
+        header: "Total Child2", key: "totalMonthlyContributionsChild2", width: 1, render: (value, row) => {
+
+        }
+      }
     ];
 
 
@@ -296,7 +305,7 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
 
     },[isOpen]);
 
-    if (!isOpen) return null;
+    if (!isOpen){ return null;}
 
     // Render outside #root so inert doesn't block the modal
     return ReactDOM.createPortal(
@@ -305,14 +314,15 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
           onClick={onClose}
         >
           <div
-              className="model-wrapper"
+            className="model-wrapper"
             onClick={(e) => e.stopPropagation()}
           >
 
             {/* Header */}
             <div
                 className="modal-header-container">
-                <div className="modal-header-main-text">{title}</div>
+                <div className="modal-header-main-text">{title}</div> <br/>
+                <div className="modal-header-main-secondary-text ">{flattenedOptions[0].categoryName}</div>
               <button
                   className="modal-button-close"
                 onClick={onClose}
@@ -362,10 +372,10 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
                   {categoryIncomeBrackets && categoryIncomeBrackets.length > 0 && (
 
 
-                      (!isEditing)  ? (
+                      (isEditing)  ? (
                         <div className="income-bracket-selector">
                           <label htmlFor="income-bracket-dropdown">INCOME CATEGORY</label>
-                          <p>NOTHING TO DISPLAY PAL :)</p>
+                          <p> -=: You are in Edit Mode :=- </p>
                         </div>
                       ) : (
                         <div className="income-bracket-selector">
@@ -407,38 +417,138 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
                           {headerColumnNames.map((col, colIndex) => (
                               <th
                                 className="model-view-table-header-cell">
-                                <tr key={col.key ?? colIndex}>
-
-
+                                <tr key={col.key ?? colIndex}
+                                  value={col.header}>
+                                    {/* Convert camelCase/snake_case keys into readable labels */}
+                                    {formatHeader(col.header)}
                                 </tr>
-                              {/* Convert camelCase/snake_case keys into readable labels */}
-                                  {formatHeader(col.header)}
                           </th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
-                    {displayData.map((row, rowIndex) => (
-                        <tr key={row.id ?? rowIndex}>
-                            {viewColumns.map((col) => (
-                                <td key={col}>
-                                    {/* Handles nested objects/arrays */}
-                                    {col.render ? col.render(row[col.key], row) : formatCell(row[col.key])}
-                                </td>
-                            ))}
-                        </tr>
-                    ))}
+                    {/* Monthly Risk Contributions Row => Spans over 4 columns */}
+                    <tr colspan="100%" className="model-view-special-table-row">
+
+                        <td colSpan="100%" className="model-view-special-table-row-cell">
+                        MONTHLY RISK CONTRIBUTION
+                        </td>
+                        <td colSpan="100%">
+
+                        </td>
+                        <td colSpan="100%">
+
+                        </td>
+                        <td colSpan="100%">
+
+                        </td>
+                    </tr>
+                    {/* Monthly Risk Contributions Breakdown Per cell expect cell 0 (index position) */}
+                    <tr>
+                        {/* Row Title */}
+                        <td>
+                          Risk Allocation
+                        </td>
+                        {/* Dynamic Data rendered here */}
+                        <td>
+                            {
+                                (Number(displayData[0]?.monthlyRiskContributionPrincipal) === 0 ||
+                                displayData[0]?.monthlyRiskContributionPrincipal === null ||
+                                displayData[0]?.monthlyRiskContributionPrincipal === undefined)
+                                    ? formatToLocalCurrency(displayData[0]?.monthlyRiskContributionAdult, "en-ZA")
+                                    : "-"
+                            }
+                        </td>
+                        <td>
+                            {
+                                (Number(displayData[0]?.monthlyRiskContributionAdult) === 0 ||
+                                displayData[0]?.monthlyRiskContributionAdult === null ||
+                                displayData[0]?.monthlyRiskContributionAdult === undefined)
+                                    ? "-"
+                                    : formatToLocalCurrency(displayData[0]?.monthlyRiskContributionAdult, "en-ZA")
+                            }
+
+                        </td>
+                        <td>
+                            {
+                                (Number(displayData[0]?.monthlyRiskContributionChild) === 0 ||
+                                displayData[0]?.monthlyRiskContributionChild === null ||
+                                displayData[0]?.monthlyRiskContributionChild === undefined)
+                                    ? "-"
+                                    : formatToLocalCurrency(displayData[0]?.monthlyRiskContributionChild, "en-ZA")
+                            }
+                        </td>
+                    </tr>
+                    {/* Monthly Savings Account (MSA) Breakdown Per cell expect cell 0 (index position) */}
+                    <tr colspan="100%" className="model-view-special-table-row">
+
+                        <td colSpan="100%" className="model-view-special-table-row-cell">
+                            MONTHLY SAVINGS ACCOUNT (MSA)
+                        </td>
+
+                        <td colSpan="100%">
+
+                        </td>
+                        <td colSpan="100%">
+
+                        </td>
+                        <td colSpan="100%">
+
+                        </td>
+                        <td colSpan="100%">
+
+                        </td>
+                    </tr>
+
+                    <tr>
+                        {/* Row Title */}
+                        <td>
+                            MSA Allocation
+                        </td>
+                        {/* Dynamic Data rendered here */}
+                        <td>
+
+                                {
+                                    Number(displayData[0]?.monthlyMsaContributionPrincipal) === 0 ||
+                                    displayData[0]?.monthlyMsaContributionPrincipal === null ||
+                                    displayData[0]?.monthlyMsaContributionPrincipal === undefined
+                                        ? formatToLocalCurrency(displayData[0]?.monthlyMsaContributionAdult, "en-ZA")
+                                        : "-"
+                                }
+
+
+                        </td>
+                        <td>
+                            {displayData[0]?.monthlyAdultContributionAdult
+                                ? formatToLocalCurrency(displayData[0]?.monthlyAdultContributionAdult)
+                                : "-"}
+                        </td>
+                        <td>
+                            {displayData[0]?.monthlyMsaContributionChild
+                                ? formatToLocalCurrency(displayData[0]?.monthlyMsaContributionChild, "en-ZA")
+                                : "-"}
+                        </td>
+                    </tr>
                     </tbody>
 
                   </table>
                       <div className="section-divider">
-                          <p>
+                      <p>
                               TOTAL MONTHLY DEDUCTION
                           </p>
                           <Divider />
-                      </div>
-                      {/* Sections that hold the total monthly deduction (dynmically calculated) */}
 
+                      </div>
+                      <div className="monthly-deductions-grid">
+                          {/* Dynamic Grid */}
+                          <div className="monthly-deductions-grid-cell">
+                              {/* Use the header list to display the total monthly deduction header Names */}
+                          </div>
+                      </div>
+
+
+                      {/* Sections that hold the total monthly deduction (dynamically calculated) */}
+                      {/* Either use a dynamic grid or a table to display the total monthly deduction with a conditional render on child2+ on the dynamic grid */}
                       <Divider />
                       {/* Footer */}
             </>
@@ -490,6 +600,13 @@ function formatCell(value) {
   if (typeof(value) === "object")  return JSON.stringify(value);
 
   return value;
+
+  /* Nested Tenary Operations:
+  * condition1
+  ? valueIfTrue1
+  : condition2
+      ? valueIfTrue2
+      : valueIfFalse2*/
 }
 
 export default MedicalAidOptionViewModal;
