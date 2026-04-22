@@ -8,40 +8,40 @@ namespace HRConnect.Api.Repository
   using Microsoft.EntityFrameworkCore;
   using System.Collections.Generic;
   using System.Threading.Tasks;
-  using System.Threading;
+
   public class PensionFundRepository(ApplicationDBContext context) : IPensionFundRepository
   {
-    public async Task<IEnumerable<PensionFund>> GetPensionFundsAsync(CancellationToken cancellationToken)
+    public async Task<IEnumerable<PensionFund>> GetPensionFundsAsync()
     {
-      return await context.PensionFunds.ToListAsync(cancellationToken);
+      return await context.PensionFunds.ToListAsync();
     }
 
-    public async Task<PensionFund?> GetPensionFundByIdAsync(int id, CancellationToken cancellationToken)
+    public async Task<PensionFund?> GetPensionFundByIdAsync(int id)
     {
       return await context.PensionFunds
-                          .FirstOrDefaultAsync(f => f.PensionFundId == id, cancellationToken);
+                          .FirstOrDefaultAsync(f => f.PensionFundId == id);
     }
 
-    public async Task AddPensionFundAsync(PensionFund fund, CancellationToken cancellationToken)
+    public async Task AddPensionFundAsync(PensionFund fund)
     {
-      _ = await context.PensionFunds.AddAsync(fund, cancellationToken);
-      _ = await context.SaveChangesAsync(cancellationToken);
+      _ = await context.PensionFunds.AddAsync(fund);
+      _ = await context.SaveChangesAsync();
     }
 
-    public async Task UpdatePensionFundAsync(PensionFund fund, CancellationToken cancellationToken)
+    public async Task UpdatePensionFundAsync(PensionFund fund)
     {
       _ = context.PensionFunds.Update(fund);
-      _ = await context.SaveChangesAsync(cancellationToken);
+      _ = await context.SaveChangesAsync();
     }
 
-    public async Task AddOrUpdatePensionFundAsync(PensionFund fund, CancellationToken cancellationToken)
+    public async Task AddOrUpdatePensionFundAsync(PensionFund fund)
     {
       PensionFund? existingFund = await context.PensionFunds
-          .FirstOrDefaultAsync(f => f.EmployeeId == fund.EmployeeId, cancellationToken);
+          .FirstOrDefaultAsync(f => f.EmployeeId == fund.EmployeeId);
 
       if (existingFund == null)
       {
-        _ = await context.PensionFunds.AddAsync(fund, cancellationToken);
+        _ = await context.PensionFunds.AddAsync(fund);
       }
       else
       {
@@ -55,9 +55,9 @@ namespace HRConnect.Api.Repository
       }
     }
 
-    public async Task SaveChangesAsync(CancellationToken cancellationToken)
+    public async Task SaveChangesAsync()
     {
-      _ = await context.SaveChangesAsync(cancellationToken);
+      _ = await context.SaveChangesAsync();
     }
   }
 }

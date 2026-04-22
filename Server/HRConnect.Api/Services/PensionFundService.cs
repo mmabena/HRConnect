@@ -1,7 +1,6 @@
 ﻿namespace HRConnect.Api.Services
 {
   using System.Collections.Generic;
-  using System.Threading;
   using System.Threading.Tasks;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
@@ -14,51 +13,51 @@
   {
 
     // Pension Funds
-    public async Task<IEnumerable<PensionFund>> GetPensionFundsAsync(CancellationToken cancellationToken)
+    public async Task<IEnumerable<PensionFund>> GetPensionFundsAsync()
     {
-      return await fundRepo.GetPensionFundsAsync(cancellationToken);
+      return await fundRepo.GetPensionFundsAsync();
     }
 
-    public async Task<PensionFund?> GetPensionFundByIdAsync(int id, CancellationToken cancellationToken)
+    public async Task<PensionFund?> GetPensionFundByIdAsync(int id)
     {
-      return await fundRepo.GetPensionFundByIdAsync(id, cancellationToken);
+      return await fundRepo.GetPensionFundByIdAsync(id);
     }
 
-    public async Task<ServiceResult> AddPensionFundAsync(PensionFund fund, CancellationToken cancellationToken)
+    public async Task<ServiceResult> AddPensionFundAsync(PensionFund fund)
     {
-      await fundRepo.AddPensionFundAsync(fund, cancellationToken);
-      await fundRepo.SaveChangesAsync(cancellationToken);
+      await fundRepo.AddPensionFundAsync(fund);
+      await fundRepo.SaveChangesAsync();
 
       return ServiceResult.Success("Fund added successfully.");
     }
 
-    public async Task<ServiceResult> UpdatePensionFundAsync(PensionFund fund, CancellationToken cancellationToken)
+    public async Task<ServiceResult> UpdatePensionFundAsync(PensionFund fund)
     {
-      await fundRepo.UpdatePensionFundAsync(fund, cancellationToken);
-      await fundRepo.SaveChangesAsync(cancellationToken);
+      await fundRepo.UpdatePensionFundAsync(fund);
+      await fundRepo.SaveChangesAsync();
 
       return ServiceResult.Success("Fund updated successfully.");
     }
 
     // Pension Options
-    public async Task<IEnumerable<PensionOption>> GetPensionOptionsAsync(CancellationToken cancellationToken)
+    public async Task<IEnumerable<PensionOption>> GetPensionOptionsAsync()
     {
-      return await optionRepo.GetPensionOptionsAsync(cancellationToken);
+      return await optionRepo.GetPensionOptionsAsync();
     }
 
-    public async Task<PensionOption?> GetPensionOptionByIdAsync(int id, CancellationToken cancellationToken)
+    public async Task<PensionOption?> GetPensionOptionByIdAsync(int id)
     {
-      return await optionRepo.GetPensionOptionByIdAsync(id, cancellationToken);
+      return await optionRepo.GetPensionOptionByIdAsync(id);
     }
 
-    public async Task<ServiceResult> AddPensionOptionAsync(PensionOption pensionOption, CancellationToken cancellationToken)
+    public async Task<ServiceResult> AddPensionOptionAsync(PensionOption pensionOption)
     {
       if (pensionOption.ContributionPercentage is < 0 or > 15)
       {
         return ServiceResult.Failure("Percentage must be between 0 and 15.");
       }
 
-      IEnumerable<PensionOption> existingOptions = await optionRepo.GetPensionOptionsAsync(cancellationToken);
+      IEnumerable<PensionOption> existingOptions = await optionRepo.GetPensionOptionsAsync();
 
       foreach (PensionOption option in existingOptions)
       {
@@ -68,14 +67,14 @@
         }
       }
 
-      return await optionRepo.AddPensionOptionAsync(pensionOption, cancellationToken);
+      return await optionRepo.AddPensionOptionAsync(pensionOption);
     }
 
-    public async Task<ServiceResult> UpdatePensionOptionAsync(PensionOption pensionOption, CancellationToken cancellationToken)
+    public async Task<ServiceResult> UpdatePensionOptionAsync(PensionOption pensionOption)
     {
       return pensionOption.ContributionPercentage is < 0 or > 15
         ? ServiceResult.Failure("Percentage must be between 0 and 15.")
-        : await optionRepo.UpdatePensionOptionAsync(pensionOption, cancellationToken);
+        : await optionRepo.UpdatePensionOptionAsync(pensionOption);
     }
 
     // Pension Deduction
@@ -87,11 +86,10 @@
     // Employee Pension Selection
     public async Task<ServiceResult> RecordEmployeePensionSelectionAsync(
      string employeeId,
-     int PensionOptionId,
-     CancellationToken cancellationToken)
+     int PensionOptionId)
     {
-      Employee? employee = await employeeRepo.GetEmployeeByIdAsync(employeeId, cancellationToken);
-      PensionOption? option = await optionRepo.GetPensionOptionByIdAsync(PensionOptionId, cancellationToken);
+      Employee? employee = await employeeRepo.GetEmployeeByIdAsync(employeeId);
+      PensionOption? option = await optionRepo.GetPensionOptionByIdAsync(PensionOptionId);
 
       if (employee == null || option == null)
         return ServiceResult.Failure("Employee or Pension Option not found.");
@@ -117,8 +115,8 @@
         TaxCode = 4001 // or derive dynamically
       };
 
-      await fundRepo.AddOrUpdatePensionFundAsync(fund, cancellationToken);
-      await fundRepo.SaveChangesAsync(cancellationToken);
+      await fundRepo.AddOrUpdatePensionFundAsync(fund);
+      await fundRepo.SaveChangesAsync();
 
       return ServiceResult.Success("Pension option selected and pension fund created.");
     }

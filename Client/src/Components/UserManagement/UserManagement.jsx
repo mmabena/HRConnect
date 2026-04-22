@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ActionsModal from "../ActionModal"; // Import the new ActionsModal
 import { fetchUsersAndRoles, updateUserRole } from "../../api/UserManagement";
-import {fetchAllEmployees} from '../../api/Employee.js'
+import { fetchAllEmployees } from '../../api/Employee.js'
 import { getStoredUserRole } from "../../utils/roleUtils";
 import useInitialColors from "../../hooks/useInitialColors";
 import { resolveRole } from "../../utils/roleUtils.js";
@@ -36,39 +36,41 @@ const UserManagement = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [loggedInUser, setLoggedInUser] = useState(null);
 
-  const {COLORS}=useInitialColors();
+  const { COLORS } = useInitialColors();
 
-    const loadData = async () => {
-      try {
-        setIsLoading(true);
-        const { users, roles } = await fetchUsersAndRoles();
-        const employees=await fetchAllEmployees();
+  const loadData = async () => {
+    try {
+      setIsLoading(true);
+      const { users, roles } = await fetchUsersAndRoles();
+      const employees = await fetchAllEmployees();
 
-        setRoles(roles || []);
-        const mappedUsers = (users || []).map((user) => {
-           const employee=employees.find(e=>e.email==user.email)
-          console.log(employee)
-          return{
+      setRoles(roles || []);
+      const mappedUsers = (users || []).map((user) => {
+        const employee = employees.find(e => e.email == user.email)
+        console.log(employee)
+        return {
           ...user,
-          branch:employee.city||"",
+          branch: `${employee.city}` || "Uknown Branch",
           name: `${employee.name} ${employee.surname}` || user.email,
           role: user.role || roles.find((r) => Number(r.roleId) === Number(user.roleId))?.name || "Unknown Role",
-          status:"Active",
-          statusValue: USER_STATUS.ACTIVE, }});
+          status: "Active",
+          statusValue: USER_STATUS.ACTIVE,
+        }
+      });
 
-          setUsers(mappedUsers);
-          setLoggedInUser(mappedUsers[0]||null);
-          setCurrentUserRole(getStoredUserRole().roleName || "User");
+      setUsers(mappedUsers);
+      setLoggedInUser(mappedUsers[0] || null);
+      setCurrentUserRole(getStoredUserRole().roleName || "User");
 
-      } catch (error) {
-        console.error("Failed to load data:", error);
-        alert("Failed to load user data. Please try again.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    } catch (error) {
+      console.error("Failed to load data:", error);
+      alert("Failed to load user data. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    useEffect(()=>{
+  useEffect(() => {
     loadData();
   }, []);
 
@@ -99,10 +101,10 @@ const UserManagement = () => {
   const saveEmployeeDetails = async () => {
     try {
       const user = users[selectedUserIndex];
-      const normalizedEditRole=resolveRole(editRole);
+      const normalizedEditRole = resolveRole(editRole);
 
-      const selectedRole=roles.find(
-        (r)=>Number(r.roleId)===normalizedEditRole.roleId
+      const selectedRole = roles.find(
+        (r) => Number(r.roleId) === normalizedEditRole.roleId
       );
 
       await updateUserRole(user.userId, selectedRole.roleId);
@@ -119,8 +121,8 @@ const UserManagement = () => {
       updatedUsers[selectedUserIndex] = {
         ...user,
         role: selectedRole.name,
-        status:"Active",
-        statusValue:USER_STATUS.ACTIVE,
+        status: "Active",
+        statusValue: USER_STATUS.ACTIVE,
         roleId: selectedRole.roleId,
       };
       setUsers(updatedUsers);
@@ -137,8 +139,8 @@ const UserManagement = () => {
       const user = users[selectedUserIndex];
       if (!user) throw new Error("Invalid user");
 
-    if(updatedData.roleId !=null)
-        await updateUserRole(user.userId,updatedData.roleId);
+      if (updatedData.roleId != null)
+        await updateUserRole(user.userId, updatedData.roleId);
 
       const updatedUsers = [...users];
       updatedUsers[selectedUserIndex] = {
@@ -198,13 +200,13 @@ const UserManagement = () => {
 
       {activeTab === "userProfile" && (
         <>
-        {/*Card on top of the table*/} 
-            <div className="payslip-card">
-              <div className="payslip-ribbon">
-               <span className="card-title">
+          {/*Card on top of the table*/}
+          <div className="payslip-card">
+            <div className="payslip-ribbon">
+              <span className="card-title">
                 User Profile
-               </span>
-              </div>
+              </span>
+            </div>
             {/*2nd Row on is the rest of the table*/}
             <table className="styled-table">
               <thead>
@@ -224,7 +226,7 @@ const UserManagement = () => {
                         <div className={`initials-circle
                         ${COLORS[idx % COLORS.length]}
                       `}>
-                  {user.name?.[0] || "?"}</div>
+                          {user.name?.[0] || "?"}</div>
                         <span className="user-name">{user.name || "Unknown User"}</span>
                       </div>
                     </td>
