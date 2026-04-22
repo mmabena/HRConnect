@@ -1,10 +1,13 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace HRConnect.Api.DTOs
 {
   public class ResponseEligibileOptionsDto
   {
     //Employee details (Summarized and applicable to medical options query)
-    public string EmployeeName { get; set; } //Employee FirstName
-    public string EmployeeSurname { get; set; }
+    
+    public string? EmployeeName { get; set; }  //Employee FirstName
+    public string? EmployeeSurname { get; set; } 
     public decimal Salary { get; set; }
     public int NumberOfPrincipals { get; set; } = 1; // Default to 1 principal, as most employees will have at least themselves as a principal
     public int NumberOfAdults { get; set; }

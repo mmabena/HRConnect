@@ -147,7 +147,7 @@ namespace HRConnect.Api.Services
         return null;
       }
 
-      if (string.IsNullOrWhiteSpace(employee.Email))
+      if (string.IsNullOrWhiteSpace(employee!.Email))
       {
         throw new ArgumentException("Employee does not have an email address.");
       }

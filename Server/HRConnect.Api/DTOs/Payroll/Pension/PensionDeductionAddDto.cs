@@ -2,6 +2,6 @@
 {
   public class PensionDeductionAddDto
   {
-    public string EmployeeId { get; set; }
+    public string? EmployeeId { get; set; }
   }
 }

@@ -27,7 +27,7 @@ namespace HRConnect.Api.Services
         public async Task InitializeEmployeeLeaveBalancesAsync(string employeeId)
         {
             var employee = await _context.Employees
-                .Include(e => e.Position)
+                .Include(e => e.Position!)
                     .ThenInclude(p => p.JobGrade)
                 .Include(e => e.LeaveBalances)
                 .FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
@@ -56,7 +56,7 @@ namespace HRConnect.Api.Services
                     var rule = await _context.LeaveEntitlementRules
                         .Where(r =>
                             r.LeaveTypeId == leaveType.Id &&
-                            r.JobGradeId == employee.Position.JobGradeId &&
+                            r.JobGradeId == employee.Position!.JobGradeId &&
                             r.MinYearsService <= yearsOfService &&
                             (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
                             r.IsActive)
@@ -214,7 +214,7 @@ namespace HRConnect.Api.Services
         {
             var employee = await _context.Employees
                 .Include(e => e.LeaveBalances)
-                .Include(e => e.Position)
+                .Include(e => e.Position!)
                     .ThenInclude(p => p.JobGrade)
                 .FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
 
@@ -476,7 +476,7 @@ namespace HRConnect.Api.Services
             var rules = await _context.LeaveEntitlementRules
                 .Where(r =>
                     r.LeaveTypeId == annualLeave.Id &&
-                    r.JobGradeId == employee.Position.JobGradeId &&
+                    r.JobGradeId == employee.Position!.JobGradeId &&
                     r.IsActive)
                 .OrderBy(r => r.MinYearsService)
                 .ToListAsync();
@@ -608,7 +608,7 @@ namespace HRConnect.Api.Services
             var rule = await _context.LeaveEntitlementRules
                 .Where(r =>
                     r.LeaveTypeId == annualLeave.Id &&
-                    r.JobGradeId == employee.Position.JobGradeId &&
+                    r.JobGradeId == employee.Position!.JobGradeId &&
                     r.MinYearsService <= yearsOfService &&
                     (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
                     r.IsActive)
@@ -670,7 +670,7 @@ namespace HRConnect.Api.Services
             var rule = await _context.LeaveEntitlementRules
                 .Where(r =>
                 r.LeaveTypeId == annualLeave.Id &&
-                r.JobGradeId == employee.Position.JobGradeId &&
+                r.JobGradeId == employee.Position!.JobGradeId &&
                 r.MinYearsService <= yearsOfService &&
                 (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
                 r.IsActive)
@@ -681,7 +681,7 @@ namespace HRConnect.Api.Services
                 .Reference(e => e.Position)
                 .LoadAsync();
 
-            await _context.Entry(employee.Position)
+            await _context.Entry(employee.Position!)
                 .Reference(p => p.JobGrade)
                 .LoadAsync();
 
@@ -690,7 +690,7 @@ namespace HRConnect.Api.Services
                 {
                     EmployeeId = employee.EmployeeId,
                     PositionId = employee.PositionId,
-                    PositionName = employee.Position.PositionTitle,
+                    PositionName = employee.Position!.PositionTitle,
                     AnnualEntitlement = rule.DaysAllocated,
                     DailyRate = (rule.DaysAllocated / 12m) / 21.67m,
                     EffectiveFrom = employee.StartDate,

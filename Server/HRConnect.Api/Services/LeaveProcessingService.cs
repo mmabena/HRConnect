@@ -157,7 +157,7 @@ namespace HRConnect.Api.Services
 
                 var balances = await _context.EmployeeLeaveBalances
                     .Include(b => b.Employee)
-                        .ThenInclude(e => e.Position)
+                        .ThenInclude(e => e.Position!)
                         .ThenInclude(p => p.JobGrade)
                     .Where(b => b.LeaveTypeId == annualLeave.Id)
                     .ToListAsync();
