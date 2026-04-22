@@ -5,6 +5,7 @@ namespace HRConnect.Api.Services
   using System.Linq;
   using System.Threading.Tasks;
   using HRConnect.Api.DTOs.Employee;
+  using HRConnect.Api.DTOs.UserCompany;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
   using HRConnect.Api.Utils;
@@ -44,8 +45,10 @@ namespace HRConnect.Api.Services
     private readonly IPositionRepository _positionRepo;
     private readonly ICompanyRepository _companyRepo;
     private readonly IEmailService _emailService;
+    private readonly IActiveCompanyService _activeCompanyService;
     private readonly ILeaveBalanceService _leaveBalanceService;
     private readonly ILeaveProcessingService _leaveProcessingService;
+    private readonly IUserCompanyService _userCompanyService;
     private readonly IPasswordHasher<User> _passwordHasher;
     private static readonly char[] UppercaseChars = "ABCDEFGHJKLMNPQRSTUVWXYZ".ToCharArray();
     private static readonly char[] LowercaseChars = "abcdefghijkmnopqrstuvwxyz".ToCharArray();
@@ -56,24 +59,28 @@ namespace HRConnect.Api.Services
       .Concat(DigitChars)
       .Concat(SpecialChars)
       .ToArray();
-    public EmployeeService(ApplicationDBContext context, IEmployeeRepository employeeRepo, IEmailService emailService,ICompanyRepository companyRepo, IPositionRepository positionRepo, ILeaveBalanceService leaveBalanceService, ILeaveProcessingService leaveProcessingService, IPasswordHasher<User> passwordHasher)
+    public EmployeeService(ApplicationDBContext context,IActiveCompanyService activeCompanyService, IUserCompanyService userCompanyService, IEmployeeRepository employeeRepo, IEmailService emailService,ICompanyRepository companyRepo, IPositionRepository positionRepo, ILeaveBalanceService leaveBalanceService, ILeaveProcessingService leaveProcessingService, IPasswordHasher<User> passwordHasher)
     {
       _context = context;
       _employeeRepo = employeeRepo;
       _emailService = emailService;
       _positionRepo = positionRepo;
       _companyRepo = companyRepo;
+      _activeCompanyService = activeCompanyService;
       _leaveBalanceService = leaveBalanceService;
       _leaveProcessingService = leaveProcessingService;
       _passwordHasher = passwordHasher;
+      _userCompanyService = userCompanyService;
     }
     /// <summary>
     /// Retrieves all employees from the repository.
     /// </summary>
     /// <returns>A list of all employees.</returns>
-    public async Task<List<EmployeeDto>> GetAllEmployeesAsync()
+    public async Task<List<EmployeeDto>> GetAllEmployeesAsync(int userId)
     {
-      var employees = await _employeeRepo.GetAllEmployeesAsync();
+      var activeCompanyId = await _activeCompanyService.GetActiveCompanyIdAsync(userId);
+
+      var employees = await _employeeRepo.GetAllEmployeeByCompanyAsync(activeCompanyId);
 
       await _leaveProcessingService.RecalculateAllSickLeaveAsync();
       await _leaveProcessingService.RecalculateAllFamilyResponsibilityLeaveAsync();
@@ -85,13 +92,21 @@ namespace HRConnect.Api.Services
     /// </summary>
     /// <param name="EmployeeId">The employee identifier.</param>
     /// <returns>The employee if found; otherwise null.</returns>
-    public async Task<EmployeeDto?> GetEmployeeByIdAsync(string employeeId)
-    {
+    public async Task<EmployeeDto?> GetEmployeeByIdAsync(int userId, string employeeId)
+    { 
+      var activeCompanyId = await _activeCompanyService.GetActiveCompanyIdAsync(userId);
 
       //Recalculate leave balances for the employee before returning the data
       await _leaveBalanceService.RecalculateAnnualLeaveAsync(employeeId);
 
       var employee = await _employeeRepo.GetEmployeeByIdAsync(employeeId);
+
+      if (employee == null)
+          throw new ValidationException("Employee does not exist");
+        
+      if (employee.CompanyId != activeCompanyId)
+          throw new UnauthorizedAccessException("Access denied to this employee.");
+
       return employee?.ToEmployeeDto();
     }
     public async Task<List<EmployeeDto>> GetAllEmployeesByCompanyAsync(string companyId)
@@ -111,7 +126,7 @@ namespace HRConnect.Api.Services
     /// </summary>
     /// <param name="employeeRequestDto">Employee creation request data.</param>
     /// <returns>The newly created employee entity and the Welcome email sent.</returns>
-    public async Task<EmployeeDto> CreateEmployeeAsync(CreateEmployeeRequestDto employeeRequestDto)
+    public async Task<EmployeeDto> CreateEmployeeAsync(int userId, CreateEmployeeRequestDto employeeRequestDto)
     {
       // Validate Common Fields
       ValidateCommonFields(employeeRequestDto);
@@ -127,9 +142,11 @@ namespace HRConnect.Api.Services
       ValidateTitleAndGender(employeeRequestDto);
       employeeRequestDto.EmployeeId = await GenerateUniqueEmpId(employeeRequestDto.Surname);
 
-      var company = await _companyRepo.GetCompanyByIdAsync(employeeRequestDto.CompanyId);
+      var activeCompanyId = await _activeCompanyService.GetActiveCompanyIdAsync(userId);
+
+      var company = await _companyRepo.GetCompanyByIdAsync(activeCompanyId);
       if (company == null)
-        throw new ValidationException($"Company with ID {employeeRequestDto.CompanyId} does not exist.");
+        throw new ValidationException($"Company with ID {activeCompanyId} does not exist.");
 
       var position = await _positionRepo.GetPositionByIdAsync(employeeRequestDto.PositionId);
       if (position == null)
@@ -148,7 +165,15 @@ namespace HRConnect.Api.Services
       try
       {
         var createdEmployee = await _employeeRepo.CreateEmployeeAsync(new_employee);
-        await EnsureUserRecordAsync(createdEmployee);
+        var user = await EnsureUserRecordAsync(createdEmployee);
+        //Assign company to user
+        await _userCompanyService.AssignCompanyToUserAsync(
+          user.UserId,
+          new CreateUserCompanyDto
+          {
+            CompanyId = createdEmployee.CompanyId
+          }
+        );
         // Initialize leave balances for the new employee.
         await _leaveBalanceService.InitializeEmployeeLeaveBalancesAsync(createdEmployee.EmployeeId);
         await _leaveBalanceService.RecalculateAnnualLeaveAsync(createdEmployee.EmployeeId);
@@ -171,7 +196,7 @@ namespace HRConnect.Api.Services
     /// <param name="EmployeeId">The employee identifier.</param>
     /// <param name="employeeDto">Updated employee data.</param>
     /// <returns>The updated employee or null if not found.</returns>
-    public async Task<EmployeeDto?> UpdateEmployeeAsync(string employeeId, UpdateEmployeeRequestDto employeeDto)
+    public async Task<EmployeeDto?> UpdateEmployeeAsync(int userId, string employeeId, UpdateEmployeeRequestDto employeeDto)
     {
       var existingEmployee = await _employeeRepo.GetEmployeeByIdAsync(employeeId);
       if (existingEmployee == null)
@@ -190,9 +215,11 @@ namespace HRConnect.Api.Services
       if (position == null)
         throw new ValidationException($"Position with ID {employeeDto.PositionId} does not exist.");
 
-      var company = await _companyRepo.GetCompanyByIdAsync(employeeDto.CompanyId);
+      var activeCompanyId = await _activeCompanyService.GetActiveCompanyIdAsync(userId);
+
+      var company = await _companyRepo.GetCompanyByIdAsync(activeCompanyId);
       if (company == null)
-        throw new ValidationException($"Company with ID {employeeDto.CompanyId} does not exist.");
+        throw new ValidationException($"Company with ID {activeCompanyId} does not exist.");
 
       existingEmployee.PositionId = position.PositionId;
       existingEmployee.Position = position;
@@ -332,13 +359,18 @@ namespace HRConnect.Api.Services
     /// </summary>
     /// <param name="EmployeeId">The employee identifier.</param>
     /// <returns>True if deletion successful.</returns>
-    public async Task<bool> DeleteEmployeeAsync(string employeeId)
+    public async Task<bool> DeleteEmployeeAsync(int userId, string employeeId)
     {
+      var activeCompanyId = await _activeCompanyService.GetActiveCompanyIdAsync(userId);
+
       var existingEmployee = await _employeeRepo.GetEmployeeByIdAsync(employeeId);
 
       if (existingEmployee == null)
         throw new NotFoundException("Employee not found");
 
+      if (existingEmployee.CompanyId != activeCompanyId)
+        throw new UnauthorizedAccessException("You cannot delete employees from another company.");
+      
       var now = DateTime.UtcNow;
       // Business rule: Only allow deletion within the same start month
       if (existingEmployee.StartDate.Year != now.Year || existingEmployee.StartDate.Month != now.Month)
@@ -402,7 +434,7 @@ namespace HRConnect.Api.Services
       await _emailService.SendEmailAsync(employee.Email, subject, body);
     }
 
-    private async Task EnsureUserRecordAsync(Employee employee, string? previousEmail = null)
+    private async Task<User> EnsureUserRecordAsync(Employee employee, string? previousEmail = null)
     {
       var currentEmail = employee.Email.Trim();
       User? user = null;
@@ -423,14 +455,14 @@ namespace HRConnect.Api.Services
 
           user.Email = currentEmail;
           await _context.SaveChangesAsync();
-          return;
+          return user;
         }
       }
 
       user ??= await _context.Users.FirstOrDefaultAsync(existingUser => existingUser.Email == currentEmail);
       if (user != null)
       {
-        return;
+        return user;
       }
 
       var newUser = new User
@@ -444,6 +476,8 @@ namespace HRConnect.Api.Services
 
       await _context.Users.AddAsync(newUser);
       await _context.SaveChangesAsync();
+
+      return newUser;
     }
     /// <summary>
     /// Extracts Date of Birth and Gender from the provided ID Number.

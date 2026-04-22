@@ -5,8 +5,10 @@ namespace HRConnect.Api.Controllers
   using System.Threading.Tasks;
   using HRConnect.Api.Mappers;
   using HRConnect.Api.Models;
+  using System.Globalization;
   using Microsoft.AspNetCore.Mvc;
   using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Utils;
   using HRConnect.Api.DTOs.Employee;
   using Microsoft.AspNetCore.Authorization;
   using HRConnect.Api.DTOs;
@@ -29,7 +31,9 @@ namespace HRConnect.Api.Controllers
     [Authorize(Roles = "SuperUser")]
     public async Task<IActionResult> GetAllEmployees()
     {
-      var employees = await _employeeService.GetAllEmployeesAsync();
+      var userId = User.GetUserId();
+
+      var employees = await _employeeService.GetAllEmployeesAsync(userId);
       return Ok(employees);
     }
 
@@ -37,7 +41,9 @@ namespace HRConnect.Api.Controllers
     [Authorize(Roles = "SuperUser")]
     public async Task<IActionResult> GetEmployeeById(string EmployeeId)
     {
-      var employee = await _employeeService.GetEmployeeByIdAsync(EmployeeId);
+      var userId = User.GetUserId();
+
+      var employee = await _employeeService.GetEmployeeByIdAsync(userId, EmployeeId);
       if (employee == null)
         return NotFound();
 
@@ -56,7 +62,9 @@ namespace HRConnect.Api.Controllers
     [Authorize(Roles = "SuperUser")]
     public async Task<IActionResult> CreateEmployee([FromBody] CreateEmployeeRequestDto employeeDto)
     {
-      var employee = await _employeeService.CreateEmployeeAsync(employeeDto);
+      var userId = User.GetUserId();
+
+      var employee = await _employeeService.CreateEmployeeAsync(userId, employeeDto);
       return CreatedAtAction(nameof(GetEmployeeById), new { employeeId = employee.EmployeeId }, employee);
     }
 
@@ -64,7 +72,9 @@ namespace HRConnect.Api.Controllers
     [Authorize(Roles = "SuperUser")]
     public async Task<IActionResult> UpdateEmployee(string EmployeeId, [FromBody] UpdateEmployeeRequestDto employeeDto)
     {
-      var updatedEmployee = await _employeeService.UpdateEmployeeAsync(EmployeeId, employeeDto);
+      var userId = User.GetUserId();
+
+      var updatedEmployee = await _employeeService.UpdateEmployeeAsync(userId, EmployeeId, employeeDto);
       if (updatedEmployee == null)
         return NotFound();
 
@@ -106,7 +116,10 @@ namespace HRConnect.Api.Controllers
     [Authorize(Roles = "SuperUser")]
     public async Task<IActionResult> DeleteEmployee(string EmployeeId)
     {
-      var deletedEmployee = await _employeeService.DeleteEmployeeAsync(EmployeeId);
+
+      var userId = User.GetUserId();
+
+      var deletedEmployee = await _employeeService.DeleteEmployeeAsync(userId, EmployeeId);
       if (!deletedEmployee)
         return NotFound();
 

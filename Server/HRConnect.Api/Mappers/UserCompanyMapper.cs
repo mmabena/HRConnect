@@ -17,11 +17,11 @@ namespace HRConnect.Api.Mappers
                 IsDefault = userCompanyModel.IsDefault
             };
         }
-        public static UserCompany ToUserCompanyFromCreateDTO(this CreateUserCompanyDto userCompanyRequestDto)
+        public static UserCompany ToUserCompanyFromCreateDTO(this CreateUserCompanyDto userCompanyRequestDto, int userId)
         {
             return new UserCompany
             {
-                UserId = userCompanyRequestDto.UserId,
+                UserId = userId,
                 CompanyId = userCompanyRequestDto.CompanyId,
                 IsDefault = userCompanyRequestDto.IsDefault,
                 CreatedAt = DateTime.UtcNow

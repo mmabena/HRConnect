@@ -117,9 +117,9 @@ namespace HRConnect.Api.Data
           .HasIndex(o => o.Description)
           .IsUnique();
 
-      modelBuilder.Entity<PayrollRecord>()
-      .HasIndex(x => new { x.PayrollRunId, x.EmployeeId })
-      .IsUnique();
+      // modelBuilder.Entity<PayrollRecord>()
+      //     .HasIndex(x => new { x.PayrollRunId, x.EmployeeId })
+      //     .IsUnique();
 
       modelBuilder.Entity<Employee>().Property(e => e.Title).HasConversion<string>();
       modelBuilder.Entity<Employee>().Property(e => e.Gender).HasConversion<string>();

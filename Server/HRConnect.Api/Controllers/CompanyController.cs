@@ -29,7 +29,7 @@ namespace HRConnect.Api.Controllers
       return Ok(companies);
     }
 
-    [HttpGet("{CompanyId}")]
+    [HttpGet("{companyId}")]
     [Authorize(Roles = "SuperUser")]
     public async Task<IActionResult> GetCompanyById(string companyId)
     {

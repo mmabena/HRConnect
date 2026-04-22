@@ -10,5 +10,6 @@ namespace HRConnect.Api.Interfaces
         Task<bool> UserCompanyExistsAsync(int userId, string companyId);
         Task<UserCompany> CreateUserCompanyAsync(UserCompany userCompanyModel);
         Task<List<UserCompany>> GetUserCompaniesByUserIdAsync(int userId);
+        Task UpdateRangeAsync(List<UserCompany> userCompanies);
     }
 }

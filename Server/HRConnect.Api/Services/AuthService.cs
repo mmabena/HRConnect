@@ -4,6 +4,7 @@ namespace HRConnect.Api.Services
   using System.Security.Claims;
   using System.IdentityModel.Tokens.Jwt;
   using HRConnect.Api.Interfaces;
+  using System.Globalization;
   using System.Collections.Concurrent;
   using HRConnect.Api.Models;
   using Microsoft.AspNetCore.Identity;
@@ -164,6 +165,7 @@ namespace HRConnect.Api.Services
       var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+            new Claim("UserId", user.UserId.ToString(CultureInfo.InvariantCulture)),
             new Claim("role", user.Role.ToString())
         };
 

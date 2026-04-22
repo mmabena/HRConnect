@@ -7,7 +7,6 @@ namespace HRConnect.Api.DTOs.UserCompany
 {
     public class CreateUserCompanyDto
     {
-        public int UserId { get; set; }
         public string CompanyId { get; set; } = string.Empty;
         public bool IsDefault { get; set; }
     }

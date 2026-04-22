@@ -79,6 +79,7 @@ namespace HRConnect.Api.Repository
     public async Task<List<Employee>> GetAllEmployeeByCompanyAsync(string companyId)
     {
       return await _context.Employees
+              .Include(e => e.Position)
               .Where(e => e.CompanyId == companyId)
               .ToListAsync();
     }
