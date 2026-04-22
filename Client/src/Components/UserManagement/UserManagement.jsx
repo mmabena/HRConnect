@@ -3,6 +3,7 @@ import ActionsModal from "../ActionModal"; // Import the new ActionsModal
 import { fetchUsersAndRoles, updateUserRole } from "../../api/UserManagement";
 import {fetchAllEmployees} from '../../api/Employee.js'
 import { getStoredUserRole } from "../../utils/roleUtils";
+import useInitialColors from "../../hooks/useInitialColors";
 import { resolveRole } from "../../utils/roleUtils.js";
 import {
   FaUser,
@@ -14,6 +15,7 @@ import {
   FaEllipsisV,
   FaTimes,
 } from "react-icons/fa";
+import "./UserManagement.css";
 
 // Status constants
 const USER_STATUS = {
@@ -34,6 +36,8 @@ const UserManagement = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [loggedInUser, setLoggedInUser] = useState(null);
 
+  const {COLORS}=useInitialColors();
+
     const loadData = async () => {
       try {
         setIsLoading(true);
@@ -46,12 +50,13 @@ const UserManagement = () => {
           console.log(employee)
           return{
           ...user,
+          branch:employee.city||"",
           name: `${employee.name} ${employee.surname}` || user.email,
           role: user.role || roles.find((r) => Number(r.roleId) === Number(user.roleId))?.name || "Unknown Role",
           status:"Active",
           statusValue: USER_STATUS.ACTIVE, }});
 
-        setUsers(mappedUsers);
+          setUsers(mappedUsers);
           setLoggedInUser(mappedUsers[0]||null);
           setCurrentUserRole(getStoredUserRole().roleName || "User");
 
@@ -193,21 +198,22 @@ const UserManagement = () => {
 
       {activeTab === "userProfile" && (
         <>
-
+        {/*Card on top of the table*/} 
+            <div className="payslip-card">
+              <div className="payslip-ribbon">
+               <span className="card-title">
+                User Profile
+               </span>
+              </div>
+            {/*2nd Row on is the rest of the table*/}
             <table className="styled-table">
               <thead>
-                  <tr className="table-ribbon">
-                  <th colSpan="4" className="ribbon-title">
-                  <p className="title">
-                    User Profiles
-                  </p>
-                   </th>
-                  </tr>
-                <tr>
+                <tr className="heading">
                   <th>User</th>
                   <th>Email</th>
+                  <th>Branch</th>
                   <th>Role</th>
-                  <th>Actions</th>
+                  <th className="action-col">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -215,30 +221,36 @@ const UserManagement = () => {
                   <tr key={idx}>
                     <td>
                       <div className="user-info">
-                        <div className="avatar-circle">{user.name?.[0] || "?"}</div>
+                        <div className={`initials-circle
+                        ${COLORS[idx % COLORS.length]}
+                      `}>
+                  {user.name?.[0] || "?"}</div>
                         <span className="user-name">{user.name || "Unknown User"}</span>
                       </div>
                     </td>
                     <td>{user.email || "No email"}</td>
+                    <td>{user.branch}</td>
                     <td>
                       <span className={`role-badge ${(user.role || "").toLowerCase()}`}>
                         <FaUserLock /> {user.role || "Unknown Role"}
                       </span>
                     </td>
 
+
                     <td className="action-buttons">
                       <button
                         className="actions-trigger-btn"
                         onClick={() => handleShowActions(idx)}
                       >
-                        <FaEllipsisV /> 
-                  Actions
+                        <FaEllipsisV />
+                        Actions
                       </button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+          </div>
 
           <ActionsModal
             isOpen={selectedUserIndex !== null}
