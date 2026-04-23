@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import ActionsModal from "../ActionModal"; // Import the new ActionsModal
+import ActionsModal from "./RoleModal.jsx"; // Import the new ActionsModal
 import { fetchUsersAndRoles, updateUserRole } from "../../api/UserManagement";
 import { fetchAllEmployees } from '../../api/Employee.js'
 import { getStoredUserRole } from "../../utils/roleUtils";
 import useInitialColors from "../../hooks/useInitialColors";
 import { resolveRole } from "../../utils/roleUtils.js";
+import {SlidersHorizontal} from "lucide-react"
 import {
   FaUser,
   FaUsers,
@@ -16,6 +17,8 @@ import {
   FaTimes,
 } from "react-icons/fa";
 import "./UserManagement.css";
+import usePagination from "../../hooks/useEmpPagination.js";
+import useDropdown from "../../hooks/useDropdown";
 
 // Status constants
 const USER_STATUS = {
@@ -91,7 +94,7 @@ const UserManagement = () => {
     }
     const user = users[selectedUserIndex];
     if (user) {
-      setEditRole(user.roleId ?? ""); // store roleId for select value
+      setEditRole(user.roleId ?? ""); 
       setEditStatus(Number(user.statusValue));
       setShowEditEmployeeModal(true);
       handleCloseActions();
@@ -162,6 +165,19 @@ const UserManagement = () => {
     }
   };
 
+  const {
+      activePage,
+      setActivePage,
+      itemsPerPage,
+      setItemsPerPage,
+      totalPages,
+      indexOfFirstItem,
+      indexOfLastItem,
+      currentItems
+  }=usePagination(users);
+
+  const { dropdownOpen, toggleDropdown, closeDropdown } = useDropdown();
+
   const filteredUsers = users.filter((user) => {
     const searchLower = searchTerm.toLowerCase();
     return (
@@ -181,6 +197,12 @@ const UserManagement = () => {
         </div>
       </div>
     );
+  const handleItemsPerPageChange = (option) => {
+    setItemsPerPage(option);
+    closeDropdown();
+    setActivePage(1);
+  };
+
 
   return (
     <div className="menu-background">
@@ -188,7 +210,14 @@ const UserManagement = () => {
       <div className="top-bar">
         <FaUsers size={25} />
         <h2>User Management</h2>
-        <div className="search-bar" style={{ marginLeft: 'auto' }}>
+            <button
+              className="filter-btn"
+            >
+              <SlidersHorizontal size={20} />
+            
+              Filter
+            </button>
+        <div className="search-bar" >
           <input
             type="text"
             placeholder=" Search users..."
@@ -226,7 +255,8 @@ const UserManagement = () => {
                         <div className={`initials-circle
                         ${COLORS[idx % COLORS.length]}
                       `}>
-                          {user.name?.[0] || "?"}</div>
+                          {(`${(user.name[0]||"").charAt(0)}
+                          ${(user.name[1]||"").charAt(0)}`)}</div>
                         <span className="user-name">{user.name || "Unknown User"}</span>
                       </div>
                     </td>
@@ -268,8 +298,7 @@ const UserManagement = () => {
           {showEditEmployeeModal && selectedUserIndex !== null && (
             <div
               className="actions-modal-overlay"
-              onClick={() => setShowEditEmployeeModal(false)}
-            >
+              onClick={() => setShowEditEmployeeModal(false)}>
               <div className="actions-modal" onClick={(e) => e.stopPropagation()}>
                 <div className="actions-modal-header">
                   <h3>Edit {users[selectedUserIndex].name}</h3>
@@ -322,6 +351,105 @@ const UserManagement = () => {
               </div>
             </div>
           )}
+        
+  <div className="pagination-container">
+        <div className="pagination-left-section">
+          <span className="pagination-range">
+            <strong className="range-bold">
+              {indexOfFirstItem + 1} -{" "}
+              {Math.min(indexOfLastItem, filteredUsers.length)}
+            </strong>{" "}
+            of {filteredUsers.length}
+          </span>
+
+          <div className="per-page-box" onClick={toggleDropdown}>
+            <span className="per-page-number">{itemsPerPage}</span>
+            <img
+              src="/images/arrow_drop_down_circle.png"
+              alt="Dropdown"
+              className="dropdown-icon"
+            />
+            {dropdownOpen && (
+              <div className="dropdown-options">
+                {[10].map((option) => (
+                  <div
+                    key={option}
+                    className="dropdown-option"
+                    onClick={() => handleItemsPerPageChange(option)}
+                  >
+                    {option}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <span className="per-page-label">Per page</span>
+        </div>
+
+        <div className="pagination-right-section">
+          <div className="pagination-controls">
+            {/* Go to First Page */}
+            <img
+              src="/images/arrow_drop_down_circle.png"
+              alt="First"
+              className={`pagination-arrow ${activePage === 1 ? "disabled" : ""}`}
+              onClick={() => activePage > 1 && setActivePage(1)}
+            />
+
+            {/* Go to Previous Page */}
+            <img
+              src="/images/arrow_drop_down_circle.png"
+              alt="Previous"
+              className={`pagination-arrow ${activePage === 1 ? "disabled" : ""}`}
+              onClick={() => activePage > 1 && setActivePage(activePage - 1)}
+            />
+
+            {/* Page numbers remain the same */}
+            <div className="page-count">
+              {Array.from({ length: totalPages || 1 }, (_, i) => {
+                const pageNum = i + 1;
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => setActivePage(pageNum)}
+                    className={`page-number ${activePage === pageNum ? "active" : ""}`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Go to Next Page */}
+            <img
+              src="/images/arrow_drop_down_circle.png"
+              alt="Next"
+              className={`pagination-arrow next ${
+                activePage === totalPages ? "disabled" : ""
+              }`}
+              onClick={() =>
+                activePage < totalPages && setActivePage(activePage + 1)
+              }
+            />
+
+            {/* Go to Last Page */}
+            <img
+              src="/images/arrow_drop_down_circle.png"
+              alt="Last"
+              className={`pagination-arrow next ${
+                activePage === totalPages ? "disabled" : ""
+              }`}
+              onClick={() =>
+                activePage < totalPages && setActivePage(totalPages)
+              }
+            />
+          </div>
+          <div className="employee-count">
+            {`${filteredUsers.length} Admins @ Singular`}
+          </div>
+        </div>
+      </div>
         </>
       )}
     </div>

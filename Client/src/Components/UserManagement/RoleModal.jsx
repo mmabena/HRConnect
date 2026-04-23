@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { FaTimes, FaEdit } from "react-icons/fa";
-import { resolveRole } from "../utils/roleUtils";
-import { fetchRoles, updateUserRole } from "../api/UserManagement";
+import { resolveRole } from "../../utils/roleUtils";
+import { fetchRoles, updateUserRole } from "../../api/UserManagement";
+import "./RoleModal.css"
 
-const ActionsModal = ({ isOpen, onClose, user, onSuccess }) => {
+const RolesModal = ({ isOpen, onClose, user, onSuccess }) => {
   const [roles, setRoles] = useState([]);
   const [selectedRole, setSelectedRole] = useState(0);
-  const [selectedStatus, setSelectedStatus] = useState(1); // Default active
   const [showDropdowns, setShowDropdowns] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -74,9 +74,9 @@ const ActionsModal = ({ isOpen, onClose, user, onSuccess }) => {
   return (
     <div className="actions-modal-overlay" onClick={onClose}>
       <div className="actions-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="actions-modal-header">
+        <div className="roles-modal-header">
           <h3>
-            Actions for {user.firstName} {user.lastName}
+            Roles for {user.firstName} {user.lastName}
           </h3>
           <button className="close-btn" onClick={onClose}>
             <FaTimes />
@@ -112,20 +112,6 @@ const ActionsModal = ({ isOpen, onClose, user, onSuccess }) => {
                 </select>
               </div>
 
-              {/* <div className="form-group"> */}
-              {/*   <label htmlFor="statusSelect">Status:</label> */}
-              {/*   <select */}
-              {/*     id="statusSelect" */}
-              {/*     value={selectedStatus} */}
-              {/*     onChange={(e) => { */}
-              {/*       const val = Number(e.target.value); */}
-              {/*       if (val === 0 || val === 1) setSelectedStatus(val); */}
-              {/*     }} */}
-              {/*   > */}
-              {/*     <option value={1}>Active</option> */}
-              {/*     <option value={0}>Inactive</option> */}
-              {/*   </select> */}
-              {/* </div> */}
             </>
           )}
 
@@ -145,4 +131,4 @@ const ActionsModal = ({ isOpen, onClose, user, onSuccess }) => {
   );
 };
 
-export default ActionsModal;
+export default RolesModal;

@@ -1,0 +1,27 @@
+.roles-modal-header h3{
+color:white;
+}
+.roles-modal-header{
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 36px 32px 33px 32px;
+gap: 285px;
+
+height: 76px;
+
+background: #355867;
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+}
+
+.close-btn{
+width: 34px;
+height: 34px;
+background: rgba(255, 255, 255, 0.15);
+border-radius: 10px;
+color:white;
+margin-left:auto;
+}
