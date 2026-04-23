@@ -8,6 +8,7 @@ import EditLeaveTypeModal from "./EditLeaveTypeModal";
 import { toggleLeaveTypeStatus } from "../../api/leaveTypeApi";
 import ConfirmStatusModal from "./ConfirmStatusModal";
 import { Dot } from 'lucide-react';
+import { Plus } from "lucide-react";
 
 
 const LeaveTables = () => {
@@ -86,7 +87,8 @@ const confirmToggle = async () => {
 
     <div className="lt-top-section">
       <button className="lt-add-btn" onClick={() => setShowModal(true)}>
-          + Add Leave Type
+        <Plus className="add-icon" />
+        <span className="add-text">Add Leave Type</span>
       </button>
     </div>
 

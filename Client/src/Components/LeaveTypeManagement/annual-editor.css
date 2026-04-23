@@ -207,3 +207,7 @@
   color: #355867;
   cursor: not-allowed;
 }
+.input-error {
+  border: 1px solid #e83131 !important;
+  background-color: rgba(232, 49, 49, 0.05);
+}

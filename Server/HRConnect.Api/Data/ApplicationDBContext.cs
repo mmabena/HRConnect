@@ -134,6 +134,10 @@ namespace HRConnect.Api.Data
           .HasIndex(x => new { x.JobGradeId, x.GroupKey })
           .IsUnique();
 
+      modelBuilder.Entity<EmployeeCompanyContribution>()
+    .HasIndex(e => new { e.PayrollRunId, e.EmployeeId })
+    .IsUnique();
+
       // Company Contributions
       modelBuilder.Entity<CompanyContribution>()
           .Property(c => c.Percentage)
@@ -195,7 +199,7 @@ namespace HRConnect.Api.Data
       modelBuilder.Entity<PayrollPeriod>().Property(p => p.IsLocked).IsConcurrencyToken();
       modelBuilder.Entity<PayrollRecord>().Property(p => p.IsLocked).IsConcurrencyToken();
 
-      // Medical Aid
+      // Medical Aid //EmployeeCompanyContributions
       modelBuilder.Entity<MedicalAidDeduction>()
           .HasOne(m => m.MedicalOption)
           .WithMany()

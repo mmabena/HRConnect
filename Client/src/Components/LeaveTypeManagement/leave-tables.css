@@ -32,12 +32,30 @@
   margin-top: -10px;
 }
 .lt-add-btn {
-  background-color: #638549; 
-  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 6px 16px;
+
+  background-color: #638549;
   border: none;
-  padding: 8px 17px;
   border-radius: 8px;
   cursor: pointer;
+}
+.add-text {
+  font-family: 'Anek Bangla', sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 37px;
+  letter-spacing: 0.02em;
+  color: #FFFFFF;
+}
+.add-icon {
+  width: 20px;
+  height: 20px;
+  color: #FFFFFF;
 }
 
 .lt-table {
@@ -189,8 +207,7 @@
 
   font-size: 13px;
   padding: 4px 12px;
-  cursor: pointer;
-  white-space: nowrap;    
+  cursor: pointer;  
 }
 .lt-status.active {
   background: rgba(99, 133, 73, 0.35);

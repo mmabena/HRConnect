@@ -9,6 +9,7 @@ const AnnualLeaveEditor = ({ leaveType, onSuccess, onClose, isEditing, setIsEdit
   const [customRules, setCustomRules] = useState([]);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState(""); 
+  const [errorFields, setErrorFields] = useState({});
 
   const buildGroupedRules = () => {
   return {
@@ -37,6 +38,11 @@ const AnnualLeaveEditor = ({ leaveType, onSuccess, onClose, isEditing, setIsEdit
       [field]: value
     }
   }));
+  setErrorFields(prev => {
+  const copy = { ...prev };
+  delete copy[ruleKey];
+  return copy;
+});
 };
  const handleAddRange = () => {
 
@@ -64,17 +70,34 @@ const hasChanges =
 const showMessage = (text, type = "error") => {
   setMessage(text);
   setMessageType(type);
-
-  setTimeout(() => {
-    setMessage("");
-    setMessageType("");
-  }, 5000);
 };
 
   const handleRemoveRange = (id) => {
     setCustomRules(prev => prev.filter(r => r.id !== id));
   };
+const mapBackendError = (message) => {
+  if (!message) return "Something went wrong";
 
+  const msg = message.toLowerCase();
+
+  if (msg.includes("daysallocated")) {
+    return "Leave days must be greater than 0";
+  }
+
+  if (msg.includes("maxyearsservice") && msg.includes("less")) {
+    return "Max years cannot be less than minimum years";
+  }
+
+  if (msg.includes("gap detected")) {
+    return "Service ranges must be continuous with no gaps";
+  }
+
+  if (msg.includes("duplicate")) {
+    return "Duplicate service ranges are not allowed";
+  }
+
+  return "Unable to save changes. Please check your inputs.";
+};
  const handleSave = async () => {
   try {
 
@@ -153,7 +176,8 @@ const finalRules = allRules.map((r, index) => {
     message = message.title || JSON.stringify(message);
   }
 
-  showMessage(message || "Failed to update leave type", "error");
+  const friendlyMessage = mapBackendError(message);
+showMessage(friendlyMessage, "error");
 }
 };
 
