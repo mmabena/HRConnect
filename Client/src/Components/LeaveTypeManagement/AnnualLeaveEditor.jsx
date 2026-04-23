@@ -89,11 +89,11 @@ const mapBackendError = (message) => {
   }
 
   if (msg.includes("gap detected")) {
-    return "Service ranges must be continuous with no gaps";
+    return "Employement year ranges must have no gaps between them. (Min and Max years)";
   }
 
   if (msg.includes("duplicate")) {
-    return "Duplicate service ranges are not allowed";
+    return "Duplicate year service ranges are not allowed";
   }
 
   return "Unable to save changes. Please check your inputs.";
@@ -104,9 +104,7 @@ const mapBackendError = (message) => {
   const allRules = [...leaveType.rules, ...customRules];
 
 const finalRules = allRules.map((r, index) => {
-  const ruleKey = r.id?.startsWith("new-")
-    ? r.id
-    : `${r.groupKey}-${r.minYearsService}`;
+ const ruleKey = r.id ?? `${r.groupKey}-${index}`;
 
   const edited = editedRules[ruleKey];
 
@@ -224,9 +222,7 @@ showMessage(friendlyMessage, "error");
 
           {currentRules.map((r, index) => {
 
-            const ruleKey = r.id?.startsWith("new-")
-                ? r.id
-                : `${r.groupKey}-${r.minYearsService}`;
+            const ruleKey = r.id ?? `${r.groupKey}-${index}`;
             const edited = editedRules[ruleKey] || {};
 
             return (
