@@ -162,6 +162,11 @@ const displayData = useMemo(() =>
         header: "Child" , key: "child", render: () => {
 
         }
+      },
+      {
+        header: "Child2+", key: "child2+", render: () => {
+
+        }
       }
     ];
 
@@ -452,30 +457,35 @@ const displayData = useMemo(() =>
                         {/* Dynamic Data rendered here */}
                         <td>
                             {
-                                (Number(displayData[0]?.monthlyRiskContributionPrincipal) === 0 ||
-                                displayData[0]?.monthlyRiskContributionPrincipal === null ||
-                                displayData[0]?.monthlyRiskContributionPrincipal === undefined)
-                                    ? formatToLocalCurrency(displayData[0]?.monthlyRiskContributionAdult, "en-ZA")
-                                    : "-"
+                                (Number(displayData[0]?.monthlyRiskContributionPrincipal) > 0)
+                                ?  formatToLocalCurrency(displayData[0]?.monthlyRiskContributionPrincipal, "en-ZA")
+                                :  displayData[0]?.monthlyRiskContributionPrincipal === null
+                                   ?  displayData[0].monthlyRiskContributionAdult
+                                   :  "-"
                             }
                         </td>
                         <td>
                             {
-                                (Number(displayData[0]?.monthlyRiskContributionAdult) === 0 ||
-                                displayData[0]?.monthlyRiskContributionAdult === null ||
-                                displayData[0]?.monthlyRiskContributionAdult === undefined)
-                                    ? "-"
-                                    : formatToLocalCurrency(displayData[0]?.monthlyRiskContributionAdult, "en-ZA")
+                                (Number(displayData[0]?.monthlyRiskContributionAdult) > 0)
+                                ?  formatToLocalCurrency(displayData[0]?.monthlyRiskContributionAdult, "en-ZA")
+                                :  "-"
                             }
 
                         </td>
                         <td>
                             {
-                                (Number(displayData[0]?.monthlyRiskContributionChild) === 0 ||
-                                displayData[0]?.monthlyRiskContributionChild === null ||
-                                displayData[0]?.monthlyRiskContributionChild === undefined)
-                                    ? "-"
-                                    : formatToLocalCurrency(displayData[0]?.monthlyRiskContributionChild, "en-ZA")
+                                (Number(displayData[0]?.monthlyRiskContributionAdult) > 0)
+                                ?  formatToLocalCurrency(displayData[0]?.monthlyRiskContributionChild, "en-ZA")
+                                :  "-"
+                            }
+                        </td>
+                        <td>
+                            {
+                                ((displayData[0]?.monthlyRiskContributionChild2) === null)
+                                ? formatToLocalCurrency(displayData[0]?.monthlyRiskContributionChild, "en-ZA")
+                                : Number(displayData[0]?.monthlyRiskContributionChild2) > 0
+                                    ? formatToLocalCurrency(displayData[0]?.monthlyRiskContributionChild2, "en-ZA")
+                                    : "-"
                             }
                         </td>
                     </tr>
@@ -507,24 +517,26 @@ const displayData = useMemo(() =>
                         </td>
                         {/* Dynamic Data rendered here */}
                         <td>
-
-                                {
-                                    Number(displayData[0]?.monthlyMsaContributionPrincipal) === 0 ||
-                                    displayData[0]?.monthlyMsaContributionPrincipal === null ||
-                                    displayData[0]?.monthlyMsaContributionPrincipal === undefined
-                                        ? formatToLocalCurrency(displayData[0]?.monthlyMsaContributionAdult, "en-ZA")
-                                        : "-"
-                                }
-
-
+                            {
+                                (Number(displayData[0]?.monthlyMsaContributionPrincipal) > 0)
+                                ? formatToLocalCurrency(displayData[0]?.monthlyMsaContributionPrincipal, "en-ZA")
+                                : (displayData[0]?.monthlyMsaContributionPrincipal === null && displayData[0]?.monthlyMsaContributionAdult !== null && displayData[0]?.monthlyMsaContributionAdult > 0)
+                                ? formatToLocalCurrency(displayData[0]?.monthlyMsaContributionAdult, "en-ZA")
+                                : "-"
+                            }
                         </td>
                         <td>
-                            {displayData[0]?.monthlyAdultContributionAdult
-                                ? formatToLocalCurrency(displayData[0]?.monthlyAdultContributionAdult)
+                            {displayData[0]?.monthlyMsaContributionAdult > 0
+                                ? formatToLocalCurrency(displayData[0]?.monthlyMsaContributionAdult, "en-ZA")
                                 : "-"}
                         </td>
                         <td>
-                            {displayData[0]?.monthlyMsaContributionChild
+                            {displayData[0]?.monthlyMsaContributionChild > 0
+                                ? formatToLocalCurrency(displayData[0]?.monthlyMsaContributionChild, "en-ZA")
+                                : "-"}
+                        </td>
+                        <td>
+                            {displayData[0]?.monthlyMsaContributionChild > 0
                                 ? formatToLocalCurrency(displayData[0]?.monthlyMsaContributionChild, "en-ZA")
                                 : "-"}
                         </td>
