@@ -240,8 +240,6 @@ namespace HRConnect.Api.Services
             application.RejectionReason = reason;
 
             await _context.SaveChangesAsync();
-
-            // 🔥 ALWAYS SEND EMAIL
             await SendEmployeeDecisionEmail(application, false);
         }
         /// <summary>

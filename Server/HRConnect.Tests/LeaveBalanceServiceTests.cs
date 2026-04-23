@@ -32,8 +32,6 @@ namespace HRConnect.Tests
 
             return new ApplicationDBContext(options);
         }
-
-        // 🔥 IMPORTANT: return CONCRETE types (fixes CA1859)
         private static LeaveBalanceService CreateLeaveBalanceService(ApplicationDBContext context)
             => new LeaveBalanceService(context);
 
@@ -55,65 +53,19 @@ namespace HRConnect.Tests
             );
         }
 
-        // ---------------- BASIC TEST ----------------
-
         [Fact]
         public async Task Initialize_ShouldCreateBalance()
         {
             var context = GetDb();
 
             context.JobGrades.Add(new JobGrade { JobGradeId = 1, Name = "G1" });
-            context.Positions.AddRange(
-      new Position { PositionId = 1, JobGradeId = 1, OccupationalLevelId = 1 },
-      new Position { PositionId = 2, JobGradeId = 1, OccupationalLevelId = 1 }
-            );
 
-            var employee = new Employee
+            context.JobGradeGroupMaps.Add(new JobGradeGroupMap
             {
-                EmployeeId = Guid.NewGuid().ToString(),
-                PositionId = 1,
-                Gender = Gender.Male,
-                StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1))
-            };
-
-            context.Employees.Add(employee);
-
-            context.LeaveTypes.Add(new LeaveType
-            {
-                Id = 1,
-                Code = "AL",
-                Name = "Annual Leave",
-                Description = "Annual Leave",
-                IsActive = true
-            });
-
-            context.LeaveEntitlementRules.Add(new LeaveEntitlementRule
-            {
-                Id = 1,
-                LeaveTypeId = 1,
                 JobGradeId = 1,
-                MinYearsService = 0,
-                DaysAllocated = 15,
-                IsActive = true
+                GroupKey = "G1"
             });
 
-            await context.SaveChangesAsync();
-
-            var service = CreateLeaveBalanceService(context);
-
-            await service.InitializeEmployeeLeaveBalancesAsync(employee.EmployeeId);
-
-            Assert.Single(context.EmployeeLeaveBalances);
-        }
-
-        // ---------------- DUPLICATE PROTECTION ----------------
-
-        [Fact]
-        public async Task Initialize_ShouldNotDuplicate()
-        {
-            var context = GetDb();
-
-            context.JobGrades.Add(new JobGrade { JobGradeId = 1, Name = "G1" });
             context.Positions.AddRange(
                 new Position { PositionId = 1, JobGradeId = 1, OccupationalLevelId = 1 },
                 new Position { PositionId = 2, JobGradeId = 1, OccupationalLevelId = 1 }
@@ -137,13 +89,79 @@ namespace HRConnect.Tests
                 Description = "Annual Leave",
                 IsActive = true
             });
-
             context.LeaveEntitlementRules.Add(new LeaveEntitlementRule
             {
                 Id = 1,
                 LeaveTypeId = 1,
-                JobGradeId = 1,
+                GroupKey = "G1",
                 MinYearsService = 0,
+                MaxYearsService = null,
+                DaysAllocated = 15,
+                IsActive = true
+            });
+
+            await context.SaveChangesAsync();
+
+            var service = CreateLeaveBalanceService(context);
+            context.EmployeeAccrualRateHistories.Add(new EmployeeAccrualRateHistory
+            {
+                EmployeeId = employee.EmployeeId,
+                AnnualEntitlement = 15,
+                DailyRate = 15m / 260m,
+                EffectiveFrom = employee.StartDate,
+                EffectiveTo = null,
+                CreatedDate = DateTime.UtcNow
+            });
+            await context.SaveChangesAsync();
+
+            await service.InitializeEmployeeLeaveBalancesAsync(employee.EmployeeId);
+
+            Assert.Single(context.EmployeeLeaveBalances);
+        }
+
+        [Fact]
+        public async Task Initialize_ShouldNotDuplicate()
+        {
+            var context = GetDb();
+
+            context.JobGrades.Add(new JobGrade { JobGradeId = 1, Name = "G1" });
+
+            context.JobGradeGroupMaps.Add(new JobGradeGroupMap
+            {
+                JobGradeId = 1,
+                GroupKey = "G1"
+            });
+
+            context.Positions.AddRange(
+                new Position { PositionId = 1, JobGradeId = 1, OccupationalLevelId = 1 },
+                new Position { PositionId = 2, JobGradeId = 1, OccupationalLevelId = 1 }
+            );
+
+            var employee = new Employee
+            {
+                EmployeeId = Guid.NewGuid().ToString(),
+                PositionId = 1,
+                Gender = Gender.Male,
+                StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1))
+            };
+
+            context.Employees.Add(employee);
+
+            context.LeaveTypes.Add(new LeaveType
+            {
+                Id = 1,
+                Code = "AL",
+                Name = "Annual Leave",
+                Description = "Annual Leave",
+                IsActive = true
+            });
+            context.LeaveEntitlementRules.Add(new LeaveEntitlementRule
+            {
+                Id = 1,
+                LeaveTypeId = 1,
+                GroupKey = "G1",
+                MinYearsService = 0,
+                MaxYearsService = null,
                 DaysAllocated = 15,
                 IsActive = true
             });
@@ -152,13 +170,20 @@ namespace HRConnect.Tests
 
             var service = CreateLeaveBalanceService(context);
 
-            await service.InitializeEmployeeLeaveBalancesAsync(employee.EmployeeId);
+            context.EmployeeAccrualRateHistories.Add(new EmployeeAccrualRateHistory
+            {
+                EmployeeId = employee.EmployeeId,
+                AnnualEntitlement = 15,
+                DailyRate = 15m / 260m,
+                EffectiveFrom = employee.StartDate,
+                EffectiveTo = null,
+                CreatedDate = DateTime.UtcNow
+            });
+            await context.SaveChangesAsync();
             await service.InitializeEmployeeLeaveBalancesAsync(employee.EmployeeId);
 
             Assert.Single(context.EmployeeLeaveBalances);
         }
-
-        // ---------------- PROMOTION ----------------
 
         [Fact]
         public async Task Promotion_ShouldPreserveTakenDays()
@@ -168,6 +193,11 @@ namespace HRConnect.Tests
             context.JobGrades.AddRange(
                 new JobGrade { JobGradeId = 1, Name = "G1" },
                 new JobGrade { JobGradeId = 2, Name = "G2" });
+
+            context.JobGradeGroupMaps.AddRange(
+                new JobGradeGroupMap { JobGradeId = 1, GroupKey = "G1" },
+                new JobGradeGroupMap { JobGradeId = 2, GroupKey = "G2" }
+            );
 
             context.OccupationalLevels.Add(new OccupationalLevel { OccupationalLevelId = 1, Description = "Level 1" });
 
@@ -198,13 +228,14 @@ namespace HRConnect.Tests
                 Description = "Annual Leave",
                 IsActive = true
             });
-
             context.LeaveEntitlementRules.AddRange(
                 new LeaveEntitlementRule
                 {
                     Id = 1,
                     LeaveTypeId = 1,
-                    JobGradeId = 1,
+                    GroupKey = "G1",
+                    MinYearsService = 0,
+                    MaxYearsService = null,
                     DaysAllocated = 15,
                     IsActive = true
                 },
@@ -212,7 +243,9 @@ namespace HRConnect.Tests
                 {
                     Id = 2,
                     LeaveTypeId = 1,
-                    JobGradeId = 2,
+                    GroupKey = "G2",
+                    MinYearsService = 0,
+                    MaxYearsService = null,
                     DaysAllocated = 20,
                     IsActive = true
                 });
@@ -221,7 +254,17 @@ namespace HRConnect.Tests
 
             var balanceService = CreateLeaveBalanceService(context);
             var employeeService = CreateEmployeeService(context);
+            context.EmployeeAccrualRateHistories.Add(new EmployeeAccrualRateHistory
+            {
+                EmployeeId = employee.EmployeeId,
+                AnnualEntitlement = 15,
+                DailyRate = 15m / 260m,
+                EffectiveFrom = employee.StartDate,
+                EffectiveTo = null,
+                CreatedDate = DateTime.UtcNow
+            });
 
+            await context.SaveChangesAsync();
             await balanceService.InitializeEmployeeLeaveBalancesAsync(employee.EmployeeId);
 
             var balance = context.EmployeeLeaveBalances.First();
@@ -250,15 +293,20 @@ namespace HRConnect.Tests
             Assert.Equal(5, context.EmployeeLeaveBalances.First().TakenDays);
         }
 
-        // ---------------- RESET ----------------
-
         [Fact]
         public async Task Reset_ShouldCapCarryoverAtFive()
         {
             var context = GetDb();
 
             context.JobGrades.Add(new JobGrade { JobGradeId = 1, Name = "G1" });
+            context.JobGradeGroupMaps.Add(new JobGradeGroupMap
+            {
+                JobGradeId = 1,
+                GroupKey = "G1"
+            });
+
             context.OccupationalLevels.Add(new OccupationalLevel { OccupationalLevelId = 1, Description = "Level 1" });
+
             context.Positions.AddRange(
                 new Position { PositionId = 1, JobGradeId = 1, OccupationalLevelId = 1 },
                 new Position { PositionId = 2, JobGradeId = 1, OccupationalLevelId = 1 }
@@ -282,12 +330,13 @@ namespace HRConnect.Tests
                 Description = "Annual Leave",
                 IsActive = true
             });
-
             context.LeaveEntitlementRules.Add(new LeaveEntitlementRule
             {
                 Id = 1,
                 LeaveTypeId = 1,
-                JobGradeId = 1,
+                GroupKey = "G1",
+                MinYearsService = 0,
+                MaxYearsService = null,
                 DaysAllocated = 15,
                 IsActive = true
             });
@@ -296,6 +345,17 @@ namespace HRConnect.Tests
 
             var balanceService = CreateLeaveBalanceService(context);
             var processingService = CreateLeaveProcessingService(context);
+            context.EmployeeAccrualRateHistories.Add(new EmployeeAccrualRateHistory
+            {
+                EmployeeId = employee.EmployeeId,
+                AnnualEntitlement = 15,
+                DailyRate = 15m / 260m,
+                EffectiveFrom = employee.StartDate,
+                EffectiveTo = null,
+                CreatedDate = DateTime.UtcNow
+            });
+            
+            await context.SaveChangesAsync();
 
             await balanceService.InitializeEmployeeLeaveBalancesAsync(employee.EmployeeId);
 
@@ -308,8 +368,6 @@ namespace HRConnect.Tests
 
             Assert.Equal(5, context.EmployeeLeaveBalances.First().CarryoverDays);
         }
-
-        // ---------------- VALIDATION ----------------
 
         [Fact]
         public async Task Initialize_ShouldThrowIfEmployeeNotFound()

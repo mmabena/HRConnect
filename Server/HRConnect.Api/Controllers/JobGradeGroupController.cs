@@ -18,8 +18,6 @@ namespace HRConnect.Api.Controllers
         {
             _context = context;
         }
-
-        // GET ALL GROUPS
         [HttpGet]
         public async Task<IActionResult> GetGroups()
         {
@@ -40,7 +38,6 @@ namespace HRConnect.Api.Controllers
             return Ok(groups);
         }
 
-        // CREATE NEW GROUP
         [HttpPost]
         public async Task<IActionResult> CreateGroup(CreateGroupRequest request)
         {
@@ -50,14 +47,12 @@ namespace HRConnect.Api.Controllers
             if (request.JobGradeIds.Count == 0)
                 return BadRequest("Group must have at least one JobGrade");
 
-            // Prevent duplicate group
             var groupExists = await _context.JobGradeGroupMaps
                 .AnyAsync(x => x.GroupKey == request.GroupKey);
 
             if (groupExists)
                 return BadRequest("GroupKey already exists");
 
-            // Validate JobGrades exist
             var validJobGrades = await _context.JobGrades
                 .Where(j => request.JobGradeIds.Contains(j.JobGradeId))
                 .Select(j => j.JobGradeId)
@@ -66,7 +61,6 @@ namespace HRConnect.Api.Controllers
             if (validJobGrades.Count != request.JobGradeIds.Count)
                 return BadRequest("One or more JobGrades do not exist");
 
-            // Ensure none already assigned
             var alreadyAssigned = await _context.JobGradeGroupMaps
                 .Where(x => request.JobGradeIds.Contains(x.JobGradeId))
                 .Select(x => x.JobGradeId)
@@ -87,7 +81,6 @@ namespace HRConnect.Api.Controllers
             return Ok("Group created successfully");
         }
 
-        // MOVE JOBGRADE TO ANOTHER GROUP
         [HttpPut("move")]
         public async Task<IActionResult> MoveJobGrade(MoveJobGradeRequest request)
         {
@@ -97,14 +90,12 @@ namespace HRConnect.Api.Controllers
             if (mapping == null)
                 return NotFound("Mapping not found");
 
-            // Validate target group exists
             var targetGroupExists = await _context.JobGradeGroupMaps
                 .AnyAsync(x => x.GroupKey == request.NewGroupKey);
 
             if (!targetGroupExists)
                 return BadRequest("Target group does not exist");
 
-            // Prevent leaving group empty
             var currentGroupCount = await _context.JobGradeGroupMaps
                 .CountAsync(x => x.GroupKey == mapping.GroupKey);
 
@@ -118,7 +109,6 @@ namespace HRConnect.Api.Controllers
             return Ok("JobGrade moved successfully");
         }
 
-        // REMOVE JOBGRADE (WITH SAFETY CHECK)
         [HttpDelete]
         public async Task<IActionResult> RemoveJobGrade(RemoveJobGradeRequest request)
         {

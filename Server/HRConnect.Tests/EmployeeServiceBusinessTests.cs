@@ -58,7 +58,6 @@ namespace HRConnect.Tests
             employeeRepoMock.Setup(x => x.BeginTransactionAsync())
                 .ReturnsAsync(transactionMock.Object);
 
-            // 🔥 FIX 1: RETURN DATA FROM DB
             employeeRepoMock.Setup(x => x.GetEmployeeByIdAsync(It.IsAny<string>()))
                 .ReturnsAsync((string id) => db.Employees.FirstOrDefault(e => e.EmployeeId == id));
 
@@ -68,7 +67,7 @@ namespace HRConnect.Tests
             employeeRepoMock.Setup(x => x.CreateEmployeeAsync(It.IsAny<Employee>()))
             .ReturnsAsync((Employee e) =>
             {
-                db.Employees.Add(e);  
+                db.Employees.Add(e);
                 db.SaveChanges();
                 return e;
             });
@@ -76,7 +75,6 @@ namespace HRConnect.Tests
             employeeRepoMock.Setup(x => x.GetAllEmployeeIdsWithPrefix(It.IsAny<string>()))
                 .ReturnsAsync(new List<string>());
 
-            // 🔥 FIX 2: DUPLICATE VALIDATION CALLS
             employeeRepoMock.Setup(x => x.GetEmployeeByEmailAsync(It.IsAny<string>()))
                 .ReturnsAsync((Employee?)null);
 
@@ -91,6 +89,16 @@ namespace HRConnect.Tests
 
             positionRepoMock.Setup(x => x.GetPositionByIdAsync(It.IsAny<int>()))
                 .ReturnsAsync((int id) => db.Positions.FirstOrDefault(p => p.PositionId == id));
+            if (!db.JobGradeGroupMaps.Any())
+            {
+                db.JobGradeGroupMaps.Add(new JobGradeGroupMap
+                {
+                    JobGradeId = 1,
+                    GroupKey = "G1"
+                });
+
+                db.SaveChanges();
+            }
 
             return new EmployeeService(
                 db,
@@ -101,9 +109,6 @@ namespace HRConnect.Tests
                 GetProcessingService(db)
             );
         }
-
-        // ================= CREATE =================
-
         [Fact]
         public async Task CreateEmployee_ShouldInitializeLeaveBalances()
         {
@@ -112,6 +117,13 @@ namespace HRConnect.Tests
             var service = GetService(db, email);
 
             db.JobGrades.Add(new JobGrade { JobGradeId = 1, Name = "G1" });
+
+            db.JobGradeGroupMaps.Add(new JobGradeGroupMap
+            {
+                JobGradeId = 1,
+                GroupKey = "G1"
+            });
+
             db.OccupationalLevels.Add(new OccupationalLevel { OccupationalLevelId = 1, Description = "Level 1" });
             db.Positions.Add(new Position { PositionId = 1, JobGradeId = 1, OccupationalLevelId = 1 });
 
@@ -128,7 +140,7 @@ namespace HRConnect.Tests
             {
                 Id = 1,
                 LeaveTypeId = 1,
-                JobGradeId = 1,
+                GroupKey = "G1",
                 DaysAllocated = 15,
                 MinYearsService = 0,
                 IsActive = true
@@ -161,7 +173,6 @@ namespace HRConnect.Tests
             Assert.Single(db.EmployeeLeaveBalances);
         }
 
-        // ================= UPDATE =================
 
         [Fact]
         public async Task UpdatePosition_ShouldCreateNewAccrualSegment()
@@ -173,6 +184,11 @@ namespace HRConnect.Tests
             db.JobGrades.AddRange(
                 new JobGrade { JobGradeId = 1, Name = "G1" },
                 new JobGrade { JobGradeId = 2, Name = "G2" });
+
+            db.JobGradeGroupMaps.AddRange(
+                new JobGradeGroupMap { JobGradeId = 1, GroupKey = "G1" },
+                new JobGradeGroupMap { JobGradeId = 2, GroupKey = "G2" }
+            );
 
             db.OccupationalLevels.Add(new OccupationalLevel { OccupationalLevelId = 1, Description = "Level 1" });
 
@@ -188,10 +204,23 @@ namespace HRConnect.Tests
                 Description = "Annual Leave",
                 IsActive = true
             });
-
             db.LeaveEntitlementRules.AddRange(
-                new LeaveEntitlementRule { Id = 1, LeaveTypeId = 1, JobGradeId = 1, DaysAllocated = 15, IsActive = true },
-                new LeaveEntitlementRule { Id = 2, LeaveTypeId = 1, JobGradeId = 2, DaysAllocated = 20, IsActive = true });
+                new LeaveEntitlementRule
+                {
+                    Id = 1,
+                    LeaveTypeId = 1,
+                    GroupKey = "G1",
+                    DaysAllocated = 15,
+                    IsActive = true
+                },
+                new LeaveEntitlementRule
+                {
+                    Id = 2,
+                    LeaveTypeId = 1,
+                    GroupKey = "G2",
+                    DaysAllocated = 20,
+                    IsActive = true
+                });
 
             var employee = new Employee
             {
@@ -233,7 +262,6 @@ namespace HRConnect.Tests
             Assert.Equal(2, db.EmployeeAccrualRateHistories.Count());
         }
 
-        // ================= VALIDATION =================
 
         [Fact]
         public async Task UpdatePosition_ShouldThrowIfEmployeeNotFound()

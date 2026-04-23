@@ -27,7 +27,6 @@ const AnnualLeaveEditor = ({ leaveType, onSuccess, onClose, isEditing, setIsEdit
 
   const currentRules = [...baseRules, ...customRules];
 
-  // EACH FIELD UPDATES ONLY ITS OWN RULE 
   const handleFieldChange = (ruleKey, field, value) => {
   setEditedRules(prev => ({
     ...prev,
@@ -37,8 +36,6 @@ const AnnualLeaveEditor = ({ leaveType, onSuccess, onClose, isEditing, setIsEdit
     }
   }));
 };
-
-  /* ADD RANGE (UNCHANGED) */
  const handleAddRange = () => {
 
   const groupKey =
@@ -64,7 +61,6 @@ const AnnualLeaveEditor = ({ leaveType, onSuccess, onClose, isEditing, setIsEdit
     setCustomRules(prev => prev.filter(r => r.id !== id));
   };
 
-  /* SAVE */
  const handleSave = async () => {
   try {
 
@@ -97,7 +93,6 @@ const finalRules = allRules.map((r, index) => {
   };
 });
 
-    // GROUP + SORT + CLEAN
     const grouped = {};
 
     finalRules.forEach(r => {
@@ -141,7 +136,6 @@ const finalRules = allRules.map((r, index) => {
   return (
     <div className="annual-wrapper">
 
-      {/* TABS */}
       <div className="tabs">
         <button
           className={activeTab === "groupA" ? "active" : ""}
@@ -165,7 +159,6 @@ const finalRules = allRules.map((r, index) => {
         </button>
       </div>
 
-      {/* RULE TABLE */}
       <div className="rule-box">
 
         <div className="rule-header">
@@ -186,7 +179,6 @@ const finalRules = allRules.map((r, index) => {
             return (
               <div key={ruleKey} className="rule-row">
 
-                {/* MIN YEARS */}
                 <input
                 disabled={!isEditing}
                   value={
@@ -199,7 +191,6 @@ const finalRules = allRules.map((r, index) => {
                   }
                 />
 
-                {/* MAX YEARS */}
                 <input
                 disabled={!isEditing}
                   value={
@@ -212,7 +203,6 @@ const finalRules = allRules.map((r, index) => {
                   }
                 />
 
-                {/* DAYS */}
                 <div className="days-edit">
                   <input
                   disabled={!isEditing}
@@ -256,14 +246,13 @@ const finalRules = allRules.map((r, index) => {
         )}
       </div>
 
-      {/* IMPACT BOX (UNCHANGED) */}
       <div className="impact-box">
         {Object.keys(editedRules).length > 0
           ? "Changes detected. Employees will be recalculated."
           : "No changes yet"}
       </div>
 
-      {/* ACTIONS */}
+      
       <div className="actions">
 
   {!isEditing ? (

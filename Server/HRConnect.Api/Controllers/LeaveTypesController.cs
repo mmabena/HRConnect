@@ -24,12 +24,10 @@ namespace HRConnect.Api.Controllers
             _context = context;
         }
 
-        // GET ALL
         [HttpGet]
         public async Task<IActionResult> GetAll()
             => Ok(await _service.GetLeaveTypesAsync());
 
-        // GET BY ID
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
@@ -43,7 +41,6 @@ namespace HRConnect.Api.Controllers
             }
         }
 
-        // GET VALID GROUP KEYS (IMPORTANT FOR FRONTEND)
         [HttpGet("group-keys")]
         public async Task<IActionResult> GetGroupKeys()
         {
@@ -55,7 +52,6 @@ namespace HRConnect.Api.Controllers
             return Ok(keys);
         }
 
-        // CREATE
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateLeaveTypeRequest request)
         {
@@ -87,7 +83,6 @@ namespace HRConnect.Api.Controllers
             }
         }
 
-        // UPDATE
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateLeaveTypeRequest request)
         {
@@ -115,12 +110,10 @@ namespace HRConnect.Api.Controllers
             }
         }
 
-        // GET ALL EMPLOYEES WITH LEAVE
         [HttpGet("employees")]
         public async Task<IActionResult> GetEmployeesWithLeave()
             => Ok(await _service.GetAllEmployeesWithLeaveAsync());
 
-        // GET SINGLE EMPLOYEE WITH LEAVE
         [HttpGet("employees/{employeeId}")]
         public async Task<IActionResult> GetEmployeeWithLeave(string employeeId)
         {

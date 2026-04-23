@@ -42,7 +42,6 @@ namespace HRConnect.Api.Services
                 rule.MaxYearsService < rule.MinYearsService)
                 throw new InvalidOperationException("MaxYearsService cannot be less than MinYearsService.");
 
-            // FIXED: DB-DRIVEN GROUP FILTER
             var employees = await _context.Employees
                 .Include(e => e.Position)
                 .Include(e => e.LeaveBalances)
@@ -92,7 +91,6 @@ namespace HRConnect.Api.Services
             if (rule == null)
                 throw new InvalidOperationException("Rule not found.");
 
-            //  DB-DRIVEN GROUP FILTER
             var employees = await _context.Employees
                 .Include(e => e.Position)
                 .Include(e => e.LeaveBalances)

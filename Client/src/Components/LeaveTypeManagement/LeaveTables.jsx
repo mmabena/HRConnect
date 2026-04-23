@@ -59,26 +59,21 @@ const confirmToggle = async () => {
   }
 };
 
-  // Handles entitlement display logic
   const getEntitlement = (rules) => {
   if (!rules || rules.length === 0) return "-";
 
-  // Get unique days values
   const activeRules = rules.filter(r => r.isActive !== false);
   const uniqueDays = [...new Set(activeRules.map(r => r.daysAllocated))];
 
-  // If all rules have SAME value → show it
   if (uniqueDays.length === 1) {
     return `${uniqueDays[0]} Days`;
   }
-
-  // Different values (Annual Leave) → show dash
   return "-";
 };
 
   return (
      <div className="menu-background custom-scrollbar">
-
+<div className="lt-page">
     <div className="wrap-container">
       <div className="heading-container">Company Management</div>
     </div>
@@ -95,7 +90,6 @@ const confirmToggle = async () => {
       </button>
     </div>
 
-     {/* ================= ACTIVE TABLE ================= */}
       <div className="lt-box">
         <div className="lt-header">
           <span>Leave History</span>
@@ -131,35 +125,34 @@ const confirmToggle = async () => {
                 </td>
 
                 <td className="lt-actions">
-  <span
-    onClick={() => {
-      setSelectedLeaveId(item.id);
-      setIsViewMode(true);
-      setShowEdit(true);
-    }}
-  >
-    View
-  </span>
-
-  <span className="divider">|</span>
-
-  <span className="edit-table-actions"
-    onClick={() => {
-      setSelectedLeaveId(item.id);
-      setIsViewMode(false);
-      setShowEdit(true);
-    }}
-  >
-    Edit
-  </span>
-</td>
+                  <span
+                    onClick={() => {
+                      setSelectedLeaveId(item.id);
+                      setIsViewMode(true);
+                      setShowEdit(true);
+                    }}
+                  >
+                    View
+                  </span>
+                  
+                  <span className="divider">|</span>
+                  
+                  <span className="edit-table-actions"
+                    onClick={() => {
+                      setSelectedLeaveId(item.id);
+                      setIsViewMode(false);
+                      setShowEdit(true);
+                    }}
+                  >
+                    Edit
+                  </span>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-   {/* ================= INACTIVE TABLE ================= */}
       <div className="lt-box">
         <div className="lt-header">
           <span>Leave Definitions</span>
@@ -219,6 +212,7 @@ const confirmToggle = async () => {
   onConfirm={confirmToggle}
   isActive={selectedItem?.isActive}
 />
+</div>
     </div>
     
   );

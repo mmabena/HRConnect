@@ -1,54 +1,59 @@
 
-/* Main wrapper around both tables */
 .lt-wrapper {
-  padding: 20px; /* space inside page */
+  padding: 20px; 
+}
+.lt-page {
+  display: flex;
+  flex-direction: column;
+  gap: -5px; 
 }
 
-/* Card container */
 .lt-box {
-  background: white; /* white card */
-  border-radius: 10px; /* rounded edges */
-  margin-bottom: 20px; /* spacing between tables */
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1); /* soft shadow */
-  overflow: hidden; /* prevents overflow outside rounded edges */
+  background: white; 
+  border-radius: 10px; 
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1); 
+  overflow: hidden; 
+  position: relative;
+  bottom: 18px;
 }
-
-/* Header section (title + button) */
 .lt-header {
-  display: flex; /* put items in a row */
-  justify-content: space-between; /* space between title and button */
-  align-items: center; /* vertical alignment */
-  padding: 15px; /* spacing inside header */
+  display: flex;
+  justify-content: space-between; 
+  align-items: center; 
+  padding: 15px; 
   font-weight: 600;
   color: #002D40;
   background-color: lightgrey;
 }
-
-/* Add button (matches your green button style) */
+.lt-top-section {
+  display: flex; 
+  justify-content: flex-end; 
+  padding: 15px; 
+  margin-top: -10px;
+}
 .lt-add-btn {
-  background-color: #90e975; /* same as global add button */
+  background-color: #638549; 
   color: white;
   border: none;
-  padding: 8px 16px;
-  border-radius: 8px; /* rounded */
+  padding: 8px 17px;
+  border-radius: 8px;
   cursor: pointer;
 }
 
-/* Table base */
 .lt-table {
-  width: 100%; /* full width */
-  border-collapse: collapse; /* remove gaps */
+  width: 100%; 
+  border-collapse: collapse;
 }
 
-/* Table headers */
+
 .lt-table th {
-  background-color: #355867; /* primary color */
+  background-color: #355867; 
   color: white;
   padding: 17px;
   text-align: left;
 }
 
-/* Table cells */
+
 .lt-table td {
   padding: 20px;
   border-bottom: 1px solid #ccc;

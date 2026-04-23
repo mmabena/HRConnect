@@ -1,4 +1,4 @@
-/* ================= MAIN WRAPPER ================= */
+
 .annual-wrapper {
   width: 100%;
   max-width: 100%;
@@ -8,8 +8,6 @@
   gap: 20px;
 }
 
-
-/* ================= TABS ================= */
 .tabs {
   box-sizing: border-box;
 
@@ -44,7 +42,6 @@
 }
 
 
-/* ================= RULE BOX ================= */
 .rule-box {
   border: 1px solid #cfd8dc;
   border-radius: 10px;
@@ -52,7 +49,7 @@
   width: 100%;
   box-sizing: border-box;
   padding: 15px;
-  min-height: 250px;           /* MIN height */
+  min-height: 250px;           
   display: flex;
   flex-direction: column;
 }
@@ -97,10 +94,8 @@
   padding: 10px 10px 8px;
   box-sizing: border-box;
 
-  /* reserve scroll gutter so outside alignment does not shift */
   scrollbar-gutter: stable both-edges;
 
-  /* Firefox */
   scrollbar-width: thin;
   scrollbar-color: rgba(53, 88, 103, 0.35) transparent;
 }
@@ -130,8 +125,6 @@
   cursor: pointer;
   font-size: 12px;
 }
-
-/* ================= DAYS EDIT ================= */
 .days-edit {
   display: flex;
   align-items: center;
@@ -147,7 +140,6 @@
 }
 
 
-/* ================= ADD RANGE ================= */
 .add-range {
   margin-top: 6px;
   background: transparent;
@@ -158,8 +150,6 @@
   text-align: center;
 }
 
-
-/* ================= IMPACT ================= */
 .impact-box {
   border: 1px solid rgba(53, 88, 103, 0.35);
   border-radius: 8px;
@@ -172,7 +162,6 @@
 }
 
 
-/* ================= ACTIONS ================= */
 .actions {
   display: flex;
   justify-content: space-between;

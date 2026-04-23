@@ -1,16 +1,16 @@
-/* Dark background overlay behind modal */
+
 .modal-overlay {
-  position: fixed; /* stays on screen */
+  position: fixed; 
   top: 0;
   left: 0;
-  background: rgba(0,0,0,0.4); /* dark transparent */
+  background: rgba(0,0,0,0.4);
   display: flex;
-  justify-content: center; /* center horizontally */
-  align-items: center; /* center vertically */
-  z-index: 1000; /* stays above everything */
+  justify-content: center; 
+  align-items: center; 
+  z-index: 1000; 
 }
 
-/* White card modal */
+
 .modal-card {
   background: white;
   padding: 35px;
@@ -20,11 +20,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 35px; /* tighter spacing between elements */
-position: relative; /* for absolute positioning of errors */
+  gap: 35px; 
+position: relative; 
 }
 
-/* Modal title */
+
 .modal-title {
   width: 100%;
   height: 26px;
@@ -44,7 +44,7 @@ position: relative; /* for absolute positioning of errors */
   margin-top: 20px;
 }
 
-/* Input fields */
+
 .modal-card input {
   box-sizing: border-box;
 
@@ -69,9 +69,8 @@ position: relative; /* for absolute positioning of errors */
 }
 .modal-card input::placeholder {
   color: #002D40;
-  opacity: 0.9; /* keeps it lighter than actual text */
+  opacity: 0.9; 
 }
-/* Checkbox layout */
 .checkbox {
   display: flex;
   align-items: center;
@@ -84,7 +83,7 @@ position: relative; /* for absolute positioning of errors */
   width: 18px;
   height: 18px;
   position: relative;
-  top: -10px; /* vertically center with text */
+  top: -10px; 
 }
 
 .female {
@@ -92,10 +91,9 @@ position: relative; /* for absolute positioning of errors */
   font-weight: 400;
   color: #002D40;
   position: relative;
-  top: -21px; /* vertically center with text */
+  top: -21px; 
 }
 
-/* Save button */
 .modal-btn {
   background-color: #002D40;
   color: white;
@@ -113,6 +111,8 @@ position: relative; /* for absolute positioning of errors */
   font-size: 11px;
   color: #002D40;
   line-height: 1.6;
+  position: relative;
+  top: -20px;
 }
 
 .align-right {
@@ -124,15 +124,14 @@ position: relative; /* for absolute positioning of errors */
 
 .align-left {
   display: block;
-  margin-top: 22px; /* small controlled spacing */
+  margin-top: 22px; 
   text-align: center;
   position: relative;
   left: 0px; 
 }
 
-/* Logo inside modal */
 .modal-card .logo-container {
-  position: static; /* override global absolute positioning */
+  position: static; 
   width: auto;
   height: auto;
   top: auto;
@@ -161,12 +160,10 @@ position: relative; /* for absolute positioning of errors */
 .pipe {
   margin: 0 6px; /* controls spacing around | */
 }
-/* Make input act as anchor */
 .modal-card input {
   position: relative;
 }
 
-/* Error text floats under input WITHOUT affecting layout */
 .error-text {
   position: absolute;
   font-size: 12px;
@@ -174,7 +171,6 @@ position: relative; /* for absolute positioning of errors */
   margin-top: 2px;
 }
 
-/* Position each error manually (aligned under inputs) */
 .modal-card input:nth-of-type(1) + .error-text {
   top: 220px;
   left: calc(50% - 215px);
@@ -242,5 +238,5 @@ position: relative; /* for absolute positioning of errors */
 }
 .femaleOnly {
   position: relative;
-  top: -22px; /* vertically center with text */
+  top: -22px;
 }

@@ -140,7 +140,6 @@ namespace HRConnect.Api.Services
             if (existingCodes.Any(x => string.Equals(x, request.Code, StringComparison.OrdinalIgnoreCase)))
                 errors.Add($"Leave type code '{request.Code}' already exists.");
 
-            // VALIDATE GROUP KEYS EXIST IN DB
             var validGroupKeys = await _context.JobGradeGroupMaps
                 .Select(x => x.GroupKey)
                 .Distinct()
@@ -176,7 +175,8 @@ namespace HRConnect.Api.Services
                 GroupKey = rule.GroupKey,
                 MinYearsService = rule.MinYearsService,
                 MaxYearsService = rule.MaxYearsService,
-                DaysAllocated = rule.DaysAllocated
+                DaysAllocated = rule.DaysAllocated,
+                IsActive = true
             }).ToList();
 
             await _context.LeaveEntitlementRules.AddRangeAsync(rules);
@@ -219,7 +219,6 @@ namespace HRConnect.Api.Services
             if (existingNames.Any(x => string.Equals(x, request.Name, StringComparison.OrdinalIgnoreCase)))
                 errors.Add($"Leave type name '{request.Name}' already exists.");
 
-            // VALIDATE GROUP KEYS
             var validGroupKeys = await _context.JobGradeGroupMaps
                 .Select(x => x.GroupKey)
                 .Distinct()
@@ -237,16 +236,13 @@ namespace HRConnect.Api.Services
 
             ValidateRules(request.Rules);
 
-            // UPDATE LEAVE TYPE
             leaveType.Name = request.Name;
             leaveType.Description = request.Description;
             leaveType.FemaleOnly = request.FemaleOnly;
             leaveType.IsActive = request.IsActive;
 
-            // REMOVE OLD RULES
             _context.LeaveEntitlementRules.RemoveRange(leaveType.EntitlementRules);
 
-            // ADD NEW RULES CLEANLY
             var newRules = request.Rules.Select(r => new LeaveEntitlementRule
             {
                 LeaveTypeId = leaveType.Id,

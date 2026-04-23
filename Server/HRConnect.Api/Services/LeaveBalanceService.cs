@@ -88,8 +88,7 @@ namespace HRConnect.Api.Services
                     };
                     balancesToAdd.Add(annualBalance);
 
-                    await BackfillHistoricalAnnualAccrualAsync(employee);
-                    await CreateInitialAccrualSegmentAsync(employee);
+
 
                     continue;
                 }
@@ -138,6 +137,8 @@ namespace HRConnect.Api.Services
 
             _context.EmployeeLeaveBalances.AddRangeAsync(balancesToAdd);
             await _context.SaveChangesAsync();
+            await BackfillHistoricalAnnualAccrualAsync(employee);
+            await CreateInitialAccrualSegmentAsync(employee);
         }
         /// <summary>
         /// Updates the taken days for a specific leave type and employee. 

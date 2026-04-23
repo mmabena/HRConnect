@@ -14,6 +14,8 @@ const EditLeaveTypeModal = ({
 
   const [selected, setSelected] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [apiError, setApiError] = useState("");
   
 
   const [form, setForm] = useState({
@@ -25,8 +27,6 @@ const EditLeaveTypeModal = ({
 useEffect(() => {
   setIsEditing(!isViewMode);
 }, [isViewMode]);
-
-  // LOAD SELECTED LEAVE TYPE
   useEffect(() => {
     if (!selectedId) return;
 
@@ -38,7 +38,7 @@ useEffect(() => {
 
       setForm({
         description: lt.description || "",
-        femaleOnly: lt.femaleOnly,
+        femaleOnly: lt.code === "ML" ? lt.femaleOnly : false,
         days: uniqueDays.length === 1 ? uniqueDays[0] : ""
       });
     }
@@ -47,7 +47,6 @@ useEffect(() => {
 
   if (!isOpen) return null;
 
-  //HANDLE INPUT CHANGE
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
@@ -56,16 +55,17 @@ useEffect(() => {
       [name]: type === "checkbox" ? checked : value
     });
   };
-  // SAVE NON-ANNUAL
   const handleSubmit = async () => {
   try {
+    const validationErrors = validate();
 
-    if (selected.code !== "AL") {
-      if (!form.days || isNaN(form.days) || Number(form.days) <= 0) {
-        alert("Please enter valid leave days");
-        return;
-      }
-    }
+if (Object.keys(validationErrors).length > 0) {
+  setErrors(validationErrors);
+  return;
+}
+
+setErrors({});
+setApiError("");
     console.log("PAYLOAD:", {
   name: selected.name,
   description: form.description,
@@ -106,15 +106,55 @@ useEffect(() => {
     onClose();
 
   } catch (err) {
-    console.error("FULL ERROR:", err.response?.data || err);
+  console.error(err);
+
+  if (err.response?.data) {
+    let message = err.response.data;
+
+    if (typeof message === "object") {
+      message = message.title || JSON.stringify(message);
+    }
+
+    message = message.toLowerCase();
+
+    if (message.includes("code")) {
+      setErrors(prev => ({ ...prev, code: "Code already exists" }));
+    } 
+    else if (message.includes("name")) {
+      setErrors(prev => ({ ...prev, name: "Name already exists" }));
+    } 
+    else {
+      setApiError(message);
+    }
+  } else {
+    setApiError("Failed to update leave type");
   }
+}
+};
+const validate = () => {
+  const newErrors = {};
+
+  if (!form.description.trim()) {
+    newErrors.description = "Description is required";
+  }
+
+  if (selected?.code !== "AL") {
+    if (!form.days || isNaN(form.days) || Number(form.days) <= 0) {
+      newErrors.days = "Enter valid number of days";
+    }
+  }
+
+  if (form.femaleOnly && selected?.code !== "ML") {
+    newErrors.femaleOnly = "Only allowed for maternity leave";
+  }
+
+  return newErrors;
 };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-card" onClick={(e) => e.stopPropagation()}>
 
-        {/* LOGO */}
         <div className="logo-container">
           <span className="logo-bold">singular</span>
           <span className="logo-light">express</span>
@@ -126,8 +166,6 @@ useEffect(() => {
     : `View ${selected?.name}`
   }
 </h2>
-
-        {/* ================= NON-ANNUAL ================= */}
         {selected && selected.code !== "AL" && (
   <>
     <input value={selected.name} disabled />
@@ -140,7 +178,7 @@ useEffect(() => {
       placeholder="Description"
       disabled={!isEditing}
     />
-
+    <span className="error-text">{errors.description || ""}</span>
     <input
       name="days"
       value={form.days}
@@ -148,17 +186,21 @@ useEffect(() => {
       placeholder="Leave Entitlement"
       disabled={!isEditing}
     />
-
-    <label className="checkbox">
-      <input
-        type="checkbox"
-        name="femaleOnly"
-        checked={form.femaleOnly}
-        onChange={handleChange}
-        disabled={!isEditing}
-      />
-      <span className="female">Female Only</span>
-    </label>
+    <span className="error-text">{errors.days || ""}</span>
+    {selected?.code === "ML" && isEditing && (
+      <>
+        <label className="checkbox">
+          <input
+            type="checkbox"
+            name="femaleOnly"
+            checked={form.femaleOnly}
+            onChange={handleChange}
+          />
+          <span className="female">Female Only</span>
+        </label>
+        <span className="error-text">{errors.femaleOnly || ""}</span>
+      </>
+    )}
 
     <div className="actions">
       {!isEditing ? (
@@ -173,7 +215,7 @@ useEffect(() => {
         </>
       ) : (
         <>
-          <button className="cancel" onClick={() => setIsEditing(false)}>
+          <button className="cancel" onClick={onClose}>
             Cancel
           </button>
 
@@ -182,12 +224,21 @@ useEffect(() => {
           </button>
         </>
       )}
-      
+      {apiError && <div className="api-error">{apiError}</div>}
     </div>
+    <p className="right-frame-bottom-text">
+          <span className="align-right">
+            Privacy Policy <span className="pipe">|</span> Terms & Conditions
+          </span>
+          <br />
+          <span className="align-left">
+            Copyright © 2026 Singular Systems. All rights reserved.
+          </span>
+        </p>
+
   </>
 )}
 
-        {/* ================= ANNUAL LEAVE ================= */}
         {selected && selected.code === "AL" && (
           <AnnualLeaveEditor
             leaveType={selected}
