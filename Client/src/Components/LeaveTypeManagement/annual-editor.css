@@ -6,6 +6,7 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+  position: relative;
 }
 
 .tabs {
@@ -183,4 +184,26 @@
   padding: 8px 18px;
   border-radius: 6px;
   cursor: pointer;
+}
+.message-text {
+  position: absolute;
+  top: -58px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+.message-text.error {
+  color: #eb1111;
+}
+
+.message-text.success {
+  color: #08cf01;
+}
+.next:disabled {
+  background: rgba(0, 0, 0, 0.1);
+  color: #355867;
+  cursor: not-allowed;
 }

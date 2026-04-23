@@ -120,7 +120,7 @@ const confirmToggle = async () => {
                     className="lt-status active"
                     onClick={() => handleToggleClick(item)}
                   >
-                    <Dot className="status-dot" /> Active
+                    <span className="status-dot" /> Active
                   </span>
                 </td>
 
@@ -182,7 +182,7 @@ const confirmToggle = async () => {
                     className="lt-status inactive"
                     onClick={() => handleToggleClick(item)}
                   >
-                    <Dot className="status-dot" /> Inactive
+                    <span className="status-dot" /> Inactive
                   </span>
                 </td>
                 <td className="lt-comment">-</td>

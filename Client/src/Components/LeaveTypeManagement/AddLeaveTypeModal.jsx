@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./add-leave-type-modal.css";
 import { createLeaveType } from "../../api/leaveTypeApi";
 
@@ -13,6 +13,12 @@ const AddLeaveTypeModal = ({ isOpen, onClose, onSuccess }) => {
 
   const [errors, setErrors] = useState({});
   const [apiError, setApiError] = useState("");
+  useEffect(() => {
+  if (isOpen) {
+    setErrors({});
+    setApiError("");
+  }
+}, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -116,7 +122,14 @@ const AddLeaveTypeModal = ({ isOpen, onClose, onSuccess }) => {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div
+      className="modal-overlay"
+      onClick={() => {
+        setErrors({});
+        setApiError("");
+        onClose();
+      }}
+    >
       <div className="modal-card" onClick={(e) => e.stopPropagation()}>
 
         <div className="logo-container">

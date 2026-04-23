@@ -7,6 +7,8 @@ const AnnualLeaveEditor = ({ leaveType, onSuccess, onClose, isEditing, setIsEdit
   const [activeTab, setActiveTab] = useState("groupA");
   const [editedRules, setEditedRules] = useState({});
   const [customRules, setCustomRules] = useState([]);
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState(""); 
 
   const buildGroupedRules = () => {
   return {
@@ -55,6 +57,18 @@ const AnnualLeaveEditor = ({ leaveType, onSuccess, onClose, isEditing, setIsEdit
       daysAllocated: 0
     }
   ]);
+};
+const hasChanges =
+  Object.keys(editedRules).length > 0 || customRules.length > 0;
+
+const showMessage = (text, type = "error") => {
+  setMessage(text);
+  setMessageType(type);
+
+  setTimeout(() => {
+    setMessage("");
+    setMessageType("");
+  }, 5000);
 };
 
   const handleRemoveRange = (id) => {
@@ -123,19 +137,34 @@ const finalRules = allRules.map((r, index) => {
       rules: cleanedRules
     });
 
-    onSuccess();
-    onClose();
+    showMessage("Leave type updated successfully", "success");
+
+    setTimeout(() => {
+      onSuccess();
+      onClose();
+    }, 800); 
 
   } catch (err) {
-    console.error(err);
-    console.log("BACKEND ERROR:", err.response?.data);
-    alert("Failed to update leave type");
+  console.error(err);
+
+  let message = err.response?.data;
+
+  if (typeof message === "object") {
+    message = message.title || JSON.stringify(message);
   }
+
+  showMessage(message || "Failed to update leave type", "error");
+}
 };
+
 
   return (
     <div className="annual-wrapper">
-
+      {message && (
+        <div className={`message-text ${messageType}`}>
+          {message}
+        </div>
+      )}
       <div className="tabs">
         <button
           className={activeTab === "groupA" ? "active" : ""}
@@ -239,7 +268,7 @@ const finalRules = allRules.map((r, index) => {
 
         </div>
 
-        {isEditing && (
+    {isEditing && (
             <button className="add-range" onClick={handleAddRange}>
               + Add Range
             </button>
@@ -267,11 +296,15 @@ const finalRules = allRules.map((r, index) => {
     </>
   ) : (
     <>
-      <button className="cancel" onClick={() => setIsEditing(false)}>
+      <button className="cancel" onClick={onClose}>
         Cancel
       </button>
 
-      <button className="next" onClick={handleSave}>
+      <button
+        className="next"
+        onClick={handleSave}
+        disabled={!hasChanges}
+      >
         Save Changes
       </button>
     </>

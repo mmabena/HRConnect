@@ -71,22 +71,22 @@
   color: #002D40;
 }
 
-/* Code column (blue text like screenshot) */
+
 .lt-code {
   color: #006088;
   font-weight: 600;
 }
 
-/* Inactive code (red) */
+
 .inactive-code {
   color: red;
 }
 
-/* Status badge */
+
 .lt-status {
-  border-radius: 20px; /* pill shape */
+  border-radius: 20px; 
 }
-/* Actions column layout */
+
 .lt-actions {
   display: flex;
   gap: 10px;
@@ -94,7 +94,6 @@
   
 }
 
-/* Action links */
 .lt-actions span {
   cursor: pointer;
   color: #006088;
@@ -110,22 +109,22 @@
   bottom: -1px;
 }
 
-/* Push content slightly down from navbar */
+
 .menu-background {
-  padding-top: 30px; /* space below navbar */
+  padding-top: 30px; 
 }
 
-/* Section holding the button */
+
 .lt-top-section {
-  display: flex; /* horizontal layout */
-  justify-content: flex-end; /* move button right */
-  margin-bottom: 20px; /* space before table */
-  padding: 0 10px; /* align with table edges */
+  display: flex; 
+  justify-content: flex-end; 
+  margin-bottom: 20px; 
+  padding: 0 10px; 
 }
 
-/* Table container spacing */
+
 .lt-box {
-  margin-bottom: 60px; /* space between tables */
+  margin-bottom: 60px; 
 }
 .lt-table {
   width: 100%;
@@ -139,7 +138,7 @@
 .lt-table th,
 .lt-table td {
   text-align: left;
-  vertical-align: middle; /* aligns content nicely */
+  vertical-align: middle; 
 }
 .lt-add-btn {
   background-color: #638549;
@@ -153,7 +152,7 @@
   margin-bottom: 2%;
 }
 .lt-page-container {
-  padding: 0 60px; /* keeps spacing from sides */
+  padding: 0 60px;
   margin-right: 8%;
 }
 .lt-top-section {
@@ -162,30 +161,28 @@
   margin-bottom: 30px;
 }
 
-/* Make tables align with button */
+
 .lt-box {
   width: 100%;
 }
 
-/* Container for logo text */
 .logo-container {
-  text-align: center; /* center horizontally */
-  margin-bottom: 10px; /* space before title */
+  text-align: center; 
+  margin-bottom: 10px;
 }
 
-/* "singular" bold part */
+
 .logo-bold {
   font-weight: 700;
-  color: #002D40; /* match your theme */
+  color: #002D40; 
   font-size: 20px;
 }
 
-/* "express" light part */
 .logo-light {
   font-weight: 300;
-  color: #638549; /* accent color */
+  color: #638549; 
   font-size: 20px;
-  margin-left: 4px; /* small spacing between words */
+  margin-left: 4px;
 }
 .lt-status {
   align-items: center;
@@ -193,20 +190,24 @@
   font-size: 13px;
   padding: 4px 12px;
   cursor: pointer;
-  white-space: nowrap;    /* prevents wrapping */
+  white-space: nowrap;    
 }
 .lt-status.active {
   background: rgba(99, 133, 73, 0.35);
-  color: #559c0e;
+  color: #638549;
 }
 .lt-status.inactive {
-  background: rgba(232, 49, 49, 0.35);
-  color: #8b0000;
+  background-color: #E8313159;
+  color: #FE3944;
 }
 .status-dot {
-  height: 10px;
-  width: 10px;
-  border-radius: 50%;
+  position: relative;
+  bottom: 3px;
+  width: 4px;
+  height: 4px;
+  background-color: currentColor;
+  border-radius: 60%;
   display: inline-block;
-  
+  gap: 6px;
+  margin-right: 6px;
 }

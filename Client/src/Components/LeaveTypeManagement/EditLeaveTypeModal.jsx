@@ -16,6 +16,7 @@ const EditLeaveTypeModal = ({
   const [isEditing, setIsEditing] = useState(false);
   const [errors, setErrors] = useState({});
   const [apiError, setApiError] = useState("");
+ 
   
 
   const [form, setForm] = useState({
@@ -26,12 +27,16 @@ const EditLeaveTypeModal = ({
 
 useEffect(() => {
   setIsEditing(!isViewMode);
+  setErrors({});
+  setApiError("");
 }, [isViewMode]);
   useEffect(() => {
     if (!selectedId) return;
 
     const lt = leaveTypes.find(x => x.id === Number(selectedId));
     setSelected(lt);
+    setErrors({});
+    setApiError("");
 
     if (lt && lt.code !== "AL") {
       const uniqueDays = [...new Set(lt.rules.map(r => r.daysAllocated))];
@@ -55,6 +60,13 @@ useEffect(() => {
       [name]: type === "checkbox" ? checked : value
     });
   };
+   const hasChanges =
+  selected &&
+  (
+    form.description !== (selected.description || "") ||
+    (selected.code !== "AL" && Number(form.days) !== Number(selected.rules?.[0]?.daysAllocated)) ||
+    (selected.code === "ML" && form.femaleOnly !== selected.femaleOnly)
+  );
   const handleSubmit = async () => {
   try {
     const validationErrors = validate();
@@ -219,7 +231,11 @@ const validate = () => {
             Cancel
           </button>
 
-          <button className="next" onClick={handleSubmit}>
+          <button
+            className="next"
+            onClick={handleSubmit}
+            disabled={!hasChanges}
+          >
             Save Changes
           </button>
         </>
