@@ -662,6 +662,36 @@ namespace HRConnect.Api.Migrations
                     b.ToTable("AuditLogs");
                 });
 
+            modelBuilder.Entity("HRConnect.Api.Models.BankBranchCode", b =>
+                {
+                    b.Property<int>("BankBranchCodeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BankBranchCodeId"));
+
+                    b.Property<string>("BankName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UniversalCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("BankBranchCodeId");
+
+                    b.ToTable("BankBranchCode");
+                });
+
             modelBuilder.Entity("HRConnect.Api.Models.BankingDetail", b =>
                 {
                     b.Property<int>("BankingDetailsId")
@@ -686,11 +716,10 @@ namespace HRConnect.Api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("BankName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("BankBranchCodeId")
+                        .HasColumnType("int");
 
-                    b.Property<string>("BranchCode")
+                    b.Property<string>("BankName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -735,6 +764,8 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("AccountNumberSearchHash")
                         .IsUnique();
+
+                    b.HasIndex("BankBranchCodeId");
 
                     b.HasIndex("EmployeeId")
                         .IsUnique();
@@ -1959,11 +1990,19 @@ namespace HRConnect.Api.Migrations
 
             modelBuilder.Entity("HRConnect.Api.Models.BankingDetail", b =>
                 {
+                    b.HasOne("HRConnect.Api.Models.BankBranchCode", "BankBranchCode")
+                        .WithMany("BankingDetails")
+                        .HasForeignKey("BankBranchCodeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("HRConnect.Api.Models.Employee", "Employee")
                         .WithOne("BankingDetail")
                         .HasForeignKey("HRConnect.Api.Models.BankingDetail", "EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("BankBranchCode");
 
                     b.Navigation("Employee");
                 });
@@ -2188,6 +2227,11 @@ namespace HRConnect.Api.Migrations
                     b.Navigation("SimplePropertyTriggers");
 
                     b.Navigation("SimpleTriggers");
+                });
+
+            modelBuilder.Entity("HRConnect.Api.Models.BankBranchCode", b =>
+                {
+                    b.Navigation("BankingDetails");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.Employee", b =>

@@ -11,6 +11,7 @@ namespace HRConnect.Api.Mappers
         {
             return new BankingDetail
             {
+                EmployeeId = dto.EmployeeId,
                 Name = dto.Name,
                 Surname = dto.Surname,
                 IdNumber = dto.IdNumber,
@@ -22,7 +23,7 @@ namespace HRConnect.Api.Mappers
                 AccountNumberEncrypted = encryptedAccount,
                 AccountNumberSearchHash = hash,
                 AccountNumberLast4Digits = last4,
-                BranchCode = dto.BranchCode,
+                BankBranchCodeId = dto.BankBranchCodeId,
 
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
@@ -36,6 +37,7 @@ namespace HRConnect.Api.Mappers
             return new BankingDetailDto
             {
                 BankingDetailsId = entity.BankingDetailsId,
+                EmployeeId = entity.EmployeeId,
                 Name = entity.Name,
                 Surname = entity.Surname,
                 IdNumber = entity.IdNumber,
@@ -46,9 +48,10 @@ namespace HRConnect.Api.Mappers
 
                 // For security reasons, we do not return the actual account number.
                 //  Instead, we return a masked version or simply indicate that it exists.
-             AccountNumber = "**** **** " + entity.AccountNumberLast4Digits,
-                BranchCode = entity.BranchCode,
+                AccountNumber = "**** **** " + entity.AccountNumberLast4Digits,
 
+                // Include the branch code if available
+                BranchCode = entity.BankBranchCode?.UniversalCode ?? "N/A",
                 NetSalary = entity.NetSalary,
                 IsActive = entity.IsActive,
 

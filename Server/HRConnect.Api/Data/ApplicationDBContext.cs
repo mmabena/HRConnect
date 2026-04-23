@@ -231,6 +231,11 @@ namespace HRConnect.Api.Data
       .HasForeignKey(t => t.PayrollRunId)
       .HasPrincipalKey(p => p.PayrollRunId);
 
+      modelBuilder.Entity<BankingDetail>()
+          .HasOne(b => b.BankBranchCode)
+          .WithMany(bc => bc.BankingDetails)
+          .HasForeignKey(b => b.BankBranchCodeId)
+          .OnDelete(DeleteBehavior.Restrict);
 
       modelBuilder.Entity<BankingDetail>()
     .HasIndex(b => b.AccountNumberSearchHash)
@@ -253,7 +258,8 @@ namespace HRConnect.Api.Data
             e.Entity is PayrollPeriod ||
             e.Entity is PayrollRun ||
             e.Entity is PayrollRecord ||
-            e.Entity is EmployeePensionEnrollment
+            e.Entity is EmployeePensionEnrollment ||
+            e.Entity is BankingDetail
             ));
 
       foreach (var e in modifiedRecords)

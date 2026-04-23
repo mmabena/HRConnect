@@ -71,37 +71,40 @@ namespace HRConnect.Api.Utils.BankingDetailsValidation
             switch (bankName)
             {
                 case "capitec":
-                    Ensure(accountNumber, TenDigits(), "Capitec requires 10 digits");
+                    Ensure(accountNumber, TenDigits(), "The account number entered does not match our records. Please verify and try again.");
                     break;
 
                 case "nedbank":
-                    Ensure(accountNumber, TenDigits(), "Nedbank requires 10 digits");
+                    Ensure(accountNumber, TenDigits(), "The account number entered does not match our records. Please verify and try again.");
                     break;
 
                 case "fnb":
                 case "absa":
                 case "standardbank":
-                    Ensure(accountNumber, NineToElevenDigits(), "Invalid account number length");
+                    Ensure(accountNumber, NineToElevenDigits(), "The account number entered does not match our records. Please verify and try again.");
                     break;
 
                 case "investec":
-                    Ensure(accountNumber, EightToThirteenDigits(), "Invalid Investec account number");
+                    Ensure(accountNumber, EightToThirteenDigits(), "The account number entered does not match our records. Please verify and try again.");
                     break;
 
                 case "africanbank":
-                    Ensure(accountNumber, TenToElevenDigits(), "Invalid African Bank account number");
+                    Ensure(accountNumber, TenToElevenDigits(), "The account number entered does not match our records. Please verify and try again.");
                     break;
 
                 case "bidvestbank":
-                    Ensure(accountNumber, NineToTenDigits(), "Invalid Bidvest Bank account number");
+                    Ensure(accountNumber, NineToTenDigits(), "The account number entered does not match our records. Please verify and try again.");
                     break;
 
                 case "grindrodbank":
-                    Ensure(accountNumber, EightToTwelveDigits(), "Invalid Grindrod Bank account number");
+                    Ensure(accountNumber, EightToTwelveDigits(), "The account number entered does not match our records. Please verify and try again.");
                     break;
 
                 case "discoverybank":
-                    Ensure(accountNumber, NineToElevenDigits(), "Invalid Discovery Bank account number");
+                    Ensure(accountNumber, NineToElevenDigits(), "The account number entered does not match our records. Please verify and try again.");
+                    break;
+                case "tymebank":
+                    Ensure(accountNumber, TenDigits(), "The account number entered does not match our records. Please verify and try again.");
                     break;
             }
         }

@@ -11,9 +11,9 @@ namespace HRConnect.Api.DTOs.BankingDetails
         public string IdNumber { get; set; } = string.Empty;
         public string PassportNumber { get; set; } = string.Empty;
         public BankName BankName { get; set; } 
+        public int BankBranchCodeId { get; set; }
         public string AccountNumber { get; set; } = string.Empty;
         public AccountType AccountType { get; set; }
-        public string BranchCode { get; set; } = string.Empty;
         public bool IsActive { get; set; } = true;
 
 

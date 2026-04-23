@@ -1,10 +1,10 @@
 namespace HRConnect.Api.Models
 {
     using System;
+    using HRConnect.Api.Models;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
-
 
     public enum BankName
     {
@@ -56,15 +56,25 @@ namespace HRConnect.Api.Models
         public string AccountNumberSearchHash { get; set; } = string.Empty;
 
         public string AccountNumberLast4Digits { get; set; } = string.Empty;
+
         [Required]
         public AccountType AccountType { get; set; }
+
         [Required]
-        public string BranchCode { get; set; } = string.Empty;
+        public int BankBranchCodeId { get; set; } 
+
+        public BankBranchCode BankBranchCode { get; set; } = null!;
+
         public bool IsLocked { get; set; } 
+
         public DateTime? LockedAt { get; set; }
+
         public decimal? NetSalary { get; set; }
+
         public bool IsActive { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     }
 }

@@ -15,6 +15,8 @@ namespace HRConnect.Tests
   using Microsoft.EntityFrameworkCore.Storage;
   using HRConnect.Api.Utils;
   using System.Linq;
+  using Microsoft.AspNetCore.SignalR;
+  using HRConnect.Api.Hubs;
 
   public class EmployeeServiceTests : IDisposable
   {
@@ -23,9 +25,10 @@ namespace HRConnect.Tests
     private readonly Mock<IEmailService> _emailServiceMock;
     private readonly Mock<ILeaveBalanceService> _leaveBalanceServiceMock;
     private readonly Mock<ILeaveProcessingService> _leaveProcessingServiceMock;
-
     private readonly ApplicationDBContext _context;
     private readonly EmployeeService _employeeService;
+
+ 
 
     public EmployeeServiceTests()
     {
@@ -34,6 +37,7 @@ namespace HRConnect.Tests
       _positionRepoMock = new Mock<IPositionRepository>();
       _leaveBalanceServiceMock = new Mock<ILeaveBalanceService>();
       _leaveProcessingServiceMock = new Mock<ILeaveProcessingService>();
+     
 
       var options = new DbContextOptionsBuilder<ApplicationDBContext>()
           .UseInMemoryDatabase(Guid.NewGuid().ToString())
@@ -132,6 +136,8 @@ namespace HRConnect.Tests
           _positionRepoMock.Object,
           _leaveBalanceServiceMock.Object,
           _leaveProcessingServiceMock.Object
+       
+
       );
     }
 

@@ -23,7 +23,9 @@ namespace HRConnect.Api.Repository
         /// <returns> A list of all banking details.</returns>
         public async Task<List<BankingDetail>> GetAllBankingDetailsAsync()
         {
-            return await _context.BankingDetails.ToListAsync();
+            return await _context.BankingDetails
+            .Include(b => b.BankBranchCode)
+            .ToListAsync();
         }
 
         /// <summary>
@@ -37,7 +39,8 @@ namespace HRConnect.Api.Repository
         public async Task<BankingDetail?> GetBankingDetailsByEmployeeIdAsync(string EmployeeId)
         {
             return await _context.BankingDetails
-                .FirstOrDefaultAsync(b => b.EmployeeId == EmployeeId);
+            .Include(b => b.BankBranchCode)
+            .FirstOrDefaultAsync(b => b.EmployeeId == EmployeeId);
         }
 
         /// <summary>
@@ -72,12 +75,12 @@ namespace HRConnect.Api.Repository
         public async Task LockBankingDetailsAsync()
         {
             await _context.BankingDetails
-            .Where (b => !b.IsLocked)
+            .Where(b => !b.IsLocked)
             .ExecuteUpdateAsync(b => b.SetProperty(bd => bd.IsLocked, true)
-            .SetProperty(bd => bd.LockedAt, DateTime.UtcNow));
+            .SetProperty(bd => bd.LockedAt, DateTime.Now));
         }
 
-      public async Task<bool> AnyAsync(Expression<Func<BankingDetail, bool>> predicate)
+        public async Task<bool> AnyAsync(Expression<Func<BankingDetail, bool>> predicate)
         {
             return await _context.BankingDetails.AnyAsync(predicate);
         }

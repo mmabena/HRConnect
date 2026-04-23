@@ -87,9 +87,11 @@ namespace HRConnect.Api.Services
             if (employee == null)
                 throw new KeyNotFoundException("Employee not found");
 
+            // Normalize and hash the account number for duplicate checking
             var normalized = _hashingHelper.Normalize(createBankingDetailsDto.AccountNumber);
             var searchHash = _hashingHelper.ComputeSearchHash(normalized);
 
+            // Check for duplicates across all records, excluding the current employees record (if updating)
             var duplicate = await _bankingDetailRepo.AnyAsync(x =>
                 x.AccountNumberSearchHash == searchHash);
 
@@ -99,6 +101,8 @@ namespace HRConnect.Api.Services
             BankDetailsValidations.ValidateBankingDetails(
                 createBankingDetailsDto.BankName.ToString(),
                 normalized);
+
+    
 
             var entity = new BankingDetail
             {
@@ -113,8 +117,9 @@ namespace HRConnect.Api.Services
                 AccountNumberSearchHash = searchHash,
                 AccountNumberLast4Digits = normalized.Length >= 4 ? normalized[^4..] : normalized,
 
+                BankBranchCodeId = createBankingDetailsDto.BankBranchCodeId,
                 AccountType = createBankingDetailsDto.AccountType,
-                BranchCode = createBankingDetailsDto.BranchCode,
+        
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -128,9 +133,15 @@ namespace HRConnect.Api.Services
             return MapToBankingDetailDto(result);
         }
 
-        // ======================================================
-        // UPDATE (FIXED LOGIC)
-        // ======================================================
+       /// <summary>
+       /// Updates banking details for a given employee. 
+       /// Validates input, checks for duplicates, and ensures that the banking details are not locked before allowing updates.
+       /// </summary>
+       /// <param name="EmployeeId"> </param>
+       /// <param name="updatebankingDetailsDto"></param>
+       /// <returns></returns>
+       /// <exception cref="KeyNotFoundException"></exception>
+       /// <exception cref="ValidationException"></exception>
         public async Task<BankingDetailDto> UpdateBankingDetailsAsync(
             string EmployeeId,
             UpdateBankingDetailDto updatebankingDetailsDto)
@@ -163,13 +174,15 @@ namespace HRConnect.Api.Services
             BankDetailsValidations.ValidateBankingDetails(
                 updatebankingDetailsDto.BankName.ToString(),
                 normalized);
+            
+
 
             existing.BankName = updatebankingDetailsDto.BankName;
             existing.AccountNumberEncrypted = _encryptionService.Encrypt(normalized);
             existing.AccountNumberSearchHash = searchHash;
             existing.AccountNumberLast4Digits = normalized.Length >= 4 ? normalized[^4..] : normalized;
             existing.AccountType = updatebankingDetailsDto.AccountType;
-            existing.BranchCode = updatebankingDetailsDto.BranchCode;
+            existing.BankBranchCodeId = updatebankingDetailsDto.BankBranchCodeId;
             existing.UpdatedAt = DateTime.UtcNow;
 
             await _bankingDetailRepo.UpdateBankingDetailsAsync(existing);
@@ -189,14 +202,14 @@ namespace HRConnect.Api.Services
                 if (!detail.IsLocked)
                 {
                     detail.IsLocked = true;
-                    detail.LockedAt = DateTime.UtcNow;
+                    detail.LockedAt = DateTime.Now;
 
                     await _bankingDetailRepo.UpdateBankingDetailsAsync(detail);
                 }
             }
         }
 
-        // ======================================================
+        // ====================================================== 
         // VALIDATION
         // ======================================================
         private void ValidateCommonFields(CreateBankingDetailDto dto)
@@ -229,7 +242,7 @@ namespace HRConnect.Api.Services
                 BankName = d.BankName,
                 AccountType = d.AccountType,
                 AccountNumber = _encryptionService.Decrypt(d.AccountNumberEncrypted),
-                BranchCode = d.BranchCode,
+                BranchCode = d.BankBranchCode?.UniversalCode ?? string.Empty,
                 NetSalary = d.NetSalary,
                 IsActive = d.IsActive,
                 CreatedAt = d.CreatedAt,

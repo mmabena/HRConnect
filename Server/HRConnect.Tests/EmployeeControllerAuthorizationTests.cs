@@ -11,6 +11,8 @@ namespace HRConnect.Tests
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using HRConnect.Api.Interfaces;
+    using HRConnect.Api.Hubs;
+    using Microsoft.AspNetCore.SignalR;
     public class EmployeeControllerAuthorizationTests
     {
         private static EmployeeController CreateControllerWithRole(string role)
@@ -18,10 +20,13 @@ namespace HRConnect.Tests
             // Mock the service and controller dependencies
             var mockService = new Mock<IEmployeeService>();
             var mockLeaveBalance = new Mock<ILeaveBalanceService>();
+            var mockHubContext = new Mock<IHubContext<UserPositionHub>>();
 
             var controller = new EmployeeController(
                 mockService.Object,
-                mockLeaveBalance.Object
+                mockLeaveBalance.Object,
+                mockHubContext.Object
+        
             );
 
             // Mock the HttpContext with a ClaimsPrincipal having a role
@@ -48,10 +53,12 @@ namespace HRConnect.Tests
                        .ReturnsAsync(new List<EmployeeDto>());
 
             var mockLeaveBalance = new Mock<ILeaveBalanceService>();
+            var mockHubContext = new Mock<IHubContext<UserPositionHub>>();
 
             var controller = new EmployeeController(
                 mockService.Object,
-                mockLeaveBalance.Object
+                mockLeaveBalance.Object,
+                mockHubContext.Object
             );
 
             // Set up SuperUser role
@@ -79,10 +86,12 @@ namespace HRConnect.Tests
             // Arrange
             var mockService = new Mock<IEmployeeService>();
             var mockLeaveBalance = new Mock<ILeaveBalanceService>();
+            var mockHubContext = new Mock<IHubContext<UserPositionHub>>();
 
             var controller = new EmployeeController(
                 mockService.Object,
-                mockLeaveBalance.Object
+                mockLeaveBalance.Object,
+                mockHubContext.Object
             );
             var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
             {
@@ -127,10 +136,12 @@ namespace HRConnect.Tests
                        });
 
             var mockLeaveBalance = new Mock<ILeaveBalanceService>();
+            var mockHubContext = new Mock<IHubContext<UserPositionHub>>();  
 
             var controller = new EmployeeController(
                 mockService.Object,
-                mockLeaveBalance.Object
+                mockLeaveBalance.Object,
+                mockHubContext.Object
             );
 
             // Set up SuperUser role
@@ -167,10 +178,12 @@ namespace HRConnect.Tests
             };
 
             var mockLeaveBalance = new Mock<ILeaveBalanceService>();
+            var mockHubContext = new Mock<IHubContext<UserPositionHub>>();
 
             var controller = new EmployeeController(
                 mockService.Object,
-                mockLeaveBalance.Object
+                mockLeaveBalance.Object,
+                mockHubContext.Object
             );
 
             // Set up NormalUser role
