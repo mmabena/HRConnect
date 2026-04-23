@@ -51,6 +51,9 @@ namespace HRConnect.Tests
             var companyRepoMock = new Mock<ICompanyRepository>();
             var transactionMock = new Mock<Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction>();
 
+            var activeCompanyService = new Mock<IActiveCompanyService>();
+            var userCompanyService = new Mock<IUserCompanyService>();
+
             transactionMock.Setup(t => t.CommitAsync(It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
@@ -60,7 +63,7 @@ namespace HRConnect.Tests
             employeeRepoMock.Setup(x => x.BeginTransactionAsync())
                 .ReturnsAsync(transactionMock.Object);
 
-            
+
 
             // 🔥 FIX 1: RETURN DATA FROM DB
             employeeRepoMock.Setup(x => x.GetEmployeeByIdAsync(It.IsAny<string>()))
@@ -72,7 +75,7 @@ namespace HRConnect.Tests
             employeeRepoMock.Setup(x => x.CreateEmployeeAsync(It.IsAny<Employee>()))
             .ReturnsAsync((Employee e) =>
             {
-                db.Employees.Add(e);  
+                db.Employees.Add(e);
                 db.SaveChanges();
                 return e;
             });
@@ -102,12 +105,14 @@ namespace HRConnect.Tests
 
             return new EmployeeService(
                 db,
+                activeCompanyService.Object,
+                userCompanyService.Object,
                 employeeRepoMock.Object,
                 email,
+                companyRepoMock.Object,
                 positionRepoMock.Object,
                 GetBalanceService(db),
                 GetProcessingService(db),
-                companyRepoMock.Object,
                 new PasswordHasher<User>()
             );
         }
@@ -146,7 +151,7 @@ namespace HRConnect.Tests
 
             await db.SaveChangesAsync();
 
-            var result = await service.CreateEmployeeAsync(new CreateEmployeeRequestDto
+            var result = await service.CreateEmployeeAsync(1, new CreateEmployeeRequestDto
             {
                 Name = "Test",
                 Surname = "User",
@@ -221,7 +226,7 @@ namespace HRConnect.Tests
 
             await GetBalanceService(db).InitializeEmployeeLeaveBalancesAsync(employee.EmployeeId);
 
-            await service.UpdateEmployeeAsync(employee.EmployeeId, new UpdateEmployeeRequestDto
+            await service.UpdateEmployeeAsync(1, employee.EmployeeId, new UpdateEmployeeRequestDto
             {
                 Title = Title.Mr,
                 Gender = Gender.Male,
@@ -252,7 +257,7 @@ namespace HRConnect.Tests
             var service = GetService(db, new FakeEmailService());
 
             await Assert.ThrowsAsync<NotFoundException>(() =>
-                service.UpdateEmployeeAsync("invalid", new UpdateEmployeeRequestDto
+                service.UpdateEmployeeAsync(1, "invalid", new UpdateEmployeeRequestDto
                 {
                     Title = Title.Mr,
                     Gender = Gender.Male,

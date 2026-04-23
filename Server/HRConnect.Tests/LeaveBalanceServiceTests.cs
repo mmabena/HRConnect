@@ -9,6 +9,7 @@ namespace HRConnect.Tests
     using HRConnect.Api.Services;
     using Microsoft.EntityFrameworkCore;
     using Xunit;
+    using Moq;
     using HRConnect.Api.Interfaces;
     using HRConnect.Api.Utils;
     using HRConnect.Api.DTOs.Employee;
@@ -45,16 +46,29 @@ namespace HRConnect.Tests
         {
             var employeeRepo = new EmployeeRepository(context);
             var positionRepo = new PositionRepository(context);
-            var companyRepo = new CompanyRepository(context);
+
+            var activeCompanyServiceMock = new Mock<IActiveCompanyService>();
+            var userCompanyServiceMock = new Mock<IUserCompanyService>();
+            var companyRepoMock = new Mock<ICompanyRepository>();
+
+            activeCompanyServiceMock
+                .Setup(x => x.GetActiveCompanyIdAsync(It.IsAny<int>()))
+                .ReturnsAsync("COMP001");
+
+            companyRepoMock
+                .Setup(x => x.GetCompanyByIdAsync("COMP001"))
+                .ReturnsAsync(() => context.Companies.First(c => c.CompanyId == "COMP001"));
 
             return new EmployeeService(
                 context,
+                activeCompanyServiceMock.Object,
+                userCompanyServiceMock.Object,
                 employeeRepo,
                 new FakeEmailService(),
+                companyRepoMock.Object,
                 positionRepo,
                 CreateLeaveBalanceService(context),
                 CreateLeaveProcessingService(context),
-                companyRepo,
                 new PasswordHasher<User>()
             );
         }
@@ -239,7 +253,7 @@ namespace HRConnect.Tests
             balance.TakenDays = 5;
             await context.SaveChangesAsync();
 
-            await employeeService.UpdateEmployeeAsync(employee.EmployeeId, new UpdateEmployeeRequestDto
+            await employeeService.UpdateEmployeeAsync(1, employee.EmployeeId, new UpdateEmployeeRequestDto
             {
                 Title = Title.Mr,
                 Gender = Gender.Male,

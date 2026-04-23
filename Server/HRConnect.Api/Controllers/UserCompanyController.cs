@@ -5,6 +5,7 @@ namespace HRConnect.Api.Controllers
     using System.Linq;
     using System.Globalization;
     using HRConnect.Api.DTOs.UserCompany;
+    using HRConnect.Api.Utils;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Authorization;
     using System.Threading.Tasks;
@@ -23,12 +24,7 @@ namespace HRConnect.Api.Controllers
         [HttpGet("my-companies")]
         public async Task<IActionResult> GetMyCompanies()
         {
-            var userIdClaim = User.FindFirst("UserId")?.Value;
-
-            if (string.IsNullOrEmpty(userIdClaim))
-                return Unauthorized();
-
-            var userId = int.Parse(userIdClaim, CultureInfo.InvariantCulture);
+            var userId = User.GetUserId();
 
             var companies = await _userCompanyService.GetMyCompaniesAsync(userId);
             return Ok(companies);
@@ -42,10 +38,12 @@ namespace HRConnect.Api.Controllers
             return Ok("Company assigned successfully");
         }
 
-        [HttpPost("switch-company/{userId}")]
+        [HttpPost("switch-company")]
         [Authorize(Roles = "SuperUser")]
-        public async Task<IActionResult> SwitchCompany(int userId, string companyId)
+        public async Task<IActionResult> SwitchCompany(string companyId)
         {
+            var userId = User.GetUserId(); 
+
             await _userCompanyService.SwitchCompanyAsync(userId, companyId);
             return Ok("Company switched successfully");
         }
