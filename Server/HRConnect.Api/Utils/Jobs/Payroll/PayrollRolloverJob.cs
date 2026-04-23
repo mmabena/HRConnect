@@ -5,11 +5,8 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
   using HRConnect.Api.Interfaces.Pension;
   using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Models.PayrollDeduction;
-  using HRConnect.Api.Models.Pension;
   using Microsoft.Extensions.DependencyInjection;
-  using Microsoft.EntityFrameworkCore;
   using HRConnect.Api.Services;
-  using HRConnect.Api.Data;
 
   /// <summary>
   /// Payroll Rollover Job class to handle the locking, rolling over and 
@@ -33,19 +30,20 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
     private readonly IEmployeePensionEnrollmentService _employeePensionEnrollmentService;
     private readonly IServiceProvider _serviceProvider;
     private readonly IReportsService _reportsService;
-    private readonly ApplicationDBContext _context;
+    private readonly ICompanyContributionRepository _contributionRepo;
     private static readonly int MAX_RUNS = 12;
 
     //This makes mocking and using testing time-related edge cases a lot easier
     private readonly Func<DateTime> _now;
     public PayrollRolloverJob(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService, IServiceProvider serviceProvider,
       IEmployeePensionEnrollmentService employeePensionEnrollmentService,
-      IReportsService reportsService, ApplicationDBContext context, Func<DateTime>? now = null)
+      IReportsService reportsService, ICompanyContributionRepository
+      contributionRepo, Func<DateTime>? now = null)
     {
       _payrollRunRepo = payrollRunRepo;
       _payrollPeriodService = payrollPeriodService;
       _reportsService = reportsService;
-      _context = context;
+      _contributionRepo = contributionRepo;
       _now = now ?? (() => DateTime.Now);
       _serviceProvider = serviceProvider;
       _employeePensionEnrollmentService = employeePensionEnrollmentService;
@@ -196,8 +194,7 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
 
     private async Task AllocateCompanyContributionsIfNeeded(int payrollRunId)
     {
-      var alreadyAllocated = await _context.EmployeeCompanyContributions
-        .AnyAsync(e => e.PayrollRunId == payrollRunId);
+      var alreadyAllocated = await _contributionRepo.FindAllocatedContribution(payrollRunId);
 
       if (alreadyAllocated)
         return;

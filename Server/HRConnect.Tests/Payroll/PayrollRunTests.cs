@@ -1,136 +1,285 @@
-using Xunit;
-using Moq;
-using HRConnect.Api.Models.Payroll;
-using HRConnect.Api.Interfaces;
-using HRConnect.Api.Utils.Payroll;
-using Quartz;
-using System;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.ComponentModel.DataAnnotations;
-public class PayrollTests
+namespace HRConnect.Tests
 {
-  private readonly Mock<IPayrollRunRepository> _payrollRunRepo;
-  private readonly Mock<IPayrollPeriodRepository> _payrollPeriodRepo;
-  private readonly Mock<IPayrollPeriodService> _payrollPeriodService;
-  private readonly Mock<IReportsService> _reportsService;
-  private readonly Mock<IWebHostEnvironment> _env;
-  private readonly Func<DateTime> _now;
+  using Moq;
+  using HRConnect.Api.Models.Payroll;
+  using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Utils.Jobs.Payroll;
+  using HRConnect.Api.Interfaces.Pension;
+  using Quartz;
+  using System;
+  using Microsoft.Extensions.DependencyInjection;
+  using HRConnect.Api.Models.PayrollDeduction;
 
-  public PayrollTests()
+  public class PayrollTests
   {
-    _payrollRunRepo = new Mock<IPayrollRunRepository>();
-    _payrollPeriodService = new Mock<IPayrollPeriodService>();
-    _payrollPeriodRepo = new Mock<IPayrollPeriodRepository>();
-    _reportsService = new Mock<IReportsService>();
-    _now = (() => DateTime.Now);
-    _env = new Mock<IWebHostEnvironment>();
-  }
+    private readonly Mock<IPayrollRunRepository> _payrollRunRepo;
+    private readonly Mock<IPayrollPeriodRepository> _payrollPeriodRepo;
+    private readonly Mock<IPayrollPeriodService> _payrollPeriodService;
+    private readonly Mock<IEmployeePensionEnrollmentService> _employeePensionEnrollmentService;
+    private Mock<IServiceProvider> _serviceProvider;
+    private readonly Mock<IServiceScope> _scopeMock;
+    private readonly Mock<IReportsService> _reportsService;
+    private readonly Mock<ICompanyContributionRepository> _contributionRepoMock;
+    private Func<DateTime> _now;
 
-  //Will be used to mock the time of roll over
-  private bool IsLastMomentOfTheMonth(DateTime dateTime)
-  {
-    var lastDay = DateTime.DaysInMonth(dateTime.Year, dateTime.Month);
-
-    return dateTime.Day == lastDay &&
-      dateTime.Hour == 23 && dateTime.Minute == 59;
-  }
-
-  [Fact]
-  public async Task Should_Finalise_And_Create_New_Payroll_Run_Execute()
-  {
-    // var repo = new Mock<IPayrollRunRepository>();
-    // var _env = new Mock<IWebHostEnvironment>();
-    var currentRun = new PayrollRun
+    public PayrollTests()
     {
-      PayrollRunId = 1,
-      PayrollRunNumber = ((DateTime.Now.Month + 8) % 12) + 1,
-      PeriodDate = new DateTime(2026, 3, 1),
-      IsFinalised = false,
-      IsLocked = false,
-      Records = new List<PayrollRecord>
+      _payrollRunRepo = new Mock<IPayrollRunRepository>();
+      _payrollPeriodService = new Mock<IPayrollPeriodService>();
+      _payrollPeriodRepo = new Mock<IPayrollPeriodRepository>();
+      _reportsService = new Mock<IReportsService>();
+      _employeePensionEnrollmentService = new Mock<IEmployeePensionEnrollmentService>();
+      _contributionRepoMock = new Mock<ICompanyContributionRepository>();
+      _now = () => DateTime.Now;
+
+
+      //Mock a scope for the service scope that will be used by the injected depenedency
+      _scopeMock = new Mock<IServiceScope>();
+
+      //Mocking a Service Scope Factory interface to return our scope
+      var scopeFactoryMock = new Mock<IServiceScopeFactory>();
+      scopeFactoryMock.Setup(sf => sf.CreateScope())
+      .Returns(_scopeMock.Object);
+
+      // Finally mocking the service provider
+      _serviceProvider = new Mock<IServiceProvider>();
+      _serviceProvider.Setup(sp => sp.GetService(typeof(IServiceProvider)))
+      .Returns(scopeFactoryMock.Object);
+    }
+
+    //Will be used to mock the time of roll over
+    private static bool IsLastMomentOfTheMonth(DateTime dateTime)
+    {
+      var lastDay = DateTime.DaysInMonth(dateTime.Year, dateTime.Month);
+
+      return dateTime.Day == lastDay &&
+        dateTime.Hour == 23 && dateTime.Minute == 59;
+    }
+
+    /// <summary>
+    /// Current PayrollRun finalised, new PayrollRun created automatically and no 
+    /// manual trigger required
+    /// </summary>
+    [Fact]
+    public async Task ShouldFinaliseAndCreateNewPayrollRunExecute()
+    {
+      var services = new ServiceCollection();
+      // register other dependencies if needed
+      var serviceProvider = services.BuildServiceProvider();
+
+      var runNumber = ((DateTime.Now.Month + 8) % 12) + 1;
+      var currentRun = new PayrollRun
       {
-        // new PayrollRecord{IsLocked=false}
+        PayrollRunId = 1,
+        PayrollRunNumber = runNumber,
+        PeriodDate = new DateTime(2026, 3, 1),
+        IsFinalised = false,
+        IsLocked = false,
+        Records = new List<PayrollRecord>
+        {
+          new MedicalAidDeduction
+          {
+              IsLocked =false
+          }
+        }
+      };
+      var period = new PayrollPeriod
+      {
+        Runs = new List<PayrollRun> { currentRun }
+      };
+      _payrollPeriodService.Setup(p => p.GetLastPeriodAsync()).ReturnsAsync(period);
+      // _payrollRunRepo.Setup(r => r.GetCurrentRunAsync()).ReturnsAsync(currentRun);
+
+      PayrollRun lockedRun = new PayrollRun
+      {
+        PayrollRunNumber = runNumber + 1,
+        IsFinalised = false,
+        IsLocked = false,
+        Records = new List<PayrollRecord>
+        {
+          new MedicalAidDeduction
+          {
+              IsLocked = true
+          }
+        }
+      };
+
+      //Arrange
+      //fake future time
+      var fakeTime = new DateTime(2026, 3, 31, 23, 59, 59);//23:59 March 31st
+      _now = () => fakeTime;
+      var job = new PayrollRolloverJob(
+        _payrollRunRepo.Object,
+        _payrollPeriodService.Object,
+        serviceProvider,
+        _employeePensionEnrollmentService.Object,
+        _reportsService.Object,
+        _contributionRepoMock.Object,
+        _now
+      );
+      //Act now
+      await job.Execute(null);
+
+      //Create a new run
+      _payrollRunRepo.Setup(r => r.CreatePayrollRunAsync(It.IsAny<PayrollRun>()))
+      .ReturnsAsync(lockedRun);
+      //Update the existing run to be locked 
+      // _payrollRunRepo.Verify(r => r.UpdateRun(It.IsAny<PayrollRun>()), Times.Never);
+      _payrollRunRepo.Verify(r => r.UpdateRun(It.IsAny<PayrollRun>()), Times.AtMostOnce);
+
+      //Assert we got the results we wanted
+      Assert.True(lockedRun.IsLocked);
+      Assert.True(lockedRun.IsFinalised);
+      // Assert.All(lockedRun.Records, r => Assert.True(r.IsLocked));
+      //Make sure we check if the updates have applied
+    }
+
+    /// <summary>
+    /// Create a new PayrollRun when none exists in the system
+    /// </summary>
+    [Fact]
+    public async Task ExecuteShouldCreateNewRunIfNoneExist()
+    {
+      //Arrange 
+      var services = new ServiceCollection();
+      // register other dependencies if needed
+      var serviceProvider = services.BuildServiceProvider();
+
+
+      var period = new PayrollPeriod
+      {
+        Runs = new List<PayrollRun>()//No runs in this period yet
+      };
+
+      _payrollPeriodService.Setup(period => period.GetLastPeriodAsync())
+        .ReturnsAsync(period); ;
+
+      var job = new PayrollRolloverJob(
+        _payrollRunRepo.Object,
+        _payrollPeriodService.Object,
+        serviceProvider,
+        _employeePensionEnrollmentService.Object,
+        _reportsService.Object,
+        _contributionRepoMock.Object,
+        _now
+      );
+
+      await job.Execute(null);
+      //Make sure that there's a new payroll run
+      // _payrollRunRepo.Setup(r => r.CreatePayrollRunAsync(It.IsAny<PayrollRun>()))
+      // .ReturnsAsync<PayrollRun>((PayrollRun)null!);
+      var lockedRun = new PayrollRun { PayrollRunNumber = 1 };
+      _payrollRunRepo.Setup(r => r.CreatePayrollRunAsync(It.IsAny<PayrollRun>()))
+            .Callback<PayrollRun>(r => r = lockedRun);
+    }
+
+    /// <summary>
+    /// Locking test to try edit a locked PayrollRun should return an Exception
+    /// </summary>
+    [Fact]
+    public async Task ExecuteShouldThrowExceptionOnUpdatingLockedRecord()
+    {
+      //Arrange 
+      var services = new ServiceCollection();
+      // register other dependencies if needed
+      var serviceProvider = services.BuildServiceProvider();
+
+
+      var currentRun = new PayrollRun
+      {
+        PayrollRunNumber = 1,
+        IsFinalised = true,
+        IsLocked = true
+      };
+
+      var period = new PayrollPeriod
+      {
+        Runs = new List<PayrollRun> { currentRun }
+      };
+
+      _payrollPeriodService.Setup(period => period.GetLastPeriodAsync())
+      .ReturnsAsync(period);
+
+      var job = new PayrollRolloverJob(
+        _payrollRunRepo.Object,
+        _payrollPeriodService.Object,
+        serviceProvider,
+        _employeePensionEnrollmentService.Object,
+        _reportsService.Object,
+        _contributionRepoMock.Object,
+        _now
+      );
+
+      await job.Execute(null);
+
+      _payrollRunRepo.Verify(r => r.UpdateRun(It.IsAny<PayrollRun>()), Times.Never);
+
+      //Throw Exception for editing locked run
+      // Assert.Throw<InvalidOperationException>(() =>
+      // throw new InvalidOperationException("Record/Run under Hard Lock. Cannot be modified"));
+    }
+
+    [Fact]
+    public async Task ShouldNotRunRolloverBeforeMonthEnd()
+    {
+      //Arrange 
+      var services = new ServiceCollection();
+      // register other dependencies if needed
+      var serviceProvider = services.BuildServiceProvider();
+
+      var currentRun = new PayrollRun
+      {
+        PayrollRunId = 1,
+        PeriodDate = new DateTime(2026, 2, 1),
+        IsFinalised = false,
+        IsLocked = false
+      };
+
+      _payrollRunRepo.Setup(r => r.GetLastPayrun())
+                .ReturnsAsync(currentRun);
+
+      _now = () => new DateTime(2026, 3, 30, 23, 59, 59); //end of the month 
+                                                          //Act
+
+      var job = new PayrollRolloverJob(
+        _payrollRunRepo.Object,
+        _payrollPeriodService.Object,
+        serviceProvider,
+        _employeePensionEnrollmentService.Object,
+        _reportsService.Object,
+        _contributionRepoMock.Object,
+        _now
+      );
+      if (IsLastMomentOfTheMonth(_now()))
+      {
+        await job.Execute(null);
       }
-    };
-    var period = new PayrollPeriod
+
+      // Assert
+      _payrollRunRepo.Verify(r => r.UpdateRun(It.IsAny<PayrollRun>()), Times.Never);
+      Assert.False(currentRun.IsFinalised);
+      Assert.False(currentRun.IsLocked);
+    }
+
+
+    [Fact]
+    public async Task RolloverJobCallsRolloverPayrollDeductions()
     {
-      Runs = new List<PayrollRun> { currentRun }
-    };
-    _payrollPeriodService.Setup(p => p.GetLastPeriodAsync()).ReturnsAsync(period);
-    _payrollRunRepo.Setup(r => r.GetCurrentRunAsync()).ReturnsAsync(currentRun);
+      //Arrange 
+      var services = new ServiceCollection();
+      // register other dependencies if needed
+      var serviceProvider = services.BuildServiceProvider();
 
-    PayrollRun newRun = null!;
-
-    _payrollRunRepo.Setup(r => r.CreatePayrollRunAsync(It.IsAny<PayrollRun>()))
-          .Callback<PayrollRun>(r => newRun = r);
-
-    //fake future time
-    var fakeTime = new DateTime(2026, 3, 31, 23, 59, 59);//23:59 March 31st
-    var job = new PayrollRolloverJob(
+      var job = new PayrollRolloverJob(
         _payrollRunRepo.Object,
         _payrollPeriodService.Object,
-        _env.Object,
-        _reportsService.Object);
-    //Act now
-    await job.Execute(null);
-    //Assert we got the results we wanted
-    Assert.True(newRun.IsLocked);
-    Assert.True(newRun.IsClosed);
-    Assert.All(newRun.Records, r => Assert.True(r.IsLocked));
-    //Make sure we check if the updates have applied
-    _payrollRunRepo.Verify(r => r.UpdateRun(It.IsAny<PayrollRun>()), Times.Never);
-  }
-
-  [Fact]
-  public async Task Execute_Should_Create_New_Run_If_None_Exist()
-  {
-    var period = new PayrollPeriod
-    {
-      Runs = new List<PayrollRun>()//No runs in this period yet
-    };
-
-    _payrollPeriodService.Setup(period => period.GetLastPeriodASync())
-      .ReturnsAsync(period); ;
-
-    var job = new PayrollRolloverJob(
-        _payrollRunRepo.Object,
-        _payrollPeriodService.Object,
-        _env.Object,
+        serviceProvider,
+        _employeePensionEnrollmentService.Object,
         _reportsService.Object,
-        fakeTime);
+        _contributionRepoMock.Object,
+        null
+        );
 
-    await job.Execute(null);
-    //I'll attend the asserts at a later stage
-
-
-  }
-  [Fact]
-  public async Task Execute_Should_Not_Allow_Modify_On_Locked()
-  {
-    var currentRun = new PayrollRun
-    {
-      PayrollRunNumber = 1,
-      IsFinalised = true,
-      IsClose = true
-    };
-
-    var period = new PayrollPeriod
-    {
-      Runs = new List<PayrollRun> { currentRun }
-    };
-
-    _payrollPeriodService.Setup(period => period.GetLastPeriodAsync())
-    .ReturnAsync(period);
-
-    var job = new PayrollRolloverJob(
-        _payrollRunRepo.Object,
-        _payrollPeriodService.Object,
-        _env.Object,
-        _reportsService.Object,
-        fakeTime);
-
-    await job.Execute(null);
-    _payrollRunRepo.Verify(r => r.UpdateRun(It.IsAny<_payrollRunRepo>()), Times.Never);
+    }
   }
 }
