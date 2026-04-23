@@ -1,0 +1,527 @@
+﻿import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import ReactDOM from 'react-dom';
+import './MedicalAidOptionViewModal.css';
+import formatToLocalCurrency from '../../../../../utils/formatToLocalCurrency';
+import formatSalaryBracket from '../../../../../utils/formatSalaryBracket';
+import medicalAidOptionDynamicCalculator from '../../../../../utils/medicalAidOptionDynamicCalculator';
+import Divider from './Divider';
+
+/**
+ * MedicalAidOptionViewModal — View/Edit modal for a medical aid category and its options.
+ *
+ * ARCHITECTURE:
+ * ─────────────────────────────────────────────────────────────────
+ * 1. SINGLE RENDER PATH: CellRenderer toggles between <span> and <input>
+ *    based on isEditing. No duplicate JSX for view vs edit modes.
+ *
+ * 2. EDIT STATE: `edits` is a Map keyed by medicalOptionId → object of
+ *    changed fields. Only deltas are stored, not full copies.
+ *
+ * 3. TOUCH TRACKING: `touchedItems` is a Set of medicalOptionId values
+ *    that have at least one field changed. Save is disabled until
+ *    touchedItems.size === total options in the category.
+ *
+ * 4. PAGINATION: Each option in the category is one "page". User must
+ *    navigate through all pages and make at least one edit per page
+ *    before the Save button becomes enabled.
+ *
+ * 5. NESTED JSON PAYLOAD: On save, edits are compiled into:
+ *    {
+ *      categoryId: <id>,
+ *      categoryName: <name>,
+ *      options: [
+ *        { medicalOptionId, medicalOptionName, changedFields: {...} },
+ *        ...
+ *      ]
+ *    }
+ *
+ * 6. PERFORMANCE: useMemo for derived data, useCallback for handlers,
+ *    refs for values that don't trigger re-renders.
+ * ─────────────────────────────────────────────────────────────────
+ *
+ * @param {boolean} isOpen          - Whether the modal is visible
+ * @param {function} onClose        - Callback to close the modal
+ * @param {string} title            - Modal title
+ * @param {Array} data              - Flat array of option objects in the selected category
+ * @param {Array} categories        - All category objects (for lookup)
+ * @param {function} onSave         - Callback(categoryId, payload) invoked on save
+ */
+function MedicalAidOptionViewModal({
+  isOpen,
+  onClose,
+  title,
+  data = [],
+  categories = [],
+  onSave,
+}) {
+  // ── Edit mode toggle ──
+  const [isEditing, setIsEditing] = useState(false);
+
+  // ── Pagination: current index into the category's options ──
+  const [currentPage, setCurrentPage] = useState(0);
+
+  // ── Edit state: Map<optionId, { fieldName: newValue }> ──
+  //    Only stores fields that have been changed from their original value.
+  const [edits, setEdits] = useState(new Map());
+
+  // ── Touch tracking: Set of option IDs that have at least one edit ──
+  const [touchedItems, setTouchedItems] = useState(new Set());
+
+  // ── Dirty flag: has any edit been made at all? ──
+  const [isDirty, setIsDirty] = useState(false);
+
+  // ── Saving state ──
+  const [isSaving, setIsSaving] = useState(false);
+
+  // ── Calculator helpers ──
+  const {
+    calculatePrincipalTotal,
+    calculateAdultTotal,
+    calculateChildTotal,
+    calculateChild2Total,
+  } = medicalAidOptionDynamicCalculator(formatToLocalCurrency);
+
+  // ── Derived: group data by category ──
+  const groupedData = useMemo(() => {
+    const grouped = {};
+    data.forEach((option) => {
+      const categoryId = option.medicalOptionCategoryId;
+      const category = categories.find(
+        (cat) => cat.medicalOptionCategoryId === categoryId
+      );
+      const categoryName = category?.medicalOptionCategoryName ?? 'Unknown';
+
+      if (!grouped[categoryId]) {
+        grouped[categoryId] = {
+          categoryId,
+          categoryName,
+          options: [],
+        };
+      }
+      grouped[categoryId].options.push(option);
+    });
+    return Object.values(grouped);
+  }, [data, categories]);
+
+  // ── Derived: the current category group (first group, since data is pre-filtered) ──
+  const currentGroup = groupedData[0] ?? null;
+  const totalOptions = currentGroup?.options.length ?? 0;
+
+  // ── Derived: the currently displayed option (pagination target) ──
+  const currentOption = currentGroup?.options[currentPage] ?? null;
+
+  // ── Derived: can we save? All items must be touched ──
+  const canSave = isDirty && touchedItems.size === totalOptions && totalOptions > 0;
+
+  // ── Reset state when modal opens/closes or data changes ──
+  useEffect(() => {
+    if (isOpen) {
+      setIsEditing(false);
+      setCurrentPage(0);
+      setEdits(new Map());
+      setTouchedItems(new Set());
+      setIsDirty(false);
+      setIsSaving(false);
+    }
+  }, [isOpen, data]);
+
+  // ── Get the effective value for a field (edited value or original) ──
+  const getEffectiveValue = useCallback(
+    (optionId, field, originalValue) => {
+      const optionEdits = edits.get(optionId);
+      if (optionEdits && optionEdits[field] !== undefined) {
+        return optionEdits[field];
+      }
+      return originalValue;
+    },
+    [edits]
+  );
+
+  // ── Handle a field change for an option ──
+  const handleFieldChange = useCallback(
+    (optionId, field, newValue) => {
+      setEdits((prev) => {
+        const next = new Map(prev);
+        const optionEdits = next.get(optionId) ?? {};
+        next.set(optionId, { ...optionEdits, [field]: newValue });
+        return next;
+      });
+      setTouchedItems((prev) => {
+        const next = new Set(prev);
+        next.add(optionId);
+        return next;
+      });
+      setIsDirty(true);
+    },
+    []
+  );
+
+  // ── Toggle edit mode ──
+  const handleToggleEdit = useCallback(() => {
+    setIsEditing((prev) => !prev);
+  }, []);
+
+  // ── Compile the nested JSON payload from edits ──
+  const compilePayload = useCallback(() => {
+    if (!currentGroup) return null;
+
+    const editedOptions = [];
+    edits.forEach((changedFields, optionId) => {
+      const originalOption = currentGroup.options.find(
+        (o) => o.medicalOptionId === optionId
+      );
+      if (originalOption) {
+        editedOptions.push({
+          medicalOptionId: optionId,
+          medicalOptionName: originalOption.medicalOptionName,
+          changedFields,
+        });
+      }
+    });
+
+    return {
+      categoryId: currentGroup.categoryId,
+      categoryName: currentGroup.categoryName,
+      options: editedOptions,
+    };
+  }, [edits, currentGroup]);
+
+  // ── Handle save ──
+  const handleSave = useCallback(async () => {
+    if (!canSave) return;
+    setIsSaving(true);
+    try {
+      const payload = compilePayload();
+      if (onSave && payload) {
+        await onSave(currentGroup.categoryId, payload);
+      }
+      setIsEditing(false);
+      setEdits(new Map());
+      setTouchedItems(new Set());
+      setIsDirty(false);
+    } catch (err) {
+      console.error('Save failed:', err);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [canSave, compilePayload, onSave, currentGroup]);
+
+  // ── Pagination handlers ──
+  const goToPage = useCallback(
+    (page) => {
+      if (page >= 0 && page < totalOptions) setCurrentPage(page);
+    },
+    [totalOptions]
+  );
+
+  // ── Keyboard: Escape to close ──
+  useEffect(() => {
+    if (!isOpen) return;
+    const handler = (e) => e.key === 'Escape' && onClose();
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [isOpen, onClose]);
+
+  // ── Scroll lock ──
+  useEffect(() => {
+    document.body.style.overflowY = isOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [isOpen]);
+
+  // ── Inert background ──
+  useEffect(() => {
+    const root = document.getElementById('root');
+    if (!root) return;
+    if (isOpen) root.setAttribute('inert', '');
+    else root.removeAttribute('inert');
+    return () => root.removeAttribute('inert');
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  // ────────────────────────────────────────────────────
+  //  CELL RENDERER — the single source of truth for
+  //  every table cell. Switches between view and edit
+  //  without duplicating any layout code.
+  // ────────────────────────────────────────────────────
+  const Cell = ({ value, field, optionId, editable = false, type = 'text', className = '' }) => {
+    if (isEditing && editable && field) {
+      return (
+        <input
+          className={`editable-cell-input ${className}`}
+          type={type}
+          value={value ?? ''}
+          onChange={(e) => handleFieldChange(optionId, field, type === 'number' ? Number(e.target.value) : e.target.value)}
+        />
+      );
+    }
+    return <span className={`cell-value ${className}`}>{value ?? '-'}</span>;
+  };
+
+  // ── Format a currency value for display ──
+  const fmtCurrency = (val) => {
+    if (val === null || val === undefined) return '-';
+    const num = Number(val);
+    return num > 0 ? formatToLocalCurrency(num, 'en-ZA') : '-';
+  };
+
+  // ── Build the rows for the currently displayed option ──
+  const renderOptionTable = () => {
+    if (!currentOption) return null;
+
+    const oid = currentOption.medicalOptionId;
+
+    // Effective values (edited or original)
+    const riskPrincipal   = getEffectiveValue(oid, 'monthlyRiskContributionPrincipal',   currentOption.monthlyRiskContributionPrincipal);
+    const riskAdult       = getEffectiveValue(oid, 'monthlyRiskContributionAdult',        currentOption.monthlyRiskContributionAdult);
+    const riskChild       = getEffectiveValue(oid, 'monthlyRiskContributionChild',        currentOption.monthlyRiskContributionChild);
+    const riskChild2      = getEffectiveValue(oid, 'monthlyRiskContributionChild2',       currentOption.monthlyRiskContributionChild2);
+    const msaPrincipal    = getEffectiveValue(oid, 'monthlyMsaContributionPrincipal',     currentOption.monthlyMsaContributionPrincipal);
+    const msaAdult        = getEffectiveValue(oid, 'monthlyMsaContributionAdult',         currentOption.monthlyMsaContributionAdult);
+    const msaChild        = getEffectiveValue(oid, 'monthlyMsaContributionChild',         currentOption.monthlyMsaContributionChild);
+    const msaChild2       = getEffectiveValue(oid, 'monthlyMsaContributionChild2',        currentOption.monthlyMsaContributionChild2);
+
+    // Calculated totals (recompute from effective values so edits reflect immediately)
+    const totalPrincipal  = calculatePrincipalTotal(riskPrincipal, msaPrincipal);
+    const totalAdult      = calculateAdultTotal(riskAdult, msaAdult);
+    const totalChild      = calculateChildTotal(riskChild, msaChild);
+    const totalChild2     = calculateChild2Total(riskChild2, msaChild2);
+
+    // Which columns are editable in edit mode
+    const editable = isEditing;
+
+    return (
+      <table className="modal-view-table">
+        <thead>
+          <tr>
+            <th className="modal-view-table-header-cell">Component</th>
+            <th className="modal-view-table-header-cell">Principal</th>
+            <th className="modal-view-table-header-cell">Adult</th>
+            <th className="modal-view-table-header-cell">Child</th>
+            <th className="modal-view-table-header-cell">Child 2+</th>
+          </tr>
+        </thead>
+        <tbody>
+          {/* ── Section Header: Risk ── */}
+          <tr className="modal-view-section-row">
+            <td colSpan="5" className="modal-view-section-cell">
+              MONTHLY RISK CONTRIBUTION
+            </td>
+          </tr>
+          {/* ── Risk Data Row ── */}
+          <tr>
+            <td className="modal-view-label-cell">Risk Allocation</td>
+            <td><Cell value={editable ? riskPrincipal : fmtCurrency(riskPrincipal)} field="monthlyRiskContributionPrincipal" optionId={oid} editable={editable} type="number" /></td>
+            <td><Cell value={editable ? riskAdult : fmtCurrency(riskAdult)}       field="monthlyRiskContributionAdult"        optionId={oid} editable={editable} type="number" /></td>
+            <td><Cell value={editable ? riskChild : fmtCurrency(riskChild)}       field="monthlyRiskContributionChild"        optionId={oid} editable={editable} type="number" /></td>
+            <td><Cell value={editable ? riskChild2 : fmtCurrency(riskChild2)}     field="monthlyRiskContributionChild2"       optionId={oid} editable={editable} type="number" /></td>
+          </tr>
+
+          {/* ── Section Header: MSA ── */}
+          <tr className="modal-view-section-row">
+            <td colSpan="5" className="modal-view-section-cell">
+              MONTHLY SAVINGS ACCOUNT (MSA)
+            </td>
+          </tr>
+          {/* ── MSA Data Row ── */}
+          <tr>
+            <td className="modal-view-label-cell">MSA Allocation</td>
+            <td><Cell value={editable ? msaPrincipal : fmtCurrency(msaPrincipal)} field="monthlyMsaContributionPrincipal" optionId={oid} editable={editable} type="number" /></td>
+            <td><Cell value={editable ? msaAdult : fmtCurrency(msaAdult)}         field="monthlyMsaContributionAdult"      optionId={oid} editable={editable} type="number" /></td>
+            <td><Cell value={editable ? msaChild : fmtCurrency(msaChild)}         field="monthlyMsaContributionChild"      optionId={oid} editable={editable} type="number" /></td>
+            <td><Cell value={editable ? msaChild2 : fmtCurrency(msaChild2)}       field="monthlyMsaContributionChild2"     optionId={oid} editable={editable} type="number" /></td>
+          </tr>
+
+          {/* ── Section Header: Totals ── */}
+          <tr className="modal-view-section-row">
+            <td colSpan="5" className="modal-view-section-cell">
+              TOTAL MONTHLY DEDUCTION
+            </td>
+          </tr>
+          <tr className="modal-view-totals-row">
+            <td className="modal-view-label-cell">Total</td>
+            <td className="modal-view-total-cell">{totalPrincipal}</td>
+            <td className="modal-view-total-cell">{totalAdult}</td>
+            <td className="modal-view-total-cell">{totalChild}</td>
+            <td className="modal-view-total-cell">{totalChild2}</td>
+          </tr>
+        </tbody>
+      </table>
+    );
+  };
+
+  // ── Pagination indicator ──
+  const renderPagination = () => (
+    <div className="modal-pagination">
+      <button
+        className="pagination-btn"
+        onClick={() => goToPage(0)}
+        disabled={currentPage === 0}
+      >
+        First
+      </button>
+      <button
+        className="pagination-btn"
+        onClick={() => goToPage(currentPage - 1)}
+        disabled={currentPage === 0}
+      >
+        Previous
+      </button>
+      <span className="pagination-info">
+        Option {currentPage + 1} of {totalOptions}
+        {isEditing && touchedItems.has(currentOption?.medicalOptionId) && (
+          <span className="touched-indicator"> ✓ Edited</span>
+        )}
+        {isEditing && !touchedItems.has(currentOption?.medicalOptionId) && (
+          <span className="untouched-indicator"> ✏ Needs edit</span>
+        )}
+      </span>
+      <button
+        className="pagination-btn"
+        onClick={() => goToPage(currentPage + 1)}
+        disabled={currentPage >= totalOptions - 1}
+      >
+        Next
+      </button>
+      <button
+        className="pagination-btn"
+        onClick={() => goToPage(totalOptions - 1)}
+        disabled={currentPage >= totalOptions - 1}
+      >
+        Last
+      </button>
+    </div>
+  );
+
+  // ── Edit progress indicator ──
+  const renderEditProgress = () => {
+    if (!isEditing) return null;
+    const remaining = totalOptions - touchedItems.size;
+    return (
+      <div className="edit-progress">
+        <div className="edit-progress-bar">
+          <div
+            className="edit-progress-fill"
+            style={{ width: `${(touchedItems.size / totalOptions) * 100}%` }}
+          />
+        </div>
+        <span className="edit-progress-text">
+          {touchedItems.size} / {totalOptions} options edited
+          {remaining > 0 ? ` — ${remaining} remaining before save` : ' — All edited, ready to save'}
+        </span>
+      </div>
+    );
+  };
+
+  return ReactDOM.createPortal(
+    <div className="medicalaid-menu-background" onClick={onClose}>
+      <div className="model-wrapper" onClick={(e) => e.stopPropagation()}>
+        {/* ── Header ── */}
+        <div className="modal-header-container">
+          <div className="modal-header-main-text">{title}</div>
+          <div className="modal-header-main-secondary-text">
+            {currentGroup?.categoryName ?? ''}
+          </div>
+          <button className="modal-button-close" onClick={onClose} aria-label="Close">
+            &​times;
+          </button>
+        </div>
+
+        {/* ── Body ── */}
+        <div className="medicalAidOptions-modalBody">
+          {data.length === 0 ? (
+            <p className="medicalAidOptions-modalEmpty">No data available.</p>
+          ) : (
+            <>
+              {/* ── Option selector (view mode) / label (edit mode) ── */}
+              {isEditing ? (
+                <div className="option-selector">
+                  <label>EDITING OPTION:</label>
+                  <span className="option-name-edit">
+                    {currentOption?.medicalOptionName ?? ''}
+                  </span>
+                </div>
+              ) : (
+                <div className="option-selector">
+                  <label htmlFor="option-dropdown">MEDICAL OPTION</label>
+                  <select
+                    id="option-dropdown"
+                    value={currentOption?.medicalOptionId ?? ''}
+                    onChange={(e) => {
+                      const idx = currentGroup.options.findIndex(
+                        (o) => o.medicalOptionId === Number(e.target.value)
+                      );
+                      if (idx >= 0) goToPage(idx);
+                    }}
+                    className="category-dropdown"
+                  >
+                    {currentGroup?.options.map((opt) => (
+                      <option key={opt.medicalOptionId} value={opt.medicalOptionId}>
+                        {opt.medicalOptionName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* ── Salary bracket display ── */}
+              {currentOption && (
+                <div className="salary-bracket-display">
+                  <label>INCOME CATEGORY:</label>
+                  <span>
+                    {formatSalaryBracket(
+                      currentOption.salaryBracketMin,
+                      currentOption.salaryBracketMax,
+                      formatToLocalCurrency
+                    )}
+                  </span>
+                </div>
+              )}
+
+              <div className="section-divider">
+                <p>MONTHLY CONTRIBUTION BREAKDOWN</p>
+                <Divider />
+              </div>
+
+              {/* ── The table (single render path) ── */}
+              {renderOptionTable()}
+
+              <Divider />
+
+              {/* ── Pagination ── */}
+              {renderPagination()}
+
+              {/* ── Edit progress ── */}
+              {renderEditProgress()}
+            </>
+          )}
+        </div>
+
+        {/* ── Footer ── */}
+        <div className="medicalAidOptions-modalFooter">
+          <button className="btn btn-secondary" onClick={onClose}>
+            Cancel
+          </button>
+          <button
+            className={`btn ${isEditing ? 'btn-warning' : 'btn-primary'}`}
+            onClick={handleToggleEdit}
+          >
+            {isEditing ? 'Cancel Edit' : 'Edit Plan'}
+          </button>
+          {isEditing && (
+            <button
+              className="btn btn-primary"
+              disabled={!canSave || isSaving}
+              onClick={handleSave}
+            >
+              {isSaving ? 'Saving...' : 'Save All Changes'}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
+export default MedicalAidOptionViewModal;

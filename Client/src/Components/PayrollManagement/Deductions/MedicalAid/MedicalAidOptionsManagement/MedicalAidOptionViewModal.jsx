@@ -1,14 +1,14 @@
-import {useEffect, useMemo, useState} from 'react';
+import {useEffect, useMemo, useState, useCallback} from 'react';
 import ReactDOM from 'react-dom';
 import './MedicalAidOptionViewModal.css';
 import formatToLocalCurrency from "../../../../../utils/formatToLocalCurrency";
 import formatSalaryBracket from "../../../../../utils/formatSalaryBracket";
 import medicalAidOptionDynamicCalculator from "../../../../../utils/medicalAidOptionDynamicCalculator";
 import Divider from './Divider';
-import DynamicGrid from './DynamicGrid';
 
 
-function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categories = [], categoryArray = []}) {
+
+function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categories = [], categoryArray = []}, onSave) {
     // TODO : Prepare the data/transform to use within the model, with all it's category's relatives
     /*
     * Transform the flat data into a grouped structure by category
@@ -17,21 +17,24 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
     * Display grouped data showing option names and salary brackets per category
     * */
 
-    //==== Work Area for proposed solution
-    // Step 3 : Update MedicalAidOptionViewModal to accept and use categories
+    // New Arch
+    const [isEditing, setIsEditing] = useState(false);
+    const [currentPage, setCurrentPage] = useState(0);
+    const [edits, setEdits] = useState(new Map());
+    const [touchedItems, setTouchedItems] = useState(new Set());
+    const [isDirty, setIsDirty] = new useState(true);
+    const [isSaving,setIsSaving] = useState(false);
+    // Old Arch Below
     const [selectedOptionId,setSelectedOptionId] = useState(null);
     const [categoryNameList, setCategoryNameList] = useState(null);
     const [categoryIncomeBrackets, setCategoryIncomeBrackets] = useState(null);
     const [selectedIncomeBracket, setSelectedIncomeBracket] = useState(null);
-    const [isEditing, setIsEditing] = useState(false);
-    //const [editedPayload, setEditedPayload] = useMemo([]);
-    const [riskAllocationsCollection, setRiskAllocationCollection] = useState([]);
-    const [msaAllocationsCollection, setMsaAllocationCollection] = useState([]);
+
 
     const {
       calculatePrincipalTotal,
       calculateAdultTotal,
-      calcculateChildTotal,
+      calculateChildTotal,
       calculateChild2Total
     } = medicalAidOptionDynamicCalculator(formatToLocalCurrency);
 
@@ -45,6 +48,35 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
     useEffect(() => {
       setCategoryNameList(categoryArray);
     },[categoryArray]);
+
+    /*To replace the above 2
+    *   const handleToggleEdit = useCallback(() => {
+    *       setIsEditing(prev => !prev);
+    *   }, []);
+    *
+    *   const handleFiledChanges = useCallback((optionId, field, newValue) => {
+    *       setEdits((prev) => {
+    *           const next = new Map(prev);
+    *           const optionEdits = next.get(optionId) ?? {};
+    *           next.set(optionId, { ...optionEdits, [field]: newValue});
+    *           return next;
+    *       });
+    *       setTouchedItems((prev) => {
+    *           const next = new Set(prev);
+    *           next.add(optionId);
+    *           return next;
+    *       })
+    *       setIsDirty(true);
+    *   }, []);
+    *
+    *   const getEffectiveValue = useCallback((optionId, field, originalValue) => {
+    *       const optionEdits = edits.get(optionId);
+    *       if(optionEdits && optionEdits[field] !== undefined){
+    *           return optionEdits[field];
+    *       }
+    *       return originalValue;
+    *   }, [edits]);
+    * */
 
     // Step1 : Transform the flat data into a grouped structure by category || Data transformer helper function
     const groupedOptionsByCategory = (options, categories) => {
@@ -76,16 +108,30 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
       return Object.values(grouped);
     };
 
-    // Group data by category (Part of Part 3)
-    //const groupedData = groupedOptionsByCategory(data, categories);
+    /*
+    *  The above to be replaced by the below code (optimized)
+    *
+    *   const groupedOptionsByCategory = (options, categories) => {
+    *       const grouped = {};
+    *       options.forEach(option => {
+    *           const optionId = option.medicalOptionId;
+    *           const categoryId = option.medicalOptionCategoryId;
+    *           const category = categories.find(cat => cat.medicalOptionCategoryId === categoryId);
+    *           const categoryName = category?.medicalOptionCategoryName ?? 'Unknown';
+    *
+    *           if(!grouped[categoryId]){
+    *               grouped[categoryId] = {
+    *                   categoryId,
+    *                   categoryName,
+    *                   options: []
+    *               };
+    *           }
+    *           grouped[categoryId].options.push(option);
+    *       });
+    *    return Object.values(grouped);
+    *   }
+    * */
 
-    // Flatten all options with category info for dropdown
-    /*const flattenedOptions = groupedData.flatMap(category =>
-    category.options.map(option => ({
-        ...option,
-        categoryName: category.categoryName ? category.categoryName : category.categoryId
-    }))
-    );*/
 
     // the above have been replaced with the following that useMemo() for performance efficiency:
     const groupedData = useMemo(()=>
@@ -98,6 +144,18 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
           categoryName: category.categoryName ? category.categoryName : category.categoryId
         }))),[groupedData]);
 
+    /* The following (below) replaces the above code:
+    *
+    *  const groupedData = useMemo(() =>
+    *   groupedOptionsByCategory(data, categories), [data, categories]);
+    *
+    *  const currentGroup = groupedData[0] ?? null;
+    *  const totalOptions = currentGroup?.options.length ?? 0;
+    *  const currentOption = currentGroup?.options[currentPage] ?? null;
+    *  const canSave = isDirty && touchedItems.size === totalOptions && totalOptions > 0;
+    *
+    * */
+
 
     // Set default category on data load
     useEffect(() => {
@@ -105,6 +163,8 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
         setSelectedOptionId(flattenedOptions[0].medicalOptionId);
       }
     },[flattenedOptions, selectedOptionId]);
+
+
 
     // Extract the currently selected option => to get the calc values to use
 
@@ -139,7 +199,27 @@ const displayData = useMemo(() =>
     //==== End Work Area for proposed solution
 
 
-
+    // the above code [from line: 161 till 201] will be replaced by the below code
+    /*
+    *  useEffect(() => {
+    *   if (isOpen) {
+    *     setIsEditing(false);
+    *     setCurerntPage(0);
+    *     setEdits(new Map());
+    *     setTouchedItems(new Set());
+    *     setIsDirty(false);
+    *     setIsSaving(false);
+    *   }
+    *  }, [isOpen, data]);
+    *
+    *  const goToPage = useCallback((page) => {
+    *     if(page >= 0 && page < totalOptions) setCurrentPage(page)
+    *  }, [totalOptions]);
+    *
+    *  const compilePayload = useCallback(() => {}, [])
+    *
+    *
+    * */
 
 
     const headerColumnNames = [
@@ -485,7 +565,9 @@ const displayData = useMemo(() =>
                                 ? formatToLocalCurrency(displayData[0]?.monthlyRiskContributionChild, "en-ZA")
                                 : Number(displayData[0]?.monthlyRiskContributionChild2) > 0
                                     ? formatToLocalCurrency(displayData[0]?.monthlyRiskContributionChild2, "en-ZA")
-                                    : "-"
+                                    : Number(displayData[0]?.monthlyRiskContributionChild2) === 0
+                                        ? "FREE"
+                                        : "-"
                             }
                         </td>
                     </tr>
