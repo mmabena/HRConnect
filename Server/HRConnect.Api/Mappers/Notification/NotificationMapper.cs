@@ -6,11 +6,28 @@ namespace HRConnect.Api.Mappers.Notification
   {
     public static NotificationDto ToNotificationDto(this Notification notificationModel)
     {
-      return new NotificationDto { };
+      return new NotificationDto
+      {
+        Message = notificationModel.Message,
+        IsRead = notificationModel.IsRead,
+        Type = notificationModel.Type,
+        Severity = notificationModel.Severity,
+        DueDate = notificationModel.DueDate,
+        DeliveryChannel = notificationModel.DeliveryChannel,
+        CreatedAt = notificationModel.CreatedAt
+      };
     }
-    public static Notification ToNotificationFromDto(this NotificationDto dto)
+    public static Notification ToNotificationFromDto(this CreateNotificationDto dto)
     {
-      return new Notification { };
+      return new Notification
+      {
+        Message = dto.Message,
+        Type = dto.Type,
+        Severity = dto.Severity,
+        EmployeeId = dto.EmployeeId,
+        DueDate = dto.DueDate,
+        DeliveryChannel = dto.DeliveryChannel,
+      };
     }
   }
 }

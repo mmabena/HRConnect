@@ -8,12 +8,15 @@ namespace HRConnect.Api.Mappers
     {
       return new UserRegisterDto
       {
+        UserId = userModel.UserId,
         /// <summary>
         /// Maps the email from the user model to the DTO while leaving the password empty
         /// for security reasons. The password is intentionally not included to prevent exposing
         /// sensitive information.
         /// </summary>
         Email = userModel.Email,
+        Role = userModel.Role.ToString(),
+        RoleId = (int)userModel.Role,
         Password = string.Empty
       };
     }

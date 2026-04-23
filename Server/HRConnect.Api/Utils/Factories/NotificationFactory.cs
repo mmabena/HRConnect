@@ -1,8 +1,9 @@
 namespace HRConnect.Api.Utils.Factories
 {
   using HRConnect.Api.Interfaces.Notification;
-  using HRConnect.Api.Services;
-  using HRConnect.Api.Models;
+  using HRConnect.Api.DTOs.Notification;
+  using HRConnect.Api.Mappers.Notification;
+
   public class NotificationFactory : INotificationFactory
   {
     private readonly INotificationService _notificationService;
@@ -10,11 +11,12 @@ namespace HRConnect.Api.Utils.Factories
     {
       _notificationService = notificationService;
     }
-    public async Task ProduceNotificationAsync(Notification notification)
+    public async Task ProduceNotificationAsync(CreateNotificationDto notification)
     {
-      throw new NotImplementedException();
-
-      //Dispatch a notification once created
+      var newNoti = notification.ToNotificationFromDto();
+      newNoti.CreatedAt = DateTime.Now;
+      newNoti.IsRead = false;
+      await _notificationService.CreateOrEnsureExistsAsync(newNoti);
     }
   }
 }

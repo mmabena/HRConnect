@@ -1,8 +1,8 @@
+
 using System.Text;
 using Audit.Core;
 using Audit.EntityFramework;
 using HRConnect.Api.Data;
-// using Resend;
 using HRConnect.Api.Interfaces;
 using HRConnect.Api.Interfaces.Pension;
 using HRConnect.Api.Middleware;
@@ -15,7 +15,6 @@ using HRConnect.Api.Utils.Jobs.Payroll;
 using HRConnect.Api.Utils.Jobs.Pension;
 using HRConnect.Api.Utils.Jobs.Notification;
 using HRConnect.Api.Utils.Payroll;
-using HRConnect.Api.Utils.Seed;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -26,6 +25,7 @@ using Quartz;
 using HRConnect.Api.Interfaces.Notification;
 using HRConnect.Api.Utils.Factories;
 using HRConnect.Api.Utils.Notification;
+using HRConnect.Api.Interfaces.Payroll.Earning;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -159,7 +159,7 @@ builder.Services.AddQuartz(q =>
   q.AddTrigger(opts => opts
   .ForJob(NotificationJobKey)
   .WithIdentity("NotificationJOb-Trigger")
-  .WithCronSchedule("5,6,7,8,9,10 0/1 * * * ?"));
+  .WithCronSchedule("0 0 0 1 * ?"));
   // 0 -> 0 seconds
   // 0 -> 0 minutes
   // 0 -> 0 hours
@@ -219,25 +219,33 @@ builder.Services.AddScoped<ITaxDeductionRepository, TaxDeductionRepository>();
 builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
 builder.Services.AddScoped<IPositionRepository, PositionRepository>();
 builder.Services.AddScoped<IPositionService, PositionService>();
+builder.Services.AddScoped<ICompanyContributionRepository, CompanyContributionRepository>();
+builder.Services.AddScoped<IEmployeeCompanyContributionRepository, EmployeeCompanyContributionRepository>();
+builder.Services.AddScoped<ICompanyContributionAllocationService, CompanyContributionAllocationService>();
+builder.Services.AddScoped<ICompanyContributionRepository, CompanyContributionRepository>();
+builder.Services.AddScoped<ICompanyContributionService, CompanyContributionService>();
 builder.Services.AddScoped<IJobGradeRepository, JobGradeRepository>();
 builder.Services.AddScoped<IJobGradeService, JobGradeService>();
-// builder.Services.AddScoped<ILeaveTypeManagementRepository, LeaveTypeManagementRepository>();
 builder.Services.AddScoped<IOccupationalLevelRepository, OccupationalLevelRepository>();
 builder.Services.AddScoped<IOccupationalLevelService, OccupationalLevelService>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.Services.AuthService>();
 
-// Mpho Mosia - Leave Services 
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<ILeaveBalanceService, LeaveBalanceService>();
 builder.Services.AddScoped<ILeaveProcessingService, LeaveProcessingService>();
 builder.Services.AddScoped<ILeaveRuleService, LeaveRuleService>();
+builder.Services.AddScoped<IPensionFundService, PensionFundService>();
+builder.Services.AddScoped<IEmployeePensionRepository, EmployeePensionRepository>();
+builder.Services.AddScoped<IPensionFundService, PensionFundService>();
 
+builder.Services.AddScoped<IPensionFundRepository, PensionFundRepository>();
 builder.Services.AddScoped<ILeaveTypeManagementService, LeaveTypeManagementService>();
 builder.Services.AddScoped<ILeaveApplicationService, LeaveApplicationService>();
 
 builder.Services.AddHostedService<LeaveAutomationBackgroundService>();
 
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+builder.Services.AddScoped<IEmployeeCompanyContributionService, EmployeeCompanyContributionService>();
 builder.Services.AddScoped<IStatutoryContributionRepository, StatutoryContributionRepository>();
 builder.Services.AddScoped<IStatutoryContributionService, StatutoryContributionService>();
 builder.Services.AddTransient<IPensionProjectionService, PensionProjectionService>();
@@ -256,7 +264,8 @@ builder.Services.AddScoped<INotificationFactory, NotificationFactory>();
 builder.Services.AddScoped<INotificationDispatcher, NotificationDispatcher>();
 builder.Services.AddScoped<IJobScheduleService, JobScheduleService>();
 
-builder.Services.AddScoped<PositionAndLeaveSeed>();
+builder.Services.AddScoped<IPayrollEarningRepository, PayrollEarningRepository>();
+builder.Services.AddScoped<IPayrollEarningService, PayrollEarningService>();
 
 builder.Services.AddCors(options =>
 {
@@ -281,11 +290,9 @@ using (var scope = app.Services.CreateScope())
 
 using (var scope = app.Services.CreateScope())
 {
-  var seeder = scope.ServiceProvider.GetRequiredService<PositionAndLeaveSeed>();
-
-  await seeder.SeedAsync();
+  var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+  await userService.SyncEmployeeUserAsync();
 }
-
 
 if (app.Environment.IsDevelopment())
 {

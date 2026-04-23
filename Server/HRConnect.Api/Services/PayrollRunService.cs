@@ -9,11 +9,13 @@ namespace HRConnect.Api.Services
   {
     private readonly IPayrollRunRepository _payrollRunRepo;
     private readonly IPayrollPeriodService _payrollPeriodService;
+    private readonly ICompanyContributionAllocationService _allocationService;
 
-    public PayrollRunService(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService)
+    public PayrollRunService(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService, ICompanyContributionAllocationService allocationService)
     {
       _payrollRunRepo = payrollRunRepo;
       _payrollPeriodService = payrollPeriodService;
+      _allocationService = allocationService;
     }
 
     public async Task<PayrollRunDto?> GetPayrunByRunNumberAsync(int payrollRunNumber)
@@ -57,7 +59,9 @@ namespace HRConnect.Api.Services
     /// </summary>
     /// <param name="payrollRecord">Payroll Record derived type being added 
     /// to the current payroll run  </param>
-    /// <param name="employeeId">EmployeeId as a foreign for adding record for particular record</param>
+    /// <param name="employeeId">EmployeeId as a foreign for adding record for particular record
+    /// <b>Required.</b> The identifier of the employee associated with the record. Must be a valid employeeId as this function doesn't assume existence.
+    /// </param>
     /// <returns>Successfully Completed Task</returns>
     /// <exception cref="InvalidDataException">Invalid Type Expected 'PayrollRecord'
     /// </exception>
@@ -80,7 +84,7 @@ namespace HRConnect.Api.Services
       await _payrollRunRepo.UpdateRun(currentPayRun);
     }
 
-    public async Task AddRecordsCollectionToRunAsync(IList<PayrollRecord> recordsCollection, string employeeId)
+    public async Task AddRecordsCollectionToRunAsync(IList<PayrollRecord> recordsCollection, string? employeeId)
     {
       var payperiod = await _payrollPeriodService.GetLastPeriodAsync();
       if (payperiod == null)
@@ -91,11 +95,14 @@ namespace HRConnect.Api.Services
       if (currentPayRun == null)
         throw new InvalidDataException("No current payroll run found or it is locked");
 
-      foreach (var record in recordsCollection
-      )
+      foreach (var record in recordsCollection)
       {
+        var empId = !string.IsNullOrWhiteSpace(employeeId)
+        ? employeeId
+        : record.EmployeeId;
+
         record.PayrollRun = currentPayRun;
-        record.EmployeeId = employeeId;
+        record.EmployeeId = empId;
         currentPayRun.Records.Add(record);
       }
       await _payrollRunRepo.UpdateRun(currentPayRun);

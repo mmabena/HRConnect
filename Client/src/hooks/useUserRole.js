@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
+import { getStoredUserRole } from "../utils/roleUtils";
 
 const useUserRole = () => {
 
  const [role, setRole] = useState(null);
 
  useEffect(()=>{
-   setRole("superuser");
+   setRole(getStoredUserRole().key);
  },[]);
 
  return role;
