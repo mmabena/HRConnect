@@ -7,20 +7,35 @@ namespace HRConnect.Api.Models
     using System.ComponentModel.DataAnnotations.Schema;
 
     public enum BankName
-    {
-        Absa,
-        AfricanBank,
-        BidvestBank,
-        Capitec,
-        DiscoveryBank,
-        FNB,
-        GrindrodBank,
-        Investec,
-        Nedbank,
-        StandardBank,
-        TymeBank
-        
-    }
+{
+    Absa,
+    AfricanBank,
+    AlbarakaBank,
+    BankZero,
+    BidvestBank,
+    Capitec,
+    Citibank,
+    DiscoveryBank,
+    FNB,
+    FirstRandBank,
+    GBSMutualBank,
+    GrindrodBank,
+    HBZBank,
+    HSBC,
+    Investec,
+    JPMorganChase,
+    LandBank,
+    MercantileBank,
+    Nedbank,
+    Postbank,
+    SasfinBank,
+    StandardBank,
+    StandardChartered,
+    StateBankOfIndia,
+    TymeBank,
+    Ubank,
+    YWBNMutualBank
+}
 
     public enum AccountType
     {
@@ -29,7 +44,29 @@ namespace HRConnect.Api.Models
         Current,
         Business
     }
-    public class BankingDetail
+
+    public enum PayFrequency
+    {
+        Weekly,
+        BiWeekly,
+        Monthly
+    }
+
+    public enum PaymentMethod
+    {
+        EFT,
+        Cheque,
+        Cash
+
+    }
+
+    public enum ReferenceTypes
+    {
+        salary,
+        bonus,
+        other
+    }
+        public class BankingDetail
     {
         [Key]
         public int BankingDetailsId { get; set; }
@@ -59,6 +96,15 @@ namespace HRConnect.Api.Models
 
         [Required]
         public AccountType AccountType { get; set; }
+
+        [Required]
+        public PaymentMethod PaymentMethod { get; set; }
+
+        [Required]
+        public PayFrequency PayFrequency { get; set; }
+        
+        [Required]
+        public ReferenceTypes ReferenceType { get; set; }
 
         [Required]
         public int BankBranchCodeId { get; set; } 
