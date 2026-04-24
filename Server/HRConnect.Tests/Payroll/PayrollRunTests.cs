@@ -5,7 +5,6 @@ namespace HRConnect.Tests
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Utils.Jobs.Payroll;
   using HRConnect.Api.Interfaces.Pension;
-  using Quartz;
   using System;
   using Microsoft.Extensions.DependencyInjection;
   using HRConnect.Api.Models.PayrollDeduction;
@@ -16,12 +15,16 @@ namespace HRConnect.Tests
     private readonly Mock<IPayrollPeriodRepository> _payrollPeriodRepo;
     private readonly Mock<IPayrollPeriodService> _payrollPeriodService;
     private readonly Mock<IEmployeePensionEnrollmentService> _employeePensionEnrollmentService;
-    private Mock<IServiceProvider> _serviceProvider;
-    private readonly Mock<IServiceScope> _scopeMock;
     private readonly Mock<IReportsService> _reportsService;
     private readonly Mock<ICompanyContributionRepository> _contributionRepoMock;
+    private readonly Mock<ICompanyContributionAllocationService> _contributionAllocService;
     private Func<DateTime> _now;
 
+    //These are not injected into they are however used for mocking scoped services
+    //in the job
+    // private readonly Mock<IServiceScope> _scopeMock;
+    // private readonly Mock<IServiceProvider> _serviceProviderMock;
+    // private readonly Mock<IServiceScopeFactory> _serviceScopeFactoryMock;
     public PayrollTests()
     {
       _payrollRunRepo = new Mock<IPayrollRunRepository>();
@@ -30,21 +33,24 @@ namespace HRConnect.Tests
       _reportsService = new Mock<IReportsService>();
       _employeePensionEnrollmentService = new Mock<IEmployeePensionEnrollmentService>();
       _contributionRepoMock = new Mock<ICompanyContributionRepository>();
+      _contributionAllocService = new Mock<ICompanyContributionAllocationService>();
       _now = () => DateTime.Now;
 
+      // //Mock a scope for the service provider that will be used by the injected depenedency
+      // _serviceProviderMock = new Mock<IServiceProvider>();
+      // _serviceProviderMock
+      //   .Setup(sp => sp.GetService(typeof(ICompanyContributionAllocationService)))
+      //   .Returns(_contributionAllocService.Object);
+      //
+      // //Mock the service scope
+      // _scopeMock = new Mock<IServiceScope>();
+      // _scopeMock
+      //   .Setup(ss => ss.ServiceProvider)
+      //   .Returns(_serviceProviderMock.Object);
+      //
+      // _serviceScopeFactoryMock=new Mock<IServiceScopeFactory>();
 
-      //Mock a scope for the service scope that will be used by the injected depenedency
-      _scopeMock = new Mock<IServiceScope>();
 
-      //Mocking a Service Scope Factory interface to return our scope
-      var scopeFactoryMock = new Mock<IServiceScopeFactory>();
-      scopeFactoryMock.Setup(sf => sf.CreateScope())
-      .Returns(_scopeMock.Object);
-
-      // Finally mocking the service provider
-      _serviceProvider = new Mock<IServiceProvider>();
-      _serviceProvider.Setup(sp => sp.GetService(typeof(IServiceProvider)))
-      .Returns(scopeFactoryMock.Object);
     }
 
     //Will be used to mock the time of roll over
@@ -65,6 +71,12 @@ namespace HRConnect.Tests
     {
       var services = new ServiceCollection();
       // register other dependencies if needed
+      services.AddScoped<ICompanyContributionAllocationService>(
+          _ => _contributionAllocService.Object
+          );
+      services.AddScoped<ICompanyContributionAllocationService>(
+          _ => _contributionAllocService.Object
+          );
       var serviceProvider = services.BuildServiceProvider();
 
       var runNumber = ((DateTime.Now.Month + 8) % 12) + 1;
@@ -118,13 +130,12 @@ namespace HRConnect.Tests
         _now
       );
       //Act now
-      await job.Execute(null);
+      await job.Execute(null!);
 
       //Create a new run
       _payrollRunRepo.Setup(r => r.CreatePayrollRunAsync(It.IsAny<PayrollRun>()))
       .ReturnsAsync(lockedRun);
       //Update the existing run to be locked 
-      // _payrollRunRepo.Verify(r => r.UpdateRun(It.IsAny<PayrollRun>()), Times.Never);
       _payrollRunRepo.Verify(r => r.UpdateRun(It.IsAny<PayrollRun>()), Times.AtMostOnce);
 
       //Assert we got the results we wanted
@@ -143,6 +154,9 @@ namespace HRConnect.Tests
       //Arrange 
       var services = new ServiceCollection();
       // register other dependencies if needed
+      services.AddScoped<ICompanyContributionAllocationService>(
+          _ => _contributionAllocService.Object
+          );
       var serviceProvider = services.BuildServiceProvider();
 
 
@@ -164,7 +178,7 @@ namespace HRConnect.Tests
         _now
       );
 
-      await job.Execute(null);
+      await job.Execute(null!);
       //Make sure that there's a new payroll run
       // _payrollRunRepo.Setup(r => r.CreatePayrollRunAsync(It.IsAny<PayrollRun>()))
       // .ReturnsAsync<PayrollRun>((PayrollRun)null!);
@@ -182,6 +196,9 @@ namespace HRConnect.Tests
       //Arrange 
       var services = new ServiceCollection();
       // register other dependencies if needed
+      services.AddScoped<ICompanyContributionAllocationService>(
+    _ => _contributionAllocService.Object
+    );
       var serviceProvider = services.BuildServiceProvider();
 
 
@@ -210,7 +227,7 @@ namespace HRConnect.Tests
         _now
       );
 
-      await job.Execute(null);
+      await job.Execute(null!);
 
       _payrollRunRepo.Verify(r => r.UpdateRun(It.IsAny<PayrollRun>()), Times.Never);
 
@@ -225,6 +242,9 @@ namespace HRConnect.Tests
       //Arrange 
       var services = new ServiceCollection();
       // register other dependencies if needed
+      services.AddScoped<ICompanyContributionAllocationService>(
+          _ => _contributionAllocService.Object
+          );
       var serviceProvider = services.BuildServiceProvider();
 
       var currentRun = new PayrollRun
@@ -252,7 +272,7 @@ namespace HRConnect.Tests
       );
       if (IsLastMomentOfTheMonth(_now()))
       {
-        await job.Execute(null);
+        await job.Execute(null!);
       }
 
       // Assert
@@ -268,6 +288,9 @@ namespace HRConnect.Tests
       //Arrange 
       var services = new ServiceCollection();
       // register other dependencies if needed
+      services.AddScoped<ICompanyContributionAllocationService>(
+          _ => _contributionAllocService.Object
+          );
       var serviceProvider = services.BuildServiceProvider();
 
       var job = new PayrollRolloverJob(

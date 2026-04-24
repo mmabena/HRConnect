@@ -6,7 +6,6 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
   using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Models.PayrollDeduction;
   using Microsoft.Extensions.DependencyInjection;
-  using HRConnect.Api.Services;
 
   /// <summary>
   /// Payroll Rollover Job class to handle the locking, rolling over and 
@@ -35,6 +34,7 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
 
     //This makes mocking and using testing time-related edge cases a lot easier
     private readonly Func<DateTime> _now;
+
     public PayrollRolloverJob(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService, IServiceProvider serviceProvider,
       IEmployeePensionEnrollmentService employeePensionEnrollmentService,
       IReportsService reportsService, ICompanyContributionRepository
@@ -187,7 +187,6 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
         var jobException = new JobExecutionException(ex);
         throw jobException;
       }
-
       await _employeePensionEnrollmentService.RollOverEmloyeePensionEnrollmentAsync();
       await RolloverPayrollDeductions();
     }
