@@ -3,12 +3,18 @@ import { FaTimes, FaEdit } from "react-icons/fa";
 import { resolveRole } from "../../utils/roleUtils";
 import { fetchRoles, updateUserRole } from "../../api/UserManagement";
 import "./RoleModal.css"
+import { fetchAllEmployees } from "../../api/Employee.js";
+import { Check, UserRound } from "lucide-react";
 
 const RolesModal = ({ isOpen, onClose, user, onSuccess }) => {
   const [roles, setRoles] = useState([]);
   const [selectedRole, setSelectedRole] = useState(0);
   const [showDropdowns, setShowDropdowns] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [loadedUser, setLoadedUser] = useState({
+    firstName: "",
+    lastName: ""
+  });
 
   // Fetch roles when modal opens
   useEffect(() => {
@@ -36,12 +42,33 @@ const RolesModal = ({ isOpen, onClose, user, onSuccess }) => {
   // When user changes, set role and status explicitly as numbers
   useEffect(() => {
     if (user) {
-     const normalizedUserRole = resolveRole(user);
+      const normalizedUserRole = resolveRole(user);
       setSelectedRole(normalizedUserRole.roleId != null ? normalizedUserRole.roleId : "",);
       // Backend expects 0 or 1 exactly; coerce here safely
+      console.log(`Noramlised User Role ${normalizedUserRole.roleName}`);
       setShowDropdowns(false);
     }
   }, [user]);
+
+  const loadUserFromEmployeeData = async () => {
+    try {
+      const employees = await fetchAllEmployees()
+      console.log(employees);
+
+      const employee = employees.find(e => e.email == user.email);
+      setLoadedUser({
+        firstName: employee?.name || "Unknown User",
+        lastName: employee?.surname || "Uknown User"
+      })
+    }
+    catch (error) {
+      console.log(`Failed To Load User From Employee Data ${error}`)
+      // alert("Failed to load user data. Please try again.");
+    }
+  }
+  useEffect(() => {
+    loadUserFromEmployeeData();
+  }, [user])
 
   const handleSave = async () => {
     if (!user?.userId) {
@@ -75,15 +102,21 @@ const RolesModal = ({ isOpen, onClose, user, onSuccess }) => {
     <div className="actions-modal-overlay" onClick={onClose}>
       <div className="actions-modal" onClick={(e) => e.stopPropagation()}>
         <div className="roles-modal-header">
-          <h3>
-            Roles for {user.firstName} {user.lastName}
-          </h3>
+          <div className="name-tag">
+            <UserRound className="name-tag-icon" />
+            <div>
+              <h3>Change User Role</h3>
+              <p>
+                {loadedUser.firstName} {loadedUser.lastName}
+              </p>
+            </div>
+          </div>
           <button className="close-btn" onClick={onClose}>
             <FaTimes />
           </button>
         </div>
 
-        <div className="actions-modal-content">
+        <div className="roles-modal-content">
           <button
             className="action-btn"
             onClick={() => setShowDropdowns((v) => !v)}
@@ -92,29 +125,19 @@ const RolesModal = ({ isOpen, onClose, user, onSuccess }) => {
             Update Role
           </button>
 
-          {showDropdowns && (
-            <>
-              <div className="form-group">
-                <label htmlFor="roleSelect">Role:</label>
-                <select
-                  id="roleSelect"
-                  value={selectedRole}
-                  onChange={(e) => setSelectedRole(Number(e.target.value))}
-                >
-                  <option value={0} disabled>
-                    -- Select Role --
-                  </option>
-                  {roles.map(({ id, name }) => (
-                    <option key={id} value={id}>
-                      {name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+          <div className="roles-buttons">
+            <p>Select New Role</p>
+            <button
+              className={`role-btn ${selectedRole === 1 ? "active" : ""}`}
+              onClick={() => setSelectedRole(0)}>
+              Super User
+            </button>
 
-            </>
-          )}
-
+            <button className={`role-btn ${selectedRole === 1 ? "active" : ""}`}
+              onClick={() => setSelectedRole(1)}>
+              Normal User
+            </button>
+          </div>
           <div className="modal-actions">
             <button
               className="action-btn"
@@ -124,6 +147,20 @@ const RolesModal = ({ isOpen, onClose, user, onSuccess }) => {
               <FaEdit style={{ marginRight: 6 }} />
               {isSaving ? "Saving..." : "Save Changes"}
             </button>
+          </div>
+          <div className="roles-modal-footer">
+            <div className="roles-actions">
+              <button className="roles-actions-btn cancel"
+                onClick={onClose}>
+                Cancel
+              </button>
+              <button className="roles-actions-btn save"
+                onClick={handleSave}
+                disabled={isSaving}>
+                <Check />
+                {isSaving ? "Saving..." : "Save Changes"}
+              </button>
+            </div>
           </div>
         </div>
       </div>
