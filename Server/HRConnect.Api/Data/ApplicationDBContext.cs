@@ -9,8 +9,10 @@ namespace HRConnect.Api.Data
   using AppAny.Quartz.EntityFrameworkCore.Migrations;
   using AppAny.Quartz.EntityFrameworkCore.Migrations.SqlServer;
   using HRConnect.Api.Models.Payroll.Earning;
+  using HRConnect.Api.Models.Benchmarking;
+    using System.Reflection.Metadata;
 
-  public class ApplicationDBContext(DbContextOptions dbContextOptions) : DbContext(dbContextOptions)
+    public class ApplicationDBContext(DbContextOptions dbContextOptions) : DbContext(dbContextOptions)
   {
 
     public DbSet<User> Users { get; set; }
@@ -48,6 +50,8 @@ namespace HRConnect.Api.Data
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<PayrollEarning> PayrollEarnings { get; set; }
     public DbSet<FinalTaxDeduction> FinalTaxDeductions { get; set; }
+   public DbSet<SalaryBenchmark> SalaryBenchmarks { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
       base.OnModelCreating(modelBuilder);
@@ -240,6 +244,38 @@ namespace HRConnect.Api.Data
             .IsRequired();
 
         entity.Property(e => e.TaxCode).IsRequired();
+      });
+
+
+     modelBuilder.Entity<SalaryBenchmark>(entity =>
+      {
+          entity.HasKey(e => e.Id);
+
+          entity.Property(e => e.Location)
+              .IsRequired()
+              .HasMaxLength(100);
+
+          entity.Property(e => e.Salary25th)
+              .HasColumnType("decimal(18,2)");
+
+          entity.Property(e => e.Salary50th)
+              .HasColumnType("decimal(18,2)");
+
+          entity.Property(e => e.Salary75th)
+              .HasColumnType("decimal(18,2)");
+
+          entity.Property(e => e.Source)
+              .IsRequired()
+              .HasMaxLength(200);
+
+          entity.Property(e => e.CreatedBy)
+              .IsRequired()
+              .HasMaxLength(100);
+
+          entity.HasOne(e => e.JobGrade)
+              .WithMany()
+              .HasForeignKey(e => e.InternalJobGradeId)
+              .OnDelete(DeleteBehavior.Restrict);
       });
 
 

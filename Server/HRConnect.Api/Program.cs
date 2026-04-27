@@ -267,6 +267,9 @@ builder.Services.AddScoped<IJobScheduleService, JobScheduleService>();
 builder.Services.AddScoped<IPayrollEarningRepository, PayrollEarningRepository>();
 builder.Services.AddScoped<IPayrollEarningService, PayrollEarningService>();
 
+builder.Services.AddScoped<ISalaryBenchmarkRepository, SalaryBenchmarkRepository>();
+builder.Services.AddScoped<ISalaryBenchmarkService, SalaryBenchmarkService>();
+
 builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowReact",
