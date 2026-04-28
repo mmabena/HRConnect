@@ -11,6 +11,12 @@ import useImageUpload from "../../hooks/useImageUpload";
 import useUserRole from "../../hooks/useUserRole";
 import { ArrowRight, Upload, UserRoundPlus, X } from "lucide-react";
 
+/// </summary>
+/// MOCK super user role
+/// </summary>
+
+const getCurrentUserRole = () => "superuser";
+
 const AddEmployeeModal = ({ closeModal }) => {
   const navigate = useNavigate();
   const role = useUserRole();
@@ -57,9 +63,10 @@ const AddEmployeeModal = ({ closeModal }) => {
     });
 
   const fileInputRef = useRef(null);
-  const [fileName, setFileName] = useState(
-    "Click to upload or drag a file here PDF, JPG or PNG · max 5MB",
-  );
+  const handleImageClick = () => {
+    fileInputRef.current.click();
+  };
+  const [fileName, setFileName] = useState("Click to upload or drag a file here PDF, JPG or PNG · max 5MB");
 
   if (role !== "superuser") {
     return <div>Access Denied. Only super users can access this page.</div>;
@@ -169,17 +176,13 @@ const AddEmployeeModal = ({ closeModal }) => {
             <div className="emp-left-icon-wrapper">
               <UserRoundPlus size={24} />
             </div>
-
             <span className="emp-title-wrapper emp-center-logo-text">
               New Employee
             </span>
-
             <div className="emp-right-icon-wrapper">
               <X size={24} />
             </div>
           </div>
-
-          {/* STEP INDICATOR (UNCHANGED UI) */}
           <div className="emp-wizard-container">
             <div className="emp-wizard-frame">
               <div className="emp-step-wrapper">
@@ -195,7 +198,6 @@ const AddEmployeeModal = ({ closeModal }) => {
               </div>
 
               <div className="emp-line-step"></div>
-
               <div className="emp-step-wrapper">
                 <div className="emp-step-inactive">3</div>
                 <span className="emp-wizard-step">Leave</span>
@@ -214,7 +216,6 @@ const AddEmployeeModal = ({ closeModal }) => {
                 <div className="emp-step-inactive">5</div>
                 <span className="emp-wizard-step">Medical Aid</span>
               </div>
-
               <div className="emp-line-step"></div>
 
               <div className="emp-step-wrapper">
@@ -225,7 +226,6 @@ const AddEmployeeModal = ({ closeModal }) => {
           </div>
         </div>
 
-        {/* YOUR FULL FORM UI (UNCHANGED) */}
         <div className="emp-name-surname-container">
           <div className="emp-form-grid">
             <div className="emp-personal-details-heading">
@@ -736,7 +736,10 @@ const AddEmployeeModal = ({ closeModal }) => {
 
               <div className="emp-input-wrapper">
                 <div className="emp-upload-wrapper">
-                  <span className="upload-label">Attach Profile Image</span>
+                  
+                  <span className="upload-label">
+                    Attach Profile Image
+                  </span>
 
                   <div className="upload-container">
                     <input
@@ -795,7 +798,9 @@ const AddEmployeeModal = ({ closeModal }) => {
                 }}
                 disabled={loading}
               >
-                {loading ? "Saving..." : step === 6 ? "Save" : "Next"}
+                {loading ? "Saving..." : "Next"}
+
+                <ArrowRight size={20} className="save-button-icon" />
               </button>
             </div>
           </div>
