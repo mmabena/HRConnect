@@ -10,5 +10,7 @@ namespace HRConnect.Api.Repository
   {
     Task<SalaryBenchmark> CreateAsync(SalaryBenchmark benchmark);
     Task<IEnumerable<SalaryBenchmark>> GetAllAsync();
+    Task<SalaryBenchmark> GetByIdAsync(int Id);
+    Task<SalaryBenchmark> UpdateAsync(SalaryBenchmark benchmark);
   }
 }

@@ -10,6 +10,7 @@ namespace HRConnect.Api.Controllers
   using System.Security.Claims;
   using HRConnect.Api.DTOs.Benchmarking;
   using HRConnect.Api.Interfaces;
+  using System.Security.Cryptography;
 
   [ApiController]
   [Route("api/salary-benchmarks")]
@@ -65,6 +66,31 @@ namespace HRConnect.Api.Controllers
       return Ok(benchmarks);
     }
 
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(int id, [FromBody] SalaryBenchmarkUpdateDto request)
+    {
+      if (id <= 0)
+      {
+        return BadRequest("Please enter a valid Benchmark Id");
+      }
+      if (request.Salary25th <= 0 || request.Salary50th <= 0 || request.Salary75th <= 0)
+      {
+        return BadRequest("Salary percentile has to be greater than 0");
+      }
 
+      if (string.IsNullOrWhiteSpace(request.Source))
+      {
+        return BadRequest("Source can not be left empty");
+      }
+
+      var result = await _service.UpdateAsync(id, request);
+
+      if (result == null)
+      {
+        return NotFound($"Salary benchmark with id {id} was not found.");
+      }
+
+      return Ok(result);
+    }
   }
 }

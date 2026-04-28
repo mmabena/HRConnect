@@ -37,5 +37,19 @@ namespace HRConnect.Api.Repository
       .OrderByDescending(b => b.CreatedDate)
       .ToListAsync();
     }
+
+    public async Task<SalaryBenchmark> GetByIdAsync(int Id)
+    {
+      return await _context.SalaryBenchmarks
+      .Include(b => b.JobGrade)
+      .FirstOrDefaultAsync(b => b.Id == Id);
+    }
+
+    public async Task<SalaryBenchmark> UpdateAsync(SalaryBenchmark benchmark)
+    {
+      _context.SalaryBenchmarks.Update(benchmark);
+      await _context.SaveChangesAsync();
+      return benchmark;
+    }
   }
 }

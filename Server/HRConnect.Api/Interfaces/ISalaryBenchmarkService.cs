@@ -4,12 +4,14 @@ namespace HRConnect.Api.Interfaces
   using System;
   using System.Collections.Generic;
   using System.Linq;
-  using System.Threading.Tasks;
+    using System.Security.Cryptography;
+    using System.Threading.Tasks;
 
 
   public interface ISalaryBenchmarkService
   {
     Task<SalaryBenchmarkResponseDto> CreateAsync(SalaryBenchmarkRequestDto request, string createdBy);
     Task<IEnumerable<SalaryBenchmarkResponseDto>> GetAllAsync();
+    Task<SalaryBenchmarkResponseDto>UpdateAsync(int id, SalaryBenchmarkUpdateDto request);
   }
 }

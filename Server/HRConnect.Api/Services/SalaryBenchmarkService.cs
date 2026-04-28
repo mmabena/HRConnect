@@ -58,5 +58,23 @@ namespace HRConnect.Api.Services
       CreatedBy = benchmark.CreatedBy,
       CreatedDate = benchmark.CreatedDate
     };
+
+    public async Task<SalaryBenchmarkResponseDto>UpdateAsync(int id, SalaryBenchmarkUpdateDto request)
+    {
+      var exisiting = await _repository.GetByIdAsync(id);
+      bool recordNotFound = exisiting == null;
+      if (recordNotFound)
+      {
+        return null;
+      }
+
+      exisiting.Salary25th = request.Salary25th;
+      exisiting.Salary50th = request.Salary50th;
+      exisiting.Salary75th = request.Salary75th;
+      exisiting.Source = request.Source;
+
+      var updated = await _repository.UpdateAsync(exisiting);
+      return MapToResponse(updated);
+    }
   }
 }
