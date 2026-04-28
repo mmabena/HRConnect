@@ -14,27 +14,35 @@ namespace HRConnect.Api.Utils.Jobs.Notification
   {
     private readonly IJobScheduleService _jobScheduleService;
     private readonly INotificationFactory _notificationFactory;
-    private readonly ApplicationDBContext _context;
     private readonly INotificationDispatcher _notificationDispatcher;
+    private readonly IEmployeeService _employeeService;
     private readonly IUserService _userService;
     // private static readonly int DAYS_TO_ROLLOVER_NOTIFICATION = 5;
-    public NotificationJob(IJobScheduleService jobScheduleService, INotificationFactory notificationFactory, INotificationDispatcher notificationDispatcher, IUserService userService, ApplicationDBContext context)
+    public NotificationJob(IJobScheduleService jobScheduleService, INotificationFactory notificationFactory, INotificationDispatcher notificationDispatcher, IUserService userService,
+    IEmployeeService employeeService)
     {
       _jobScheduleService = jobScheduleService;
       _notificationFactory = notificationFactory;
       _notificationDispatcher = notificationDispatcher;
       _userService = userService;
-      _context = context;
+      _employeeService = employeeService;
     }
 
-    public async Task<IList<Employee>> OrganiseSuperUsersAsync()
+    public async Task<List<string>> OrganiseSuperUsersAsync()
     {
       var users = await _userService.GetAllUsersAsync();
 
       //Only returns users with SuperUser role
       users = users.FindAll(u => u.Role == UserRole.SuperUser);
-      Employee employees = new Array();
+      List<string> employeeIds = new();
 
+      foreach (var u in users)
+      {
+        var e = await _employeeService.GetEmployeeByEmailAsync(u.Email);
+        if (e is not null)
+          employeeIds.Add(e.EmployeeId);
+      }
+      return employeeIds;
     }
 
     public async Task Execute(IJobExecutionContext context)
@@ -50,8 +58,8 @@ namespace HRConnect.Api.Utils.Jobs.Notification
       int secondsUntilRollover = (payrollExecutionDate.Value - DateTime.Now).Seconds;
       if (secondsUntilRollover > 0)
       {
-        var superUser = await OrganiseSuperUsersAsync();
-        foreach (var su in superUser)
+        var superUserIds = await OrganiseSuperUsersAsync();
+        foreach (var su in superUserIds)
         {
           //every user in these iterations is a super user
           var notification = new CreateNotificationDto
@@ -61,7 +69,7 @@ namespace HRConnect.Api.Utils.Jobs.Notification
             Type = NotificationType.Payroll,
             DeliveryChannel = "InApp",
             DueDate = payrollExecutionDate,
-            EmployeeId = $"{su.UserId}"
+            EmployeeId = $"{su}"
           };
           await _notificationFactory.ProduceNotificationAsync(notification);
         }

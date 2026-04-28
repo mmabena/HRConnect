@@ -16,7 +16,8 @@ namespace HRConnect.Api.Utils.Factories
       var newNoti = notification.ToNotificationFromDto();
       newNoti.CreatedAt = DateTime.Now;
       newNoti.IsRead = false;
-      await _notificationService.CreateOrEnsureExistsAsync(newNoti);
+      // await _notificationService.CreateOrEnsureExistsAsync(newNoti);
+      await _notificationService.CreateAndDispatchAsync(newNoti);
     }
   }
 }
