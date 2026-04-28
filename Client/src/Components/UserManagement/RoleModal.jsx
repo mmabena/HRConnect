@@ -4,7 +4,7 @@ import { resolveRole } from "../../utils/roleUtils";
 import { fetchRoles, updateUserRole } from "../../api/UserManagement";
 import "./RoleModal.css"
 import { fetchAllEmployees } from "../../api/Employee.js";
-import { Check, UserRound } from "lucide-react";
+import { Check, UserRound, UserLock } from "lucide-react";
 
 const RolesModal = ({ isOpen, onClose, user, onSuccess }) => {
   const [roles, setRoles] = useState([]);
@@ -117,37 +117,30 @@ const RolesModal = ({ isOpen, onClose, user, onSuccess }) => {
         </div>
 
         <div className="roles-modal-content">
-          <button
-            className="action-btn"
-            onClick={() => setShowDropdowns((v) => !v)}
-          >
-            <FaEdit style={{ marginRight: 6 }} />
-            Update Role
-          </button>
-
           <div className="roles-buttons">
             <p>Select New Role</p>
-            <button
-              className={`role-btn ${selectedRole === 1 ? "active" : ""}`}
-              onClick={() => setSelectedRole(0)}>
-              Super User
-            </button>
+            <div className="roles-buttons-wrapper">
+              <button
+                className={`role-btn superuser ${selectedRole === 1 ? "active" : ""}`}
+                onClick={() => {
+                  setSelectedRole(1)
+                  console.log(`Super User Button Has Role ${selectedRole}`)
+                }}>
+                <UserLock />
+                Super User
+              </button>
 
-            <button className={`role-btn ${selectedRole === 1 ? "active" : ""}`}
-              onClick={() => setSelectedRole(1)}>
-              Normal User
-            </button>
+              <button className={`role-btn normaluser ${selectedRole === 0 ? "active" : ""}`}
+                onClick={() => {
+                  setSelectedRole(0)
+                  console.log(`Normal User Button Has Role ${selectedRole}`)
+                }}>
+                <UserLock />
+                Normal User
+              </button>
+            </div>
           </div>
-          <div className="modal-actions">
-            <button
-              className="action-btn"
-              onClick={handleSave}
-              disabled={isSaving}
-            >
-              <FaEdit style={{ marginRight: 6 }} />
-              {isSaving ? "Saving..." : "Save Changes"}
-            </button>
-          </div>
+
           <div className="roles-modal-footer">
             <div className="roles-actions">
               <button className="roles-actions-btn cancel"
@@ -162,6 +155,7 @@ const RolesModal = ({ isOpen, onClose, user, onSuccess }) => {
               </button>
             </div>
           </div>
+
         </div>
       </div>
     </div>

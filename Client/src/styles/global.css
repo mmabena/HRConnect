@@ -954,3 +954,14 @@ body {
     font-size: 12px;
   }
 }
+.superuser{
+background: #0060881A;
+border:1px solid #00608887;
+color: var(--COLOUR-Calm-Blue, #006088);
+}
+.normaluser{
+border:1px solid #AFBF74;
+background: #AFBF744D;
+color: var(--COLOUR-Olive-Green, #638549);
+border:1px solid #AFBF74;
+}

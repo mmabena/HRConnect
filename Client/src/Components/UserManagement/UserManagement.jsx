@@ -276,8 +276,7 @@ const UserManagement = () => {
                     <td className="action-buttons">
                       <button
                         className="actions-trigger-btn"
-                        onClick={() => handleShowActions(idx)}
-                      >
+                        onClick={() => handleShowActions(idx)} >
                         <FaEllipsisV />
                         Actions
                       </button>

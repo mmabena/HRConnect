@@ -16,9 +16,15 @@ flex-grow: 0;
 }
 
 .roles-modal-content{
-height:396px;
+/* height:396px; */
+  min-height:369px;
+  max-height:80vh;
+  overflow-y:auto;
+
 display:flex;
 flex-direction:column;
+padding:15px;
+gap:12px;
 }
 
 .close-btn{
@@ -95,12 +101,12 @@ box-sizing: border-box;
 display: flex;
 flex-direction: row;
 justify-content:center;
-align-items: flex-end;
+align-items:center; 
 padding: 12px 0px;
 gap: 44px;
 
-position: relative;
 
+margin-top:auto;
 }
 .roles-actions{
 box-sizing: border-box;
@@ -160,9 +166,13 @@ order: 1;
 flex-grow: 0;
 }
 
+.roles-buttons.normaluser{
+border:1px solid #AFBF74;
+}
 .roles-buttons{
 position: absolute;
 display:flex;
+flex-direction:column;
 align-items:center;
 width: 506px;
 height: 143px;
@@ -172,23 +182,25 @@ gap:44px;
 .roles-buttons p{
 width: 115px;
 height: 26px;
-
 font-family: 'Anek Bangla';
 font-style: normal;
 font-weight: 500;
 font-size: 15px;
 line-height: 26px;
 /* identical to box height, or 173% */
-color: #4F6E78;
+/* color: #4F6E78; */
+color:red;
 flex: none;
 order: 0;
 flex-grow: 0;
+position:flex-start;
 }
 
 .role-btn{
+  cursor:pointer;
 box-sizing: border-box;
 display: flex;
-flex-direction: row;
+flex-direction: column;
 justify-content: center;
 align-items: center;
 padding: 0px;
@@ -197,11 +209,18 @@ gap: 10px;
 width: 230px;
 height: 62px;
 
-background: rgba(0, 96, 136, 0.1);
+/* background: rgba(0, 96, 136, 0.1); */
 border: 1px solid rgba(0, 96, 136, 0.53);
 border-radius: 5px;
 
 flex: none;
 order: 0;
 flex-grow: 0;
+}
+.roles-buttons-wrapper{
+position:relative;
+display:flex;
+flex-direction:row;
+justify-content:center;
+gap:44px;
 }

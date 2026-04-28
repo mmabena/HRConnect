@@ -72,17 +72,21 @@ border:1px solid #4F6E78;
 color:white;
 background-color:var(--primary-color);
 }
+/*superuser*/
 .role-badge.superuser{
-border:1px solid #00608887; 
+border:1px solid #00608887;
+/* border:1px solid #00608887;  */
 max-width:146px;
 cursor: default;
-
+color: var(--COLOUR-Calm-Blue, #006088);
 }
 .role-badge.normaluser{
 cursor: default;
-border:1px solid #AFBF74;
-color:#638549;
 background: #AFBF744D;
+border:1px solid #AFBF74;
+/* border:1px solid #AFBF74; */
+/* color:#638549; */
+/* background: #AFBF744D; */
 max-width:146px;
 }
 .styled-table td{
