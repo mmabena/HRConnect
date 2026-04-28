@@ -1,4 +1,4 @@
-﻿namespace HRConnect.Api.Services
+namespace HRConnect.Api.Services
 {
   using System.Collections.Generic;
   using System.Threading.Tasks;
@@ -13,7 +13,7 @@
   using HRConnect.Api.Utils.Pension.ValidationHelpers;
 
   public class PensionDeductionService(IPensionDeductionRepository pensionDeductionRepository,
-    IEmployeeRepository employeeRepository, IEmployeePensionEnrollmentRepository employeePensionEnrollmentRepository, 
+    IEmployeeRepository employeeRepository, IEmployeePensionEnrollmentRepository employeePensionEnrollmentRepository,
     IPensionOptionRepository pensionOptionRepository, IPayrollRunRepository payrollRunRepository, IPayrollRunService payrollRunService) : IPensionDeductionService
   {
     private readonly IPensionDeductionRepository _pensionDeductionRepository = pensionDeductionRepository;
@@ -227,7 +227,7 @@
             (decimal)existEmployeesPensionEnrollment.VoluntaryContribution),
           EmailAddress = existingEmployee.Email,
           PhysicalAddress = existingEmployee.PhysicalAddress,
-          PayrollRunId = currentPayrollRunId.PayrollRunId,
+          PayrollRunId = currentPayrollRunId!.PayrollRunId,
           CreatedDate = existEmployeesPensionEnrollment.EffectiveDate,
           IsActive = true
         };
@@ -280,7 +280,7 @@
         Employee? employee = await _employeeRepository.GetEmployeeByIdAsync(enrollment.EmployeeId);
         if (employee != null && employee.PensionOptionId != null && employee.IsActive)
         {
-          decimal pensionCategoryPercentage = await _pensionOptionRepository.GetPensionOptionPercentageByIdAsync((int)employee.PensionOptionId);
+          decimal pensionCategoryPercentage = await _pensionOptionRepository.GetPensionOptionPercentageByIdAsync((int)employee.PensionOptionId!);
 
           PensionDeduction pensionDeduction = new()
           {

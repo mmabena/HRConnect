@@ -32,8 +32,8 @@ namespace HRConnect.Api.Data
     public DbSet<PayrollRun> PayrollRuns { get; set; }
     public DbSet<PayrollRecord> PayrollRecords { get; set; }
     public DbSet<PensionFund> PensionFunds { get; set; }
-        // LEAVE SYSTEM
-        public DbSet<LeaveType> LeaveTypes { get; set; }
+    // LEAVE SYSTEM
+    public DbSet<LeaveType> LeaveTypes { get; set; }
     public DbSet<LeaveEntitlementRule> LeaveEntitlementRules { get; set; }
     public DbSet<EmployeeLeaveBalance> EmployeeLeaveBalances { get; set; }
     public DbSet<LeaveApplication> LeaveApplications { get; set; }
@@ -106,10 +106,6 @@ namespace HRConnect.Api.Data
           .HasIndex(o => o.Description)
           .IsUnique();
 
-      modelBuilder.Entity<PayrollRecord>()
-      .HasIndex(x => new { x.PayrollRunId, x.EmployeeId })
-      .IsUnique();
-
       modelBuilder.Entity<Employee>().Property(e => e.Title).HasConversion<string>();
       modelBuilder.Entity<Employee>().Property(e => e.Gender).HasConversion<string>();
       modelBuilder.Entity<Employee>().Property(e => e.Branch).HasConversion<string>();
@@ -133,9 +129,9 @@ namespace HRConnect.Api.Data
           .HasForeignKey(lb => lb.LeaveTypeId)
           .OnDelete(DeleteBehavior.Restrict);
 
-      modelBuilder.Entity<EmployeeCompanyContribution>()
-    .HasIndex(e => new { e.PayrollRunId, e.EmployeeId })
-    .IsUnique();
+      //   modelBuilder.Entity<EmployeeCompanyContribution>()
+      // .HasIndex(e => new { e.PayrollRunId, e.EmployeeId })
+      // .IsUnique();
 
       modelBuilder.Entity<LeaveEntitlementRule>()
           .HasOne(r => r.JobGrade)

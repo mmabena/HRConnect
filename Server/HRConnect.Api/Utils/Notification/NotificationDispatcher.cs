@@ -16,6 +16,7 @@ namespace HRConnect.Api.Utils.Notification
       {
         try
         {
+          Console.WriteLine($"Sending notification to {strategy.Name}");
           await strategy.SendNotificationAsync(notification);
         }
         catch (Exception ex)
