@@ -26,7 +26,7 @@ namespace HRConnect.Api.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<IActionResult> ApplyForLeave([FromBody] CreateApplicationRequest request)
+        public async Task<IActionResult> ApplyForLeave([FromForm] CreateApplicationRequest request)
         {
             var result = await _service.ApplyForLeaveAsync(request);
             return Ok(result);
@@ -70,7 +70,7 @@ namespace HRConnect.Api.Controllers
                 message = "Leave rejected successfully."
             });
         }
-        
+
         [HttpGet("{id}/approve")]
         public async Task<IActionResult> ApproveFromEmail(
     int id,

@@ -43,6 +43,7 @@ namespace HRConnect.Api.Models
         public DateTime TokenExpiry { get; set; } = DateTime.UtcNow.AddDays(2);
         [Timestamp]
         public byte[] RowVersion { get; set; } = Array.Empty<byte>();
+        public ICollection<LeaveDocument> Documents { get; set; } = new List<LeaveDocument>();
 
     }
 

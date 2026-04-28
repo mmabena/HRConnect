@@ -12,15 +12,18 @@ namespace HRConnect.Api.Services
         private readonly ApplicationDBContext _context;
         private readonly IEmailService _emailService;
         private readonly IConfiguration _configuration;
+        private readonly ICloudinaryService _cloudinaryService;
 
         public LeaveApplicationService(
             ApplicationDBContext context,
             IEmailService emailService,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            ICloudinaryService cloudinaryService)
         {
             _context = context;
             _emailService = emailService;
             _configuration = configuration;
+            _cloudinaryService = cloudinaryService;
         }
         /// <summary>
         /// Processes a leave application request by validating the employee, leave type, and requested dates, checking the employee's leave balance,
@@ -55,6 +58,62 @@ namespace HRConnect.Api.Services
             if (leaveType == null)
                 throw new InvalidOperationException("Leave type not found.");
 
+            if (leaveType.Code != "AL" &&
+                (request.Documents == null || request.Documents.Count == 0))
+            {
+                throw new ArgumentException("Supporting documents are required.");
+            }
+
+            var allowedTypes = new[] { "image/png", "image/jpeg", "application/pdf" };
+            var allowedExtensions = new[] { ".png", ".jpg", ".jpeg", ".pdf" };
+            const long maxFileSize = 5 * 1024 * 1024;
+
+            var documents = new List<LeaveDocument>();
+            var uploadedPublicIds = new List<string>();
+
+            try
+            {
+                if (request.Documents != null)
+                {
+                    foreach (var file in request.Documents)
+                    {
+                        if (file.Length == 0)
+                            throw new ArgumentException("Empty file is not allowed.");
+
+                        if (file.Length > maxFileSize)
+                            throw new ArgumentException("File exceeds 5MB.");
+
+                        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+
+                        if (!allowedTypes.Contains(file.ContentType) || !allowedExtensions.Contains(extension))
+                            throw new ArgumentException("Invalid file type.");
+
+                        var (url, publicId) = await _cloudinaryService.UploadFileAsync(file);
+
+                        uploadedPublicIds.Add(publicId);
+
+                        documents.Add(new LeaveDocument
+                        {
+                            FileName = file.FileName,
+                            FileUrl = url,
+                            PublicId = publicId,
+                            FileType = file.ContentType,
+                            FileSize = file.Length
+                        });
+                    }
+                }
+            }
+            catch
+            {
+                //Rollback uploaded files
+                foreach (var publicId in uploadedPublicIds)
+                {
+                    await _cloudinaryService.DeleteFileAsync(publicId);
+                }
+
+                throw;
+            }
+
             var balance = employee.LeaveBalances
                 .FirstOrDefault(lb => lb.LeaveTypeId == request.LeaveTypeId);
 
@@ -75,13 +134,16 @@ namespace HRConnect.Api.Services
                 StartDate = request.StartDate,
                 EndDate = request.EndDate,
                 DaysRequested = daysRequested,
+                Documents = documents,
                 Status = LeaveApplication.LeaveApplicationStatus.Pending,
                 AppliedDate = DateTime.UtcNow
             };
 
             await _context.LeaveApplications.AddAsync(application);
-            await SendManagerApprovalEmail(application);
+
             await _context.SaveChangesAsync();
+
+            await SendManagerApprovalEmail(application);
 
             return MapToResponse(application);
         }
@@ -98,6 +160,7 @@ namespace HRConnect.Api.Services
         public async Task ApproveLeaveAsync(int applicationId, Guid token)
         {
             var application = await _context.LeaveApplications
+                .Include(a => a.Documents) // includes documents for email usage
                 .FirstOrDefaultAsync(a => a.Id == applicationId);
 
             if (application == null)
@@ -113,16 +176,26 @@ namespace HRConnect.Api.Services
                 throw new InvalidOperationException("Only pending applications can be approved");
 
             var balance = await _context.EmployeeLeaveBalances
-                .FirstAsync(b => b.EmployeeId == application.EmployeeId &&
-                                 b.LeaveTypeId == application.LeaveTypeId);
+                .FirstOrDefaultAsync(b => b.EmployeeId == application.EmployeeId &&
+                                          b.LeaveTypeId == application.LeaveTypeId);
+
+            if (balance == null)
+                throw new InvalidOperationException("Leave balance not found");
+
+            if (balance.AvailableDays < application.DaysRequested)
+                throw new InvalidOperationException("Insufficient leave balance");
 
             balance.TakenDays += application.DaysRequested;
             balance.AvailableDays -= application.DaysRequested;
 
             application.Status = LeaveApplication.LeaveApplicationStatus.Approved;
             application.DecisionDate = DateTime.UtcNow;
+
             var employee = await _context.Employees
-                .FirstAsync(e => e.EmployeeId == application.EmployeeId);
+                .FirstOrDefaultAsync(e => e.EmployeeId == application.EmployeeId);
+
+            if (employee == null)
+                throw new InvalidOperationException("Employee not found");
 
             var manager = await _context.Employees
                 .FirstOrDefaultAsync(e => e.EmployeeId == employee.CareerManagerID);
@@ -138,6 +211,7 @@ namespace HRConnect.Api.Services
         public async Task ApproveLeaveInternalAsync(int applicationId)
         {
             var application = await _context.LeaveApplications
+                .Include(a => a.Documents)
                 .FirstOrDefaultAsync(a => a.Id == applicationId);
 
             if (application == null)
@@ -147,15 +221,23 @@ namespace HRConnect.Api.Services
                 throw new InvalidOperationException("Only pending applications can be approved");
 
             var balance = await _context.EmployeeLeaveBalances
-                .FirstAsync(b => b.EmployeeId == application.EmployeeId &&
-                                 b.LeaveTypeId == application.LeaveTypeId);
+                .FirstOrDefaultAsync(b => b.EmployeeId == application.EmployeeId &&
+                                          b.LeaveTypeId == application.LeaveTypeId);
+
+            if (balance == null)
+                throw new InvalidOperationException("Leave balance not found");
+
+            if (balance.AvailableDays < application.DaysRequested)
+                throw new InvalidOperationException("Insufficient leave balance");
 
             balance.TakenDays += application.DaysRequested;
             balance.AvailableDays -= application.DaysRequested;
 
-            //GET MANAGER NAME
             var employee = await _context.Employees
-                .FirstAsync(e => e.EmployeeId == application.EmployeeId);
+                .FirstOrDefaultAsync(e => e.EmployeeId == application.EmployeeId);
+
+            if (employee == null)
+                throw new InvalidOperationException("Employee not found");
 
             var manager = await _context.Employees
                 .FirstOrDefaultAsync(e => e.EmployeeId == employee.CareerManagerID);
@@ -168,7 +250,6 @@ namespace HRConnect.Api.Services
 
             await _context.SaveChangesAsync();
 
-            // ALWAYS SEND EMAIL
             await SendEmployeeDecisionEmail(application, true);
         }
         /// <summary>
@@ -183,6 +264,7 @@ namespace HRConnect.Api.Services
         public async Task RejectLeaveAsync(int applicationId, Guid token, string? reason)
         {
             var application = await _context.LeaveApplications
+                .Include(a => a.Documents) // ADDED: needed for email/document access
                 .FirstOrDefaultAsync(a => a.Id == applicationId);
 
             if (application == null)
@@ -197,18 +279,24 @@ namespace HRConnect.Api.Services
             if (application.Status != LeaveApplication.LeaveApplicationStatus.Pending)
                 throw new InvalidOperationException("Only pending applications can be rejected");
 
-            application.Status = LeaveApplication.LeaveApplicationStatus.Rejected;
-            application.DecisionDate = DateTime.UtcNow;
             var employee = await _context.Employees
-            .FirstAsync(e => e.EmployeeId == application.EmployeeId);
+                .FirstOrDefaultAsync(e => e.EmployeeId == application.EmployeeId);
+
+            if (employee == null)
+                throw new InvalidOperationException("Employee not found");
 
             var manager = await _context.Employees
                 .FirstOrDefaultAsync(e => e.EmployeeId == employee.CareerManagerID);
 
+            application.Status = LeaveApplication.LeaveApplicationStatus.Rejected;
+            application.DecisionDate = DateTime.UtcNow;
             application.DecisionBy = manager != null
                 ? $"{manager.Name} {manager.Surname}"
                 : "Admin";
-            application.RejectionReason = reason;
+
+            application.RejectionReason = string.IsNullOrWhiteSpace(reason)
+                ? "No reason provided" // fallback if no reason is given
+                : reason;
 
             await _context.SaveChangesAsync();
 
@@ -217,6 +305,7 @@ namespace HRConnect.Api.Services
         public async Task RejectLeaveInternalAsync(int applicationId, string? reason)
         {
             var application = await _context.LeaveApplications
+                .Include(a => a.Documents)
                 .FirstOrDefaultAsync(a => a.Id == applicationId);
 
             if (application == null)
@@ -226,7 +315,10 @@ namespace HRConnect.Api.Services
                 throw new InvalidOperationException("Only pending applications can be rejected");
 
             var employee = await _context.Employees
-                .FirstAsync(e => e.EmployeeId == application.EmployeeId);
+                .FirstOrDefaultAsync(e => e.EmployeeId == application.EmployeeId);
+
+            if (employee == null)
+                throw new InvalidOperationException("Employee not found");
 
             var manager = await _context.Employees
                 .FirstOrDefaultAsync(e => e.EmployeeId == employee.CareerManagerID);
@@ -237,9 +329,12 @@ namespace HRConnect.Api.Services
                 ? $"{manager.Name} {manager.Surname}"
                 : "Admin";
 
-            application.RejectionReason = reason;
+            application.RejectionReason = string.IsNullOrWhiteSpace(reason)
+                ? "No reason provided"
+                : reason;
 
             await _context.SaveChangesAsync();
+
             await SendEmployeeDecisionEmail(application, false);
         }
         /// <summary>
@@ -253,12 +348,32 @@ namespace HRConnect.Api.Services
             return new LeaveApplicationResponse
             {
                 Id = application.Id,
-                EmployeeId = application.EmployeeId,
+                EmployeeName = application.Employee != null
+                    ? $"{application.Employee.Name} {application.Employee.Surname}"
+                    : "Unknown",
+
                 LeaveTypeId = application.LeaveTypeId,
+                LeaveTypeCode = application.LeaveType?.Code ?? string.Empty,
+
                 StartDate = application.StartDate,
                 EndDate = application.EndDate,
                 DaysRequested = application.DaysRequested,
-                Status = application.Status.ToString()
+                DaysAllocated = application.LeaveType?.EntitlementRules != null &&
+                                application.LeaveType.EntitlementRules.Count > 0
+                    ? application.LeaveType.EntitlementRules
+                        .Where(r => r.IsActive)
+                        .OrderByDescending(r => r.MinYearsService)
+                        .Select(r => r.DaysAllocated)
+                        .FirstOrDefault()
+                    : 0,
+
+                Status = application.Status.ToString(),
+
+                Documents = application.Documents?.Select(d => new LeaveDocumentResponse
+                {
+                    FileName = d.FileName,
+                    FileUrl = d.FileUrl
+                }).ToList() ?? new List<LeaveDocumentResponse>()
             };
         }
         /// <summary>
@@ -273,23 +388,42 @@ namespace HRConnect.Api.Services
     bool approved)
         {
             var employee = await _context.Employees
-                .FirstAsync(e => e.EmployeeId == application.EmployeeId);
+                .FirstOrDefaultAsync(e => e.EmployeeId == application.EmployeeId);
+
+            if (employee == null)
+                throw new InvalidOperationException("Employee not found");
 
             var leaveType = await _context.LeaveTypes
-                .FirstAsync(l => l.Id == application.LeaveTypeId);
+                .FirstOrDefaultAsync(l => l.Id == application.LeaveTypeId);
+
+            if (leaveType == null)
+                throw new InvalidOperationException("Leave type not found");
 
             var decision = approved ? "APPROVED" : "REJECTED";
 
             var emailBody = EmailTemplates.GenerateDecisionEmailHtml(
-            employee,
-            leaveType,
-            application,
-            approved
-        );
+                employee,
+                leaveType,
+                application,
+                approved
+            );
+
+            var documentLinks = "";
+
+            if (application.Documents != null && application.Documents.Count > 0)
+            {
+                documentLinks = "<br/><br/><strong>Supporting Documents:</strong><br/>" +
+                    string.Join("<br/>",
+                        application.Documents.Select(d =>
+                            $"<a href='{System.Net.WebUtility.HtmlEncode(d.FileUrl)}' target='_blank'>" +
+                            $"{System.Net.WebUtility.HtmlEncode(d.FileName)}</a>"));
+            }
+
+            emailBody += documentLinks;
 
             await _emailService.SendEmailAsync(
                 employee.Email,
-                "Leave Application Decision",
+                $"Leave Application {decision}",
                 emailBody
             );
         }
@@ -304,16 +438,27 @@ namespace HRConnect.Api.Services
         private async Task SendManagerApprovalEmail(LeaveApplication application)
         {
             var employee = await _context.Employees
-                .FirstAsync(e => e.EmployeeId == application.EmployeeId);
+                .FirstOrDefaultAsync(e => e.EmployeeId == application.EmployeeId);
+
+            if (employee == null)
+                throw new InvalidOperationException("Employee not found");
 
             var leaveType = await _context.LeaveTypes
-                .FirstAsync(l => l.Id == application.LeaveTypeId);
+                .FirstOrDefaultAsync(l => l.Id == application.LeaveTypeId);
+
+            if (leaveType == null)
+                throw new InvalidOperationException("Leave type not found");
+
             if (application.ApprovalToken == Guid.Empty)
             {
                 application.ApprovalToken = Guid.NewGuid();
                 application.TokenExpiry = DateTime.UtcNow.AddHours(48);
             }
+
             var baseUrl = _configuration["AppSettings:BaseUrl"];
+
+            if (string.IsNullOrWhiteSpace(baseUrl))
+                throw new InvalidOperationException("Base URL is not configured");
 
             var approveLink =
                 $"{baseUrl}/api/LeaveApplication/{application.Id}/approve?token={application.ApprovalToken}";
@@ -322,15 +467,27 @@ namespace HRConnect.Api.Services
                 $"{baseUrl}/api/LeaveApplication/{application.Id}/reject?token={application.ApprovalToken}";
 
             var emailBody = EmailTemplates.GenerateApprovalEmailHtml(
-            employee,
-            leaveType,
-            application,
-            approveLink,
-            rejectLink
-        );
+                employee,
+                leaveType,
+                application,
+                approveLink,
+                rejectLink
+            );
+
+            var documentLinks = "";
+
+            if (application.Documents != null && application.Documents.Count > 0)
+            {
+                documentLinks = "<br/><br/><strong>Supporting Documents:</strong><br/>" +
+                    string.Join("<br/>",
+                        application.Documents.Select(d =>
+                            $"<a href='{d.FileUrl}'>Download {d.FileName}</a>"));
+            }
+
+            emailBody += documentLinks;
 
             var manager = await _context.Employees
-     .FirstOrDefaultAsync(e => e.EmployeeId == employee.CareerManagerID);
+                .FirstOrDefaultAsync(e => e.EmployeeId == employee.CareerManagerID);
 
             if (manager == null)
                 throw new InvalidOperationException($"Manager not found for employee {employee.EmployeeId}");
@@ -341,6 +498,107 @@ namespace HRConnect.Api.Services
                 emailBody
             );
         }
+        public async Task<List<LeaveApplicationResponse>> GetAllAsync()
+        {
+            var applications = await _context.LeaveApplications
+                .AsNoTracking()
+                .Include(a => a.Employee)
+                .Include(a => a.LeaveType)
+                    .ThenInclude(lt => lt.EntitlementRules)
+                .Include(a => a.Documents)
+                .ToListAsync();
 
+            if (applications == null || applications.Count == 0)
+                return new List<LeaveApplicationResponse>();
+
+            return applications.Select(a => new LeaveApplicationResponse
+            {
+                Id = a.Id,
+
+                EmployeeName = a.Employee != null
+                    ? $"{a.Employee.Name} {a.Employee.Surname}"
+                    : "Unknown",
+
+                LeaveTypeId = a.LeaveTypeId,
+
+                LeaveTypeCode = a.LeaveType?.Code ?? string.Empty,
+
+                StartDate = a.StartDate,
+                EndDate = a.EndDate,
+                DaysRequested = a.DaysRequested,
+
+                DaysAllocated = a.LeaveType?.EntitlementRules != null && a.LeaveType.EntitlementRules.Count > 0
+                    ? a.LeaveType.EntitlementRules
+                        .Where(r => r.IsActive)
+                        .OrderByDescending(r => r.MinYearsService)
+                        .Select(r => r.DaysAllocated)
+                        .FirstOrDefault()
+                    : 0, // fallback
+
+                Status = a.Status.ToString(),
+
+                Documents = a.Documents != null && a.Documents.Count > 0
+                    ? a.Documents.Select(d => new LeaveDocumentResponse
+                    {
+                        FileName = d.FileName,
+                        FileUrl = d.FileUrl
+                    }).ToList()
+                    : new List<LeaveDocumentResponse>()
+            }).ToList();
+        }
+        public async Task<List<LeaveApplicationResponse>> GetByLeaveTypeCodeAsync(string code)
+        {
+            if (string.IsNullOrWhiteSpace(code))
+                throw new ArgumentException("Leave type code is required.");
+
+            code = code.Trim().ToUpperInvariant();
+
+            var applications = await _context.LeaveApplications
+                .AsNoTracking()
+                .Include(a => a.Employee)
+                .Include(a => a.LeaveType)
+                    .ThenInclude(lt => lt.EntitlementRules)
+                .Include(a => a.Documents)
+                .Where(a => a.LeaveType.Code == code)
+                .ToListAsync();
+
+            if (applications == null || applications.Count == 0)
+                return new List<LeaveApplicationResponse>();
+
+            return applications.Select(a => new LeaveApplicationResponse
+            {
+                Id = a.Id,
+
+                EmployeeName = a.Employee != null
+                    ? $"{a.Employee.Name} {a.Employee.Surname}"
+                    : "Unknown",
+
+                LeaveTypeId = a.LeaveTypeId,
+
+                LeaveTypeCode = a.LeaveType?.Code ?? string.Empty,
+
+                StartDate = a.StartDate,
+                EndDate = a.EndDate,
+                DaysRequested = a.DaysRequested,
+
+                DaysAllocated = a.LeaveType?.EntitlementRules != null && a.LeaveType.EntitlementRules.Count > 0
+                    ? a.LeaveType.EntitlementRules
+                        .Where(r => r.IsActive)
+                        .OrderByDescending(r => r.MinYearsService)
+                        .Select(r => r.DaysAllocated)
+                        .FirstOrDefault()
+                    : 0,
+
+                Status = a.Status.ToString(),
+
+                Documents = a.Documents != null && a.Documents.Count > 0
+                    ? a.Documents.Select(d => new LeaveDocumentResponse
+                    {
+                        FileName = d.FileName,
+                        FileUrl = d.FileUrl
+                    }).ToList()
+                    : new List<LeaveDocumentResponse>()
+            }).ToList();
+        }
     }
 }

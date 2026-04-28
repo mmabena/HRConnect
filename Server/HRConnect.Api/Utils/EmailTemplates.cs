@@ -15,48 +15,63 @@ namespace HRConnect.Api.Utils
         /// <param name="rejectLink"></param>
         /// <returns></returns>
         public static string GenerateApprovalEmailHtml(
-            Employee employee,
-            LeaveType leaveType,
-            LeaveApplication application,
-            string approveLink,
-            string rejectLink)
+    Employee employee,
+    LeaveType leaveType,
+    LeaveApplication application,
+    string approveLink,
+    string rejectLink)
         {
+            var documentLinks = "";
+
+            if (application.Documents != null && application.Documents.Count > 0)
+            {
+                documentLinks = $"""
+            <br>
+            <p><strong>Supporting Documents:</strong></p>
+            {string.Join("<br/>",
+                        application.Documents.Select(d =>
+                            $"<a href='{d.FileUrl}' target='_blank'>Download {d.FileName}</a>"))}
+            """;
+            }
+
             return $"""
-                    <html>
-                    <body style="font-family: Arial; background:#f4f6f8; padding:20px;">
+            <html>
+            <body style="font-family: Arial; background:#f4f6f8; padding:20px;">
 
-                    <div style="max-width:600px;background:white;padding:30px;border-radius:8px">
+            <div style="max-width:600px;background:white;padding:30px;border-radius:8px">
 
-                    <h2>Leave Approval Required</h2>
+            <h2>Leave Approval Required</h2>
 
-                    <p><strong>Employee:</strong> {employee.Name} {employee.Surname}</p>
-                    <p><strong>Leave Type:</strong> {leaveType.Name}</p>
-                    <p><strong>Dates:</strong> {application.StartDate:dd MMM yyyy} → {application.EndDate:dd MMM yyyy}</p>
-                    <p><strong>Days Requested:</strong> {application.DaysRequested}</p>
+            <p><strong>Employee:</strong> {employee.Name} {employee.Surname}</p>
+            <p><strong>Leave Type:</strong> {leaveType.Name}</p>
+            <p><strong>Dates:</strong> {application.StartDate:dd MMM yyyy} → {application.EndDate:dd MMM yyyy}</p>
+            <p><strong>Days Requested:</strong> {application.DaysRequested}</p>
 
-                    <br>
+            {documentLinks} <!-- ADDED -->
 
-                    <a href="{approveLink}"
-                    style="background:#2ecc71;color:white;padding:12px 25px;text-decoration:none;border-radius:6px;margin-right:10px;font-weight:bold;">
-                    Approve
-                    </a>
+            <br>
 
-                    <a href="{rejectLink}"
-                    style="background:#e74c3c;color:white;padding:12px 25px;text-decoration:none;border-radius:6px;font-weight:bold;">
-                    Reject
-                    </a>
+            <a href="{approveLink}"
+            style="background:#2ecc71;color:white;padding:12px 25px;text-decoration:none;border-radius:6px;margin-right:10px;font-weight:bold;">
+            Approve
+            </a>
 
-                    <br><br>
+            <a href="{rejectLink}"
+            style="background:#e74c3c;color:white;padding:12px 25px;text-decoration:none;border-radius:6px;font-weight:bold;">
+            Reject
+            </a>
 
-                    <p style="color:#888;font-size:12px">
-                    HRConnect Leave Management System
-                    </p>
+            <br><br>
 
-                    </div>
+            <p style="color:#888;font-size:12px">
+            HRConnect Leave Management System
+            </p>
 
-                    </body>
-                    </html>
-                    """;
+            </div>
+
+            </body>
+            </html>
+            """;
         }
         /// <summary>
         /// Generates the HTML content for the leave decision email, 
@@ -69,29 +84,55 @@ namespace HRConnect.Api.Utils
         /// <param name="approved"></param>
         /// <returns></returns>
         public static string GenerateDecisionEmailHtml(
-            Employee employee,
-            LeaveType leaveType,
-            LeaveApplication application,
-            bool approved)
+    Employee employee,
+    LeaveType leaveType,
+    LeaveApplication application,
+    bool approved)
         {
             var decision = approved ? "APPROVED" : "REJECTED";
 
+            var documentLinks = "";
+
+            if (application.Documents != null && application.Documents.Count > 0)
+            {
+                documentLinks = $"""
+            <br/>
+            <p><strong>Supporting Documents:</strong></p>
+            {string.Join("<br/>",
+                        application.Documents.Select(d =>
+                            $"<a href='{d.FileUrl}' target='_blank'>Download {d.FileName}</a>"))}
+            """;
+            }
+
             return $"""
-                    <h2>Leave Application Update</h2>
+            <html>
+            <body style="font-family: Arial; background:#f4f6f8; padding:20px;">
 
-                    <p>Hello {employee.Name},</p>
+            <div style="max-width:600px;background:white;padding:30px;border-radius:8px">
 
-                    <p>Your leave request has been <strong>{decision}</strong>.</p>
-                    {(approved ? "" : $"<p><strong>Reason:</strong> {application.RejectionReason}</p>")}
+            <h2>Leave Application Update</h2>
 
-                    <p><strong>Leave Type:</strong> {leaveType.Name}</p>
-                    <p><strong>Dates:</strong> {application.StartDate:dd MMM yyyy} to {application.EndDate:dd MMM yyyy}</p>
-                    <p><strong>Days:</strong> {application.DaysRequested}</p>
+            <p>Hello {employee.Name},</p>
 
-                    <br/>
+            <p>Your leave request has been <strong>{decision}</strong>.</p>
 
-                    <p>Regards,<br/>HRConnect</p>
-                    """;
+            {(approved ? "" : $"<p><strong>Reason:</strong> {application.RejectionReason}</p>")}
+
+            <p><strong>Leave Type:</strong> {leaveType.Name}</p>
+            <p><strong>Dates:</strong> {application.StartDate:dd MMM yyyy} to {application.EndDate:dd MMM yyyy}</p>
+            <p><strong>Days:</strong> {application.DaysRequested}</p>
+
+            {documentLinks}
+
+            <br/>
+
+            <p>Regards,<br/>HRConnect</p>
+
+            </div>
+
+            </body>
+            </html>
+            """;
         }
         /// <summary>
         /// Generates the HTML content for the position update email, 
