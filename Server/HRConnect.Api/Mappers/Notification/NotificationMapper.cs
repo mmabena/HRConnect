@@ -17,7 +17,20 @@ namespace HRConnect.Api.Mappers.Notification
         CreatedAt = notificationModel.CreatedAt
       };
     }
-    public static Notification ToNotificationFromDto(this CreateNotificationDto dto)
+    public static Notification ToNotificationFromDto(this NotificationDto dto)
+    {
+      return new Notification
+      {
+        Message = dto.Message,
+        Type = dto.Type,
+        Severity = dto.Severity,
+        DueDate = dto.DueDate,
+        IsRead = dto.IsRead,
+        DeliveryChannel = dto.DeliveryChannel,
+        IdempotencyKey = dto.IdempotencyKey
+      };
+    }
+    public static Notification ToNotificationFromCreateDto(this CreateNotificationDto dto)
     {
       return new Notification
       {

@@ -5,25 +5,21 @@ namespace HRConnect.Api.Utils.Jobs.Notification
   using HRConnect.Api.Interfaces.Notification;
   using HRConnect.Api.DTOs.Notification;
   using HRConnect.Api.Models;
-  using HRConnect.Api.Data;
 
   // Prevent multiple of these jobs from running concurrently
   [DisallowConcurrentExecution]
-
   public class NotificationJob : IJob
   {
     private readonly IJobScheduleService _jobScheduleService;
     private readonly INotificationFactory _notificationFactory;
-    private readonly INotificationDispatcher _notificationDispatcher;
     private readonly IEmployeeService _employeeService;
     private readonly IUserService _userService;
     // private static readonly int DAYS_TO_ROLLOVER_NOTIFICATION = 5;
-    public NotificationJob(IJobScheduleService jobScheduleService, INotificationFactory notificationFactory, INotificationDispatcher notificationDispatcher, IUserService userService,
+    public NotificationJob(IJobScheduleService jobScheduleService, INotificationFactory notificationFactory, IUserService userService,
     IEmployeeService employeeService)
     {
       _jobScheduleService = jobScheduleService;
       _notificationFactory = notificationFactory;
-      _notificationDispatcher = notificationDispatcher;
       _userService = userService;
       _employeeService = employeeService;
     }
@@ -55,7 +51,10 @@ namespace HRConnect.Api.Utils.Jobs.Notification
       // Swap this in when pushing to main 
       // int daysUntilRollover = (payrollExecutionDate.Value.Date - DateTime.Now).Days;
 
-      int secondsUntilRollover = (payrollExecutionDate.Value - DateTime.Now).Seconds;
+      int secondsUntilRollover = (DateTime.Now - payrollExecutionDate.Value).Seconds;
+      Console.WriteLine($"====SECONDS UNTIL ROLLOVER {secondsUntilRollover}");
+      Console.WriteLine($"====SECONDS FROM PAYROLL EXECUTION DATE {payrollExecutionDate.Value.Second}");
+      Console.WriteLine($"====Now {DateTime.Now.Second}");
       if (secondsUntilRollover > 0)
       {
         var superUserIds = await OrganiseSuperUsersAsync();

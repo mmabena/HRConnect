@@ -10,5 +10,6 @@ namespace HRConnect.Api.DTOs.Notification
     public DateTime? DueDate { get; set; }
     public string DeliveryChannel { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
+    public string IdempotencyKey { get; set; } = string.Empty;
   }
 }

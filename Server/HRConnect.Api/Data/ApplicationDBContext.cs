@@ -12,7 +12,6 @@ namespace HRConnect.Api.Data
 
   public class ApplicationDBContext(DbContextOptions dbContextOptions) : DbContext(dbContextOptions)
   {
-
     public DbSet<User> Users { get; set; }
     public DbSet<Employee> Employees { get; set; }
     public DbSet<Position> Positions { get; set; }
@@ -283,7 +282,7 @@ namespace HRConnect.Api.Data
       // 2601 -> duplicate key violation 
       // 2627 -> unique constraints violation
       modelBuilder.Entity<Notification>()
-        .HasIndex(n => new { n.IdempotencyKey, n.DeliveryChannel })
+        .HasIndex(n => new { n.IdempotencyKey })
         .IsUnique()
         .HasDatabaseName("UX_Notification_Idempotency");
 
@@ -315,7 +314,6 @@ namespace HRConnect.Api.Data
           throw new InvalidOperationException("Record/Run under Hard Lock. Cannot be modified");
         }
       }
-
       return await base.SaveChangesAsync(cancellationToken);
     }
   }

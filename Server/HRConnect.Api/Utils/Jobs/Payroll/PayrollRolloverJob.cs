@@ -2,7 +2,9 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
 {
   using global::Quartz;
   using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Interfaces.Notification;
   using HRConnect.Api.Interfaces.Pension;
+  using HRConnect.Api.Models;
   using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Models.PayrollDeduction;
   using Microsoft.Extensions.DependencyInjection;
@@ -30,6 +32,9 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
     private readonly IServiceProvider _serviceProvider;
     private readonly IReportsService _reportsService;
     private readonly ICompanyContributionRepository _contributionRepo;
+    private readonly IUserService _userService;
+    private readonly IEmployeeService _employeeService;
+    private readonly INotificationService _notificationsService;
     private static readonly int MAX_RUNS = 12;
 
     //This makes mocking and using testing time-related edge cases a lot easier
@@ -37,16 +42,20 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
 
     public PayrollRolloverJob(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService, IServiceProvider serviceProvider,
       IEmployeePensionEnrollmentService employeePensionEnrollmentService,
-      IReportsService reportsService, ICompanyContributionRepository
-      contributionRepo, Func<DateTime>? now = null)
+      IReportsService reportsService, ICompanyContributionRepository contributionRepo,
+      IUserService userService, IEmployeeService employeeService,
+      INotificationService notificationsService, Func<DateTime>? now = null)
     {
       _payrollRunRepo = payrollRunRepo;
       _payrollPeriodService = payrollPeriodService;
       _reportsService = reportsService;
       _contributionRepo = contributionRepo;
-      _now = now ?? (() => DateTime.Now);
       _serviceProvider = serviceProvider;
       _employeePensionEnrollmentService = employeePensionEnrollmentService;
+      _userService = userService;
+      _employeeService = employeeService;
+      _notificationsService = notificationsService;
+      _now = now ?? (() => DateTime.Now);
     }
     /// <summary>
     /// Rolls over to a new period <see cref="PayrollPeriod"/> and creates and new valid payroll run <see cref="PayrollRun"/>  
@@ -68,7 +77,7 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
         EndDate = (oldPeriod?.EndDate ?? DateTime.Now).AddYears(1)
       };
 
-      await _payrollPeriodService.CreatePeriodAsync(newPeriod);
+      _ = await _payrollPeriodService.CreatePeriodAsync(newPeriod);
 
       var newPayrun = new PayrollRun
       {
@@ -79,11 +88,29 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
       };
       newPeriod.Runs.Add(newPayrun);
 
-      await _payrollRunRepo.CreatePayrollRunAsync(newPayrun);
+      _ = await _payrollRunRepo.CreatePayrollRunAsync(newPayrun);
 
       return newPeriod;
     }
+    public async Task ClearPayrollNotifications()
+    {
+      var users = await _userService.GetAllUsersAsync();
 
+      //Only returns users with SuperUser role
+      users = users.FindAll(u => u.Role == UserRole.SuperUser);
+      List<string> employeeIds = new();
+
+      foreach (var u in users)
+      {
+        var e = await _employeeService.GetEmployeeByEmailAsync(u.Email);
+        if (e != null)
+        {
+          employeeIds.Add(e.EmployeeId);
+        }
+      }
+      await _notificationsService.MarkBatchedNotificationsReadByTypeAsync(NotificationType.Payroll,
+      employeeIds);
+    }
     public async Task RolloverPayrollRun(PayrollPeriod payrollPeriod, int runId)
     {
       PayrollRun newRun = new PayrollRun
@@ -97,10 +124,9 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
       };
 
       payrollPeriod.Runs.Add(newRun);
-      await _payrollRunRepo.CreatePayrollRunAsync(newRun);
+      _ = await _payrollRunRepo.CreatePayrollRunAsync(newRun);
 
       await AllocateCompanyContributionsIfNeeded(newRun.PayrollRunId);
-
     }
 
     public async Task Execute(IJobExecutionContext context)
@@ -175,6 +201,8 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
         {
           await RolloverPayrollRun(payperiod, nextRun);
         }
+        await ClearPayrollNotifications();
+
       }
       catch (InvalidOperationException ex)
       {

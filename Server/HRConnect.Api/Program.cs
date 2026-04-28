@@ -153,13 +153,15 @@ builder.Services.AddQuartz(q =>
   q.AddTrigger(opts => opts
   .ForJob(RolloverJobKey)
   .WithIdentity("PayrollRollover-Trigger")
-  .WithCronSchedule("5,10,15,20,25 0/1 * * * ?", x =>
+  .WithCronSchedule("30 0/1 * * * ?", x =>
   x.WithMisfireHandlingInstructionFireAndProceed()));
 
   q.AddTrigger(opts => opts
   .ForJob(NotificationJobKey)
-  .WithIdentity("NotificationJOb-Trigger")
-  .WithCronSchedule("30 0/1 * * * ?"));
+  .WithIdentity("NotificationJob-Trigger")
+  .WithCronSchedule("5,10,15,20,25 0/1 * * * ?", x =>
+  x.WithMisfireHandlingInstructionIgnoreMisfires()));
+
   // 0 -> 0 seconds
   // 0 -> 0 minutes
   // 0 -> 0 hours

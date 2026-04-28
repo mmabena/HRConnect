@@ -1,5 +1,6 @@
 namespace HRConnect.Api.Repository
 {
+  using System.Linq;
   using HRConnect.Api.Interfaces.Notification;
   using HRConnect.Api.Models;
   using HRConnect.Api.Data;
@@ -14,7 +15,6 @@ namespace HRConnect.Api.Repository
   // }
   public class NotificationRepository : INotificationRepository
   {
-    // Task <NotificationDto> CreateNotification
     private readonly ApplicationDBContext _context;
     public NotificationRepository(ApplicationDBContext context)
     {
@@ -22,16 +22,16 @@ namespace HRConnect.Api.Repository
     }
     public async Task AddNotificationAsync(Notification notification)
     {
-      await _context.Notifications.AddAsync(notification);
-      // var save = await Save();
+      _ = await _context.Notifications.AddAsync(notification);
     }
 
-    public async Task Save()
+    public async Task<bool> Save()
     {
-      await _context.SaveChangesAsync();
-
+      if (await _context.SaveChangesAsync() > 0)
+        return true;
+      return false;
     }
-    // Task AddNotificationBatchAsync(Notification notification);
+
     /// <summary>
     /// This metod acts as a deduplication safe guard when creating and dispatching 
     /// notifications. It is used as boolean check before notification storing
@@ -48,23 +48,43 @@ namespace HRConnect.Api.Repository
       (n.Message == message) &&
       (n.EmployeeId == employeeId) &&
       (n.Severity == severity) &&
-      n.IsRead == false)//Avoid to duplicate unread messages
+      !n.IsRead)//Avoids duplicating unread messages
       .FirstOrDefaultAsync();
     }
 
-    public async Task<bool> TryAndAquireAsync(string idempotencyKey, string deliveryChannel)
+    public async Task<bool> TryAndAquireAsync(string idempotencyKey)
     {
       return await _context.Notifications.AsNoTracking()
         .AnyAsync(n =>
           (n.IdempotencyKey == idempotencyKey) &&
-          (n.DeliveryChannel == deliveryChannel) &&
-          n.IsRead == false);
+          !n.IsRead);
     }
-    public async Task<bool> MarkAsReadAsync(Notification notification)
+    public async Task MarkBatchAsReadAsync(List<string> employeeIds, NotificationType type)
     {
-      var result = _context.Notifications.Update(notification);
-      var saveResult = await Save();
-      return saveResult.IsSuccess;
+      //Prefer batching updating as SQL has a parameter limit of ~2100
+      foreach (var idBatch in employeeIds.Chunk(500))
+      {
+        await _context.Notifications.Where(n =>
+        idBatch.Contains(n.EmployeeId) &&
+        (n.Type == type) &&
+        !n.IsRead)
+        .ExecuteUpdateAsync(s =>
+        s.SetProperty(n => n.IsRead, true));
+
+      }
+    }
+    public async Task MarkAsReadAsync(Notification notification)
+    {
+      // _ = _context.Notifications.Update(notification);
+      //attatching entity into the entity tracker 
+      _context.Attach(notification);
+
+      notification.IsRead = true;
+
+      _context.Entry(notification).Property(n => n.IsRead)
+      .IsModified = true;
+
+      _ = await Save();
     }
     public async Task<IEnumerable<NotificationDto>> GetAllUnreadAsync(string? employeeId)
     {
