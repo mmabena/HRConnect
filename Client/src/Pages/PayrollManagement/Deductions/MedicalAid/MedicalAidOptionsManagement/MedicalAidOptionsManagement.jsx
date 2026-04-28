@@ -229,14 +229,28 @@ const MedicalAidOptionsManagement = () => {
         <div className="wrapper-container">
     
             {/* Modal component -  */}
+
+
             <MedicalAidOptionViewModal
                 isOpen={isModalOpen}
                 onClose={handleCloseModal}
                 title="Medical Aid Options"
                 data={modalData}
                 categories={medicalOptionsCategory}
-                categoryArray={medicalOptionsCategory}
+                onSave={async (categoryId, payload) => {
+                    try {
+                        await updateBulkMedicalOptionsByCategoryId(categoryId, payload);
+                        toast.success('Options updated successfully');
+                        handleCloseModal();
+                        const refreshed = await getMedicalOptionsSnapshot();
+                        setMedicalOptions(refreshed);
+                    } catch (err) {
+                        toast.error('Failed to update options');
+                        console.error(err);
+                    }
+                }}
             />
+
     
             <div className="singular-staff-heading-container">
               Deductions

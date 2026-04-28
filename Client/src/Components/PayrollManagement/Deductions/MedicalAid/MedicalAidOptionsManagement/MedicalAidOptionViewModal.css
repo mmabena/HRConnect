@@ -218,3 +218,186 @@ tr {
     border-color: #4a90e2;
     box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
 }
+
+/* ── Editable cell input ── */
+.editable-cell-input {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #4a90e2;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: inherit;
+    background: #fffdf0;
+    box-sizing: border-box;
+}
+.editable-cell-input:focus {
+    outline: none;
+    border-color: #355867;
+    box-shadow: 0 0 0 2px rgba(53, 88, 103, 0.2);
+}
+
+/* ── Cell value (view mode) ── */
+.cell-value {
+    font-size: 13px;
+    color: #333;
+}
+
+/* ── Section row spanning all columns ── */
+.modal-view-section-row {
+    background: #355867;
+}
+.modal-view-section-cell {
+    padding: 10px 12px;
+    color: #fff;
+    font-weight: 600;
+    font-size: 13px;
+    text-align: left;
+}
+
+/* ── Label column ── */
+.modal-view-label-cell {
+    font-weight: 600;
+    background: #f5f5f5;
+    min-width: 140px;
+}
+
+/* ── Total row ── */
+.modal-view-totals-row {
+    background: #e8f0fe;
+    font-weight: 700;
+}
+.modal-view-total-cell {
+    color: #355867;
+}
+
+/* ── Pagination within modal ── */
+.modal-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    margin-top: 12px;
+}
+.pagination-btn {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    background: white;
+    color: #333;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s ease;
+}
+.pagination-btn:hover:not(:disabled) {
+    background: #355867;
+    color: white;
+    border-color: #355867;
+}
+.pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+.pagination-info {
+    font-size: 13px;
+    color: #555;
+    min-width: 180px;
+    text-align: center;
+}
+.touched-indicator { color: #2e7d32; font-weight: 600; }
+.untouched-indicator { color: #c62828; font-weight: 600; }
+
+/* ── Edit progress bar ── */
+.edit-progress {
+    margin-top: 12px;
+    padding: 10px 15px;
+    background: #f5f5f5;
+    border-radius: 8px;
+}
+.edit-progress-bar {
+    height: 8px;
+    background: #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 6px;
+}
+.edit-progress-fill {
+    height: 100%;
+    background: #355867;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+.edit-progress-text {
+    font-size: 12px;
+    color: #555;
+}
+
+/* ── Option selector ── */
+.option-selector {
+    margin-bottom: 12px;
+    padding: 12px 15px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.option-selector label {
+    font-weight: 600;
+    color: #333;
+    font-size: 13px;
+}
+.option-name-edit {
+    font-weight: 600;
+    color: #c62828;
+}
+
+/* ── Salary bracket display ── */
+.salary-bracket-display {
+    margin-bottom: 12px;
+    padding: 10px 15px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+}
+.salary-bracket-display label {
+    font-weight: 600;
+    color: #333;
+}
+
+/* ── Button variants ── */
+.btn-primary {
+    background: #355867;
+    color: white;
+    border: 1px solid #355867;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: opacity 0.2s;
+}
+.btn-primary:hover:not(:disabled) { opacity: 0.85; }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-warning {
+    background: #e65100;
+    color: white;
+    border: 1px solid #e65100;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+}
+.btn-secondary {
+    background: white;
+    color: #333;
+    border: 1px solid #ddd;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+}
