@@ -5,6 +5,8 @@ namespace HRConnect.Api.Services
   using HRConnect.Api.Interfaces.Notification;
   using HRConnect.Api.DTOs.Notification;
   using HRConnect.Api.Utils.Notification;
+  using System.Text;
+  using System.Security.Cryptography;
   public class NotificationService : INotificationService
   {
     private readonly INotificationRepository _notificationRepository;
@@ -29,19 +31,22 @@ namespace HRConnect.Api.Services
 
     public async Task CreateAndDispatchAsync(Notification notification)
     {
-      //Ensure that we don't have duplicate notifications before storing
-      //Alternatively filter in a range of DueDates and CreatedDates
-      var notificationExists = await _notificationRepository.ExistsAsync(notification.Type, notification.EmployeeId, notification.Message, notification.Severity);
-
-      if (notificationExists == null)
+      //Check if this persistent notifications has already been created.
+      //Rule is Payroll and TaxUpload notifications cannot be marked read 
+      //unless certain condititions hold true. This makes them 
+      //susceptible to duplicate notifications being created thus polluting the database.
+      //
+      //This can be avoided by ensure the Insert db request is Idempotent. Build the 
+      //key before querying the db
+      BuildIdempotencyKey(notification);
+      bool isPesistent = NotificationTypeRules.ShouldPersist(notification.Severity);
+      if (isPesistent)
       {
-        return;
+        var exists = await _notificationRepository.TryAndAquireAsync(notification.IdempotencyKey, notification.DeliveryChannel);
       }
-
-      //create and store the notification
-      notification.CreatedAt = DateTime.Now;
+      //For other general notifications or it does not exist
       await _notificationRepository.AddNotificationAsync(notification);
-
+      _ = await _notificationRepository.Save();
       //Dispatch all notifications
       await _notificationDispatcher.DispatchNotificationAsync(notification);
     }
@@ -52,20 +57,31 @@ namespace HRConnect.Api.Services
       if (isPesistent)
       {
         //Find if it already exists 
-        var existing = await _notificationRepository.ExistsAsync(notification.Type, notification.EmployeeId, notification.Message, notification.Severity);
+        BuildIdempotencyKey(notification);
+        // var existing = await _notificationRepository.ExistsAsync(notification.Type, notification.EmployeeId, notification.Message, notification.Severity);
+        var existing = await _notificationRepository.TryAndAquireAsync(notification.IdempotencyKey, notification.DeliveryChannel);
 
-        if (existing != null)
+
+        if (existing is true)
         {
           //Keep the Payroll and Tax Table uploads notifications persistent
-          notification.IsRead = false;
+          // notification.IsRead = true;
           return;
         }
       }
       //For other general notifications or it does not exist
       await _notificationRepository.AddNotificationAsync(notification);
-
+      _ = await _notificationRepository.Save();
       //Dispatch all notifications
       await _notificationDispatcher.DispatchNotificationAsync(notification);
+    }
+    private void BuildIdempotencyKey(Notification request)
+    {
+      var hashSource = $"{request.Type}:{request.EmployeeId}:{request.DeliveryChannel}:{request.Message.Trim()}";
+      using var sha = SHA256.Create();
+      var bytes = Encoding.UTF8.GetBytes(hashSource);
+      var hash = sha.ComputeHash(bytes);
+      request.IdempotencyKey = Convert.ToHexString(hash);
     }
   }
 }

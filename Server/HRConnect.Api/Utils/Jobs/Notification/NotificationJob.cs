@@ -3,8 +3,8 @@ namespace HRConnect.Api.Utils.Jobs.Notification
   using global::Quartz;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Interfaces.Notification;
-  using HRConnect.Api.Models;
   using HRConnect.Api.DTOs.Notification;
+  using HRConnect.Api.Models;
   using HRConnect.Api.Data;
 
   // Prevent multiple of these jobs from running concurrently
@@ -27,12 +27,14 @@ namespace HRConnect.Api.Utils.Jobs.Notification
       _context = context;
     }
 
-    public async Task<IList<User>> OrganiseSuperUsersAsync()
+    public async Task<IList<Employee>> OrganiseSuperUsersAsync()
     {
       var users = await _userService.GetAllUsersAsync();
 
       //Only returns users with SuperUser role
-      return users.FindAll(u => u.Role == UserRole.SuperUser);
+      users = users.FindAll(u => u.Role == UserRole.SuperUser);
+      Employee employees = new Array();
+
     }
 
     public async Task Execute(IJobExecutionContext context)
@@ -48,21 +50,21 @@ namespace HRConnect.Api.Utils.Jobs.Notification
       int secondsUntilRollover = (payrollExecutionDate.Value - DateTime.Now).Seconds;
       if (secondsUntilRollover > 0)
       {
-        // var superUser = await OrganiseSuperUsersAsync();
-        // foreach (var su in superUser)
-        // {
-        //   //every user in these iterations is a super user
-        //   var notification = new CreateNotificationDto
-        //   {
-        //     Message = $"Finalise Payroll. Payroll Will Rollover In {secondsUntilRollover}",
-        //     Severity = NotificationSeverity.Critical,
-        //     Type = NotificationType.Payroll,
-        //     DeliveryChannel = "InApp",
-        //     DueDate = payrollExecutionDate,
-        //     EmployeeId = $"{su.UserId}"
-        //   };
-        //   await _notificationFactory.ProduceNotificationAsync(notification);
-        // }
+        var superUser = await OrganiseSuperUsersAsync();
+        foreach (var su in superUser)
+        {
+          //every user in these iterations is a super user
+          var notification = new CreateNotificationDto
+          {
+            Message = $"Finalise Payroll. Payroll Will Rollover In {secondsUntilRollover}",
+            Severity = NotificationSeverity.Critical,
+            Type = NotificationType.Payroll,
+            DeliveryChannel = "InApp",
+            DueDate = payrollExecutionDate,
+            EmployeeId = $"{su.UserId}"
+          };
+          await _notificationFactory.ProduceNotificationAsync(notification);
+        }
       }
     }
   }

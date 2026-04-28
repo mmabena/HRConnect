@@ -7,6 +7,11 @@ namespace HRConnect.Api.Repository
   using HRConnect.Api.DTOs.Notification;
   using Microsoft.EntityFrameworkCore;
 
+  // public readonly struct SaveResult
+  // {
+  //   public bool IsSuccess { get; init};
+  //   public string? ResultMsg { get; init; }
+  // }
   public class NotificationRepository : INotificationRepository
   {
     // Task <NotificationDto> CreateNotification
@@ -18,13 +23,15 @@ namespace HRConnect.Api.Repository
     public async Task AddNotificationAsync(Notification notification)
     {
       await _context.Notifications.AddAsync(notification);
-      await _context.SaveChangesAsync();
+      // var save = await Save();
     }
-    // public async Task AddNotificationBatchAsync(Notification notification)
-    // {
-    //   await _context.Notifications.AddAsync(notification);
-    // }
 
+    public async Task Save()
+    {
+      await _context.SaveChangesAsync();
+
+    }
+    // Task AddNotificationBatchAsync(Notification notification);
     /// <summary>
     /// This metod acts as a deduplication safe guard when creating and dispatching 
     /// notifications. It is used as boolean check before notification storing
@@ -44,12 +51,20 @@ namespace HRConnect.Api.Repository
       n.IsRead == false)//Avoid to duplicate unread messages
       .FirstOrDefaultAsync();
     }
+
+    public async Task<bool> TryAndAquireAsync(string idempotencyKey, string deliveryChannel)
+    {
+      return await _context.Notifications.AsNoTracking()
+        .AnyAsync(n =>
+          (n.IdempotencyKey == idempotencyKey) &&
+          (n.DeliveryChannel == deliveryChannel) &&
+          n.IsRead == false);
+    }
     public async Task<bool> MarkAsReadAsync(Notification notification)
     {
-      _context.Notifications.Update(notification);
-      if (await _context.SaveChangesAsync() > 0)
-        return true;
-      return false;
+      var result = _context.Notifications.Update(notification);
+      var saveResult = await Save();
+      return saveResult.IsSuccess;
     }
     public async Task<IEnumerable<NotificationDto>> GetAllUnreadAsync(string? employeeId)
     {

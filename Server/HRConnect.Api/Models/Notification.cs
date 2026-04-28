@@ -23,7 +23,7 @@ namespace HRConnect.Api.Models
     //This will also determine if a user is a superuer
     public string EmployeeId { get; set; } = string.Empty;
     public DateTime? DueDate { get; set; }
-
+    public string IdempotencyKey { get; set; } = null!;
     public DateTime CreatedAt { get; set; }
     public string DeliveryChannel { get; set; } = string.Empty;//"Email", "InApp" etc
   }

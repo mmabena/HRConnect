@@ -275,11 +275,22 @@ namespace HRConnect.Api.Data
       .HasForeignKey(t => t.PayrollRunId)
       .HasPrincipalKey(p => p.PayrollRunId);
 
+
       //Notifaction Configurations
+      // HasIndex()->this enforces uniqueness at a database level using 
+      // custom Idempotency Keys
+      // If we violate this Unique Constraints, SQL Server will throw error codes
+      // 2601 -> duplicate key violation 
+      // 2627 -> unique constraints violation
+      modelBuilder.Entity<Notification>()
+        .HasIndex(n => new { n.IdempotencyKey, n.DeliveryChannel })
+        .IsUnique()
+        .HasDatabaseName("UX_Notification_Idempotency");
+
       modelBuilder.Entity<Notification>().Property(n => n.Severity)
           .HasConversion<string>();
       modelBuilder.Entity<Notification>().Property(n => n.Type)
-      .HasConversion<string>();
+          .HasConversion<string>();
     }
 
     //Override 'SaveChangesAsync' for Payroll Records to enforce locked records on a payroll run 
