@@ -41,14 +41,14 @@ namespace HRConnect.Api.Services
 
       if (pensionProjectRequestDto.VoluntaryContribution != 0)
       {
-        if (ValidVoluntaryContribution(pensionProjectRequestDto.VoluntaryContribution, Utils.AvailablePensionOptions.GetPensionPercentage(pensionProjectRequestDto.SelectedPensionPercentage),
+        if (ValidVoluntaryContribution(pensionProjectRequestDto.VoluntaryContribution, AvailablePensionOptions.GetPensionPercentage(pensionProjectRequestDto.SelectedPensionPercentage),
           pensionProjectRequestDto.Salary) != "")
         {
           return new PensionProjectionResultDto
           {
             WarningMessage = ValidVoluntaryContribution(
                 pensionProjectRequestDto.VoluntaryContribution,
-                Utils.AvailablePensionOptions.GetPensionPercentage(pensionProjectRequestDto.SelectedPensionPercentage),
+                AvailablePensionOptions.GetPensionPercentage(pensionProjectRequestDto.SelectedPensionPercentage),
                 pensionProjectRequestDto.Salary
               )
           };
@@ -261,6 +261,11 @@ namespace HRConnect.Api.Services
       {
         for (int month = currentMonth; month <= 12; month++)
         {
+          if (_monthlyContributions == null || _voluntaryContributions == null)
+          {
+            throw new InvalidOperationException("Monthly contributions or voluntary contributions array is not initialized.");
+          }
+
           if ((month == determineWhenIsApril + today.Month) && currentMonth == today.Month)
           {
             empSalary = Math.Round(empSalary * (decimal)(SALARYINCREASE_PERCENTAGE + 1), 2);
@@ -270,11 +275,12 @@ namespace HRConnect.Api.Services
             empSalary = Math.Round(empSalary * (decimal)(SALARYINCREASE_PERCENTAGE + 1), 2);
           }
 
-          decimal monthlyContribution = Math.Round(empSalary * (decimal)Utils.AvailablePensionOptions.GetPensionPercentage(selectedPercentage), 2);
+          decimal monthlyContribution = Math.Round(empSalary * (decimal)AvailablePensionOptions.GetPensionPercentage(selectedPercentage), 2);
 
           if (voluntaryContributionFrequency == ContributionFrequency.Permanent)
           {
             decimal voluntaryContributionAfterSalaryIncrease = CalculateExcessAmountFromVoluntaryContribution(monthlyContribution, voluntaryContribution);
+
             _monthlyContributions[year][month - 1] = PensionMonthlyContributionCap(monthlyContribution + voluntaryContributionAfterSalaryIncrease);
             _voluntaryContributions[year][month - 1] = voluntaryContributionAfterSalaryIncrease;
             _totalProjectedSavings += Math.Round(PensionMonthlyContributionCap(monthlyContribution + voluntaryContribution), 2);

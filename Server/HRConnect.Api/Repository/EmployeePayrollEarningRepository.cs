@@ -23,6 +23,12 @@
       return employeePayrollEarning;
     }
 
+    public async Task AddRangeAsync(List<EmployeePayrollEarning> employeePayrollEarnings)
+    {
+      await _context.EmployeePayrollEarnings.AddRangeAsync(employeePayrollEarnings);
+      _ = await _context.SaveChangesAsync();
+    }
+
     public async Task<EmployeePayrollEarning?> CheckIfEmployeeEarningExistsForCurrentPayrun(string employeeId, string payrollEarningId, int payrollRunId)
     {
       return await _context.EmployeePayrollEarnings.Where(epe => epe.EmployeeId == employeeId
@@ -129,18 +135,6 @@
     }
 
     ///<summary>
-    ///Retrieve employee payroll earnings that are not locked by employee Id from the database
-    ///</summary>
-    ///<param name="employeeId">Employee Id</param>
-    ///<returns>
-    ///A list of EmployeePayrollEarning objects representing employee payroll earnings that are not locked with the given employee Id in the database
-    ///</returns>
-    public Task<List<EmployeePayrollEarning>> GetEmployeePayrollEarningsNotLocked(string employeeId)
-    {
-      return _context.EmployeePayrollEarnings.Where(epe => epe.EmployeeId == employeeId && !epe.IsLocked).ToListAsync();
-    }
-
-    ///<summary>
     ///Lock employee payroll earnings in the database
     ///</summary>
     ///<param name="employeePayrollEarnings">A list of EmployeePayrollEarning objects to be locked</param>
@@ -151,11 +145,24 @@
       _ = await _context.SaveChangesAsync();
     }
 
+    ///<summary>
+    ///Update employee payroll earning 
+    ///</summary>
+    ///<param name="employeePayrollEarning">Employee payroll earning model</param>
+    ///<returns>
+    ///Update employee payroll earning model
+    ///</returns>
     public async Task<EmployeePayrollEarning> UpdateAsync(EmployeePayrollEarning employeePayrollEarning)
     {
       _ = _context.EmployeePayrollEarnings.Update(employeePayrollEarning);
       _ = await _context.SaveChangesAsync();
       return employeePayrollEarning;
+    }
+
+    public async Task UpdateRangeAsync(List<EmployeePayrollEarning> employeePayrollEarnings)
+    {
+      _context.EmployeePayrollEarnings.UpdateRange(employeePayrollEarnings);
+      _ = await _context.SaveChangesAsync();
     }
   }
 }

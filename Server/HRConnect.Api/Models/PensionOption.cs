@@ -13,8 +13,8 @@ namespace HRConnect.Api.Models
     public int PensionOptionId { get; set; }
         [Column(TypeName = "decimal(18,2)")]
         public decimal ContributionPercentage { get; set; }
-    public ICollection<Employee> Employees { get; set; }
-        public ICollection<EmployeePensionEnrollment> EmployeePensionEnrollment { get; set; } = [];
-        public ICollection<PensionDeduction> PensionDeduction { get; set; } = [];
+    public ICollection<Employee> Employees { get; set; } = [];
+    public ICollection<EmployeePensionEnrollment> EmployeePensionEnrollment { get; set; } = [];
+    public ICollection<PensionDeduction> PensionDeduction { get; set; } = [];
   }
 }

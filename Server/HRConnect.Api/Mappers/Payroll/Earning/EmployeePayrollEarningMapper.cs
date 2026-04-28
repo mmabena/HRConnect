@@ -24,6 +24,7 @@
         PayrollEarningId = employeePayrollEarning.PayrollEarningId,
         TaxCode = employeePayrollEarning.TaxCode,
         Amount = employeePayrollEarning.Amount,
+        CalculatedAmountAfterTax = employeePayrollEarning.CalculatedAmountAfterTax,
         PayrollRunId = employeePayrollEarning.PayrollRunId,
         IsLocked = employeePayrollEarning.IsLocked
       };

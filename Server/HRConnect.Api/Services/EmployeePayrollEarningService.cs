@@ -28,15 +28,16 @@
     ///<param name="employeePayrollEarningAddDto">Employee payroll earning add request data transfer object</param>
     ///<returns>
     ///Added employee payroll earning 
-    ///</returns>
+    ///</returns>Emplo
     ///<exception cref="NotFoundException"></exception>
     public async Task<EmployeePayrollEarningDto> AddAsync(EmployeePayrollEarningAddDto employeePayrollEarningAddDto)
     {
       ValidateEmployeePayrollEarningsDto.ValidateEmployeePayrollEarningAddDto(employeePayrollEarningAddDto);
-      PayrollRun currentPayrollRun = _payrollRunRepository.GetCurrentRunAsync().Result ?? throw new NotFoundException("Current payroll run not found");
+      PayrollRun currentPayrollRun = await _payrollRunRepository.GetCurrentRunAsync() ?? throw new NotFoundException("Current payroll run not found");
       EmployeePayrollEarning? existingEmployeePayrollEarning = await _employeePayrollEarningRepository.CheckIfEmployeeEarningExistsForCurrentPayrun
         (employeePayrollEarningAddDto.EmployeeId, employeePayrollEarningAddDto.PayrollEarningId, currentPayrollRun.PayrollRunId);
-      PayrollEarning? payrollEarning = await _payrollEarningRepository.GetByPayrollEarningId(employeePayrollEarningAddDto.PayrollEarningId);
+      PayrollEarning? payrollEarning = await _payrollEarningRepository.GetByPayrollEarningId(employeePayrollEarningAddDto.PayrollEarningId)
+        ?? throw new NotFoundException($"Payroll earning with id {employeePayrollEarningAddDto.PayrollEarningId} can not be found");
 
       if (existingEmployeePayrollEarning == null && payrollEarning != null)
       {
@@ -44,15 +45,17 @@
         newEmployeeEarning.TaxCode = payrollEarning.TaxCode;
         newEmployeeEarning.PayrollRunId = currentPayrollRun.PayrollRunId;
         newEmployeeEarning.IsLocked = false;
-        newEmployeeEarning.Amount = await CalculateAmountForPayrollEarning(employeePayrollEarningAddDto.PayrollEarningId, employeePayrollEarningAddDto.EmployeeId,
+        decimal[] employeeEarningAmounts = await CalculateAmountForPayrollEarning(payrollEarning, employeePayrollEarningAddDto.EmployeeId,
           employeePayrollEarningAddDto.OverTimeHoursWorked, employeePayrollEarningAddDto.Amount);
+        newEmployeeEarning.Amount = employeeEarningAmounts[0];
+        newEmployeeEarning.CalculatedAmountAfterTax = employeeEarningAmounts[1];
 
         EmployeePayrollEarning addedEmployeePayrollEarning = await _employeePayrollEarningRepository.AddAsync(newEmployeeEarning);
         return addedEmployeePayrollEarning.ToEmployeePayrollEarningDto();
       }
       else
       {
-        EmployeePayrollEarningUpdateDto employeePayrollEarningUpdateDto = new EmployeePayrollEarningUpdateDto()
+        EmployeePayrollEarningUpdateDto employeePayrollEarningUpdateDto = new()
         {
           EmployeeId = employeePayrollEarningAddDto.EmployeeId,
           PayrollEarningId = employeePayrollEarningAddDto.PayrollEarningId,
@@ -154,17 +157,53 @@
       return employeePayrollEarnings.Select(epe => epe.ToEmployeePayrollEarningDto()).ToList();
     }
 
-    /// <summary>
-    ///Retrieves all employee payroll earnings for a specific employee that are not locked from the database.
-    /// </summary>
-    /// <param name="employeeId">Employee Id</param>
-    /// <returns>
-    ///A list of EmployeePayrollEarningDto objects for all employee payroll earnings for a specific employee that are not locked from the database.
-    ///   </returns>
-    public async Task<List<EmployeePayrollEarningDto>> GetEmployeePayrollEarningsNotLocked(string employeeId)
+    ///<summary>
+    ///Intialized task to enroll employee to salary payroll earning
+    ///</summary>
+    ///<exception cref="NotFoundException"></exception>
+    public async Task InitializeEmployeePayrollEarningsAsync()
     {
-      List<EmployeePayrollEarning> employeePayrollEarnings = await _employeePayrollEarningRepository.GetEmployeePayrollEarningsNotLocked(employeeId);
-      return employeePayrollEarnings.Select(epe => epe.ToEmployeePayrollEarningDto()).ToList();
+      PayrollRun? currentPayRollRun = await _payrollRunRepository.GetCurrentRunAsync() ?? throw new NotFoundException("Current payroll run not found");
+      List<Employee> existingEmployees = await _employeeRepository.GetAllEmployeesAsync();
+      PayrollEarning salaryPayrollEarning = await _payrollEarningRepository.GetByPayrollEarningId("PRE001") ?? throw new NotFoundException("Salary payroll earning not found");
+      List<EmployeePayrollEarning> employeeSalaryPayrollEarnings = [];
+
+      foreach (Employee employee in existingEmployees)
+      {
+        List<EmployeePayrollEarning> employeePayrollEarnings = await _employeePayrollEarningRepository.GetByEmployeeIdAsync(employee.EmployeeId);
+
+        if (employeePayrollEarnings.Any(e => e.PayrollEarningId == "PRE001"))
+        {
+          continue;
+        }
+
+        EmployeePayrollEarning employeeSalaryPayrollEarning = new()
+        {
+          EmployeeId = employee.EmployeeId,
+          PayrollEarningId = salaryPayrollEarning.PayrollEarningId,
+          TaxCode = salaryPayrollEarning.TaxCode,
+          OverTimeHoursWorked = null,
+          PayrollRunId = currentPayRollRun.PayrollRunId,
+          IsLocked = false
+        };
+
+
+        employeeSalaryPayrollEarning.Amount = employee.MonthlySalary;
+        int employeeAge = CalculateAge.UsingDOB(employee.DateOfBirth);
+        decimal tax = await _taxDeductionService.CalculateTaxAsync(employee.MonthlySalary, employeeAge);
+        employeeSalaryPayrollEarning.CalculatedAmountAfterTax = employee.MonthlySalary - tax;
+
+        employeeSalaryPayrollEarnings.Add(employeeSalaryPayrollEarning);
+      }
+
+      try
+      {
+        await _employeePayrollEarningRepository.AddRangeAsync(employeeSalaryPayrollEarnings);
+      }
+      catch (Exception ex)
+      {
+        Console.WriteLine($"Error locking employee payroll earnings: {ex}");
+      }
     }
 
     ///<summary>
@@ -191,7 +230,7 @@
     }
 
     ///<summary>
-    ///Roll over employee payroll earningst for employees
+    ///Roll over employee payroll earnings for employees
     ///</summary>
     public async Task RollOverEmployeePayrollEarningsAsync()
     {
@@ -201,26 +240,46 @@
       foreach (Employee employee in employees)
       {
         List<EmployeePayrollEarning> employeeExistingPayrollEarnings = await _employeePayrollEarningRepository.GetByEmployeeIdAndLastRunIdAsync(employee.EmployeeId);
-
+        List<EmployeePayrollEarning> employeePayrollEarningToBeRolledOver = [];
         foreach (EmployeePayrollEarning employeePayrollEarning in employeeExistingPayrollEarnings)
         {
+          PayrollEarning? payrollEarning = await _payrollEarningRepository.GetByPayrollEarningId(employeePayrollEarning.PayrollEarningId)
+             ?? throw new NotFoundException($"Payroll earning with id {employeePayrollEarning.PayrollEarningId} can not be found");
+
           EmployeePayrollEarning newEmployeePayrollEarning = new()
           {
             EmployeeId = employee.EmployeeId,
             PayrollEarningId = employeePayrollEarning.PayrollEarningId,
             TaxCode = employeePayrollEarning.TaxCode,
-            Amount = ((employeePayrollEarning.TaxCode == 3601) && (employeePayrollEarning.OverTimeHoursWorked == null)) ? employee.MonthlySalary : 0,
             IsLocked = false,
             PayrollRunId = currentPayrollRun.PayrollRunId
           };
+
+          if (payrollEarning.TaxCode == 3601 &&
+          payrollEarning.OvertimeHourMultiplier == null &&
+          newEmployeePayrollEarning.OverTimeHoursWorked == null &&
+          payrollEarning.CanProRata)
+          {
+            newEmployeePayrollEarning.Amount = employee.MonthlySalary;
+            int employeeAge = CalculateAge.UsingDOB(employee.DateOfBirth);
+            decimal tax = await _taxDeductionService.CalculateTaxAsync(employee.MonthlySalary, employeeAge);
+            newEmployeePayrollEarning.CalculatedAmountAfterTax = employee.MonthlySalary - tax;
+          }
+          else
+          {
+            newEmployeePayrollEarning.Amount = 0m;
+            newEmployeePayrollEarning.CalculatedAmountAfterTax = 0m;
+          }
 
           if (employeePayrollEarning.PayrollRunId == newEmployeePayrollEarning.PayrollRunId)
           {
             continue;
           }
 
-          _ = await _employeePayrollEarningRepository.AddAsync(newEmployeePayrollEarning);
+          employeePayrollEarningToBeRolledOver.Add(newEmployeePayrollEarning);
         }
+
+        await _employeePayrollEarningRepository.AddRangeAsync(employeePayrollEarningToBeRolledOver);
       }
     }
 
@@ -236,14 +295,18 @@
     {
       ValidateEmployeePayrollEarningsDto.ValidateEmployeePayrollEarningUpdateDto(employeePayrollEarningUpdateDto);
       PayrollRun currentPayrollRun = _payrollRunRepository.GetCurrentRunAsync().Result ?? throw new NotFoundException("Current payroll run not found");
+      PayrollEarning? payrollEarning = await _payrollEarningRepository.GetByPayrollEarningId(employeePayrollEarningUpdateDto.PayrollEarningId)
+        ?? throw new NotFoundException($"Payroll earning with id {employeePayrollEarningUpdateDto.PayrollEarningId} can not be found");
       EmployeePayrollEarning? existingEmployeePayrollEarning = await _employeePayrollEarningRepository.CheckIfEmployeeEarningExistsForCurrentPayrun
         (employeePayrollEarningUpdateDto.EmployeeId, employeePayrollEarningUpdateDto.PayrollEarningId, currentPayrollRun.PayrollRunId)
         ?? throw new NotFoundException($"Employee payroll earning not found for employee id {employeePayrollEarningUpdateDto.EmployeeId} " +
         $"and payroll earning id {employeePayrollEarningUpdateDto.PayrollEarningId}");
 
       existingEmployeePayrollEarning.OverTimeHoursWorked = employeePayrollEarningUpdateDto.OverTimeHoursWorked ?? existingEmployeePayrollEarning.OverTimeHoursWorked;
-      existingEmployeePayrollEarning.Amount = await CalculateAmountForPayrollEarning(existingEmployeePayrollEarning.PayrollEarningId,
-        employeePayrollEarningUpdateDto.EmployeeId, employeePayrollEarningUpdateDto.OverTimeHoursWorked, employeePayrollEarningUpdateDto.Amount);
+      decimal[] employeePayrollAmounts = await CalculateAmountForPayrollEarning(payrollEarning, existingEmployeePayrollEarning.EmployeeId, employeePayrollEarningUpdateDto.OverTimeHoursWorked,
+        employeePayrollEarningUpdateDto.Amount);
+      existingEmployeePayrollEarning.Amount = employeePayrollAmounts[0];
+      existingEmployeePayrollEarning.CalculatedAmountAfterTax = employeePayrollAmounts[1];
 
       EmployeePayrollEarning toBeUpdatedEmployeePayrollEarning = await _employeePayrollEarningRepository.UpdateAsync(existingEmployeePayrollEarning);
 
@@ -258,79 +321,66 @@
     ///The calculated amount for the given employee payroll earning.
     ///</returns>
     ///<exception cref="NotFoundException">Payroll earning not found</exception>
-    private async Task<decimal> CalculateAmountForPayrollEarning(string payrollEarningId, string employeeId, int? OverTimeHoursWorked, decimal? Amount)
+    private async Task<decimal[]> CalculateAmountForPayrollEarning(PayrollEarning payrollEarning, string employeeId, int? OverTimeHoursWorked, decimal? Amount)
     {
-      PayrollEarning? payrollEarning = await _payrollEarningRepository.GetByPayrollEarningId(payrollEarningId);
       Employee employee = await _employeeRepository.GetEmployeeByIdAsync(employeeId)
         ?? throw new NotFoundException($"Employee with id {employeeId} not found");
       int age = CalculateAge.UsingDOB(employee.DateOfBirth);
-      if (payrollEarning != null)
+      if (payrollEarning.IsActive)
       {
-        if (payrollEarning.IsActive)
+        decimal workingDays = 21.67m;
+        decimal employeeSalaryHourlyRate = Math.Round(employee.MonthlySalary / (workingDays * 8), 2);
+        decimal taxableAmount = 0m;
+        decimal tax;
+
+        if (payrollEarning.TaxCode == 3601 &&
+          payrollEarning.OvertimeHourMultiplier == null &&
+          OverTimeHoursWorked == null &&
+          payrollEarning.CanProRata) //Regular earning
         {
-          int workingDays = WorkingDayCalculator.CountWorkingDaysForCurrentMonth();
-          if (workingDays == 0)
+          int remainingWorkingDays = WorkingDayCalculator.CountRemainingWorkingDaysForCurrentMonth();
+          decimal proRataSalary = remainingWorkingDays * 8 * employeeSalaryHourlyRate;
+          if (payrollEarning.Taxable && (payrollEarning.TaxPercentage != null))
           {
-            throw new InvalidOperationException("No working days in current month.");
+            tax = await _taxDeductionService.CalculateTaxAsync(proRataSalary, age);
+            taxableAmount = tax * Math.Round((decimal)payrollEarning.TaxPercentage / 100, 2);
           }
 
-          decimal employeeSalaryHourlyRate = Math.Round(employee.MonthlySalary / (workingDays * 8), 2);
-          decimal taxableAmount = 0m;
-          decimal tax;
-
-          if (payrollEarning.TaxCode == 3601 &&
-            payrollEarning.OvertimeHourMultiplier == null &&
-            OverTimeHoursWorked == null &&
-            payrollEarning.CanProRata) //Regular earning
+          return [proRataSalary, proRataSalary - taxableAmount];
+        }
+        else if (payrollEarning.TaxCode == 3601
+          && payrollEarning.OvertimeHourMultiplier.HasValue
+          && OverTimeHoursWorked.HasValue) //Over time 
+        {
+          decimal overtimeEarnings = Math.Round(employeeSalaryHourlyRate * payrollEarning.OvertimeHourMultiplier.Value * OverTimeHoursWorked.Value, 2);
+          if (payrollEarning.Taxable && payrollEarning.TaxPercentage != null)
           {
-            int remainingWorkingDays = WorkingDayCalculator.CountRemainingWorkingDaysForCurrentMonth();
-            decimal proRataSalary = remainingWorkingDays * 8 * employeeSalaryHourlyRate;
-            if (payrollEarning.Taxable && (payrollEarning.TaxPercentage != null))
-            {
-              tax = await _taxDeductionService.CalculateTaxAsync(proRataSalary * 12, age);
-              taxableAmount = tax * Math.Round((decimal)payrollEarning.TaxPercentage / 100, 2);
-            }
-
-            return proRataSalary - taxableAmount;
+            tax = await _taxDeductionService.CalculateTaxAsync(overtimeEarnings, age);
+            taxableAmount = tax * Math.Round((decimal)payrollEarning.TaxPercentage / 100, 2);
           }
-          else if (payrollEarning.TaxCode == 3601
-            && payrollEarning.OvertimeHourMultiplier.HasValue
-            && OverTimeHoursWorked.HasValue) //Over time 
-          {
-            decimal overtimeEarnings = Math.Round(employeeSalaryHourlyRate * payrollEarning.OvertimeHourMultiplier.Value * OverTimeHoursWorked.Value, 2);
-            if (payrollEarning.Taxable && payrollEarning.TaxPercentage != null)
-            {
-              tax = await _taxDeductionService.CalculateTaxAsync(overtimeEarnings /** 12*/, age);
-              taxableAmount = tax * Math.Round((decimal)payrollEarning.TaxPercentage / 100, 2);
-            }
 
-            return overtimeEarnings - taxableAmount;
-          }
-          else
-          {
-            if (payrollEarning.Taxable && payrollEarning.TaxPercentage != null && Amount.HasValue)
-            {
-              tax = await _taxDeductionService.CalculateTaxAsync((decimal)Amount * 12, age);
-              taxableAmount = tax * Math.Round((decimal)payrollEarning.TaxPercentage / 100, 2);
-
-              return (decimal)Amount - taxableAmount;
-            }
-            else
-            {
-              return Amount ?? 0m;
-            }
-          }
+          return [overtimeEarnings, overtimeEarnings - taxableAmount];
         }
         else
         {
-          throw new InvalidOperationException($"Payroll earning with id {payrollEarningId} is not active");
+          if (payrollEarning.Taxable && payrollEarning.TaxPercentage != null && Amount.HasValue)
+          {
+            tax = await _taxDeductionService.CalculateTaxAsync((decimal)Amount, age);
+            taxableAmount = tax * Math.Round((decimal)payrollEarning.TaxPercentage / 100, 2);
+
+            return [(decimal)Amount, (decimal)Amount - taxableAmount];
+          }
+          else
+          {
+            return (Amount != null) ? [(decimal)Amount, (decimal)Amount] : [0, 0];
+          }
         }
       }
       else
       {
-        throw new NotFoundException($"Payroll earning with id {payrollEarningId} not found");
+        //throw new InvalidOperationException($"Payroll earning with id {payrollEarning.PayrollEarningId} is not active");
+        return [0, 0];
       }
     }
-
   }
 }

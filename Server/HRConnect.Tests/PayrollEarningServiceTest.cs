@@ -2,21 +2,36 @@
 {
   using HRConnect.Api.DTOs.Payroll.Earning;
   using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Models;
+  using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Models.Payroll.Earning;
+  using HRConnect.Api.Repository;
   using HRConnect.Api.Services;
   using HRConnect.Api.Utils;
   using Moq;
-  using Quartz.Impl.Triggers;
 
   public class PayrollEarningServiceTest
   {
     private readonly PayrollEarningService _payrollEarningService;
     private readonly Mock<IPayrollEarningRepository> _payrollEarningRepositoryMock;
+    private readonly Mock<IEmployeePayrollEarningRepository> _employeePayrollEarningRepositoryMock;
+    private readonly Mock<IEmployeeRepository> _employeeRepositoryMock;
+    private readonly Mock<IPayrollRunRepository> _payrollRunRepositoryMock;
+    private readonly Mock<ITaxDeductionService> _taxDeductionServiceMock;
 
     public PayrollEarningServiceTest()
     {
       _payrollEarningRepositoryMock = new Mock<IPayrollEarningRepository>();
-      _payrollEarningService = new PayrollEarningService(_payrollEarningRepositoryMock.Object);
+      _employeePayrollEarningRepositoryMock = new Mock<IEmployeePayrollEarningRepository>();
+      _employeeRepositoryMock = new Mock<IEmployeeRepository>();
+      _payrollRunRepositoryMock = new Mock<IPayrollRunRepository>();
+      _taxDeductionServiceMock = new Mock<ITaxDeductionService>();
+      _payrollEarningService = new PayrollEarningService(
+        _payrollEarningRepositoryMock.Object,
+        _employeePayrollEarningRepositoryMock.Object,
+        _payrollRunRepositoryMock.Object,
+        _employeeRepositoryMock.Object,
+        _taxDeductionServiceMock.Object);
     }
 
     [Fact]
@@ -216,6 +231,7 @@
         CanProRata = true,
         IsOnGoing = true,
       };
+
       PayrollEarning updatedPayrollEarning = new()
       {
         PayrollEarningId = payrollEarningId,
@@ -229,6 +245,47 @@
         IsOnGoing = (bool)payrollEarningUpdateDto.IsOnGoing,
       };
 
+      Employee fakeEmployee = new()
+      {
+        EmployeeId = "EMP001",
+        Name = "Test User",
+        Surname = "Smith",
+        PensionOptionId = 1,
+        MonthlySalary = 5100.00M,
+        StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
+        IdNumber = "0305055487589",
+        TaxNumber = "1234567890",
+        PhysicalAddress = "123 Main St",
+        Email = "john.smith@singular.co.za",
+      };
+
+      PayrollRun payrollRun = new()
+      {
+        PayrollRunId = 1
+      };
+
+      List<EmployeePayrollEarning> employeePayrollEarnings = new()
+      {
+        new EmployeePayrollEarning()
+        {
+          EmployeeId = fakeEmployee.EmployeeId,
+          PayrollEarningId = payrollEarningId,
+          Amount = 1000,
+          CalculatedAmountAfterTax = 1000,
+          PayrollRunId = payrollRun.PayrollRunId,
+          IsLocked = false,
+        },
+        new EmployeePayrollEarning()
+        {
+          EmployeeId = fakeEmployee.EmployeeId,
+          PayrollEarningId = payrollEarningId,
+          Amount = 1000,
+          CalculatedAmountAfterTax = 1000,
+          PayrollRunId = payrollRun.PayrollRunId,
+          IsLocked = false,
+        }
+      };
+
       _ = _payrollEarningRepositoryMock
         .Setup(r => r.CheckIfDescriptionsExists(payrollEarningUpdateDto.ShortDescription, payrollEarningUpdateDto.LongDescription))
         .ReturnsAsync(false);
@@ -236,6 +293,14 @@
       _ = _payrollEarningRepositoryMock
         .Setup(r => r.GetByPayrollEarningId(payrollEarningId))
         .ReturnsAsync(updatedPayrollEarning);
+
+      _ = _payrollRunRepositoryMock
+        .Setup(r => r.GetCurrentRunAsync())
+        .ReturnsAsync(payrollRun);
+
+      _ = _employeePayrollEarningRepositoryMock
+        .Setup(r => r.GetByPayrollRunIdAsync(payrollRun.PayrollRunId))
+        .ReturnsAsync(employeePayrollEarnings);
 
       _ = _payrollEarningRepositoryMock
         .Setup(r => r.UpdateAsync(It.IsAny<PayrollEarning>()))

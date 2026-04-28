@@ -8,6 +8,7 @@
     public bool Taxable { get; set; }
     public int TaxCode { get; set; }
     public decimal Amount { get; set; }
+    public decimal CalculatedAmountAfterTax { get; set; }
     public int PayrollRunId { get; set; }
     public bool IsLocked { get; set; }
   }

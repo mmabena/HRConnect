@@ -11,6 +11,7 @@
     public int? OverTimeHoursWorked { get; set; }
     [Column(TypeName = "decimal(18,2)")]
     public decimal Amount { get; set; }
+    public decimal CalculatedAmountAfterTax { get; set; }
     public int PayrollRunId { get; set; }
     public bool IsLocked { get; set; }
 
