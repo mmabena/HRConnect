@@ -13,24 +13,14 @@ namespace HRConnect.Api.Migrations
             migrationBuilder.AddColumn<string>(
                 name: "IdempotencyKey",
                 table: "Notifications",
-                type: "nvarchar(450)",
+                type: "nvarchar(max)",
                 nullable: false,
                 defaultValue: "");
-
-            migrationBuilder.CreateIndex(
-                name: "UX_Notification_Idempotency",
-                table: "Notifications",
-                column: "IdempotencyKey",
-                unique: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropIndex(
-                name: "UX_Notification_Idempotency",
-                table: "Notifications");
-
             migrationBuilder.DropColumn(
                 name: "IdempotencyKey",
                 table: "Notifications");

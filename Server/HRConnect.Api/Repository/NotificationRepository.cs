@@ -8,11 +8,6 @@ namespace HRConnect.Api.Repository
   using HRConnect.Api.DTOs.Notification;
   using Microsoft.EntityFrameworkCore;
 
-  // public readonly struct SaveResult
-  // {
-  //   public bool IsSuccess { get; init};
-  //   public string? ResultMsg { get; init; }
-  // }
   public class NotificationRepository : INotificationRepository
   {
     private readonly ApplicationDBContext _context;
@@ -20,9 +15,11 @@ namespace HRConnect.Api.Repository
     {
       _context = context;
     }
-    public async Task AddNotificationAsync(Notification notification)
+    public async Task<Notification> AddNotificationAsync(Notification notification)
     {
       _ = await _context.Notifications.AddAsync(notification);
+      _ = await Save();
+      return notification;
     }
 
     public async Task<bool> Save()
@@ -52,10 +49,10 @@ namespace HRConnect.Api.Repository
       .FirstOrDefaultAsync();
     }
 
-    public async Task<bool> TryAndAquireAsync(string idempotencyKey)
+    public async Task<Notification?> TryAndAquireAsync(string idempotencyKey)
     {
       return await _context.Notifications.AsNoTracking()
-        .AnyAsync(n =>
+        .FirstOrDefaultAsync(n =>
           (n.IdempotencyKey == idempotencyKey) &&
           !n.IsRead);
     }
@@ -109,6 +106,20 @@ namespace HRConnect.Api.Repository
                   (n.EmployeeId == employeeId) &&
                   (n.Severity == severity)).ToListAsync();
       return notifications.Select(n => n.ToNotificationDto());
+    }
+    public async Task<Notification?> TryCreateUnreadAsync(Notification notification)
+    {
+      using var tsx = await _context.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+
+      var existsUnread = await TryAndAquireAsync(notification.IdempotencyKey);
+      if (existsUnread == null)
+        return existsUnread;
+
+      await _context.Notifications.AddAsync(notification);
+      await _context.SaveChangesAsync();
+
+      await tsx.CommitAsync();
+      return notification;
     }
   }
 }

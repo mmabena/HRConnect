@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRConnect.Api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20260428124851_NotificationIdempotency")]
+    [Migration("20260429122333_NotificationIdempotency")]
     partial class NotificationIdempotency
     {
         /// <inheritdoc />
@@ -1198,7 +1198,7 @@ namespace HRConnect.Api.Migrations
 
                     b.Property<string>("IdempotencyKey")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsRead")
                         .HasColumnType("bit");
@@ -1216,10 +1216,6 @@ namespace HRConnect.Api.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("NotificationId");
-
-                    b.HasIndex("IdempotencyKey")
-                        .IsUnique()
-                        .HasDatabaseName("UX_Notification_Idempotency");
 
                     b.ToTable("Notifications");
                 });

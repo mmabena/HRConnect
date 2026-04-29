@@ -8,6 +8,7 @@ namespace HRConnect.Api.Services
   using System.Text;
   using System.Security.Cryptography;
   using HRConnect.Api.Mappers.Notification;
+  using SQLitePCL;
 
   public class NotificationService : INotificationService
   {
@@ -56,15 +57,15 @@ namespace HRConnect.Api.Services
       //This can be avoided by ensure the Insert db request is Idempotent. Build the 
       //key before querying the db
       BuildIdempotencyKey(notification);
-      bool isPesistent = NotificationTypeRules.ShouldPersist(notification.Severity);
+      bool isPesistent = NotificationsRules.ShouldPersist(notification.Severity);
       if (isPesistent)
       {
         var exists = await _notificationRepository.TryAndAquireAsync(notification.IdempotencyKey);
-        if (exists)
+        if (exists != null)
           return;
       }
       //For other general notifications or it does not exist
-      await _notificationRepository.AddNotificationAsync(notification);
+      _ = await _notificationRepository.AddNotificationAsync(notification);
       _ = await _notificationRepository.Save();
       //Dispatch all notifications
       await _notificationDispatcher.DispatchNotificationAsync(notification);
@@ -72,7 +73,7 @@ namespace HRConnect.Api.Services
 
     public async Task CreateOrEnsureExistsAsync(Notification notification)
     {
-      bool isPesistent = NotificationTypeRules.ShouldPersist(notification.Severity);
+      bool isPesistent = NotificationsRules.ShouldPersist(notification.Severity);
       if (isPesistent)
       {
         //Find if it already exists 
@@ -80,7 +81,7 @@ namespace HRConnect.Api.Services
         // var existing = await _notificationRepository.ExistsAsync(notification.Type, notification.EmployeeId, notification.Message, notification.Severity);
         var exists = await _notificationRepository.TryAndAquireAsync(notification.IdempotencyKey);
 
-        if (exists)
+        if (exists != null)
         {
           //Keep the Payroll and Tax Table uploads notifications persistent
           // notification.IsRead = true;
@@ -88,7 +89,7 @@ namespace HRConnect.Api.Services
         }
       }
       //For other general notifications or it does not exist
-      await _notificationRepository.AddNotificationAsync(notification);
+      _ = await _notificationRepository.AddNotificationAsync(notification);
       _ = await _notificationRepository.Save();
       //Dispatch all notifications
       await _notificationDispatcher.DispatchNotificationAsync(notification);
@@ -101,5 +102,28 @@ namespace HRConnect.Api.Services
       var hash = SHA256.HashData(bytes);
       request.IdempotencyKey = Convert.ToHexString(hash);
     }
+    public async Task TryCreateAndDispatch(Notification notification)
+    {
+      BuildIdempotencyKey(notification);
+      bool isPersistent = NotificationsRules.ShouldPersist(notification.Severity);
+      Notification? created = null;
+      if (isPersistent)
+      {
+        created = await _notificationRepository.TryCreateUnreadAsync(notification);
+      }
+      else
+      {
+        _ = await _notificationRepository.AddNotificationAsync(notification);
+      }
+
+      if (created != null)
+      {
+        return;
+      }
+      _ = await _notificationRepository.AddNotificationAsync(notification);
+      await _notificationDispatcher.DispatchNotificationAsync(notification);
+      // return created?.ToNotificationDto() ?? null;
+    }
+
   }
 }

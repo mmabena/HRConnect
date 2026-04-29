@@ -281,10 +281,10 @@ namespace HRConnect.Api.Data
       // If we violate this Unique Constraints, SQL Server will throw error codes
       // 2601 -> duplicate key violation 
       // 2627 -> unique constraints violation
-      modelBuilder.Entity<Notification>()
-        .HasIndex(n => new { n.IdempotencyKey })
-        .IsUnique()
-        .HasDatabaseName("UX_Notification_Idempotency");
+      // modelBuilder.Entity<Notification>()
+      //   .HasIndex(n => new { n.IdempotencyKey })
+      //   .IsUnique()
+      //   .HasDatabaseName("UX_Notification_Idempotency");
 
       modelBuilder.Entity<Notification>().Property(n => n.Severity)
           .HasConversion<string>();
