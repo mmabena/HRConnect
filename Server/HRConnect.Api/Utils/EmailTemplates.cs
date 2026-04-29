@@ -47,7 +47,7 @@ namespace HRConnect.Api.Utils
             <p><strong>Dates:</strong> {application.StartDate:dd MMM yyyy} → {application.EndDate:dd MMM yyyy}</p>
             <p><strong>Days Requested:</strong> {application.DaysRequested}</p>
 
-            {documentLinks} <!-- ADDED -->
+            {documentLinks}
 
             <br>
 

@@ -17,8 +17,8 @@ namespace HRConnect.Api.Utils
     public EmailService(IConfiguration configuration)
     {
       string? sendGridApiKey = configuration["SendGrid:ApiKey"];
-      _fromEmail = configuration["SendGrid:FromEmail"] ?? "noreply@hrconnect.com";
-      _fromName = configuration["SendGrid:FromName"] ?? "HRConnect Team";
+      _fromEmail = configuration["SendGrid:FromEmail"] ?? "ochimerema@gmail.com";
+      _fromName = configuration["SendGrid:FromName"] ?? "HRConnect";
 
       if (string.IsNullOrWhiteSpace(sendGridApiKey))
       {

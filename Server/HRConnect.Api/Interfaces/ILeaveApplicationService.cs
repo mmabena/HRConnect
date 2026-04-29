@@ -16,6 +16,7 @@ namespace HRConnect.Api.Interfaces
         Task RejectLeaveInternalAsync(int applicationId, string? reason);
         Task<List<LeaveApplicationResponse>> GetAllAsync();
         Task<List<LeaveApplicationResponse>> GetByLeaveTypeCodeAsync(string code);
+        Task<List<LeaveApplicationResponse>> GetByStatusAsync(string status);
 
     }
 }

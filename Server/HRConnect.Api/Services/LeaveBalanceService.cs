@@ -152,11 +152,20 @@ namespace HRConnect.Api.Services
         /// <exception cref="InvalidOperationException"></exception>
         public async Task UpdateTakenDaysAsync(UpdateTakenDaysRequest request)
         {
-            if (request.TakenDays < 0)
-                throw new InvalidOperationException("Used days cannot be negative.");
+            ArgumentNullException.ThrowIfNull(request);
+
+            if (string.IsNullOrWhiteSpace(request.EmployeeId))
+                throw new ArgumentException("EmployeeId is required.");
+
+            if (request.LeaveTypeId <= 0)
+                throw new ArgumentException("Invalid LeaveTypeId.");
+
+            if (request.TakenDays <= 0)
+                throw new InvalidOperationException("Taken days must be greater than zero.");
 
             var balance = await _context.EmployeeLeaveBalances
                 .Include(b => b.LeaveType)
+                .ThenInclude(lt => lt.EntitlementRules)
                 .Include(b => b.Employee)
                 .FirstOrDefaultAsync(b =>
                     b.EmployeeId == request.EmployeeId &&
@@ -168,13 +177,30 @@ namespace HRConnect.Api.Services
             if (balance.LeaveType.Code == "SL")
                 await RecalculateSickLeaveAsync(request.EmployeeId);
 
-            if (request.TakenDays > balance.AvailableDays)
-                throw new InvalidOperationException(
-                    "Used days cannot exceed available days.");
+            decimal totalEntitlement;
 
-            balance.TakenDays = request.TakenDays;
+            if (balance.LeaveType.Code == "ML")
+            {
+                totalEntitlement = balance.LeaveType.EntitlementRules
+                    .Where(r => r.IsActive && r.GroupKey == "ALL")
+                    .Select(r => r.DaysAllocated)
+                    .FirstOrDefault();
+            }
+            else
+            {
+                totalEntitlement = balance.AccruedDays + balance.CarryoverDays;
+            }
 
-            if (balance.LeaveType.Code == "AL")
+            if (balance.TakenDays + request.TakenDays > totalEntitlement)
+                throw new InvalidOperationException("Total taken days exceed entitlement.");
+
+            balance.TakenDays += request.TakenDays;
+
+            if (balance.LeaveType.Code == "ML")
+            {
+                balance.AvailableDays = totalEntitlement - balance.TakenDays;
+            }
+            else if (balance.LeaveType.Code == "AL")
             {
                 balance.AvailableDays =
                     balance.CarryoverDays +
@@ -186,6 +212,9 @@ namespace HRConnect.Api.Services
                 balance.AvailableDays =
                     balance.AccruedDays - balance.TakenDays;
             }
+
+            if (balance.AvailableDays < 0)
+                balance.AvailableDays = 0;
 
             try
             {

@@ -71,7 +71,7 @@ namespace HRConnect.Api.Controllers
             return Ok(updatedEmployee);
         }
 
-        // INJECTED: Update leave usage
+        // Update leave usage
         [HttpPut("update-used-days")]
         [Authorize(Roles = "SuperUser")]
         public async Task<IActionResult> UpdateTakenDays([FromBody] UpdateTakenDaysRequest request)
@@ -80,7 +80,7 @@ namespace HRConnect.Api.Controllers
             return Ok("Used days updated successfully.");
         }
 
-        // INJECTED: Leave projection
+        // Leave projection
         [HttpGet("project-annual-leave")]
         [Authorize(Roles = "SuperUser")]
         public async Task<IActionResult> ProjectAnnualLeave(string employeeId, DateOnly projectionDate)

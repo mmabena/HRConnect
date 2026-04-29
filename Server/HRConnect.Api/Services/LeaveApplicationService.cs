@@ -6,6 +6,7 @@ namespace HRConnect.Api.Services
     using HRConnect.Api.Models;
     using HRConnect.Api.Utils;
     using Microsoft.EntityFrameworkCore;
+    using System.Globalization;
 
     public class LeaveApplicationService : ILeaveApplicationService
     {
@@ -474,17 +475,6 @@ namespace HRConnect.Api.Services
                 rejectLink
             );
 
-            var documentLinks = "";
-
-            if (application.Documents != null && application.Documents.Count > 0)
-            {
-                documentLinks = "<br/><br/><strong>Supporting Documents:</strong><br/>" +
-                    string.Join("<br/>",
-                        application.Documents.Select(d =>
-                            $"<a href='{d.FileUrl}'>Download {d.FileName}</a>"));
-            }
-
-            emailBody += documentLinks;
 
             var manager = await _context.Employees
                 .FirstOrDefaultAsync(e => e.EmployeeId == employee.CareerManagerID);
@@ -600,5 +590,66 @@ namespace HRConnect.Api.Services
                     : new List<LeaveDocumentResponse>()
             }).ToList();
         }
+        public async Task<List<LeaveApplicationResponse>> GetByStatusAsync(string status)
+        {
+            if (string.IsNullOrWhiteSpace(status))
+                throw new ArgumentException("Status is required.");
+
+            status = status.Trim();
+
+            if (!Enum.TryParse<LeaveApplication.LeaveApplicationStatus>(
+                status, true, out var parsedStatus))
+            {
+                throw new ArgumentException("Invalid status value. Use Pending, Approved, or Rejected.");
+            }
+
+            var applications = await _context.LeaveApplications
+                .AsNoTracking()
+                .Include(a => a.Employee)
+                .Include(a => a.LeaveType)
+                    .ThenInclude(lt => lt.EntitlementRules)
+                .Include(a => a.Documents)
+                .Where(a => a.Status == parsedStatus)
+                .ToListAsync();
+
+            if (applications == null || applications.Count == 0)
+                return new List<LeaveApplicationResponse>();
+
+            return applications.Select(a => new LeaveApplicationResponse
+            {
+                Id = a.Id,
+
+                EmployeeName = a.Employee != null
+                    ? $"{a.Employee.Name} {a.Employee.Surname}"
+                    : "Unknown",
+
+                LeaveTypeId = a.LeaveTypeId,
+
+                LeaveTypeCode = a.LeaveType?.Code ?? string.Empty,
+
+                StartDate = a.StartDate,
+                EndDate = a.EndDate,
+                DaysRequested = a.DaysRequested,
+
+                DaysAllocated = a.LeaveType?.EntitlementRules != null && a.LeaveType.EntitlementRules.Count > 0
+                    ? a.LeaveType.EntitlementRules
+                        .Where(r => r.IsActive)
+                        .OrderByDescending(r => r.MinYearsService)
+                        .Select(r => r.DaysAllocated)
+                        .FirstOrDefault()
+                    : 0,
+
+                Status = a.Status.ToString(),
+
+                Documents = a.Documents != null && a.Documents.Count > 0
+                    ? a.Documents.Select(d => new LeaveDocumentResponse
+                    {
+                        FileName = d.FileName,
+                        FileUrl = d.FileUrl
+                    }).ToList()
+                    : new List<LeaveDocumentResponse>()
+            }).ToList();
+        }
+
     }
 }

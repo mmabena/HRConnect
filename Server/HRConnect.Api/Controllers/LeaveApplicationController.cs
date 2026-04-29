@@ -102,5 +102,23 @@ namespace HRConnect.Api.Controllers
             await _service.RejectLeaveInternalAsync(id, reason);
             return Ok("Rejected internally");
         }
+        [HttpGet("by-status/{status}")]
+        public async Task<IActionResult> GetByStatus(string status)
+        {
+            var result = await _service.GetByStatusAsync(status);
+            return Ok(result);
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var result = await _service.GetAllAsync();
+            return Ok(result);
+        }
+        [HttpGet("by-type/{code}")]
+        public async Task<IActionResult> GetByLeaveTypeCode(string code)
+        {
+            var result = await _service.GetByLeaveTypeCodeAsync(code);
+            return Ok(result);
+        }
     }
 }

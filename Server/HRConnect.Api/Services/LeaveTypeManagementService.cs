@@ -40,21 +40,22 @@ namespace HRConnect.Api.Services
                 .Include(e => e.Position)
                 .Include(e => e.LeaveBalances)
                     .ThenInclude(lb => lb.LeaveType)
+                    .ThenInclude(lt => lt.EntitlementRules)
                 .Select(e => new EmployeeWithLeaveDto
                 {
                     EmployeeId = e.EmployeeId,
                     FullName = e.Name + " " + e.Surname,
                     Email = e.Email,
                     Position = e.Position.PositionTitle,
-                    LeaveBalances = e.LeaveBalances.
-                    Where(lb => lb.LeaveType.IsActive)
-                    .Select(lb => new LeaveBalanceSummary
-                    {
-                        LeaveType = lb.LeaveType.Name,
-                        AccruedDays = lb.AccruedDays,
-                        TakenDays = lb.TakenDays,
-                        AvailableDays = lb.AvailableDays
-                    }).ToList()
+                    LeaveBalances = e.LeaveBalances
+                        .Where(lb => lb.LeaveType.IsActive)
+                        .Select(lb => new LeaveBalanceSummary
+                        {
+                            LeaveType = lb.LeaveType.Name,
+                            AccruedDays = lb.AccruedDays,
+                            TakenDays = lb.TakenDays,
+                            AvailableDays = lb.AvailableDays
+                        }).ToList()
                 })
                 .ToListAsync();
         }
@@ -76,14 +77,14 @@ namespace HRConnect.Api.Services
                 Email = e.Email,
                 Position = e.Position.PositionTitle,
                 LeaveBalances = e.LeaveBalances
-                .Where(lb => lb.LeaveType.IsActive)
-                .Select(lb => new LeaveBalanceSummary
-                {
-                    LeaveType = lb.LeaveType.Name,
-                    AccruedDays = lb.AccruedDays,
-                    TakenDays = lb.TakenDays,
-                    AvailableDays = lb.AvailableDays
-                }).ToList()
+                    .Where(lb => lb.LeaveType.IsActive)
+                    .Select(lb => new LeaveBalanceSummary
+                    {
+                        LeaveType = lb.LeaveType.Name,
+                        AccruedDays = lb.AccruedDays,
+                        TakenDays = lb.TakenDays,
+                        AvailableDays = lb.AvailableDays
+                    }).ToList()
             };
         }
         /// <summary>
