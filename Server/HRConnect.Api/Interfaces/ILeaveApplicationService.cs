@@ -17,6 +17,10 @@ namespace HRConnect.Api.Interfaces
         Task<List<LeaveApplicationResponse>> GetAllAsync();
         Task<List<LeaveApplicationResponse>> GetByLeaveTypeCodeAsync(string code);
         Task<List<LeaveApplicationResponse>> GetByStatusAsync(string status);
+        Task<List<LeaveApplicationResponse>> GetByEmployeeIdAsync(string employeeId);
+        Task<List<LeaveApplicationResponse>> GetFilteredAsync(
+    string? status,
+    string? leaveTypeCode);
 
     }
 }

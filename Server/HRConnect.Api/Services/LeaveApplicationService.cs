@@ -650,6 +650,127 @@ namespace HRConnect.Api.Services
                     : new List<LeaveDocumentResponse>()
             }).ToList();
         }
+        public async Task<List<LeaveApplicationResponse>> GetByEmployeeIdAsync(string employeeId)
+        {
+            if (string.IsNullOrWhiteSpace(employeeId))
+                throw new ArgumentException("EmployeeId is required.");
 
+            employeeId = employeeId.Trim();
+
+            var applications = await _context.LeaveApplications
+                .AsNoTracking()
+                .Include(a => a.Employee)
+                .Include(a => a.LeaveType)
+                    .ThenInclude(lt => lt.EntitlementRules)
+                .Include(a => a.Documents)
+                .Where(a => a.EmployeeId == employeeId)
+                .ToListAsync();
+
+            if (applications.Count == 0)
+                return new List<LeaveApplicationResponse>();
+
+            return applications.Select(a => new LeaveApplicationResponse
+            {
+                Id = a.Id,
+
+                EmployeeName = a.Employee != null
+                    ? $"{a.Employee.Name} {a.Employee.Surname}"
+                    : "Unknown",
+
+                LeaveTypeId = a.LeaveTypeId,
+                LeaveTypeCode = a.LeaveType?.Code ?? string.Empty,
+
+                StartDate = a.StartDate,
+                EndDate = a.EndDate,
+                DaysRequested = a.DaysRequested,
+
+                DaysAllocated = a.LeaveType?.EntitlementRules != null && a.LeaveType.EntitlementRules.Count > 0
+                    ? a.LeaveType.EntitlementRules
+                        .Where(r => r.IsActive)
+                        .OrderByDescending(r => r.MinYearsService)
+                        .Select(r => r.DaysAllocated)
+                        .FirstOrDefault()
+                    : 0,
+
+                Status = a.Status.ToString(),
+
+                Documents = a.Documents != null && a.Documents.Count > 0
+                    ? a.Documents.Select(d => new LeaveDocumentResponse
+                    {
+                        FileName = d.FileName,
+                        FileUrl = d.FileUrl
+                    }).ToList()
+                    : new List<LeaveDocumentResponse>()
+            }).ToList();
+        }
+#pragma warning disable CA1304, CA1311, CA1862
+        public async Task<List<LeaveApplicationResponse>> GetFilteredAsync(
+            string? status,
+            string? leaveTypeCode)
+        {
+            var query = _context.LeaveApplications
+                .AsNoTracking()
+                .Include(a => a.Employee)
+                .Include(a => a.LeaveType)
+                    .ThenInclude(lt => lt.EntitlementRules)
+                .Include(a => a.Documents)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(status))
+            {
+                if (!Enum.TryParse<LeaveApplication.LeaveApplicationStatus>(
+                    status.Trim(), true, out var parsedStatus))
+                {
+                    throw new ArgumentException("Invalid status. Use Pending, Approved, or Rejected.");
+                }
+
+                query = query.Where(a => a.Status == parsedStatus);
+            }
+
+            if (!string.IsNullOrWhiteSpace(leaveTypeCode))
+            {
+                var normalizedCode = leaveTypeCode.Trim().ToUpper();
+
+                query = query.Where(a =>
+                    a.LeaveType.Code.ToUpper() == normalizedCode);
+            }
+
+            var applications = await query.ToListAsync();
+
+            return applications.Select(a => new LeaveApplicationResponse
+            {
+                Id = a.Id,
+
+                EmployeeName = a.Employee != null
+                    ? $"{a.Employee.Name} {a.Employee.Surname}"
+                    : "Unknown",
+
+                LeaveTypeId = a.LeaveTypeId,
+                LeaveTypeCode = a.LeaveType?.Code ?? string.Empty,
+
+                StartDate = a.StartDate,
+                EndDate = a.EndDate,
+                DaysRequested = a.DaysRequested,
+
+                DaysAllocated = a.LeaveType?.EntitlementRules != null && a.LeaveType.EntitlementRules.Count > 0
+                    ? a.LeaveType.EntitlementRules
+                        .Where(r => r.IsActive)
+                        .OrderByDescending(r => r.MinYearsService)
+                        .Select(r => r.DaysAllocated)
+                        .FirstOrDefault()
+                    : 0,
+
+                Status = a.Status.ToString(),
+
+                Documents = a.Documents != null && a.Documents.Count > 0
+                    ? a.Documents.Select(d => new LeaveDocumentResponse
+                    {
+                        FileName = d.FileName,
+                        FileUrl = d.FileUrl
+                    }).ToList()
+                    : new List<LeaveDocumentResponse>()
+            }).ToList();
+        }
+#pragma warning restore CA1862, CA1311, CA1304
     }
 }

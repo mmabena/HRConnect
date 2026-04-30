@@ -236,7 +236,6 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
         </div>
 
         <ul className="menu-list">
-          {/* ✅ Personal - Static, no toggle */}
           <li>
             <div className="menu-item-wrapper">
               <img

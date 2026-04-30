@@ -10,6 +10,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 import "./Components/MenuBar/MenuBar.css";
+import LeaveHistory from "./Components/LeaveApplicationManagement/LeaveHistory";
 import EmployeeList from "./Pages/EmployeeManagement/EmployeeList";
 import Payslip from "./Pages/PayrollInfo/Payslip"
 import AddEmployeeModal from "./Components/EmployeeManagement/AddEmployeeModal";
@@ -195,6 +196,7 @@ function App() {
           <Route path="/taxTableManagement" element={<TaxTableManagement />} />
           <Route path="/leaveManagement" element={<LeaveTables />} />
           <Route path="/taxTableUpload" element={<TaxTableUpload />} />
+          <Route path="/leave-application" element={<LeaveHistory />} />
           <Route path="/positionManagement" element={<PositionManagement />} />
           <Route
             path="/addPositionManagement"

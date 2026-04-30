@@ -7,7 +7,7 @@ namespace HRConnect.Api.Controllers
     using HRConnect.Api.Interfaces;
 
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/LeaveApplications")]
     public class LeaveApplicationController : ControllerBase
     {
         private readonly ILeaveApplicationService _service;
@@ -118,6 +118,20 @@ namespace HRConnect.Api.Controllers
         public async Task<IActionResult> GetByLeaveTypeCode(string code)
         {
             var result = await _service.GetByLeaveTypeCodeAsync(code);
+            return Ok(result);
+        }
+        [HttpGet("by-employee-id/{employeeId}")]
+        public async Task<IActionResult> GetByEmployeeId(string employeeId)
+        {
+            var result = await _service.GetByEmployeeIdAsync(employeeId);
+            return Ok(result);
+        }
+        [HttpGet("filter")]
+        public async Task<IActionResult> GetFiltered(
+    [FromQuery] string? status,
+    [FromQuery] string? leaveTypeCode)
+        {
+            var result = await _service.GetFilteredAsync(status, leaveTypeCode);
             return Ok(result);
         }
     }

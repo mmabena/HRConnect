@@ -36,6 +36,10 @@ namespace HRConnect.Api.Services
             if (employee == null)
                 throw new InvalidOperationException("Employee not found.");
 
+            if (employee.Position == null)
+                throw new InvalidOperationException("Employee position not found.");
+            if (employee.Position == null)
+                throw new InvalidOperationException("Employee position not found.");
             var groupKey = await _context.JobGradeGroupMaps
                 .Where(x => x.JobGradeId == employee.Position.JobGradeId)
                 .Select(x => x.GroupKey)
@@ -174,6 +178,9 @@ namespace HRConnect.Api.Services
             if (balance == null)
                 throw new InvalidOperationException("Leave balance not found.");
 
+            if (balance.LeaveType == null)
+                throw new InvalidOperationException("Leave type is not loaded for the balance.");
+
             if (balance.LeaveType.Code == "SL")
                 await RecalculateSickLeaveAsync(request.EmployeeId);
 
@@ -248,8 +255,9 @@ namespace HRConnect.Api.Services
             var annualLeave = await _context.LeaveTypes
                 .FirstAsync(l => l.Code == "AL" && l.IsActive);
 
-            var balance = employee.LeaveBalances
-                .First(b => b.LeaveTypeId == annualLeave.Id);
+            var balance = employee.LeaveBalances?
+                .FirstOrDefault(b => b.LeaveTypeId == annualLeave.Id)
+                ?? throw new InvalidOperationException("Annual leave balance not found.");
 
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
@@ -464,8 +472,9 @@ namespace HRConnect.Api.Services
             var annualLeave = await _context.LeaveTypes
                 .FirstAsync(l => l.Code == "AL" && l.IsActive);
 
-            var balance = employee.LeaveBalances
-                .First(b => b.LeaveTypeId == annualLeave.Id);
+            var balance = employee.LeaveBalances?
+                .FirstOrDefault(b => b.LeaveTypeId == annualLeave.Id)
+                ?? throw new InvalidOperationException("Annual leave balance not found.");
 
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
@@ -620,6 +629,10 @@ namespace HRConnect.Api.Services
             if (employee.StartDate.Year >= currentYear)
                 return;
 
+            if (employee.Position == null)
+                throw new InvalidOperationException("Employee position not found.");
+            if (employee.Position == null)
+                throw new InvalidOperationException("Employee position not found.");
             var groupKey = await _context.JobGradeGroupMaps
                 .Where(x => x.JobGradeId == employee.Position.JobGradeId)
                 .Select(x => x.GroupKey)
@@ -691,6 +704,9 @@ namespace HRConnect.Api.Services
 
             if (exists)
                 return;
+
+            if (employee.Position == null)
+                throw new InvalidOperationException("Employee position not found.");
 
             var groupKey = await _context.JobGradeGroupMaps
                 .Where(x => x.JobGradeId == employee.Position.JobGradeId)
