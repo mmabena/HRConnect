@@ -13,8 +13,14 @@ font-size:16px;
     color:white;
     font-size:16px;
 }
+.top-bar h2{
+    font-size:40px;
+}
 .top-bar {
     color:var(--primary-color);
+display: flex;
+flex-direction: row;
+gap:45px;
 }
 .payslip-card{
   border-radius:10px;
@@ -22,34 +28,34 @@ font-size:16px;
   background: rgba(53, 88, 103, 0.15);
   border-radius: 10px 10px 10px 10px;
 }
-
-/* User Profiles */
 .card-title{
+display:block;
+text-align: left;
+padding-left: 24px;
 height: 37px;
 font-family: 'Anek Bangla';
 font-style: normal;
 font-weight: 500;
-font-size: 20px;
-line-height: 37px;
+font-size: 26px;
 letter-spacing: 0.02em;
 color: #355867;
+min-height: 55px;
 }
 
 .search-bar{
-  margin-left:auto;
   background-color:#4F6E781A;
   border-radius: 8px;
   min-width: 360px;
   height: 56px;
-
   max-width: 720px;
   margin-top:15px;
 }
+
 .search-bar input::placeholder {
 color:var(--primary-color);
 }
+
 .search-bar input {
-color:var(--primary-color);
 font-size:16px;
 font-weight: 400;
 line-height: 26px;
@@ -57,7 +63,14 @@ min-width: 360px;
 height: 56px;
 border:none;
 }
+.search-bar input[type="text"]{
+    border:none;
+    
+}
 
+.search-bar svg{
+
+}
 .heading {
   background-color:var(--primary-color);
   color:var(--primary-color);
@@ -75,7 +88,6 @@ background-color:var(--primary-color);
 /*superuser*/
 .role-badge.superuser{
 border:1px solid #00608887;
-/* border:1px solid #00608887;  */
 max-width:146px;
 cursor: default;
 color: var(--COLOUR-Calm-Blue, #006088);
@@ -84,9 +96,6 @@ color: var(--COLOUR-Calm-Blue, #006088);
 cursor: default;
 background: #AFBF744D;
 border:1px solid #AFBF74;
-/* border:1px solid #AFBF74; */
-/* color:#638549; */
-/* background: #AFBF744D; */
 max-width:146px;
 }
 .styled-table td{
@@ -96,7 +105,6 @@ font-weight:500;
 .filter-btn{
 cursor: pointer;
 position: relative;
-left: 300px;
 margin-left:auto;
 
   display: flex;
@@ -113,7 +121,6 @@ margin-left:auto;
   opacity: 0.9;
   background: var(--white);
 
-  /* text-align: center; */
   font-family: "Anek Bangla";
   font-size: 20px;
   font-style: normal;

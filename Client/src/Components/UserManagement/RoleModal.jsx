@@ -4,7 +4,7 @@ import { resolveRole } from "../../utils/roleUtils";
 import { fetchRoles, updateUserRole } from "../../api/UserManagement";
 import "./RoleModal.css"
 import { fetchAllEmployees } from "../../api/Employee.js";
-import { Check, UserRound, UserLock } from "lucide-react";
+import { Check, UserRound, UserLock, ArrowRight } from "lucide-react";
 
 const RolesModal = ({ isOpen, onClose, user, onSuccess }) => {
   const [roles, setRoles] = useState([]);
@@ -49,6 +49,10 @@ const RolesModal = ({ isOpen, onClose, user, onSuccess }) => {
       setShowDropdowns(false);
     }
   }, [user]);
+
+  const returnCurrentRole=(roleSelected)=>{
+    return roles[roleSelected].name
+  }
 
   const loadUserFromEmployeeData = async () => {
     try {
@@ -115,10 +119,38 @@ const RolesModal = ({ isOpen, onClose, user, onSuccess }) => {
             <FaTimes />
           </button>
         </div>
-
+            
         <div className="roles-modal-content">
+            <div >
+                <p>CURRENT ROLE</p>
+                <div className="current-role-banner">
+                    <span>
+                {selectedRole===1 ? 
+                <p className="status normaluser">
+                    Normal User
+                </p>
+                :
+                <p className="status superuser">
+                    Super User
+                </p>
+                }
+                <p className="status">
+                    Change To  <ArrowRight/> 
+                </p>
+                {selectedRole===0 ?
+                 <p className="status normaluser">
+                    Normal User
+                 </p>
+                 :
+                  <p className="status superuser">
+                    Super User
+                  </p>
+                 }
+                    </span>
+                </div>
+            </div>
           <div className="roles-buttons">
-            <p>Select New Role</p>
+            <p>SELECT NEW ROLE</p>
             <div className="roles-buttons-wrapper">
               <button
                 className={`role-btn superuser ${selectedRole === 1 ? "active" : ""}`}

@@ -16,13 +16,14 @@ flex-grow: 0;
 }
 
 .roles-modal-content{
-/* height:396px; */
   min-height:369px;
   max-height:80vh;
   overflow-y:auto;
 
 display:flex;
 flex-direction:column;
+align-items: center;
+justify-content: center;
 padding:15px;
 gap:12px;
 }
@@ -44,7 +45,6 @@ gap: 16px;
 width: 210px;
 height: 52px;
 
-/* Inside auto layout */
 flex: none;
 order: 0;
 flex-grow: 0;
@@ -57,21 +57,21 @@ height: 34px;
 background: rgba(255, 255, 255, 0.15);
 border-radius: 10px;
 color:white;
-/* Inside auto layout */
 flex: none;
 order: 0;
 flex-grow: 0;
 }
+
 .name-tag h3{
 width: 160px;
 height: 26px;
-
 font-family: 'Anek Bangla';
 font-style: normal;
 font-weight: 600;
 font-size: 20px;
 line-height: 26px;
-/* identical to box height, or 130% */ color: #FFFFFF; flex: none;
+color: #FFFFFF; 
+flex: none;
 order: 0;
 align-self: stretch;
 flex-grow: 0;
@@ -85,13 +85,13 @@ font-style: normal;
 font-weight: 500;
 font-size: 16px;
 line-height: 26px;
-/* identical to box height, or 162% */
 color: #FFFFFF;
 flex: none;
 order: 1;
 align-self: stretch;
 flex-grow: 0;
 }
+
 .name-tag div{
   text-align:left;
 }
@@ -104,16 +104,14 @@ justify-content:center;
 align-items:center; 
 padding: 12px 0px;
 gap: 44px;
-
-
 margin-top:auto;
 }
+
 .roles-actions{
 box-sizing: border-box;
 display: flex;
 flex-direction: row;
 justify-content:center;
-/* align-items:center; */
 padding: 12px 0px;
 gap: 44px;
 position: relative;
@@ -136,7 +134,6 @@ color:var(--color-grey-36, #5C5C5C);
 opacity: 0.9;
 border: 1px solid rgba(112, 112, 112, 0.5);
 border-radius: 10px;
-
 flex: none;
 order: 0;
 flex-grow: 0;
@@ -173,27 +170,22 @@ border:1px solid #AFBF74;
 position: absolute;
 display:flex;
 flex-direction:column;
+justify-content: center;
 align-items:center;
 width: 506px;
 height: 143px;
-gap:44px;
+gap:24px;
 }
 
 .roles-buttons p{
-width: 115px;
-height: 26px;
 font-family: 'Anek Bangla';
 font-style: normal;
 font-weight: 500;
-font-size: 15px;
-line-height: 26px;
-/* identical to box height, or 173% */
-/* color: #4F6E78; */
-color:red;
-flex: none;
+color: #4F6E78;
+align-self: flex-start;
+text-align:left;
 order: 0;
 flex-grow: 0;
-position:flex-start;
 }
 
 .role-btn{
@@ -205,22 +197,65 @@ justify-content: center;
 align-items: center;
 padding: 0px;
 gap: 10px;
-
 width: 230px;
 height: 62px;
-
-/* background: rgba(0, 96, 136, 0.1); */
-border: 1px solid rgba(0, 96, 136, 0.53);
 border-radius: 5px;
-
 flex: none;
 order: 0;
 flex-grow: 0;
 }
+
 .roles-buttons-wrapper{
 position:relative;
 display:flex;
 flex-direction:row;
 justify-content:center;
 gap:44px;
+}
+
+.current-role-banner {
+  position: relative; 
+  margin-bottom: 20px;
+  justify-content: center;
+  padding: 24px 7px;
+  gap: 35px;
+  width: 505px;
+  height: 74px;
+  background: rgba(79, 110, 120, 0.1);
+  border: 1px solid rgba(79, 110, 120, 0.5);
+  border-radius: 10px;
+}
+
+.current-role-banner{
+display: flex;
+flex-direction:row;
+justify-content: center;
+align-items: center;
+}
+
+.roles-modal-content p{
+    padding: 0px 0px 0px 4px;
+font-family: 'Anek Bangla';
+font-style: normal;
+font-weight: 500;
+color: #4F6E78;
+align-self: flex-start;
+text-align:left;
+}
+
+.current-role-banner span{
+display: flex;
+gap:45px
+}
+
+.status{
+width:115px;
+margin-top: auto;
+align-items: center;
+border:none;
+background: none;
+}
+
+.status svg{
+    vertical-align: middle;
 }

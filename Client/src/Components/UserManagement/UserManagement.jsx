@@ -5,7 +5,7 @@ import { fetchAllEmployees } from '../../api/Employee.js'
 import { getStoredUserRole } from "../../utils/roleUtils";
 import useInitialColors from "../../hooks/useInitialColors";
 import { resolveRole } from "../../utils/roleUtils.js";
-import { SlidersHorizontal } from "lucide-react"
+import { SlidersHorizontal, SearchIcon } from "lucide-react"
 import {
   FaUser,
   FaUsers,
@@ -19,6 +19,7 @@ import {
 import "./UserManagement.css";
 import usePagination from "../../hooks/useEmpPagination.js";
 import useDropdown from "../../hooks/useDropdown";
+import FilterTable from "../FilterTable.jsx";
 
 // Status constants
 const USER_STATUS = {
@@ -57,7 +58,7 @@ const UserManagement = () => {
         console.log(localStorage)
         return {
           ...user,
-          branch: `${employee.city}` || "Uknown Branch",
+          branch: `${employee.branch}` || "Uknown Branch",
           name: `${employee.name} ${employee.surname}` || user.email,
           role: user.role || roles.find((r) => Number(r.roleId) === Number(user.roleId))?.name || "Unknown Role",
           status: "Active",
@@ -84,7 +85,13 @@ const UserManagement = () => {
   const hasAdminRights = (role) => ["Admin", "SuperUser"].includes(role || "");
 
   const handleShowActions = (userIndex) => {
+    const currentEmployee=localStorage.getItem("currentEmployee");
+    const employee=JSON.parse(currentEmployee);
     setSelectedUserIndex(userIndex);
+
+    const user = users[userIndex];
+  if(user?.email===employee?.email)
+    setSelectedUserIndex(null)
   };
 
   const handleCloseActions = () => {
@@ -99,7 +106,6 @@ const UserManagement = () => {
     const user = users[selectedUserIndex];
     if (user) {
       setEditRole(user.roleId ?? "");
-      setEditStatus(Number(user.statusValue));
       setShowEditEmployeeModal(true);
       handleCloseActions();
     }
@@ -168,7 +174,16 @@ const UserManagement = () => {
       return false;
     }
   };
+  const handleFilter=(value)=>{
+  setActiveFilter(val)
 
+  if(!val){
+    setFilteredU(users)
+    return;
+  }
+  const filteredResult=users.filter(user=>user.branch)
+  setFilteredU(filteredResult)
+  }
   const {
     activePage,
     setActivePage,
@@ -181,7 +196,7 @@ const UserManagement = () => {
   } = usePagination(users);
 
   const { dropdownOpen, toggleDropdown, closeDropdown } = useDropdown();
-
+  const [filteredU,setFilteredU]=useState([])
   const filteredUsers = users.filter((user) => {
     const searchLower = searchTerm.toLowerCase();
     return (
@@ -190,6 +205,8 @@ const UserManagement = () => {
       (user.role || "").toLowerCase().includes(searchLower)
     );
   });
+
+
 
   if (isLoading)
     return (
@@ -212,14 +229,17 @@ const UserManagement = () => {
     <div className="menu-background">
       {/* Removed MenuBar here */}
       <div className="top-bar">
-        <FaUsers size={25} />
         <h2>User Management</h2>
         <button
           className="filter-btn"
         >
           <SlidersHorizontal size={20} />
-
-          Filter
+          {/* Filter */}
+          <FilterTable
+          data={users}
+          filterKey="branch"
+          onFilter={handleFilter}
+          />
         </button>
         <div className="search-bar" >
           <input
@@ -228,6 +248,8 @@ const UserManagement = () => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
+
+        <SearchIcon/>
         </div>
       </div>
 
