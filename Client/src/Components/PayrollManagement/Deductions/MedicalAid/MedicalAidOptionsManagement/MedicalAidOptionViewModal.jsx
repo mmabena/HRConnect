@@ -111,10 +111,11 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
           monthlyMsaContributionPrincipal: changedFields.monthlyMsaContributionPrincipal ?? option.monthlyMsaContributionPrincipal,
           monthlyMsaContributionAdult: changedFields.monthlyMsaContributionAdult ?? option.monthlyMsaContributionAdult,
           monthlyMsaContributionChild: changedFields.monthlyMsaContributionChild ?? option.monthlyMsaContributionChild,
-          totalMonthlyContributionsPrincipal: calculatePrincipalTotal(changedFields.monthlyRiskContributionPrincipal ?? option.monthlyRiskContributionPrincipal, changedFields.monthlyMsaContributionPrincipal ?? option.monthlyMsaContributionPrincipal ),
-          totalMonthlyContributionsAdult: calculateAdultTotal(changedFields.monthlyRiskContributionAdult ?? option.monthlyRiskContributionAdult, changedFields.monthlyMsaContributionAdult ?? option.monthlyMsaContributionAdult ) ,
-          totalMonthlyContributionsChild: calculateChildTotal(changedFields.monthlyRiskContributionChild ?? option.monthlyRiskContributionChild, changedFields.monthlyMsaContributionChild ?? option.monthlyMsaContributionChild ),
-          totalMonthlyContributionsChild2: calculateChild2Total(changedFields.monthlyRiskContributionChild2 ?? option.monthlyRiskContributionChild2, (changedFields.monthlyMsaContributionChild2 ?? option.monthlyMsaContributionChild2) ?? 0 )
+          totalMonthlyContributionsPrincipal: (changedFields.monthlyRiskContributionPrincipal ?? option.monthlyRiskContributionPrincipal) + (changedFields.monthlyMsaContributionPrincipal ?? option.monthlyMsaContributionPrincipal ),
+          totalMonthlyContributionsAdult: (changedFields.monthlyRiskContributionAdult ?? option.monthlyRiskContributionAdult) + ( changedFields.monthlyMsaContributionAdult ?? option.monthlyMsaContributionAdult ) ,
+          totalMonthlyContributionsChild: (changedFields.monthlyRiskContributionChild ?? option.monthlyRiskContributionChild) + ( changedFields.monthlyMsaContributionChild ?? option.monthlyMsaContributionChild ),
+          totalMonthlyContributionsChild2: ((changedFields.monthlyRiskContributionChild2 ?? option.monthlyRiskContributionChild2) + ( (changedFields.monthlyMsaContributionChild2 ?? option.monthlyMsaContributionChild2) )) === 0 ?
+              null : ((changedFields.monthlyRiskContributionChild2 ?? option.monthlyRiskContributionChild2) + ( (changedFields.monthlyMsaContributionChild2 ?? option.monthlyMsaContributionChild2) ))
         };
       });
     }, [edits, currentGroup]);
@@ -125,14 +126,21 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
       try{
         const payload = compilePayload();
         if(onSave && payload){
+          //Reset local state BEFORE handing off to parent
+          setIsEditing(false);
+          setEdits(new Map());
+          setTouchedItems(new Set());
+          setIsDirty(false);
+
+          //parent handles modal close, toast, and data refresh
           await onSave(currentGroup.categoryId, payload);
         }
-        setIsEditing(false);
-        setEdits(new Map());
-        setTouchedItems(new Set());
-        setIsDirty(false);
+
       }
       catch (error) {
+        // Re-enable editing if save fails
+        setIsEditing(false);
+        setIsSaving(false);
         console.error("Error saving changes:", error);
       }
       finally{
