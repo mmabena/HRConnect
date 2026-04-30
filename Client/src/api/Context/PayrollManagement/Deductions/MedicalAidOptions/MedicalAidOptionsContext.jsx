@@ -249,18 +249,18 @@ export const MedicalAidOptionsProvider = ({children}) => {
       setError(null);
 
       // Validate Input
-      const sanitizedId = MedicalAidOptionsValidator.sanitizeInput(categoryId);
-      const sanitizedRequest = MedicalAidOptionsValidator.sanitizeJSON(request);
-      const sanitizedCategoryId = MedicalAidOptionsValidator.validateCategoryId(sanitizedId);
+      //const sanitizedId = MedicalAidOptionsValidator.sanitizeInput(categoryId);
+      //const sanitizedRequest = MedicalAidOptionsValidator.sanitizeJSON(request);
+      //const sanitizedCategoryId = MedicalAidOptionsValidator.validateCategoryId(sanitizedId);
 
-      if(!sanitizedRequest.isValid && !sanitizedCategoryId.isValid){
-          throw new Error(sanitizedRequest.error.toString() + '\n' + sanitizedCategoryId.error.toString());
-      }
+      //if(!sanitizedRequest.isValid && !sanitizedCategoryId.isValid){
+      //    throw new Error(sanitizedRequest.error.toString() + '\n' + sanitizedCategoryId.error.toString());
+      //}
 
-      const data = medicalOptionServices.updateCategoryById(sanitizedId, sanitizedRequest.data);
+      const data = medicalOptionServices.updateCategoryById(categoryId, request);
       const response = Array.isArray(data) ? data : Array.isArray(data.data) ? data.data : [];
       //setMedicalAidOptionsCategories(response);
-        return response;
+      return response;
 
     }
     catch(error){
@@ -278,15 +278,15 @@ export const MedicalAidOptionsProvider = ({children}) => {
       setError(null);
 
       // Validate Input
-      const sanitizedId = MedicalAidOptionsValidator.sanitizeInput(categoryId);
-      const sanitizedRequest = MedicalAidOptionsValidator.sanitizeJSON(request);
-      const sanitizedCategoryId = MedicalAidOptionsValidator.validateCategoryId(sanitizedId);
+      //const sanitizedId = MedicalAidOptionsValidator.sanitizeInput(categoryId);
+      //const sanitizedRequest = MedicalAidOptionsValidator.sanitizeJSON(request);
+      //const sanitizedCategoryId = MedicalAidOptionsValidator.validateCategoryId(sanitizedId);
 
-      if(!sanitizedRequest.isValid && !sanitizedCategoryId.isValid){
-          throw new Error(sanitizedRequest.error.toString() + '\n' + sanitizedCategoryId.error.toString());
-      }
+      //if(!sanitizedRequest.isValid && !sanitizedCategoryId.isValid){
+      //    throw new Error(sanitizedRequest.error.toString() + '\n' + sanitizedCategoryId.error.toString());
+      //}
 
-      const data = medicalOptionServices.updateBulkMedicalOptionsByCategoryId(sanitizedId, sanitizedRequest.data);
+      const data = medicalOptionServices.updateBulkMedicalOptionsByCategoryId(categoryId, request);
       const response = Array.isArray(data) ? data : Array.isArray(data.data) ? data.data : [];
       // use effect to reflect changes
         return response;

@@ -239,11 +239,24 @@ const MedicalAidOptionsManagement = () => {
                 categories={medicalOptionsCategory}
                 onSave={async (categoryId, payload) => {
                     try {
-                        await updateBulkMedicalOptionsByCategoryId(categoryId, payload);
-                        toast.success('Options updated successfully');
-                        handleCloseModal();
-                        const refreshed = await getMedicalOptionsSnapshot();
-                        setMedicalOptions(refreshed);
+                        console.log("Payload Data :_____");
+                        console.log(payload);
+                        console.log("Category ID :_____");
+                        console.log(categoryId);
+                        let request = await updateBulkMedicalOptionsByCategoryId(categoryId, payload);
+                        console.log("-----------=: Request :=------------");
+                        console.log(request);
+                        if(request.status === 200 || request.status === 204 || request.status === 201){
+                            toast.success('Options updated successfully');
+                            handleCloseModal();
+                            const refreshed = await getMedicalOptionsSnapshot();
+                            setMedicalOptions(refreshed);
+                        }
+                        else{
+                            toast.error('Failed to update options');
+                            console.error('Failed to update options');
+                        }
+
                     } catch (err) {
                         toast.error('Failed to update options');
                         console.error(err);

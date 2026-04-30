@@ -1532,7 +1532,7 @@
           // Get the corresponding database option for THIS payload item
           var dbOption = dbData.FirstOrDefault(o => o.MedicalOptionId == dto.MedicalOptionId);
 
-          if (dbOption != null && !ValidateContributionValuesWithContext(dto, dbOption))
+          if (dbOption != null && !ValidateContributionValuesWithContext(dto, dbOption) )
           {
             result.IsValid = false;
             result.ErrorMessage = $"Invalid contribution values for option {dto.MedicalOptionId} ({dbOption.MedicalOptionName}) in variant '{variantName}'";

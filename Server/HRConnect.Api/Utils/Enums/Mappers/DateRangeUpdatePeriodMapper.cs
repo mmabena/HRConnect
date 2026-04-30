@@ -113,7 +113,7 @@
       return period switch
       {
         DateRangeUpdatePeriod.CategoryOptionsUpdatePeriod => (
-          new DateTime(y, 11, 1, 0, 0, 01), // Nov 01 00:00:01.001 - Prod
+          new DateTime(y, 01, 1, 0, 0, 01), // Nov 01 00:00:01.001 - Prod
           new DateTime(y, 12, 31, 23, 59, 59) // Dec 31 23:59:59.999 - Prod
         ),
         _ => throw new ArgumentOutOfRangeException(nameof(period),

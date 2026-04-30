@@ -97,25 +97,26 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
 
     const compilePayload = useCallback(() => {
       if(!currentGroup) return null;
-      const  editedOptions = [];
-      edits.forEach((changedFields, optionId) => {
-        const originalOption = currentGroup.options.find(
-          (o) => o.medicalOptionId === optionId
-        );
-        if(originalOption){
-          editedOptions.push({
-            medicalOptionId: optionId,
-            medicalOptionName: originalOption.medicalOptionName,
-            changedFields,
-          });
-        }
-      });
 
-     return {
-       categoryId: currentGroup.categoryId,
-       categoryName: currentGroup.categoryName,
-       options: editedOptions
-     };
+      return currentGroup.options.map((option) => {
+        const changedFields = edits.get(option.medicalOptionId) ?? {};
+        return {
+          medicalOptionId: option.medicalOptionId,
+          salaryBracketMin: changedFields.salaryBracketMin ?? option.salaryBracketMin,
+          salaryBracketMax: changedFields.salaryBracketMax ?? option.salaryBracketMax,
+          monthlyRiskContributionPrincipal: changedFields.monthlyRiskContributionPrincipal ?? option.monthlyRiskContributionPrincipal,
+          monthlyRiskContributionAdult: changedFields.monthlyRiskContributionAdult ?? option.monthlyRiskContributionAdult,
+          monthlyRiskContributionChild: changedFields.monthlyRiskContributionChild ?? option.monthlyRiskContributionChild,
+          monthlyRiskContributionChild2: changedFields.monthlyRiskContributionChild2 ?? option.monthlyRiskContributionChild2,
+          monthlyMsaContributionPrincipal: changedFields.monthlyMsaContributionPrincipal ?? option.monthlyMsaContributionPrincipal,
+          monthlyMsaContributionAdult: changedFields.monthlyMsaContributionAdult ?? option.monthlyMsaContributionAdult,
+          monthlyMsaContributionChild: changedFields.monthlyMsaContributionChild ?? option.monthlyMsaContributionChild,
+          totalMonthlyContributionsPrincipal: calculatePrincipalTotal(changedFields.monthlyRiskContributionPrincipal ?? option.monthlyRiskContributionPrincipal, changedFields.monthlyMsaContributionPrincipal ?? option.monthlyMsaContributionPrincipal ),
+          totalMonthlyContributionsAdult: calculateAdultTotal(changedFields.monthlyRiskContributionAdult ?? option.monthlyRiskContributionAdult, changedFields.monthlyMsaContributionAdult ?? option.monthlyMsaContributionAdult ) ,
+          totalMonthlyContributionsChild: calculateChildTotal(changedFields.monthlyRiskContributionChild ?? option.monthlyRiskContributionChild, changedFields.monthlyMsaContributionChild ?? option.monthlyMsaContributionChild ),
+          totalMonthlyContributionsChild2: calculateChild2Total(changedFields.monthlyRiskContributionChild2 ?? option.monthlyRiskContributionChild2, (changedFields.monthlyMsaContributionChild2 ?? option.monthlyMsaContributionChild2) ?? 0 )
+        };
+      });
     }, [edits, currentGroup]);
 
     const handleSave = useCallback(async () => {
