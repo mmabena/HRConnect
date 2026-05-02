@@ -40,6 +40,9 @@ const UserManagement = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [loggedInUser, setLoggedInUser] = useState(null);
 
+  const [activeFilter,setActiveFilter]=useState(null);
+  const [filteredUsers,setFilteredUsers]=useState([])
+  const [isFilterOpen,setIsFilterOpen]=useState(false)
   const { COLORS } = useInitialColors();
 
   const loadData = async () => {
@@ -52,8 +55,6 @@ const UserManagement = () => {
       const mappedUsers = (users || []).map((user) => {
 
         const employee = employees.find(e => e.email == user.email)
-        console.log(`user email ${user.email}`)
-        console.log(employee)
         console.log('local storage itself');
         console.log(localStorage)
         return {
@@ -67,6 +68,7 @@ const UserManagement = () => {
       });
 
       setUsers(mappedUsers);
+      setFilteredUsers(mappedUsers);
       setLoggedInUser(mappedUsers[0] || null);
       setCurrentUserRole(getStoredUserRole().roleName || "User");
 
@@ -174,15 +176,15 @@ const UserManagement = () => {
       return false;
     }
   };
-  const handleFilter=(value)=>{
+  const handleFilter=(val)=>{
   setActiveFilter(val)
 
   if(!val){
-    setFilteredU(users)
+    setFilteredUsers(users)
     return;
   }
-  const filteredResult=users.filter(user=>user.branch)
-  setFilteredU(filteredResult)
+  const filteredResult=users.filter(user=>user.branch===val)
+  setFilteredUsers(filteredResult)
   }
   const {
     activePage,
@@ -196,8 +198,7 @@ const UserManagement = () => {
   } = usePagination(users);
 
   const { dropdownOpen, toggleDropdown, closeDropdown } = useDropdown();
-  const [filteredU,setFilteredU]=useState([])
-  const filteredUsers = users.filter((user) => {
+  const filterUsers = users.filter((user) => {
     const searchLower = searchTerm.toLowerCase();
     return (
       (user.name || "").toLowerCase().includes(searchLower) ||
@@ -205,8 +206,6 @@ const UserManagement = () => {
       (user.role || "").toLowerCase().includes(searchLower)
     );
   });
-
-
 
   if (isLoading)
     return (
@@ -232,13 +231,16 @@ const UserManagement = () => {
         <h2>User Management</h2>
         <button
           className="filter-btn"
+          onClick={()=>setIsFilterOpen(prev=>!prev)}
         >
           <SlidersHorizontal size={20} />
-          {/* Filter */}
+          Filter
           <FilterTable
           data={users}
           filterKey="branch"
           onFilter={handleFilter}
+          isOpen={isFilterOpen}
+          onClose={()=>setIsFilterOpen(false)}
           />
         </button>
         <div className="search-bar" >
