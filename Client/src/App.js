@@ -33,6 +33,7 @@ import PersonalInformation from "./Components/PersonalInformation.jsx";
 import NotificationPage from "./Pages/NotificationPage/NotificationPage.jsx";
 import api from "../src/api/api.js";
 import { resolveRole } from "./utils/roleUtils.js";
+import SalaryBenchmark from "./Pages/SalaryBenchmark/SalaryBenchmark.jsx";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
@@ -235,6 +236,7 @@ function App() {
           <Route path="/personal" element={<PersonalInformation />} />
           <Route path="/payslip" element= {<Payslip/>}/>
           <Route path="/notifications" element={<NotificationPage />} />
+          <Route path="/salarybenchmark" element={<SalaryBenchmark />} />
         </Routes>
       </div>
     </div>

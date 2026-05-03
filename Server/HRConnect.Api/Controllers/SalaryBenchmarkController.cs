@@ -59,6 +59,11 @@ namespace HRConnect.Api.Controllers
       return CreatedAtAction(nameof(GetAll), new { id = createdBenchmark.Id }, createdBenchmark);
     }
 
+    /// <summary>
+    /// This endpoint allows the admin to view all salary benchmarks entered into the system,
+    ///  sorted by most recent.
+    /// </summary>
+    /// <returns></returns>
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -66,6 +71,12 @@ namespace HRConnect.Api.Controllers
       return Ok(benchmarks);
     }
 
+    /// <summary>
+    /// This endpoint allows the admin to update an existing salary benchmark.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="request"></param>
+    /// <returns></returns>
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, [FromBody] SalaryBenchmarkUpdateDto request)
     {
@@ -90,6 +101,29 @@ namespace HRConnect.Api.Controllers
         return NotFound($"Salary benchmark with id {id} was not found.");
       }
 
+      return Ok(result);
+    }
+
+    /// <summary>
+    /// This endpoint allows the admin to view all the employees
+    /// with their salary benchmark data.
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("employees")]
+    public async Task<IActionResult> GetEmployeeSalaryBenchmarksAsync()
+    {
+      var result = await _service.GetEmployeeSalaryBenchmarksAsync();
+      return Ok(result);
+    }
+
+    /// <summary>
+    /// Views the summary of the salary benchmarks
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("summary")]
+    public async Task<IActionResult> GetSummary()
+    {
+      var result = await _service.GetSummaryAsync();
       return Ok(result);
     }
   }

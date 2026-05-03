@@ -8,7 +8,7 @@ namespace HRConnect.Api.DTOs.Benchmarking
 
   public class SalaryBenchmarkRequestDto
   {
-    public int InternalJobGradeId { get; set; }
+    public int PositionId { get; set; }
     public string Location { get; set; } = string.Empty;
     public decimal Salary25th { get; set; }
     public decimal Salary50th { get; set; }

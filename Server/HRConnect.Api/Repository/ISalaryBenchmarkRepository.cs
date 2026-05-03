@@ -5,6 +5,7 @@ namespace HRConnect.Api.Repository
   using System.Linq;
   using System.Threading.Tasks;
   using HRConnect.Api.Models.Benchmarking;
+  using HRConnect.Api.DTOs.Benchmarking;
 
   public interface ISalaryBenchmarkRepository
   {
@@ -12,5 +13,8 @@ namespace HRConnect.Api.Repository
     Task<IEnumerable<SalaryBenchmark>> GetAllAsync();
     Task<SalaryBenchmark> GetByIdAsync(int Id);
     Task<SalaryBenchmark> UpdateAsync(SalaryBenchmark benchmark);
+    Task<IEnumerable<EmployeeSalaryBenchmarkDto>> GetEmployeeSalaryBenchmarksAsync();
+    Task<BenchmarkSummaryDto> GetSummaryAsync();
+
   }
 }

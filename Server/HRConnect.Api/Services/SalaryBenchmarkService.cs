@@ -25,7 +25,7 @@ namespace HRConnect.Api.Services
     {
       var benchmark = new SalaryBenchmark
       {
-        InternalJobGradeId = request.InternalJobGradeId,
+        PositionId = request.PositionId,
         Location = request.Location,
         Salary25th = request.Salary25th,
         Salary50th = request.Salary50th,
@@ -48,8 +48,9 @@ namespace HRConnect.Api.Services
     private static SalaryBenchmarkResponseDto MapToResponse(SalaryBenchmark benchmark) => new()
     {
       Id = benchmark.Id,
-      InternalJobGradeId = benchmark.InternalJobGradeId,
-      JobGradeName = benchmark.JobGrade.Name,
+      PositionId = benchmark.PositionId,
+      PositionTitle = benchmark.Position?.PositionTitle ?? string.Empty,
+      JobGradeName = benchmark.Position?.JobGrade?.Name ?? string.Empty,
       Location = benchmark.Location,
       Salary25th = benchmark.Salary25th,
       Salary50th = benchmark.Salary50th,
@@ -59,7 +60,7 @@ namespace HRConnect.Api.Services
       CreatedDate = benchmark.CreatedDate
     };
 
-    public async Task<SalaryBenchmarkResponseDto>UpdateAsync(int id, SalaryBenchmarkUpdateDto request)
+    public async Task<SalaryBenchmarkResponseDto> UpdateAsync(int id, SalaryBenchmarkUpdateDto request)
     {
       var exisiting = await _repository.GetByIdAsync(id);
       bool recordNotFound = exisiting == null;
@@ -75,6 +76,16 @@ namespace HRConnect.Api.Services
 
       var updated = await _repository.UpdateAsync(exisiting);
       return MapToResponse(updated);
+    }
+
+    public async Task<IEnumerable<EmployeeSalaryBenchmarkDto>> GetEmployeeSalaryBenchmarksAsync()
+    {
+      return await _repository.GetEmployeeSalaryBenchmarksAsync();
+    }
+
+    public async Task<BenchmarkSummaryDto> GetSummaryAsync()
+    {
+      return await _repository.GetSummaryAsync();
     }
   }
 }

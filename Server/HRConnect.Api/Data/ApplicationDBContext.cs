@@ -272,9 +272,9 @@ namespace HRConnect.Api.Data
               .IsRequired()
               .HasMaxLength(100);
 
-          entity.HasOne(e => e.JobGrade)
+          entity.HasOne(e => e.Position)
               .WithMany()
-              .HasForeignKey(e => e.InternalJobGradeId)
+              .HasForeignKey(e => e.PositionId)
               .OnDelete(DeleteBehavior.Restrict);
       });
 
