@@ -9,7 +9,7 @@ namespace HRConnect.Api.Interfaces.Notification
     Task MarkBatchAsReadAsync(List<string> employeeIds, NotificationType type);
     Task MarkAsReadAsync(Notification notification);
     Task<bool> Save();
-    Task<Notification> TryAndAquireAsync(string idempotencyKey);
+    Task<Notification?> TryAndAquireAsync(string idempotencyKey);
     Task<IEnumerable<NotificationDto>> GetAllUnreadAsync(string? employeeId);
     Task<IEnumerable<NotificationDto>> GetAllEmployeeNotificationsBySeverityAsync(string employeeId, NotificationSeverity severity);
     Task<IEnumerable<NotificationDto>> GetAllEmployeeNotificationsByTypeAsync(NotificationType type, string employeeId);

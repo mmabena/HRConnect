@@ -59,7 +59,7 @@ namespace HRConnect.Api.Services
       bool isPesistent = NotificationsRules.ShouldPersist(notification.Severity);
       if (isPesistent)
       {
-        Notification exists = await _notificationRepository.TryAndAquireAsync(notification.IdempotencyKey);
+        Notification? exists = await _notificationRepository.TryAndAquireAsync(notification.IdempotencyKey);
         if (exists != null) { return; }
       }
       //For other general notifications or it does not exist
@@ -77,7 +77,7 @@ namespace HRConnect.Api.Services
         //Find if it already exists 
         BuildIdempotencyKey(notification);
         // var existing = await _notificationRepository.ExistsAsync(notification.Type, notification.EmployeeId, notification.Message, notification.Severity);
-        Notification exists = await _notificationRepository.TryAndAquireAsync(notification.IdempotencyKey);
+        Notification? exists = await _notificationRepository.TryAndAquireAsync(notification.IdempotencyKey);
 
         if (exists != null)
         {
