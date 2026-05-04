@@ -1,4 +1,4 @@
-﻿import {useEffect, useState} from 'react';
+﻿import {useEffect, useState, useCallback} from 'react';
 import {
     useMedicalAidOptionContext
 } from "../../../../../api/Context/PayrollManagement/Deductions/MedicalAidOptions/MedicalAidOptionsContext";
@@ -222,7 +222,35 @@ const MedicalAidOptionsManagement = () => {
     const handleRowClick = (row) => {
         handleCloseModal(row);
     };
-    
+   
+    const handleMedicalUpdateSave = useCallback( async (categoryId, payload) => {
+      let statusFlag = false;
+      try{
+        let requestPayload = await updateBulkMedicalOptionsByCategoryId(categoryId, payload);
+        console.log("||--------------------------------< Debug : Update API Response Dump Test From Medical Aid Management Component >-----------------------------------||"); 
+	    console.log("<---------Response returned :-----------> ");
+	    console.log("Request Metadata : ${request}");
+
+        /*if([200,204,201].includes(request.status)){
+          handleCloseModal();
+	  const refreshed = await getMedicalOptionsSnapshot();
+	  setMedicalOptions(refreshed);
+	  statusFlag = true;
+	  return (request, statusFlag);	*/
+	        //}
+	   /* else{
+          toast.error('Failed to update options');
+	  //return (request,statusFlag);
+
+	    }*/
+        console.log(requestPayload);
+      }
+      catch (error){
+        toast.error('Failed to update options: ${error}');
+	console.error('Error updating options : ', error);
+     
+      }
+    }, [handleCloseModal, getMedicalOptionsSnapshot, setMedicalOptions]);
     
     return (
       <div className="menu-background">
@@ -237,31 +265,7 @@ const MedicalAidOptionsManagement = () => {
                 title="Medical Aid Options"
                 data={modalData}
                 categories={medicalOptionsCategory}
-                onSave={async (categoryId, payload) => {
-                    try {
-                        console.log("Payload Data :_____");
-                        console.log(payload);
-                        console.log("Category ID :_____");
-                        console.log(categoryId);
-                        let request = await updateBulkMedicalOptionsByCategoryId(categoryId, payload);
-                        console.log("-----------=: Request :=------------");
-                        console.log(request);
-                        if(request.status === 200 || request.status === 204 || request.status === 201){
-                            toast.success('Options updated successfully');
-                            handleCloseModal();
-                            const refreshed = await getMedicalOptionsSnapshot();
-                            setMedicalOptions(refreshed);
-                        }
-                        else{
-                            toast.error('Failed to update options');
-                            console.error('Failed to update options');
-                        }
-
-                    } catch (err) {
-                        toast.error('Failed to update options');
-                        console.error(err);
-                    }
-                }}
+                onSave={handleMedicalUpdateSave}
             />
 
     

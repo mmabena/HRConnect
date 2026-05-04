@@ -273,7 +273,7 @@ namespace HRConnect.Api.Controllers
         await _medicalOptionService.BulkUpdateMedicalOptionsByCategoryAsync(optionId,
           bulkUpdateDto);
       if (result == null || !result.Any()) return NotFound();
-      return NoContent();
+      return Ok(bulkUpdateDto);
     }
     /// <summary>
     /// Updates an existing medical option category.

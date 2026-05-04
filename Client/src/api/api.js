@@ -22,9 +22,12 @@ api.interceptors.request.use(
 );
 
 api.interceptors.response.use(
-  response => response,
-  error => {
-    console.log("Interceptor caught error:", error.response?.status);
+  (response) => {
+    // Return full response, avoiding instances of destructuring data on 204	  
+    return response;
+  },
+  (error) => {
+    console.log("Interceptor caught error:", (error || error.response?.status));
     return Promise.reject(error);
   }
 );

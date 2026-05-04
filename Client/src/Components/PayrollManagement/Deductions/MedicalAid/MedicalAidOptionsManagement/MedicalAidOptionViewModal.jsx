@@ -131,11 +131,17 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
           setEdits(new Map());
           setTouchedItems(new Set());
           setIsDirty(false);
-
+          // logginng the payload before sending over api
+          console.log("||--------------------< Payload Dump Test Start >--------------------||");
+          console.log(payload);
+          console.log("||--------------------< Payload Dump Test End >--------------------||");
           //parent handles modal close, toast, and data refresh
-          await onSave(currentGroup.categoryId, payload);
+          let updateRequest = await onSave(currentGroup.categoryId, payload);
+          console.log(">u<| <----------------------------------+ Status Update On API Call from ModalView Component  +----------------------------------> |>u<");
+	  console.log("<-----* Response returned  *----->");
+	  console.log(updateRequest);
+	  console.log("-----------|>u<| Dump Complete |>u<| ----------");
         }
-
       }
       catch (error) {
         // Re-enable editing if save fails
