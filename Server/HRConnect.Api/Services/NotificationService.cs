@@ -8,7 +8,6 @@ namespace HRConnect.Api.Services
   using System.Text;
   using System.Security.Cryptography;
   using HRConnect.Api.Mappers.Notification;
-  using SQLitePCL;
 
   public class NotificationService : INotificationService
   {
@@ -21,13 +20,13 @@ namespace HRConnect.Api.Services
     }
     public async Task<IEnumerable<NotificationDto>> GetAllEmployeeNotificationsByTypeAsync(NotificationType type, string employeeId)
     {
-      var notifications = await _notificationRepository.GetAllEmployeeNotificationsByTypeAsync(type, employeeId);
+      IEnumerable<NotificationDto> notifications = await _notificationRepository.GetAllEmployeeNotificationsByTypeAsync(type, employeeId);
 
       return notifications;
     }
     public async Task<IEnumerable<NotificationDto>> GetAllEmployeeNotificationsBySeverityAsync(NotificationSeverity severity, string employeeId)
     {
-      var notifications = await _notificationRepository.GetAllEmployeeNotificationsBySeverityAsync(employeeId, severity);
+      IEnumerable<NotificationDto> notifications = await _notificationRepository.GetAllEmployeeNotificationsBySeverityAsync(employeeId, severity);
 
       return notifications;
     }
@@ -37,10 +36,10 @@ namespace HRConnect.Api.Services
     }
     public async Task MarkNotificationReadByTypeAsync(NotificationType type, string employeeId)
     {
-      var notification = await _notificationRepository
+      IEnumerable<NotificationDto> notification = await _notificationRepository
       .GetAllEmployeeNotificationsByTypeAsync(type, employeeId);
 
-      foreach (var n in notification)
+      foreach (NotificationDto n in notification)
       {
         n.IsRead = true;
         BuildIdempotencyKey(n.ToNotificationFromDto());
@@ -60,9 +59,8 @@ namespace HRConnect.Api.Services
       bool isPesistent = NotificationsRules.ShouldPersist(notification.Severity);
       if (isPesistent)
       {
-        var exists = await _notificationRepository.TryAndAquireAsync(notification.IdempotencyKey);
-        if (exists != null)
-          return;
+        Notification exists = await _notificationRepository.TryAndAquireAsync(notification.IdempotencyKey);
+        if (exists != null) { return; }
       }
       //For other general notifications or it does not exist
       _ = await _notificationRepository.AddNotificationAsync(notification);
@@ -79,7 +77,7 @@ namespace HRConnect.Api.Services
         //Find if it already exists 
         BuildIdempotencyKey(notification);
         // var existing = await _notificationRepository.ExistsAsync(notification.Type, notification.EmployeeId, notification.Message, notification.Severity);
-        var exists = await _notificationRepository.TryAndAquireAsync(notification.IdempotencyKey);
+        Notification exists = await _notificationRepository.TryAndAquireAsync(notification.IdempotencyKey);
 
         if (exists != null)
         {
@@ -96,10 +94,10 @@ namespace HRConnect.Api.Services
     }
     private void BuildIdempotencyKey(Notification request)
     {
-      var hashSource = $"{request.Type}:{request.EmployeeId}:{request.DeliveryChannel}:{request.Message.Trim()}";
-      using var sha = SHA256.Create();
-      var bytes = Encoding.UTF8.GetBytes(hashSource);
-      var hash = SHA256.HashData(bytes);
+      string hashSource = $"{request.Type}:{request.EmployeeId}:{request.DeliveryChannel}:{request.Message.Trim()}";
+      using SHA256 sha = SHA256.Create();
+      byte[] bytes = Encoding.UTF8.GetBytes(hashSource);
+      byte[] hash = SHA256.HashData(bytes);
       request.IdempotencyKey = Convert.ToHexString(hash);
     }
     public async Task TryCreateAndDispatch(Notification notification)

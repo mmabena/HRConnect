@@ -41,7 +41,7 @@ letter-spacing: 0.02em;
 color: #355867;
 min-height: 55px;
 }
-
+  
 .search-bar{
   background-color:#4F6E781A;
   border-radius: 8px;
@@ -49,6 +49,7 @@ min-height: 55px;
   height: 56px;
   max-width: 720px;
   margin-top:15px;
+  margin-right:-15px;
 }
 
 .search-bar input::placeholder {
@@ -69,7 +70,9 @@ border:none;
 }
 
 .search-bar svg{
-
+margin-top:5px;
+/* padding-top:5px; */
+margin-right: 10px;
 }
 .heading {
   background-color:var(--primary-color);
@@ -129,3 +132,4 @@ margin-left:auto;
 .pagination-container{
     margin-top: auto;
 }
+

@@ -43,6 +43,8 @@ const UserManagement = () => {
   const [activeFilter,setActiveFilter]=useState(null);
   const [filteredUsers,setFilteredUsers]=useState([])
   const [isFilterOpen,setIsFilterOpen]=useState(false)
+  const [filters,setFilters]=useState(null)//keyword we're using for filtering
+
   const { COLORS } = useInitialColors();
 
   const loadData = async () => {
@@ -54,7 +56,7 @@ const UserManagement = () => {
       setRoles(roles || []);
       const mappedUsers = (users || []).map((user) => {
 
-        const employee = employees.find(e => e.email == user.email)
+        const employee = employees.find(e => e.email === user.email)
         console.log('local storage itself');
         console.log(localStorage)
         return {
@@ -79,11 +81,38 @@ const UserManagement = () => {
       setIsLoading(false);
     }
   };
-
   useEffect(() => {
-    loadData();
-  }, []);
+      loadData();
+    }, []);
 
+    //Transform loaded data for a single layer of filter and searching
+    const transformData=(loadedData,filter,search)=>{
+        let result=[...loadedData]
+
+        //Apply filters before searching 
+        //returns all the keys of the object passed in 
+            if(filter)
+                result=result.filter(i=>i.branch===filter)
+        
+        
+        //Search the filtered results. If no filter is applied Search should 
+        //search the original loadedData
+        if(search.trim() !== ""){
+        const searchLower = searchTerm.toLowerCase();
+        result=result.filter(item=>
+            item.name.toLowerCase().includes(searchLower) ||
+            item.email.toLowerCase().includes(searchLower)
+            );
+        }
+        return result;
+    }
+
+    useEffect(()=>{
+        const finalResult=transformData(users,filters,searchTerm);
+        setFilteredUsers(finalResult);
+    },[users,filters,searchTerm])
+
+    
   const hasAdminRights = (role) => ["Admin", "SuperUser"].includes(role || "");
 
   const handleShowActions = (userIndex) => {
@@ -92,7 +121,7 @@ const UserManagement = () => {
     setSelectedUserIndex(userIndex);
 
     const user = users[userIndex];
-  if(user?.email===employee?.email)
+    if(user?.email===employee?.email)
     setSelectedUserIndex(null)
   };
 
@@ -176,16 +205,20 @@ const UserManagement = () => {
       return false;
     }
   };
-  const handleFilter=(val)=>{
-  setActiveFilter(val)
 
-  if(!val){
-    setFilteredUsers(users)
-    return;
+  const handleFilter=(val)=>{
+    setFilters(val)
+//   setActiveFilter(val)
+
+//   if(!val){
+//     setFilteredUsers(users)
+//     return;
+//   }
+
+//   const filteredResult=users.filter(user=>user.branch===val)
+//   setFilteredUsers(filteredResult)
   }
-  const filteredResult=users.filter(user=>user.branch===val)
-  setFilteredUsers(filteredResult)
-  }
+
   const {
     activePage,
     setActivePage,
@@ -198,7 +231,8 @@ const UserManagement = () => {
   } = usePagination(users);
 
   const { dropdownOpen, toggleDropdown, closeDropdown } = useDropdown();
-  const filterUsers = users.filter((user) => {
+
+    const filterUsers = users.filter((user) => {
     const searchLower = searchTerm.toLowerCase();
     return (
       (user.name || "").toLowerCase().includes(searchLower) ||
@@ -255,8 +289,6 @@ const UserManagement = () => {
         </div>
       </div>
 
-      {activeTab === "userProfile" && (
-        <>
           {/*Card on top of the table*/}
           <div className="payslip-card">
             <div className="payslip-ribbon">
@@ -475,8 +507,6 @@ const UserManagement = () => {
               </div>
             </div>
           </div>
-        </>
-      )}
     </div>
   );
 };

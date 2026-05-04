@@ -1,6 +1,6 @@
 namespace HRConnect.Api.Utils.Jobs.Notification
 {
-  using global::Quartz;
+  using Quartz;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Interfaces.Notification;
   using HRConnect.Api.DTOs.Notification;

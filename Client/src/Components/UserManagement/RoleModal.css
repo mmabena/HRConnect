@@ -259,3 +259,6 @@ background: none;
 .status svg{
     vertical-align: middle;
 }
+.menu-background{
+    padding: 26px 60px 50px 60px;
+}
