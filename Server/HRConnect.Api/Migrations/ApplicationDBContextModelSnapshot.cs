@@ -689,7 +689,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("BankBranchCodeId");
 
-                    b.ToTable("BankBranchCode");
+                    b.ToTable("BankBranchCodes");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.BankingDetail", b =>

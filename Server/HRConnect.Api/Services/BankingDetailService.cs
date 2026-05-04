@@ -50,6 +50,20 @@ namespace HRConnect.Api.Services
             return dtos;
         }
 
+        public async Task<List<BankBranchCodeDto>> GetAllBankBranchCodesAsync()
+        {
+            var branchCodes = await _bankingDetailRepo.GetAllBankBranchCodesAsync();
+
+            var dtos = branchCodes.Select(b => new BankBranchCodeDto
+            {
+                BankBranchCodeId = b.BankBranchCodeId,
+                BankName =b.BankName,
+                UniversalCode =  b.UniversalCode
+            }).ToList();
+
+            return dtos;
+        }
+
         // ======================================================
         // GET BY EMPLOYEE ID
         // ======================================================

@@ -31,6 +31,13 @@ namespace HRConnect.Api.Controllers
             return Ok(result);
         }
 
+        [HttpGet("BankBranchCodes")]
+        public async Task<IActionResult> GetAllBankBranchCodes()
+        {
+            var result = await _service.GetAllBankBranchCodesAsync();
+            return Ok(result);
+        }
+
         /// <summary>
         /// Retrieves the banking details of a temporary employee by their employee ID.
         /// This method accepts an employee ID as a parameter and calls the service layer to retrieve the corresponding banking details. 
@@ -77,6 +84,6 @@ namespace HRConnect.Api.Controllers
             return Ok(result);
         }
 
-
+       
     }
 }

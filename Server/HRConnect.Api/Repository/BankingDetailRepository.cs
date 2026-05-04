@@ -28,6 +28,11 @@ namespace HRConnect.Api.Repository
             .ToListAsync();
         }
 
+        public async Task<List<BankBranchCode>> GetAllBankBranchCodesAsync()
+        {
+            return await _context.BankBranchCodes.ToListAsync();
+        }
+
         /// <summary>
         /// Retrieves the banking details of a temporary employee by their employee ID.
         ///  This method queries the database for a BankingDetail record that matches the provided employee ID.

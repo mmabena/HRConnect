@@ -12,11 +12,8 @@ namespace HRConnect.Api.Services
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-
-    using System.Linq;
     using System.Security.Cryptography.X509Certificates;
-    using System.Threading.Tasks;
-
+   
     public class PositionService : IPositionService
     {
         /// <summary>

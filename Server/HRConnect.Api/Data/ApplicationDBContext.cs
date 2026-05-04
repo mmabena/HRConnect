@@ -12,6 +12,7 @@ namespace HRConnect.Api.Data
     public DbSet<User> Users { get; set; }
     public DbSet<Employee> Employees { get; set; }
     public DbSet<BankingDetail> BankingDetails { get; set; }
+    public DbSet<BankBranchCode> BankBranchCodes { get; set; }
     public DbSet<Position> Positions { get; set; }
     public DbSet<JobGrade> JobGrades { get; set; }
     public DbSet<OccupationalLevel> OccupationalLevels { get; set; }
@@ -236,6 +237,8 @@ namespace HRConnect.Api.Data
           .WithMany(bc => bc.BankingDetails)
           .HasForeignKey(b => b.BankBranchCodeId)
           .OnDelete(DeleteBehavior.Restrict);
+      
+    
 
       modelBuilder.Entity<BankingDetail>()
     .HasIndex(b => b.AccountNumberSearchHash)

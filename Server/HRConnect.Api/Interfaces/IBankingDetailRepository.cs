@@ -9,6 +9,7 @@ namespace HRConnect.Api.Interfaces
     public interface IBankingDetailRepository
     {
         Task<List<BankingDetail>> GetAllBankingDetailsAsync();
+        Task<List<BankBranchCode>> GetAllBankBranchCodesAsync();
         Task<BankingDetail?> GetBankingDetailsByEmployeeIdAsync(string EmployeeId);
         Task<BankingDetail> CreateBankingDetailsAsync(BankingDetail bankingDetails);
         Task<BankingDetail> UpdateBankingDetailsAsync(BankingDetail bankingDetails);
