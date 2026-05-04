@@ -93,77 +93,661 @@
   background: #1e293b;
 }
 
-.sb-btn--primary{
+.sb-btn--primary {
   background-color: #355867;
-  color: #FFFFFF;
+  color: #ffffff;
 }
 
+.sb-filters {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding: 15px 0px;
+  gap: 25px;
 
+  width: 1453px;
+  height: 94px;
 
-.sb-filters{
-display: flex;
-flex-direction: row;
-justify-content: flex-end;
-align-items: flex-start;
-padding: 15px 0px;
-gap: 25px;
-
-width: 1453px;
-height: 94px;
-
-flex: none;
-order: 2;
-flex-grow: 0;
-
-
+  flex: none;
+  order: 2;
+  flex-grow: 0;
 }
 
-.sb-filters-group{
-display: flex;
-flex-direction: row;
-align-items: center;
-padding: 11px 25px;
-gap: 38px;
+.sb-filters-group {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 11px 25px;
+  gap: 38px;
 
-width: 1403px;
-height: 64px;
+  width: 1400px;
+  height: 64px;
 
-background: rgba(79, 110, 120, 0.1);
-border-radius: 10px;
+  background: rgba(79, 110, 120, 0.1);
+  border-radius: 10px;
 
-flex: none;
-order: 0;
-flex-grow: 0;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
 }
 
-.sb-group-filters{
-box-sizing: border-box;
+.sb-group-filters {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 25px;
+
+  width: 420px;
+  height: 42px;
+
+  border-right: 1px solid #9a9a9a;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.sb-group-filters-s {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 20px;
+  width: 420px;
+  height: 42px;
+
+  border-right: 1px solid #9a9a9a;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.sb-group-filter {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px;
+  gap: 25px;
+
+  width: 420px;
+  height: 42px;
+
+  /* Inside auto layout */
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+/* ── filter ── */
+
+.sb-filter-branch {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 25px;
+  width: 418px;
+  height: 42px;
+
+  flex: none;
+  order: 2;
+  flex-grow: 0;
+}
+
+.sb-filter-label {
+  width: 80px;
+  height: 15px;
+
+  font-family: "Anek Bangla";
+  font-style: normal;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 15px;
+  letter-spacing: -0.43px;
+
+  color: #707070;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.sb-filter-label-s {
+  width: 115px;
+  height: 15px;
+
+  font-family: "Anek Bangla";
+  font-style: normal;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 15px;
+  letter-spacing: -0.43px;
+  color: #707070;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.sb-filter-label-b {
+  width: 55px;
+  height: 15px;
+
+  font-family: "Anek Bangla";
+  font-style: normal;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 15px;
+  letter-spacing: -0.43px;
+
+  color: #707070;
+
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.sb-filters-group select {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 6px 12px;
+  gap: 10px;
+  border: #ffffff;
+  width: 272px;
+  height: 42px;
+
+  background: #ffffff;
+  border-radius: 10px;
+  flex: none;
+  order: 1;
+  flex-grow: 0;
+
+  font-family: "Anek Bangla";
+  font-style: normal;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 30px;
+
+  letter-spacing: 0.02em;
+  color: #4f6e78;
+}
+
+/* ── summary stat cards ── */
+.sb-stats {
+  width: 1454px;
+  height: 93px;
+  flex: none;
+  order: 3;
+  flex-grow: 0;
+}
+
+.sb-stats-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px;
+  gap: 42px;
+
+  position: absolute;
+  width: 1404px;
+  height: 84px;
+  left: 70px;
+}
+
+.sb-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 20px 28px 23px;
+  gap: 11px;
+
+  width: 440px;
+  height: 84px;
+
+  background: rgba(79, 110, 120, 0.1);
+  border-radius: 10px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.sb-stat-label {
+  width: 384px;
+  height: 15px;
+
+  font-family: "Anek Bangla";
+  font-style: normal;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 15px;
+  letter-spacing: -0.43px;
+
+  color: #707070;
+
+  flex: start;
+  order: 0;
+  align-self: stretch;
+  flex-grow: 0;
+}
+
+.sb-stat-value {
+  width: 384px;
+  height: 15px;
+
+  font-family: "Anek Bangla";
+  font-style: normal;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 15px;
+
+  letter-spacing: -0.43px;
+
+  color: #355867;
+  flex: none;
+  order: 1;
+  align-self: stretch;
+  flex-grow: 0;
+}
+
+/* ── loading / error messages ── */
+.sb-state-msg {
+  text-align: center;
+  padding: 2rem;
+  font-size: 14px;
+  color: #888;
+}
+.sb-state-msg--error {
+  color: #a32d2d;
+}
+
+/* ── employee cards list ── */
+.sb-cards {
+  display: flex;
+  flex-direction: column;
+  padding: 0px;
+  gap: 15px;
+  position: relative;
+  left: 50px;
+  width: 1400px;
+  height: 1259px;
+  overflow-y: scroll;
+
+  /* Inside auto layout */
+  flex: none;
+  order: 4;
+  flex-grow: 0;
+}
+
+.sb-card {
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.sb-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.sb-card-header:hover {
+  background: var(--color-background-secondary, #f9f9f9);
+}
+
+/* ── avatar ───────────────────────────────────────────────────────────────── */
+
+.sb-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+ 
+.sb-avatar--blue   { background: #E6F1FB; color: #185FA5; }
+.sb-avatar--teal   { background: #E1F5EE; color: #0F6E56; }
+.sb-avatar--amber  { background: #FAEEDA; color: #854F0B; }
+.sb-avatar--coral  { background: #FAECE7; color: #993C1D; }
+.sb-avatar--purple { background: #EEEDFE; color: #534AB7; }
+
+
+/* ── card info ────────────────────────────────────────────────────────────── */
+
+.sb-card-info {
+  flex: 1;
+  min-width: 0;
+}
+ 
+.sb-card-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin: 0 0 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+ 
+.sb-card-position {
+  font-size: 12px;
+  color: var(--color-text-secondary, #888);
+  margin: 0;
+}
+ 
+.sb-card-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+ 
+.sb-card-salary-label {
+  font-size: 11px;
+  color: var(--color-text-secondary, #888);
+  margin: 0;
+  text-align: right;
+}
+ 
+.sb-card-salary-value {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin: 0;
+  text-align: right;
+}
+/* ── badges ───────────────────────────────────────────────────────────────── */
+
+.sb-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.sb-badge--location {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 0px;
+  gap: 5px;
+
+  width: 148px;
+  height: 30px;
+
+  background: rgba(154, 154, 154, 0.22);
+  border-radius: 15px;
+
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 2px 3px;
+  gap: 10px;
+  border: 1px solid #355867;
+
+  font-family: "Anek Bangla";
+  font-style: normal;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 15px;
+  /* identical to box height, or 94% */
+  letter-spacing: -0.43px;
+
+  color: #355867;
+}
+
+.sb-badge--below-market {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 0px;
+  gap: 5px;
+
+  width: 148px;
+  height: 30px;
+
+  background: rgba(226, 33, 33, 0.13);
+  border: 0.5px solid #f45052;
+  border-radius: 15px;
+  font-family: "Anek Bangla";
+  font-style: normal;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 15px;
+  /* identical to box height, or 94% */
+  letter-spacing: -0.43px;
+
+  color: #f45052;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.sb-badge--at-market {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 0px;
+  gap: 5px;
+
+  width: 148px;
+  height: 30px;
+
+  background: rgba(175, 191, 116, 0.3);
+  border: 0.5px solid #afbf74;
+  border-radius: 15px;
+
+  font-family: "Anek Bangla";
+  font-style: normal;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 15px;
+  /* identical to box height, or 94% */
+  letter-spacing: -0.43px;
+
+  color: #638549;
+
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.sb-badge--above-market {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 0px;
+  gap: 5px;
+
+  width: 148px;
+  height: 30px;
+
+  background: rgba(4, 171, 255, 0.14);
+  border: 0.5px solid #1d8dc5;
+  border-radius: 15px;
+
+  font-family: "Anek Bangla";
+  font-style: normal;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 15px;
+  /* identical to box height, or 94% */
+  letter-spacing: -0.43px;
+
+  color: #1d8dc5;
+
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.sb-badge--nodata {
+  background: var(--color-background-secondary, #f5f5f5);
+  color: var(--color-text-secondary, #888);
+}
+
+/* ── chevron ──────────────────────────────────────────────────────────────── */
+
+.sb-chevron {
+  width: 24px;
+  height: 24px;
+  color: var(--color-text-secondary, #888);
+  transition: transform 0.2s ease;
+  display: inline-block;
+}
+
+.sb-chevron--open {
+  transform: rotate(180deg);
+}
+
+/* ── card body ────────────────────────────────────────────────────────────── */
+
+.sb-card-body {
+  padding: 0 16px 16px;
+  border-top: 0.5px solid var(--color-border-tertiary, #e5e5e5);
+}
+
+.sb-card-meta {
+  font-size: 13px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  flex: none;
+  order: 1;
+  flex-grow: 0;
+  z-index: 1;
+  padding: 12px 0;
+}
+
+.sb-card-meta strong {
+  width: 75px;
+  height: 15px;
+
+  font-family: "Anek Bangla";
+  font-style: normal;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 15px;
+  /* identical to box height, or 94% */
+  letter-spacing: -0.43px;
+
+  color: #355867;
+
+  /* Inside auto layout */
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+.sb-label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 15px;
+
+  width: 200px;
+  height: 51px;
+
+  /* Inside auto layout */
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+  margin: 0px -16px;
+}
+
+/* ── benchmark box ────────────────────────────────────────────────────────── */
+
+.sb-bench-box {
+  border: 0.5px solid var(--color-border-tertiary, #e5e5e5);
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.sb-bench-label {
 display: flex;
 flex-direction: row;
 align-items: center;
 padding: 0px;
-gap: 25px;
 
-width: 420px;
-height: 42px;
+width: 200px;
+height: 33px;
 
-border-right: 1px solid #9A9A9A;
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 0px;
+
+font-family: 'Anek Bangla';
+font-style: normal;
+font-weight: 500;
+font-size: 16px;
+line-height: 15px;
+/* identical to box height, or 94% */
+letter-spacing: -0.43px;
+
+color: #9A9A9A;
+
 flex: none;
 order: 0;
 flex-grow: 0;
 
 }
 
-.sb-group-filter{
-box-sizing: border-box;
+.sb-bench-source {
 display: flex;
 flex-direction: row;
 align-items: center;
 padding: 0px;
-gap: 25px;
 
-width: 420px;
-height: 42px;
+width: 200px;
+height: 41px;
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 0px;
+
+
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: center;
+padding: 10px;
+gap: 10px;
+
+
+font-family: 'Anek Bangla';
+font-style: normal;
+font-weight: 500;
+font-size: 16px;
+line-height: 15px;
+/* identical to box height, or 94% */
+letter-spacing: -0.43px;
+
+color: #355867;
+
 
 /* Inside auto layout */
 flex: none;
@@ -172,261 +756,251 @@ flex-grow: 0;
 
 }
 
-/* ── filter ── */
+/* ── legend ───────────────────────────────────────────────────────────────── */
 
-.sb-filter-branch{
+.sb-legend {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.sb-legend-item {
 display: flex;
 flex-direction: row;
 align-items: center;
-padding: 20px;
-gap: 25px;
-width: 418px;
-height: 42px;
+padding: 0px 10px 0px 15px;
 
+width: 142px;
+height: 51px;
+
+flex: none;
+order: 0;
+flex-grow: 0;
+}
+
+.sb-legend-item--below{
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 0px 10px 0px 15px;
+
+width: 142px;
+height: 51px;
+
+/* Person Login */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: center;
+padding: 10px;
+gap: 10px;
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+}
+
+.sb-legend-item--above{
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 0px 10px 0px 15px;
+
+width: 269px;
+height: 51px;
+
+
+/* Inside auto layout */
 flex: none;
 order: 2;
 flex-grow: 0;
 
-}
-
-.sb-filter-label{
-width: 80px;
-height: 15px;
-
-font-family: 'Anek Bangla';
-font-style: normal;
-font-weight: 500;
-font-size: 16px;
-line-height: 15px;
-letter-spacing: -0.43px;
-
-color: #707070;
-flex: none;
-order: 0;
-flex-grow: 0;
 
 }
 
-.sb-filter-label-s{
-  
-width: 136px;
-height: 15px;
-
-font-family: 'Anek Bangla';
-font-style: normal;
-font-weight: 500;
-font-size: 16px;
-line-height: 15px;
-letter-spacing: -0.43px;
-
-color: #707070;
-flex: none;
-order: 0;
-flex-grow: 0;
-}
-
-.sb-filter-label-b{
-width: 55px;
-height: 15px;
-
-font-family: 'Anek Bangla';
-font-style: normal;
-font-weight: 500;
-font-size: 16px;
-line-height: 15px;
-letter-spacing: -0.43px;
-
-color: #707070;
-
-flex: none;
-order: 0;
-flex-grow: 0;
-
-}
-
-.sb-filters-group select{
+.sb-legend-item--market{
 display: flex;
 flex-direction: row;
 align-items: center;
-padding: 6px 12px;
-gap: 10px;
-border: #ffffff;
-width: 272px;
-height: 42px;
+padding: 0px 10px 0px 15px;
 
-background: #FFFFFF;
-border-radius: 10px;
+width: 240px;
+height: 51px;
+
+
+/* Inside auto layout */
 flex: none;
 order: 1;
 flex-grow: 0;
 
-font-family: 'Anek Bangla';
-font-style: normal;
-font-weight: 500;
-font-size: 16px;
-line-height: 30px;
-
-letter-spacing: 0.02em;
-color: #4F6E78;
 }
 
-.sb-stats{
-width: 1454px;
-height: 93px;
-flex: none;
-order: 3;
-flex-grow: 0;
+.sb-legend-swatch {
+  width: 12px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
 }
 
-/* ── summary stat cards ── */
-
-.sb-stats-container{
-display: flex;
-flex-direction: row;
-align-items: center;
-padding: 0px;
-gap: 42px;
-
-position: absolute;
-width: 1404px;
-height: 84px;
-left: 70px;
+.sb-legend-line {
+  width: 16px;
+  height: 2px;
+  background: var(--color-text-primary, #111);
+  flex-shrink: 0;
 }
 
-.sb-stat{
-display: flex;
-flex-direction: column;
-align-items: flex-start;
-padding: 20px 28px 23px;
-gap: 11px;
+/* ── range bar ────────────────────────────────────────────────────────────── */
 
-width: 440px;
-height: 84px;
-
-background: rgba(79, 110, 120, 0.1);
-border-radius: 10px;
-flex: none;
-order: 0;
-flex-grow: 0;
-
+.sb-range-wrap {
+  position: relative;
+  margin: 24px 0 32px;
 }
 
-.sb-stat-label{
-width: 384px;
-height: 15px;
-
-font-family: 'Anek Bangla';
-font-style: normal;
-font-weight: 500;
-font-size: 16px;
-line-height: 15px;
-letter-spacing: -0.43px;
-
-color: #707070;
-
-flex: start;
-order: 0;
-align-self: stretch;
-flex-grow: 0;
-
+.sb-range-emp-label {
+  position: absolute;
+  top: -20px;
+  transform: translateX(-50%);
+  font-size: 10px;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
-.sb-stat-value{
-width: 384px;
-height: 15px;
-
-font-family: 'Anek Bangla';
-font-style: normal;
-font-weight: 500;
-font-size: 20px;
-line-height: 15px;
-
-letter-spacing: -0.43px;
-
-color: #355867;
-flex: none;
-order: 1;
-align-self: stretch;
-flex-grow: 0;
+.sb-range-track {
+  position: relative;
+  height: 10px;
+  border-radius: 5px;
+  overflow: visible;
 }
 
-/* ── loading / error messages ── */
-.sb-state-msg {}
-.sb-state-msg--error {}
- 
-/* ── employee cards list ── */
-.sb-cards {}               /* flex column wrapper */
-.sb-card {}                /* individual card */
- 
-/* clickable header row inside each card */
-.sb-card-header {}
- 
-/* profile image / initials circle */
-.sb-avatar {}              /* shared shape — make this a circle */
-.sb-avatar--initials {}    /* coloured background fallback when no photo */
- 
-/* name + position block */
-.sb-card-info {}
-.sb-card-name {}
-.sb-card-position {}
- 
-/* right side of header — salary, badges, chevron */
-.sb-card-right {}
-.sb-card-salary {}
-.sb-card-salary-label {}
-.sb-card-salary-value {}
- 
-/* status + location badges */
-.sb-badge {}
-.sb-badge--location {}
-.sb-badge--below-market {}
-.sb-badge--at-market {}
-.sb-badge--above-market {}
-.sb-badge--no-data {}
- 
-/* expand/collapse arrow */
-.sb-chevron {}
-.sb-chevron--open {}       /* rotated state when card is open */
- 
-/* expandable body */
-.sb-card-body {}
-.sb-card-meta {}           /* annual salary + location line */
- 
-/* ── benchmark box (inside expanded card) ── */
-.sb-bench-box {}
-.sb-bench-label {}         /* "Market Benchmark" heading */
-.sb-bench-source {}        /* source name e.g. "Glassdoor 2025" */
- 
-/* legend */
-.sb-legend {}
-.sb-legend-item {}
-.sb-legend-item--below {}
-.sb-legend-item--market {}
-.sb-legend-item--above {}
-.sb-legend-item--median {}
- 
-/* ── range bar ── */
-.sb-range-wrap {}          /* relative container for the whole bar area */
-.sb-emp-label {}           /* salary label that floats above the dot */
-.sb-range-track {}         /* the actual bar — give this a height */
-.sb-zone {}                /* shared zone styles */
-.sb-zone--below {}         /* red zone left of P25 */
-.sb-zone--market {}        /* green zone P25 to P75 */
-.sb-zone--above {}         /* blue zone right of P75 */
-.sb-tick {}                /* vertical divider line on the bar */
-.sb-tick--median {}        /* P50 tick — usually darker */
-.sb-tick-top {}            /* label above the tick (P25 / P50 / P75) */
-.sb-tick-bottom {}         /* amount label below the tick */
-.sb-marker {}              /* employee dot on the bar */
- 
-/* ── percentile summary boxes ── */
-.sb-pboxes {}              /* 4-column grid */
-.sb-pbox {}
-.sb-pbox-label {}
-.sb-pbox-value {}
-.sb-pbox-value--negative {} /* red colour for below-median values */
- 
-/* no benchmark data message */
-.sb-nodata {}
+.sb-zone {
+  position: absolute;
+  top: 0;
+  height: 100%;
+}
 
+.sb-zone--below {
+  background: #fca5a5;
+  border-radius: 5px 0 0 5px;
+}
+.sb-zone--market {
+  background: #bef264;
+}
+.sb-zone--above {
+  background: #bae6fd;
+  border-radius: 0 5px 5px 0;
+}
 
+/* ── ticks ────────────────────────────────────────────────────────────────── */
+
+.sb-tick {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 1.5px;
+  background: var(--color-background-primary, #fff);
+  z-index: 5;
+}
+
+.sb-tick--median {
+  background: var(--color-text-primary, #111);
+}
+
+.sb-tick-label {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--color-text-secondary, #888);
+  white-space: nowrap;
+}
+
+.sb-tick-label--top {
+  top: -18px;
+}
+.sb-tick-label--bottom {
+  bottom: -18px;
+}
+
+/* ── employee dot marker ──────────────────────────────────────────────────── */
+
+.sb-marker {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2.5px solid #fff;
+  z-index: 10;
+}
+
+/* ── percentile summary boxes ─────────────────────────────────────────────── */
+
+.sb-pboxes {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.sb-pbox {
+  border: 0.5px solid var(--color-border-tertiary, #e5e5e5);
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+}
+
+.sb-pbox-label {
+  font-size: 11px;
+  color: var(--color-text-secondary, #888);
+  margin: 0 0 4px;
+}
+
+.sb-pbox-value {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.sb-pbox-value--red {
+  color: #a32d2d;
+}
+
+/* ── no data ──────────────────────────────────────────────────────────────── */
+
+.sb-nodata {
+  font-size: 13px;
+  color: var(--color-text-secondary, #888);
+  font-style: italic;
+  padding: 12px 0;
+}
+
+/* ── responsive ───────────────────────────────────────────────────────────── */
+
+@media (max-width: 680px) {
+  .sb-page {
+    padding: 1rem;
+  }
+  .sb-stats {
+    grid-template-columns: 1fr;
+  }
+  .sb-pboxes {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .sb-card-right {
+    gap: 6px;
+  }
+  .sb-card-salary {
+    display: none;
+  }
+  .sb-filter-divider {
+    display: none;
+  }
+}

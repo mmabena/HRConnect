@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import PayrollNavbar from "../../Components/PayrollNavBar";
 import api from "../../api/api.js";
 import "./SalaryBenchmark.css";
+import AddBenchmark from "./AddBenchmark.jsx";
 
 function getInitials(name) {
   return name
@@ -80,61 +81,82 @@ function RangeBar({ employee }) {
 
       {/* legend */}
       <div className="sb-legend">
-        <span className="sb-legend-item sb-legend-item--below">Below P25</span>
+        <span className="sb-legend-item sb-legend-item--below">
+          <svg
+            width="30"
+            height="47"
+            viewBox="0 0 30 47"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <rect
+              y="16"
+              width="30"
+              height="15"
+              rx="5"
+              fill="#D12C2C"
+              fill-opacity="0.3"
+            />
+          </svg>
+          Below P25
+        </span>
         <span className="sb-legend-item sb-legend-item--market">
+          <svg
+            width="30"
+            height="15"
+            viewBox="0 0 30 15"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <rect width="30" height="15" rx="5" fill="#DDE4C5" />
+          </svg>
           Market Range (P25–P75)
         </span>
-        <span className="sb-legend-item sb-legend-item--above">Above P75</span>
-        <span className="sb-legend-item sb-legend-item--median">
-          Median (P50)
+        <span className="sb-legend-item sb-legend-item--above">
+          <svg
+            width="30"
+            height="15"
+            viewBox="0 0 30 15"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <rect width="30" height="15" rx="5" fill="#DDE8EF" />
+          </svg>
+          Above P75 - Median (P50)
         </span>
       </div>
 
       {/* range bar */}
       <div className="sb-range-wrap">
         {/* employee salary label — sits above the dot */}
-        <span className="sb-emp-label" style={{ left: `${salpct}%` }}>
-          {fmtRand(monthlySalary)}
-        </span>
+        <span className="sb-emp-label">{fmtRand(monthlySalary)}</span>
 
         <div className="sb-range-track">
           {/* colour zones */}
-          <div
-            className="sb-zone sb-zone--below"
-            style={{ left: "0%", width: `${p25pct}%` }}
-          />
-          <div
-            className="sb-zone sb-zone--market"
-            style={{ left: `${p25pct}%`, width: `${p75pct - p25pct}%` }}
-          />
-          <div
-            className="sb-zone sb-zone--above"
-            style={{ left: `${p75pct}%`, width: `${100 - p75pct}%` }}
-          />
+          <div className="sb-zone sb-zone--below" />
+          <div className="sb-zone sb-zone--market" />
+          <div className="sb-zone sb-zone--above" />
 
           {/* P25 tick */}
-          <div className="sb-tick" style={{ left: `${p25pct}%` }}>
+          <div className="sb-tick">
             <span className="sb-tick-top">P25</span>
             <span className="sb-tick-bottom">{fmtRand(salary25th)}</span>
           </div>
 
           {/* P50 tick */}
-          <div
-            className="sb-tick sb-tick--median"
-            style={{ left: `${p50pct}%` }}
-          >
+          <div className="sb-tick sb-tick--median">
             <span className="sb-tick-top">P50</span>
             <span className="sb-tick-bottom">{fmtRand(salary50th)}</span>
           </div>
 
           {/* P75 tick */}
-          <div className="sb-tick" style={{ left: `${p75pct}%` }}>
+          <div className="sb-tick">
             <span className="sb-tick-top">P75</span>
             <span className="sb-tick-bottom">{fmtRand(salary75th)}</span>
           </div>
 
           {/* employee dot marker */}
-          <div className="sb-marker" style={{ left: `${salpct}%` }} />
+          <div className="sb-marker" />
         </div>
       </div>
 
@@ -146,7 +168,7 @@ function RangeBar({ employee }) {
         </div>
         <div className="sb-pbox">
           <p className="sb-pbox-label">P50 (Median)</p>
-          <p className="sb-pbox-value">{fmtRand(salary50th)}</p>
+          <p className="sb-pbox-value">{fmtRand(salary50th)} </p>
         </div>
         <div className="sb-pbox">
           <p className="sb-pbox-label">P75 (Highest)</p>
@@ -191,7 +213,28 @@ function EmployeeCard({ employee, isOpen, onToggle }) {
             </p>
           </div>
           <span className="sb-badge sb-badge--location">
-            {employee.branch || "—"}
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M13 6.80006C13 9.7959 9.53812 12.9159 8.37562 13.8795C8.26733 13.9577 8.1355 14 8 14C7.8645 14 7.73267 13.9577 7.62438 13.8795C6.46188 12.9159 3 9.7959 3 6.80006C3 5.527 3.52678 4.30609 4.46447 3.40591C5.40215 2.50572 6.67392 2 8 2C9.32608 2 10.5979 2.50572 11.5355 3.40591C12.4732 4.30609 13 5.527 13 6.80006Z"
+                stroke="#355867"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M8 8.60008C9.03553 8.60008 9.875 7.79418 9.875 6.80006C9.875 5.80593 9.03553 5.00004 8 5.00004C6.96447 5.00004 6.125 5.80593 6.125 6.80006C6.125 7.79418 6.96447 8.60008 8 8.60008Z"
+                stroke="#355867"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+
+            {employee.location || "—"}
           </span>
           <span
             className={`sb-badge sb-badge--${status.toLowerCase().replace(" ", "-")}`}
@@ -208,12 +251,11 @@ function EmployeeCard({ employee, isOpen, onToggle }) {
       {isOpen && (
         <div className="sb-card-body">
           <div className="sb-card-meta">
-            <span>
-              Annual Salary:{" "}
-              <strong>{fmtRand(employee.monthlySalary * 12)}</strong>
+            <span className="sb-label">
+              Annual Salary: <strong>{fmtRand(employee.monthlySalary)}</strong>
             </span>
-            <span>
-              Location: <strong>{employee.branch || "—"}</strong>
+            <span className="sb-label">
+              Location: <strong>{employee.location || "—"}</strong>
             </span>
           </div>
           <RangeBar employee={employee} />
@@ -225,12 +267,22 @@ function EmployeeCard({ employee, isOpen, onToggle }) {
 
 function SalaryBenchmark() {
   const [employees, setEmployees] = useState([]);
+  const [benchmark, setBenchmark] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [openId, setOpenId] = useState(null);
   const [filterPosition, setFilterPosition] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [filterBranch, setFilterBranch] = useState("");
+  const [showPopup, setShowPopup] = useState(false);
+  const [formData, setFormData] = useState({
+    positionTitle: "",
+    location: "",
+    source: "",
+    salary25th: "",
+    salary50th: "",
+    salary75th: "",
+  });
 
   useEffect(() => {
     async function load() {
@@ -245,6 +297,43 @@ function SalaryBenchmark() {
     }
     load();
   }, []);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const res = await api.get("/salary-benchmarks");
+        setBenchmark(res.data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, []);
+
+  const handleAddBenchmark = async () => {
+    try {
+      setLoading(true);
+      const res = await api.post("/salary-benchmarks", formData);
+
+      setBenchmark((prev) => [...prev, res.data]);
+      setShowPopup(false); // close popup
+      // reset form
+      setFormData({
+        positonTitle: "",
+        location: "",
+        source: "",
+        salary25th: "",
+        salary50th: "",
+        salary75th: "",
+      });
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const positions = useMemo(
     () => [...new Set(employees.map((e) => e.positionTitle))].sort(),
@@ -314,7 +403,10 @@ function SalaryBenchmark() {
             </svg>
             Benchmarks
           </button>
-          <button className="sb-btn sb-btn--primary">
+          <button
+            className="sb-btn sb-btn--primary"
+            onClick={() => setShowPopup(true)}
+          >
             <svg
               width="24"
               height="24"
@@ -355,7 +447,7 @@ function SalaryBenchmark() {
             </select>
           </div>
 
-          <div className="sb-group-filters">
+          <div className="sb-group-filters-s">
             <span className="sb-filter-label-s">Salary benchmark</span>
             <select
               value={filterStatus}
@@ -425,6 +517,17 @@ function SalaryBenchmark() {
               />
             ))
           )}
+        </div>
+      )}
+      {showPopup && (
+        <div className="modal-overlay">
+          <AddBenchmark
+            onClose={() => setShowPopup(false)}
+            onUploadSuccess={() => {
+              handleAddBenchmark();
+              setShowPopup(false);
+            }}
+          />
         </div>
       )}
     </div>
