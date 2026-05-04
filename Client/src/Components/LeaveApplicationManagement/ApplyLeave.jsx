@@ -5,7 +5,6 @@ const ApplyLeave = () => {
   return (
     <div className="leave-page">
 
-      {/* TOP NAV */}
       <div className="leave-tabs">
         <div className="leave-tab">Personal Information</div>
         <div className="leave-tab">Payroll Information</div>
@@ -73,7 +72,12 @@ const ApplyLeave = () => {
 
               <div className="form-group">
                 <label>Leave balance</label>
-                <input type="text" className="input disabled" placeholder="1.85 Days remaining" disabled />
+                <input
+                type="text"
+                className="input disabled"
+                value="1.85 Days remaining"
+                disabled
+              />
               </div>
             </div>
           </div>
@@ -90,13 +94,18 @@ const ApplyLeave = () => {
               ></textarea>
             </div>
 
+           <div className="form-group">
+            <label>Attach Supporting Document</label>
+
             <div className="upload-box">
-              <p>Click to upload or drag a file here</p>
-              <small>PDF, JPG or PNG - max 5MB</small>
+              <div className="upload-content">
+                <p>Click to upload or drag a file here</p>
+                <small>PDF, JPG or PNG - max 5MB</small>
+              </div>
             </div>
           </div>
-
-          {/* ACTION BUTTONS */}
+          </div>
+  {/* ACTION BUTTONS */}
           <div className="form-actions">
             <button className="submit-btn">✓ Submit Application</button>
             <button className="cancel-btn">Cancel</button>
@@ -110,28 +119,36 @@ const ApplyLeave = () => {
           {/* ENTITLEMENTS */}
           <div className="card">
             <p className="card-title">LEAVE ENTITLEMENTS</p>
-
+            
             <div className="progress-item">
-              <span>Annual Leave</span>
-              <span>4.85 / 15 Days</span>
+              <div className="progress-row">
+                <span>Annual Leave</span>
+                <span>4.85 / 15 Days</span>
+              </div>
               <div className="progress-bar red"></div>
             </div>
-
+            
             <div className="progress-item">
-              <span>Sick Leave</span>
-              <span>26 / 30 Days</span>
+              <div className="progress-row">
+                <span>Sick Leave</span>
+                <span>26 / 30 Days</span>
+              </div>
               <div className="progress-bar blue"></div>
             </div>
-
+            
             <div className="progress-item">
-              <span>Annual Leave</span>
-              <span>1 / 3 Days</span>
+              <div className="progress-row">
+                <span>Family Responsibility Leave</span>
+                <span>1 / 3 Days</span>
+              </div>
               <div className="progress-bar blue"></div>
             </div>
-
+            
             <div className="progress-item">
-              <span>Maternity Leave</span>
-              <span>0 / 121 Days</span>
+              <div className="progress-row">
+                <span>Maternity Leave</span>
+                <span>0 / 121 Days</span>
+              </div>
               <div className="progress-bar grey"></div>
             </div>
           </div>
@@ -147,6 +164,7 @@ const ApplyLeave = () => {
               <li>Unused leave does not carry over to the following year.</li>
             </ul>
           </div>
+        
 
         </div>
 
