@@ -1,8 +1,9 @@
-﻿namespace HRConnect.Api.Utils.Jobs.Pension
+﻿namespace HRConnect.Api.Utils.Jobs
 {
   using System.Threading.Tasks;
   using Quartz;
   using HRConnect.Api.Interfaces.Pension;
+  using HRConnect.Api.Interfaces.Payroll.Earning;
 
   public class EmployeeEnrollmentJob(IServiceProvider serviceProvider) : IJob
   {
@@ -14,9 +15,11 @@
     public async Task Execute(IJobExecutionContext context)
     {
       using IServiceScope scope = _serviceProvider.CreateScope();
-      IEmployeePensionEnrollmentService intializer = scope.ServiceProvider.GetRequiredService<IEmployeePensionEnrollmentService>();
+      IEmployeePensionEnrollmentService pensionInitializer = scope.ServiceProvider.GetRequiredService<IEmployeePensionEnrollmentService>();
+      IEmployeePayrollEarningService payrollEarningInitializer = scope.ServiceProvider.GetRequiredService<IEmployeePayrollEarningService>();
 
-      await intializer.InitializeEmployeePensionEnrollment();
+      await pensionInitializer.InitializeEmployeePensionEnrollment();
+      await payrollEarningInitializer.InitializeEmployeePayrollEarningsAsync();
     }
   }
 }

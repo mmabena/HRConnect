@@ -1298,6 +1298,51 @@ namespace HRConnect.Api.Migrations
                     b.ToTable("PasswordResetPins");
                 });
 
+            modelBuilder.Entity("HRConnect.Api.Models.Payroll.Earning.EmployeePayrollEarning", b =>
+                {
+                    b.Property<int>("EmployeePayrollEarningId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EmployeePayrollEarningId"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("CalculatedAmountAfterTax")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("EmployeeId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("IsLocked")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("OverTimeHoursWorked")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PayrollEarningId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("PayrollRunId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TaxCode")
+                        .HasColumnType("int");
+
+                    b.HasKey("EmployeePayrollEarningId");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.HasIndex("PayrollEarningId");
+
+                    b.HasIndex("PayrollRunId");
+
+                    b.ToTable("EmployeePayrollEarnings");
+                });
+
             modelBuilder.Entity("HRConnect.Api.Models.Payroll.Earning.PayrollEarning", b =>
                 {
                     b.Property<string>("PayrollEarningId")
@@ -1335,6 +1380,20 @@ namespace HRConnect.Api.Migrations
                     b.HasKey("PayrollEarningId");
 
                     b.ToTable("PayrollEarnings");
+
+                    b.HasData(
+                        new
+                        {
+                            PayrollEarningId = "PRE001",
+                            CanProRata = true,
+                            IsActive = true,
+                            IsOnGoing = true,
+                            LongDescription = "Employee monthly salary",
+                            ShortDescription = "Basic salary",
+                            TaxCode = 3601,
+                            TaxPercentage = 100m,
+                            Taxable = true
+                        });
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.Payroll.PayrollPeriod", b =>
@@ -1424,6 +1483,100 @@ namespace HRConnect.Api.Migrations
                     b.HasIndex("PeriodId");
 
                     b.ToTable("PayrollRuns");
+                });
+
+            modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction.Deduction", b =>
+                {
+                    b.Property<string>("DeductionId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("CompanyId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DeductionType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("EmployerContributed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("InputType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LongDescription")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("MaximumValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("MinimumValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ShortDescription")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("Status")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("TaxCode")
+                        .HasColumnType("int");
+
+                    b.HasKey("DeductionId");
+
+                    b.ToTable("Deductions");
+                });
+
+            modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction.EmployeeDeduction", b =>
+                {
+                    b.Property<int>("EmployeeDeductionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EmployeeDeductionId"));
+
+                    b.Property<decimal>("AmountOrPercentage")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("CalculatedDeductionAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("DeductionId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("DeductionInputType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("DeductionType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EmployeeId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("IsLocked")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("PayrollRunId")
+                        .HasColumnType("int");
+
+                    b.HasKey("EmployeeDeductionId");
+
+                    b.HasIndex("DeductionId");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.HasIndex("PayrollRunId");
+
+                    b.ToTable("EmployeeDeductions");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.Pension.EmployeePensionEnrollment", b =>
@@ -2141,6 +2294,31 @@ namespace HRConnect.Api.Migrations
                     b.Navigation("MedicalOptionCategory");
                 });
 
+            modelBuilder.Entity("HRConnect.Api.Models.Payroll.Earning.EmployeePayrollEarning", b =>
+                {
+                    b.HasOne("HRConnect.Api.Models.Employee", "Employee")
+                        .WithMany("EmployeePayrollEarning")
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("HRConnect.Api.Models.Payroll.Earning.PayrollEarning", "PayrollEarning")
+                        .WithMany("EmployeePayrollEarning")
+                        .HasForeignKey("PayrollEarningId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("HRConnect.Api.Models.Payroll.PayrollRun", null)
+                        .WithMany()
+                        .HasForeignKey("PayrollRunId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Employee");
+
+                    b.Navigation("PayrollEarning");
+                });
+
             modelBuilder.Entity("HRConnect.Api.Models.Payroll.PayrollRecord", b =>
                 {
                     b.HasOne("HRConnect.Api.Models.Payroll.PayrollRun", "PayrollRun")
@@ -2161,6 +2339,31 @@ namespace HRConnect.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("Period");
+                });
+
+            modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction.EmployeeDeduction", b =>
+                {
+                    b.HasOne("HRConnect.Api.Models.PayrollDeduction.Deduction", "Deduction")
+                        .WithMany("EmployeeDeduction")
+                        .HasForeignKey("DeductionId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("HRConnect.Api.Models.Employee", "Employee")
+                        .WithMany("EmployeeDeduction")
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("HRConnect.Api.Models.Payroll.PayrollRun", null)
+                        .WithMany()
+                        .HasForeignKey("PayrollRunId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Deduction");
+
+                    b.Navigation("Employee");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.Pension.EmployeePensionEnrollment", b =>
@@ -2276,6 +2479,10 @@ namespace HRConnect.Api.Migrations
 
                     b.Navigation("AnnualLeaveAccrualHistories");
 
+                    b.Navigation("EmployeeDeduction");
+
+                    b.Navigation("EmployeePayrollEarning");
+
                     b.Navigation("EmployeePensionEnrollment");
 
                     b.Navigation("LeaveApplications");
@@ -2309,6 +2516,11 @@ namespace HRConnect.Api.Migrations
                     b.Navigation("Positions");
                 });
 
+            modelBuilder.Entity("HRConnect.Api.Models.Payroll.Earning.PayrollEarning", b =>
+                {
+                    b.Navigation("EmployeePayrollEarning");
+                });
+
             modelBuilder.Entity("HRConnect.Api.Models.Payroll.PayrollPeriod", b =>
                 {
                     b.Navigation("Runs");
@@ -2317,6 +2529,11 @@ namespace HRConnect.Api.Migrations
             modelBuilder.Entity("HRConnect.Api.Models.Payroll.PayrollRun", b =>
                 {
                     b.Navigation("Records");
+                });
+
+            modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction.Deduction", b =>
+                {
+                    b.Navigation("EmployeeDeduction");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.PensionOption", b =>

@@ -47,6 +47,9 @@ namespace HRConnect.Api.Data
     public DbSet<MedicalAidDeduction> MedicalAidDeductions { get; set; }
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<PayrollEarning> PayrollEarnings { get; set; }
+    public DbSet<EmployeePayrollEarning> EmployeePayrollEarnings { get; set; }
+    public DbSet<Deduction> Deductions { get; set; }
+    public DbSet<EmployeeDeduction> EmployeeDeductions { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
       base.OnModelCreating(modelBuilder);
@@ -280,6 +283,65 @@ namespace HRConnect.Api.Data
           .HasConversion<string>();
       modelBuilder.Entity<Notification>().Property(n => n.Type)
       .HasConversion<string>();
+
+      modelBuilder.Entity<Employee>()
+        .HasMany(epre => epre.EmployeePayrollEarning)
+        .WithOne(e => e.Employee)
+        .HasForeignKey(e => e.EmployeeId)
+        .OnDelete(DeleteBehavior.NoAction)
+        .IsRequired();
+
+      modelBuilder.Entity<PayrollEarning>()
+        .HasMany(epre => epre.EmployeePayrollEarning)
+        .WithOne(pre => pre.PayrollEarning)
+        .HasForeignKey(pre => pre.PayrollEarningId)
+        .OnDelete(DeleteBehavior.NoAction)
+        .IsRequired();
+
+      
+
+      modelBuilder.Entity<EmployeePayrollEarning>()
+        .HasOne<PayrollRun>()
+        .WithMany()
+        .HasForeignKey(epe => epe.PayrollRunId)
+        .HasPrincipalKey(p => p.PayrollRunId);
+
+      modelBuilder.Entity<PayrollEarning>().HasData(
+          new PayrollEarning
+          {
+            PayrollEarningId = "PRE001",
+            ShortDescription = "Basic salary",
+            LongDescription = "Employee monthly salary",
+            Taxable = true,
+            TaxCode = 3601,
+            TaxPercentage = 100m,
+            OvertimeHourMultiplier = null,
+            CanProRata = true,
+            IsOnGoing = true,
+            IsActive = true
+          }
+        );
+
+      modelBuilder.Entity<Deduction>().Property(d => d.InputType).HasConversion<string>();
+
+      modelBuilder.Entity<EmployeeDeduction>()
+        .HasOne<PayrollRun>()
+        .WithMany()
+        .HasForeignKey(ed => ed.PayrollRunId)
+        .HasPrincipalKey(p => p.PayrollRunId);
+
+      modelBuilder.Entity<Deduction>()
+        .HasMany(d => d.EmployeeDeduction)
+        .WithOne(ed => ed.Deduction)
+        .HasForeignKey(ed => ed.DeductionId)
+        .OnDelete(DeleteBehavior.NoAction);
+
+      modelBuilder.Entity<Employee>()
+        .HasMany(e => e.EmployeeDeduction)
+        .WithOne(ed => ed.Employee)
+        .HasForeignKey(ed => ed.EmployeeId)
+        .OnDelete(DeleteBehavior.NoAction);
+
     }
 
     //Override 'SaveChangesAsync' for Payroll Records to enforce locked records on a payroll run 
@@ -292,7 +354,9 @@ namespace HRConnect.Api.Data
             e.Entity is PayrollPeriod ||
             e.Entity is PayrollRun ||
             e.Entity is PayrollRecord ||
-            e.Entity is EmployeePensionEnrollment
+            e.Entity is EmployeePensionEnrollment ||
+            e.Entity is EmployeePayrollEarning ||
+            e.Entity is EmployeeDeduction
             ));
 
       foreach (var e in modifiedRecords)
