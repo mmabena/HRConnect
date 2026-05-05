@@ -1,4 +1,4 @@
-﻿import {useEffect, useState, useCallback} from 'react';
+﻿import {useCallback, useEffect, useState} from 'react';
 import {
     useMedicalAidOptionContext
 } from "../../../../../api/Context/PayrollManagement/Deductions/MedicalAidOptions/MedicalAidOptionsContext";
@@ -23,6 +23,7 @@ const MedicalAidOptionsManagement = () => {
   const [initialized, setInitialized] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [updateSuccess, setUpdateSuccess] = useState(false); // this will govern the state of the uodate	
 
     // Handler to open modal || Modified to cater for passing on the options plus it's categories options
     const handleViewRecord = (rowData) => {
@@ -110,9 +111,10 @@ const MedicalAidOptionsManagement = () => {
         header: "Principal", key: "totalMonthlyContributionsPrincipal", width:1 ,
           render: (value, row) => {
             const principalAmount = row.totalMonthlyContributionsPrincipal;
+            const adultAmount = row.totalMonthlyContributionsAdult;
 
             if (principalAmount === null || principalAmount === undefined){
-              return formatToLocalCurrency(row.totalMonthlyContributionsAdult, "en-ZA");
+              return formatToLocalCurrency(adultAmount, "en-ZA");
             }
 
             //else return the principal value
@@ -224,41 +226,55 @@ const MedicalAidOptionsManagement = () => {
     };
    
     const handleMedicalUpdateSave = useCallback( async (categoryId, payload) => {
-      let statusFlag = false;
+
       try{
-        let requestPayload = await updateBulkMedicalOptionsByCategoryId(categoryId, payload);
-        console.log("||--------------------------------< Debug : Update API Response Dump Test From Medical Aid Management Component >-----------------------------------||"); 
+        let response = await updateBulkMedicalOptionsByCategoryId(categoryId, payload);
+        console.log("||--------------------------------< Debug : Update API Response Dump Test From Medical Aid Management Component >-----------------------------------||");
 	    console.log("<---------Response returned :-----------> ");
-	    console.log("Request Metadata : ${request}");
+	    console.log(`Request Metadata : ${JSON.stringify(response)}`);
 
-        /*if([200,204,201].includes(request.status)){
-          handleCloseModal();
-	  const refreshed = await getMedicalOptionsSnapshot();
-	  setMedicalOptions(refreshed);
-	  statusFlag = true;
-	  return (request, statusFlag);	*/
-	        //}
-	   /* else{
-          toast.error('Failed to update options');
-	  //return (request,statusFlag);
-
-	    }*/
-        console.log(requestPayload);
+        // Check if update was successful
+        if (response && [200, 201, 204].includes(response.status)) {
+            toast.success('Medical options updated successfully!');
+	    setUpdateSuccess(true); // only set the signal to true when there is a success
+            return { success: true, response };
+        } else {
+            toast.error('Failed to update options');
+            return { success: false, response };
+        }
       }
       catch (error){
-        toast.error('Failed to update options: ${error}');
-	console.error('Error updating options : ', error);
-     
+        toast.error('Failed to update options: ${error.message}');
+	    console.error('Error updating options : ', error);
+        return { success: false, error };
       }
-    }, [handleCloseModal, getMedicalOptionsSnapshot, setMedicalOptions]);
+    }, []);
+
+    // useEffect: this will handle refreshes after success
+    useEffect(() => {
+      if(!updateSuccess) return; //if no update return nothing
+	
+      //else get snapshot and update snapshot state
+      (async () => {
+        try{
+          const refreshed = await getMedicalOptionsSnapshot();
+		setMedicalOptions(refreshed);
+	  handleCloseModal();
+	}
+	catch(error){
+	  toast.error("Failed to refresh global options data");
+	}
+	finally{
+          setUpdateSuccess(false);
+	}
+      })();
+    },[updateSuccess]); //it is a dependancy as it will only trigger on successful updates
     
     return (
       <div className="menu-background">
         <div className="wrapper-container">
     
             {/* Modal component -  */}
-
-
             <MedicalAidOptionViewModal
                 isOpen={isModalOpen}
                 onClose={handleCloseModal}
@@ -268,7 +284,6 @@ const MedicalAidOptionsManagement = () => {
                 onSave={handleMedicalUpdateSave}
             />
 
-    
             <div className="singular-staff-heading-container">
               Deductions
     

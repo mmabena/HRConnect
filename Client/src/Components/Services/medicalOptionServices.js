@@ -49,8 +49,8 @@ export const medicalOptionServics = {
     return response.data;
   },
   updateBulkMedicalOptionsByCategoryId: async (categoryId, bulkRequest) => {
-    const response = await api.put(`${basePath}/${categoryId}/variants`, bulkRequest);
-    return response;
+    return await api.put(`${basePath}/${categoryId}/variants`, bulkRequest);
+
   }
 };
 

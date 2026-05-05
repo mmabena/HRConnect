@@ -1,11 +1,10 @@
-import {useEffect, useMemo, useState, useCallback} from 'react';
+import {useCallback, useEffect, useMemo, useState} from 'react';
 import ReactDOM from 'react-dom';
 import './MedicalAidOptionViewModal.css';
 import formatToLocalCurrency from "../../../../../utils/formatToLocalCurrency";
 import formatSalaryBracket from "../../../../../utils/formatSalaryBracket";
 import medicalAidOptionDynamicCalculator from "../../../../../utils/medicalAidOptionDynamicCalculator";
 import Divider from './Divider';
-
 
 
 function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categories = [], categoryArray = [], onSave}) {
@@ -111,7 +110,7 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
           monthlyMsaContributionPrincipal: changedFields.monthlyMsaContributionPrincipal ?? option.monthlyMsaContributionPrincipal,
           monthlyMsaContributionAdult: changedFields.monthlyMsaContributionAdult ?? option.monthlyMsaContributionAdult,
           monthlyMsaContributionChild: changedFields.monthlyMsaContributionChild ?? option.monthlyMsaContributionChild,
-          totalMonthlyContributionsPrincipal: (changedFields.monthlyRiskContributionPrincipal ?? option.monthlyRiskContributionPrincipal) + (changedFields.monthlyMsaContributionPrincipal ?? option.monthlyMsaContributionPrincipal ),
+          totalMonthlyContributionsPrincipal: (changedFields.monthlyRiskContributionPrincipal ?? option.monthlyRiskContributionPrincipal) + (changedFields.monthlyMsaContributionPrincipal ?? option.monthlyMsaContributionPrincipal ) ?? null,
           totalMonthlyContributionsAdult: (changedFields.monthlyRiskContributionAdult ?? option.monthlyRiskContributionAdult) + ( changedFields.monthlyMsaContributionAdult ?? option.monthlyMsaContributionAdult ) ,
           totalMonthlyContributionsChild: (changedFields.monthlyRiskContributionChild ?? option.monthlyRiskContributionChild) + ( changedFields.monthlyMsaContributionChild ?? option.monthlyMsaContributionChild ),
           totalMonthlyContributionsChild2: ((changedFields.monthlyRiskContributionChild2 ?? option.monthlyRiskContributionChild2) + ( (changedFields.monthlyMsaContributionChild2 ?? option.monthlyMsaContributionChild2) )) === 0 ?
@@ -218,12 +217,12 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
         const msaPrincipal = getEffectiveValue(oid, 'monthlyMsaContributionPrincipal', currentOption.monthlyMsaContributionPrincipal);
         const msaAdult = getEffectiveValue(oid, 'monthlyMsaContributionAdult', currentOption.monthlyMsaContributionAdult);
         const msaChild = getEffectiveValue(oid, 'monthlyMsaContributionChild', currentOption.monthlyMsaContributionChild);
-        const msaChild2 = getEffectiveValue(oid, 'monthlyMsaContributionChild2', currentOption.monthlyMsaContributionChild2 ?? 0);
+        const msaChild2 = getEffectiveValue(oid, 'monthlyMsaContributionChild2', currentOption.monthlyMsaContributionChild2);
 
-        const totalPrincipal = calculatePrincipalTotal(riskPrincipal, msaPrincipal);
+        const totalPrincipal = calculatePrincipalTotal(riskPrincipal, msaPrincipal) ? null : calculatePrincipalTotal(riskPrincipal, msaPrincipal);
         const totalAdult = calculateAdultTotal(riskAdult, msaAdult);
         const totalChild = calculateChildTotal(riskChild, msaChild);
-        const totalChild2 = calculateChild2Total(riskChild2, msaChild2);
+        const totalChild2 = calculateChild2Total(riskChild2, msaChild2) ? null : calculateChild2Total(riskChild2, msaChild2);
 
         return (
           <table className="model-view-table">
@@ -293,10 +292,10 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
               </tr>
               <tr className="modal-view-totals-row">
                 <td className="modal-view-label-cell">Total</td>
-                <td className="modal-view-label-cell">{totalPrincipal}</td>
+                <td className="modal-view-label-cell">{totalPrincipal ??totalAdult}</td>
                 <td className="modal-view-label-cell">{totalAdult}</td>
                 <td className="modal-view-label-cell">{totalChild}</td>
-                <td className="modal-view-label-cell">{totalChild2}</td>
+                <td className="modal-view-label-cell">{totalChild ?? `Free`}</td>
               </tr>
             </tbody>
 

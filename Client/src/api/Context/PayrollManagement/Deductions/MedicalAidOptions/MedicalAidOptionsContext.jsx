@@ -287,9 +287,9 @@ export const MedicalAidOptionsProvider = ({children}) => {
       //}
 
       const data = medicalOptionServices.updateBulkMedicalOptionsByCategoryId(categoryId, request);
-      const response = Array.isArray(data) ? data : Array.isArray(data.data) ? data.data : [];
+      const response = Array.isArray(data) ? data : Array.isArray(data.data) ? data.data : data;
       // use effect to reflect changes
-        return response;
+      return response;
     }
     catch(error){
       setError(error || "Failed to update medical aid option category by category");
