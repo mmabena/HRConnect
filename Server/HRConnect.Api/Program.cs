@@ -105,7 +105,7 @@ builder.Services.AddAuthentication(options =>
 .AddJwtBearer(options =>
 {
   var jwt = builder.Configuration.GetSection("JwtSettings");
-  var secretValue = jwt["Secret"] ?? string.Empty;
+  string secretValue = jwt["Secret"] ?? string.Empty;
   byte[] keyBytes;
   try
   {
@@ -284,14 +284,11 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
   var initialiser = scope.ServiceProvider.GetRequiredService<PayrollInit>();
+  var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
 
   //initialise a payperiod and payrun on app start up
   await initialiser.InitialisePayrollPeriod();
-}
 
-using (var scope = app.Services.CreateScope())
-{
-  var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
   await userService.SyncEmployeeUserAsync();
 }
 
