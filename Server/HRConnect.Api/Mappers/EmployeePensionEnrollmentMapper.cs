@@ -10,7 +10,7 @@
       return new EmployeePensionEnrollment
       {
         EmployeeId = employeePensionEnrollmentDto.EmployeeId,
-        VoluntaryContribution = (decimal)employeePensionEnrollmentDto.VoluntaryContribution!,
+        VoluntaryContribution = employeePensionEnrollmentDto.VoluntaryContribution ?? 0,
         IsVoluntaryContributionPermament = employeePensionEnrollmentDto.IsVoluntaryContributionPermament,
       };
     }

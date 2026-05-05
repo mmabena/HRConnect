@@ -82,7 +82,7 @@
       if (existingEmployee != null)
       {
         decimal pensionOptionPercentage = await GetEmployeePensionOptionPercentageAsync((int)existingEmployee.PensionOptionId!);
-        PayrollRun? currentPayrollRunId = await _payrollRunRepository.GetCurrentRunAsync();
+        PayrollRun? currentPayrollRunId = await _payrollRunRepository.GetCurrentRunAsync() ?? throw new NotFoundException("Current payroll run not found");
         PensionDeduction? existingPensionDeduction = await _pensionDeductionRepository
           .GetByEmployeeIdAndIsNotLockedAsync(employeePensionEnrollment.EmployeeId);
         if (existingPensionDeduction == null)
@@ -93,7 +93,11 @@
             FirstName = existingEmployee.Name,
             LastName = existingEmployee.Surname,
             DateJoinedCompany = existingEmployee.StartDate,
+<<<<<<< HEAD
             IdNumber = existingEmployee.IdNumber!,
+=======
+            IdNumber = existingEmployee.IdNumber ?? "",
+>>>>>>> main-v0.2
             Passport = existingEmployee.PassportNumber,
             TaxNumber = existingEmployee.TaxNumber,
             PensionableSalary = existingEmployee.MonthlySalary,

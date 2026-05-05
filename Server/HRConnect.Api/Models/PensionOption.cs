@@ -1,4 +1,4 @@
-﻿
+
 namespace HRConnect.Api.Models
 {
   using System.ComponentModel.DataAnnotations.Schema;

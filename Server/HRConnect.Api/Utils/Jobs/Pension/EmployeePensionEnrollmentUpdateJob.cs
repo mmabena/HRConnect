@@ -31,9 +31,9 @@
         EmployeePensionEnrollment? employeePensionEnrollment = await _employeePensionEnrollmentRepository.
         GetByEmployeeIdAndLastRunIdAsync(employeePensionEnrollmentUpdateDto.EmployeeId);
 
-        int oldPensionOptionId = (int)(employeePensionEnrollment?.PensionOptionId);
         if (employeePensionEnrollment != null)
         {
+          int oldPensionOptionId = employeePensionEnrollment.PensionOptionId;
           employeePensionEnrollment.PensionOptionId = employeePensionEnrollmentUpdateDto.PensionOptionId
           ?? employeePensionEnrollment.PensionOptionId;
           employeePensionEnrollment.VoluntaryContribution = employeePensionEnrollmentUpdateDto.VoluntaryContribution

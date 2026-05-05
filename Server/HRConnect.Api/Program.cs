@@ -12,7 +12,6 @@ using HRConnect.Api.Repository;
 using HRConnect.Api.Services;
 using HRConnect.Api.Utils;
 using HRConnect.Api.Utils.Jobs.Payroll;
-using HRConnect.Api.Utils.Jobs.Pension;
 using HRConnect.Api.Utils.Jobs.Notification;
 using HRConnect.Api.Utils.Payroll;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -26,6 +25,8 @@ using HRConnect.Api.Interfaces.Notification;
 using HRConnect.Api.Utils.Factories;
 using HRConnect.Api.Utils.Notification;
 using HRConnect.Api.Interfaces.Payroll.Earning;
+using HRConnect.Api.Interfaces.Payroll.Deduction;
+using HRConnect.Api.Utils.Jobs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -267,6 +268,12 @@ builder.Services.AddScoped<IJobScheduleService, JobScheduleService>();
 
 builder.Services.AddScoped<IPayrollEarningRepository, PayrollEarningRepository>();
 builder.Services.AddScoped<IPayrollEarningService, PayrollEarningService>();
+builder.Services.AddScoped<IEmployeePayrollEarningRepository, EmployeePayrollEarningRepository>();
+builder.Services.AddScoped<IEmployeePayrollEarningService, EmployeePayrollEarningService>();
+builder.Services.AddScoped<IDeductionRepository, DeductionRepository>();
+builder.Services.AddScoped<IDeductionService, DeductionService>();
+builder.Services.AddScoped<IEmployeeDeductionRepository, EmployeeDeductionRepository>();
+builder.Services.AddScoped<IEmployeeDeductionService, EmployeeDeductionService>();
 
 builder.Services.AddCors(options =>
 {
