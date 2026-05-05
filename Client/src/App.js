@@ -30,7 +30,7 @@ import ProjectionCalculator from "./Pages/PayrollTools/ProjectionCalculator";
 import PersonalInformation from "./Components/PersonalInformation.jsx";
 import api from "../src/api/api.js";
 import ChangePositionManagement from "./Components/companyManagement/PositionManagement/ChangePositionManagement.jsx";
-import BankingDetailsModal from "./Components/BankingManagement/BankingDetailsModal.jsx";
+import BankingDetailsModal from "./Components/Steps/BankingManagement/BankingDetailsModal.jsx";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {

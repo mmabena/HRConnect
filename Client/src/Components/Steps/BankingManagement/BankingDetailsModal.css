@@ -1,0 +1,26 @@
+.emp-form-banking-details-grid {
+display:flex;
+  width:600px;
+height: 444px;
+  flex-direction: column;
+  align-items:center;
+
+ 
+  gap: 17px;
+}
+
+/* Frame 46347 */
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+align-items: center;
+padding: 0px;
+
+position: absolute;
+width: 819px;
+height: 375px;
+left: calc(50% - 819px/2 + 0.5px);
+top: calc(50% - 375px/2);
+
+border-radius: 5px;
