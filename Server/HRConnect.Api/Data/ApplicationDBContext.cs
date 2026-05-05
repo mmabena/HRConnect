@@ -9,6 +9,8 @@ namespace HRConnect.Api.Data
   using AppAny.Quartz.EntityFrameworkCore.Migrations;
   using AppAny.Quartz.EntityFrameworkCore.Migrations.SqlServer;
   using HRConnect.Api.Models.Payroll.Earning;
+  using System.Collections.Generic;
+  using Microsoft.EntityFrameworkCore.ChangeTracking;
 
   public class ApplicationDBContext(DbContextOptions dbContextOptions) : DbContext(dbContextOptions)
   {
@@ -19,7 +21,6 @@ namespace HRConnect.Api.Data
     public DbSet<OccupationalLevel> OccupationalLevels { get; set; }
     public DbSet<PasswordResetPin> PasswordResetPins { get; set; }
     public DbSet<PasswordHistory> PasswordHistories { get; set; }
-    // Payroll (MAIN)
     public DbSet<MedicalOption> MedicalOptions { get; set; }
     public DbSet<MedicalOptionCategory> MedicalOptionCategories { get; set; }
     public DbSet<TaxTableUpload> TaxTableUploads { get; set; }
@@ -80,9 +81,9 @@ namespace HRConnect.Api.Data
 
       // Employee -> Position
       modelBuilder.Entity<Employee>()
-    .HasOne(e => e.Position)
-    .WithMany(p => p.Employees)
-    .HasForeignKey(e => e.PositionId);
+         .HasOne(e => e.Position)
+         .WithMany(p => p.Employees)
+         .HasForeignKey(e => e.PositionId);
 
       // Employee -> CareerManager
       modelBuilder.Entity<Employee>()
@@ -128,10 +129,6 @@ namespace HRConnect.Api.Data
           .HasForeignKey(lb => lb.LeaveTypeId)
           .OnDelete(DeleteBehavior.Restrict);
 
-      //   modelBuilder.Entity<EmployeeCompanyContribution>()
-      // .HasIndex(e => new { e.PayrollRunId, e.EmployeeId })
-      // .IsUnique();
-
       modelBuilder.Entity<LeaveEntitlementRule>()
           .HasOne(r => r.JobGrade)
           .WithMany(j => j.LeaveEntitlementRules)
@@ -139,8 +136,8 @@ namespace HRConnect.Api.Data
           .OnDelete(DeleteBehavior.Restrict);
 
       modelBuilder.Entity<CompanyContribution>()
-    .Property(c => c.Percentage)
-    .HasColumnType("decimal(10,6)");
+          .Property(c => c.Percentage)
+          .HasColumnType("decimal(10,6)");
 
       modelBuilder.Entity<EmployeeCompanyContribution>()
           .Property(e => e.DeathPercentage)
@@ -209,7 +206,6 @@ namespace HRConnect.Api.Data
           .HasDefaultValue(0.01m);
 
       // Payroll relationships
-
       modelBuilder.Entity<PayrollPeriod>().HasMany(p => p.Runs)
       .WithOne(r => r.Period)
       .HasForeignKey(p => p.PeriodId);
@@ -279,7 +275,7 @@ namespace HRConnect.Api.Data
       modelBuilder.Entity<Notification>().Property(n => n.Severity)
           .HasConversion<string>();
       modelBuilder.Entity<Notification>().Property(n => n.Type)
-      .HasConversion<string>();
+          .HasConversion<string>();
 
       modelBuilder.Entity<Employee>()
         .HasMany(epre => epre.EmployeePayrollEarning)
@@ -343,7 +339,7 @@ namespace HRConnect.Api.Data
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
       //Intercept all instances of saving any changes to db
-      var modifiedRecords = ChangeTracker.Entries()
+      IEnumerable<EntityEntry> modifiedRecords = ChangeTracker.Entries()
             .Where(e => (e.State == EntityState.Modified || e.State == EntityState.Deleted) &&
             (
             e.Entity is PayrollPeriod ||
@@ -354,10 +350,10 @@ namespace HRConnect.Api.Data
             e.Entity is EmployeeDeduction
             ));
 
-      foreach (var e in modifiedRecords)
+      foreach (EntityEntry e in modifiedRecords)
       {
         //Any locked entity should be under a Hard Lock. Don't allow any changes
-        var prevLockState = (bool)e.OriginalValues["IsLocked"]!;
+        bool prevLockState = (bool)e.OriginalValues["IsLocked"]!;
         if (prevLockState)
         {
           throw new InvalidOperationException("Record/Run under Hard Lock. Cannot be modified");

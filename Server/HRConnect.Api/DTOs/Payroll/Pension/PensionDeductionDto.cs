@@ -2,11 +2,7 @@
 {
   public class PensionDeductionDto
   {
-<<<<<<< HEAD
     public string EmployeeId { get; set; } = string.Empty;
-=======
-    public required string EmployeeId { get; set; }
->>>>>>> main-v0.2
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
     public DateOnly? DateJoinedCompany { get; set; }

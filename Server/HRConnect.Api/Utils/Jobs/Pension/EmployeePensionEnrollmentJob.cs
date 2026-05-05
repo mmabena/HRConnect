@@ -93,11 +93,7 @@
             FirstName = existingEmployee.Name,
             LastName = existingEmployee.Surname,
             DateJoinedCompany = existingEmployee.StartDate,
-<<<<<<< HEAD
-            IdNumber = existingEmployee.IdNumber!,
-=======
             IdNumber = existingEmployee.IdNumber ?? "",
->>>>>>> main-v0.2
             Passport = existingEmployee.PassportNumber,
             TaxNumber = existingEmployee.TaxNumber,
             PensionableSalary = existingEmployee.MonthlySalary,

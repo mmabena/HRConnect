@@ -14,14 +14,14 @@
   {
 
     [HttpGet("options")]
-    public async Task<ActionResult<IEnumerable<PensionOption>>> GetPensionOptions()
+    public async Task<ActionResult> GetPensionOptions()
     {
       IEnumerable<PensionOption> options = await pensionFundService.GetPensionOptionsAsync();
       return Ok(options);
     }
 
     [HttpGet("options/{id}")]
-    public async Task<ActionResult<PensionOption>> GetPensionOption(int id)
+    public async Task<ActionResult> GetPensionOption(int id)
     {
       PensionOption? option = await pensionFundService.GetPensionOptionByIdAsync(id);
       return option != null ? Ok(option) : NotFound("Pension option not found.");
