@@ -1,7 +1,90 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { getEmployeeLeave, applyLeave } from "../../api/leaveApplicationApi";
 import "./ApplyLeave.css";
 
 const ApplyLeave = () => {
+  const [leaveData, setLeaveData] = useState(null);
+  const [selectedLeaveId, setSelectedLeaveId] = useState("");
+  const [description, setDescription] = useState("");
+  const [files, setFiles] = useState([]);
+  const selectedBalance = leaveData?.leaveBalances?.find(
+  (l) => l.leaveTypeId === Number(selectedLeaveId)
+);
+
+const [startDate, setStartDate] = useState("");
+const [endDate, setEndDate] = useState("");
+const [isSubmitting, setIsSubmitting] = useState(false);
+const calculateDays = () => {
+  if (!startDate || !endDate) return 0;
+
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+
+  const diffTime = end - start;
+
+  if (diffTime < 0) return 0;
+
+  return Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+};
+
+const requestedDays = calculateDays();
+const remainingBalance =
+  selectedBalance && requestedDays
+    ? (selectedBalance.availableDays - requestedDays).toFixed(2)
+    : null;
+const safeRemaining =
+  remainingBalance < 0 ? 0 : remainingBalance;
+const handleSubmit = async () => {
+  if (isSubmitting) return; 
+
+  setIsSubmitting(true);
+
+  try {
+    const employee = JSON.parse(localStorage.getItem("currentEmployee"));
+    const employeeId = employee?.employeeId;
+
+    if (!employeeId) {
+      setIsSubmitting(false);
+      return alert("Employee not found");
+    }
+
+    const formData = new FormData();
+
+    formData.append("EmployeeId", employeeId);
+    formData.append("LeaveTypeId", selectedLeaveId);
+    formData.append("StartDate", startDate);
+    formData.append("EndDate", endDate);
+    formData.append("Description", description);
+
+    files.forEach((file) => {
+      formData.append("Documents", file);
+    });
+
+    await applyLeave(formData);
+
+    alert("Leave application submitted successfully");
+
+  } catch (error) {
+    console.error(error);
+    alert("Submission failed");
+  } finally {
+    setIsSubmitting(false);  
+  }
+};
+
+  useEffect(() => {
+  const fetchLeave = async () => {
+    const employee = JSON.parse(localStorage.getItem("currentEmployee"));
+    const employeeId = employee?.employeeId;
+
+    if (!employeeId) return;
+
+    const res = await getEmployeeLeave(employeeId);
+    setLeaveData(res);
+  };
+
+  fetchLeave();
+}, []);
   return (
     <div className="leave-page">
 
@@ -34,8 +117,10 @@ const ApplyLeave = () => {
           <div className="info-box">
             <span className="info-icon">i</span>
             <p>
-              Your current annual leave balance is 4.85 days. All Applications are viewed within 2 business days.
-            </p>
+            {selectedBalance
+              ? `Your current ${selectedBalance.leaveType} balance is ${selectedBalance.availableDays} days. All Applications are viewed within 2 business days.`
+              : "Select a leave type to view your balance."}
+          </p>
           </div>
 
           {/* LEAVE DETAILS */}
@@ -45,8 +130,17 @@ const ApplyLeave = () => {
             {/* Leave Type */}
             <div className="form-group">
               <label>Leave Type</label>
-              <select className="input">
-                <option>Leave Type</option>
+              <select
+                className="input"
+                onChange={(e) => setSelectedLeaveId(e.target.value)}
+              >
+                <option value="">Leave Type</option>
+              
+                {leaveData?.leaveBalances.map((l, index) => (
+                 <option key={l.leaveTypeId} value={l.leaveTypeId}>
+                  {l.leaveType}
+                </option>
+                ))}
               </select>
             </div>
 
@@ -54,20 +148,45 @@ const ApplyLeave = () => {
             <div className="row">
               <div className="form-group">
                 <label>Start Date</label>
-                <input type="date" className="input" />
+                <input
+                type="date"
+                className="input"
+                value={startDate}
+                onChange={(e) => {
+                setStartDate(e.target.value);                           
+                setTimeout(() => {
+                  e.target.blur();
+                }, 0);
+              }}
+              />
               </div>
 
               <div className="form-group">
                 <label>End Date</label>
-                <input type="date" className="input" />
+                <input
+                  type="date"
+                  className="input"
+                  value={endDate}
+                  onChange={(e) => {
+                  setEndDate(e.target.value);
+                  setTimeout(() => {
+                    e.target.blur();
+                  }, 0);
+                }}
+                />
               </div>
             </div>
 
             {/* Days + Balance */}
             <div className="row">
               <div className="form-group">
-                <label>Number of Days</label>
-                <input type="text" className="input disabled" placeholder="3 Days" disabled />
+               <label>Number of Days</label>
+               <input
+                type="text"
+                className="input disabled"
+                value={requestedDays > 0 ? `${requestedDays} Days` : ""}
+                disabled
+              />
               </div>
 
               <div className="form-group">
@@ -75,7 +194,11 @@ const ApplyLeave = () => {
                 <input
                 type="text"
                 className="input disabled"
-                value="1.85 Days remaining"
+               value={
+                  remainingBalance !== null
+                    ? `${safeRemaining} Days remaining`
+                    : ""
+                }
                 disabled
               />
               </div>
@@ -90,14 +213,32 @@ const ApplyLeave = () => {
               <label>Description / Reason</label>
               <textarea
                 className="textarea"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
                 placeholder="Briefly describe the reason for your leave request..."
-              ></textarea>
+              />
             </div>
 
            <div className="form-group">
             <label>Attach Supporting Document</label>
 
-            <div className="upload-box">
+            <div
+              className="upload-box"
+              onClick={() => document.getElementById("fileInput").click()}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => {
+                e.preventDefault();
+                setFiles([...e.dataTransfer.files]);
+              }}
+            >
+              <input
+                id="fileInput"
+                type="file"
+                multiple
+                style={{ display: "none" }}
+                onChange={(e) => setFiles([...e.target.files])}
+              />
+
               <div className="upload-content">
                 <p>Click to upload or drag a file here</p>
                 <small>PDF, JPG or PNG - max 5MB</small>
@@ -105,9 +246,15 @@ const ApplyLeave = () => {
             </div>
           </div>
           </div>
-  {/* ACTION BUTTONS */}
+          {/* ACTION BUTTONS */}
           <div className="form-actions">
-            <button className="submit-btn">✓ Submit Application</button>
+           <button
+              className="submit-btn"
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Submitting..." : "✓ Submit Application"}
+            </button>
             <button className="cancel-btn">Cancel</button>
           </div>
 

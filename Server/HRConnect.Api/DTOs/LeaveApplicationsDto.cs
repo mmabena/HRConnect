@@ -27,9 +27,9 @@ namespace HRConnect.Api.DTOs
         public string Status { get; set; } = null!;
         public List<LeaveDocumentResponse> Documents { get; set; } = new();
     }
-    public class RejectLeaveRequest
+    public class DecisionRequest
     {
-        public string Reason { get; set; } = string.Empty;
+        public string? Reason { get; set; } = string.Empty;
     }
     public class LeaveDocumentResponse
     {

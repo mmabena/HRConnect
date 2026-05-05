@@ -37,6 +37,7 @@ namespace HRConnect.Api.DTOs
     }
     public class LeaveBalanceSummary
     {
+        public int LeaveTypeId { get; set; } 
         public string LeaveType { get; set; } = null!;
         public decimal AccruedDays { get; set; }
         public decimal TakenDays { get; set; }

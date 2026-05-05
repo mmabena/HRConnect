@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getLeaveHistory } from "../../api/leaveApplicationApi";
+import { getLeaveHistory, getEmployeeLeave } from "../../api/leaveApplicationApi";
 import "./LeaveHistory.css";
 import { Dot } from "lucide-react";
 import ApplyLeave from "./ApplyLeave";
@@ -7,6 +7,7 @@ import ApplyLeave from "./ApplyLeave";
 const LeaveHistory = () => {
   const [data, setData] = useState([]);
   const [showApply, setShowApply] = useState(false);
+  const [balances, setBalances] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -20,10 +21,10 @@ const LeaveHistory = () => {
         }
 
         const res = await getLeaveHistory(employeeId);
-
-        console.log("API DATA:", res); // DEBUG
-
         setData(res);
+
+        const leaveRes = await getEmployeeLeave(employeeId);
+        setBalances(leaveRes.leaveBalances);
       } catch (error) {
         console.error(error);
       }
@@ -32,12 +33,10 @@ const LeaveHistory = () => {
     fetchData();
   }, []);
 
-  // ✅ FIX 1: DATE FORMAT
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString("en-GB");
   };
 
-  // ✅ FIX 2: LEAVE TYPE MAPPING
   const mapLeaveType = (code) => {
     switch (code) {
       case "AL":
@@ -53,7 +52,6 @@ const LeaveHistory = () => {
     }
   };
 
-  // ✅ FIX 3: STATUS STYLE
   const getStatusClass = (status) => {
     switch (status) {
       case "Approved":
@@ -64,16 +62,15 @@ const LeaveHistory = () => {
         return "status pending";
     }
   };
-if (showApply) {
-  return <ApplyLeave />;
-}
+
+  if (showApply) {
+    return <ApplyLeave />;
+  }
+
   return (
     <div className="leave-page">
-
-      {/* HEADER TITLE */}
       <h1 className="leave-title">Leave Application</h1>
 
-      {/* NAV */}
       <div className="leave-tabs">
         <div className="leave-tab">Personal Information</div>
         <div className="leave-tab">Payroll Information</div>
@@ -81,7 +78,6 @@ if (showApply) {
         <div className="leave-tab">Payroll Tools</div>
       </div>
 
-      {/* ACTION BUTTONS */}
       <div className="leave-actions">
         <button className="filter-btn">Filter</button>
         <button className="apply-btn" onClick={() => setShowApply(true)}>
@@ -89,9 +85,7 @@ if (showApply) {
         </button>
       </div>
 
-      {/* TABLE CARD */}
       <div className="leave-card">
-
         <div className="leave-header">Leave History</div>
 
         <table className="leave-table">
@@ -118,22 +112,18 @@ if (showApply) {
               data.map((item) => (
                 <tr key={item.id}>
                   <td>{mapLeaveType(item.leaveTypeCode)}</td>
-
                   <td>{formatDate(item.startDate)}</td>
                   <td>{formatDate(item.endDate)}</td>
-
                   <td>{item.daysAllocated} Days</td>
                   <td>{item.daysRequested} Days</td>
-
-                 <td>
-                  <span className={getStatusClass(item.status)}>
+                  <td>
+                    <span className={getStatusClass(item.status)}>
                       <Dot
                         className={`status-dot-icon ${item.status.toLowerCase()}`}
                       />
                       {item.status}
                     </span>
-                </td>
-
+                  </td>
                   <td className="view-link">View</td>
                 </tr>
               ))
@@ -141,14 +131,12 @@ if (showApply) {
           </tbody>
         </table>
 
-        {/* PAGINATION */}
         <div className="pagination">
           <button>{"<"}</button>
           <button className="active">1</button>
           <button>2</button>
           <button>{">"}</button>
         </div>
-
       </div>
     </div>
   );

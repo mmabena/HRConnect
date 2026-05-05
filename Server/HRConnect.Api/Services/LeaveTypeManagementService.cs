@@ -51,6 +51,7 @@ namespace HRConnect.Api.Services
                         .Where(lb => lb.LeaveType.IsActive)
                         .Select(lb => new LeaveBalanceSummary
                         {
+                            LeaveTypeId = lb.LeaveTypeId,
                             LeaveType = lb.LeaveType.Name,
                             AccruedDays = lb.AccruedDays,
                             TakenDays = lb.TakenDays,
@@ -80,6 +81,7 @@ namespace HRConnect.Api.Services
                     .Where(lb => lb.LeaveType.IsActive)
                     .Select(lb => new LeaveBalanceSummary
                     {
+                        LeaveTypeId = lb.LeaveTypeId,
                         LeaveType = lb.LeaveType.Name,
                         AccruedDays = lb.AccruedDays,
                         TakenDays = lb.TakenDays,

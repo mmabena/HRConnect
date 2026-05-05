@@ -462,10 +462,10 @@ namespace HRConnect.Api.Services
                 throw new InvalidOperationException("Base URL is not configured");
 
             var approveLink =
-                $"{baseUrl}/api/LeaveApplication/{application.Id}/approve?token={application.ApprovalToken}";
+                $"{baseUrl}/api/LeaveApplications/{application.Id}/approve?token={application.ApprovalToken}";
 
             var rejectLink =
-                $"{baseUrl}/api/LeaveApplication/{application.Id}/reject?token={application.ApprovalToken}";
+                $"{baseUrl}/api/LeaveApplications/{application.Id}/reject?token={application.ApprovalToken}";
 
             var emailBody = EmailTemplates.GenerateApprovalEmailHtml(
                 employee,
