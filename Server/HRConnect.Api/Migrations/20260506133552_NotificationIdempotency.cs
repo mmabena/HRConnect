@@ -10,6 +10,14 @@ namespace HRConnect.Api.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AlterColumn<int>(
+                name: "DeliveryChannel",
+                table: "Notifications",
+                type: "int",
+                nullable: false,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(max)");
+
             migrationBuilder.AddColumn<string>(
                 name: "IdempotencyKey",
                 table: "Notifications",
@@ -24,6 +32,14 @@ namespace HRConnect.Api.Migrations
             migrationBuilder.DropColumn(
                 name: "IdempotencyKey",
                 table: "Notifications");
+
+            migrationBuilder.AlterColumn<string>(
+                name: "DeliveryChannel",
+                table: "Notifications",
+                type: "nvarchar(max)",
+                nullable: false,
+                oldClrType: typeof(int),
+                oldType: "int");
         }
     }
 }

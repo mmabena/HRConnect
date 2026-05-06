@@ -122,6 +122,15 @@ namespace HRConnect.Api.Services
       await _notificationDispatcher.DispatchNotificationAsync(notification);
       // return created?.ToNotificationDto() ?? null;
     }
+    public async Task<bool> DeleteAllReadAsync()
+    {
+      return await _notificationRepository.DeleteAllReadAsync();
+
+    }
+    public async Task<bool> DeleteAllByEmployeeIdAsync(string employeeId)
+    {
+      return await _notificationRepository.DeleteAllByEmployeeId(employeeId);
+    }
 
   }
 }

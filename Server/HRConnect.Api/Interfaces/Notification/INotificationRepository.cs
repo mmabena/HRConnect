@@ -14,5 +14,8 @@ namespace HRConnect.Api.Interfaces.Notification
     Task<IEnumerable<NotificationDto>> GetAllEmployeeNotificationsBySeverityAsync(string employeeId, NotificationSeverity severity);
     Task<IEnumerable<NotificationDto>> GetAllEmployeeNotificationsByTypeAsync(NotificationType type, string employeeId);
     Task<Notification?> TryCreateUnreadAsync(Notification notification);
+    Task<bool> DeleteAllReadAsync();
+    Task<bool> DeleteAllReadByTypeAsync(NotificationType type);
+    Task<bool> DeleteAllByEmployeeId(string employeeId);
   }
 }

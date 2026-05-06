@@ -59,7 +59,7 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
       _employeePensionEnrollmentService = employeePensionEnrollmentService;
       _userService = userService;
       _employeeService = employeeService;
-      _employeePensionEnrollmentService = employeePensionEnrollmentService;
+      _employeeDeductionService = employeeDeductionService;
       _employeePayrollEarningService = employeePayrollEarningService;
       _notificationsService = notificationsService;
       _now = now ?? (() => DateTime.Now);

@@ -7,6 +7,7 @@ namespace HRConnect.Api.Repository
   using HRConnect.Api.Mappers.Notification;
   using HRConnect.Api.DTOs.Notification;
   using Microsoft.EntityFrameworkCore;
+  using EFCore.BulkExtensions;
 
   public class NotificationRepository : INotificationRepository
   {
@@ -67,19 +68,24 @@ namespace HRConnect.Api.Repository
         !n.IsRead)
         .ExecuteUpdateAsync(s =>
         s.SetProperty(n => n.IsRead, true));
-
       }
+
+      //Read Notifications are automatically deleted
+      await DeleteAllReadByTypeAsync(type);
     }
     public async Task MarkAsReadAsync(Notification notification)
     {
       // _ = _context.Notifications.Update(notification);
       //attatching entity into the entity tracker 
-      _context.Attach(notification);
+      _ = _context.Attach(notification);
 
       notification.IsRead = true;
 
       _context.Entry(notification).Property(n => n.IsRead)
       .IsModified = true;
+
+      //Read Notifications are automatically deleted
+      //  await DeleteAllReadAsync();
 
       _ = await Save();
     }
@@ -121,5 +127,23 @@ namespace HRConnect.Api.Repository
       await tsx.CommitAsync();
       return notification;
     }
+    public async Task<bool> DeleteAllReadAsync()
+    {
+      return await _context.Notifications.Where(n => n.IsRead)
+          .ExecuteDeleteAsync() > 0;
+    }
+    public async Task<bool> DeleteAllReadByTypeAsync(NotificationType type)
+    {
+      return await _context.Notifications.Where(n => n.IsRead &&
+          n.Type == type)
+          .ExecuteDeleteAsync() > 0;
+    }
+
+    public async Task<bool> DeleteAllByEmployeeId(string employeeId)
+    {
+      return await _context.Notifications.Where(n => n.EmployeeId == employeeId)
+        .ExecuteDeleteAsync() > 0;
+    }
+
   }
 }

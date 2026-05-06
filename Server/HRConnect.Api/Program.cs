@@ -154,13 +154,13 @@ builder.Services.AddQuartz(q =>
   q.AddTrigger(opts => opts
   .ForJob(RolloverJobKey)
   .WithIdentity("PayrollRollover-Trigger")
-  .WithCronSchedule("0 0 0 1 * ?", x =>
+  .WithCronSchedule("30 0/1 * * * ?", x =>
   x.WithMisfireHandlingInstructionFireAndProceed()));
 
   q.AddTrigger(opts => opts
   .ForJob(NotificationJobKey)
   .WithIdentity("NotificationJob-Trigger")
-  .WithCronSchedule("0 0 0 1 * ?", x =>
+  .WithCronSchedule("10,15,20,25 0/1 * * * ?", x =>
   x.WithMisfireHandlingInstructionIgnoreMisfires()));
 
   // 0 -> 0 seconds
@@ -196,6 +196,10 @@ builder.Services.AddQuartzHostedService(q =>
 {
   q.WaitForJobsToComplete = true;
 });
+
+builder.Services.Configure<ToptConfigOptions>(
+  builder.Configuration.GetSection("Totp"));
+
 
 builder.Configuration.AddUserSecrets<Program>();
 builder.Services.AddSingleton(provider =>
@@ -274,7 +278,6 @@ builder.Services.AddScoped<IDeductionRepository, DeductionRepository>();
 builder.Services.AddScoped<IDeductionService, DeductionService>();
 builder.Services.AddScoped<IEmployeeDeductionRepository, EmployeeDeductionRepository>();
 builder.Services.AddScoped<IEmployeeDeductionService, EmployeeDeductionService>();
-
 builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowReact",

@@ -66,7 +66,7 @@ namespace HRConnect.Api.Utils.Jobs.Notification
             Message = $"Finalise Payroll. Payroll Will Rollover In {secondsUntilRollover}",
             Severity = NotificationSeverity.Critical,
             Type = NotificationType.Payroll,
-            DeliveryChannel = "InApp",
+            DeliveryChannel = DeliveryChannel.InApp,
             DueDate = payrollExecutionDate,
             EmployeeId = $"{su}"
           };
