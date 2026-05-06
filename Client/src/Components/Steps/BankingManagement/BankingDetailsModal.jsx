@@ -1,7 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./BankingDetailsModal.css";
-
-import { UserRoundPlus, X } from "lucide-react";
 
 const BankingDetailsModal = ({
   employee,
@@ -11,16 +9,42 @@ const BankingDetailsModal = ({
   onNext,
   onBack,
 }) => {
-
-  const banks = ["FNB", "Standard Bank", "ABSA", "Nedbank", "Capitec"];
-  const accountTypes = ["Savings", "Cheque", "Business"];
-  const paymentMethods = ["EFT", "Cash", "Cheque"];
-  const payFrequencies = ["Weekly", "Bi-Weekly", "Monthly"];
-
+  const [bankData, setBankData] = useState([]);
   const [currentStep] = useState(2);
+
+  const banks = Array.isArray(bankData)
+    ? bankData.map((b) => b.bankName)
+    : [];
+
+  const accountTypes = ["Savings", "Cheque", "Business"];
+
+  const paymentMethods = ["EFT", "Cash", "Cheque"];
+
+  const payFrequencies = [
+    "Weekly",
+    "Bi-Weekly",
+    "Monthly",
+  ];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    if (name === "bankName") {
+      const selectedBank = bankData.find(
+        (b) =>
+          b.bankName?.toLowerCase() ===
+          value.toLowerCase(),
+      );
+
+      setEmployee((prev) => ({
+        ...prev,
+        bankName: value,
+        branchCode:
+          selectedBank?.branchCode || "",
+      }));
+
+      return;
+    }
 
     setEmployee((prev) => ({
       ...prev,
@@ -31,196 +55,306 @@ const BankingDetailsModal = ({
   const validateBanking = () => {
     const errors = {};
 
-    if (!employee.bankName) errors.bankName = "Bank is required";
-    if (!employee.accountNumber) errors.accountNumber = "Account number is required";
-    if (!employee.branchCode) errors.branchCode = "Branch code is required";
-    if (!employee.accountType) errors.accountType = "Account type is required";
-    if (!employee.accountHolderName) errors.accountHolderName = "Account holder name is required";
-    if (!employee.paymentMethod) errors.paymentMethod = "Payment method is required";
+    if (!employee.bankName)
+      errors.bankName = "Bank is required";
+
+    if (!employee.accountNumber)
+      errors.accountNumber =
+        "Account number is required";
+
+    if (!employee.branchCode)
+      errors.branchCode =
+        "Branch code is required";
+
+    if (!employee.accountType)
+      errors.accountType =
+        "Account type is required";
+
+    if (!employee.accountHolderName)
+      errors.accountHolderName =
+        "Account holder name is required";
+
+    if (!employee.paymentMethod)
+      errors.paymentMethod =
+        "Payment method is required";
 
     return errors;
   };
 
+  useEffect(() => {
+    const fetchBankCodes = async () => {
+      try {
+        const res = await fetch(
+          "/api/BankingDetails/BankBranchCodes",
+        );
+
+        const data = await res.json();
+
+        setBankData(
+          Array.isArray(data)
+            ? data
+            : data.data || [],
+        );
+      } catch (err) {
+        console.error(
+          "Failed to load bank branch codes",
+          err,
+        );
+      }
+    };
+
+    fetchBankCodes();
+  }, []);
+
   const handleNext = () => {
     const errors = validateBanking();
+
     setFormErrors(errors);
 
-    if (Object.keys(errors).length > 0) return;
+    if (Object.keys(errors).length > 0)
+      return;
 
     onNext();
   };
 
-  return (
-   
+return (
+  <div className="emp-name-surname-container">
+    <div className="emp-form-grid">
 
-    
-      
-          <div className="emp-name-surname-container">
+      <div className="emp-personal-details-heading">
+        <span>Banking Details</span>
+      </div>
 
-            <div className="emp-form-banking-details-grid">
+      <div className="emp-personal-details-sub">
+        <span>Salary payment account information</span>
+      </div>
 
-              <div className="emp-personal-banking-details-heading">
-                Banking Details
-              </div>
+      {/* BANK */}
+      <div className="emp-full-width dropdown-wrapper emp-input-wrapper">
+        <select
+          name="bankName"
+          value={employee.bankName || ""}
+          onChange={handleChange}
+          className={`emp-name-input ${
+            formErrors.bankName ? "emp-error-input" : ""
+          }`}
+        >
+          <option value="">Select Bank</option>
 
-              <div className="emp-personal-banking-details-sub">
-                Salary payment account information
-              </div>
+          {banks.map((b) => (
+            <option key={b} value={b}>
+              {b}
+            </option>
+          ))}
+        </select>
 
-              {/* BANK */}
-              <div className="emp-full-width dropdown-wrapper emp-input-wrapper">
-                <select
-                  name="bankName"
-                  value={employee.bankName || ""}
-                  onChange={handleChange}
-                  className={`emp-name-input ${formErrors.bankName ? "emp-error-input" : ""}`}
-                >
-                  <option value="">Select Bank</option>
-                  {banks.map((b) => (
-                    <option key={b} value={b}>{b}</option>
-                  ))}
-                </select>
+        {formErrors.bankName && (
+          <span className="emp-error-message">
+            {formErrors.bankName}
+          </span>
+        )}
 
-                {formErrors.bankName && (
-                  <span className="emp-error-message">{formErrors.bankName}</span>
-                )}
-              </div>
+        <img
+          src="/images/arrow_drop_down_circle.png"
+          alt="Dropdown icon"
+          className="dropdown-icon"
+        />
+      </div>
 
-              {/* ACCOUNT + BRANCH */}
-              <div className="emp-two-col">
+      {/* ACCOUNT + BRANCH */}
+      <div className="emp-two-col">
 
-                <div className="emp-input-wrapper">
-                  <input
-                    type="text"
-                    name="accountNumber"
-                    placeholder="Account Number"
-                    value={employee.accountNumber || ""}
-                    onChange={handleChange}
-                    className={`emp-name-input ${formErrors.accountNumber ? "emp-error-input" : ""}`}
-                  />
-                  {formErrors.accountNumber && (
-                    <span className="emp-error-message">{formErrors.accountNumber}</span>
-                  )}
-                </div>
+        <div className="emp-input-wrapper">
+          <input
+            type="text"
+            name="accountNumber"
+            placeholder="Account Number"
+            value={employee.accountNumber || ""}
+            onChange={handleChange}
+            className={`emp-name-input ${
+              formErrors.accountNumber ? "emp-error-input" : ""
+            }`}
+          />
 
-                <div className="emp-input-wrapper">
-                  <input
-                    type="text"
-                    name="branchCode"
-                    placeholder="Branch Code"
-                    value={employee.branchCode || ""}
-                    onChange={handleChange}
-                    className={`emp-name-input ${formErrors.branchCode ? "emp-error-input" : ""}`}
-                  />
-                  {formErrors.branchCode && (
-                    <span className="emp-error-message">{formErrors.branchCode}</span>
-                  )}
-                </div>
+          {formErrors.accountNumber && (
+            <span className="emp-error-message">
+              {formErrors.accountNumber}
+            </span>
+          )}
+        </div>
 
-              </div>
+        <div className="emp-input-wrapper">
+          <input
+            type="text"
+            name="branchCode"
+            placeholder="Branch Code"
+            value={employee.branchCode || ""}
+            readOnly
+            className={`emp-name-input ${
+              formErrors.branchCode ? "emp-error-input" : ""
+            }`}
+          />
 
-              {/* TYPE + PAYMENT */}
-              <div className="emp-two-col">
+          {formErrors.branchCode && (
+            <span className="emp-error-message">
+              {formErrors.branchCode}
+            </span>
+          )}
+        </div>
 
-                <div className="emp-input-wrapper dropdown-wrapper">
-                  <select
-                    name="accountType"
-                    value={employee.accountType || ""}
-                    onChange={handleChange}
-                    className={`emp-name-input ${formErrors.accountType ? "emp-error-input" : ""}`}
-                  >
-                    <option value="">Account Type</option>
-                    {accountTypes.map((t) => (
-                      <option key={t} value={t}>{t}</option>
-                    ))}
-                  </select>
+      </div>
 
-                  {formErrors.accountType && (
-                    <span className="emp-error-message">{formErrors.accountType}</span>
-                  )}
-                </div>
+      {/* TYPE + PAYMENT */}
+      <div className="emp-two-col">
 
-                <div className="emp-input-wrapper dropdown-wrapper">
-                  <select
-                    name="paymentMethod"
-                    value={employee.paymentMethod || ""}
-                    onChange={handleChange}
-                    className={`emp-name-input ${formErrors.paymentMethod ? "emp-error-input" : ""}`}
-                  >
-                    <option value="">Payment Method</option>
-                    {paymentMethods.map((p) => (
-                      <option key={p} value={p}>{p}</option>
-                    ))}
-                  </select>
+        <div className="emp-input-wrapper dropdown-wrapper">
+          <select
+            name="accountType"
+            value={employee.accountType || ""}
+            onChange={handleChange}
+            className={`emp-name-input ${
+              formErrors.accountType ? "emp-error-input" : ""
+            }`}
+          >
+            <option value="">Account Type</option>
 
-                  {formErrors.paymentMethod && (
-                    <span className="emp-error-message">{formErrors.paymentMethod}</span>
-                  )}
-                </div>
+            {accountTypes.map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </select>
 
-              </div>
+          {formErrors.accountType && (
+            <span className="emp-error-message">
+              {formErrors.accountType}
+            </span>
+          )}
 
-              {/* HOLDER + REF */}
-              <div className="emp-two-col">
+          <img
+            src="/images/arrow_drop_down_circle.png"
+            alt="Dropdown icon"
+            className="dropdown-icon"
+          />
+        </div>
 
-                <div className="emp-input-wrapper">
-                  <input
-                    type="text"
-                    name="accountHolderName"
-                    placeholder="Account Holder Name"
-                    value={employee.accountHolderName || ""}
-                    onChange={handleChange}
-                    className={`emp-name-input ${formErrors.accountHolderName ? "emp-error-input" : ""}`}
-                  />
+        <div className="emp-input-wrapper dropdown-wrapper">
+          <select
+            name="paymentMethod"
+            value={employee.paymentMethod || ""}
+            onChange={handleChange}
+            className={`emp-name-input ${
+              formErrors.paymentMethod ? "emp-error-input" : ""
+            }`}
+          >
+            <option value="">Payment Method</option>
 
-                  {formErrors.accountHolderName && (
-                    <span className="emp-error-message">{formErrors.accountHolderName}</span>
-                  )}
-                </div>
+            {paymentMethods.map((p) => (
+              <option key={p} value={p}>
+                {p}
+              </option>
+            ))}
+          </select>
 
-                <div className="emp-input-wrapper">
-                  <input
-                    type="text"
-                    name="reference"
-                    placeholder="Reference"
-                    value={employee.reference || ""}
-                    onChange={handleChange}
-                    className="emp-name-input"
-                  />
-                </div>
+          {formErrors.paymentMethod && (
+            <span className="emp-error-message">
+              {formErrors.paymentMethod}
+            </span>
+          )}
 
-              </div>
+          <img
+            src="/images/arrow_drop_down_circle.png"
+            alt="Dropdown icon"
+            className="dropdown-icon"
+          />
+        </div>
 
-              {/* FREQUENCY + DATE */}
-              <div className="emp-two-col">
+      </div>
 
-                <div className="emp-input-wrapper dropdown-wrapper">
-                  <select
-                    name="payFrequency"
-                    value={employee.payFrequency || ""}
-                    onChange={handleChange}
-                    className="emp-name-input"
-                  >
-                    <option value="">Pay Frequency</option>
-                    {payFrequencies.map((f) => (
-                      <option key={f} value={f}>{f}</option>
-                    ))}
-                  </select>
-                </div>
+      {/* HOLDER + REF */}
+      <div className="emp-two-col">
 
-                <div className="emp-input-wrapper">
-                  <input
-                    type="date"
-                    name="payDate"
-                    value={employee.payDate || ""}
-                    onChange={handleChange}
-                    className="emp-name-input"
-                  />
-                </div>
+        <div className="emp-input-wrapper">
+          <input
+            type="text"
+            name="accountHolderName"
+            placeholder="Account Holder Name"
+            value={employee.accountHolderName || ""}
+            onChange={handleChange}
+            className={`emp-name-input ${
+              formErrors.accountHolderName ? "emp-error-input" : ""
+            }`}
+          />
 
-              </div>
+          {formErrors.accountHolderName && (
+            <span className="emp-error-message">
+              {formErrors.accountHolderName}
+            </span>
+          )}
+        </div>
 
-              {/* BUTTONS */}
+        <div className="emp-input-wrapper">
+          <input
+            type="text"
+            name="reference"
+            placeholder="Reference"
+            value={employee.reference || ""}
+            onChange={handleChange}
+            className="emp-name-input"
+          />
+        </div>
+
+      </div>
+
+      {/* FREQUENCY + DATE */}
+      <div className="emp-two-col">
+
+        <div className="emp-input-wrapper dropdown-wrapper">
+          <select
+            name="payFrequency"
+            value={employee.payFrequency || ""}
+            onChange={handleChange}
+            className="emp-name-input"
+          >
+            <option value="">Pay Frequency</option>
+
+            {payFrequencies.map((f) => (
+              <option key={f} value={f}>
+                {f}
+              </option>
+            ))}
+          </select>
+
+          <img
+            src="/images/arrow_drop_down_circle.png"
+            alt="Dropdown icon"
+            className="dropdown-icon"
+          />
+        </div>
+
+        <div className="emp-input-wrapper">
+          <div className="date-wrapper">
+            <label className="date-label">Pay Date</label>
+
+            <input
+              type="date"
+              name="payDate"
+              value={employee.payDate || ""}
+              onChange={handleChange}
+              className="emp-name-input"
+            />
+
+            <img
+              src="/images/calendar-range.svg"
+              alt="Calendar icon"
+              className="dropdown-icon"
+            />
+          </div>
+        </div>
+
+      </div>
+
+      {/* BUTTONS */}
               <div className="emp-button-row">
 
                 <button className="emp-back-button" onClick={onBack}>
@@ -233,10 +367,9 @@ const BankingDetailsModal = ({
 
               </div>
 
-            </div>
-          </div>
-        )};
-
-
+    </div>
+  </div>
+);
+};
 
 export default BankingDetailsModal;

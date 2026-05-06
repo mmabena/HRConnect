@@ -1,26 +1,101 @@
-.emp-form-banking-details-grid {
-display:flex;
-  width:600px;
-height: 444px;
-  flex-direction: column;
-  align-items:center;
 
- 
-  gap: 17px;
+
+.banking-form-grid {
+  
+  width: 1180px;
+  max-height: 843px;
+  margin-left:375px;
+  height: 100%;
+  left: 100px;
+  border-radius: 10px;
+  display: grid;
+  margin-top:100px;
+  padding:20px;
+  z-index: 1;
+  gap:17px
 }
 
-/* Frame 46347 */
+.banking-details-heading {
+  font-size: 16px;
+  font-weight: 600;
+  color: #355867;
+  width: 100%;
+}
 
-/* Auto layout */
-display: flex;
-flex-direction: column;
-align-items: center;
-padding: 0px;
+.banking-details-sub {
+  font-size: 14px;
+  color: #006088;
+  width: 100%;
+}
 
-position: absolute;
-width: 819px;
-height: 375px;
-left: calc(50% - 819px/2 + 0.5px);
-top: calc(50% - 375px/2);
+.banking-full-width {
+  width: 100%;
+}
 
-border-radius: 5px;
+.banking-two-col {
+  display: flex;
+  gap: 31px;
+  width: 100%;
+}
+
+.banking-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.banking-input {
+  height: 33px;
+  padding: 5px 10px;
+  border: 1px solid rgba(0, 96, 136, 0.6);
+  border-radius: 5px;
+  font-size: 14px;
+  color: #4f6e78;
+  outline: none;
+}
+
+.banking-input:focus {
+  border-color: #006088;
+}
+
+.banking-dropdown-wrapper select {
+  cursor: pointer;
+  background-color: #fff;
+}
+
+.banking-input-error {
+  border: 1px solid red;
+}
+
+.banking-error-message {
+  font-size: 12px;
+  color: red;
+  margin-top: 3px;
+}
+
+.banking-button-row {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.banking-back-button {
+  width: 187px;
+  height: 47px;
+  border-radius: 10px;
+  border: 1px solid rgba(112, 112, 112, 0.5);
+  background: rgba(255, 255, 255, 0.7);
+  color: #5c5c5c;
+  cursor: pointer;
+}
+
+.banking-next-button {
+  width: 187px;
+  height: 47px;
+  border-radius: 10px;
+  border: 1px solid #707070;
+  background: #355867;
+  color: #fff;
+  cursor: pointer;
+}
