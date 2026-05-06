@@ -7,6 +7,8 @@ const ApplyLeave = () => {
   const [selectedLeaveId, setSelectedLeaveId] = useState("");
   const [description, setDescription] = useState("");
   const [files, setFiles] = useState([]);
+  const employee = JSON.parse(localStorage.getItem("currentEmployee"));
+  
   const selectedBalance = leaveData?.leaveBalances?.find(
   (l) => l.leaveTypeId === Number(selectedLeaveId)
 );
@@ -28,6 +30,7 @@ const calculateDays = () => {
 };
 
 const requestedDays = calculateDays();
+
 const remainingBalance =
   selectedBalance && requestedDays
     ? (selectedBalance.availableDays - requestedDays).toFixed(2)
@@ -71,7 +74,15 @@ const handleSubmit = async () => {
     setIsSubmitting(false);  
   }
 };
+const formatDate = (dateString) => {
+  if (!dateString) return "";
 
+  return new Date(dateString).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+};
   useEffect(() => {
   const fetchLeave = async () => {
     const employee = JSON.parse(localStorage.getItem("currentEmployee"));
@@ -145,36 +156,64 @@ const handleSubmit = async () => {
             </div>
 
             {/* Dates */}
-            <div className="row">
-              <div className="form-group">
-                <label>Start Date</label>
-                <input
-                type="date"
-                className="input"
-                value={startDate}
-                onChange={(e) => {
-                setStartDate(e.target.value);                           
-                setTimeout(() => {
-                  e.target.blur();
-                }, 0);
-              }}
-              />
-              </div>
 
-              <div className="form-group">
-                <label>End Date</label>
-                <input
-                  type="date"
-                  className="input"
-                  value={endDate}
-                  onChange={(e) => {
-                  setEndDate(e.target.value);
-                  setTimeout(() => {
-                    e.target.blur();
-                  }, 0);
-                }}
-                />
-              </div>
+           <div className="row">
+            <div className="row date-row">
+
+  {/* Start Date */}
+  <div className="form-group">
+    <label>Start Date</label>
+
+    <div className="date-wrapper">
+
+      <input
+        type="date"
+        className="input date-input"
+        value={startDate}
+        onChange={(e) => {
+          setStartDate(e.target.value);
+        }}
+      />
+
+      <span className="formatted-date">
+        {formatDate(startDate)}
+      </span>
+
+      <img
+        src="/images/calendar-range.svg"
+        alt="calendar icon"
+        className="calendar-icon"
+      />
+    </div>
+  </div>
+
+  {/* End Date */}
+  <div className="form-group">
+    <label>End Date</label>
+
+    <div className="date-wrapper">
+
+      <input
+        type="date"
+        className="input date-input"
+        value={endDate}
+        onChange={(e) => {
+          setEndDate(e.target.value);
+        }}
+      />
+
+      <span className="formatted-date">
+        {formatDate(endDate)}
+      </span>
+
+      <img
+        src="/images/calendar-range.svg"
+        alt="calendar icon"
+        className="calendar-icon"
+      />
+    </div>
+  </div>
+            </div>
             </div>
 
             {/* Days + Balance */}
@@ -239,10 +278,17 @@ const handleSubmit = async () => {
                 onChange={(e) => setFiles([...e.target.files])}
               />
 
-              <div className="upload-content">
-                <p>Click to upload or drag a file here</p>
-                <small>PDF, JPG or PNG - max 5MB</small>
-              </div>
+             <div className="upload-content">
+            <img
+              src="/images/arrow_upload_ready.png"
+              alt="upload icon"
+              className="upload-icon"
+            />
+
+            <p>Click to upload or drag a file here</p>
+
+            <small>PDF, JPG or PNG - max 5MB</small>
+          </div>
             </div>
           </div>
           </div>
@@ -261,63 +307,102 @@ const handleSubmit = async () => {
         </div>
 
         {/* RIGHT PANEL */}
-        <div className="apply-right">
+<div className="apply-right">
 
-          {/* ENTITLEMENTS */}
-          <div className="card">
-            <p className="card-title">LEAVE ENTITLEMENTS</p>
-            
-            <div className="progress-item">
-              <div className="progress-row">
-                <span>Annual Leave</span>
-                <span>4.85 / 15 Days</span>
-              </div>
-              <div className="progress-bar red"></div>
+  <div className="card">
+    <p className="card-title">LEAVE ENTITLEMENTS</p>
+
+    {leaveData?.leaveBalances
+      ?.filter((leave) => {
+        if (
+          leave.leaveType === "Maternity Leave" &&
+          employee?.gender !== "Female"
+        ) {
+          return false;
+        }
+
+        return true;
+      })
+      .map((leave, index) => {
+        const entitlement =
+          leave.leaveType === "Annual Leave"
+            ? 22
+            : leave.accruedDays;
+
+        const percentage =
+          entitlement > 0
+            ? (leave.availableDays / entitlement) * 100
+            : 0;
+
+        const isAnnualLeave =
+          leave.leaveType === "Annual Leave";
+
+        let progressClass = "blue";
+
+        if (isAnnualLeave) {
+          if (percentage >= 75) {
+            progressClass = "red";
+          } else if (percentage >= 50) {
+            progressClass = "orange";
+          } else {
+            progressClass = "blue";
+          }
+        }
+
+        if (leave.availableDays <= 0) {
+          progressClass = "grey";
+        }
+
+        return (
+          <div className="progress-item" key={index}>
+            <div className="progress-row">
+              <span>{leave.leaveType}</span>
+
+              <span>
+                {leave.availableDays} / {entitlement} Days
+              </span>
             </div>
-            
-            <div className="progress-item">
-              <div className="progress-row">
-                <span>Sick Leave</span>
-                <span>26 / 30 Days</span>
-              </div>
-              <div className="progress-bar blue"></div>
-            </div>
-            
-            <div className="progress-item">
-              <div className="progress-row">
-                <span>Family Responsibility Leave</span>
-                <span>1 / 3 Days</span>
-              </div>
-              <div className="progress-bar blue"></div>
-            </div>
-            
-            <div className="progress-item">
-              <div className="progress-row">
-                <span>Maternity Leave</span>
-                <span>0 / 121 Days</span>
-              </div>
-              <div className="progress-bar grey"></div>
+
+            <div className="progress-track">
+              <div
+                className={`progress-bar ${progressClass}`}
+                style={{
+                  width: `${Math.min(percentage, 100)}%`,
+                }}
+              ></div>
             </div>
           </div>
+        );
+      })}
+  </div>
 
-          {/* POLICY */}
-          <div className="card">
-            <p className="card-title">LEAVE POLICY</p>
+  {/* POLICY */}
+  <div className="policy-card">
+    <p className="card-title">LEAVE POLICY</p>
 
-            <ul className="policy-list">
-              <li>Annual leave must be approved at least 5 business days in advance.</li>
-              <li>Sick leave requires a medical certificate for absences exceeding 2 consecutive days.</li>
-              <li>Family responsibility leave covers up to 3 days per year for qualifying events.</li>
-              <li>Unused leave does not carry over to the following year.</li>
-            </ul>
-          </div>
-        
+    <ul className="policy-list">
+      <li>
+        Annual leave must be approved at least 5 business days in advance.
+      </li>
 
+      <li>
+        Sick leave requires a medical certificate for absences exceeding 2 consecutive days.
+      </li>
+
+      <li>
+        Family responsibility leave covers up to 3 days per year for qualifying events.
+      </li>
+
+      <li>
+        Unused leave does not carry over to the following year.
+      </li>
+    </ul>
+  </div>
+</div>
         </div>
-
       </div>
-    </div>
   );
 };
+
 
 export default ApplyLeave;

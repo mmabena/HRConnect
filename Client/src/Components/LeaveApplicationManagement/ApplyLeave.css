@@ -73,7 +73,7 @@
   position: relative;
   left: 55px;
   top: -40px;
-  height: 792px; 
+  height: 820px; 
 
   width: 812px;
 
@@ -185,21 +185,39 @@
   font-size: 16px;
 
   color: #002D40;
+
+  background: #ffffff;
 }
 .row {
   display: flex;
-  justify-content: space-between;
-  gap: 12px;
+  align-items: flex-start;
+  justify-content: flex-start;
 
-  width: 100%;
-  max-width: 764px;
+  gap: 67px;
+
+  width: 787px;
+
   margin-top: 15px;
+}
+
+.row .form-group {
+  display: flex;
+  flex-direction: column;
+
+  width: 360px;
+  max-width: 360px;
+
+  margin-top: 0;
+}
+.row .form-group .input {
+  width: 336px;
+  height: 40px;
+
   box-sizing: border-box;
 }
-.row .form-group {
-  flex: 1;
-  max-width: calc(50% - 6px);
-  margin-top: 0;
+.date-row .date-wrapper {
+  position: relative;
+  left: 1px;
 }
 .form-group label {
   font-family: 'Anek Bangla';
@@ -261,7 +279,7 @@ input:disabled {
 .textarea {
   box-sizing: border-box;
 
-  width: 772px;
+  width: 767px;
   height: 87px;
 
   background: rgba(255, 255, 255, 0.38);
@@ -285,7 +303,7 @@ input:disabled {
 .upload-box {
   box-sizing: border-box;
 
-  width: 772px;
+  width: 767px;
   height: 90px;
 
   background: rgba(255, 255, 255, 0.38);
@@ -440,12 +458,9 @@ input:disabled {
   float: right;
 }
 .progress-bar {
-  margin-top: 6px;
-
-  width: 100%;
-  height: 3px;
-
+  height: 100%;
   border-radius: 10px;
+  transition: width 0.3s ease;
 }
 .progress-bar.red {
   background: #E12528;
@@ -466,22 +481,25 @@ input:disabled {
   width: 100%;
 }
 .policy-card {
-  position: absolute;
-  top: 393px;
-  left: 0;
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  padding: 33px 12px 33px 19px;
+  gap: 12px;
 
   width: 501px;
   height: 336px;
 
-  padding: 33px 12px 33px 19px;
-
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-
   background: rgba(255, 255, 255, 0.8);
   border: 1px solid rgba(0, 0, 0, 0.25);
   border-radius: 10px;
+
+  flex: none;
+  order: 1;
+  flex-grow: 0;
 }
 .policy-list {
   list-style: none;
@@ -500,6 +518,8 @@ input:disabled {
   color: #4F6E78;
 
   border-bottom: 1px solid #C3BEBE;
+
+  text-align: left;
 }
 .policy-list li::before {
   content: "";
@@ -513,4 +533,159 @@ input:disabled {
 
   border-radius: 50%;
   background: #4F6E78;
+}
+.progress-item {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  width: 100%;
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+
+  border-bottom: 1px solid #c3bebe;
+}
+
+.progress-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  width: 100%;
+
+  font-family: "Anek Bangla";
+  font-size: 13px;
+  color: #4f6e78;
+}
+
+.progress-track {
+  width: 100%;
+  height: 6px;
+
+  background: #e5e5e5;
+  border-radius: 10px;
+
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  border-radius: 10px;
+
+  transition: width 0.3s ease;
+}
+
+.progress-bar.red {
+  background: #e12528;
+}
+
+.progress-bar.blue {
+  background: #4f6e78;
+}
+
+.progress-bar.grey {
+  background: #bdbdbd;
+}
+.progress-bar.orange {
+  background: #f59e0b;
+}
+select.input {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  background: url("/public/images/arrow_drop_down_circle.png") no-repeat right 10px center;
+
+  background-size: 20px 20px;
+
+  padding-right: 40px;
+}
+.date-wrapper {
+  position: relative;
+
+  width: 336px;
+}
+
+.date-input {
+  width: 100%;
+  height: 40px;
+
+  box-sizing: border-box;
+
+  position: relative;
+  z-index: 2;
+
+  color: #002D40;
+
+  font-family: 'Anek Bangla';
+  font-size: 16px;
+
+  padding-right: 45px;
+  padding-left: 12px;
+
+  background: transparent;
+}
+.calendar-icon {
+  position: absolute;
+
+  right: 5px;
+  top: 50%;
+
+  transform: translateY(-50%);
+
+  width: 24px;
+  height: 24px;
+
+  pointer-events: none;
+}
+.upload-content {
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  height: 100%;
+
+  text-align: center;
+
+  padding-top: 30px;
+}
+.upload-icon {
+  width: 24px;
+  height: 24px;
+
+  position: relative;
+  left: 50%;
+  margin-top: 300px;
+  margin-bottom: 8px;
+}
+.date-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+
+  gap: 67px;
+
+  width: 787px;
+
+  margin-top: 15px;
+}
+.formatted-date {
+  position: absolute;
+
+  left: 12px;
+  top: 50%;
+
+  transform: translateY(-50%);
+
+  font-family: 'Anek Bangla';
+  font-size: 16px;
+
+  color: #002D40;
+
+  pointer-events: none;
+
+  z-index: 1;
 }
