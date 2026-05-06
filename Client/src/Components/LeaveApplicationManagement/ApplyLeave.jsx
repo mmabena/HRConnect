@@ -98,14 +98,6 @@ const formatDate = (dateString) => {
 }, []);
   return (
     <div className="leave-page">
-
-      <div className="leave-tabs">
-        <div className="leave-tab">Personal Information</div>
-        <div className="leave-tab">Payroll Information</div>
-        <div className="leave-tab active">Leave</div>
-        <div className="leave-tab">Payroll Tools</div>
-      </div>
-
       {/* HEADER */}
       <div className="apply-header">
         <div>

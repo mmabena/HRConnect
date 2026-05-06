@@ -1,11 +1,10 @@
 .leave-page {
   position: relative;
-  top: 33px;
-  left: 450px;
-   
 
-  width: 2200px;
-  height: 1080px;
+  margin-left: 356px;
+
+  width: calc(100vw - 356px);
+  min-height: calc(102vh - 21px);
 
   display: flex;
   flex-direction: column;
@@ -21,6 +20,11 @@
   );
 
   border-radius: 20px 0px 0px 20px;
+
+  box-sizing: border-box;
+
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 .leave-title {
   display: flex;

@@ -3,7 +3,7 @@
   flex-direction: row;
   align-items: center;
   position: relative;
-  top: -20px;
+  top: -10px;
 
   gap: 960px;
 
@@ -72,7 +72,7 @@
 
   position: relative;
   left: 55px;
-  top: -40px;
+  top: -20px;
   height: 820px; 
 
   width: 812px;
@@ -657,8 +657,8 @@ select.input {
   height: 24px;
 
   position: relative;
-  left: 50%;
-  margin-top: 300px;
+  left: 0%;
+  margin-top: -36px;
   margin-bottom: 8px;
 }
 .date-row {
