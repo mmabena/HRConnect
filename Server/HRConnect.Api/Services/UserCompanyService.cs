@@ -5,6 +5,8 @@ namespace HRConnect.Api.Services
     using System.Linq;
     using HRConnect.Api.Models;
     using HRConnect.Api.Mappers;
+    using Microsoft.EntityFrameworkCore;
+    using HRConnect.Api.Data;
     using HRConnect.Api.Interfaces;
     using HRConnect.Api.DTOs.UserCompany;
     using System.Threading.Tasks;
@@ -13,21 +15,36 @@ namespace HRConnect.Api.Services
         private readonly IUserCompanyRepository _userCompanyRepo;
         private readonly IUserRepository _userRepo;
         private readonly ICompanyRepository _companyRepo;
+        private readonly ApplicationDBContext _context;
 
-        public UserCompanyService(IUserCompanyRepository userCompanyRepo, IUserRepository userRepo, ICompanyRepository companyRepo)
+        public UserCompanyService(ApplicationDBContext context, IUserCompanyRepository userCompanyRepo, IUserRepository userRepo, ICompanyRepository companyRepo)
         {
             _userCompanyRepo = userCompanyRepo;
             _userRepo = userRepo;
             _companyRepo = companyRepo;
+            _context = context;
         }
 
         public async Task<List<UserCompanyDto>> GetMyCompaniesAsync(int userId)
         {
             var companies = await _userCompanyRepo.GetUserCompaniesByUserIdAsync(userId);
 
-            return companies
-                .Select(uc => uc.ToUserCompanyDto())
-                .ToList();
+            var result = new List<UserCompanyDto>();
+
+            foreach (var company in companies)
+            {
+                var employeeCount = await _context.Employees
+                  .CountAsync(e => e.CompanyId == company.CompanyId);
+
+                result.Add(new UserCompanyDto
+                {
+                    CompanyId = company.CompanyId,
+                    CompanyName = company.Company.CompanyName,
+                    IsDefault = company.IsDefault,
+                    EmployeeCount = employeeCount
+                });
+            }
+            return result;
 
         }
         public async Task AssignCompanyToUserAsync(int userId, CreateUserCompanyDto userCompanyRequestDto)
@@ -51,6 +68,9 @@ namespace HRConnect.Api.Services
                 throw new UnauthorizedAccessException($"User {userId} is not linkeed to this company({companyId})");
 
             var userCompanies = await _userCompanyRepo.GetUserCompaniesByUserIdAsync(userId);
+
+            if (userCompanies.Count == 1)
+                throw new InvalidOperationException("Cannot switch company: User is only linked to one company.");
 
             foreach (var uc in userCompanies)
             {

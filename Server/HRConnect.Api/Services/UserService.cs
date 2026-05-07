@@ -207,6 +207,30 @@ namespace HRConnect.Api.Services
     {
       return _userRepo.DeleteUserAsync(id);
     }
+
+    public async Task<CurrentUserDto?> GetCurrentUserAsync(string email)
+    {
+      if (string.IsNullOrWhiteSpace(email))
+        return null;
+
+      var user = await _userRepo.GetUserByEmailAsync(email);
+      
+      if (user == null) 
+      return null;
+
+      var employee = await _userRepo.GetEmployeeByEmailAsync(email);
+
+      return new CurrentUserDto
+      {
+        UserId = user.UserId,
+        Email = user.Email,
+        Role = user.Role.ToString(),
+        FullName = employee != null
+          ? $"{employee.Name} {employee.Surname}"
+          : null,
+        JobTitle = employee?.Position?.PositionTitle
+      };
+    }
     public async Task<bool> ChangePasswordAsync(ChangePasswordRequestDto dto)
     {
       var user = await _userRepo.GetUserByEmailAsync(dto.Email);

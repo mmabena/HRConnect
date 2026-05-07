@@ -1,6 +1,9 @@
 using HRConnect.Api.DTOs.User;
 using HRConnect.Api.Mappers;
 using Microsoft.AspNetCore.Mvc;
+using HRConnect.Api.Data;
+using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 
 namespace HRConnect.Api.Controllers
@@ -10,6 +13,7 @@ namespace HRConnect.Api.Controllers
   public class UserController : ControllerBase
   {
     private readonly HRConnect.Api.Interfaces.IUserService _userService;
+
 
     public UserController(HRConnect.Api.Interfaces.IUserService userService)
     {
@@ -133,6 +137,26 @@ namespace HRConnect.Api.Controllers
         ModelState.AddModelError("Validation", ex.Message);
         return ValidationProblem(ModelState);
       }
+    }
+
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<IActionResult> GetCurrentUser()
+    {
+      var email =
+        User.FindFirst(ClaimTypes.Email)?.Value ??
+        User.FindFirst("email")?.Value;
+
+      if (string.IsNullOrEmpty(email))
+        return Unauthorized();
+
+      var result = await _userService.GetCurrentUserAsync(email);
+
+      if (result == null)
+        return NotFound();
+
+      return Ok(result);
+
     }
   }
 }

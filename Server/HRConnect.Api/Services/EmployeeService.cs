@@ -241,7 +241,6 @@ namespace HRConnect.Api.Services
       existingEmployee.ZipCode = employeeDto.ZipCode;
       existingEmployee.Branch = employeeDto.Branch;
       existingEmployee.PositionId = employeeDto.PositionId;
-      existingEmployee.CompanyId = employeeDto.CompanyId;
       existingEmployee.MonthlySalary = employeeDto.MonthlySalary;
       existingEmployee.CareerManagerID = employeeDto.CareerManagerID;
       existingEmployee.EmploymentStatus = employeeDto.EmploymentStatus;

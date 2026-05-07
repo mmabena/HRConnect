@@ -18,15 +18,22 @@ namespace HRConnect.Api.Services
 
         public async Task<string> GetActiveCompanyIdAsync(int userId)
         {
-            var companyId = await _context.UserCompanies
-                .Where(uc => uc.UserId == userId && uc.IsDefault)
-                .Select(uc => uc.CompanyId)
-                .FirstOrDefaultAsync();
-            
-            if (companyId == null)
-                throw new InvalidOperationException("No active company set for this user.");
+            var companies = await _context.UserCompanies
+                .Where(uc => uc.UserId == userId)
+                .ToListAsync();
 
-            return companyId;
+            if (companies.Count == 0)
+                throw new UnauthorizedAccessException("User not linked to any company.");
+
+            var active = companies.FirstOrDefault(uc => uc.IsDefault);
+
+            if (active != null)
+                return active.CompanyId;
+
+            if (companies.Count == 1)
+                return companies.First().CompanyId;
+
+            throw new InvalidOperationException("No active company set.");
         }
     }
 }

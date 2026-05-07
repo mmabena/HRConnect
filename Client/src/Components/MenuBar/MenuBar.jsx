@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import api from "../../../src/api/api.js";
+import axios from "axios";
 import { resolveRole } from "../../utils/roleUtils";
 
 const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
@@ -12,6 +13,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   const [deductionsOpen, setDeductionsOpen] = useState(false);
   const [payrollOpen, setPayrollOpen] = useState(false);
   const [leaveOpen, setLeaveOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(null);
   const [payOpen, setPayOpen] = useState(false);
   const [payinfoOpen, setPayInfoOpen] = useState(false);
   const [manualReportToggle, setManualReportToggle] = useState(false);
@@ -218,6 +220,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
       "/positionManagement",
       "/company-details",
       "/salarybudgets",
+      "/companyList",
     ],
     3: [
       "/earnings",
@@ -361,6 +364,14 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                       onClick={() => navigate("/salarybudgets")}
                     >
                       Salary Budgets
+                    </span>
+                  </li>
+                  <li>
+                    <span
+                      className="menu-subitem"
+                      onClick={() => navigate("/companyList")}
+                    >
+                      Company List
                     </span>
                   </li>
                 </ul>

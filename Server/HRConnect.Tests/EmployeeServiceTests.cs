@@ -328,6 +328,47 @@ namespace HRConnect.Tests
       await Assert.ThrowsAsync<NotFoundException>(() => _employeeService.DeleteEmployeeAsync(1, "EMP999"));
     }
 
+    [Fact]
+    public async Task GetAllEmployeesAsync_UsesActiveCompanyId()
+    {
+      var userId = 1;
+
+      _activeCompanyServiceMock
+        .Setup(x => x.GetActiveCompanyIdAsync(userId))
+        .ReturnsAsync("COMP001");
+
+      _employeeRepositoryMock
+        .Setup(x => x.GetAllEmployeeByCompanyAsync("COMP001"))
+        .ReturnsAsync(new List<Employee>
+        {
+          new Employee { EmployeeId = "EMP001", CompanyId = "COMP001" },
+          new Employee { EmployeeId = "EMP002", CompanyId = "COMP001" }
+        });
+
+      var result = await _employeeService.GetAllEmployeesAsync(userId);
+
+      Assert.NotNull(result);
+      Assert.Equal("COMP001", result.First().CompanyId);
+    }
+
+    [Fact]
+    public async Task GetEmployeeByIdAsync_DifferentCompany_ThrowUnauthrizedAccessException()
+    {
+      var userId = 1;
+      var employeeId = "EMP001";
+
+      _activeCompanyServiceMock
+        .Setup(x => x.GetActiveCompanyIdAsync(userId))
+        .ReturnsAsync("COMP001");
+
+      _employeeRepositoryMock
+        .Setup(x => x.GetEmployeeByIdAsync(employeeId))
+        .ReturnsAsync(new Employee { EmployeeId = employeeId, CompanyId = "COMP002" });
+
+      await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
+        _employeeService.GetEmployeeByIdAsync(userId, employeeId));
+    }
+
     public void Dispose()
     {
       _context.Dispose();

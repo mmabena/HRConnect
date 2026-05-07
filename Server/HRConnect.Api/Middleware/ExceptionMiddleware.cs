@@ -106,9 +106,21 @@ namespace HRConnect.Api.Middleware
         errors["city"] = message;
       else if (message.Contains("disabilityType", StringComparison.OrdinalIgnoreCase))
         errors["disabilityType"] = message;
+      //Company Validation
+      else if (message.Contains("Company name", StringComparison.OrdinalIgnoreCase))
+        errors["companyName"] = message;
+      else if (message.Contains("Registration number", StringComparison.OrdinalIgnoreCase))
+        errors["registrationNumber"] = message;
+      else if (message.Contains("UIF number", StringComparison.OrdinalIgnoreCase))
+        errors["uifNumber"] = message;
+      else if (message.Contains("VAT number", StringComparison.OrdinalIgnoreCase))
+        errors["vatNumber"] = message;
+      else if (message.Contains("Contact number", StringComparison.OrdinalIgnoreCase))
+        errors["contactNumber"] = message;
+      else if (message.Contains("Company address", StringComparison.OrdinalIgnoreCase))
+        errors["companyAddress"] = message;
       else
         errors["general"] = message;
-
       return errors;
     }
   }

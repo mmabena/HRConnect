@@ -29,7 +29,26 @@ namespace HRConnect.Api.Services
     public async Task<List<CompanyDto>> GetAllCompaniesAsync()
     {
       var companies = await _companyRepo.GetAllCompaniesAsync();
-      return companies.Select(c => c.ToCompanyDto()).ToList();
+      var result = new List<CompanyDto>();
+
+      foreach (var company in companies)
+      {
+        var employeeCount = await _context.Employees
+          .CountAsync(e => e.CompanyId == company.CompanyId);
+
+        result.Add(new CompanyDto
+        {
+          CompanyId = company.CompanyId,
+          CompanyName = company.CompanyName,
+          RegistrationNumber = company.RegistrationNumber,
+          UIFNumber = company.UIFNumber,
+          VATNumber = company.VATNumber,
+          ContactNumber = company.ContactNumber,
+          CompanyAddress = company.CompanyAddress,
+          EmployeeCount = employeeCount
+        });
+      }
+      return result;
     }
     /// <summary>
     /// Retrieves a single company by its Company ID.
@@ -90,32 +109,32 @@ namespace HRConnect.Api.Services
     private async Task ValidateCreate(CreateCompanyRequestDto companyRequestDto)
     {
       if (string.IsNullOrWhiteSpace(companyRequestDto.CompanyName))
-        throw new ArgumentException("Company name is required");
+        throw new ValidationException("Company name is required");
 
       if (companyRequestDto.RegistrationNumber.Length != 14)
-        throw new ArgumentException("Registration number must be 14 digits");
+        throw new ValidationException("Registration number must be 14 digits");
 
       if (companyRequestDto.UIFNumber.Length != 10)
-        throw new ArgumentException("UIF number must be 10 digits");
+        throw new ValidationException("UIF number must be 10 digits");
 
       if (companyRequestDto.ContactNumber.Length != 10)
-        throw new ArgumentException("Contact number must be 10 digits");
+        throw new ValidationException("Contact number must be 10 digits");
 
       if (!string.IsNullOrWhiteSpace(companyRequestDto.RegistrationNumber) &&
           await _companyRepo.GetCompanyByRegNumberAsync(companyRequestDto.RegistrationNumber) != null)
-        throw new InvalidOperationException("A company with the same registration number already exists");
+        throw new BusinessRuleException("A company with the same registration number already exists");
 
       if (!string.IsNullOrWhiteSpace(companyRequestDto.UIFNumber) &&
           await _companyRepo.GetCompanyByUIFAsync(companyRequestDto.UIFNumber) != null)
-        throw new InvalidOperationException("A company with the same UIF number already exists");
+        throw new BusinessRuleException("A company with the same UIF number already exists");
 
       if (!string.IsNullOrWhiteSpace(companyRequestDto.VATNumber) &&
           await _companyRepo.GetCompanyByVATAsync(companyRequestDto.VATNumber) != null)
-        throw new InvalidOperationException("A company with the same VAT number already exists");
+        throw new BusinessRuleException("A company with the same VAT number already exists");
 
       if (!string.IsNullOrWhiteSpace(companyRequestDto.ContactNumber) &&
           await _companyRepo.GetCompanyByContactNumberAsync(companyRequestDto.ContactNumber) != null)
-        throw new InvalidOperationException("A company with the same contact number already exists");
+        throw new BusinessRuleException("A company with the same contact number already exists");
     }
   }
 }
