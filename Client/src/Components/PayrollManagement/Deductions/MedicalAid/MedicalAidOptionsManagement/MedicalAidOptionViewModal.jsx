@@ -219,13 +219,13 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
         const msaChild = getEffectiveValue(oid, 'monthlyMsaContributionChild', currentOption.monthlyMsaContributionChild);
         const msaChild2 = getEffectiveValue(oid, 'monthlyMsaContributionChild2', currentOption.monthlyMsaContributionChild2);
 
-        const totalPrincipal = calculatePrincipalTotal(riskPrincipal, msaPrincipal) ? null : calculatePrincipalTotal(riskPrincipal, msaPrincipal);
+        const totalPrincipal = calculatePrincipalTotal(riskPrincipal, msaPrincipal) > 0 ? null : calculatePrincipalTotal(riskPrincipal, msaPrincipal);
         const totalAdult = calculateAdultTotal(riskAdult, msaAdult);
         const totalChild = calculateChildTotal(riskChild, msaChild);
         const totalChild2 = calculateChild2Total(riskChild2, msaChild2) ? null : calculateChild2Total(riskChild2, msaChild2);
 
         return (
-          <table className="model-view-table">
+          <table className="modal-view-table">
             <thead>
               <tr>
                 <th className="model-view-table-header-cell">Component</th>
@@ -237,16 +237,9 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
             </thead>
 
             <tbody>
-              {/* Non-editable: Option Name*/}
-              <tr>
-                <td className="modal-view-label-cell">Option Name</td>
-                <td colSpan='4'>
-                  <Cell value={currentOption.medicalOptionName} editable={false} />
-                </td>
-              </tr>
-
+              {/* Non-editable: Option Name* Yanked out as it has been moved to the top/}
               {/* Non-editable: Salary Bracket*/}
-              <tr>
+		{/*<tr>
                 <td className="modal-view-label-cell">
                   Income Category
                 </td>
@@ -260,7 +253,8 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
                     editable={false}
                     />
                 </td>
-              </tr>
+              </tr>*
+		yanking it out to align with figma/}
               {/* Section: Risk*/}
               <tr className="modal-view-section-row">
                 <td colSpan='5' className="modal-view-section-cell">
@@ -292,7 +286,7 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
               </tr>
               <tr className="modal-view-totals-row">
                 <td className="modal-view-label-cell">Total</td>
-                <td className="modal-view-label-cell">{totalPrincipal ??totalAdult}</td>
+                <td className="modal-view-label-cell">{totalPrincipal}</td>
                 <td className="modal-view-label-cell">{totalAdult}</td>
                 <td className="modal-view-label-cell">{totalChild}</td>
                 <td className="modal-view-label-cell">{totalChild ?? `Free`}</td>
@@ -343,9 +337,17 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
           <div className="model-wrapper" onClick={(e) => e.stopPropagation()}>
             {/* Header*/}
             <div className="modal-header-container">
-              <div className="modal-header-main-text">{title}</div>
-              <div className="modal-header-main-secondary-text">{currentGroup?.categoryName ?? ''}</div>
-              <button className="modal-button-close" onClick={onClose} aria-label="Close">&times;</button>
+                {/* Header Content Holder */}
+              <div className="modal-header-content-holder">
+                <div className="modal-header-main-text">{title}</div>
+                <div className="modal-header-main-secondary-text">{currentGroup?.categoryName ?? ''}</div>
+              </div>
+                {/* Header Controls Holder */}
+              <div className="modal-header-control-holder">
+                <button className="modal-button-close" onClick={onClose} aria-label="Close">&times;</button>
+              </div>
+
+
             </div>
           {/* Body */}
           <div className="medicalAidOptions-modalBody">
@@ -355,12 +357,31 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
               <>
                 {/* Option Selector */}
                 {isEditing ? (
+                  /* Edit Mode */
                   <div className="option-selector">
                     <label>EDITING OPTION:</label>
                     <span className="option-name-edit">{currentOption.medicalOptionName ?? ''}</span>
                   </div>
+			
                 ) : (
+                  /* View Mode */
+                  // Updated UI Logic
                   <div className="option-selector">
+                      <div className="medical-option-name-container" id="medical-option-name">
+                          <p className="medical-option-name-static">MEDICAL OPTION</p>
+                          <div className="medical-option-name-dynamic">{currentOption.medicalOptionName ?? ''}</div>
+                      </div>
+                      <div className="medical-option-salary-bracket-container">
+                        <p className="medical-option-salary-bracket-static-label">INCOME CATEGORY</p>
+                        <div className="medical-option-salary-bracket-dynamic-label">{formatSalaryBracket(
+                            currentOption.salaryBracketMin,
+                            currentOption.salaryBracketMax,
+                            formatToLocalCurrency
+                        )}</div>
+                      </div>
+                      
+                  </div>
+                  /*<div className="option-selector">
                     <label htmlFor="option-dropdown">MEDICAL OPTION</label>
                     <select
                       id="option-dropdown"
@@ -379,11 +400,11 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
                         </option>
                       ))}
                     </select>
-                  </div>
+                  </div>*/
                 )}
 
                 <div className="section-divider">
-                  <p>MONTHLY CONTRIBUTION BREAKDOWN</p>
+                  <p id="monthly-contrib-breakdown">MONTHLY CONTRIBUTION BREAKDOWN</p>
                   <Divider />
                 </div>
 
@@ -400,12 +421,13 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
 
 
           <div className="medicalAidOptions-modalFooter">
-            <button className="btn btn-secondary" onClick={onClose}>
+            <button className="btn btn-secondary" onClick={onClose} id="modal-footer-action-button">
               Cancel
             </button>
             <button
               className={`btn ${isEditing ? 'btn-warning' : 'btn-primary'}`}
               onClick={handleToggleEdit}
+              id="modal-footer-action-button"
             >
               {isEditing ? 'Cancel Edit' : 'Edit Plan'}
             </button>
@@ -415,6 +437,7 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
                 className="btn btn-primary"
                 disabled={!canSave || isSaving}
                 onClick={handleSave}
+                id="modal-footer-action-button"
               >
                 {isSaving ? 'Saving...' : 'Save All Changes'}
               </button>

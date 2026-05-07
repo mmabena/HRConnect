@@ -4,7 +4,7 @@
             const riskPrincipal = risk;
             const msaPrincipal = msa;
             let totalPrincipal;
-
+            //TODO: fix formatting here especially around where the risk principal will be null, current logic assumes that only the msa might be null
             if(msaPrincipal === 0 || msaPrincipal === null || msaPrincipal === undefined){
                 totalPrincipal = Number(riskPrincipal);
             }

@@ -1,5 +1,6 @@
 ﻿.dynamic-grid-container {
   display: flex;
+  font-family: 'Anek Bangla', sans-serif;
   flex-direction: column;
   gap: 20px;
     padding: 20px;
@@ -26,14 +27,14 @@
 .grid-header-cell {
   padding: 12px;
   text-align: left;
-    font-size: 13px;
+  font-size: 13px;
   font-weight: 600;
-    color: white;
+  color: white;
 
 }
 
 .grid-row {
-    background: white;
+  background: white;
   border-bottom: 1px solid #eee;
   transition: background-color 0.2s ease;
 }

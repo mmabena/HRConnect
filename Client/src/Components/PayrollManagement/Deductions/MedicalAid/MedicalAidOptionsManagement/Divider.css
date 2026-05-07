@@ -1,7 +1,10 @@
 ﻿.divider {
   border: none;
-  border-top: 1px solid gray;
-  margin: 16px 0;
+  border-bottom: 1px solid;
+  border-color: rgba(154, 154, 154, 0.55);
+  margin-bottom: 16px;
+  margin-top: 2px;
+  padding: 0;
 }
 
 .divier-dashed {

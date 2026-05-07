@@ -164,3 +164,8 @@ GeneratedClients/
 /Server/.todo/tasks.json
 Client/package-lock.json
 package-lock.json
+/Client/src/dev/index.js
+/Client/src/dev/palette.jsx
+/Client/src/dev/previews.jsx
+/Client/src/dev/README.md
+/Client/src/dev/useInitial.js
