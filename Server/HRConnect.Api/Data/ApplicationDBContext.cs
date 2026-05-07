@@ -337,9 +337,17 @@ namespace HRConnect.Api.Data
 
       modelBuilder.Entity<TOTPState>()
       .HasKey(o => o.UserId);
+
       modelBuilder.Entity<MFAUserSecret>()
       .HasKey(m => m.UserId);
 
+      modelBuilder.Entity<TOTPState>()
+      .Property(u => u.UserId)
+      .ValueGeneratedNever();
+
+      modelBuilder.Entity<MFAUserSecret>()
+      .Property(u => u.UserId)
+      .ValueGeneratedNever();
     }
 
     //Override 'SaveChangesAsync' for Payroll Records to enforce locked records on a payroll run 

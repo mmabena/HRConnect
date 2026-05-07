@@ -4,6 +4,7 @@ using Audit.Core;
 using Audit.EntityFramework;
 using HRConnect.Api.Data;
 using HRConnect.Api.Interfaces;
+using HRConnect.Api.Interfaces.TOTP;
 using HRConnect.Api.Interfaces.Pension;
 using HRConnect.Api.Middleware;
 using HRConnect.Api.Models;
@@ -277,6 +278,11 @@ builder.Services.AddScoped<IDeductionRepository, DeductionRepository>();
 builder.Services.AddScoped<IDeductionService, DeductionService>();
 builder.Services.AddScoped<IEmployeeDeductionRepository, EmployeeDeductionRepository>();
 builder.Services.AddScoped<IEmployeeDeductionService, EmployeeDeductionService>();
+builder.Services.AddSingleton<ISecretsProtector, SecretsProtector>();
+builder.Services.AddScoped<ITOTPService, TOTPService>();
+builder.Services.AddScoped<ITOTPRepository, TOTPRepository>();
+builder.Services.AddScoped<IMFAUserSecretsService, MFAUserSecretsService>();
+builder.Services.AddScoped<IMFAUserSecretsRepository, MFAUserSecretsRepository>();
 builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowReact",

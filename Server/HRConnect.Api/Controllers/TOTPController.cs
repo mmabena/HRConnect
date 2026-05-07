@@ -2,20 +2,31 @@ namespace HRConnect.Api.Controllers
 {
   using Microsoft.AspNetCore.Mvc;
   using HRConnect.Api.DTOs.TOTP;
+  using HRConnect.Api.Interfaces.TOTP;
 
   [Route("api/totp")]
   [ApiController]
   public class TOTPController : ControllerBase
   {
-
-    [HttpPost("/verify")]
-    public Task<IActionResult> VerifyPin([FromBody] TOTPValidateRequestDto dto)
+    private readonly ITOTPService _totpService;
+    public TOTPController(ITOTPService totpService)
     {
-      throw new NotImplementedException();
+      _totpService = totpService;
     }
-    public Task<IActionResult> ResendNewPin()
+    [HttpPost("/sendOtp/{userId}")]
+    public async Task<IActionResult> SendOTP(int userId)
     {
-      throw new NotImplementedException();
+      await _totpService.SendTotp(userId);
+      return Ok();
     }
+    // [HttpPost("/verify")]
+    // public Task<IActionResult> VerifyPin([FromBody] TOTPValidateRequestDto dto)
+    // {
+    //   throw new NotImplementedException();
+    // }
+    // public Task<IActionResult> ResendNewPin()
+    // {
+    //   throw new NotImplementedException();
+    // }
   }
 }

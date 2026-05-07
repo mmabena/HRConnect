@@ -8,6 +8,6 @@ namespace HRConnect.Api.Models
   public class TOTPState
   {
     public int UserId { get; set; }
-    public DateTime? LastUsedTimeStamp { get; set; }
+    public long LastUsedTimeStamp { get; set; }
   }
 }

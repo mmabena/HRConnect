@@ -1805,7 +1805,7 @@ namespace HRConnect.Api.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
 
                     b.Property<DateTime?>("LastUsedTimeStamp")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("bigint");
 
                     b.HasKey("UserId");
 
