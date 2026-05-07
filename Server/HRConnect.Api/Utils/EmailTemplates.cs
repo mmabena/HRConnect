@@ -47,7 +47,6 @@ namespace HRConnect.Api.Utils
             <p><strong>Dates:</strong> {application.StartDate:dd MMM yyyy} → {application.EndDate:dd MMM yyyy}</p>
             <p><strong>Days Requested:</strong> {application.DaysRequested}</p>
 
-            {documentLinks}
 
             <br>
 
@@ -60,7 +59,9 @@ namespace HRConnect.Api.Utils
             style="background:#e74c3c;color:white;padding:12px 25px;text-decoration:none;border-radius:6px;font-weight:bold;">
             Reject
             </a>
-
+            
+            {documentLinks}
+            
             <br><br>
 
             <p style="color:#888;font-size:12px">

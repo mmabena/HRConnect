@@ -250,14 +250,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: flex-start;
-
   gap: 2px;
-
   min-width: 93px;  
   min-height: 30px;
-
   border-radius: 20px;
-
   font-family: 'Anek Bangla';
   font-weight: 500;
   font-size: 16px;
@@ -309,7 +305,7 @@
   height: 40px;
 
   left: 657.5px;
-  top: 662px;
+  top: 690px;
 
   display: flex;
   flex-direction: row;

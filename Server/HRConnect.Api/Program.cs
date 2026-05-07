@@ -26,6 +26,7 @@ using HRConnect.Api.Interfaces.Notification;
 using HRConnect.Api.Utils.Factories;
 using HRConnect.Api.Utils.Notification;
 using HRConnect.Api.Interfaces.Payroll.Earning;
+using HRConnect.Api.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,6 +62,7 @@ builder.Services.AddControllers()
           new System.Text.Json.Serialization.JsonStringEnumConverter()
       );
     });
+builder.Services.AddSignalR();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -312,4 +314,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseMiddleware<ExceptionMiddleware>();
 app.MapControllers();
+app.MapHub<LeaveHub>("/leaveHub");
 app.Run();

@@ -17,6 +17,7 @@ namespace HRConnect.Api.DTOs
     public class LeaveApplicationResponse
     {
         public int Id { get; set; }
+        public string EmployeeId { get; set; } = string.Empty;
         public string EmployeeName { get; set; } = string.Empty;
         public int LeaveTypeId { get; set; }
         public string LeaveTypeCode { get; set; } = string.Empty;

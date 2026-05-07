@@ -3,35 +3,88 @@ import { getLeaveHistory, getEmployeeLeave } from "../../api/leaveApplicationApi
 import "./LeaveHistory.css";
 import { Dot } from "lucide-react";
 import ApplyLeave from "./ApplyLeave";
+import {
+  startLeaveHubConnection,
+  getLeaveHubConnection,
+} from "../../signalr/leaveHubConnection";
 
 const LeaveHistory = () => {
   const [data, setData] = useState([]);
   const [showApply, setShowApply] = useState(false);
   const [balances, setBalances] = useState([]);
+  
+const fetchData = async () => {
+  try {
+    const employee = JSON.parse(
+      localStorage.getItem("currentEmployee")
+    );
 
+    const employeeId = employee?.employeeId;
+
+    if (!employeeId) {
+      console.error("No employeeId found");
+      return;
+    }
+
+    const res = await getLeaveHistory(employeeId);
+    setData(res);
+
+    const leaveRes = await getEmployeeLeave(employeeId);
+    setBalances(leaveRes.leaveBalances);
+
+  } catch (error) {
+    console.error(error);
+  }
+};
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const employee = JSON.parse(localStorage.getItem("currentEmployee"));
-        const employeeId = employee?.employeeId;
 
-        if (!employeeId) {
-          console.error("No employeeId found");
-          return;
-        }
+  fetchData();
 
-        const res = await getLeaveHistory(employeeId);
-        setData(res);
+  const setupSignalR = async () => {
 
-        const leaveRes = await getEmployeeLeave(employeeId);
-        setBalances(leaveRes.leaveBalances);
-      } catch (error) {
-        console.error(error);
+    const employee = JSON.parse(
+      localStorage.getItem("currentEmployee")
+    );
+
+    const employeeId = employee?.employeeId;
+
+    if (!employeeId) {
+      return;
+    }
+
+    const connection =
+      await startLeaveHubConnection(employeeId);
+
+    if (!connection) {
+      return;
+    }
+
+    connection.on(
+      "LeaveUpdated",
+      async (message) => {
+
+        console.log(
+          "Realtime leave update received:",
+          message
+        );
+
+        await fetchData();
       }
-    };
+    );
+  };
 
-    fetchData();
-  }, []);
+  setupSignalR();
+
+  return () => {
+
+    const connection = getLeaveHubConnection();
+
+    if (connection) {
+      connection.off("LeaveUpdated");
+    }
+  };
+
+}, []);
 
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString("en-GB");

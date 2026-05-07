@@ -7,6 +7,8 @@ namespace HRConnect.Api.Services
     using HRConnect.Api.Utils;
     using Microsoft.EntityFrameworkCore;
     using System.Globalization;
+    using Microsoft.AspNetCore.SignalR;
+    using HRConnect.Api.Hubs;
 
     public class LeaveApplicationService : ILeaveApplicationService
     {
@@ -14,17 +16,20 @@ namespace HRConnect.Api.Services
         private readonly IEmailService _emailService;
         private readonly IConfiguration _configuration;
         private readonly ICloudinaryService _cloudinaryService;
+        private readonly IHubContext<LeaveHub> _hubContext;
 
         public LeaveApplicationService(
             ApplicationDBContext context,
             IEmailService emailService,
             IConfiguration configuration,
-            ICloudinaryService cloudinaryService)
+            ICloudinaryService cloudinaryService,
+            IHubContext<LeaveHub> hubContext)
         {
             _context = context;
             _emailService = emailService;
             _configuration = configuration;
             _cloudinaryService = cloudinaryService;
+            _hubContext = hubContext;
         }
         /// <summary>
         /// Processes a leave application request by validating the employee, leave type, and requested dates, checking the employee's leave balance,
@@ -143,6 +148,17 @@ namespace HRConnect.Api.Services
             await _context.LeaveApplications.AddAsync(application);
 
             await _context.SaveChangesAsync();
+            await _hubContext.Clients
+                .Group(application.EmployeeId)
+                .SendAsync(
+                "LeaveUpdated",
+                new
+                {
+                    employeeId = application.EmployeeId,
+                    applicationId = application.Id,
+                    status = application.Status.ToString()
+                }
+            );
 
             await SendManagerApprovalEmail(application);
 
@@ -206,6 +222,17 @@ namespace HRConnect.Api.Services
                 : "Admin";
 
             await _context.SaveChangesAsync();
+            await _hubContext.Clients
+                .Group(application.EmployeeId)
+                .SendAsync(
+                    "LeaveUpdated",
+                    new
+                    {
+                        employeeId = application.EmployeeId,
+                        applicationId = application.Id,
+                        status = application.Status.ToString()
+                    }
+                );
 
             await SendEmployeeDecisionEmail(application, true);
         }
@@ -250,6 +277,18 @@ namespace HRConnect.Api.Services
                 : "Admin";
 
             await _context.SaveChangesAsync();
+            await _hubContext.Clients
+                .Group(application.EmployeeId)
+                .SendAsync(
+                    "LeaveUpdated",
+                    new
+                    {
+                        employeeId = application.EmployeeId,
+                        applicationId = application.Id,
+                        status = application.Status.ToString()
+                    }
+                );
+
 
             await SendEmployeeDecisionEmail(application, true);
         }
@@ -300,7 +339,17 @@ namespace HRConnect.Api.Services
                 : reason;
 
             await _context.SaveChangesAsync();
-
+            await _hubContext.Clients
+                .Group(application.EmployeeId)
+                .SendAsync(
+                    "LeaveUpdated",
+                    new
+                    {
+                        employeeId = application.EmployeeId,
+                        applicationId = application.Id,
+                        status = application.Status.ToString()
+                    }
+                );
             await SendEmployeeDecisionEmail(application, false);
         }
         public async Task RejectLeaveInternalAsync(int applicationId, string? reason)
@@ -335,6 +384,17 @@ namespace HRConnect.Api.Services
                 : reason;
 
             await _context.SaveChangesAsync();
+            await _hubContext.Clients
+                .Group(application.EmployeeId)
+                .SendAsync(
+                    "LeaveUpdated",
+                    new
+                    {
+                        employeeId = application.EmployeeId,
+                        applicationId = application.Id,
+                        status = application.Status.ToString()
+                    }
+                );
 
             await SendEmployeeDecisionEmail(application, false);
         }
@@ -409,15 +469,29 @@ namespace HRConnect.Api.Services
                 approved
             );
 
-            var documentLinks = "";
+            var documentLinks = string.Empty;
 
             if (application.Documents != null && application.Documents.Count > 0)
             {
-                documentLinks = "<br/><br/><strong>Supporting Documents:</strong><br/>" +
-                    string.Join("<br/>",
+                documentLinks =
+                    @"<hr style='margin-top:30px;margin-bottom:20px;' />
+
+        <div style='margin-top:20px;'>
+            <h3 style='margin-bottom:10px;'>Supporting Documents</h3>"
+                    +
+
+                    string.Join(
+                        "<br/><br/>",
                         application.Documents.Select(d =>
-                            $"<a href='{System.Net.WebUtility.HtmlEncode(d.FileUrl)}' target='_blank'>" +
-                            $"{System.Net.WebUtility.HtmlEncode(d.FileName)}</a>"));
+                            $"<a href='{System.Net.WebUtility.HtmlEncode(d.FileUrl)}' " +
+                            $"target='_blank'>" +
+                            $"{System.Net.WebUtility.HtmlEncode(d.FileName)}</a>"
+                        )
+                    )
+
+                    +
+
+                    @"</div>";
             }
 
             emailBody += documentLinks;

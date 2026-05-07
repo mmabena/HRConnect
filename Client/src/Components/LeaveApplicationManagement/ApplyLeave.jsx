@@ -8,94 +8,94 @@ const ApplyLeave = () => {
   const [description, setDescription] = useState("");
   const [files, setFiles] = useState([]);
   const employee = JSON.parse(localStorage.getItem("currentEmployee"));
-  
+
   const selectedBalance = leaveData?.leaveBalances?.find(
-  (l) => l.leaveTypeId === Number(selectedLeaveId)
-);
+    (l) => l.leaveTypeId === Number(selectedLeaveId),
+  );
 
-const [startDate, setStartDate] = useState("");
-const [endDate, setEndDate] = useState("");
-const [isSubmitting, setIsSubmitting] = useState(false);
-const calculateDays = () => {
-  if (!startDate || !endDate) return 0;
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const calculateDays = () => {
+    if (!startDate || !endDate) return 0;
 
-  const start = new Date(startDate);
-  const end = new Date(endDate);
+    const start = new Date(startDate);
+    const end = new Date(endDate);
 
-  const diffTime = end - start;
+    const diffTime = end - start;
 
-  if (diffTime < 0) return 0;
+    if (diffTime < 0) return 0;
 
-  return Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
-};
-
-const requestedDays = calculateDays();
-
-const remainingBalance =
-  selectedBalance && requestedDays
-    ? (selectedBalance.availableDays - requestedDays).toFixed(2)
-    : null;
-const safeRemaining =
-  remainingBalance < 0 ? 0 : remainingBalance;
-const handleSubmit = async () => {
-  if (isSubmitting) return; 
-
-  setIsSubmitting(true);
-
-  try {
-    const employee = JSON.parse(localStorage.getItem("currentEmployee"));
-    const employeeId = employee?.employeeId;
-
-    if (!employeeId) {
-      setIsSubmitting(false);
-      return alert("Employee not found");
-    }
-
-    const formData = new FormData();
-
-    formData.append("EmployeeId", employeeId);
-    formData.append("LeaveTypeId", selectedLeaveId);
-    formData.append("StartDate", startDate);
-    formData.append("EndDate", endDate);
-    formData.append("Description", description);
-
-    files.forEach((file) => {
-      formData.append("Documents", file);
-    });
-
-    await applyLeave(formData);
-
-    alert("Leave application submitted successfully");
-
-  } catch (error) {
-    console.error(error);
-    alert("Submission failed");
-  } finally {
-    setIsSubmitting(false);  
-  }
-};
-const formatDate = (dateString) => {
-  if (!dateString) return "";
-
-  return new Date(dateString).toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-};
-  useEffect(() => {
-  const fetchLeave = async () => {
-    const employee = JSON.parse(localStorage.getItem("currentEmployee"));
-    const employeeId = employee?.employeeId;
-
-    if (!employeeId) return;
-
-    const res = await getEmployeeLeave(employeeId);
-    setLeaveData(res);
+    return Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
   };
 
-  fetchLeave();
-}, []);
+  const requestedDays = calculateDays();
+
+  const remainingBalance =
+    selectedBalance && requestedDays
+      ? (selectedBalance.availableDays - requestedDays).toFixed(2)
+      : null;
+  const safeRemaining = remainingBalance < 0 ? 0 : remainingBalance;
+  const handleSubmit = async () => {
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+
+    try {
+      const employee = JSON.parse(localStorage.getItem("currentEmployee"));
+      const employeeId = employee?.employeeId;
+
+      if (!employeeId) {
+        setIsSubmitting(false);
+        return alert("Employee not found");
+      }
+
+      const formData = new FormData();
+
+      formData.append("EmployeeId", employeeId);
+      formData.append("LeaveTypeId", selectedLeaveId);
+      formData.append("StartDate", startDate);
+      formData.append("EndDate", endDate);
+      formData.append("Description", description);
+
+      files.forEach((file) => {
+        formData.append("Documents", file);
+      });
+
+      await applyLeave(formData);
+
+      alert("Leave application submitted successfully");
+
+      window.location.reload();
+    } catch (error) {
+      console.error(error);
+      alert("Submission failed");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+
+    return new Date(dateString).toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  };
+  useEffect(() => {
+    const fetchLeave = async () => {
+      const employee = JSON.parse(localStorage.getItem("currentEmployee"));
+      const employeeId = employee?.employeeId;
+
+      if (!employeeId) return;
+
+      const res = await getEmployeeLeave(employeeId);
+      setLeaveData(res);
+    };
+
+    fetchLeave();
+  }, []);
   return (
     <div className="leave-page">
       {/* HEADER */}
@@ -112,18 +112,16 @@ const formatDate = (dateString) => {
 
       {/* MAIN GRID */}
       <div className="apply-grid">
-
         {/* LEFT PANEL */}
         <div className="apply-left">
-
           {/* INFO BOX */}
           <div className="info-box">
             <span className="info-icon">i</span>
             <p>
-            {selectedBalance
-              ? `Your current ${selectedBalance.leaveType} balance is ${selectedBalance.availableDays} days. All Applications are viewed within 2 business days.`
-              : "Select a leave type to view your balance."}
-          </p>
+              {selectedBalance
+                ? `Your current ${selectedBalance.leaveType} balance is ${selectedBalance.availableDays} days. All Applications are viewed within 2 business days.`
+                : "Select a leave type to view your balance."}
+            </p>
           </div>
 
           {/* LEAVE DETAILS */}
@@ -138,100 +136,97 @@ const formatDate = (dateString) => {
                 onChange={(e) => setSelectedLeaveId(e.target.value)}
               >
                 <option value="">Leave Type</option>
-              
+
                 {leaveData?.leaveBalances.map((l, index) => (
-                 <option key={l.leaveTypeId} value={l.leaveTypeId}>
-                  {l.leaveType}
-                </option>
+                  <option key={l.leaveTypeId} value={l.leaveTypeId}>
+                    {l.leaveType}
+                  </option>
                 ))}
               </select>
             </div>
 
             {/* Dates */}
 
-           <div className="row">
-            <div className="row date-row">
+            <div className="row">
+              <div className="row date-row">
+                {/* Start Date */}
+                <div className="form-group">
+                  <label>Start Date</label>
 
-  {/* Start Date */}
-  <div className="form-group">
-    <label>Start Date</label>
+                  <div className="date-wrapper">
+                    <input
+                      type="date"
+                      className="input date-input"
+                      value={startDate}
+                      onChange={(e) => {
+                        setStartDate(e.target.value);
+                      }}
+                    />
 
-    <div className="date-wrapper">
+                    <span className="formatted-date">
+                      {formatDate(startDate)}
+                    </span>
 
-      <input
-        type="date"
-        className="input date-input"
-        value={startDate}
-        onChange={(e) => {
-          setStartDate(e.target.value);
-        }}
-      />
+                    <img
+                      src="/images/calendar-range.svg"
+                      alt="calendar icon"
+                      className="calendar-icon"
+                    />
+                  </div>
+                </div>
 
-      <span className="formatted-date">
-        {formatDate(startDate)}
-      </span>
+                {/* End Date */}
+                <div className="form-group">
+                  <label>End Date</label>
 
-      <img
-        src="/images/calendar-range.svg"
-        alt="calendar icon"
-        className="calendar-icon"
-      />
-    </div>
-  </div>
+                  <div className="date-wrapper">
+                    <input
+                      type="date"
+                      className="input date-input"
+                      value={endDate}
+                      onChange={(e) => {
+                        setEndDate(e.target.value);
+                      }}
+                    />
 
-  {/* End Date */}
-  <div className="form-group">
-    <label>End Date</label>
+                    <span className="formatted-date">
+                      {formatDate(endDate)}
+                    </span>
 
-    <div className="date-wrapper">
-
-      <input
-        type="date"
-        className="input date-input"
-        value={endDate}
-        onChange={(e) => {
-          setEndDate(e.target.value);
-        }}
-      />
-
-      <span className="formatted-date">
-        {formatDate(endDate)}
-      </span>
-
-      <img
-        src="/images/calendar-range.svg"
-        alt="calendar icon"
-        className="calendar-icon"
-      />
-    </div>
-  </div>
-            </div>
+                    <img
+                      src="/images/calendar-range.svg"
+                      alt="calendar icon"
+                      className="calendar-icon"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Days + Balance */}
             <div className="row">
               <div className="form-group">
-               <label>Number of Days</label>
-               <input
-                type="text"
-                className="input disabled"
-                value={requestedDays > 0 ? `${requestedDays} Days` : ""}
-                disabled
-              />
+                <label>Number of Days</label>
+                <input
+                  type="text"
+                  className="input disabled"
+                  value={requestedDays > 0 ? `${requestedDays} Days` : ""}
+                  disabled
+                />
               </div>
 
               <div className="form-group">
                 <label>Leave balance</label>
                 <input
-                type="text"
-                className="input disabled"
-               value={
-                  remainingBalance !== null
-                    ? `${safeRemaining} Days remaining`
-                    : ""
-                }
-                disabled
-              />
+                  type="text"
+                  className="input disabled"
+                  value={
+                    remainingBalance !== null
+                      ? `${safeRemaining} Days remaining`
+                      : ""
+                  }
+                  disabled
+                />
               </div>
             </div>
           </div>
@@ -250,43 +245,43 @@ const formatDate = (dateString) => {
               />
             </div>
 
-           <div className="form-group">
-            <label>Attach Supporting Document</label>
+            <div className="form-group">
+              <label>Attach Supporting Document</label>
 
-            <div
-              className="upload-box"
-              onClick={() => document.getElementById("fileInput").click()}
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={(e) => {
-                e.preventDefault();
-                setFiles([...e.dataTransfer.files]);
-              }}
-            >
-              <input
-                id="fileInput"
-                type="file"
-                multiple
-                style={{ display: "none" }}
-                onChange={(e) => setFiles([...e.target.files])}
-              />
+              <div
+                className="upload-box"
+                onClick={() => document.getElementById("fileInput").click()}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  setFiles([...e.dataTransfer.files]);
+                }}
+              >
+                <input
+                  id="fileInput"
+                  type="file"
+                  multiple
+                  style={{ display: "none" }}
+                  onChange={(e) => setFiles([...e.target.files])}
+                />
 
-             <div className="upload-content">
-            <img
-              src="/images/arrow_upload_ready.png"
-              alt="upload icon"
-              className="upload-icon"
-            />
+                <div className="upload-content">
+                  <img
+                    src="/images/arrow_upload_ready.png"
+                    alt="upload icon"
+                    className="upload-icon"
+                  />
 
-            <p>Click to upload or drag a file here</p>
+                  <p>Click to upload or drag a file here</p>
 
-            <small>PDF, JPG or PNG - max 5MB</small>
-          </div>
+                  <small>PDF, JPG or PNG - max 5MB</small>
+                </div>
+              </div>
             </div>
-          </div>
           </div>
           {/* ACTION BUTTONS */}
           <div className="form-actions">
-           <button
+            <button
               className="submit-btn"
               onClick={handleSubmit}
               disabled={isSubmitting}
@@ -295,106 +290,101 @@ const formatDate = (dateString) => {
             </button>
             <button className="cancel-btn">Cancel</button>
           </div>
-
         </div>
 
         {/* RIGHT PANEL */}
-<div className="apply-right">
+        <div className="apply-right">
+          <div className="card">
+            <p className="card-title">LEAVE ENTITLEMENTS</p>
 
-  <div className="card">
-    <p className="card-title">LEAVE ENTITLEMENTS</p>
+            {leaveData?.leaveBalances
+              ?.filter((leave) => {
+                if (
+                  leave.leaveType === "Maternity Leave" &&
+                  employee?.gender !== "Female"
+                ) {
+                  return false;
+                }
 
-    {leaveData?.leaveBalances
-      ?.filter((leave) => {
-        if (
-          leave.leaveType === "Maternity Leave" &&
-          employee?.gender !== "Female"
-        ) {
-          return false;
-        }
+                return true;
+              })
+              .map((leave, index) => {
+                const entitlement =
+                  leave.leaveType === "Annual Leave" ? 22 : leave.accruedDays;
 
-        return true;
-      })
-      .map((leave, index) => {
-        const entitlement =
-          leave.leaveType === "Annual Leave"
-            ? 22
-            : leave.accruedDays;
+                const percentage =
+                  entitlement > 0
+                    ? (leave.availableDays / entitlement) * 100
+                    : 0;
 
-        const percentage =
-          entitlement > 0
-            ? (leave.availableDays / entitlement) * 100
-            : 0;
+                const isAnnualLeave = leave.leaveType === "Annual Leave";
 
-        const isAnnualLeave =
-          leave.leaveType === "Annual Leave";
+                let progressClass = "blue";
 
-        let progressClass = "blue";
+                if (isAnnualLeave) {
+                  if (percentage >= 75) {
+                    progressClass = "red";
+                  } else if (percentage >= 50) {
+                    progressClass = "orange";
+                  } else {
+                    progressClass = "blue";
+                  }
+                }
 
-        if (isAnnualLeave) {
-          if (percentage >= 75) {
-            progressClass = "red";
-          } else if (percentage >= 50) {
-            progressClass = "orange";
-          } else {
-            progressClass = "blue";
-          }
-        }
+                if (leave.availableDays <= 0) {
+                  progressClass = "grey";
+                }
 
-        if (leave.availableDays <= 0) {
-          progressClass = "grey";
-        }
+                return (
+                  <div className="progress-item" key={index}>
+                    <div className="progress-row">
+                      <span>{leave.leaveType}</span>
 
-        return (
-          <div className="progress-item" key={index}>
-            <div className="progress-row">
-              <span>{leave.leaveType}</span>
+                      <span>
+                        {leave.availableDays} / {entitlement} Days
+                      </span>
+                    </div>
 
-              <span>
-                {leave.availableDays} / {entitlement} Days
-              </span>
-            </div>
-
-            <div className="progress-track">
-              <div
-                className={`progress-bar ${progressClass}`}
-                style={{
-                  width: `${Math.min(percentage, 100)}%`,
-                }}
-              ></div>
-            </div>
+                    <div className="progress-track">
+                      <div
+                        className={`progress-bar ${progressClass}`}
+                        style={{
+                          width: `${Math.min(percentage, 100)}%`,
+                        }}
+                      ></div>
+                    </div>
+                  </div>
+                );
+              })}
           </div>
-        );
-      })}
-  </div>
 
-  {/* POLICY */}
-  <div className="policy-card">
-    <p className="card-title">LEAVE POLICY</p>
+          {/* POLICY */}
+          <div className="policy-card">
+            <p className="card-title">LEAVE POLICY</p>
 
-    <ul className="policy-list">
-      <li>
-        Annual leave must be approved at least 5 business days in advance.
-      </li>
+            <ul className="policy-list">
+              <li>
+                Annual leave must be approved at least 5 business days in
+                advance.
+              </li>
 
-      <li>
-        Sick leave requires a medical certificate for absences exceeding 2 consecutive days.
-      </li>
+              <li>
+                Sick leave requires a medical certificate for absences exceeding
+                2 consecutive days.
+              </li>
 
-      <li>
-        Family responsibility leave covers up to 3 days per year for qualifying events.
-      </li>
+              <li>
+                Family responsibility leave covers up to 3 days per year for
+                qualifying events.
+              </li>
 
-      <li>
-        Unused leave does not carry over to the following year.
-      </li>
-    </ul>
-  </div>
-</div>
+              <li>Unused leave does not carry over to the following year.</li>
+            </ul>
+          </div>
         </div>
       </div>
+    </div>
   );
 };
-
 
 export default ApplyLeave;
