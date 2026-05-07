@@ -27,6 +27,7 @@ using HRConnect.Api.Utils.Notification;
 using HRConnect.Api.Interfaces.Payroll.Earning;
 using HRConnect.Api.Interfaces.Payroll.Deduction;
 using HRConnect.Api.Utils.Jobs;
+using Microsoft.AspNetCore.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -196,10 +197,9 @@ builder.Services.AddQuartzHostedService(q =>
 {
   q.WaitForJobsToComplete = true;
 });
-
+//Get the config step minutes for Time-Based One Time Pin (TOTP)
 builder.Services.Configure<ToptConfigOptions>(
   builder.Configuration.GetSection("Totp"));
-
 
 builder.Configuration.AddUserSecrets<Program>();
 builder.Services.AddSingleton(provider =>
@@ -269,7 +269,6 @@ builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<INotificationFactory, NotificationFactory>();
 builder.Services.AddScoped<INotificationDispatcher, NotificationDispatcher>();
 builder.Services.AddScoped<IJobScheduleService, JobScheduleService>();
-
 builder.Services.AddScoped<IPayrollEarningRepository, PayrollEarningRepository>();
 builder.Services.AddScoped<IPayrollEarningService, PayrollEarningService>();
 builder.Services.AddScoped<IEmployeePayrollEarningRepository, EmployeePayrollEarningRepository>();
@@ -286,6 +285,16 @@ builder.Services.AddCors(options =>
           .AllowAnyHeader()
           .AllowAnyMethod()
           .AllowCredentials());
+});
+
+builder.Services.AddRateLimiter(options =>
+{
+  options.AddFixedWindowLimiter("totp", opts =>
+  {
+    opts.Window = TimeSpan.FromMinutes(5);
+    opts.PermitLimit = 5;//You have 5 attempts to send pin
+    opts.QueueLimit = 0;
+  });
 });
 
 var app = builder.Build();
@@ -318,5 +327,6 @@ app.UseGlobalExceptionHandler();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseMiddleware<ExceptionMiddleware>();
-app.MapControllers();
+app.UseRateLimiter();
+app.MapControllers().RequireRateLimiting("totp");
 app.Run();

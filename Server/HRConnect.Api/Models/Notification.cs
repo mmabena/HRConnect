@@ -9,8 +9,9 @@ namespace HRConnect.Api.Models
   }
   public enum NotificationType
   {
-    Payroll, TaxUpload, LeaveRequest, LeaveRequestResponse, General
+    Payroll, TaxUpload, RoleUpdate, LeaveRequest, LeaveRequestResponse, General
   }
+  [Flags]
   public enum DeliveryChannel
   {
     InApp, Email
@@ -28,6 +29,6 @@ namespace HRConnect.Api.Models
     public DateTime? DueDate { get; set; }
     public string IdempotencyKey { get; set; } = null!;
     public DateTime CreatedAt { get; set; }
-    public DeliveryChannel DeliveryChannel { get; set; }//"Email", "InApp" etc
+    public DeliveryChannel DeliveryChannel { get; set; } //Email", "InApp" etc
   }
 }

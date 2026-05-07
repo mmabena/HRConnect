@@ -2,17 +2,17 @@
 namespace HRConnect.Api.Controllers
 {
   using HRConnect.Api.DTOs.User;
+  using HRConnect.Api.Interfaces;
   using HRConnect.Api.Mappers;
   using Microsoft.AspNetCore.Mvc;
   using Microsoft.AspNetCore.Authorization;
-
   [Route("api/user")]
   [ApiController]
   public class UserController : ControllerBase
   {
-    private readonly HRConnect.Api.Interfaces.IUserService _userService;
+    private readonly IUserService _userService;
 
-    public UserController(HRConnect.Api.Interfaces.IUserService userService)
+    public UserController(IUserService userService)
     {
       _userService = userService;
     }

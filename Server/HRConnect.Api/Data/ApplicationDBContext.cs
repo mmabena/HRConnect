@@ -50,6 +50,8 @@ namespace HRConnect.Api.Data
     public DbSet<EmployeePayrollEarning> EmployeePayrollEarnings { get; set; }
     public DbSet<Deduction> Deductions { get; set; }
     public DbSet<EmployeeDeduction> EmployeeDeductions { get; set; }
+    public DbSet<TOTPState> TOTPStates { get; set; }
+    public DbSet<MFAUserSecret> UserSecrets { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
       base.OnModelCreating(modelBuilder);
@@ -332,6 +334,11 @@ namespace HRConnect.Api.Data
         .WithOne(ed => ed.Employee)
         .HasForeignKey(ed => ed.EmployeeId)
         .OnDelete(DeleteBehavior.NoAction);
+
+      modelBuilder.Entity<TOTPState>()
+      .HasKey(o => o.UserId);
+      modelBuilder.Entity<MFAUserSecret>()
+      .HasKey(m => m.UserId);
 
     }
 
