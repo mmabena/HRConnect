@@ -80,7 +80,7 @@ namespace HRConnect.Api.Repository
         return new EmployeeSalaryBenchmarkDto
         {
           EmployeeId = e.EmployeeId,
-          FullName = e.Name + "" + e.Surname,
+          FullName = e.Name + " " + e.Surname,
           PositionTitle = e.Position?.PositionTitle,
           MonthlySalary = e.MonthlySalary,
 
@@ -88,7 +88,7 @@ namespace HRConnect.Api.Repository
           Salary50th = benchmark?.Salary50th,
           Salary75th = benchmark?.Salary75th,
           Location = benchmark?.Location,
-          Source = benchmark.Source
+          Source = benchmark?.Source
         };
       });
     }

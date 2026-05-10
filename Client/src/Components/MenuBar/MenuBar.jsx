@@ -558,6 +558,8 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
             </li>
           )}
 
+
+
           {/* NormalUser tools (NormalUser only) */}
           {permissions.isNormalUser && (
             <li>
@@ -662,37 +664,10 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
           )}
         </ul>
 
+
+
       </div>
-
-      <div className="menu-footer">
-        <div className="menu-icon-wrapper">
-          <div className="menu-icon-wrapper">
-            <img
-              src="/images/bell.svg"
-              alt="Bell icon"
-              className="menu-icon"
-              onClick={() => {
-                navigate("/notifications", { state: { role: role } });
-              }}
-            />
-
-            {/* Dynamic unread badge */}
-            {bellCount > 0 && (
-              <span
-                className="notification-badge"
-                data-count={bellCount > 99 ? "99+" : bellCount}
-              >
-                {bellCount > 99 ? "99+" : bellCount}
-              </span>
-            )}
-          </div>
-
-          <img
-            src="/images/setitngs_icon.png"
-            alt="Settings icon"
-            className="menu-icon"
-          />
-        </div>
+      <div className="menu-footer">   
 
         {/* Container for user details */}
         <div className="user-details-container">
@@ -734,6 +709,36 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
               {currentUser?.jobTitle}
             </div>
           </div>
+
+               <div className="menu-icon-wrapper">
+          <div className="menu-icons-wrapper">
+            <img
+              src="/images/bell.svg"
+              alt="Bell icon"
+              className="menu-icon"
+              onClick={() => {
+                navigate("/notifications", { state: { role: role } });
+              }}
+            />
+
+            {/* Dynamic unread badge */}
+            {bellCount > 0 && (
+              <span
+                className="notification-badge"
+                data-count={bellCount > 99 ? "99+" : bellCount}
+              >
+                {bellCount > 99 ? "99+" : bellCount}
+              </span>
+            )}
+          </div>
+
+          <img
+            src="/images/setitngs_icon.png"
+            alt="Settings icon"
+            className="menu-icon"
+          />
+        </div>
+          
         </div>
       </div>
     </div>

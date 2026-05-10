@@ -272,6 +272,7 @@
   color: #4f6e78;
 }
 
+
 /* ── summary stat cards ── */
 .sb-stats {
   width: 1454px;
@@ -369,9 +370,6 @@
   position: relative;
   left: 50px;
   width: 1400px;
-  height: 1259px;
-  overflow-y: scroll;
-
   /* Inside auto layout */
   flex: none;
   order: 4;
@@ -380,6 +378,7 @@
 
 .sb-card {
   background: #ffffff;
+  border-radius: 10px;
   overflow: hidden;
 }
 
@@ -390,6 +389,17 @@
   padding: 14px 16px;
   cursor: pointer;
   transition: background 0.15s;
+  box-sizing: border-box;
+  position: relative;
+}
+.sb-card-header::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 1%;
+  width: 98%;
+  height: 1px;
+  background: rgba(154, 154, 154, 0.3);
 }
 
 .sb-card-header:hover {
@@ -409,37 +419,88 @@
   font-weight: 500;
   flex-shrink: 0;
 }
- 
-.sb-avatar--blue   { background: #E6F1FB; color: #185FA5; }
-.sb-avatar--teal   { background: #E1F5EE; color: #0F6E56; }
-.sb-avatar--amber  { background: #FAEEDA; color: #854F0B; }
-.sb-avatar--coral  { background: #FAECE7; color: #993C1D; }
-.sb-avatar--purple { background: #EEEDFE; color: #534AB7; }
 
+.sb-avatar--blue {
+  background: #e6f1fb;
+  color: #185fa5;
+}
+.sb-avatar--teal {
+  background: #e1f5ee;
+  color: #0f6e56;
+}
+.sb-avatar--amber {
+  background: #faeeda;
+  color: #854f0b;
+}
+.sb-avatar--coral {
+  background: #faece7;
+  color: #993c1d;
+}
+.sb-avatar--purple {
+  background: #eeedfe;
+  color: #534ab7;
+}
 
 /* ── card info ────────────────────────────────────────────────────────────── */
 
 .sb-card-info {
+  width: 118px;
+  height: 35px;
+
+  order: 0;
+  flex-grow: 0;
+
   flex: 1;
   min-width: 0;
 }
- 
+
 .sb-card-name {
-  font-size: 14px;
+  position: relative;
+  width: 99px;
+  height: 15px;
+  left: 0px;
+  top: 0px;
+
+  font-family: "Anek Bangla";
+  font-style: normal;
   font-weight: 500;
-  color: var(--color-text-primary);
+  font-size: 16px;
+  line-height: 15px;
+  /* identical to box height, or 94% */
+  letter-spacing: -0.43px;
+
+  color: #355867;
   margin: 0 0 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
- 
+
 .sb-card-position {
-  font-size: 12px;
-  color: var(--color-text-secondary, #888);
-  margin: 0;
+  position: relative;
+  width: 190px;
+  height: 15px;
+  left: 0px;
+  top: 2px;
+
+  font-family: "Anek Bangla";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 15px;
+  /* identical to box height, or 94% */
+  letter-spacing: -0.43px;
+
+  color: #9a9a9a;
+
+  margin: 0 0 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+  padding: 1px 13px;
 }
- 
+
 .sb-card-right {
   display: flex;
   align-items: center;
@@ -449,18 +510,46 @@
   flex-wrap: wrap;
   justify-content: flex-end;
 }
- 
+
 .sb-card-salary-label {
-  font-size: 11px;
-  color: var(--color-text-secondary, #888);
+  width: 90px;
+  height: 15px;
+
+  font-family: "Anek Bangla";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 15px;
+  /* identical to box height, or 94% */
+  letter-spacing: -0.43px;
+
+  color: #355867;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+
   margin: 0;
   text-align: right;
 }
- 
+
 .sb-card-salary-value {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--color-text-primary);
+  width: 75px;
+  height: 15px;
+
+  font-family: "Anek Bangla";
+  font-style: normal;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 15px;
+  /* identical to box height, or 94% */
+  letter-spacing: -0.43px;
+
+  color: #355867;
+
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+
   margin: 0;
   text-align: right;
 }
@@ -625,13 +714,8 @@
 
 /* ── card body ────────────────────────────────────────────────────────────── */
 
-.sb-card-body {
-  padding: 0 16px 16px;
-  border-top: 0.5px solid var(--color-border-tertiary, #e5e5e5);
-}
-
 .sb-card-meta {
-  font-size: 13px;
+  font-size: 16px;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -643,13 +727,112 @@
   padding: 12px 0;
 }
 
+.sb-card-meta {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 32px;
+  padding: 12px 0;
+  flex-wrap: wrap;
+}
+
+.sb-card-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+
+.sb-card-container-l {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+
+.sb-label-ms {
+  font-family: "Anek Bangla";
+  font-weight: 400;
+  font-size: 16px;
+  letter-spacing: -0.43px;
+  color: #355867;
+  white-space: nowrap;
+  position: relative;
+  left: 20px;
+}
+
 .sb-card-meta strong {
-  width: 75px;
-  height: 15px;
+  font-family: "Anek Bangla";
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: -0.43px;
+  color: #355867;
+  white-space: nowrap;
+}
+
+.sb-label {
+  font-family: "Anek Bangla";
+  font-weight: 400;
+  font-size: 16px;
+  letter-spacing: -0.43px;
+  color: #355867;
+  white-space: nowrap;
+}
+
+/* ── benchmark box ────────────────────────────────────────────────────────── */
+
+.sb-bench-box {
+  border: 0.5px solid #e5e5e5;
+  border-radius: 10px;
+  padding: 27px;
+}
+
+.sb-bench-label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px;
+
+  width: 200px;
+  height: 33px;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px;
 
   font-family: "Anek Bangla";
   font-style: normal;
-  font-weight: 600;
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 15px;
+  /* identical to box height, or 94% */
+  letter-spacing: -0.43px;
+
+  color: #9a9a9a;
+
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.sb-bench-source {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px;
+
+  width: 200px;
+  height: 33px;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px;
+
+  font-family: "Anek Bangla";
+  font-style: normal;
+  font-weight: 500;
   font-size: 16px;
   line-height: 15px;
   /* identical to box height, or 94% */
@@ -657,103 +840,9 @@
 
   color: #355867;
 
-  /* Inside auto layout */
   flex: none;
   order: 0;
   flex-grow: 0;
-}
-.sb-label {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  padding: 15px;
-
-  width: 200px;
-  height: 51px;
-
-  /* Inside auto layout */
-  flex: none;
-  order: 0;
-  flex-grow: 0;
-  margin: 0px -16px;
-}
-
-/* ── benchmark box ────────────────────────────────────────────────────────── */
-
-.sb-bench-box {
-  border: 0.5px solid var(--color-border-tertiary, #e5e5e5);
-  border-radius: 10px;
-  padding: 14px;
-}
-
-.sb-bench-label {
-display: flex;
-flex-direction: row;
-align-items: center;
-padding: 0px;
-
-width: 200px;
-height: 33px;
-
-display: flex;
-flex-direction: row;
-align-items: center;
-padding: 0px;
-
-font-family: 'Anek Bangla';
-font-style: normal;
-font-weight: 500;
-font-size: 16px;
-line-height: 15px;
-/* identical to box height, or 94% */
-letter-spacing: -0.43px;
-
-color: #9A9A9A;
-
-flex: none;
-order: 0;
-flex-grow: 0;
-
-}
-
-.sb-bench-source {
-display: flex;
-flex-direction: row;
-align-items: center;
-padding: 0px;
-
-width: 200px;
-height: 41px;
-display: flex;
-flex-direction: row;
-align-items: center;
-padding: 0px;
-
-
-display: flex;
-flex-direction: row;
-justify-content: center;
-align-items: center;
-padding: 10px;
-gap: 10px;
-
-
-font-family: 'Anek Bangla';
-font-style: normal;
-font-weight: 500;
-font-size: 16px;
-line-height: 15px;
-/* identical to box height, or 94% */
-letter-spacing: -0.43px;
-
-color: #355867;
-
-
-/* Inside auto layout */
-flex: none;
-order: 0;
-flex-grow: 0;
-
 }
 
 /* ── legend ───────────────────────────────────────────────────────────────── */
@@ -766,78 +855,70 @@ flex-grow: 0;
 }
 
 .sb-legend-item {
-display: flex;
-flex-direction: row;
-align-items: center;
-padding: 0px 10px 0px 15px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px 10px 0px 15px;
 
-width: 142px;
-height: 51px;
+  width: 142px;
+  height: 51px;
 
-flex: none;
-order: 0;
-flex-grow: 0;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
 }
 
-.sb-legend-item--below{
-display: flex;
-flex-direction: row;
-align-items: center;
-padding: 0px 10px 0px 15px;
+.sb-legend-item--below {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px 10px 0px 15px;
 
-width: 142px;
-height: 51px;
+  width: 142px;
+  height: 51px;
 
-/* Person Login */
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  gap: 10px;
 
-/* Auto layout */
-display: flex;
-flex-direction: row;
-justify-content: center;
-align-items: center;
-padding: 10px;
-gap: 10px;
-
-/* Inside auto layout */
-flex: none;
-order: 0;
-flex-grow: 0;
-
+  /* Inside auto layout */
+  flex: none;
+  order: 0;
+  flex-grow: 0;
 }
 
-.sb-legend-item--above{
-display: flex;
-flex-direction: row;
-align-items: center;
-padding: 0px 10px 0px 15px;
+.sb-legend-item--above {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  gap: 10px;
 
-width: 269px;
-height: 51px;
-
-
-/* Inside auto layout */
-flex: none;
-order: 2;
-flex-grow: 0;
-
-
+  width: 270px;
+  height: 51px;
+  /* Inside auto layout */
+  flex: none;
+  order: 1;
+  flex-grow: 0;
 }
 
-.sb-legend-item--market{
-display: flex;
-flex-direction: row;
-align-items: center;
-padding: 0px 10px 0px 15px;
+.sb-legend-item--market {
+  /* Auto layout */
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  gap: 10px;
 
-width: 240px;
-height: 51px;
-
-
-/* Inside auto layout */
-flex: none;
-order: 1;
-flex-grow: 0;
-
+  width: 270px;
+  height: 51px;
+  /* Inside auto layout */
+  flex: none;
+  order: 1;
+  flex-grow: 0;
 }
 
 .sb-legend-swatch {
@@ -858,22 +939,25 @@ flex-grow: 0;
 
 .sb-range-wrap {
   position: relative;
-  margin: 24px 0 32px;
+  margin: 32px 0 40px;
 }
 
 .sb-range-emp-label {
   position: absolute;
-  top: -20px;
+  top: -38px;
+  left: var(--sal);
   transform: translateX(-50%);
-  font-size: 10px;
-  font-weight: 500;
+  font-size: 16px;
+  font-weight: 600;
   white-space: nowrap;
+  color: #355867;
+  pointer-events: none;
 }
 
 .sb-range-track {
   position: relative;
-  height: 10px;
-  border-radius: 5px;
+  height: 12px;
+  border-radius: 6px;
   overflow: visible;
 }
 
@@ -884,15 +968,21 @@ flex-grow: 0;
 }
 
 .sb-zone--below {
-  background: #fca5a5;
-  border-radius: 5px 0 0 5px;
+  left: 0;
+  width: var(--p25);
+  background: rgba(209, 44, 44, 0.3);
+  border-radius: 6px 0 0 6px;
 }
 .sb-zone--market {
-  background: #bef264;
+  left: var(--p25);
+  width: var(--market-width);
+  background: #dde4c5;
 }
 .sb-zone--above {
-  background: #bae6fd;
-  border-radius: 0 5px 5px 0;
+  left: var(--p75);
+  width: var(--above-width);
+  background: #c7d9e599;
+  border-radius: 6px;
 }
 
 /* ── ticks ────────────────────────────────────────────────────────────────── */
@@ -902,12 +992,58 @@ flex-grow: 0;
   top: 0;
   height: 100%;
   width: 1.5px;
-  background: var(--color-background-primary, #fff);
+  background: rgba(0, 0, 0, 0.7);
   z-index: 5;
 }
 
+.sb-tick--p25 {
+  left: var(--p25);
+}
+.sb-tick--p50 {
+  left: var(--p50);
+}
+.sb-tick--p75 {
+  left: var(--p75);
+}
+
 .sb-tick--median {
-  background: var(--color-text-primary, #111);
+  background: #355867;
+}
+
+.sb-tick-top {
+  position: absolute;
+  width: 22px;
+  height: 15px;
+  left: -15px;
+  bottom: 15px;
+
+  font-family: "Anek Bangla";
+  font-style: normal;
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 15px;
+  /* identical to box height, or 107% */
+  letter-spacing: -0.43px;
+
+  color: #638549;
+}
+
+.sb-tick-bottom {
+  position: absolute;
+  width: 65px;
+  height: 15px;
+  left: -25px;
+  top: 17px;
+
+  font-family: "Anek Bangla";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 15px;
+  /* identical to box height, or 115% */
+  letter-spacing: -0.43px;
+
+  color: #355867;
 }
 
 .sb-tick-label {
@@ -932,12 +1068,38 @@ flex-grow: 0;
 .sb-marker {
   position: absolute;
   top: 50%;
+  left: var(--sal);
   transform: translate(-50%, -50%);
   width: 14px;
   height: 14px;
   border-radius: 50%;
   border: 2.5px solid #fff;
-  z-index: 10;
+  z-index: 10px;
+}
+
+.sb-card:has(.sb-badge--below-market) .sb-marker {
+  background: #f45052;
+  box-shadow:
+    0 0 0 2px #fff,
+    0 0 0 3.5px #f45052;
+}
+.sb-card:has(.sb-badge--at-market) .sb-marker {
+  background: #638549;
+  box-shadow:
+    0 0 0 2px #fff,
+    0 0 0 3.5px #638549;
+}
+.sb-card:has(.sb-badge--above-market) .sb-marker {
+  background: #c7d9e599;
+  box-shadow:
+    0 0 0 2px #fff,
+    0 0 0 3.5px #1d8dc5;
+}
+.sb-card:has(.sb-badge--nodata) .sb-marker {
+  background: #9a9a9a;
+  box-shadow:
+    0 0 0 2px #fff,
+    0 0 0 3.5px #9a9a9a;
 }
 
 /* ── percentile summary boxes ─────────────────────────────────────────────── */
@@ -950,23 +1112,68 @@ flex-grow: 0;
 }
 
 .sb-pbox {
-  border: 0.5px solid var(--color-border-tertiary, #e5e5e5);
-  border-radius: 8px;
-  padding: 10px;
-  text-align: center;
+  /* Frame 46806 */
+
+  box-sizing: border-box;
+
+  /* Auto layout */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 15px 42px;
+  gap: 14px;
+
+  width: 280px;
+  height: 74px;
+
+  border: 0.5px solid #8aa4ae;
+  border-radius: 10px;
 }
 
 .sb-pbox-label {
-  font-size: 11px;
-  color: var(--color-text-secondary, #888);
-  margin: 0 0 4px;
+  /* P25(Lowest) */
+
+  width: 196px;
+  height: 15px;
+
+  font-family: "Anek Bangla";
+  font-style: normal;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 15px;
+  /* identical to box height, or 107% */
+  text-align: center;
+  letter-spacing: -0.43px;
+
+  color: #707070;
+
+  flex: none;
+  order: 0;
+  align-self: stretch;
+  flex-grow: 0;
 }
 
 .sb-pbox-value {
-  font-size: 15px;
-  font-weight: 500;
-  color: var(--color-text-primary);
-  margin: 0;
+  /* R 580 000 */
+
+  width: 196px;
+  height: 15px;
+
+  font-family: "Anek Bangla";
+  font-style: normal;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 15px;
+  /* identical to box height, or 94% */
+  text-align: center;
+  letter-spacing: -0.43px;
+
+  color: #355867;
+
+  flex: none;
+  order: 1;
+  align-self: stretch;
+  flex-grow: 0;
 }
 
 .sb-pbox-value--red {
@@ -1003,4 +1210,244 @@ flex-grow: 0;
   .sb-filter-divider {
     display: none;
   }
+}
+
+/* benchmark table */
+
+.sb-table-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding: 0px;
+
+  width: 1454px;
+  height: 572px;
+
+  /* Inside auto layout */
+  flex: none;
+  order: 4;
+  flex-grow: 0;
+}
+
+.sb-table-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding: 0px;
+
+  width: 1400px;
+  height: 572px;
+
+  /* Inside auto layout */
+  flex: none;
+  order: 4;
+  flex-grow: 0;
+}
+
+.sb-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: "Anek Bangla", sans-serif;
+  background: #ffffff;
+  border-radius: 10px;
+}
+
+.sb-table thead tr {
+  background: #355867;
+  width: 219px;
+  height: 59px;
+  gap: 10px;
+  color: #fff;
+  font-family: "Anek Bangla";
+  font-weight: 600;
+  font-size: 17px;
+  line-height: 15px;
+  letter-spacing: -0.43px;
+  padding: 10px;
+}
+
+.sb-table th {
+  padding: 14px 18px;
+  text-align: center;
+  font-family: "Anek Bangla";
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: -0.43px;
+  white-space: nowrap;
+  border-bottom: 0.5px solid rgba(154, 154, 154, 0.3);
+}
+
+.sb-table tbody tr {
+  transition: background 0.15s;
+}
+
+.sb-table tbody tr + tr td {
+  border-top: 0.5px solid rgba(154, 154, 154, 0.2);
+}
+
+.sb-table td {
+  padding: 13px 18px;
+  font-family: "Anek Bangla", sans-serif;
+  font-size: 15px;
+  color: #355867;
+  letter-spacing: -0.43px;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.sb-table-btn--edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  font-family: "Anek Bangla", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #355867;
+  background: transparent;
+  border: 0.5px solid rgba(53, 88, 103, 0.37);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+
+.sb-table-btn--edit:hover {
+  background: rgba(53, 88, 103, 0.07);
+}
+
+/* ── pagination bar — sticky to bottom ── */
+.sb-pagination {
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 5px 0px 5px 60px;
+gap: 16px;
+
+position: relative;
+width: 1462px;
+height: 56px;
+left: -4px;
+top: 680px;
+
+
+}
+
+.sb-pagination-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sb-pagination-right {
+display: flex;
+flex-direction: row;
+justify-content: flex-end;
+align-items: flex-end;
+padding: 0px;
+gap: 16px;
+
+width: 1200px;
+height: 37px;
+
+flex: none;
+order: 2;
+flex-grow: 0;
+
+}
+
+/* ── X of Y label ── */
+.sb-page-info {
+  font-size: 15px;
+  color: #355867;
+  letter-spacing: -0.43px;
+}
+
+.sb-page-info strong {
+  font-weight: 600;
+  color: #355867;
+}
+
+/* ── per page dropdown ── */
+.sb-perpage-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.sb-perpage-select {
+  appearance: none;
+  padding: 4px 28px 4px 10px;
+  font-family: "Anek Bangla", sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  color: #355867;
+  background: #ffffff;
+  border: 0.5px solid rgba(53, 88, 103, 0.37);
+  border-radius: 8px;
+  cursor: pointer;
+  outline: none;
+}
+
+.sb-perpage-icon {
+  position: absolute;
+  right: 8px;
+  width: 16px;
+  height: 16px;
+  color: #355867;
+  pointer-events: none;
+}
+
+.sb-perpage-label {
+  font-size: 15px;
+  color: #707070;
+  letter-spacing: -0.43px;
+}
+
+/* ── page buttons ── */
+.sb-page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 6px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: #355867;
+  font-family: "Anek Bangla", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.sb-page-btn:hover:not(:disabled) {
+  background: rgba(53, 88, 103, 0.1);
+}
+
+.sb-page-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.sb-page-btn--active {
+  color: #1d8dc5;
+  font-weight: 700;
+}
+
+.sb-page-btn--active:hover {
+  background: transparent;
+}
+
+.sb-page-dots {
+  font-size: 14px;
+  color: #9a9a9a;
+  padding: 0 4px;
+}
+
+/* add bottom padding to the page so cards don't hide behind the fixed bar */
+.menu-background {
+  padding-bottom: 60px;
 }

@@ -3,13 +3,14 @@ import PayrollNavbar from "../../Components/PayrollNavBar";
 import api from "../../api/api.js";
 import "./SalaryBenchmark.css";
 import AddBenchmark from "./AddBenchmark.jsx";
+import EditBenchmark from "./EditBenchmark.jsx";
 
 function getInitials(name) {
   return name
     .split(" ")
-    .map((n) => n[0])
+    .map((name) => name.charAt(0))
     .join("")
-    .slice(0, 2)
+    .substring(0, 2)
     .toUpperCase();
 }
 
@@ -25,31 +26,108 @@ function getMarketStatus(employee) {
   return "Above Market";
 }
 
-// ─── avatar ───────────────────────────────────────────────────────────────────
+//icons(svg) for markets
 
-function EmployeeAvatar({ name, profileImage }) {
-  const [imgError, setImgError] = useState(false);
-
-  if (profileImage && !imgError) {
-    return (
-      <img
-        src={profileImage}
-        alt={name}
-        className="sb-avatar"
-        onError={() => setImgError(true)}
+function IconBelowMarket() {
+  return (
+    <svg
+      width="28"
+      height="24"
+      viewBox="0 0 28 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M12.5 17H17M17 17V11M17 17L10.625 8.5L6.875 13.5L2 7"
+        stroke="#F45052"
+        stroke-linecap="round"
+        stroke-linejoin="round"
       />
+    </svg>
+  );
+}
+
+function IconAtMarket() {
+  return (
+    <svg
+      width="28"
+      height="24"
+      viewBox="0 0 28 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M13 7.5H17.5M17.5 7.5V13.5M17.5 7.5L11.125 16L7.375 11L2.5 17.5"
+        stroke="#638549"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+  );
+}
+
+function IconAboveMarket() {
+  return (
+    <svg
+      width="28"
+      height="24"
+      viewBox="0 0 28 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M13 7.5H17.5M17.5 7.5V13.5M17.5 7.5L11.125 16L7.375 11L2.5 17.5"
+        stroke="#1D8DC5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+  );
+}
+//status badge
+function StatusBadge({ status }) {
+  if (status === "Below Market") {
+    return (
+      <span className="sb-badge sb-badge--below-market">
+        <IconBelowMarket /> Below Market
+      </span>
     );
   }
 
+  if (status === "At Market") {
+    return (
+      <span className="sb-badge sb-badge--at-market">
+        <IconAtMarket /> At Market
+      </span>
+    );
+  }
+
+  if (status === "Above Market") {
+    return (
+      <span className="sb-badge sb-badge--above-market">
+        <IconAboveMarket /> Above Market
+      </span>
+    );
+  }
+
+  return <span className="sb-badge sb-badge--nodata">No Data</span>;
+}
+
+// ─── avatar ───────────────────────────────────────────────────────────────────
+const AVATAR_COLORS = ["blue", "teal", "amber", "coral", "purple"];
+
+function EmployeeAvatar({ name, index }) {
+  const color = AVATAR_COLORS[index % AVATAR_COLORS.length];
+
   return (
-    <div className="sb-avatar sb-avatar--initials">{getInitials(name)}</div>
+    <div className={`sb-avatar sb-avatar--${color}`}>{getInitials(name)}</div>
   );
 }
 
 // ─── range bar ────────────────────────────────────────────────────────────────
 
 function RangeBar({ employee }) {
-  const { monthlySalary, salary25th, salary50th, salary75th, benchmarkSource } =
+  const { monthlySalary, salary25th, salary50th, salary75th, source } =
     employee;
 
   if (!salary25th || !salary50th || !salary75th) {
@@ -77,7 +155,7 @@ function RangeBar({ employee }) {
   return (
     <div className="sb-bench-box">
       <p className="sb-bench-label">Market Benchmark</p>
-      <p className="sb-bench-source">{benchmarkSource}</p>
+      <p className="sb-bench-source">{source}</p>
 
       {/* legend */}
       <div className="sb-legend">
@@ -126,10 +204,22 @@ function RangeBar({ employee }) {
         </span>
       </div>
 
-      {/* range bar */}
-      <div className="sb-range-wrap">
+      {/* Custom properties are set here so the css can position each
+      element. This is a standard pattern, THE VALUES ARE DATA, NOT STYLES.
+      All the styles are in the css file associated */}
+      <div
+        className="sb-range-wrap"
+        style={{
+          "--p25": `${p25pct}%`,
+          "--p50": `${p50pct}%`,
+          "--p75": `${p75pct}%`,
+          "--sal": `${salpct}%`,
+          "--market-width": `${p75pct - p25pct}%`,
+          "--above-width": `${100 - p75pct}%`,
+        }}
+      >
         {/* employee salary label — sits above the dot */}
-        <span className="sb-emp-label">{fmtRand(monthlySalary)}</span>
+        <span className="sb-range-emp-label">{fmtRand(monthlySalary)}</span>
 
         <div className="sb-range-track">
           {/* colour zones */}
@@ -138,19 +228,19 @@ function RangeBar({ employee }) {
           <div className="sb-zone sb-zone--above" />
 
           {/* P25 tick */}
-          <div className="sb-tick">
+          <div className="sb-tick sb-tick--p25">
             <span className="sb-tick-top">P25</span>
             <span className="sb-tick-bottom">{fmtRand(salary25th)}</span>
           </div>
 
           {/* P50 tick */}
-          <div className="sb-tick sb-tick--median">
+          <div className="sb-tick sb-tick--p50 ">
             <span className="sb-tick-top">P50</span>
             <span className="sb-tick-bottom">{fmtRand(salary50th)}</span>
           </div>
 
           {/* P75 tick */}
-          <div className="sb-tick">
+          <div className="sb-tick sb-tick--p75">
             <span className="sb-tick-top">P75</span>
             <span className="sb-tick-bottom">{fmtRand(salary75th)}</span>
           </div>
@@ -189,16 +279,13 @@ function RangeBar({ employee }) {
 
 // ─── employee card
 
-function EmployeeCard({ employee, isOpen, onToggle }) {
+function EmployeeCard({ employee, index, isOpen, onToggle }) {
   const status = getMarketStatus(employee);
 
   return (
     <div className="sb-card">
       <div className="sb-card-header" onClick={onToggle}>
-        <EmployeeAvatar
-          name={employee.fullName}
-          profileImage={employee.profileImage}
-        />
+        <EmployeeAvatar name={employee.fullName} index={index} />
 
         <div className="sb-card-info">
           <p className="sb-card-name">{employee.fullName}</p>
@@ -251,16 +338,191 @@ function EmployeeCard({ employee, isOpen, onToggle }) {
       {isOpen && (
         <div className="sb-card-body">
           <div className="sb-card-meta">
-            <span className="sb-label">
-              Annual Salary: <strong>{fmtRand(employee.monthlySalary)}</strong>
-            </span>
-            <span className="sb-label">
-              Location: <strong>{employee.location || "—"}</strong>
-            </span>
+            <div className="sb-card-container">
+              <span className="sb-label-ms">
+                Monthly Salary:{" "}
+                <strong>{fmtRand(employee.monthlySalary)}</strong>
+              </span>
+            </div>
+            <div className="sb-card-container-l">
+              <span className="sb-label">
+                Location: <strong>{employee.location || "—"}</strong>
+              </span>
+            </div>
           </div>
           <RangeBar employee={employee} />
         </div>
       )}
+    </div>
+  );
+}
+
+function Pagination({
+  currentPage,
+  totalPages,
+  itemsPerPage,
+  onPageChange,
+  onItemsPerPageChange,
+  totalItems,
+}) {
+  if (totalPages <= 0) return null;
+
+  function getPages() {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    const pages = [1];
+    if (currentPage > 3) pages.push("...");
+    for (
+      let i = Math.max(2, currentPage - 1);
+      i <= Math.min(totalPages - 1, currentPage + 1);
+      i++
+    ) {
+      pages.push(i);
+    }
+    if (currentPage < totalPages - 2) pages.push("...");
+    pages.push(totalPages);
+    return pages;
+  }
+
+  return (
+    <div className="sb-pagination">
+      {/* left — X of Y */}
+      <div className="sb-pagination-left">
+        <span className="sb-page-info">
+          <strong>{currentPage}</strong> of {totalPages}
+        </span>
+
+        {/* per page dropdown */}
+        <div className="sb-perpage-wrapper">
+          <select
+            className="sb-perpage-select"
+            value={itemsPerPage}
+            onChange={(e) => {
+              onItemsPerPageChange(Number(e.target.value));
+              onPageChange(1); // reset to page 1 when per page changes
+            }}
+          >
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={15}>15</option>
+            <option value={18}>18</option>
+            <option value={20}>20</option>
+          </select>
+          <svg
+            className="sb-perpage-icon"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path d="M10 13L14 9H6L10 13Z" />
+          </svg>
+        </div>
+        <span className="sb-perpage-label">Per page</span>
+      </div>
+
+      {/* right — page buttons */}
+      <div className="sb-pagination-right">
+        {/* first page */}
+        <button
+          className="sb-page-btn"
+          onClick={() => onPageChange(1)}
+          disabled={currentPage === 1}
+          title="First page"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 20 20"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M7 10L11 14L11 6L7 10ZM-4.37114e-07 10C-3.76646e-07 8.61667 0.2625 7.31667 0.7875 6.1C1.3125 4.88333 2.025 3.825 2.925 2.925C3.825 2.025 4.88333 1.3125 6.1 0.787499C7.31667 0.262499 8.61667 -4.97581e-07 10 -4.37114e-07C11.3833 -3.76646e-07 12.6833 0.2625 13.9 0.7875C15.1167 1.3125 16.175 2.025 17.075 2.925C17.975 3.825 18.6875 4.88333 19.2125 6.1C19.7375 7.31667 20 8.61667 20 10C20 11.3833 19.7375 12.6833 19.2125 13.9C18.6875 15.1167 17.975 16.175 17.075 17.075C16.175 17.975 15.1167 18.6875 13.9 19.2125C12.6833 19.7375 11.3833 20 10 20C8.61667 20 7.31666 19.7375 6.1 19.2125C4.88333 18.6875 3.825 17.975 2.925 17.075C2.025 16.175 1.3125 15.1167 0.7875 13.9C0.2625 12.6833 -4.97581e-07 11.3833 -4.37114e-07 10ZM2 10C2 12.2333 2.775 14.125 4.325 15.675C5.875 17.225 7.76667 18 10 18C12.2333 18 14.125 17.225 15.675 15.675C17.225 14.125 18 12.2333 18 10C18 7.76667 17.225 5.875 15.675 4.325C14.125 2.775 12.2333 2 10 2C7.76667 2 5.875 2.775 4.325 4.325C2.775 5.875 2 7.76667 2 10Z"
+              fill="#123d50"
+            />
+          </svg>
+        </button>
+
+        {/* prev */}
+        <button
+          className="sb-page-btn"
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          title="Previous page"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 20 20"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M7 10L11 14L11 6L7 10ZM-4.37114e-07 10C-3.76646e-07 8.61667 0.2625 7.31667 0.7875 6.1C1.3125 4.88333 2.025 3.825 2.925 2.925C3.825 2.025 4.88333 1.3125 6.1 0.787499C7.31667 0.262499 8.61667 -4.97581e-07 10 -4.37114e-07C11.3833 -3.76646e-07 12.6833 0.2625 13.9 0.7875C15.1167 1.3125 16.175 2.025 17.075 2.925C17.975 3.825 18.6875 4.88333 19.2125 6.1C19.7375 7.31667 20 8.61667 20 10C20 11.3833 19.7375 12.6833 19.2125 13.9C18.6875 15.1167 17.975 16.175 17.075 17.075C16.175 17.975 15.1167 18.6875 13.9 19.2125C12.6833 19.7375 11.3833 20 10 20C8.61667 20 7.31666 19.7375 6.1 19.2125C4.88333 18.6875 3.825 17.975 2.925 17.075C2.025 16.175 1.3125 15.1167 0.7875 13.9C0.2625 12.6833 -4.97581e-07 11.3833 -4.37114e-07 10ZM2 10C2 12.2333 2.775 14.125 4.325 15.675C5.875 17.225 7.76667 18 10 18C12.2333 18 14.125 17.225 15.675 15.675C17.225 14.125 18 12.2333 18 10C18 7.76667 17.225 5.875 15.675 4.325C14.125 2.775 12.2333 2 10 2C7.76667 2 5.875 2.775 4.325 4.325C2.775 5.875 2 7.76667 2 10Z"
+              fill="#006088"
+            />
+          </svg>
+        </button>
+
+        {/* page numbers */}
+        {getPages().map((page, i) =>
+          page === "..." ? (
+            <span key={`dots-${i}`} className="sb-page-dots">
+              ...
+            </span>
+          ) : (
+            <button
+              key={page}
+              className={`sb-page-btn ${currentPage === page ? "sb-page-btn--active" : ""}`}
+              onClick={() => onPageChange(page)}
+            >
+              {page}
+            </button>
+          ),
+        )}
+
+        {/* next */}
+        <button
+          className="sb-page-btn"
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          title="Next page"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 20 20"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M13 10L9 6L9 14L13 10ZM20 10C20 11.3833 19.7375 12.6833 19.2125 13.9C18.6875 15.1167 17.975 16.175 17.075 17.075C16.175 17.975 15.1167 18.6875 13.9 19.2125C12.6833 19.7375 11.3833 20 10 20C8.61667 20 7.31667 19.7375 6.1 19.2125C4.88333 18.6875 3.825 17.975 2.925 17.075C2.025 16.175 1.3125 15.1167 0.7875 13.9C0.2625 12.6833 1.02753e-07 11.3833 1.19249e-07 10C1.35745e-07 8.61667 0.2625 7.31667 0.7875 6.1C1.3125 4.88333 2.025 3.825 2.925 2.925C3.825 2.025 4.88333 1.3125 6.1 0.7875C7.31667 0.262501 8.61667 1.02753e-07 10 1.19249e-07C11.3833 1.35745e-07 12.6833 0.262501 13.9 0.787501C15.1167 1.3125 16.175 2.025 17.075 2.925C17.975 3.825 18.6875 4.88333 19.2125 6.1C19.7375 7.31667 20 8.61667 20 10ZM18 10C18 7.76667 17.225 5.875 15.675 4.325C14.125 2.775 12.2333 2 10 2C7.76667 2 5.875 2.775 4.325 4.325C2.775 5.875 2 7.76667 2 10C2 12.2333 2.775 14.125 4.325 15.675C5.875 17.225 7.76667 18 10 18C12.2333 18 14.125 17.225 15.675 15.675C17.225 14.125 18 12.2333 18 10Z"
+              fill="#006088"
+            />
+          </svg>
+        </button>
+
+        {/* last page */}
+        <button
+          className="sb-page-btn"
+          onClick={() => onPageChange(totalPages)}
+          disabled={currentPage === totalPages}
+          title="Last page"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 20 20"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M13 10L9 6L9 14L13 10ZM20 10C20 11.3833 19.7375 12.6833 19.2125 13.9C18.6875 15.1167 17.975 16.175 17.075 17.075C16.175 17.975 15.1167 18.6875 13.9 19.2125C12.6833 19.7375 11.3833 20 10 20C8.61667 20 7.31667 19.7375 6.1 19.2125C4.88333 18.6875 3.825 17.975 2.925 17.075C2.025 16.175 1.3125 15.1167 0.7875 13.9C0.2625 12.6833 1.02753e-07 11.3833 1.19249e-07 10C1.35745e-07 8.61667 0.2625 7.31667 0.7875 6.1C1.3125 4.88333 2.025 3.825 2.925 2.925C3.825 2.025 4.88333 1.3125 6.1 0.7875C7.31667 0.262501 8.61667 1.02753e-07 10 1.19249e-07C11.3833 1.35745e-07 12.6833 0.262501 13.9 0.787501C15.1167 1.3125 16.175 2.025 17.075 2.925C17.975 3.825 18.6875 4.88333 19.2125 6.1C19.7375 7.31667 20 8.61667 20 10ZM18 10C18 7.76667 17.225 5.875 15.675 4.325C14.125 2.775 12.2333 2 10 2C7.76667 2 5.875 2.775 4.325 4.325C2.775 5.875 2 7.76667 2 10C2 12.2333 2.775 14.125 4.325 15.675C5.875 17.225 7.76667 18 10 18C12.2333 18 14.125 17.225 15.675 15.675C17.225 14.125 18 12.2333 18 10Z"
+              fill="#006088"
+            />
+          </svg>
+        </button>
+      </div>
     </div>
   );
 }
@@ -275,14 +537,23 @@ function SalaryBenchmark() {
   const [filterStatus, setFilterStatus] = useState("");
   const [filterBranch, setFilterBranch] = useState("");
   const [showPopup, setShowPopup] = useState(false);
-  const [formData, setFormData] = useState({
-    positionTitle: "",
-    location: "",
-    source: "",
-    salary25th: "",
-    salary50th: "",
-    salary75th: "",
-  });
+
+  const [viewMode, setViewMode] = useState("employees");
+
+  const [editingBenchmark, setEditingBenchmark] = useState(null);
+
+  const reloadBenchmarks = async () => {
+    try {
+      const res = await api.get("/salary-benchmarks");
+      setBenchmark(res.data);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  useEffect(() => {
+    reloadBenchmarks();
+  }, []);
 
   useEffect(() => {
     async function load() {
@@ -298,36 +569,29 @@ function SalaryBenchmark() {
     load();
   }, []);
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const res = await api.get("/salary-benchmarks");
-        setBenchmark(res.data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
-  }, []);
+  //  useEffect(() => {
+  //     async function load() {
+  //       try {
+  //         const res = await api.get("/salary-benchmarks");
+  //         setBenchmark(res.data);
+  //       } catch (err) {
+  //         setError(err.message);
+  //       } finally {
+  //         setLoading(false);
+  //       }
+  //     }
+  //     load();
+  //   }, []);
 
   const handleAddBenchmark = async () => {
     try {
       setLoading(true);
-      const res = await api.post("/salary-benchmarks", formData);
+      const res = await api.post("/salary-benchmarks");
 
       setBenchmark((prev) => [...prev, res.data]);
       setShowPopup(false); // close popup
       // reset form
-      setFormData({
-        positonTitle: "",
-        location: "",
-        source: "",
-        salary25th: "",
-        salary50th: "",
-        salary75th: "",
-      });
+    
     } catch (err) {
       setError(err.message);
     } finally {
@@ -346,19 +610,73 @@ function SalaryBenchmark() {
 
   const filtered = useMemo(() => {
     return employees.filter((e) => {
+      if (viewMode === "benchmarks" && !e.salary25th) return false;
+
       if (filterPosition && e.positionTitle !== filterPosition) return false;
       if (filterBranch && e.location !== filterBranch) return false;
       if (filterStatus && getMarketStatus(e) !== filterStatus) return false;
       return true;
     });
-  }, [employees, filterPosition, filterBranch, filterStatus]);
+  }, [employees, viewMode, filterPosition, filterBranch, filterStatus]);
 
-  const totalBenchmarks = filtered.filter((e) => e.salary25th).length;
-  const positionsCovered = new Set(
-    filtered.filter((e) => e.salary25th).map((e) => e.positionTitle),
-  ).size;
-  const locations = new Set(filtered.map((e) => e.location).filter(Boolean))
-    .size;
+  const benchmarkEmployees = useMemo(
+    () => employees.filter((e) => e.salary25th),
+    [employees],
+  );
+
+  // ── employees view stats (based on filtered employees)
+  const totalBenchmarks = useMemo(
+    () => filtered.filter((e) => e.salary25th).length,
+    [filtered],
+  );
+
+  const positionsCovered = useMemo(
+    () =>
+      new Set(filtered.filter((e) => e.salary25th).map((e) => e.positionTitle))
+        .size,
+    [filtered],
+  );
+
+  const locations = useMemo(
+    () => new Set(filtered.map((e) => e.location).filter(Boolean)).size,
+    [filtered],
+  );
+
+  // ── benchmarks view stats (based on the benchmark table)
+  const totalBenchmarkEntries = useMemo(() => benchmark.length, [benchmark]);
+
+  const benchmarkPositionsCovered = useMemo(
+    () => new Set(benchmark.map((b) => b.positionTitle)).size,
+    [benchmark],
+  );
+
+  const benchmarkLocations = useMemo(
+    () => new Set(benchmark.map((b) => b.location).filter(Boolean)).size,
+    [benchmark],
+  );
+
+  const [empPage, setEmpPage] = useState(1);
+  const [empPerPage, setEmpPerPage] = useState(5);
+  const [benchmarkPage, setBenchmarkPage] = useState(1);
+
+  const [benchmarkPerPage, setBenchmarkPerPage] = useState(5);
+
+  useEffect(() => {
+    setEmpPage(1);
+  }, [filterPosition, filterStatus, filterBranch]);
+
+  const totalEmpPages = Math.ceil(filtered.length / empPerPage);
+
+  const paginatedEmployees = useMemo(() => {
+    const start = (empPage - 1) * empPerPage;
+    return filtered.slice(start, start + empPerPage);
+  }, [filtered, empPage, empPerPage]);
+
+  const totalBenchmarkPages = Math.ceil(benchmark.length / benchmarkPerPage);
+  const paginatedBenchmarks = useMemo(() => {
+    const start = (benchmarkPage - 1) * benchmarkPerPage;
+    return benchmark.slice(start, start + benchmarkPerPage);
+  }, [benchmark, benchmarkPage, benchmarkPerPage]);
 
   function toggleCard(id) {
     setOpenId((prev) => (prev === id ? null : id));
@@ -369,7 +687,7 @@ function SalaryBenchmark() {
       <div className="sb-wrap-container">
         <div className="sb-container">Payroll Management </div>
         <div className="sb-actions">
-          <button className="sb-btn">
+          <button className="sb-btn" onClick={() => setViewMode("employees")}>
             <svg
               width="22"
               height="22"
@@ -386,7 +704,7 @@ function SalaryBenchmark() {
             </svg>
             Employee list
           </button>
-          <button className="sb-btn">
+          <button className="sb-btn" onClick={() => setViewMode("benchmarks")}>
             <svg
               width="22"
               height="22"
@@ -479,56 +797,190 @@ function SalaryBenchmark() {
           </div>
         </div>
       </div>
+
       <div className="sb-stats">
         <div className="sb-stats-container">
-          <div className="sb-stat">
-            <p className="sb-stat-label">Total Benchmarks</p>
-            <p className="sb-stat-value">{loading ? "-" : totalBenchmarks}</p>
-          </div>
-          <div className="sb-stat">
-            <p className="sb-stat-label">Positions Covered</p>
-            <p className="sb-stat-value">{loading ? "-" : positionsCovered}</p>
-          </div>
-          <div className="sb-stat">
-            <p className="sb-stat-label">Locations</p>
-            <p className="sb-stat-value">{loading ? "—" : locations}</p>
-          </div>
-        </div>
-      </div>
-      {loading && <p className="sb-state-msg">Loading Employees</p>}
-      {error && (
-        <p className="sb-state-msg sb-state-msg--error">Error:{error}</p>
-      )}
-
-      {!loading && !error && (
-        <div className="sb-cards">
-          {filtered.length === 0 ? (
-            <p className="sb-state-msg">
-              No employees match the filters selected
-            </p>
+          {viewMode === "employees" ? (
+            <>
+              <div className="sb-stat">
+                <p className="sb-stat-label">Total Benchmarks</p>
+                <p className="sb-stat-value">
+                  {loading ? "-" : totalBenchmarks}
+                </p>
+              </div>
+              <div className="sb-stat">
+                <p className="sb-stat-label">Positions Covered</p>
+                <p className="sb-stat-value">
+                  {loading ? "-" : positionsCovered}
+                </p>
+              </div>
+              <div className="sb-stat">
+                <p className="sb-stat-label">Locations</p>
+                <p className="sb-stat-value">{loading ? "—" : locations}</p>
+              </div>
+            </>
           ) : (
-            filtered.map((emp, i) => (
-              <EmployeeCard
-                key={emp.employeeId}
-                employee={emp}
-                index={i}
-                isOpen={openId === emp.employeeId}
-                onToggle={() => toggleCard(emp.employeeId)}
-              />
-            ))
+            <>
+              <div className="sb-stat">
+                <p className="sb-stat-label">Total Benchmarks</p>
+                <p className="sb-stat-value">
+                  {loading ? "—" : totalBenchmarkEntries}
+                </p>
+              </div>
+              <div className="sb-stat">
+                <p className="sb-stat-label">Positions Covered</p>
+                <p className="sb-stat-value">
+                  {loading ? "—" : benchmarkPositionsCovered}
+                </p>
+              </div>
+              <div className="sb-stat">
+                <p className="sb-stat-label">Locations</p>
+                <p className="sb-stat-value">
+                  {loading ? "—" : benchmarkLocations}
+                </p>
+              </div>
+            </>
           )}
         </div>
+      </div>
+
+      {viewMode === "employees" && (
+        <>
+          {loading && <p className="sb-state-msg">Loading Employees</p>}
+          {error && (
+            <p className="sb-state-msg sb-state-msg--error">Error: {error}</p>
+          )}
+
+          {!loading && !error && (
+            <>
+              <div className="sb-cards">
+                {filtered.length === 0 ? (
+                  <p className="sb-state-msg">
+                    No employees match the filters selected
+                  </p>
+                ) : (
+                  paginatedEmployees.map((emp, i) => (
+                    <EmployeeCard
+                      key={emp.employeeId}
+                      employee={emp}
+                      index={i}
+                      isOpen={openId === emp.employeeId}
+                      onToggle={() => toggleCard(emp.employeeId)}
+                    />
+                  ))
+                )}
+              </div>
+
+              <Pagination
+                currentPage={empPage}
+                totalPages={totalEmpPages}
+                itemsPerPage={empPerPage}
+                onPageChange={setEmpPage}
+                onItemsPerPageChange={(val) => {
+                  setEmpPerPage(val);
+                  setEmpPage(1);
+                }}
+              />
+            </>
+          )}
+
+          {showPopup && (
+            <div className="modal-overlay">
+              <AddBenchmark
+                onClose={() => setShowPopup(false)}
+                onAddSuccess={async (newBenchmark) => {
+                  await reloadBenchmarks();
+                  const res = await api.get("/salary-benchmarks/employees");
+                  setEmployees(res.data);
+                  setShowPopup(false);
+                }}
+              />
+            </div>
+          )}
+        </>
       )}
-      {showPopup && (
-        <div className="modal-overlay">
-          <AddBenchmark
-            onClose={() => setShowPopup(false)}
-            onUploadSuccess={() => {
-              handleAddBenchmark();
-              setShowPopup(false);
+
+      {viewMode === "benchmarks" && (
+        <>
+          {/* ✅ modal lives outside the table */}
+          {editingBenchmark && (
+            <div className="modal-overlay">
+              <EditBenchmark
+                benchmark={editingBenchmark}
+                onClose={() => setEditingBenchmark(null)}
+                onEditSuccess={(updated) => {
+                  setBenchmark((prev) =>
+                    prev.map((b) => (b.id === updated.id ? updated : b)),
+                  );
+                  setEditingBenchmark(null);
+                }}
+              />
+            </div>
+          )}
+
+          <div className="sb-table-wrap">
+            <div className="sb-table-container">
+              <table className="sb-table">
+                <thead>
+                  <tr>
+                    <th>Position</th>
+                    <th>Location</th>
+                    <th>P25</th>
+                    <th>P50</th>
+                    <th>P75</th>
+                    <th>Source</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedBenchmarks.map((b) => (
+                    <tr key={b.id}>
+                      <td>{b.positionTitle || b.positionId}</td>
+                      <td>{b.location}</td>
+                      <td>R {b.salary25th.toLocaleString("en-ZA")}</td>
+                      <td>R {b.salary50th.toLocaleString("en-ZA")}</td>
+                      <td>R {b.salary75th.toLocaleString("en-ZA")}</td>
+                      <td>{b.source}</td>
+                      <td className="sb-table-actions">
+                        <button
+                          className="sb-table-btn sb-table-btn--edit"
+                          onClick={() => setEditingBenchmark(b)}
+                        >
+                          Edit
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <Pagination
+            currentPage={benchmarkPage}
+            totalPages={totalBenchmarkPages}
+            itemsPerPage={benchmarkPerPage}
+            onPageChange={setBenchmarkPage}
+            onItemsPerPageChange={(val) => {
+              setBenchmarkPerPage(val);
+              setBenchmarkPage(1);
             }}
           />
-        </div>
+
+          {showPopup && (
+            <div className="modal-overlay">
+              <AddBenchmark
+                onClose={() => setShowPopup(false)}
+                onAddSuccess={async () => {
+                  await reloadBenchmarks();
+                  const res = await api.get("/salary-benchmarks/employees");
+                  setEmployees(res.data);
+                  setShowPopup(false);
+                }}
+              />
+            </div>
+          )}
+        </>
       )}
     </div>
   );
