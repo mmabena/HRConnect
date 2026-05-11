@@ -429,7 +429,7 @@ namespace HRConnect.Api.Services
                     : 0,
 
                 Status = application.Status.ToString(),
-
+                DecisionDate = application.DecisionDate,
                 Documents = application.Documents?.Select(d => new LeaveDocumentResponse
                 {
                     FileName = d.FileName,
@@ -600,7 +600,7 @@ namespace HRConnect.Api.Services
                     : 0, // fallback
 
                 Status = a.Status.ToString(),
-
+                DecisionDate = a.DecisionDate,
                 Documents = a.Documents != null && a.Documents.Count > 0
                     ? a.Documents.Select(d => new LeaveDocumentResponse
                     {
@@ -654,7 +654,7 @@ namespace HRConnect.Api.Services
                     : 0,
 
                 Status = a.Status.ToString(),
-
+                DecisionDate = a.DecisionDate,
                 Documents = a.Documents != null && a.Documents.Count > 0
                     ? a.Documents.Select(d => new LeaveDocumentResponse
                     {
@@ -714,7 +714,7 @@ namespace HRConnect.Api.Services
                     : 0,
 
                 Status = a.Status.ToString(),
-
+                DecisionDate = a.DecisionDate,
                 Documents = a.Documents != null && a.Documents.Count > 0
                     ? a.Documents.Select(d => new LeaveDocumentResponse
                     {
@@ -767,7 +767,7 @@ namespace HRConnect.Api.Services
                     : 0,
 
                 Status = a.Status.ToString(),
-
+                DecisionDate = a.DecisionDate,
                 Documents = a.Documents != null && a.Documents.Count > 0
                     ? a.Documents.Select(d => new LeaveDocumentResponse
                     {
@@ -835,7 +835,7 @@ namespace HRConnect.Api.Services
                     : 0,
 
                 Status = a.Status.ToString(),
-
+                DecisionDate = a.DecisionDate,
                 Documents = a.Documents != null && a.Documents.Count > 0
                     ? a.Documents.Select(d => new LeaveDocumentResponse
                     {

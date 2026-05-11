@@ -26,6 +26,7 @@ namespace HRConnect.Api.DTOs
         public decimal DaysAllocated { get; set; }
         public decimal DaysRequested { get; set; }
         public string Status { get; set; } = null!;
+        public DateTime? DecisionDate { get; set; }
         public List<LeaveDocumentResponse> Documents { get; set; } = new();
     }
     public class DecisionRequest
