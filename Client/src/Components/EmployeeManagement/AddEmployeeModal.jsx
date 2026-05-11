@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "./AddEmployeeModal.css";
@@ -13,12 +13,6 @@ import useImageUpload from "../../hooks/useImageUpload";
 import useUserRole from "../../hooks/useUserRole";
 import { ArrowRight, Upload, UserRoundPlus, X } from "lucide-react";
 
-/// </summary>
-/// MOCK super user role
-/// </summary>
-
-const getCurrentUserRole = () => "superuser";
-
 const AddEmployeeModal = ({ closeModal }) => {
   const navigate = useNavigate();
   const role = useUserRole();
@@ -27,10 +21,12 @@ const AddEmployeeModal = ({ closeModal }) => {
   const { uploadImage, uploading } = useImageUpload();
   const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+
   const titles = ["Mr", "Mrs", "Ms", "Dr", "Prof"];
   const genders = ["Male", "Female"];
   const branches = ["Johannesburg", "CapeTown", "UK"];
   const employmentStatuses = ["Permanent", "FixedTerm", "Contract"];
+
   const { employee, setEmployee, formErrors, setFormErrors, onInputChange } =
     useEmployeeForm({
       title: "",
@@ -57,22 +53,26 @@ const AddEmployeeModal = ({ closeModal }) => {
       disability: false,
       disabilityType: "",
       profileImage: "",
-
-      //Banking Fields
+      // Banking Fields
       bankName: "",
       accountNumber: "",
       branchCode: "",
       accountType: "",
       paymentMethod: "",
+      accountHolderName: "",
+      reference: "",
+      payFrequency: "",
+      payDate: "",
     });
 
   const fileInputRef = useRef(null);
-  const handleImageClick = () => {
-    fileInputRef.current.click();
-  };
   const [fileName, setFileName] = useState(
     "Click to upload or drag a file here PDF, JPG or PNG · max 5MB",
   );
+
+  const handleImageClick = () => {
+    fileInputRef.current.click();
+  };
 
   if (role !== "superuser") {
     return <div>Access Denied. Only super users can access this page.</div>;
@@ -80,27 +80,17 @@ const AddEmployeeModal = ({ closeModal }) => {
 
   const onFileChange = async (e) => {
     const file = e.target.files[0];
-
     if (!file) return;
-
     setFileName(file.name);
-
     const url = await uploadImage(file);
-
     if (url) {
-      setEmployee((prev) => ({
-        ...prev,
-        profileImage: url,
-      }));
+      setEmployee((prev) => ({ ...prev, profileImage: url }));
     }
   };
 
   const handleSave = async () => {
     const errors = validateEmployee(employee);
     setFormErrors(errors);
-
-    console.error(errors);
-
     if (Object.keys(errors).length > 0) return;
 
     try {
@@ -130,12 +120,15 @@ const AddEmployeeModal = ({ closeModal }) => {
         employmentStatus: employee.employeeStatus,
         careerManagerID: employee.reportsTo || null,
         profileImage: employee.profileImage,
-
         bankName: employee.bankName,
         accountNumber: employee.accountNumber,
         branchCode: employee.branchCode,
         accountType: employee.accountType,
         paymentMethod: employee.paymentMethod,
+        accountHolderName: employee.accountHolderName,
+        reference: employee.reference,
+        payFrequency: employee.payFrequency,
+        payDate: employee.payDate,
       };
 
       if (employee.idType === "id") {
@@ -145,7 +138,6 @@ const AddEmployeeModal = ({ closeModal }) => {
       }
 
       await addEmployee(payload);
-
       toast.success("Employee created successfully!");
       closeModal();
     } catch (error) {
@@ -154,7 +146,6 @@ const AddEmployeeModal = ({ closeModal }) => {
       } else {
         toast.error("Failed to create employee.");
       }
-
       console.error("Add employee error response data:", error.response?.data);
       console.error("Add employee error status:", error.response?.status);
     } finally {
@@ -173,704 +164,645 @@ const AddEmployeeModal = ({ closeModal }) => {
 
   if (dataLoading) return <div>Loading...</div>;
 
+  const wizardSteps = [
+    { step: 1, label: "Personal Details" },
+    { step: 2, label: "Banking Details" },
+    { step: 3, label: "Leave" },
+    { step: 4, label: "Pension" },
+    { step: 5, label: "Medical Aid" },
+    { step: 6, label: "Preview" },
+  ];
+
   return (
-    <div className="emp-center-frame">
-      <div className="emp-left-frame">
-        <div className="emp-left-frame-centered">
-          <div className="emp-headings-container">
-            <div className="emp-left-icon-wrapper">
-              <UserRoundPlus size={24} />
-            </div>
-            <span className="emp-title-wrapper emp-center-logo-text">
-              New Employee
-            </span>
-            <div className="emp-right-icon-wrapper">
-              <X size={24} />
-            </div>
-          </div>
-          <div className="emp-wizard-container">
-            <div className="emp-wizard-frame">
-              {/* STEP 1 */}
-              <div className="emp-step-wrapper">
-                <div
-                  className={
-                    currentStep >= 1 ? "emp-step-active" : "emp-step-inactive"
-                  }
-                >
-                  1
-                </div>
-
-                <span className="emp-wizard-step">Personal Details</span>
-              </div>
-
-              <div className="emp-line-step"></div>
-
-              {/* STEP 2 */}
-              <div className="emp-step-wrapper">
-                <div
-                  className={
-                    currentStep >= 2 ? "emp-step-active" : "emp-step-inactive"
-                  }
-                >
-                  2
-                </div>
-
-                <span className="emp-wizard-step">Banking Details</span>
-              </div>
-
-              <div className="emp-line-step"></div>
-
-              {/* STEP 3 */}
-              <div className="emp-step-wrapper">
-                <div
-                  className={
-                    currentStep >= 3 ? "emp-step-active" : "emp-step-inactive"
-                  }
-                >
-                  3
-                </div>
-
-                <span className="emp-wizard-step">Leave</span>
-              </div>
-
-              <div className="emp-line-step"></div>
-
-              {/* STEP 4 */}
-              <div className="emp-step-wrapper">
-                <div
-                  className={
-                    currentStep >= 4 ? "emp-step-active" : "emp-step-inactive"
-                  }
-                >
-                  4
-                </div>
-
-                <span className="emp-wizard-step">Pension</span>
-              </div>
-
-              <div className="emp-line-step"></div>
-
-              {/* STEP 5 */}
-              <div className="emp-step-wrapper">
-                <div
-                  className={
-                    currentStep >= 5 ? "emp-step-active" : "emp-step-inactive"
-                  }
-                >
-                  5
-                </div>
-
-                <span className="emp-wizard-step">Medical Aid</span>
-              </div>
-
-              <div className="emp-line-step"></div>
-
-              {/* STEP 6 */}
-              <div className="emp-step-wrapper">
-                <div
-                  className={
-                    currentStep >= 6 ? "emp-step-active" : "emp-step-inactive"
-                  }
-                >
-                  6
-                </div>
-
-                <span className="emp-wizard-step">Preview</span>
-              </div>
-            </div>
-          </div>
+    // Outer shell — always full width, vertical layout
+    <div className="emp-modal-shell">
+      {/* ── HEADER — always visible ── */}
+      <div className="emp-headings-container">
+        <div className="emp-left-icon-wrapper">
+          <UserRoundPlus size={24} />
         </div>
-        {currentStep === 1 && (
-          <div className="emp-name-surname-container">
-            <div className="emp-form-grid">
-              <div className="emp-personal-details-heading">
-                <span>Personal Details</span>
-              </div>
-              <div className="emp-personal-details-sub">
-                <span>Employee identity information</span>
-              </div>
-
-              {/* Title */}
-              <div className="emp-full-width dropdown-wrapper emp-input-wrapper">
-                <select
-                  className={`emp-name-input ${formErrors.title ? "emp-error-input" : ""}`}
-                  value={employee.title}
-                  onChange={onInputChange}
-                  name="title"
-                >
-                  <option value="">Title</option>
-                  {titles.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
-                    </option>
-                  ))}
-                </select>
-                {formErrors.title && (
-                  <span className="emp-error-message">{formErrors.title}</span>
-                )}
-                <img
-                  src="/images/arrow_drop_down_circle.png"
-                  alt="Dropdown icon"
-                  className="dropdown-icon"
-                />
-              </div>
-              {/* First Name | Last Name */}
-              <div className="emp-two-col">
-                <div className="emp-input-wrapper">
-                  <input
-                    type="text"
-                    placeholder="First Name"
-                    className={`emp-name-input  ${formErrors.name ? "emp-error-input" : ""}`}
-                    name="name"
-                    value={employee.name}
-                    onChange={onInputChange}
-                  />
-                  {formErrors.name && (
-                    <span className="emp-error-message">{formErrors.name}</span>
-                  )}
-                </div>
-                <div className="emp-input-wrapper">
-                  <input
-                    type="text"
-                    placeholder="Last Name"
-                    className={`emp-name-input  ${formErrors.surname ? "emp-error-input" : ""}`}
-                    name="surname"
-                    value={employee.surname}
-                    onChange={onInputChange}
-                  />
-                  {formErrors.surname && (
-                    <span className="emp-error-message">
-                      {formErrors.surname}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* ID Type | ID / Passport Number */}
-              <div className="emp-two-col">
-                <div className="emp-input-wrapper dropdown-wrapper">
-                  <select
-                    className={`emp-name-input  ${formErrors.idType ? "emp-error-input" : ""}`}
-                    name="idType"
-                    value={employee.idType}
-                    onChange={onInputChange}
-                  >
-                    <option value="id">ID Number</option>
-                    <option value="passport">Passport Number</option>
-                  </select>
-                  <img
-                    src="/images/arrow_drop_down_circle.png"
-                    alt="Dropdown icon"
-                    className="dropdown-icon"
-                  />
-                </div>
-
-                <div className="emp-input-wrapper">
-                  <input
-                    type="text"
-                    className={`emp-name-input  ${formErrors.idNumber ? "emp-error-input" : ""}`}
-                    name={
-                      employee.idType === "passport"
-                        ? "passportNumber"
-                        : "idNumber"
-                    } // dynamic name
-                    value={
-                      employee.idType === "passport"
-                        ? employee.passportNumber
-                        : employee.idNumber
-                    }
-                    onChange={onInputChange}
-                    placeholder={
-                      employee.idType === "passport"
-                        ? "Passport Number"
-                        : "ID Number"
-                    }
-                  />
-                  {formErrors.idNumber && employee.idType === "id" && (
-                    <span className="emp-error-message">
-                      {formErrors.idNumber}
-                    </span>
-                  )}
-                  {formErrors.passportNumber &&
-                    employee.idType === "passport" && (
-                      <span className="emp-error-message">
-                        {formErrors.passportNumber}
-                      </span>
-                    )}
-                </div>
-              </div>
-
-              {/* Nationality */}
-              <div className="emp-full-width emp-input-wrapper">
-                <input
-                  type="text"
-                  placeholder="Nationality"
-                  className={`emp-name-input ${formErrors.nationality ? "emp-error-input" : ""}`}
-                  name="nationality"
-                  value={employee.nationality}
-                  onChange={onInputChange}
-                  disabled={employee.idType === "id"}
-                />
-                {formErrors.nationality && (
-                  <span className="emp-error-message">
-                    {formErrors.nationality}
-                  </span>
-                )}
-              </div>
-
-              {/* DOB | Gender */}
-
-              <div className="emp-two-col">
-                <div className="emp-input-wrapper">
-                  <div className="date-wrapper">
-                    <label className="date-label">DOB</label>
-                    <input
-                      type="date"
-                      name="dateOfBirth"
-                      value={employee.dateOfBirth}
-                      onChange={onInputChange}
-                      className={`emp-name-input ${formErrors.dateOfBirth ? "emp-error-input" : ""}`}
-                      disabled={employee.idType === "id"}
-                    />
-                    {formErrors.dateOfBirth && (
-                      <span className="emp-error-message">
-                        {formErrors.dateOfBirth}
-                      </span>
-                    )}
-                    <img
-                      src="/images/calendar-range.svg"
-                      alt="Dropdown icon"
-                      className="dropdown-icon"
-                    />
-                  </div>
-                </div>
-                <div className="emp-input-wrapper dropdown-wrapper">
-                  <select
-                    name="gender"
-                    className="emp-name-input"
-                    value={employee.gender}
-                    onChange={onInputChange}
-                    disabled={employee.idType === "id"}
-                  >
-                    <option value="">Gender</option>
-                    {genders.map((g) => (
-                      <option key={g} value={g.toLowerCase()}>
-                        {g}
-                      </option>
-                    ))}
-                  </select>
-                  {formErrors.gender && (
-                    <span className="emp-error-message">
-                      {formErrors.gender}
-                    </span>
-                  )}
-                  <img
-                    src="/images/arrow_drop_down_circle.png"
-                    alt="Dropdown icon"
-                    className="dropdown-icon"
-                  />
-                </div>
-              </div>
-
-              {/* Disability (radio buttons) */}
-              <div className="emp-disability-wrapper">
-                <span className="emp-disability-label">Disability:</span>
-
-                <div className="emp-disability-row">
-                  <label className="emp-radio-option">
-                    <input
-                      type="radio"
-                      name="disability"
-                      value="yes"
-                      checked={employee.disability === true}
-                      onChange={onInputChange}
-                    />
-                    Yes
-                  </label>
-
-                  <label className="emp-radio-option">
-                    <input
-                      type="radio"
-                      name="disability"
-                      value="no"
-                      checked={employee.disability === false}
-                      onChange={onInputChange}
-                    />
-                    No
-                  </label>
-
-                  {employee.disability && (
-                    <input
-                      type="text"
-                      name="disabilityType"
-                      className={`emp-disability-input ${formErrors.disabilityType ? "emp-error-input" : ""}`}
-                      placeholder="Enter disability"
-                      value={employee.disabilityType}
-                      onChange={onInputChange}
-                    />
-                  )}
-                </div>
-                {formErrors.disabilityType && (
-                  <span className="emp-error-message">
-                    {formErrors.disabilityType}
-                  </span>
-                )}
-              </div>
-
-              {/* Contact Number */}
-              <div className="emp-full-width emp-input-wrapper">
-                <input
-                  type="text"
-                  placeholder="Contact Number"
-                  className={`emp-name-input ${formErrors.contactNumber ? "emp-error-input" : ""}`}
-                  name="contactNumber"
-                  value={employee.contactNumber}
-                  onChange={onInputChange}
-                />
-                {formErrors.contactNumber && (
-                  <span className="emp-error-message">
-                    {formErrors.contactNumber}
-                  </span>
-                )}
-              </div>
-
-              {/* Email */}
-              <div className="emp-full-width emp-input-wrapper">
-                <input
-                  type="email"
-                  placeholder="Email Address"
-                  className={`emp-name-input ${formErrors.email ? "emp-error-input" : ""}`}
-                  name="email"
-                  value={employee.email}
-                  onChange={onInputChange}
-                />
-                {formErrors.email && (
-                  <span className="emp-error-message">{formErrors.email}</span>
-                )}
-              </div>
-              {/* Home Address */}
-              <div className="emp-full-width emp-input-wrapper">
-                <input
-                  type="text"
-                  placeholder="Home Address"
-                  className={`emp-name-input ${formErrors.physicalAddress ? "emp-error-input" : ""}`}
-                  name="physicalAddress"
-                  value={employee.physicalAddress}
-                  onChange={onInputChange}
-                />
-                {formErrors.physicalAddress && (
-                  <span className="emp-error-message">
-                    {formErrors.physicalAddress}
-                  </span>
-                )}
-              </div>
-
-              {/* City | Postal Code */}
-              <div className="emp-two-col">
-                <div className="emp-input-wrapper">
-                  <input
-                    type="text"
-                    placeholder="City"
-                    className={`emp-name-input ${formErrors.city ? "emp-error-input" : ""}`}
-                    name="city"
-                    value={employee.city}
-                    onChange={onInputChange}
-                  />
-                  {formErrors.city && (
-                    <span className="emp-error-message">{formErrors.city}</span>
-                  )}
-                </div>
-                <div className="emp-input-wrapper">
-                  <input
-                    type="text"
-                    placeholder="Postal Code"
-                    name="zipCode"
-                    className={`emp-name-input ${formErrors.zipCode ? "emp-error-input" : ""}`}
-                    value={employee.zipCode}
-                    onChange={onInputChange}
-                  />
-                  {formErrors.zipCode && (
-                    <span className="emp-error-message">
-                      {formErrors.zipCode}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}{" "}
+        <span className="emp-title-wrapper emp-center-logo-text">
+          New Employee
+        </span>
+        <div className="emp-right-icon-wrapper">
+          <X size={24} onClick={closeModal} style={{ cursor: "pointer" }} />
+        </div>
       </div>
 
-      {/* Right frame */}
-      <div className="emp-right-frame">
-        <div className="emp-right-form-container">
-          <div className="emp-right-frame-content">
-            {currentStep === 1 && (
-              <div className="emp-name-surname-container">
-                <div className="emp-personal-details-container"></div>
-                <div className="emp-form-group emp-input-wrapper">
-                  {/* Start Date */}
-                  <div className="date-wrapper">
-                    <label className="date-label">Start Date</label>
+      {/* ── WIZARD — always visible ── */}
+      <div className="emp-wizard-container">
+        <div className="emp-wizard-frame">
+          {wizardSteps.map(({ step, label }, index, arr) => (
+            <React.Fragment key={step}>
+              <div className="emp-step-wrapper">
+                <div
+                  className={
+                    currentStep >= step
+                      ? "emp-step-active"
+                      : "emp-step-inactive"
+                  }
+                >
+                  {step}
+                </div>
+                <span className="emp-wizard-step">{label}</span>
+              </div>
+              {index < arr.length - 1 && <div className="emp-line-step" />}
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
 
+      {/* ── STEP CONTENT ── */}
+      <div className={`emp-center-frame${currentStep >= 2 ? " step-2" : ""}`}>
+        {/* LEFT FRAME — step 1 only */}
+        <div className="emp-left-frame">
+          {currentStep === 1 && (
+            <div className="emp-name-surname-container">
+              <div className="emp-form-grid">
+                <div className="emp-personal-details-heading">
+                  <span>Personal Details</span>
+                </div>
+                <div className="emp-personal-details-sub">
+                  <span>Employee identity information</span>
+                </div>
+
+                {/* Title */}
+                <div className="emp-full-width dropdown-wrapper emp-input-wrapper">
+                  <select
+                    className={`emp-name-input ${formErrors.title ? "emp-error-input" : ""}`}
+                    value={employee.title}
+                    onChange={onInputChange}
+                    name="title"
+                  >
+                    <option value="">Title</option>
+                    {titles.map((t) => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
+                  </select>
+                  {formErrors.title && (
+                    <span className="emp-error-message">
+                      {formErrors.title}
+                    </span>
+                  )}
+                  <img
+                    src="/images/arrow_drop_down_circle.png"
+                    alt="Dropdown icon"
+                    className="dropdown-icon"
+                  />
+                </div>
+
+                {/* First Name | Last Name */}
+                <div className="emp-two-col">
+                  <div className="emp-input-wrapper">
                     <input
-                      type="date"
-                      id="startDate"
-                      name="startDate"
-                      value={employee.startDate}
+                      type="text"
+                      placeholder="First Name"
+                      className={`emp-name-input ${formErrors.name ? "emp-error-input" : ""}`}
+                      name="name"
+                      value={employee.name}
                       onChange={onInputChange}
-                      className={`emp-start-date ${formErrors.startDate ? "emp-error-input" : ""}`}
                     />
-                    {formErrors.startDate && (
+                    {formErrors.name && (
                       <span className="emp-error-message">
-                        {formErrors.startDate}
+                        {formErrors.name}
+                      </span>
+                    )}
+                  </div>
+                  <div className="emp-input-wrapper">
+                    <input
+                      type="text"
+                      placeholder="Last Name"
+                      className={`emp-name-input ${formErrors.surname ? "emp-error-input" : ""}`}
+                      name="surname"
+                      value={employee.surname}
+                      onChange={onInputChange}
+                    />
+                    {formErrors.surname && (
+                      <span className="emp-error-message">
+                        {formErrors.surname}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* ID Type | ID / Passport Number */}
+                <div className="emp-two-col">
+                  <div className="emp-input-wrapper dropdown-wrapper">
+                    <select
+                      className={`emp-name-input ${formErrors.idType ? "emp-error-input" : ""}`}
+                      name="idType"
+                      value={employee.idType}
+                      onChange={onInputChange}
+                    >
+                      <option value="id">ID Number</option>
+                      <option value="passport">Passport Number</option>
+                    </select>
+                    <img
+                      src="/images/arrow_drop_down_circle.png"
+                      alt="Dropdown icon"
+                      className="dropdown-icon"
+                    />
+                  </div>
+                  <div className="emp-input-wrapper">
+                    <input
+                      type="text"
+                      className={`emp-name-input ${formErrors.idNumber ? "emp-error-input" : ""}`}
+                      name={
+                        employee.idType === "passport"
+                          ? "passportNumber"
+                          : "idNumber"
+                      }
+                      value={
+                        employee.idType === "passport"
+                          ? employee.passportNumber
+                          : employee.idNumber
+                      }
+                      onChange={onInputChange}
+                      placeholder={
+                        employee.idType === "passport"
+                          ? "Passport Number"
+                          : "ID Number"
+                      }
+                    />
+                    {formErrors.idNumber && employee.idType === "id" && (
+                      <span className="emp-error-message">
+                        {formErrors.idNumber}
+                      </span>
+                    )}
+                    {formErrors.passportNumber &&
+                      employee.idType === "passport" && (
+                        <span className="emp-error-message">
+                          {formErrors.passportNumber}
+                        </span>
+                      )}
+                  </div>
+                </div>
+
+                {/* Nationality */}
+                <div className="emp-full-width emp-input-wrapper">
+                  <input
+                    type="text"
+                    placeholder="Nationality"
+                    className={`emp-name-input ${formErrors.nationality ? "emp-error-input" : ""}`}
+                    name="nationality"
+                    value={employee.nationality}
+                    onChange={onInputChange}
+                    disabled={employee.idType === "id"}
+                  />
+                  {formErrors.nationality && (
+                    <span className="emp-error-message">
+                      {formErrors.nationality}
+                    </span>
+                  )}
+                </div>
+
+                {/* DOB | Gender */}
+                <div className="emp-two-col">
+                  <div className="emp-input-wrapper">
+                    <div className="date-wrapper">
+                      <label className="date-label">DOB</label>
+                      <input
+                        type="date"
+                        name="dateOfBirth"
+                        value={employee.dateOfBirth}
+                        onChange={onInputChange}
+                        className={`emp-name-input ${formErrors.dateOfBirth ? "emp-error-input" : ""}`}
+                        disabled={employee.idType === "id"}
+                      />
+                      {formErrors.dateOfBirth && (
+                        <span className="emp-error-message">
+                          {formErrors.dateOfBirth}
+                        </span>
+                      )}
+                      <img
+                        src="/images/calendar-range.svg"
+                        alt="Calendar icon"
+                        className="dropdown-icon"
+                      />
+                    </div>
+                  </div>
+                  <div className="emp-input-wrapper dropdown-wrapper">
+                    <select
+                      name="gender"
+                      className="emp-name-input"
+                      value={employee.gender}
+                      onChange={onInputChange}
+                      disabled={employee.idType === "id"}
+                    >
+                      <option value="">Gender</option>
+                      {genders.map((g) => (
+                        <option key={g} value={g.toLowerCase()}>
+                          {g}
+                        </option>
+                      ))}
+                    </select>
+                    {formErrors.gender && (
+                      <span className="emp-error-message">
+                        {formErrors.gender}
                       </span>
                     )}
                     <img
-                      src="/images/calendar-range.svg"
+                      src="/images/arrow_drop_down_circle.png"
                       alt="Dropdown icon"
                       className="dropdown-icon"
                     />
                   </div>
                 </div>
-                {/* Branch */}
-                <div className="emp-full-width dropdown-wrapper emp-input-wrapper">
-                  <select
-                    className={`emp-name-input ${formErrors.branch ? "emp-error-input" : ""}`}
-                    value={employee.branch}
-                    onChange={onInputChange}
-                    name="branch"
-                  >
-                    <option value="">Department</option>
-                    {branches.map((b) => (
-                      <option key={b} value={b}>
-                        {b}
-                      </option>
-                    ))}
-                  </select>
-                  {formErrors.branch && (
-                    <span className="emp-error-message">
-                      {formErrors.branch}
-                    </span>
-                  )}
-                  <img
-                    src="/images/arrow_drop_down_circle.png"
-                    alt="Dropdown icon"
-                    className="dropdown-icon"
-                  />
-                </div>
-                {/* Monthly Salary */}
-                <div className="emp-full-width emp-input-wrapper">
-                  <input
-                    type="text"
-                    placeholder="Monthly Salary"
-                    className={`emp-name-input ${formErrors.monthlySalary ? "emp-error-input" : ""}`}
-                    name="monthlySalary"
-                    value={employee.monthlySalary}
-                    onChange={(e) => {
-                      let rawValue = e.target.value;
-                      rawValue = rawValue.replace(/[^0-9.]/g, "");
 
-                      const parts = rawValue.split(".");
-                      if (parts.length > 2) {
-                        rawValue = parts[0] + "." + parts[1];
-                      }
-
-                      setEmployee((prev) => ({
-                        ...prev,
-                        monthlySalary: rawValue,
-                      }));
-                    }}
-                    onBlur={(e) => {
-                      if (employee.monthlySalary) {
-                        e.target.value = formatCurrency(employee.monthlySalary);
-                      }
-                    }}
-                    onFocus={(e) => {
-                      e.target.value = employee.monthlySalary || "";
-                    }}
-                  />
-                  {formErrors.monthlySalary && (
-                    <span className="emp-error-message">
-                      {formErrors.monthlySalary}
-                    </span>
-                  )}
-                </div>
-                {/* Tax Number */}
-                <div className="emp-full-width emp-input-wrapper">
-                  <input
-                    type="text"
-                    placeholder="Tax Number"
-                    className={`emp-name-input ${formErrors.taxNumber ? "emp-error-input" : ""}`}
-                    name="taxNumber"
-                    value={employee.taxNumber}
-                    onChange={onInputChange}
-                  />
-
-                  {formErrors.taxNumber && (
-                    <span className="emp-error-message">
-                      {formErrors.taxNumber}
-                    </span>
-                  )}
-                </div>
-                {/* Job Title */}
-                <div className="emp-full-width dropdown-wrapper emp-input-wrapper">
-                  <select
-                    name="jobTitle"
-                    value={employee.jobTitle}
-                    onChange={onInputChange}
-                    className={`emp-name-input ${formErrors.jobTitle ? "emp-error-input" : ""}`}
-                  >
-                    <option value="">Select Job Title</option>
-                    {positions.map((p) => (
-                      <option key={p.positionId} value={p.positionId}>
-                        {p.positionTitle}
-                      </option>
-                    ))}
-                  </select>
-
-                  {formErrors.jobTitle && (
-                    <span className="emp-error-message">
-                      {formErrors.jobTitle}
-                    </span>
-                  )}
-                  <img
-                    src="/images/arrow_drop_down_circle.png"
-                    alt="Dropdown icon"
-                    className="dropdown-icon"
-                  />
-                </div>
-                {/* Employment Status */}
-                <div className="emp-full-width dropdown-wrapper emp-input-wrapper">
-                  <select
-                    className={`emp-name-input ${formErrors.employeeStatus ? "emp-error-input" : ""}`}
-                    value={employee.employeeStatus}
-                    onChange={onInputChange}
-                    name="employeeStatus"
-                  >
-                    <option value="">Employment Status</option>
-                    {employmentStatuses.map((s) => (
-                      <option key={s} value={s}>
-                        {s}
-                      </option>
-                    ))}
-                  </select>
-                  {formErrors.employeeStatus && (
-                    <span className="emp-error-message">
-                      {formErrors.employeeStatus}
-                    </span>
-                  )}
-                  <img
-                    src="/images/arrow_drop_down_circle.png"
-                    alt="Dropdown icon"
-                    className="dropdown-icon"
-                  />
-                </div>
-                {/* Career Manager */}
-                <div className="emp-full-width dropdown-wrapper emp-input-wrapper">
-                  <select
-                    name="reportsTo"
-                    value={employee.reportsTo}
-                    onChange={onInputChange}
-                    className={`emp-name-input ${formErrors.reportsTo ? "emp-error-input" : ""}`}
-                  >
-                    <option value="">Select Career Manager</option>
-                    {allEmployees.map((emp) => (
-                      <option key={emp.employeeId} value={emp.employeeId}>
-                        {emp.name} {emp.surname}
-                      </option>
-                    ))}
-                  </select>
-
-                  {formErrors.reportsTo && (
-                    <span className="emp-error-message">
-                      {formErrors.reportsTo}
-                    </span>
-                  )}
-                  <img
-                    src="/images/arrow_drop_down_circle.png"
-                    alt="Dropdown icon"
-                    className="dropdown-icon"
-                  />
-                </div>
-
-                <div className="emp-input-wrapper">
-                  <div className="emp-upload-wrapper">
-                    <span className="upload-label">Attach Profile Image</span>
-
-                    <div className="upload-container">
+                {/* Disability */}
+                <div className="emp-disability-wrapper">
+                  <span className="emp-disability-label">Disability:</span>
+                  <div className="emp-disability-row">
+                    <label className="emp-radio-option">
                       <input
-                        type="file"
-                        ref={fileInputRef}
-                        className={`emp-name-input hidden-file-input ${formErrors.startDate ? "emp-error-input" : ""}`}
-                        onChange={onFileChange}
-                        name="profileImage"
-                        accept="image/*"
+                        type="radio"
+                        name="disability"
+                        value="yes"
+                        checked={employee.disability === true}
+                        onChange={onInputChange}
                       />
-
-                      <Upload
-                        alt="Upload icon"
-                        className="upload-icon"
-                        onClick={handleImageClick}
+                      Yes
+                    </label>
+                    <label className="emp-radio-option">
+                      <input
+                        type="radio"
+                        name="disability"
+                        value="no"
+                        checked={employee.disability === false}
+                        onChange={onInputChange}
                       />
+                      No
+                    </label>
+                    {employee.disability && (
+                      <input
+                        type="text"
+                        name="disabilityType"
+                        className={`emp-disability-input ${formErrors.disabilityType ? "emp-error-input" : ""}`}
+                        placeholder="Enter disability"
+                        value={employee.disabilityType}
+                        onChange={onInputChange}
+                      />
+                    )}
+                  </div>
+                  {formErrors.disabilityType && (
+                    <span className="emp-error-message">
+                      {formErrors.disabilityType}
+                    </span>
+                  )}
+                </div>
 
-                      <span className="upload-text">
-                        {uploading ? "Uploading..." : fileName}
-                      </span>
-                    </div>
-                    {formErrors.profileImage && (
+                {/* Contact Number */}
+                <div className="emp-full-width emp-input-wrapper">
+                  <input
+                    type="text"
+                    placeholder="Contact Number"
+                    className={`emp-name-input ${formErrors.contactNumber ? "emp-error-input" : ""}`}
+                    name="contactNumber"
+                    value={employee.contactNumber}
+                    onChange={onInputChange}
+                  />
+                  {formErrors.contactNumber && (
+                    <span className="emp-error-message">
+                      {formErrors.contactNumber}
+                    </span>
+                  )}
+                </div>
+
+                {/* Email */}
+                <div className="emp-full-width emp-input-wrapper">
+                  <input
+                    type="email"
+                    placeholder="Email Address"
+                    className={`emp-name-input ${formErrors.email ? "emp-error-input" : ""}`}
+                    name="email"
+                    value={employee.email}
+                    onChange={onInputChange}
+                  />
+                  {formErrors.email && (
+                    <span className="emp-error-message">
+                      {formErrors.email}
+                    </span>
+                  )}
+                </div>
+
+                {/* Home Address */}
+                <div className="emp-full-width emp-input-wrapper">
+                  <input
+                    type="text"
+                    placeholder="Home Address"
+                    className={`emp-name-input ${formErrors.physicalAddress ? "emp-error-input" : ""}`}
+                    name="physicalAddress"
+                    value={employee.physicalAddress}
+                    onChange={onInputChange}
+                  />
+                  {formErrors.physicalAddress && (
+                    <span className="emp-error-message">
+                      {formErrors.physicalAddress}
+                    </span>
+                  )}
+                </div>
+
+                {/* City | Postal Code */}
+                <div className="emp-two-col">
+                  <div className="emp-input-wrapper">
+                    <input
+                      type="text"
+                      placeholder="City"
+                      className={`emp-name-input ${formErrors.city ? "emp-error-input" : ""}`}
+                      name="city"
+                      value={employee.city}
+                      onChange={onInputChange}
+                    />
+                    {formErrors.city && (
                       <span className="emp-error-message">
-                        {formErrors.profileImage}
+                        {formErrors.city}
+                      </span>
+                    )}
+                  </div>
+                  <div className="emp-input-wrapper">
+                    <input
+                      type="text"
+                      placeholder="Postal Code"
+                      name="zipCode"
+                      className={`emp-name-input ${formErrors.zipCode ? "emp-error-input" : ""}`}
+                      value={employee.zipCode}
+                      onChange={onInputChange}
+                    />
+                    {formErrors.zipCode && (
+                      <span className="emp-error-message">
+                        {formErrors.zipCode}
                       </span>
                     )}
                   </div>
                 </div>
-               
-
-                {/* Save Button */}
-                {formErrors.general && (
-                  <div className="emp-error-message">{formErrors.general}</div>
-                )}
-                <button
-                  className="emp-save-button"
-                  onClick={() => {
-                    if (currentStep < 6) {
-                      setCurrentStep(currentStep + 1);
-                    } else {
-                      handleSave();
-                    }
-                  }}
-                  disabled={loading}
-                >
-                  {loading ? "Saving..." : "Next"}
-
-                  <ArrowRight size={20} className="save-button-icon" />
-                </button>
-
-                {/* <div className="emp-right-frame-bottom">
-                <p className="emp-right-frame-bottom-text">
-                  <span className="emp-align-right">
-                    Privacy Policy | Terms & Conditions
-                  </span>
-                  <br />
-                  <span className="emp-align-left">
-                    Copyright © 2026 Singular Systems. All rights reserved.
-                  </span>
-                </p>
-              </div> */}
               </div>
+            </div>
+          )}
+        </div>
 
-              
-            )} {currentStep === 2 && (
-                  <BankingDetailsModal
-                    employee={employee}
-                    setEmployee={setEmployee}
-                    formErrors={formErrors}
-                    setFormErrors={setFormErrors}
-                    onNext={() => setCurrentStep(3)}
-                    onBack={() => setCurrentStep(1)}
+        {/* RIGHT FRAME */}
+        <div className="emp-right-frame">
+          <div className="emp-right-form-container">
+            <div className="emp-right-frame-content">
+              {/* Step 1 — right side: employment fields */}
+              {currentStep === 1 && (
+                <div className="emp-name-surname-container">
+                  <div className="emp-personal-details-container" />
+
+                  {/* Start Date */}
+                  <div className="emp-form-group emp-input-wrapper">
+                 <div className="date-wrapper">
+                  <label className="date-label">Start Date</label>
+
+                  <input
+                    type="date"
+                    id="startDate"
+                    name="startDate"
+                    value={employee.startDate}
+                    onChange={onInputChange}
+                    className={`emp-start-date ${formErrors.startDate ? "emp-error-input" : ""}`}
                   />
-                )}
+                  {formErrors.startDate && (
+                    <span className="emp-error-message">
+                      {formErrors.startDate}
+                    </span>
+                  )}
+                  <img
+                    src="/images/calendar-range.svg"
+                    alt="Dropdown icon"
+                    className="dropdown-icon"
+                  />
+                    </div>
+                  </div>
+
+                  {/* Branch */}
+                  <div className="emp-full-width dropdown-wrapper emp-input-wrapper">
+                    <select
+                      className={`emp-name-input ${formErrors.branch ? "emp-error-input" : ""}`}
+                      value={employee.branch}
+                      onChange={onInputChange}
+                      name="branch"
+                    >
+                      <option value="">Department</option>
+                      {branches.map((b) => (
+                        <option key={b} value={b}>
+                          {b}
+                        </option>
+                      ))}
+                    </select>
+                    {formErrors.branch && (
+                      <span className="emp-error-message">
+                        {formErrors.branch}
+                      </span>
+                    )}
+                    <img
+                      src="/images/arrow_drop_down_circle.png"
+                      alt="Dropdown icon"
+                      className="dropdown-icon"
+                    />
+                  </div>
+
+                  {/* Monthly Salary */}
+                  <div className="emp-full-width emp-input-wrapper">
+                    <input
+                      type="text"
+                      placeholder="Monthly Salary"
+                      className={`emp-name-input ${formErrors.monthlySalary ? "emp-error-input" : ""}`}
+                      name="monthlySalary"
+                      value={employee.monthlySalary}
+                      onChange={(e) => {
+                        let rawValue = e.target.value.replace(/[^0-9.]/g, "");
+                        const parts = rawValue.split(".");
+                        if (parts.length > 2)
+                          rawValue = parts[0] + "." + parts[1];
+                        setEmployee((prev) => ({
+                          ...prev,
+                          monthlySalary: rawValue,
+                        }));
+                      }}
+                      onBlur={(e) => {
+                        if (employee.monthlySalary)
+                          e.target.value = formatCurrency(
+                            employee.monthlySalary,
+                          );
+                      }}
+                      onFocus={(e) => {
+                        e.target.value = employee.monthlySalary || "";
+                      }}
+                    />
+                    {formErrors.monthlySalary && (
+                      <span className="emp-error-message">
+                        {formErrors.monthlySalary}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Tax Number */}
+                  <div className="emp-full-width emp-input-wrapper">
+                    <input
+                      type="text"
+                      placeholder="Tax Number"
+                      className={`emp-name-input ${formErrors.taxNumber ? "emp-error-input" : ""}`}
+                      name="taxNumber"
+                      value={employee.taxNumber}
+                      onChange={onInputChange}
+                    />
+                    {formErrors.taxNumber && (
+                      <span className="emp-error-message">
+                        {formErrors.taxNumber}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Job Title */}
+                  <div className="emp-full-width dropdown-wrapper emp-input-wrapper">
+                    <select
+                      name="jobTitle"
+                      value={employee.jobTitle}
+                      onChange={onInputChange}
+                      className={`emp-name-input ${formErrors.jobTitle ? "emp-error-input" : ""}`}
+                    >
+                      <option value="">Select Job Title</option>
+                      {positions.map((p) => (
+                        <option key={p.positionId} value={p.positionId}>
+                          {p.positionTitle}
+                        </option>
+                      ))}
+                    </select>
+                    {formErrors.jobTitle && (
+                      <span className="emp-error-message">
+                        {formErrors.jobTitle}
+                      </span>
+                    )}
+                    <img
+                      src="/images/arrow_drop_down_circle.png"
+                      alt="Dropdown icon"
+                      className="dropdown-icon"
+                    />
+                  </div>
+
+                  {/* Employment Status */}
+                  <div className="emp-full-width dropdown-wrapper emp-input-wrapper">
+                    <select
+                      className={`emp-name-input ${formErrors.employeeStatus ? "emp-error-input" : ""}`}
+                      value={employee.employeeStatus}
+                      onChange={onInputChange}
+                      name="employeeStatus"
+                    >
+                      <option value="">Employment Status</option>
+                      {employmentStatuses.map((s) => (
+                        <option key={s} value={s}>
+                          {s}
+                        </option>
+                      ))}
+                    </select>
+                    {formErrors.employeeStatus && (
+                      <span className="emp-error-message">
+                        {formErrors.employeeStatus}
+                      </span>
+                    )}
+                    <img
+                      src="/images/arrow_drop_down_circle.png"
+                      alt="Dropdown icon"
+                      className="dropdown-icon"
+                    />
+                  </div>
+
+                  {/* Career Manager */}
+                  <div className="emp-full-width dropdown-wrapper emp-input-wrapper">
+                    <select
+                      name="reportsTo"
+                      value={employee.reportsTo}
+                      onChange={onInputChange}
+                      className={`emp-name-input ${formErrors.reportsTo ? "emp-error-input" : ""}`}
+                    >
+                      <option value="">Select Career Manager</option>
+                      {allEmployees.map((emp) => (
+                        <option key={emp.employeeId} value={emp.employeeId}>
+                          {emp.name} {emp.surname}
+                        </option>
+                      ))}
+                    </select>
+                    {formErrors.reportsTo && (
+                      <span className="emp-error-message">
+                        {formErrors.reportsTo}
+                      </span>
+                    )}
+                    <img
+                      src="/images/arrow_drop_down_circle.png"
+                      alt="Dropdown icon"
+                      className="dropdown-icon"
+                    />
+                  </div>
+
+                  {/* Profile Image Upload */}
+                  <div className="emp-input-wrapper">
+                <div className="emp-upload-wrapper">
+                  
+                  <span className="upload-label">
+                    Attach Profile Image
+                  </span>
+
+                  <div className="upload-container">
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      className={`emp-name-input hidden-file-input ${formErrors.startDate ? "emp-error-input" : ""}`}
+                      onChange={onFileChange}
+                      name="profileImage"
+                      accept="image/*"
+                    />
+
+                    <Upload
+                      alt="Upload icon"
+                      className="upload-icon"
+                      onClick={handleImageClick}
+                    />
+
+                    <span className="upload-text">
+                      {uploading ? "Uploading..." : fileName}
+                    </span>
+
+                  </div>
+                  {formErrors.profileImage && (
+                    <span className="emp-error-message">
+                      {formErrors.profileImage}
+                    </span>
+                  )}
+                </div>
+              </div>
+                  {formErrors.general && (
+                    <div className="emp-error-message">
+                      {formErrors.general}
+                    </div>
+                  )}
+
+                  {/* Next Button */}
+                  <button
+                    className="emp-save-button"
+                    onClick={() => setCurrentStep(2)}
+                    disabled={loading}
+                  >
+                    Next
+                    <ArrowRight size={20} className="save-button-icon" />
+                  </button>
+                </div>
+              )}
+
+              {/* Step 2 — Banking Details */}
+              {currentStep === 2 && (
+                <BankingDetailsModal
+                  employee={employee}
+                  setEmployee={setEmployee}
+                  formErrors={formErrors}
+                  setFormErrors={setFormErrors}
+                  onNext={() => setCurrentStep(3)}
+                  onBack={() => setCurrentStep(1)}
+                />
+              )}
+            </div>
           </div>
         </div>
       </div>
