@@ -53,7 +53,9 @@ namespace HRConnect.Api.Data
         public DbSet<PensionDeduction> PensionDeductions { get; set; }
         public DbSet<MedicalAidDeduction> MedicalAidDeductions { get; set; }
         public DbSet<Notification> Notifications { get; set; }
-
+        public DbSet<EmployeePayrollEarning> EmployeePayrollEarnings { get; set; }
+        public DbSet<Deduction> Deductions { get; set; }
+        public DbSet<EmployeeDeduction> EmployeeDeductions { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -135,7 +137,7 @@ namespace HRConnect.Api.Data
                 .HasOne(d => d.LeaveApplication)
                 .WithMany(l => l.Documents)
                 .HasForeignKey(d => d.LeaveApplicationId);
-                
+
             modelBuilder.Entity<LeaveApplication>()
                 .HasIndex(l => l.Status);
 
@@ -232,29 +234,102 @@ namespace HRConnect.Api.Data
                 .HasMany(epe => epe.EmployeePensionEnrollment)
                 .WithOne(e => e.Employee)
                 .HasForeignKey(e => e.EmployeeId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Cascade)
+                .IsRequired();
 
             modelBuilder.Entity<PensionOption>()
                 .HasMany(epe => epe.EmployeePensionEnrollment)
                 .WithOne(po => po.PensionOption)
                 .HasForeignKey(po => po.PensionOptionId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Cascade)
+                .IsRequired();
 
-            // Notifications
-            modelBuilder.Entity<Notification>().Property(n => n.Severity).HasConversion<string>();
-            modelBuilder.Entity<Notification>().Property(n => n.Type).HasConversion<string>();
+            modelBuilder.Entity<EmployeePensionEnrollment>()
+                .HasOne<PayrollRun>()
+                .WithMany()
+                .HasForeignKey(t => t.PayrollRunId)
+                .HasPrincipalKey(p => p.PayrollRunId);
+
+            //Notifaction Configurations
+            modelBuilder.Entity<Notification>().Property(n => n.Severity)
+                .HasConversion<string>();
+            modelBuilder.Entity<Notification>().Property(n => n.Type)
+            .HasConversion<string>();
+
+            modelBuilder.Entity<Employee>()
+              .HasMany(epre => epre.EmployeePayrollEarning)
+              .WithOne(e => e.Employee)
+              .HasForeignKey(e => e.EmployeeId)
+              .OnDelete(DeleteBehavior.NoAction)
+              .IsRequired();
+
+            modelBuilder.Entity<PayrollEarning>()
+              .HasMany(epre => epre.EmployeePayrollEarning)
+              .WithOne(pre => pre.PayrollEarning)
+              .HasForeignKey(pre => pre.PayrollEarningId)
+              .OnDelete(DeleteBehavior.NoAction)
+              .IsRequired();
+
+
+
+            modelBuilder.Entity<EmployeePayrollEarning>()
+              .HasOne<PayrollRun>()
+              .WithMany()
+              .HasForeignKey(epe => epe.PayrollRunId)
+              .HasPrincipalKey(p => p.PayrollRunId);
+
+            modelBuilder.Entity<PayrollEarning>().HasData(
+                new PayrollEarning
+                {
+                    PayrollEarningId = "PRE001",
+                    ShortDescription = "Basic salary",
+                    LongDescription = "Employee monthly salary",
+                    Taxable = true,
+                    TaxCode = 3601,
+                    TaxPercentage = 100m,
+                    OvertimeHourMultiplier = null,
+                    CanProRata = true,
+                    IsOnGoing = true,
+                    IsActive = true
+                }
+              );
+
+            modelBuilder.Entity<Deduction>().Property(d => d.InputType).HasConversion<string>();
+
+            modelBuilder.Entity<EmployeeDeduction>()
+              .HasOne<PayrollRun>()
+              .WithMany()
+              .HasForeignKey(ed => ed.PayrollRunId)
+              .HasPrincipalKey(p => p.PayrollRunId);
+
+            modelBuilder.Entity<Deduction>()
+              .HasMany(d => d.EmployeeDeduction)
+              .WithOne(ed => ed.Deduction)
+              .HasForeignKey(ed => ed.DeductionId)
+              .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Employee>()
+              .HasMany(e => e.EmployeeDeduction)
+              .WithOne(ed => ed.Employee)
+              .HasForeignKey(ed => ed.EmployeeId)
+              .OnDelete(DeleteBehavior.NoAction);
+
         }
 
+        //Override 'SaveChangesAsync' for Payroll Records to enforce locked records on a payroll run 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
+            //Intercept all instances of saving any changes to db
             var modifiedRecords = ChangeTracker.Entries()
-              .Where(e => (e.State == EntityState.Modified || e.State == EntityState.Deleted) &&
-              (
-                e.Entity is PayrollPeriod ||
-                e.Entity is PayrollRun ||
-                e.Entity is PayrollRecord ||
-                e.Entity is EmployeePensionEnrollment
-              ));
+                  .Where(e => (e.State == EntityState.Modified || e.State == EntityState.Deleted) &&
+                  (
+                  e.Entity is PayrollPeriod ||
+                  e.Entity is PayrollRun ||
+                  e.Entity is PayrollRecord ||
+                  e.Entity is EmployeePensionEnrollment ||
+                  e.Entity is EmployeePayrollEarning ||
+                  e.Entity is EmployeeDeduction
+                  ));
 
             foreach (var e in modifiedRecords)
             {
