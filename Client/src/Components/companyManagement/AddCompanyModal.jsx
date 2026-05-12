@@ -58,12 +58,12 @@ const AddCompanyModal = ({ closeModal }) => {
 
       toast.success("Company created successfully");
       closeModal();
-      window.location.reload();// Use signal R
+      window.location.reload(); // Use signal R
     } catch (error) {
       if (error.response && error.response.data?.errors) {
-        setFormErrors(error.response.data.error);
+        setFormErrors(error.response.data.errors);
       } else {
-        toast.error("Failed to create companyhh.")
+        toast.error("Failed to create company.");
       }
 
       console.error("Add company error response data:", error.response?.data);
@@ -99,18 +99,22 @@ const AddCompanyModal = ({ closeModal }) => {
             <div className="ACM-field-group-inner">
               <div className="ACM-field-label">COMPANY NAME</div>
 
-              <div className="ACM-field-box">
+              <div
+                className={`ACM-field-box ${
+                  formErrors.companyName ? "ACM-field-box-error" : ""
+                }`}
+              >
                 <input
                   name="companyName"
                   placeholder="e.g. Singular Systems (Pty) Ltd"
                   onChange={handleChange}
-                  className={`ACM-field-input ${formErrors.companyName ? "ACM-error-input" : ""}`}
+                  className="ACM-field-input"
                 />
-
-                {formErrors.companyName && (
-                  <span className="ACM-error">{formErrors.companyName}</span>
-                )}
               </div>
+
+              {formErrors.companyName && (
+                <span className="ACM-error">{formErrors.companyName}</span>
+              )}
             </div>
           </div>
 
@@ -124,54 +128,65 @@ const AddCompanyModal = ({ closeModal }) => {
               {/* Registration Number */}
               <div className="ACM-field-group small">
                 <div className="ACM-field-label">REGISTRATION NO</div>
-                <div className="ACM-field-box">
+                <div
+                  className={`ACM-field-box ${
+                    formErrors.registrationNumber ? "ACM-field-box-error" : ""
+                  }`}
+                >
                   <input
                     name="registrationNumber"
                     placeholder="2023/123456/07"
                     onChange={handleChange}
-                    className={`ACM-field-input ${formErrors.registrationNumber ? "ACM-error-input" : ""}`}
+                    className="ACM-field-input"
                   />
-
-                  {formErrors.registrationNumber && (
-                    <span className="ACM-error">
-                      {formErrors.registrationNumber}
-                    </span>
-                  )}
                 </div>
-              </div>
 
+                {formErrors.registrationNumber && (
+                  <span className="ACM-error">
+                    {formErrors.registrationNumber}
+                  </span>
+                )}
+              </div>
               {/* UIF Number */}
               <div className="ACM-field-group small">
                 <div className="ACM-field-label">UIF NUMBER</div>
-                <div className="ACM-field-box">
+                <div
+                  className={`ACM-field-box ${
+                    formErrors.uifNumber ? "ACM-field-box-error" : ""
+                  }`}
+                >
                   <input
                     name="uifNumber"
                     placeholder="1234567890"
                     onChange={handleChange}
-                    className={`ACM-field-input ${formErrors.uifNumber ? "ACM-error-input" : ""}`}
+                    className="ACM-field-input"
                   />
-
-                  {formErrors.uifNumber && (
-                    <span className="ACM-error">{formErrors.uifNumber}</span>
-                  )}
                 </div>
+
+                {formErrors.uifNumber && (
+                  <span className="ACM-error">{formErrors.uifNumber}</span>
+                )}
               </div>
 
               {/* VAT Number */}
               <div className="ACM-field-group small">
                 <div className="ACM-field-label">VAT NUMBER (OPTIONAL)</div>
-                <div className="ACM-field-box">
+                <div
+                  className={`ACM-field-box ${
+                    formErrors.vatNumber ? "ACM-field-box-error" : ""
+                  }`}
+                >
                   <input
                     name="vatNumber"
                     placeholder="4012345678"
                     onChange={handleChange}
-                    className={`ACM-field-input ${formErrors.vatNumber ? "ACM-error-input" : ""}`}
+                    className="ACM-field-input"
                   />
-
-                  {formErrors.vatNumber && (
-                    <span className="ACM-error">{formErrors.vatNumber}</span>
-                  )}
                 </div>
+
+                {formErrors.vatNumber && (
+                  <span className="ACM-error">{formErrors.vatNumber}</span>
+                )}
               </div>
             </div>
           </div>
@@ -184,36 +199,43 @@ const AddCompanyModal = ({ closeModal }) => {
           <div className="ACM-field-group large">
             <div className="ACM-field-label">CONTACT NUMBER</div>
 
-            <div className="ACM-field-box contact">
+            <div
+              className={`ACM-field-box contact ${
+                formErrors.contactNumber ? "ACM-field-box-error" : ""
+              }`}
+            >
               <input
                 name="contactNumber"
                 placeholder="e.g. 011 456 7890"
                 onChange={handleChange}
-                className={`ACM-field-input ${formErrors.contactNumber ? "ACM-error-input" : ""}`}
+                className="ACM-field-input"
               />
-
-              {formErrors.contactNumber && (
-                <span className="ACM-error">{formErrors.contactNumber}</span>
-              )}
             </div>
+
+            {formErrors.contactNumber && (
+              <span className="ACM-error">{formErrors.contactNumber}</span>
+            )}
           </div>
 
           {/* Company Address */}
           <div className="ACM-field-group large">
             <div className="ACM-field-label">COMPANY ADDRESS</div>
-
-            <div className="ACM-field-box address">
-              <textarea
+            <div
+              className={`ACM-field-box address ${
+                formErrors.companyAddress ? "ACM-field-box-error" : ""
+              }`}
+            >
+              <input
                 name="companyAddress"
                 placeholder="e.g. Gauteng, Johannesburg"
                 onChange={handleChange}
-                className={`ACM-field-input ${formErrors.companyAddress ? "ACM-error-input" : ""}`}
+                className="ACM-field-input"
               />
-
-              {formErrors.companyAddress && (
-                <span className="ACM-error">{formErrors.companyAddress}</span>
-              )}
             </div>
+
+            {formErrors.companyAddress && (
+              <span className="ACM-error">{formErrors.companyAddress}</span>
+            )}
           </div>
           {/* ================= SETTINGS ================= */}
           <div className="ACM-section-header">SETTINGS</div>

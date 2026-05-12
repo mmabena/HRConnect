@@ -180,7 +180,7 @@
   align-items: flex-start;
   padding: 0px 5px 5px 8px;
   width: 776px;
-  height: 77px;
+  min-height: 77px;
   border-radius: 5px;
   flex: none;
   order: 0;
@@ -292,7 +292,7 @@
   align-items: flex-start;
   padding: 0px 5px 5px 8px;
   width: 254px;
-  height: 77px;
+  min-height: 77px;
   border-radius: 5px;
   box-sizing: border-box;
 }
@@ -497,10 +497,11 @@
   background: #355867;
 }
 
-.ACM-error-input {
-  border: 1px solid red !important;
-  outline: none;
+.ACM-field-box-error {
+  border: 1px solid #ff4d4f !important;
 }
+
+
 
 .ACM-toggle.active .ACM-toggle-circle {
   left: 23px;
@@ -519,15 +520,13 @@
 }
 
 .ACM-error {
-  color: #ff4d4f;
-  font-size: 12px;
-  margin-top: 4px;
   display: block;
-}
-
-
-.ACM-field-input.error {
-  border: 1px solid #ff4d4f;
+  margin-top: 6px;
+  margin-left: 2px;
+  font-family: 'Anek Bangla', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: #ff4d4f;
 }
 
 .ACM-footer-buttons {

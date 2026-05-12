@@ -96,7 +96,7 @@ namespace HRConnect.Api.Middleware
         errors["reportsTo"] = message;
       else if (message.Contains("surname", StringComparison.OrdinalIgnoreCase))
         errors["lastName"] = message;
-      else if (message.Contains("name", StringComparison.OrdinalIgnoreCase))
+      else if (message.Contains("first name", StringComparison.OrdinalIgnoreCase))
         errors["firstName"] = message;
       else if (message.Contains("zipCode", StringComparison.OrdinalIgnoreCase))
         errors["zipCode"] = message;

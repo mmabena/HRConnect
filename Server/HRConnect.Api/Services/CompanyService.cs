@@ -111,6 +111,9 @@ namespace HRConnect.Api.Services
       if (string.IsNullOrWhiteSpace(companyRequestDto.CompanyName))
         throw new ValidationException("Company name is required");
 
+      if (string.IsNullOrWhiteSpace(companyRequestDto.CompanyAddress))
+        throw new ValidationException("Company address is required");
+
       if (companyRequestDto.RegistrationNumber.Length != 14)
         throw new ValidationException("Registration number must be 14 digits");
 
@@ -131,6 +134,7 @@ namespace HRConnect.Api.Services
       if (!string.IsNullOrWhiteSpace(companyRequestDto.VATNumber) &&
           await _companyRepo.GetCompanyByVATAsync(companyRequestDto.VATNumber) != null)
         throw new BusinessRuleException("A company with the same VAT number already exists");
+        
 
       if (!string.IsNullOrWhiteSpace(companyRequestDto.ContactNumber) &&
           await _companyRepo.GetCompanyByContactNumberAsync(companyRequestDto.ContactNumber) != null)
