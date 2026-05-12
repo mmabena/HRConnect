@@ -46,4 +46,8 @@
     </PackageReference>
   </ItemGroup>
 
-</Project>
+	<ItemGroup>
+		<Folder Include="DTOs\Employee\" />
+	</ItemGroup>
+
+</Project> 

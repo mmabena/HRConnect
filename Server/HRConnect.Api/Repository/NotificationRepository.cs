@@ -20,6 +20,11 @@ namespace HRConnect.Api.Repository
       await _context.Notifications.AddAsync(notification);
       await _context.SaveChangesAsync();
     }
+    // public async Task AddNotificationBatchAsync(Notification notification)
+    // {
+    //   await _context.Notifications.AddAsync(notification);
+    // }
+
     /// <summary>
     /// This metod acts as a deduplication safe guard when creating and dispatching 
     /// notifications. It is used as boolean check before notification storing
@@ -27,31 +32,48 @@ namespace HRConnect.Api.Repository
     /// <param name="type">The type of notification being created</param>
     /// <param name="dueDate">The date at which an action-based notification will be executed</param>
     /// <param name="dateTime">The date used to find notification creation</param>
-    /// <returns></returns>
-    public async Task<Notification?> ExistsAsync(NotificationType type, DateTime? dueDate, DateTime dateTime)
+    /// <returns>Notification Object</returns>
+    public async Task<Notification?> ExistsAsync(NotificationType type, string employeeId, string? message, NotificationSeverity severity)
     {
-      // return await _context.Notifications.AnyAsync(n =>
-      // (n.Type == type) &&
-      // (n.DueDate == null || n.DueDate == dueDate) &&
-      // (n.CreatedAt == dateTime));
-      return await _context.Notifications.FirstOrDefaultAsync(n =>
+      // return await _context.Notifications.FindAsync(type, message, employeeId, severity);
+      return await _context.Notifications.Where(n =>
       (n.Type == type) &&
-      (n.DueDate == null || n.DueDate == dueDate) &&
-      (n.CreatedAt == dateTime));
+      (n.Message == message) &&
+      (n.EmployeeId == employeeId) &&
+      (n.Severity == severity) &&
+      n.IsRead == false)//Avoid to duplicate unread messages
+      .FirstOrDefaultAsync();
     }
-    public async Task<bool> MarkAsReadAsync(int id)
+    public async Task<bool> MarkAsReadAsync(Notification notification)
     {
-      throw new NotImplementedException();
+      _context.Notifications.Update(notification);
+      if (await _context.SaveChangesAsync() > 0)
+        return true;
+      return false;
     }
     public async Task<IEnumerable<NotificationDto>> GetAllUnreadAsync(string? employeeId)
     {
       var notifications = await _context.Notifications.
             Where(n => !n.IsRead &&
-            (n.EmployeeId == null || n.EmployeeId == employeeId) &&
-      (n.DueDate == null || n.DueDate > DateTime.Now))
+            (n.EmployeeId == null || n.EmployeeId == employeeId))
       .OrderByDescending(n => n.CreatedAt).ToListAsync();
       // throw new NotImplementedException();
       return notifications.Select(n => n.ToNotificationDto()).ToList();
+    }
+    public async Task<IEnumerable<NotificationDto>> GetAllEmployeeNotificationsByTypeAsync(NotificationType type, string employeeId)
+    {
+      var notifications = await _context.Notifications.Where(n =>
+                  (n.EmployeeId == employeeId) &&
+                  (n.Type == type)).ToListAsync();
+      return notifications.Select(n => n.ToNotificationDto());
+    }
+    //Critical,Warning,Information
+    public async Task<IEnumerable<NotificationDto>> GetAllEmployeeNotificationsBySeverityAsync(string employeeId, NotificationSeverity severity)
+    {
+      var notifications = await _context.Notifications.Where(n =>
+                  (n.EmployeeId == employeeId) &&
+                  (n.Severity == severity)).ToListAsync();
+      return notifications.Select(n => n.ToNotificationDto());
     }
   }
 }

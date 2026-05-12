@@ -30,5 +30,7 @@ namespace HRConnect.Api.Models.PayrollDeduction
     public string PhysicalAddress { get; set; } = string.Empty;
     public DateOnly CreatedDate { get; set; }
     public bool IsActive { get; set; }
+
+
   }
 }

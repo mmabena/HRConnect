@@ -2,7 +2,6 @@ using System.Text;
 using Audit.Core;
 using Audit.EntityFramework;
 using HRConnect.Api.Data;
-// using Resend;
 using HRConnect.Api.Interfaces;
 using HRConnect.Api.Interfaces.Pension;
 using HRConnect.Api.Middleware;
@@ -14,10 +13,13 @@ using HRConnect.Api.Hubs;
 using HRConnect.Api.Utils;
 using HRConnect.Api.Utils.Security;
 using HRConnect.Api.Utils.Jobs.Payroll;
+using HRConnect.Api.Utils.Jobs.Notification;
 using HRConnect.Api.Utils.Jobs.Pension;
 using HRConnect.Api.Utils.BankingDetailsValidation;
 using HRConnect.Api.Utils.Settings;
 using HRConnect.Api.Utils.Payroll;
+
+using HRConnect.Api.Utils.Jobs.Payroll;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -25,6 +27,10 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using OfficeOpenXml;
 using Quartz;
+using HRConnect.Api.Interfaces.Notification;
+using HRConnect.Api.Utils.Factories;
+using HRConnect.Api.Utils.Notification;
+using HRConnect.Api.Interfaces.Payroll.Earning;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -138,12 +144,15 @@ builder.Services.AddAuthorizationBuilder()
 builder.Services.AddQuartz(q =>
 {
   var RolloverJobKey = new JobKey("PayrollRolloverJob");
-
+ var NotificationJobKey = new JobKey("NotificationJob");
   //Add a service for to run as a background job 
   q.AddJob<PayrollRolloverJob>(opts =>
   opts.WithIdentity(RolloverJobKey)
   .StoreDurably());
 
+  q.AddJob<NotificationJob>(opts =>
+  opts.WithIdentity(NotificationJobKey)
+  .StoreDurably());
   //Triggers that will need to be fired to run background job
   // using Cron Schedule
   // Second, Minute, Hour, Day of The Month, Month, Day of The Week
@@ -153,6 +162,10 @@ builder.Services.AddQuartz(q =>
   .WithCronSchedule("0 0 0 1 * ?", x =>
   x.WithMisfireHandlingInstructionFireAndProceed()));
 
+  q.AddTrigger(opts => opts
+  .ForJob(NotificationJobKey)
+  .WithIdentity("NotificationJOb-Trigger")
+  .WithCronSchedule("0 0 0 1 * ?"));
   // 0 -> 0 seconds
   // 0 -> 0 minutes
   // 0 -> 0 hours
@@ -215,6 +228,11 @@ builder.Services.AddScoped<ITaxDeductionRepository, TaxDeductionRepository>();
 builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
 builder.Services.AddScoped<IPositionRepository, PositionRepository>();
 builder.Services.AddScoped<IPositionService, PositionService>();
+builder.Services.AddScoped<ICompanyContributionRepository, CompanyContributionRepository>();
+builder.Services.AddScoped<IEmployeeCompanyContributionRepository, EmployeeCompanyContributionRepository>();
+builder.Services.AddScoped<ICompanyContributionAllocationService, CompanyContributionAllocationService>();
+builder.Services.AddScoped<ICompanyContributionRepository, CompanyContributionRepository>();
+builder.Services.AddScoped<ICompanyContributionService, CompanyContributionService>();
 builder.Services.AddScoped<IJobGradeRepository, JobGradeRepository>();
 builder.Services.AddScoped<IJobGradeService, JobGradeService>();
 builder.Services.AddScoped<IOccupationalLevelRepository, OccupationalLevelRepository>();
@@ -226,18 +244,22 @@ builder.Services.AddScoped<IBankingDetailService, BankingDetailService>();
 // Register the encryption service as a singleton since it does not maintain any state and can be shared across the application.
 builder.Services.AddSingleton<IEncryptionService, EncryptionService>();
 
-// Mpho Mosia - Leave Services 
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<ILeaveBalanceService, LeaveBalanceService>();
 builder.Services.AddScoped<ILeaveProcessingService, LeaveProcessingService>();
 builder.Services.AddScoped<ILeaveRuleService, LeaveRuleService>();
+builder.Services.AddScoped<IPensionFundService, PensionFundService>();
+builder.Services.AddScoped<IEmployeePensionRepository, EmployeePensionRepository>();
+builder.Services.AddScoped<IPensionFundService, PensionFundService>();
 
+builder.Services.AddScoped<IPensionFundRepository, PensionFundRepository>();
 builder.Services.AddScoped<ILeaveTypeManagementService, LeaveTypeManagementService>();
 builder.Services.AddScoped<ILeaveApplicationService, LeaveApplicationService>();
 
 builder.Services.AddHostedService<LeaveAutomationBackgroundService>();
 
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+builder.Services.AddScoped<IEmployeeCompanyContributionService, EmployeeCompanyContributionService>();
 builder.Services.AddScoped<IStatutoryContributionRepository, StatutoryContributionRepository>();
 builder.Services.AddScoped<IStatutoryContributionService, StatutoryContributionService>();
 builder.Services.AddTransient<IPensionProjectionService, PensionProjectionService>();
@@ -251,8 +273,6 @@ builder.Services.AddScoped<IPensionDeductionRepository, PensionDeductionReposito
 builder.Services.AddTransient<IPensionDeductionService, PensionDeductionService>();
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<HashingHelper>();
-
-
 
 builder.Services.AddCors(options =>
 {
@@ -274,6 +294,9 @@ using (var scope = app.Services.CreateScope())
   //initialise a payperiod and payrun on app start up
   await initialiser.InitialisePayrollPeriod();
 }
+
+
+
 
 if (app.Environment.IsDevelopment())
 {

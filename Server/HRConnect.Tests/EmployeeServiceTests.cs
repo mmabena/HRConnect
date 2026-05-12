@@ -15,8 +15,15 @@ namespace HRConnect.Tests
   using Microsoft.EntityFrameworkCore.Storage;
   using HRConnect.Api.Utils;
   using System.Linq;
+<<<<<<< HEAD
   using Microsoft.AspNetCore.SignalR;
   using HRConnect.Api.Hubs;
+=======
+  using Microsoft.AspNetCore.Identity;
+  using System.Reflection.Metadata;
+  using System.ComponentModel.DataAnnotations;
+  using System.Runtime.Serialization;
+>>>>>>> origin/feature/HRC021
 
   public class EmployeeServiceTests : IDisposable
   {
@@ -25,6 +32,10 @@ namespace HRConnect.Tests
     private readonly Mock<IEmailService> _emailServiceMock;
     private readonly Mock<ILeaveBalanceService> _leaveBalanceServiceMock;
     private readonly Mock<ILeaveProcessingService> _leaveProcessingServiceMock;
+<<<<<<< HEAD
+=======
+    private readonly Mock<IPasswordHasher<User>> _passwordHasherMock;
+>>>>>>> origin/feature/HRC021
     private readonly ApplicationDBContext _context;
     private readonly EmployeeService _employeeService;
 
@@ -37,7 +48,11 @@ namespace HRConnect.Tests
       _positionRepoMock = new Mock<IPositionRepository>();
       _leaveBalanceServiceMock = new Mock<ILeaveBalanceService>();
       _leaveProcessingServiceMock = new Mock<ILeaveProcessingService>();
+<<<<<<< HEAD
      
+=======
+      _passwordHasherMock = new Mock<IPasswordHasher<User>>();
+>>>>>>> origin/feature/HRC021
 
       var options = new DbContextOptionsBuilder<ApplicationDBContext>()
           .UseInMemoryDatabase(Guid.NewGuid().ToString())
@@ -45,7 +60,6 @@ namespace HRConnect.Tests
 
       _context = new ApplicationDBContext(options);
 
-      // ✅ Seed required data
       _context.OccupationalLevels.Add(new OccupationalLevel
       {
         OccupationalLevelId = 1,
@@ -56,6 +70,11 @@ namespace HRConnect.Tests
       {
         JobGradeId = 1,
         Name = "Grade"
+      });
+      _context.JobGradeGroupMaps.Add(new JobGradeGroupMap
+      {
+        JobGradeId = 1,
+        GroupKey = "G1"
       });
 
       _context.Positions.AddRange(
@@ -75,7 +94,6 @@ namespace HRConnect.Tests
 
       _context.SaveChanges();
 
-      // ✅ Transaction mock
       var transactionMock = new Mock<IDbContextTransaction>();
       transactionMock.Setup(t => t.CommitAsync(It.IsAny<CancellationToken>()))
           .Returns(Task.CompletedTask);
@@ -85,7 +103,6 @@ namespace HRConnect.Tests
       _employeeRepoMock.Setup(r => r.BeginTransactionAsync())
           .ReturnsAsync(transactionMock.Object);
 
-      // ✅ Common repo setups
       _employeeRepoMock.Setup(x => x.CreateEmployeeAsync(It.IsAny<Employee>()))
           .ReturnsAsync((Employee e) =>
           {
@@ -118,7 +135,6 @@ namespace HRConnect.Tests
       _employeeRepoMock.Setup(x => x.GetEmployeeByContactNumberAsync(It.IsAny<string>()))
           .ReturnsAsync((Employee?)null);
 
-      // ✅ Position repo setup (dynamic)
       _positionRepoMock.Setup(p => p.GetPositionByIdAsync(It.IsAny<int>()))
           .ReturnsAsync((int id) =>
               _context.Positions.FirstOrDefault(p => p.PositionId == id));
@@ -135,15 +151,28 @@ namespace HRConnect.Tests
           _emailServiceMock.Object,
           _positionRepoMock.Object,
           _leaveBalanceServiceMock.Object,
+<<<<<<< HEAD
           _leaveProcessingServiceMock.Object
        
 
+=======
+          _leaveProcessingServiceMock.Object,
+          _passwordHasherMock.Object
+>>>>>>> origin/feature/HRC021
       );
     }
 
     [Fact]
     public async Task CreateEmployeeAsyncValidInputReturnsCreatedEmployee()
     {
+      //User and employee are tied by email
+      var mockUser = new User
+      {
+        Email = "john.smith@singular.co.za",
+        PasswordHash = "dummy_hash"
+      };
+      _passwordHasherMock.Setup(h => h.HashPassword(It.IsAny<User>(), It.IsAny<string>()))
+                .Returns("hashedpassword");
       string managerId = "MNG001";
       var manager = new Employee { EmployeeId = managerId };
 
@@ -230,7 +259,7 @@ namespace HRConnect.Tests
         StartDate = DateOnly.FromDateTime(DateTime.UtcNow)
       };
 
-      await Assert.ThrowsAsync<ValidationException>(() =>
+      await Assert.ThrowsAsync<HRConnect.Api.Services.ValidationException>(() =>
           _employeeService.CreateEmployeeAsync(dto));
     }
 
@@ -243,6 +272,7 @@ namespace HRConnect.Tests
       var existing = new Employee
       {
         EmployeeId = employeeId,
+        Email = "test@singular.co.za",
         PositionId = 1,
         Position = _context.Positions.First(p => p.PositionId == 1),
         StartDate = DateOnly.FromDateTime(DateTime.UtcNow)
@@ -256,10 +286,15 @@ namespace HRConnect.Tests
         Name = "Annual Leave",
         Description = "Annual Leave"
       });
+      _context.JobGradeGroupMaps.Add(new JobGradeGroupMap
+      {
+        JobGradeId = 1,
+        GroupKey = "G1"
+      });
       _context.LeaveEntitlementRules.Add(new LeaveEntitlementRule
       {
         LeaveTypeId = 1,
-        JobGradeId = 1,
+        GroupKey = "G1",
         MinYearsService = 0,
         MaxYearsService = null,
         DaysAllocated = 15,
@@ -271,6 +306,14 @@ namespace HRConnect.Tests
         EffectiveFrom = DateOnly.FromDateTime(DateTime.UtcNow),
         EffectiveTo = null
       });
+
+      _context.Users.Add(new User
+      {
+        UserId = 1,
+        Email = "test@singular.co.za",
+        PasswordHash = "dummy"
+      });
+
       _context.SaveChanges();
       var manager = new Employee { EmployeeId = managerId };
 

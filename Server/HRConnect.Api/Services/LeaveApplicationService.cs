@@ -80,8 +80,8 @@ namespace HRConnect.Api.Services
             };
 
             await _context.LeaveApplications.AddAsync(application);
-            await _context.SaveChangesAsync();
             await SendManagerApprovalEmail(application);
+            await _context.SaveChangesAsync();
 
             return MapToResponse(application);
         }
@@ -240,8 +240,6 @@ namespace HRConnect.Api.Services
             application.RejectionReason = reason;
 
             await _context.SaveChangesAsync();
-
-            // 🔥 ALWAYS SEND EMAIL
             await SendEmployeeDecisionEmail(application, false);
         }
         /// <summary>
@@ -314,7 +312,6 @@ namespace HRConnect.Api.Services
             {
                 application.ApprovalToken = Guid.NewGuid();
                 application.TokenExpiry = DateTime.UtcNow.AddHours(48);
-                await _context.SaveChangesAsync();
             }
             var baseUrl = _configuration["AppSettings:BaseUrl"];
 
