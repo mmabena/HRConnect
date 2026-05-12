@@ -115,17 +115,18 @@ const BankingDetailsModal = ({
 
         {/* BANK */}
         <div className="emp-full-width dropdown-wrapper emp-input-wrapper">
-          <div className="emp-select-wrapper">
+          <div
+            className={`emp-select-wrapper ${employee.bankName ? "has-value" : ""}`}
+          >
             <select
               name="bankName"
               value={employee.bankName || ""}
               onChange={handleChange}
-              className={`emp-bank-name-input ${
-                formErrors.bankName ? "emp-error-input" : ""
-              }`}
+              className={`emp-bank-name-input ${formErrors.bankName ? "emp-error-input" : ""}`}
             >
-              <option value="">Select Bank</option>
-
+              <option value="" disabled hidden>
+                Select Bank
+              </option>
               {banks.map((bank, index) => (
                 <option key={index} value={bank.bankName}>
                   {bank.bankName}
@@ -315,39 +316,38 @@ const BankingDetailsModal = ({
             />
           </div>
 
-       <div className="emp-input-wrapper">
-          <div className="date-wrapper">
-            <label className="date-label">Pay Date</label>
-
-            <input
-              type="date"
-              name="payDate"
-              value={employee.payDate || ""}
-              onChange={handleChange}
-              className="emp-payDate-input"
-            />
-
-            <img
-              src="/images/calendar-range.svg"
-              alt="Calendar icon"
-              className="dropdown-icon"
-            />
+          <div className="emp-input-wrapper">
+            <div className="date-wrapper">
+              <div className="bank-date-wrapper">
+                <input
+                  type="date"
+                  name="payDate"
+                  value={employee.payDate || ""}
+                  onChange={handleChange}
+                  className="emp-payDate-input"
+                />
+                <label className="date-label">Pay Date</label>{" "}
+                {/* moved after input */}
+                <img
+                  src="/images/calendar-range.svg"
+                  alt="Calendar icon"
+                  className="dropdown-icon"
+                />
+              </div>
+            </div>
           </div>
-        </div>
-
         </div>
 
         {/* BUTTONS */}
         <div className="emp-button-row">
           <button className="emp-bank-back-button" onClick={onBack}>
-          
-             <ArrowLeft size={20} className="back-save-button-icon" />
-              Back
+            <ArrowLeft size={20} className="back-save-button-icon" />
+            Back
           </button>
 
           <button className="emp-next-button" onClick={handleNext}>
             Next
-             <ArrowRight size={20} className="next-save-button-icon" />
+            <ArrowRight size={20} className="next-save-button-icon" />
           </button>
         </div>
       </div>
