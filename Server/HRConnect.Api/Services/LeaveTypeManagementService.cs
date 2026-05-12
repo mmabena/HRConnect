@@ -265,6 +265,8 @@ namespace HRConnect.Api.Services
                 .ToListAsync();
 
             await _leaveBalanceService.RecalculateAnnualLeaveBulkAsync(employeeIds);
+            await _leaveBalanceService
+                .ApplyEntitlementRuleChangesAsync();
 
             return await GetLeaveTypeByIdAsync(leaveType.Id);
         }

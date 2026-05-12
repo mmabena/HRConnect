@@ -4,6 +4,7 @@ namespace HRConnect.Api.Interfaces
     using System.Threading.Tasks;
     using HRConnect.Api.DTOs;
     using System.Collections.Generic;
+    using HRConnect.Api.Models;
     public interface ILeaveBalanceService
     {
         Task InitializeEmployeeLeaveBalancesAsync(string employeeId);
@@ -15,5 +16,13 @@ namespace HRConnect.Api.Interfaces
         Task<LeaveProjectionResponse> ProjectAnnualLeaveAsync(string employeeId, DateOnly projectionDate);
         Task RecalculateFamilyResponsibilityLeaveBulkAsync(List<string> employeeIds);
         Task RecalculateAnnualLeaveBulkAsync(List<string> employeeIds);
+        Task CreateAccrualSegmentAsync(
+                Employee employee,
+                decimal annualEntitlement,
+                string reason,
+                DateOnly effectiveFrom);
+        Task CheckYearsOfServiceAccrualChangeAsync(
+                string employeeId);
+        Task ApplyEntitlementRuleChangesAsync();
     }
 }

@@ -4,6 +4,8 @@ namespace HRConnect.Api.Services
   using Microsoft.Extensions.DependencyInjection;
   using Microsoft.Extensions.Hosting;
   using Microsoft.Extensions.Logging;
+  using Microsoft.EntityFrameworkCore;
+  using HRConnect.Api.Data;
 
   public class LeaveAutomationBackgroundService : BackgroundService
   {
@@ -75,6 +77,21 @@ namespace HRConnect.Api.Services
 
           await leaveProcessingService.ProcessCarryOverNotificationAsync();
           await leaveProcessingService.ProcessAnnualResetAsync();
+
+          var leaveBalanceService = scope.ServiceProvider
+          .GetRequiredService<ILeaveBalanceService>();
+
+          var employeeIds = await scope.ServiceProvider
+            .GetRequiredService<ApplicationDBContext>()
+            .Employees
+            .Select(e => e.EmployeeId)
+            .ToListAsync(stoppingToken);
+
+          foreach (var employeeId in employeeIds)
+          {
+            await leaveBalanceService
+                .CheckYearsOfServiceAccrualChangeAsync(employeeId);
+          }
         }
         catch (Exception ex)
         {

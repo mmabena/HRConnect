@@ -730,20 +730,11 @@ namespace HRConnect.Api.Services
                     r.IsActive)
                 .OrderByDescending(r => r.MinYearsService)
                 .FirstAsync();
-
-            await _context.EmployeeAccrualRateHistories.AddAsync(
-                new EmployeeAccrualRateHistory
-                {
-                    EmployeeId = employee.EmployeeId,
-                    PositionId = employee.PositionId,
-                    PositionName = employee.Position.PositionTitle,
-                    AnnualEntitlement = rule.DaysAllocated,
-                    DailyRate = (rule.DaysAllocated / 12m) / 21.67m,
-                    EffectiveFrom = employee.StartDate,
-                    CreatedDate = DateTime.UtcNow
-                });
-
-            await _context.SaveChangesAsync();
+            await CreateAccrualSegmentAsync(
+                employee,
+                rule.DaysAllocated,
+                "Initial Accrual",
+                employee.StartDate);
         }
         public async Task RecalculateFamilyResponsibilityLeaveBulkAsync(List<string> employeeIds)
         {
@@ -757,6 +748,203 @@ namespace HRConnect.Api.Services
             foreach (var id in employeeIds)
             {
                 await RecalculateAnnualLeaveAsync(id);
+            }
+        }
+        public async Task CreateAccrualSegmentAsync(
+    Employee employee,
+    decimal annualEntitlement,
+    string reason,
+    DateOnly effectiveFrom)
+        {
+            var currentSegment = await _context.EmployeeAccrualRateHistories
+                .Where(x =>
+                    x.EmployeeId == employee.EmployeeId &&
+                    x.EffectiveTo == null)
+                .FirstOrDefaultAsync();
+
+            if (currentSegment != null)
+            {
+                if (currentSegment.EffectiveFrom == effectiveFrom)
+                {
+                    _context.EmployeeAccrualRateHistories
+                        .Remove(currentSegment);
+                }
+                else
+                {
+                    currentSegment.EffectiveTo =
+                        effectiveFrom.AddDays(-1);
+                }
+            }
+
+            await _context.EmployeeAccrualRateHistories.AddAsync(
+                new EmployeeAccrualRateHistory
+                {
+                    EmployeeId = employee.EmployeeId,
+                    PositionId = employee.PositionId,
+                    PositionName = employee.Position?.PositionTitle
+                        ?? "Unknown",
+
+                    AnnualEntitlement = annualEntitlement,
+
+                    DailyRate =
+                        (annualEntitlement / 12m) / 21.67m,
+
+                    EffectiveFrom = effectiveFrom,
+
+                    CreatedDate = DateTime.UtcNow,
+
+                    Reason = reason
+                });
+
+            await _context.SaveChangesAsync();
+        }
+        public async Task CheckYearsOfServiceAccrualChangeAsync(
+    string employeeId)
+        {
+            var employee = await _context.Employees
+                .Include(e => e.Position)
+                    .ThenInclude(p => p.JobGrade)
+                .FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
+
+            if (employee == null)
+                throw new InvalidOperationException(
+                    "Employee not found.");
+
+            if (employee.Position == null)
+                throw new InvalidOperationException(
+                    "Employee position not found.");
+
+            var groupKey = await _context.JobGradeGroupMaps
+                .Where(x =>
+                    x.JobGradeId == employee.Position.JobGradeId)
+                .Select(x => x.GroupKey)
+                .FirstOrDefaultAsync();
+
+            if (groupKey == null)
+                throw new InvalidOperationException(
+                    "JobGrade not mapped.");
+
+            var annualLeave = await _context.LeaveTypes
+                .FirstAsync(l =>
+                    l.Code == "AL" &&
+                    l.IsActive);
+
+            var yearsOfService =
+                CalculateYearsOfService(employee.StartDate);
+
+            var applicableRule = await _context.LeaveEntitlementRules
+                .Where(r =>
+                    r.LeaveTypeId == annualLeave.Id &&
+                    r.GroupKey == groupKey &&
+                    r.MinYearsService <= yearsOfService &&
+                    (r.MaxYearsService == null ||
+                     yearsOfService < r.MaxYearsService) &&
+                    r.IsActive)
+                .OrderByDescending(r => r.MinYearsService)
+                .FirstOrDefaultAsync();
+
+            if (applicableRule == null)
+                return;
+
+            var currentSegment =
+                await _context.EmployeeAccrualRateHistories
+                    .Where(x =>
+                        x.EmployeeId == employeeId &&
+                        x.EffectiveTo == null)
+                    .OrderByDescending(x => x.EffectiveFrom)
+                    .FirstOrDefaultAsync();
+
+            if (currentSegment == null)
+                return;
+
+            if (currentSegment.AnnualEntitlement ==
+                applicableRule.DaysAllocated)
+            {
+                return;
+            }
+
+            await CreateAccrualSegmentAsync(
+                employee,
+                applicableRule.DaysAllocated,
+                "Years Of Service Change",
+                DateOnly.FromDateTime(DateTime.UtcNow));
+
+            await RecalculateAnnualLeaveAsync(employeeId);
+        }
+        public async Task ApplyEntitlementRuleChangesAsync()
+        {
+            var employees = await _context.Employees
+                .Include(e => e.Position)
+                    .ThenInclude(p => p.JobGrade)
+                .ToListAsync();
+
+            var annualLeave = await _context.LeaveTypes
+                .FirstOrDefaultAsync(l =>
+                    l.Code == "AL" &&
+                    l.IsActive);
+
+            if (annualLeave == null)
+                return;
+
+            foreach (var employee in employees)
+            {
+                if (employee.Position == null)
+                    continue;
+
+                var groupKey = await _context.JobGradeGroupMaps
+                    .Where(x =>
+                        x.JobGradeId ==
+                        employee.Position.JobGradeId)
+                    .Select(x => x.GroupKey)
+                    .FirstOrDefaultAsync();
+
+                if (groupKey == null)
+                    continue;
+
+                var yearsOfService =
+                    CalculateYearsOfService(employee.StartDate);
+
+                var applicableRule =
+                    await _context.LeaveEntitlementRules
+                        .Where(r =>
+                            r.LeaveTypeId == annualLeave.Id &&
+                            r.GroupKey == groupKey &&
+                            r.MinYearsService <= yearsOfService &&
+                            (r.MaxYearsService == null ||
+                             yearsOfService < r.MaxYearsService) &&
+                            r.IsActive)
+                        .OrderByDescending(r => r.MinYearsService)
+                        .FirstOrDefaultAsync();
+
+                if (applicableRule == null)
+                    continue;
+
+                var currentSegment =
+                    await _context.EmployeeAccrualRateHistories
+                        .Where(x =>
+                            x.EmployeeId == employee.EmployeeId &&
+                            x.EffectiveTo == null)
+                        .OrderByDescending(x =>
+                            x.EffectiveFrom)
+                        .FirstOrDefaultAsync();
+
+                if (currentSegment == null)
+                    continue;
+
+                if (currentSegment.AnnualEntitlement ==
+                    applicableRule.DaysAllocated)
+                {
+                    continue;
+                }
+
+                await CreateAccrualSegmentAsync(
+                    employee,
+                    applicableRule.DaysAllocated,
+                    "Entitlement Rule Change",
+                    DateOnly.FromDateTime(DateTime.UtcNow));
+
+                await RecalculateAnnualLeaveAsync(
+                    employee.EmployeeId);
             }
         }
     }

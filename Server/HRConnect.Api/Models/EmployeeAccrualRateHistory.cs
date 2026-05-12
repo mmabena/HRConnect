@@ -11,22 +11,22 @@ namespace HRConnect.Api.Models
 
         public string EmployeeId { get; set; }
 
-        public int PositionId { get; set; }   
+        public int PositionId { get; set; }
         public string PositionName { get; set; } = string.Empty;
 
-        public decimal AnnualEntitlement { get; set; } 
+        public decimal AnnualEntitlement { get; set; }
 
         [Column(TypeName = "decimal(18,6)")]
-        public decimal DailyRate { get; set; } 
-
+        public decimal DailyRate { get; set; }
+        public string Reason { get; set; } = string.Empty;
         public DateOnly EffectiveFrom { get; set; }
 
-        public DateOnly? EffectiveTo { get; set; } 
+        public DateOnly? EffectiveTo { get; set; }
 
         public DateTime CreatedDate { get; set; }
 
         public Employee? Employee { get; set; }
 
-        public Position? Position { get; set; }   
+        public Position? Position { get; set; }
     }
 }
