@@ -7,7 +7,7 @@ namespace HRConnect.Api.Models
   /// </summary>
   public class MFAUserSecret
   {
-    // public int MFAUserSecretId { get; set; }
+    public int SecretId { get; set; }
     public int UserId { get; set; }
     public byte[] EncryptedUserSecret { get; set; } = null!;
     public int KeyVersion { get; set; }//versioning allows for stronger key rotation

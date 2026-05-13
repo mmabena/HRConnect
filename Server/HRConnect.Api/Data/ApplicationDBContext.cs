@@ -336,10 +336,10 @@ namespace HRConnect.Api.Data
         .OnDelete(DeleteBehavior.NoAction);
 
       modelBuilder.Entity<TOTPState>()
-      .HasKey(o => o.UserId);
+      .HasKey(o => o.Id);
 
       modelBuilder.Entity<MFAUserSecret>()
-      .HasKey(m => m.UserId);
+      .HasKey(m => m.SecretId);
 
       modelBuilder.Entity<TOTPState>()
       .Property(u => u.UserId)

@@ -1,8 +1,8 @@
 namespace HRConnect.Api.Controllers
 {
   using Microsoft.AspNetCore.Mvc;
-  using HRConnect.Api.DTOs.TOTP;
   using HRConnect.Api.Interfaces.TOTP;
+  using Microsoft.AspNetCore.Authorization;
 
   [Route("api/totp")]
   [ApiController]
@@ -13,6 +13,7 @@ namespace HRConnect.Api.Controllers
     {
       _totpService = totpService;
     }
+    [Authorize(Roles = "SuperUser")]
     [HttpPost("/sendOtp/{userId}")]
     public async Task<IActionResult> SendOTP(int userId)
     {
