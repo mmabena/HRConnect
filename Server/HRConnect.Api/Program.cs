@@ -29,6 +29,7 @@ using HRConnect.Api.Interfaces.Payroll.Earning;
 using HRConnect.Api.Interfaces.Payroll.Deduction;
 using HRConnect.Api.Utils.Jobs;
 using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -96,7 +97,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
     {
-      options.UseSqlServer(builder.Configuration.GetConnectionString("DBeaverConnection")!);
+      options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!);
       options.AddInterceptors(new AuditSaveChangesInterceptor());
     });
 
@@ -156,13 +157,13 @@ builder.Services.AddQuartz(q =>
   q.AddTrigger(opts => opts
   .ForJob(RolloverJobKey)
   .WithIdentity("PayrollRollover-Trigger")
-  .WithCronSchedule("30 0/1 * * * ?", x =>
+  .WithCronSchedule("0 0 0 1 * ?", x =>
   x.WithMisfireHandlingInstructionFireAndProceed()));
 
   q.AddTrigger(opts => opts
   .ForJob(NotificationJobKey)
   .WithIdentity("NotificationJob-Trigger")
-  .WithCronSchedule("10,15,20,25 0/1 * * * ?", x =>
+  .WithCronSchedule("0 0 0 1 * ?", x =>
   x.WithMisfireHandlingInstructionIgnoreMisfires()));
 
   // 0 -> 0 seconds
@@ -186,7 +187,7 @@ builder.Services.AddQuartz(q =>
   {
     store.UseSqlServer(options =>
         {
-          options.ConnectionString = builder.Configuration.GetConnectionString("DBeaverConnection")!;
+          options.ConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
           options.TablePrefix = "quartz.QRTZ_";
         });
     store.UseSerializer<Quartz.Simpl.SystemTextJsonObjectSerializer>();
@@ -295,11 +296,18 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddRateLimiter(options =>
 {
-  options.AddFixedWindowLimiter("totp", opts =>
+  options.AddPolicy("totp-policy", ctx =>
   {
-    opts.Window = TimeSpan.FromMinutes(5);
-    opts.PermitLimit = 5;//You have 5 attempts to send pin
-    opts.QueueLimit = 0;
+    var ip = ctx.Connection.RemoteIpAddress?.ToString() ?? "Unknown IP";
+
+    return RateLimitPartition.GetFixedWindowLimiter(
+     partitionKey: ip,
+      factory: _ => new FixedWindowRateLimiterOptions
+      {
+        PermitLimit = 3,//3 attempts per time frame
+        Window = TimeSpan.FromMinutes(1), //time frame
+        QueueLimit = 0
+      });
   });
 });
 
@@ -334,5 +342,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseRateLimiter();
-app.MapControllers().RequireRateLimiting("totp");
+app.MapControllers();//.RequireRateLimiting("totp");
 app.Run();

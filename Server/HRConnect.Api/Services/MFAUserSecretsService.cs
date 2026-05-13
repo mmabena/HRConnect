@@ -34,7 +34,6 @@ namespace HRConnect.Api.Services
       });
 
       return secret;
-
     }
   }
 }

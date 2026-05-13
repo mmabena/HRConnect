@@ -17,9 +17,9 @@ namespace HRConnect.Api.Repository
 
       if (state == null) return false;
 
-      if (stepCount <= state.LastUsedTimeStamp) return false;
+      if (stepCount <= state.LastUsedTimeStamp) return true;
       //Default to code being replayed
-      return true;
+      return false;
     }
     public async Task Save()
     {

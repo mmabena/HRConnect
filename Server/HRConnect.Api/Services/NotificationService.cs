@@ -116,6 +116,11 @@ namespace HRConnect.Api.Services
 
       if (created != null)
       {
+        Console.ForegroundColor = ConsoleColor.DarkMagenta;
+        Console.WriteLine("NOT SENDING NOTIS CZ NOT NULL");
+        Console.ResetColor();
+
+        await _notificationDispatcher.DispatchNotificationAsync(created);
         return;
       }
       _ = await _notificationRepository.AddNotificationAsync(notification);

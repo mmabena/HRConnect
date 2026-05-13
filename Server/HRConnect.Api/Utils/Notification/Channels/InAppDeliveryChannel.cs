@@ -2,7 +2,7 @@ namespace HRConnect.Api.Utils.Notification.Channels
 {
   using HRConnect.Api.Interfaces.Notification;
   using HRConnect.Api.Models;
-  public class InAppDeliveryStrategy : INotificationDeliveryChannel
+  public class InAppDeliveryChannel : INotificationDeliveryChannel
   {
     public string Name => "In-App";
     public DeliveryChannel Channel => DeliveryChannel.InApp;

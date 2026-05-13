@@ -17,9 +17,11 @@ namespace HRConnect.Api.Utils.Notification
       {
         try
         {
+          Console.ForegroundColor = ConsoleColor.Green;
           Console.WriteLine($"Sending notification to {strategy.Name}");
           Console.WriteLine($"Enum Value for Channel {strategy.Channel}");
           await strategy.SendNotificationAsync(notification);
+          Console.ResetColor();
         }
         catch (Exception ex)
         {

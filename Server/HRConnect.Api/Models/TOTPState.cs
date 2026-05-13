@@ -9,8 +9,9 @@ namespace HRConnect.Api.Models
   public class TOTPState
   {
     [Key]
-    public int Id { get; set; }
+    // public int Id { get; set; }
     public int UserId { get; set; }
     public long LastUsedTimeStamp { get; set; }
+    public User User { get; set; } = null!;
   }
 }

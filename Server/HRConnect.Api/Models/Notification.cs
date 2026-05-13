@@ -22,6 +22,7 @@ namespace HRConnect.Api.Models
     [Key]
     public int NotificationId { get; set; }
     public string Message { get; set; } = string.Empty;
+    public string Subject { get; set; } = string.Empty;
     public bool IsRead { get; set; }
     public NotificationType Type { get; set; } // Leave, Tax, Payroll
     public NotificationSeverity Severity { get; set; }

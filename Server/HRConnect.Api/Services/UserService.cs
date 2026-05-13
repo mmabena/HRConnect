@@ -11,10 +11,12 @@ namespace HRConnect.Api.Services
   using HRConnect.Api.Utils;
   using HRConnect.Api.Mappers;
   using Microsoft.EntityFrameworkCore;
+  using HRConnect.Api.Interfaces.TOTP;
 
   public class UserService : IUserService
   {
     private readonly ApplicationDBContext _context;
+    private readonly ITOTPService _otpService;
     private readonly IUserRepository _userRepo;
     private readonly Microsoft.AspNetCore.Identity.IPasswordHasher<User> _passwordHasher;
     //These are valid characters for the a password hash
@@ -27,11 +29,12 @@ namespace HRConnect.Api.Services
       .Concat(DigitChars)
       .Concat(SpecialChars)
       .ToArray();
-    public UserService(ApplicationDBContext context, IUserRepository userRepo, Microsoft.AspNetCore.Identity.IPasswordHasher<User> passwordHasher)
+    public UserService(ApplicationDBContext context, ITOTPService otpService, IUserRepository userRepo, Microsoft.AspNetCore.Identity.IPasswordHasher<User> passwordHasher)
     {
       _context = context;
       _userRepo = userRepo;
       _passwordHasher = passwordHasher;
+      _otpService = otpService;
     }
 
     public async Task<List<User>> GetAllUsersAsync()
@@ -124,8 +127,26 @@ namespace HRConnect.Api.Services
       {
         return null;
       }
-      existing.Role = (UserRole)dto.RoleId;
-      return await _userRepo.UpdateUserAsync(id, existing);
+      // existing.Role = (UserRole)dto.RoleId;
+      existing.TempRole = (UserRole)dto.RoleId;
+      //SendTotpAndNotify
+      var updatedUser = await _userRepo.UpdateUserAsync(id, existing);
+      await _otpService.SendTotpAndNotify(id);
+
+      Console.ForegroundColor = ConsoleColor.Red;
+      Console.WriteLine($"Role of updatedUser->{updatedUser?.Role} vs New Role->{updatedUser?.TempRole}");
+      Console.ResetColor();
+
+      return updatedUser;
+    }
+    public async Task ConfirmUserRoleUpdateAsync(int id)
+    {
+      User? existing = await _userRepo.GetUserByIdAsync(id);
+      if (existing != null)
+      {
+        existing.Role = (UserRole)existing.TempRole!;
+        _ = await _userRepo.UpdateUserAsync(id, existing);
+      }
     }
 
     public async Task<User?> UpdateEmployeeUserRoleAsync(string employeeId, UpdateUserRoleRequestDto dto)

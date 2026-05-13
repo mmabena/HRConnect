@@ -278,7 +278,8 @@ namespace HRConnect.Api.Data
           .HasConversion<string>();
       modelBuilder.Entity<Notification>().Property(n => n.Type)
           .HasConversion<string>();
-
+      modelBuilder.Entity<Notification>().Property(n => n.DeliveryChannel)
+          .HasConversion<string>();
       modelBuilder.Entity<Employee>()
         .HasMany(epre => epre.EmployeePayrollEarning)
         .WithOne(e => e.Employee)
@@ -335,19 +336,28 @@ namespace HRConnect.Api.Data
         .HasForeignKey(ed => ed.EmployeeId)
         .OnDelete(DeleteBehavior.NoAction);
 
-      modelBuilder.Entity<TOTPState>()
-      .HasKey(o => o.Id);
-
-      modelBuilder.Entity<MFAUserSecret>()
-      .HasKey(m => m.SecretId);
+      modelBuilder.Entity<User>()
+      .Property(u => u.TempRole)
+      .HasConversion<string>();
 
       modelBuilder.Entity<TOTPState>()
-      .Property(u => u.UserId)
-      .ValueGeneratedNever();
+      .HasIndex(u => u.UserId);
+
+      modelBuilder.Entity<TOTPState>()
+      .HasOne(t => t.User)
+      .WithOne()
+      .HasForeignKey<TOTPState>(t => t.UserId)
+      .OnDelete(DeleteBehavior.Cascade);
 
       modelBuilder.Entity<MFAUserSecret>()
-      .Property(u => u.UserId)
-      .ValueGeneratedNever();
+      .HasOne(m => m.User)
+      .WithOne()
+      .HasForeignKey<MFAUserSecret>(m => m.UserId);
+
+      // modelBuilder.Entity<TOTPState>()
+      // .Property(u => u.UserId)
+      // .ValueGeneratedNever();
+
     }
 
     //Override 'SaveChangesAsync' for Payroll Records to enforce locked records on a payroll run 

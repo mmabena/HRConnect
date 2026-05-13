@@ -1,0 +1,42 @@
+namespace HRConnect.Api.Utils.Notification.Channels
+{
+  using System.Linq.Expressions;
+  using HRConnect.Api.DTOs.Employee;
+  using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Interfaces.Notification;
+  using HRConnect.Api.Models;
+
+  public class EmailDeliveryChannel : INotificationDeliveryChannel
+  {
+    public string Name => "Email Delivery";
+    public DeliveryChannel Channel => DeliveryChannel.Email;
+    private readonly IEmailService _emailService;
+    private readonly IEmployeeService _employeeService;
+    public EmailDeliveryChannel(IEmailService emailService, IEmployeeService employeeService)
+    {
+      _emailService = emailService;
+      _employeeService = employeeService;
+    }
+    public async Task SendNotificationAsync(Notification notification)
+    {
+      EmployeeDto? employeeDto = await _employeeService.GetEmployeeByIdAsync(notification.EmployeeId);
+      if (employeeDto == null)
+        throw new InvalidDataException($"Employee {notification.EmployeeId} Cannot Be Found");
+      try
+      {
+        Console.ForegroundColor = ConsoleColor.Cyan;
+
+        await _emailService.SendEmailAsync(employeeDto.Email, notification.Subject, notification.Message);
+
+        Console.WriteLine($"SENT EMAIL TO ${notification.EmployeeId}:{employeeDto.Email} SAYING {notification.Message}");
+
+        Console.ResetColor();
+
+      }
+      catch (InvalidOperationException ex)
+      {
+        throw new InvalidOperationException($"Failed To Send Email {ex?.Message}");
+      }
+    }
+  }
+}

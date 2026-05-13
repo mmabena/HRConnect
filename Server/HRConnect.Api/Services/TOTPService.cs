@@ -3,54 +3,71 @@ namespace HRConnect.Api.Services
   using OtpNet;
   using Microsoft.Extensions.Configuration;
   using HRConnect.Api.Interfaces.TOTP;
+  using HRConnect.Api.DTOs.Employee;
   using HRConnect.Api.Models;
   using HRConnect.Api.Interfaces;
   using Microsoft.EntityFrameworkCore.Design;
+  using HRConnect.Api.DTOs.Notification;
+  using HRConnect.Api.Interfaces.Notification;
+  using System.Threading.Tasks;
 
   public class TOTPService : ITOTPService
   {
     private readonly ITOTPRepository _totpRepo;
     private readonly int _stepSeconds;
-    private readonly IUserService _userService;
+    private readonly IUserRepository _userRepo;
     private readonly IMFAUserSecretsService _mfaService;
-    public TOTPService(ITOTPRepository totpRepo, IUserService userService,
-    IMFAUserSecretsService mfaService, IConfiguration configuration)
+    private readonly IEmployeeService _employeeService;
+    private readonly INotificationFactory _notiFactory;
+    public TOTPService(ITOTPRepository totpRepo, IUserRepository userRepo,
+    IMFAUserSecretsService mfaService, IEmployeeService employeeService,
+     INotificationFactory notiFactory, IConfiguration configuration)
     {
       _totpRepo = totpRepo;
-
+      _employeeService = employeeService;
       //Use configured step minutes or fall back to 10 minutes
       _stepSeconds = ResolveStepDuration(configuration);
-      _userService = userService; ;
+      _userRepo = userRepo;
       _mfaService = mfaService;
+      _notiFactory = notiFactory;
     }
 
-    public async Task SendTotp(int userId)
+    public async Task SendTotpAndNotify(int userId)
     {
       try
       {
         //First make sure the user exists
-        User? user = await _userService.GetUserByIdAsync(userId);
+        User? user = await _userRepo.GetUserByIdAsync(userId);
         if (user == null)
           throw new KeyNotFoundException();
 
         byte[] secret = await _mfaService.GetOrCreateUserSecretAsync(user.UserId);
-        string code = await GenerateCodeAsync(secret);
-
+        string code = GenerateCode(secret);
+        Console.BackgroundColor = ConsoleColor.Red;
         Console.WriteLine($"/////////////////////THIS IS THE OTP {code}");
+        //Create Notification To Ask for TOTP in the app
+        Console.ResetColor();
+        var inAppNotification = await MakeInAppNotification(userId);
+        var emailNotification = await MakeEmailNotification(userId, code);
+        await _notiFactory.ProduceNotificationAsync(inAppNotification);
+        await _notiFactory.ProduceNotificationAsync(emailNotification);
       }
       catch (OperationException ex)
       {
         throw new OperationException($"Failed To Send OTP {ex.Message}");
       }
     }
-    public async Task<string> GenerateCodeAsync(byte[] userSecret)
+    public string GenerateCode(byte[] userSecret)
     {
       Totp otpCode = new(userSecret, step: _stepSeconds, OtpHashMode.Sha256);
+
+      Console.ForegroundColor = ConsoleColor.Red;
       Console.WriteLine($">>>>>>>>>[[[[[THE TIME-BASED ONE TIME PIN IS {otpCode}]]]]]]<<<<<<");
 
       Console.WriteLine($">>>>>>>>>[[[[[THE TOPT Computed IS {otpCode.ComputeTotp()}]]]]]]<<<<<<");
+      Console.ResetColor();
 
-      ///Create notifications to send the notifications
+
       return otpCode.ComputeTotp();
     }
     public async Task<bool> ValidateCodeAsync(int userId, byte[] userSecret, string code)
@@ -65,12 +82,13 @@ namespace HRConnect.Api.Services
         out long timeStepMatched,
         new VerificationWindow(previous: 1, future: 1));
 
-      if (!isValid)
-        return false;
-
       //Check for replays 
       if (await IsReplayAsync(userId, timeStepMatched))
         return false;
+
+      if (!isValid)
+        return false;
+
 
       // mark this code as being used so that it cannot be reused within verification 
       // window
@@ -95,6 +113,48 @@ namespace HRConnect.Api.Services
       if (seconds <= 0) return seconds * 600;
 
       return seconds;
+    }
+    private async Task<CreateNotificationDto> MakeInAppNotification(int userId)
+    {
+      var (employee, user) = await GetEmployeeFromUserIdAsync(userId);
+      ///Create notifications to send the notifications
+      // string message = $"You Role Has Been Updated from {user.Role} to {user.TempRole}";
+      CreateNotificationDto dto = new CreateNotificationDto
+      {
+        Message = $"You Role Has Been Updated from {user.Role} to {user.TempRole}",
+        EmployeeId = employee.EmployeeId,
+        Type = NotificationType.RoleUpdate,
+        Severity = NotificationSeverity.Critical,
+        DeliveryChannel = DeliveryChannel.InApp,
+        DueDate = DateTime.Now
+      };
+
+      return dto;
+    }
+    private async Task<CreateNotificationDto> MakeEmailNotification(int userId, string otp)
+    {
+      var (employee, user) = await GetEmployeeFromUserIdAsync(userId);
+      string message = $"You Role Has Been Updated from {user.Role} to {user.TempRole}Here is your One-Time-Pin: {otp} (This pin expires after {_stepSeconds / 60} minutes)";
+      CreateNotificationDto dto = new CreateNotificationDto
+      {
+        Message = message,
+        EmployeeId = employee.EmployeeId,
+        Type = NotificationType.RoleUpdate,
+        Severity = NotificationSeverity.Critical,
+        DeliveryChannel = DeliveryChannel.Email,
+        DueDate = DateTime.Now
+      };
+      return dto;
+    }
+    private async Task<(EmployeeDto employeeDto, User user)> GetEmployeeFromUserIdAsync(int userId)
+    {
+      User? user = await _userRepo.GetUserByIdAsync(userId);
+      if (user == null)
+        throw new KeyNotFoundException($"User {userId} Not Found");
+      EmployeeDto? employeeDto = await _employeeService.GetEmployeeByEmailAsync(user.Email);
+      if (employeeDto == null)
+        throw new KeyNotFoundException($"No Employee From User Type (ID: {user.UserId})");
+      return (employeeDto, user);
     }
   }
 }
