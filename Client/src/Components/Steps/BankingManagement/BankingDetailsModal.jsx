@@ -65,6 +65,7 @@ const BankingDetailsModal = ({
 
     if (!employee.paymentMethod)
       errors.paymentMethod = "Payment method is required";
+    
 
     return errors;
   };
@@ -92,6 +93,28 @@ const BankingDetailsModal = ({
     fetchBankCodes();
   }, []);
 
+  useEffect(() => {
+  if (employee.name && employee.surname) {
+    
+    // Split first names into array
+    const names = employee.name.trim().split(" ");
+
+    // Get initials
+    const initials = names
+      .map((name) => name.charAt(0).toUpperCase())
+      .join(" ");
+
+    // Build full account holder name
+    const fullName = `${employee.title || ""} ${initials} ${employee.surname}`.trim();
+
+    setEmployee((prev) => ({
+      ...prev,
+      accountHolderName: fullName,
+    }));
+  }
+}, [employee.name, employee.surname, employee.title]);
+
+
   const handleNext = () => {
     const errors = validateBanking();
 
@@ -101,6 +124,8 @@ const BankingDetailsModal = ({
 
     onNext();
   };
+  
+
 
   return (
     <div className="emp-name-surname-container">
@@ -139,6 +164,7 @@ const BankingDetailsModal = ({
               alt="Dropdown icon"
               className="dropdown-icon"
             />
+            
           </div>
         </div>
 
@@ -254,7 +280,7 @@ const BankingDetailsModal = ({
               name="accountHolderName"
               placeholder="Account Holder Name"
               value={employee.accountHolderName || ""}
-              onChange={handleChange}
+              readOnly
               className={`emp-accountHolder-input ${
                 formErrors.accountHolderName ? "emp-error-input" : ""
               }`}
@@ -333,7 +359,13 @@ const BankingDetailsModal = ({
                   alt="Calendar icon"
                   className="dropdown-icon"
                 />
+                
               </div>
+                {formErrors.payDate && (
+              <span className="emp-error-message">
+                {formErrors.payDate}
+              </span>
+            )}
             </div>
           </div>
         </div>

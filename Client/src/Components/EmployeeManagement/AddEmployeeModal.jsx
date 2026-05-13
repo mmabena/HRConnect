@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "./AddEmployeeModal.css";
 import BankingDetailsModal from "../../Components/Steps/BankingManagement/BankingDetailsModal.jsx";
-
+import LeaveTypesModal from "../Steps/LeaveType/LeaveTypesModal.jsx";
 import { addEmployee } from "../../api/Employee";
 
 import useEmployeeForm from "../../hooks/useEmployeeForm";
@@ -794,6 +794,17 @@ const AddEmployeeModal = ({ closeModal }) => {
               {/* Step 2 — Banking Details */}
               {currentStep === 2 && (
                 <BankingDetailsModal
+                  employee={employee}
+                  setEmployee={setEmployee}
+                  formErrors={formErrors}
+                  setFormErrors={setFormErrors}
+                  onNext={() => setCurrentStep(3)}
+                  onBack={() => setCurrentStep(1)}
+                />
+              )}
+              {/* Step 3 — Leave type */}
+              {currentStep === 3 && (
+                <LeaveTypesModal
                   employee={employee}
                   setEmployee={setEmployee}
                   formErrors={formErrors}
