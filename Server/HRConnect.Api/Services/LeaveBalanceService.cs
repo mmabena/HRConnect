@@ -857,8 +857,27 @@ namespace HRConnect.Api.Services
             if (currentSegment == null)
                 return;
 
-            if (currentSegment.AnnualEntitlement ==
-                applicableRule.DaysAllocated)
+            var previousRule =
+    await _context.LeaveEntitlementRules
+        .Where(r =>
+            r.LeaveTypeId == annualLeave.Id &&
+            r.GroupKey == groupKey &&
+            r.DaysAllocated ==
+                currentSegment.AnnualEntitlement &&
+            r.IsActive)
+        .OrderByDescending(r => r.MinYearsService)
+        .FirstOrDefaultAsync();
+
+            if (previousRule == null)
+            {
+                return;
+            }
+
+            var crossedYearsBracket =
+                previousRule.MinYearsService !=
+                applicableRule.MinYearsService;
+
+            if (!crossedYearsBracket)
             {
                 return;
             }

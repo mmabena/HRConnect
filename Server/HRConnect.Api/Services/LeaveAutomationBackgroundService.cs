@@ -6,7 +6,6 @@ namespace HRConnect.Api.Services
   using Microsoft.Extensions.Logging;
   using Microsoft.EntityFrameworkCore;
   using HRConnect.Api.Data;
-
   public class LeaveAutomationBackgroundService : BackgroundService
   {
     private readonly IServiceScopeFactory _scopeFactory;

@@ -264,9 +264,11 @@ namespace HRConnect.Api.Services
                 .Select(e => e.EmployeeId)
                 .ToListAsync();
 
-            await _leaveBalanceService.RecalculateAnnualLeaveBulkAsync(employeeIds);
             await _leaveBalanceService
-                .ApplyEntitlementRuleChangesAsync();
+                    .ApplyEntitlementRuleChangesAsync();
+
+            await _leaveBalanceService
+                .RecalculateAnnualLeaveBulkAsync(employeeIds);
 
             return await GetLeaveTypeByIdAsync(leaveType.Id);
         }
