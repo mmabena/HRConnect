@@ -96,6 +96,10 @@ margin-left: -70px;
   background: rgba(154, 154, 154, 0.55);
 }
 
+.emp-select-wrapper.has-value::before,
+.emp-select-wrapper.has-value::after {
+  display: none;
+}
 
 
 
