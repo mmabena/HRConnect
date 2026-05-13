@@ -21,23 +21,61 @@ function AddBenchmark({ onClose, onAddSuccess }) {
   const [saving, setSaving] = useState(false);
   const validate = () => {
     const newErrors = {};
+    if (!formData.positionId) {
+      newErrors.positionId = "Position is required";
+    }
 
-    if (!formData.positionId) newErrors.positionId = "Required";
-    if (!formData.location) newErrors.location = "Required";
-    if (!formData.source) newErrors.source = "Required";
-    if (!formData.salary25th) newErrors.salary25th = "Required";
-    if (!formData.salary50th) newErrors.salary50th = "Required";
-    if (!formData.salary75th) newErrors.salary75th = "Required";
+    if (!formData.location.trim()) {
+      newErrors.location = "Location is required";
+    }
+
+    if (!formData.source.trim()) {
+      newErrors.source = "Source is required";
+    }
+
+    if (!formData.salary25th) {
+      newErrors.salary25th = "25th percentile is required";
+    } else if (Number(formData.salary25th) <= 0) {
+      newErrors.salary25th = "Must be greater than 0";
+    }
+
+    if (!formData.salary50th) {
+      newErrors.salary50th = "50th percentile is required";
+    } else if (Number(formData.salary50th) <= 0) {
+      newErrors.salary50th = "Must be greater than 0";
+    }
+
+    if (!formData.salary75th) {
+      newErrors.salary75th = "75th percentile is required";
+    } else if (Number(formData.salary75th) <= 0) {
+      newErrors.salary75th = "Must be greater than 0";
+    }
+
+    if (Number(formData.salary25th) >= Number(formData.salary50th)) {
+      newErrors.salary50th =
+        "50th percentile must be greater than 25th percentile";
+    }
+
+    if (Number(formData.salary50th) >= Number(formData.salary75th)) {
+      newErrors.salary75th =
+        "75th percentile must be greater than 50th percentile";
+    }
 
     setErrors(newErrors);
+
     return Object.keys(newErrors).length === 0;
   };
+
   const locations = ["Johannesburg", "Cape Town"];
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
+    setErrors((prev) => ({
+    ...prev,
+    [e.target.name]: "",
+  }));
   };
 
   const handleReset = () => {
@@ -78,9 +116,9 @@ function AddBenchmark({ onClose, onAddSuccess }) {
 
       console.log("SUCCESS:", res.data);
 
-      onAddSuccess?.(res.data); 
+      onAddSuccess?.(res.data);
       setSuccess("Benchmark saved successfully!");
-handleReset();
+      handleReset();
     } catch (err) {
       console.log("ERROR:", err);
       setError("Failed to save benchmark");
@@ -90,11 +128,11 @@ handleReset();
   };
 
   useEffect(() => {
-  if (success) {
-    const timer = setTimeout(() => setSuccess(null), 3000);
-    return () => clearTimeout(timer);
-  }
-}, [success]);
+    if (success) {
+      const timer = setTimeout(() => setSuccess(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
 
   useEffect(() => {
     const fetchPositions = async () => {
@@ -147,7 +185,7 @@ handleReset();
         </div>
       </div>
       {error && <p className="error">{error}</p>}
-{success && <p className="success">{success}</p>}
+      {success && <p className="success">{success}</p>}
 
       <div className="b-form">
         <div className="b-label-container">
@@ -164,7 +202,7 @@ handleReset();
 
                 {positions.map((pos) => (
                   <option key={pos.positionId} value={pos.positionId}>
-                    {pos.positionTitle} 
+                    {pos.positionTitle}
                   </option>
                 ))}
               </select>
@@ -198,9 +236,9 @@ handleReset();
                 <path d="M10 13L14 9H6L10 13Z" />
               </svg>
             </div>
-            {errors.positionId && (
-              <span className="error">{errors.positionId}</span>
-            )}
+            {errors.location && (
+  <span className="error">{errors.location}</span>
+)}
           </div>
         </div>
         <div className="b-percentile-container">
@@ -213,20 +251,28 @@ handleReset();
               <input
                 className="bp-form-input"
                 type="number"
+                min="0"
                 name="salary25th"
                 value={formData.salary25th}
                 onChange={handleChange}
               />
+              {errors.salary25th && (
+  <span className="error">{errors.salary25th}</span>
+)}
             </div>
             <div className="b-percentile50">
               <span className="bp-label">50th Percentile(Median)</span>
               <input
                 className="bp-form-input"
                 type="number"
+                min="0"
                 name="salary50th"
                 value={formData.salary50th}
                 onChange={handleChange}
               />
+              {errors.salary50th && (
+  <span className="error">{errors.salary50th}</span>
+)}
             </div>
 
             <div className="b-percentile75">
@@ -235,10 +281,14 @@ handleReset();
               <input
                 className="bp-form-input"
                 type="number"
+                min="0"
                 name="salary75th"
                 value={formData.salary75th}
                 onChange={handleChange}
               />
+              {errors.salary75th && (
+  <span className="error">{errors.salary75th}</span>
+)}
             </div>
           </div>
         </div>
@@ -255,6 +305,9 @@ handleReset();
               onChange={handleChange}
               placeholder="Payscale Only"
             />
+            {errors.source && (
+  <span className="error">{errors.source}</span>
+)}
           </div>
         </div>
       </div>

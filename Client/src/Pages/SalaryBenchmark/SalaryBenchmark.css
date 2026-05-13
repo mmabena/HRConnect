@@ -103,7 +103,6 @@
   flex-direction: row;
   justify-content: flex-end;
   align-items: flex-start;
-  padding: 15px 0px;
   gap: 25px;
 
   width: 1453px;
@@ -272,7 +271,6 @@
   color: #4f6e78;
 }
 
-
 /* ── summary stat cards ── */
 .sb-stats {
   width: 1454px;
@@ -291,7 +289,7 @@
 
   position: absolute;
   width: 1404px;
-  height: 84px;
+  height: 45px;
   left: 70px;
 }
 
@@ -1318,54 +1316,74 @@
 
 /* ── pagination bar — sticky to bottom ── */
 .sb-pagination {
-display: flex;
-flex-direction: row;
-align-items: center;
-padding: 5px 0px 5px 60px;
-gap: 16px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 5px 0px 5px 60px;
+  gap: 16px;
 
-position: relative;
-width: 1462px;
-height: 56px;
-left: -4px;
-top: 680px;
-
-
+  position: relative;
+  width: 1462px;
+  height: 56px;
+  left: 45px;
+  top: 680px;
 }
 
 .sb-pagination-left {
   display: flex;
+  flex-direction: row;
+  justify-content: center;
   align-items: center;
-  gap: 12px;
+  padding: 0px;
+  gap: 23px;
+
+  width: 214px;
+  height: 37px;
+
+  flex: none;
+  order: 0;
+  flex-grow: 0;
 }
 
 .sb-pagination-right {
-display: flex;
-flex-direction: row;
-justify-content: flex-end;
-align-items: flex-end;
-padding: 0px;
-gap: 16px;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: flex-end;
+  padding: 0px;
+  gap: 16px;
 
-width: 1200px;
-height: 37px;
+  width: 1099px;
+  height: 37px;
 
-flex: none;
-order: 2;
-flex-grow: 0;
-
+  /* Inside auto layout */
+  flex: none;
+  order: 2;
+  flex-grow: 0;
 }
 
-/* ── X of Y label ── */
 .sb-page-info {
-  font-size: 15px;
-  color: #355867;
-  letter-spacing: -0.43px;
+  width: 50px;
+  height: 37px;
+
+  font-family: "Anek Bangla";
+  font-style: normal;
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 37px;
+  letter-spacing: 0.02em;
+
+  color: #002d40;
+
+  /* Inside auto layout */
+  flex: none;
+  order: 0;
+  flex-grow: 0;
 }
 
 .sb-page-info strong {
   font-weight: 600;
-  color: #355867;
+  color: #3f697b;
 }
 
 /* ── per page dropdown ── */
@@ -1376,15 +1394,28 @@ flex-grow: 0;
 }
 
 .sb-perpage-select {
-  appearance: none;
-  padding: 4px 28px 4px 10px;
-  font-family: "Anek Bangla", sans-serif;
-  font-size: 15px;
-  font-weight: 500;
-  color: #355867;
-  background: #ffffff;
-  border: 0.5px solid rgba(53, 88, 103, 0.37);
-  border-radius: 8px;
+  box-sizing: border-box;
+
+  /* Auto layout */
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px 10px;
+  gap: 10px;
+
+  width: 143px;
+  height: 37px;
+
+  border: 1px solid #9a9a9a;
+  box-shadow: inset 0px 2px 2px rgba(0, 0, 0, 0.25);
+  border-radius: 10px;
+
+  /* Inside auto layout */
+  flex: none;
+  order: 1;
+  align-self: stretch;
+  flex-grow: 1;
+
   cursor: pointer;
   outline: none;
 }
@@ -1392,16 +1423,28 @@ flex-grow: 0;
 .sb-perpage-icon {
   position: absolute;
   right: 8px;
-  width: 16px;
-  height: 16px;
+  width: 24px;
+  height: 24px;
   color: #355867;
   pointer-events: none;
 }
 
 .sb-perpage-label {
-  font-size: 15px;
-  color: #707070;
-  letter-spacing: -0.43px;
+  width: 76px;
+  height: 37px;
+
+  font-family: "Anek Bangla";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 37px;
+  letter-spacing: 0.02em;
+
+  color: #002d40;
+
+  flex: none;
+  order: 1;
+  flex-grow: 0;
 }
 
 /* ── page buttons ── */
@@ -1415,10 +1458,19 @@ flex-grow: 0;
   border-radius: 50%;
   border: none;
   background: transparent;
-  color: #355867;
-  font-family: "Anek Bangla", sans-serif;
-  font-size: 14px;
-  font-weight: 500;
+
+  font-family: "Anek Bangla";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 37px;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  letter-spacing: 0.02em;
+
+  color: #01a19a;
+
   cursor: pointer;
   transition: background 0.15s;
 }
