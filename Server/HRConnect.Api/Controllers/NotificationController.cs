@@ -7,6 +7,7 @@ namespace HRConnect.Api.Controllers
   using Microsoft.AspNetCore.Authorization;
   using Microsoft.AspNetCore.Mvc;
 
+
   [ApiController]
   [Route("api/notifications")]
   public class NotificationController : ControllerBase
@@ -22,7 +23,7 @@ namespace HRConnect.Api.Controllers
 
     [Authorize(Roles = "SuperUser")]
     [HttpGet("payroll/{userId}")]
-    public async Task<ActionResult<List<NotificationDto>>> GetAllPayrollNotifications(int userId)
+    public async Task<ActionResult<IList<NotificationDto>>> GetAllPayrollNotifications(int userId)
     {
       var notifications = await _notificationService.GetAllEmployeeNotificationsByTypeAsync(NotificationType.Payroll, $"{userId}");
 
@@ -31,6 +32,14 @@ namespace HRConnect.Api.Controllers
       return Ok(notifications);
     }
 
+    [HttpGet("{employeeId}")]
+    public async Task<ActionResult<IList<NotificationDto>>> GetEmployeeNotifications(string employeeId)
+    {
+      var notifications = await _notificationService.GetEmployeeNotificationsAsync(employeeId);
+      if (!notifications.Any())
+        return NotFound();
+      return Ok(notifications);
+    }
 
   }
 }

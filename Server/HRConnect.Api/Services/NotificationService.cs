@@ -18,6 +18,12 @@ namespace HRConnect.Api.Services
       _notificationRepository = notificationRepository;
       _notificationDispatcher = notificationDispatcher;
     }
+
+    public async Task<IList<NotificationDto>> GetEmployeeNotificationsAsync(string employeeId)
+    {
+      IList<NotificationDto> notifications = await _notificationRepository.GetEmployeeNotificationsAsync(employeeId);
+      return notifications;
+    }
     public async Task<IEnumerable<NotificationDto>> GetAllEmployeeNotificationsByTypeAsync(NotificationType type, string employeeId)
     {
       IEnumerable<NotificationDto> notifications = await _notificationRepository.GetAllEmployeeNotificationsByTypeAsync(type, employeeId);
@@ -116,15 +122,7 @@ namespace HRConnect.Api.Services
 
       if (created != null)
       {
-#line 119 "NotificationSerivce.cs"
-        Console.ForegroundColor = ConsoleColor.DarkMagenta;
-        Console.WriteLine("NOT SENDING NOTIS CZ NOT NULL");
-        Console.BackgroundColor = ConsoleColor.White;
-        Console.WriteLine($"The Contents of the msg {created.Message}");
-        Console.ResetColor();
-
         await _notificationDispatcher.DispatchNotificationAsync(created);
-#line default
         return;
       }
       _ = await _notificationRepository.AddNotificationAsync(notification);

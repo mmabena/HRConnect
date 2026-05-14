@@ -7,7 +7,6 @@ namespace HRConnect.Api.Repository
   using HRConnect.Api.Mappers.Notification;
   using HRConnect.Api.DTOs.Notification;
   using Microsoft.EntityFrameworkCore;
-  using EFCore.BulkExtensions;
 
   public class NotificationRepository : INotificationRepository
   {
@@ -30,6 +29,17 @@ namespace HRConnect.Api.Repository
       return false;
     }
 
+    public async Task<IList<NotificationDto>> GetEmployeeNotificationsAsync(string employeeId)
+    {
+      var notifications = await _context.Notifications.AsNoTracking().Where(n =>
+        (n.EmployeeId == employeeId) &&
+        (n.DeliveryChannel == DeliveryChannel.InApp) &&
+        !n.IsRead
+        ).OrderByDescending(n => n.Type).ToListAsync();
+      if (notifications == null)
+        return [];
+      return notifications.Select(n => n.ToNotificationDto()).ToList();
+    }
     /// <summary>
     /// This metod acts as a deduplication safe guard when creating and dispatching 
     /// notifications. It is used as boolean check before notification storing

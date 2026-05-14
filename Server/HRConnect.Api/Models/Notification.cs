@@ -3,9 +3,9 @@ namespace HRConnect.Api.Models
   using System.ComponentModel.DataAnnotations;
   public enum NotificationSeverity
   {
-    Critical,
-    Warning,
-    Infomation
+    Critical = 0,
+    Warning = 1,
+    Infomation = 2
   }
   public enum NotificationType
   {
