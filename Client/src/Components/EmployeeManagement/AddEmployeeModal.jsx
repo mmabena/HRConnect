@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import "./AddEmployeeModal.css";
 import BankingDetailsModal from "../../Components/Steps/BankingManagement/BankingDetailsModal.jsx";
 import LeaveTypesModal from "../Steps/LeaveType/LeaveTypesModal.jsx";
+
 import { addEmployee } from "../../api/Employee";
 
 import useEmployeeForm from "../../hooks/useEmployeeForm";
@@ -553,27 +554,27 @@ const AddEmployeeModal = ({ closeModal }) => {
 
                   {/* Start Date */}
                   <div className="emp-form-group emp-input-wrapper">
-                 <div className="date-wrapper">
-                  <label className="date-label">Start Date</label>
+                    <div className="date-wrapper">
+                      <label className="date-label">Start Date</label>
 
-                  <input
-                    type="date"
-                    id="startDate"
-                    name="startDate"
-                    value={employee.startDate}
-                    onChange={onInputChange}
-                    className={`emp-start-date ${formErrors.startDate ? "emp-error-input" : ""}`}
-                  />
-                  {formErrors.startDate && (
-                    <span className="emp-error-message">
-                      {formErrors.startDate}
-                    </span>
-                  )}
-                  <img
-                    src="/images/calendar-range.svg"
-                    alt="Dropdown icon"
-                    className="dropdown-icon"
-                  />
+                      <input
+                        type="date"
+                        id="startDate"
+                        name="startDate"
+                        value={employee.startDate}
+                        onChange={onInputChange}
+                        className={`emp-start-date ${formErrors.startDate ? "emp-error-input" : ""}`}
+                      />
+                      {formErrors.startDate && (
+                        <span className="emp-error-message">
+                          {formErrors.startDate}
+                        </span>
+                      )}
+                      <img
+                        src="/images/calendar-range.svg"
+                        alt="Dropdown icon"
+                        className="dropdown-icon"
+                      />
                     </div>
                   </div>
 
@@ -739,40 +740,36 @@ const AddEmployeeModal = ({ closeModal }) => {
 
                   {/* Profile Image Upload */}
                   <div className="emp-input-wrapper">
-                <div className="emp-upload-wrapper">
-                  
-                  <span className="upload-label">
-                    Attach Profile Image
-                  </span>
+                    <div className="emp-upload-wrapper">
+                      <span className="upload-label">Attach Profile Image</span>
 
-                  <div className="upload-container">
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      className={`emp-name-input hidden-file-input ${formErrors.startDate ? "emp-error-input" : ""}`}
-                      onChange={onFileChange}
-                      name="profileImage"
-                      accept="image/*"
-                    />
+                      <div className="upload-container">
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          className={`emp-name-input hidden-file-input ${formErrors.startDate ? "emp-error-input" : ""}`}
+                          onChange={onFileChange}
+                          name="profileImage"
+                          accept="image/*"
+                        />
 
-                    <Upload
-                      alt="Upload icon"
-                      className="upload-icon"
-                      onClick={handleImageClick}
-                    />
+                        <Upload
+                          alt="Upload icon"
+                          className="upload-icon"
+                          onClick={handleImageClick}
+                        />
 
-                    <span className="upload-text">
-                      {uploading ? "Uploading..." : fileName}
-                    </span>
-
+                        <span className="upload-text">
+                          {uploading ? "Uploading..." : fileName}
+                        </span>
+                      </div>
+                      {formErrors.profileImage && (
+                        <span className="emp-error-message">
+                          {formErrors.profileImage}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  {formErrors.profileImage && (
-                    <span className="emp-error-message">
-                      {formErrors.profileImage}
-                    </span>
-                  )}
-                </div>
-              </div>
                   {formErrors.general && (
                     <div className="emp-error-message">
                       {formErrors.general}
@@ -799,7 +796,7 @@ const AddEmployeeModal = ({ closeModal }) => {
                   formErrors={formErrors}
                   setFormErrors={setFormErrors}
                   onNext={() => setCurrentStep(3)}
-                  onBack={() => setCurrentStep(1)}
+                  onBack={() => setCurrentStep((prev) => prev - 1)}
                 />
               )}
               {/* Step 3 — Leave type */}
@@ -809,10 +806,11 @@ const AddEmployeeModal = ({ closeModal }) => {
                   setEmployee={setEmployee}
                   formErrors={formErrors}
                   setFormErrors={setFormErrors}
-                  onNext={() => setCurrentStep(3)}
-                  onBack={() => setCurrentStep(1)}
+                  onNext={() => setCurrentStep(4)}
+                  onBack={() => setCurrentStep((prev) => prev - 1)}
                 />
               )}
+               
             </div>
           </div>
         </div>

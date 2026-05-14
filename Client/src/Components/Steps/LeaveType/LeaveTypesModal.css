@@ -1,9 +1,14 @@
 /* WRAPPER */
-.emp-name-surname-container {
+.emp-leave-container {
   width: 100%;
   display: flex;
   justify-content: center;
   padding: 20px;
+  flex-direction: column;
+  max-width: 444px;
+  gap: 17px;
+  border-radius: 5px;
+  margin-top:-90px;
 }
 
 
@@ -49,7 +54,7 @@ margin-bottom:20px;
   width: 110%;
   margin-left: auto;
   margin-right: auto;
-  height: 2px;
+  height: 1px;
   border: none;
 }
 
@@ -86,13 +91,13 @@ height: 57px;
 }
 
 .leave-card input[type="radio"] {
- margin-left: -16px;
-  margin-right: 8px;
+ margin-left: -18px;
+  margin-right: 2px;
   display:flex;
   align-items: flex-start;
       width: 18px;
     height: 15px;
-    margin-top:-15px;
+    margin-top:-18px;
   
 }
 .leave-text {
@@ -100,15 +105,19 @@ height: 57px;
   flex-direction: column;
   align-items: flex-start;
   text-align: left;
+
 }
 
 /* TEXT INSIDE CARD */
 .leave-card h4 {
-  margin: 0;
-  font-size: 15px;
-  font-weight: 600;
-  color: #355867;
-  line-height: 18px;
+font-family: Anek Bangla;
+font-weight: 500;
+font-style: Regular;
+font-size: 15px;
+color:#002D40;
+line-height: 150%;
+letter-spacing: 0.15px;
+
 }
 
 .leave-card p {
@@ -123,11 +132,21 @@ height: 57px;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
-    column-gap: 40px;
+    column-gap: 34px;
     row-gap: 17px;
 
 }
+.leave-small-card h4{
+font-family: Anek Bangla;
+font-weight: 450;
+font-style: Regular;
+font-size: 15px;
+/* leading-trim: NONE; */
+line-height: 100%;
+letter-spacing: 2%;
+ color:#2c5f6d;
 
+}
 /* SMALL CARDS */
 .leave-small-card {
 display: flex;
@@ -148,12 +167,7 @@ border-radius: 5px;
 }
 
 
-.leave-small-card h4 {
-  margin: 0;
-  font-size: 13px;
- color:#2c5f6d;
-;
-}
+
 
 .leave-small-card p {
   margin: 4px 0 0;
@@ -161,6 +175,56 @@ border-radius: 5px;
 color:#2c5f6d;
 ;
 }
+
+.emp-leave-back-button{
+ box-sizing: border-box;
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: center;
+padding: 10px 10px 5px;
+color: #5C5C5C;
+position: absolute;
+width: 187px;
+height: 47px;
+margin-top:50px;
+left:50px;
+background: rgba(255, 255, 255, 0.7);
+opacity: 0.9;
+border: 1px solid rgba(112, 112, 112, 0.5);
+border-radius: 10px;
+}
+
+.emp-leave-next-button{
+  position: relative;
+  display: flex;
+  width: 187px;
+  height: 47px;
+  top:53px;
+  padding: 0 10px 0px 10px;
+  justify-content: center;
+  align-items: center;
+  left:360px;
+  color: var(--white);
+  text-align: center;
+  font-family: "Anek Bangla", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: 0.32px;
+  border: 1px solid var(--light-grey);
+  opacity: 0.9;
+  background: var(--primary-color);
+  background-color: var(--primary-color);
+  border-radius: 10px;
+  display: flex;
+  gap: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-top:-50px;
+}
+
 
 /* ERROR */
 .error {

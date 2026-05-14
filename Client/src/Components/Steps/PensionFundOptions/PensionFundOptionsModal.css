@@ -1,0 +1,151 @@
+.pension-modal {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 32px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  font-family: Arial, sans-serif;
+}
+
+/* TITLE */
+.pension-modal h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #2f4858;
+  margin-bottom: 24px;
+}
+
+/* SECTION SPACING */
+.field {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* LABELS */
+.field label {
+  font-size: 13px;
+  color: #5a6b75;
+  margin-bottom: 6px;
+}
+
+/* INPUT */
+.field input {
+  height: 42px;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  padding: 0 12px;
+  font-size: 14px;
+  outline: none;
+  transition: 0.2s ease;
+}
+
+.field input:focus {
+  border-color: #355867;
+}
+
+/* RADIO GROUP */
+.radio-group {
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+  align-items: center;
+}
+
+.radio-group label {
+  font-size: 14px;
+  color: #2f4858;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* SLIDER SECTION */
+.MuiBox-root {
+  margin-top: 10px;
+  padding: 10px 5px;
+}
+
+/* SLIDER CUSTOM LOOK */
+.MuiSlider-root {
+  color: #355867 !important;
+}
+
+.MuiSlider-markLabel {
+  font-size: 12px !important;
+}
+
+/* RESULTS CARD */
+.results {
+  margin-top: 25px;
+  background: #f6f9fb;
+  border-radius: 12px;
+  padding: 18px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.results p {
+  margin: 0;
+  font-size: 14px;
+  color: #2f4858;
+}
+
+/* BOTTOM BUTTONS */
+.modal-buttons {
+  margin-top: 30px;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* BACK BUTTON */
+.modal-buttons button:first-child {
+  background: #ffffff;
+  border: 1px solid #cfd8dc;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #2f4858;
+}
+
+/* NEXT BUTTON */
+.modal-buttons button:last-child {
+  background: #355867;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  transition: 0.2s ease;
+}
+
+.modal-buttons button:last-child:hover {
+  background: #27424f;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .results {
+    grid-template-columns: 1fr;
+  }
+
+  .pension-modal {
+    padding: 20px;
+  }
+
+  .modal-buttons {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
