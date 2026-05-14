@@ -1202,9 +1202,8 @@ namespace HRConnect.Api.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("DeliveryChannel")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("DeliveryChannel")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("DueDate")
                         .HasColumnType("datetime2");

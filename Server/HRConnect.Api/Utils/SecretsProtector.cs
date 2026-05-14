@@ -1,6 +1,7 @@
 namespace HRConnect.Api.Utils
 {
   using Microsoft.AspNetCore.DataProtection;
+  using System.Text;
   using Microsoft.CodeAnalysis.CSharp.Syntax;
 
   /// <summary>
@@ -52,9 +53,9 @@ namespace HRConnect.Api.Utils
       if (_protector == null)
         throw new InvalidOperationException("No Data Encryptor Initialised");
 
-      var base64 = Convert.ToBase64String(data);
-      var protectedString = _protector.Protect(base64);
-      return System.Text.Encoding.UTF8.GetBytes(protectedString);
+      string base64 = Convert.ToBase64String(data);
+      string protectedString = _protector.Protect(base64);
+      return Encoding.UTF8.GetBytes(protectedString);
     }
 
     public static byte[] UnWrapBytes(byte[] encryptedBytes)
@@ -62,8 +63,8 @@ namespace HRConnect.Api.Utils
       if (_protector == null)
         throw new InvalidOperationException("No Data Encryptor Initialised");
 
-      var cipherString = System.Text.Encoding.UTF8.GetString(encryptedBytes);
-      var unprotectedBase64 = _protector.Unprotect(cipherString);
+      string cipherString = Encoding.UTF8.GetString(encryptedBytes);
+      string unprotectedBase64 = _protector.Unprotect(cipherString);
       return Convert.FromBase64String(unprotectedBase64);
     }
   }

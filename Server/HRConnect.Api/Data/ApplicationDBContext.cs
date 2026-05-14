@@ -306,8 +306,9 @@ namespace HRConnect.Api.Data
           .HasConversion<string>();
       modelBuilder.Entity<Notification>().Property(n => n.Type)
           .HasConversion<string>();
-      modelBuilder.Entity<Notification>().Property(n => n.DeliveryChannel)
-          .HasConversion<string>();
+
+      // modelBuilder.Entity<Notification>().Property(n => n.DeliveryChannel)
+          // .HasConversion<string>();
 
       modelBuilder.Entity<Employee>()
         .HasMany(epre => epre.EmployeePayrollEarning)
