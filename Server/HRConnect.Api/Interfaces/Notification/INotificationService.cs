@@ -5,6 +5,7 @@ namespace HRConnect.Api.Interfaces.Notification
   public interface INotificationService
   {
     Task MarkNotificationReadByTypeAsync(NotificationType type, string employeeId);
+    // Task<IList<NotificationDto>> GetEmployeeNotificationsAsync(string employeeId);
     Task CreateAndDispatchAsync(Notification notification);
     Task CreateOrEnsureExistsAsync(Notification notification);
     Task MarkBatchedNotificationsReadByTypeAsync(NotificationType type, List<string> employeeIds);

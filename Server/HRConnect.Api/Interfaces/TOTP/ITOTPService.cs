@@ -4,6 +4,7 @@ namespace HRConnect.Api.Interfaces.TOTP
   {
     Task SendTotpAndNotify(int userId);
     string GenerateCode(byte[] userSecret);
+    Task ConfirmUserRoleUpdateAsync(int userId);
     Task<bool> ValidateCodeAsync(int userId, byte[] userSecret, string code);
     /// <summary>
     /// Consolidating Replay Store into the TOTPService even though it is part of 

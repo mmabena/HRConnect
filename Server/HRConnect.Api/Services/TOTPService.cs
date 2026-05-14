@@ -11,6 +11,14 @@ namespace HRConnect.Api.Services
   using HRConnect.Api.Interfaces.Notification;
   using System.Threading.Tasks;
 
+  /// <remarks>
+  /// * IUserRepository has been injected as a dependency to. 
+  /// * This is done to avoid circular dependency injection.
+  /// * IUserService -> ITOTPService thus we CANNOT have it that
+  /// * ITOTPService -> TUserService and so we arrive at
+  /// * TOTPService -> IUserRepository 
+  /// </remarks>
+
   public class TOTPService : ITOTPService
   {
     private readonly ITOTPRepository _totpRepo;
@@ -107,7 +115,7 @@ namespace HRConnect.Api.Services
     private int ResolveStepDuration(IConfiguration configuration)
     {
       int minutes = configuration.GetValue("Totp:StepMinutes", 10);
-      if (minutes <= 0) minutes = 10;
+      if (minutes < 0) minutes = 10;
 
       int seconds = Math.Max(minutes, 1) * 60;
       if (seconds <= 0) return seconds * 600;
@@ -121,6 +129,7 @@ namespace HRConnect.Api.Services
       // string message = $"You Role Has Been Updated from {user.Role} to {user.TempRole}";
       CreateNotificationDto dto = new CreateNotificationDto
       {
+        Subject = "Your new Role is ready",
         Message = $"You Role Has Been Updated from {user.Role} to {user.TempRole}",
         EmployeeId = employee.EmployeeId,
         Type = NotificationType.RoleUpdate,
@@ -134,9 +143,10 @@ namespace HRConnect.Api.Services
     private async Task<CreateNotificationDto> MakeEmailNotification(int userId, string otp)
     {
       var (employee, user) = await GetEmployeeFromUserIdAsync(userId);
-      string message = $"You Role Has Been Updated from {user.Role} to {user.TempRole}Here is your One-Time-Pin: {otp} (This pin expires after {_stepSeconds / 60} minutes)";
+      string message = $"You Role Has Been Updated from {user.Role} to {user.TempRole}.\nHere is your One-Time-Pin: {otp} (This pin expires after {_stepSeconds / 60} minutes)";
       CreateNotificationDto dto = new CreateNotificationDto
       {
+        Subject = "Employee Role Change",
         Message = message,
         EmployeeId = employee.EmployeeId,
         Type = NotificationType.RoleUpdate,
@@ -148,13 +158,23 @@ namespace HRConnect.Api.Services
     }
     private async Task<(EmployeeDto employeeDto, User user)> GetEmployeeFromUserIdAsync(int userId)
     {
-      User? user = await _userRepo.GetUserByIdAsync(userId);
-      if (user == null)
-        throw new KeyNotFoundException($"User {userId} Not Found");
-      EmployeeDto? employeeDto = await _employeeService.GetEmployeeByEmailAsync(user.Email);
-      if (employeeDto == null)
-        throw new KeyNotFoundException($"No Employee From User Type (ID: {user.UserId})");
+      User? user = await _userRepo.GetUserByIdAsync(userId) ??
+      throw new KeyNotFoundException($"User {userId} Not Found");
+
+      EmployeeDto? employeeDto = await _employeeService.GetEmployeeByEmailAsync(user.Email) ??
+      throw new KeyNotFoundException($"No Employee From User Type (ID: {user.UserId})");
+
       return (employeeDto, user);
+    }
+
+    public async Task ConfirmUserRoleUpdateAsync(int userId)
+    {
+      User? existing = await _userRepo.GetUserByIdAsync(userId);
+      if (existing != null)
+      {
+        existing.Role = (UserRole)existing.TempRole!;
+        _ = await _userRepo.UpdateUserAsync(userId, existing);
+      }
     }
   }
 }

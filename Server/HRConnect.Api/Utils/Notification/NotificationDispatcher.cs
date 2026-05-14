@@ -17,11 +17,13 @@ namespace HRConnect.Api.Utils.Notification
       {
         try
         {
+#line 20 "NotificationDispatcher.cs"
           Console.ForegroundColor = ConsoleColor.Green;
           Console.WriteLine($"Sending notification to {strategy.Name}");
           Console.WriteLine($"Enum Value for Channel {strategy.Channel}");
           await strategy.SendNotificationAsync(notification);
           Console.ResetColor();
+#line default
         }
         catch (Exception ex)
         {
@@ -38,7 +40,7 @@ namespace HRConnect.Api.Utils.Notification
     /// <returns>Resolved Channels that have notifications in the pipeline for them</returns>
     private IEnumerable<INotificationDeliveryChannel> ResolveDeliveryStrategy(DeliveryChannel deliveryChannels)
     {
-      return _deliveryStrategies.Where(s => deliveryChannels.HasFlag(s.Channel));
+      return _deliveryStrategies.Where(s => (deliveryChannels & s.Channel) == s.Channel);
     }
   }
 }

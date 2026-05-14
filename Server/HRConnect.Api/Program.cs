@@ -30,6 +30,7 @@ using HRConnect.Api.Interfaces.Payroll.Deduction;
 using HRConnect.Api.Utils.Jobs;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
+using HRConnect.Api.Utils.Notification.Channels;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -265,11 +266,13 @@ builder.Services.AddScoped<IEmployeePensionEnrollmentRepository, EmployeePension
 builder.Services.AddTransient<IEmployeePensionEnrollmentService, EmployeePensionEnrollmentService>();
 builder.Services.AddScoped<IPensionDeductionRepository, PensionDeductionRepository>();
 builder.Services.AddTransient<IPensionDeductionService, PensionDeductionService>();
-
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<INotificationFactory, NotificationFactory>();
 builder.Services.AddScoped<INotificationDispatcher, NotificationDispatcher>();
+//Individual Delivery Channels
+builder.Services.AddScoped<INotificationDeliveryChannel, InAppDeliveryChannel>();
+builder.Services.AddScoped<INotificationDeliveryChannel, EmailDeliveryChannel>();
 builder.Services.AddScoped<IJobScheduleService, JobScheduleService>();
 builder.Services.AddScoped<IPayrollEarningRepository, PayrollEarningRepository>();
 builder.Services.AddScoped<IPayrollEarningService, PayrollEarningService>();
@@ -279,7 +282,7 @@ builder.Services.AddScoped<IDeductionRepository, DeductionRepository>();
 builder.Services.AddScoped<IDeductionService, DeductionService>();
 builder.Services.AddScoped<IEmployeeDeductionRepository, EmployeeDeductionRepository>();
 builder.Services.AddScoped<IEmployeeDeductionService, EmployeeDeductionService>();
-builder.Services.AddSingleton<ISecretsProtector, SecretsProtector>();
+// builder.Services.AddSingleton<ISecretsProtector, SecretsProtector>();
 builder.Services.AddScoped<ITOTPService, TOTPService>();
 builder.Services.AddScoped<ITOTPRepository, TOTPRepository>();
 builder.Services.AddScoped<IMFAUserSecretsService, MFAUserSecretsService>();

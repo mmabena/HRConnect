@@ -11,9 +11,14 @@ namespace HRConnect.Api.Data
   using HRConnect.Api.Models.Payroll.Earning;
   using System.Collections.Generic;
   using Microsoft.EntityFrameworkCore.ChangeTracking;
+  using Microsoft.AspNetCore.DataProtection;
+  using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+  using HRConnect.Api.Utils;
 
-  public class ApplicationDBContext(DbContextOptions dbContextOptions) : DbContext(dbContextOptions)
+  public class ApplicationDBContext(DbContextOptions dbContextOptions, IDataProtectionProvider
+  provider) : DbContext(dbContextOptions)
   {
+    private readonly IDataProtector _protector = provider.CreateProtector("DbEncryptor");
     public DbSet<User> Users { get; set; }
     public DbSet<Employee> Employees { get; set; }
     public DbSet<Position> Positions { get; set; }
@@ -60,6 +65,29 @@ namespace HRConnect.Api.Data
       {
         builder.UseSqlServer(schema: "quartz", prefix: "QRTZ_");
       });
+
+      // Use this to protector to convert data of your choosing (of type string) in the database
+      SecretsProtector.Init(provider.CreateProtector("DbEncryptor"));
+      var stringEncrpter = new ValueConverter<string, string>(
+        x => x == null ? string.Empty : SecretsProtector.Wrap(x),
+        x => x == null ? string.Empty : SecretsProtector.UnWrap<string>(x)
+        );
+
+#pragma warning disable CS8603
+      var byteEncrpter = new ValueConverter<byte[], byte[]>(
+        x => x == null ? null : SecretsProtector.WrapBytes(x),
+        x => x == null ? null : SecretsProtector.UnWrapBytes(x)
+        );
+#pragma warning restore CS8603
+
+      // Using data protect to encrypt notification messages
+      modelBuilder.Entity<Notification>()
+      .Property(n => n.Message)
+      .HasConversion(stringEncrpter);
+
+      modelBuilder.Entity<MFAUserSecret>()
+      .Property(m => m.EncryptedUserSecret)
+      .HasConversion(byteEncrpter);
 
       // ================= MAIN CONFIG =================
       modelBuilder.Entity<Employee>()
@@ -280,6 +308,7 @@ namespace HRConnect.Api.Data
           .HasConversion<string>();
       modelBuilder.Entity<Notification>().Property(n => n.DeliveryChannel)
           .HasConversion<string>();
+
       modelBuilder.Entity<Employee>()
         .HasMany(epre => epre.EmployeePayrollEarning)
         .WithOne(e => e.Employee)

@@ -9,7 +9,6 @@ namespace HRConnect.Api.Interfaces
     Task<User?> GetUserByEmailAsync(string email);
     Task<User> CreateUserAsync(CreateUserRequestDto dto);
     Task<User?> UpdateUserAsync(int id, UpdateUserRequestDto dto);
-    Task ConfirmUserRoleUpdateAsync(int id);
     Task<User?> UpdateUserRoleAsync(int id, UpdateUserRoleRequestDto dto);
     Task<User?> UpdateEmployeeUserRoleAsync(string employeeId, UpdateUserRoleRequestDto dto);
     Task<bool> DeleteUserAsync(int id);

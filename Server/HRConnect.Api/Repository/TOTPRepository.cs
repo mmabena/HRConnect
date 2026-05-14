@@ -15,11 +15,10 @@ namespace HRConnect.Api.Repository
     {
       var state = await _context.TOTPStates.FindAsync(userId);
 
-      if (state == null) return false;
+      if (state == null)
+      { return false; }
 
-      if (stepCount <= state.LastUsedTimeStamp) return true;
-      //Default to code being replayed
-      return false;
+      return stepCount <= state.LastUsedTimeStamp;
     }
     public async Task Save()
     {

@@ -8,6 +8,7 @@ namespace HRConnect.Api.Mappers.Notification
     {
       return new NotificationDto
       {
+        Subject = notificationModel.Subject,
         Message = notificationModel.Message,
         IsRead = notificationModel.IsRead,
         Type = notificationModel.Type,
@@ -21,6 +22,7 @@ namespace HRConnect.Api.Mappers.Notification
     {
       return new Notification
       {
+        Subject = dto.Subject,
         Message = dto.Message,
         Type = dto.Type,
         Severity = dto.Severity,
@@ -34,6 +36,7 @@ namespace HRConnect.Api.Mappers.Notification
     {
       return new Notification
       {
+        Subject = dto.Subject,
         Message = dto.Message,
         Type = dto.Type,
         Severity = dto.Severity,

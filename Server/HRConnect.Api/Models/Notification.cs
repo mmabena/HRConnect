@@ -14,13 +14,14 @@ namespace HRConnect.Api.Models
   [Flags]
   public enum DeliveryChannel
   {
-    InApp, Email
+    InApp = 0, Email
   };
 
   public class Notification
   {
     [Key]
     public int NotificationId { get; set; }
+    public string IdempotencyKey { get; set; } = null!;
     public string Message { get; set; } = string.Empty;
     public string Subject { get; set; } = string.Empty;
     public bool IsRead { get; set; }
@@ -28,7 +29,6 @@ namespace HRConnect.Api.Models
     public NotificationSeverity Severity { get; set; }
     public string EmployeeId { get; set; } = string.Empty;
     public DateTime? DueDate { get; set; }
-    public string IdempotencyKey { get; set; } = null!;
     public DateTime CreatedAt { get; set; }
     public DeliveryChannel DeliveryChannel { get; set; } //Email", "InApp" etc
   }

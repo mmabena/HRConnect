@@ -7,6 +7,7 @@ namespace HRConnect.Api.Utils.Factories
   public class NotificationFactory : INotificationFactory
   {
     private readonly INotificationService _notificationService;
+    // private readonly ISecretsProtector _protector;
     public NotificationFactory(INotificationService notificationService)
     {
       _notificationService = notificationService;

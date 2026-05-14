@@ -6,34 +6,37 @@ namespace HRConnect.Api.Repository
   using HRConnect.Api.Models;
   using Microsoft.EntityFrameworkCore;
   using System.Collections.Generic;
-  using System.Threading;
 
-  public class PensionOptionRepository(ApplicationDBContext context) : IPensionOptionRepository
+  public class PensionOptionRepository : IPensionOptionRepository
   {
-    private readonly ApplicationDBContext _context = context;
+    private readonly ApplicationDBContext _context;
+    public PensionOptionRepository(ApplicationDBContext context)
+    {
+      _context = context;
+    }
     public async Task<IEnumerable<PensionOption>> GetPensionOptionsAsync()
     {
-      return await context.PensionOptions.ToListAsync();
+      return await _context.PensionOptions.ToListAsync();
     }
 
     public async Task<PensionOption?> GetPensionOptionByIdAsync(int id)
     {
-      return await context.PensionOptions
+      return await _context.PensionOptions
           .FirstOrDefaultAsync(o => o.PensionOptionId == id);
     }
 
     public async Task<ServiceResult> AddPensionOptionAsync(PensionOption pensionOption)
     {
-      _ = await context.PensionOptions.AddAsync(pensionOption);
-      _ = await context.SaveChangesAsync();
+      _ = await _context.PensionOptions.AddAsync(pensionOption);
+      _ = await _context.SaveChangesAsync();
 
       return ServiceResult.Success("Pension option added successfully.");
     }
 
     public async Task<ServiceResult> UpdatePensionOptionAsync(PensionOption pensionOption)
     {
-      _ = context.PensionOptions.Update(pensionOption);
-      _ = await context.SaveChangesAsync();
+      _ = _context.PensionOptions.Update(pensionOption);
+      _ = await _context.SaveChangesAsync();
 
       return ServiceResult.Success("Pension option updated successfully.");
     }

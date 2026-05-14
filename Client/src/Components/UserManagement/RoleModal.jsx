@@ -125,7 +125,7 @@ const RolesModal = ({ isOpen, onClose, user, onSuccess }) => {
                 <p>CURRENT ROLE</p>
                 <div className="current-role-banner">
                     <span>
-                {selectedRole===1 ? 
+                {selectedRole===0 ? 
                 <p className="status normaluser">
                     Normal User
                 </p>
@@ -137,7 +137,7 @@ const RolesModal = ({ isOpen, onClose, user, onSuccess }) => {
                 <p className="status">
                     Change To  <ArrowRight/> 
                 </p>
-                {selectedRole===0 ?
+                {selectedRole===1 ?
                  <p className="status normaluser">
                     Normal User
                  </p>

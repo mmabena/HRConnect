@@ -4,7 +4,6 @@ namespace HRConnect.Api.Controllers
   using HRConnect.Api.Interfaces.TOTP;
   using HRConnect.Api.DTOs.TOTP;
   using Microsoft.AspNetCore.Authorization;
-  using HRConnect.Api.Interfaces;
   using Microsoft.AspNetCore.RateLimiting;
 
   [EnableRateLimiting("totp-policy")]
@@ -14,13 +13,10 @@ namespace HRConnect.Api.Controllers
   {
     private readonly ITOTPService _totpService;
     private readonly IMFAUserSecretsService _mfaService;
-    private readonly IUserService _userService;
-    public TOTPController(ITOTPService totpService, IMFAUserSecretsService mfaService
-    , IUserService userService)
+    public TOTPController(ITOTPService totpService, IMFAUserSecretsService mfaService)
     {
       _totpService = totpService;
       _mfaService = mfaService;
-      _userService = userService;
     }
     // [Authorize(Roles = "SuperUser")]
     [HttpPost("/sendOtp/{userId}")]
@@ -37,15 +33,15 @@ namespace HRConnect.Api.Controllers
       //match it agains code
       if (await _totpService.ValidateCodeAsync(dto.UserId, storedSecret, dto.Code))
       {
-        await _userService.ConfirmUserRoleUpdateAsync(dto.UserId);
-        return Ok();
+        await _totpService.ConfirmUserRoleUpdateAsync(dto.UserId);
+        return Ok($"Success. Your Role Access Will Take Affect On Next Login");
       }
       else
       {
         return BadRequest($"Failed To Validate Your OTP");
       }
-
     }
+
     // public Task<IActionResult> ResendNewPin()
     // {
     //   throw new NotImplementedException();

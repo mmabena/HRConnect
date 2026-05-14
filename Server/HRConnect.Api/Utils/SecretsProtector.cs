@@ -1,27 +1,70 @@
 namespace HRConnect.Api.Utils
 {
-  using HRConnect.Api.Interfaces;
   using Microsoft.AspNetCore.DataProtection;
+  using Microsoft.CodeAnalysis.CSharp.Syntax;
 
   /// <summary>
   /// Protects user secrets for Time-Based One Time Pin by wrapping and unwrapping 
   /// the sercret when storing in the database. Hashing would not work as hashing
   /// alogrithms are unidirectional (you can't 'unhash' a hashed password) 
   /// </summary>
-  public class SecretsProtector : ISecretsProtector
+  public static class SecretsProtector
   {
-    private readonly IDataProtector _protector;
-    public SecretsProtector(IDataProtectionProvider protector)
+    private static IDataProtector _protector = null!;
+    public static void Init(IDataProtector protector)
     {
-      _protector = protector.CreateProtector("TotpSecret.v1");
+      _protector = protector;
     }
-    public byte[] Wrap(byte[] rawData)
+
+    //Wrap a string in protection  
+    public static string Wrap<T>(T? data)
     {
-      return _protector.Protect(rawData);
+      if (_protector == null)
+        throw new InvalidOperationException($"No Data Encryptor Initialised");
+
+      //wrap based on type
+#pragma warning disable CS8603
+      return data switch
+      {
+        string s => _protector.Protect(s),
+        byte[] b => _protector.Protect(Convert.ToBase64String(b)),
+        _ => throw new InvalidDataException($"Type {typeof(T)} Not Supported") //this is just to silence the compiler warning
+        //possibly returning a null
+      };
+#pragma warning restore CS8603
     }
-    public byte[] UnWrap(byte[] encryptedData)
+    public static T UnWrap<T>(string data)
     {
-      return _protector.Unprotect(encryptedData);
+      if (_protector == null)
+        throw new InvalidOperationException($"No Data Encryptor Initialised");
+
+      string? unprotectedData = _protector.Unprotect(data);
+      return typeof(T) switch
+      {
+        Type t when t == typeof(string) => (T)(object)unprotectedData,
+        Type t when t == typeof(byte[]) => (T)(object)Convert.FromBase64String(unprotectedData),
+        _ => throw new InvalidDataException($"Type {typeof(T)} Not Supported")
+      };
+    }
+
+    public static byte[] WrapBytes(byte[] data)
+    {
+      if (_protector == null)
+        throw new InvalidOperationException("No Data Encryptor Initialised");
+
+      var base64 = Convert.ToBase64String(data);
+      var protectedString = _protector.Protect(base64);
+      return System.Text.Encoding.UTF8.GetBytes(protectedString);
+    }
+
+    public static byte[] UnWrapBytes(byte[] encryptedBytes)
+    {
+      if (_protector == null)
+        throw new InvalidOperationException("No Data Encryptor Initialised");
+
+      var cipherString = System.Text.Encoding.UTF8.GetString(encryptedBytes);
+      var unprotectedBase64 = _protector.Unprotect(cipherString);
+      return Convert.FromBase64String(unprotectedBase64);
     }
   }
 }
