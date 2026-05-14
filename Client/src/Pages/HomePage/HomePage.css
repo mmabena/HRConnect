@@ -75,22 +75,24 @@
 }
 
 .circle4 {
-  /* Ellipse 20 */
+ /* Ellipse 20 */
 
-  position: absolute;
-  width: 249.26px;
-  height: 249.26px;
-  left: 1685px;
-  top: -58px;
+position: absolute;
+width: 249.26px;
+height: 249.26px;
+left: 1675px;
+top: -38px;
+border-radius: 100%;
 
-  border: 2px dashed rgba(217, 217, 217, 0.1);
-  transform: rotate(85.5deg);
+border: 2px dashed rgba(217, 217, 217, 0.1);
+transform: rotate(85.5deg);
 
-  /* Inside auto layout */
-  flex: none;
-  order: 9;
-  flex-grow: 0;
-  z-index: 9;
+/* Inside auto layout */
+flex: none;
+order: 9;
+flex-grow: 0;
+z-index: 9;
+
 }
 
 .circle5 {
