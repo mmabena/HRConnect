@@ -222,8 +222,9 @@
   position: absolute;
   right: 25px;
 
-  font-size: 22px;
-  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .comp-enter-dashboard-btn {
@@ -290,6 +291,23 @@
   letter-spacing: 0.02em;
   color: rgba(168, 200, 212, 0.5);
 }
+
+.comp-arrow {
+  width: 30px;
+  height: 30px;
+
+  flex: none;
+  order: 1;
+  flex-grow: 0;
+
+  color: #FFFFFF;
+  stroke-width: 1.8px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 
 /*  */
 

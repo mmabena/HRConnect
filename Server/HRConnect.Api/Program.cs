@@ -10,6 +10,7 @@ using HRConnect.Api.Middleware;
 using HRConnect.Api.Models;
 using HRConnect.Api.Repositories;
 using HRConnect.Api.Repository;
+using HRConnect.Api.Hubs;
 using HRConnect.Api.Services;
 using HRConnect.Api.Utils;
 using HRConnect.Api.Utils.Jobs.Payroll;
@@ -263,7 +264,7 @@ builder.Services.AddScoped<IEmployeePensionEnrollmentRepository, EmployeePension
 builder.Services.AddTransient<IEmployeePensionEnrollmentService, EmployeePensionEnrollmentService>();
 builder.Services.AddScoped<IPensionDeductionRepository, PensionDeductionRepository>();
 builder.Services.AddTransient<IPensionDeductionService, PensionDeductionService>();
-
+builder.Services.AddSignalR();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<INotificationFactory, NotificationFactory>();
@@ -323,5 +324,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseMiddleware<ExceptionMiddleware>();
 app.MapControllers();
+app.MapHub<CompanyHub>("/companyHub");
 app.Run();
 

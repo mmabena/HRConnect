@@ -237,28 +237,6 @@ const AddCompanyModal = ({ closeModal }) => {
               <span className="ACM-error">{formErrors.companyAddress}</span>
             )}
           </div>
-          {/* ================= SETTINGS ================= */}
-          <div className="ACM-section-header">SETTINGS</div>
-
-          {/* ================= DEFAULT COMPANY SETTING ================= */}
-          <div className="ACM-setting-card">
-            <div className="ACM-setting-content">
-              <div className="ACM-setting-text">
-                <div className="ACM-setting-title">Set as Default Company</div>
-                <div className="ACM-setting-sub">
-                  Pre-selected across all modules for this admin
-                </div>
-              </div>
-
-              {/* Toggle */}
-              <div
-                className={`ACM-toggle ${formData.isDefault ? "active" : ""}`}
-                onClick={handleToggle}
-              >
-                <div className="ACM-toggle-circle"></div>
-              </div>
-            </div>
-          </div>
         </div>
         {formErrors.general && (
           <div className="emp-error-message">{formErrors.general}</div>

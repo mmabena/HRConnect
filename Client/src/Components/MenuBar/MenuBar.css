@@ -2510,7 +2510,6 @@ input:checked + .slider:before {
 /* Dropdown label */
 
 .drop-field-label {
-
   font-family: 'Anek Bangla', sans-serif;
   font-style: normal;
   font-weight: 400;
@@ -2563,7 +2562,6 @@ input:checked + .slider:before {
   position: relative;
   width: 100%;
   margin-bottom: 14px;
-
   overflow: visible;
 }
 
@@ -2571,12 +2569,9 @@ input:checked + .slider:before {
   display: flex;
   align-items: center;
   gap: 10px;
-
   padding: 10px;
   border-radius: 10px;
-
   background: rgba(255,255,255,0.04);
-
   cursor: pointer;
   transition: 0.2s ease;
 }
@@ -2588,19 +2583,14 @@ input:checked + .slider:before {
 .menu-company-avatar {
   width: 36px;
   height: 36px;
-
   border-radius: 50%;
-
   background: #355867;
   color: white;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   font-size: 13px;
   font-weight: 600;
-
   flex-shrink: 0;
 }
 
@@ -2612,7 +2602,6 @@ input:checked + .slider:before {
 .menu-company-name {
   font-size: 14px;
   color: white;
-
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2630,19 +2619,13 @@ input:checked + .slider:before {
 
 .menu-company-dropdown {
   position: absolute;
-
   top: calc(100% + 8px);
   left: 0;
-
   width: 100%;
-
   background: #243843;
   border-radius: 12px;
-
   overflow: hidden;
-
   box-shadow: 0 8px 24px rgba(0,0,0,0.25);
-
   z-index: 1000;
 }
 
@@ -2650,11 +2633,8 @@ input:checked + .slider:before {
   display: flex;
   align-items: center;
   justify-content: space-between;
-
   padding: 12px;
-
   cursor: pointer;
-
   transition: 0.2s ease;
 }
 
@@ -2669,7 +2649,10 @@ input:checked + .slider:before {
 .menu-company-option-left {
   display: flex;
   align-items: center;
-  gap: 10px;
+
+  width: 100%;
+
+  margin-left: 25px;
 }
 
 .menu-company-option-name {
@@ -2677,7 +2660,30 @@ input:checked + .slider:before {
   color: white;
 }
 
+.menu-company-option-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  
+}
+
 .menu-company-option-sub {
   font-size: 11px;
   color: rgba(255,255,255,0.6);
+  width: 100%;
+}
+
+.menu-company-option-name,
+.menu-company-option-sub {
+  line-height: 1.2;
+}
+
+.menu-company-check {
+  width: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  flex-shrink: 0;
 }

@@ -3,6 +3,8 @@ namespace HRConnect.Api.Services
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Microsoft.AspNetCore.SignalR;
+    using HRConnect.Api.Hubs;
     using HRConnect.Api.Models;
     using HRConnect.Api.Mappers;
     using Microsoft.EntityFrameworkCore;
@@ -16,18 +18,26 @@ namespace HRConnect.Api.Services
         private readonly IUserRepository _userRepo;
         private readonly ICompanyRepository _companyRepo;
         private readonly ApplicationDBContext _context;
-
-        public UserCompanyService(ApplicationDBContext context, IUserCompanyRepository userCompanyRepo, IUserRepository userRepo, ICompanyRepository companyRepo)
+        private readonly IHubContext<CompanyHub> _companyHubContext;
+        public UserCompanyService(ApplicationDBContext context, IUserCompanyRepository userCompanyRepo, IUserRepository userRepo, ICompanyRepository companyRepo, IHubContext<CompanyHub> companyHubContext)
         {
             _userCompanyRepo = userCompanyRepo;
             _userRepo = userRepo;
             _companyRepo = companyRepo;
             _context = context;
+            _companyHubContext = companyHubContext;
         }
 
         public async Task<List<UserCompanyDto>> GetMyCompaniesAsync(int userId)
         {
             var companies = await _userCompanyRepo.GetUserCompaniesByUserIdAsync(userId);
+
+            var user = await _userRepo.GetUserByIdAsync(userId);
+
+            var employee = await _context.Employees
+                .FirstOrDefaultAsync(e => e.Email == user.Email);
+            
+            var originalCompanyId = employee?.CompanyId;
 
             var result = new List<UserCompanyDto>();
 
@@ -41,6 +51,7 @@ namespace HRConnect.Api.Services
                     CompanyId = company.CompanyId,
                     CompanyName = company.Company.CompanyName,
                     IsDefault = company.IsDefault,
+                    IsOriginalCompany = company.CompanyId == originalCompanyId,
                     EmployeeCount = employeeCount
                 });
             }
@@ -81,6 +92,15 @@ namespace HRConnect.Api.Services
             selectedCompany.IsDefault = true;
 
             await _userCompanyRepo.UpdateRangeAsync(userCompanies);
+
+            await _companyHubContext.Clients.All.SendAsync(
+                "CompanySwitched",
+                new
+                {
+                    UserId = userId,
+                    CompanyId = companyId
+                }
+            );
 
         }
         private async Task ValidateAssigning(int userId, string companyId)

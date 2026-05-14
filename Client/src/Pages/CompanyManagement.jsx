@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../api/api.js";
 import { fetchMyCompanies, switchCompany } from "../api/UserCompany";
 import { jwtDecode } from "jwt-decode";
+import { ArrowRight } from 'lucide-react';
 
 const getCurrentUser = async () => {
   try {
@@ -36,6 +37,7 @@ const CompanyManagement = () => {
               name: uc.companyName,
               employeeCount: uc.employeeCount,
               isDefault: uc.isDefault,
+              isOriginalCompany: uc.isOriginalCompany,
             }))
           : [];
 
@@ -144,11 +146,13 @@ const CompanyManagement = () => {
                 </div>
               </div>
 
-              {company.isDefault && (
+              {company.isOriginalCompany && (
                 <div className="comp-company-default">Default</div>
               )}
 
-              <div className="comp-company-arrow">→</div>
+              <div className="comp-company-arrow">
+                <ArrowRight size={30} className="comp-arrow"/>
+              </div>
             </div>
           ))}
         </div>
@@ -159,7 +163,9 @@ const CompanyManagement = () => {
           onClick={handleEnterDashboard}
         >
           <span className="comp-enter-text">Enter Dashboard</span>
-          <span className="comp-enter-icon">→</span>
+          <span className="comp-enter-icon">
+            <ArrowRight size={30} className="comp-arrow"/>
+          </span>
         </button>
       </div>
 

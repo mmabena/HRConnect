@@ -5,6 +5,7 @@ import { jwtDecode } from "jwt-decode";
 import api from "../../../src/api/api.js";
 import axios from "axios";
 import { resolveRole } from "../../utils/roleUtils";
+import connection from "../../api/signalrService.js";
 import { fetchMyCompanies, switchCompany } from "../../api/UserCompany.js";
 
 const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
@@ -83,8 +84,6 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
 
       setActiveCompany(company);
       setCompanySwitcherOpen(false);
-
-      window.location.reload(); // Implement Signal R
     } catch (error) {
       console.error("Failed to switch company:", error);
     }
@@ -189,6 +188,29 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
 
     return age;
   };
+
+  useEffect(() => {
+    const startConnection = async () => {
+      try {
+        await connection.start();
+        console.log("SignalR Connected");
+      } catch (err) {
+        console.error("SignalR Connection Error:", err);
+      }
+    };
+
+    startConnection();
+
+    connection.on("CompanySwitched", (data) => {
+      console.log("Company switched:", data);
+
+      window.location.reload();
+    });
+
+    return () => {
+      connection.off("CompanySwitched");
+    };
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = () => {
@@ -325,11 +347,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                   onClick={() => handleCompanySwitch(company)}
                 >
                   <div className="menu-company-option-left">
-                    <div className="menu-company-avatar">
-                      {company.name.substring(0, 2).toUpperCase()}
-                    </div>
-
-                    <div>
+                    <div className="menu-company-option-text">
                       <div className="menu-company-option-name">
                         {company.name}
                       </div>
@@ -340,7 +358,9 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                     </div>
                   </div>
 
-                  {activeCompany?.id === company.id && <span>✓</span>}
+                  <div className="menu-company-check">
+                    {activeCompany?.id === company.id ? "✓" : ""}
+                  </div>
                 </div>
               ))}
             </div>
