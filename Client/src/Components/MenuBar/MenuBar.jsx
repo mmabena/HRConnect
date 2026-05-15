@@ -2,205 +2,198 @@ import "./MenuBar.css";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-import axios from "axios";
-import { resolveRole } from "../../utils/roleUtils";
-import api from "../../api/api";
+import api from "../../../src/api/api.js";
+import { fetchNotifications } from "../../Pages/NotificationPage/notificationsApi.js";
 
 const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
-  const [reportOpen, setReportOpen] = useState(false);
-  const [companyOpen, setCompanyOpen] = useState(false);
-  const [adminOpen, setAdminOpen] = useState(false);
+  const [showOptions, setShowOptions] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(null);
+  const [activeMenu, setActiveMenu] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [bellCount, setBellCount] = useState(0);
   const [deductionsOpen, setDeductionsOpen] = useState(false);
-  const [payrollOpen, setPayrollOpen] = useState(false);
-  const [leaveOpen, setLeaveOpen] = useState(false);
-  const [payOpen, setPayOpen] = useState(false);
-  const [payInfoOpen, setPayInfoOpen] = useState(false);
-  const [manualReportToggle, setManualReportToggle] = useState(false);
-  const [manualAdminToggle, setManualAdminToggle] = useState(false);
-  const [showMenu, setShowMenu] = useState(false);
-  
-  //displaying user initials
-  const displayName =
-  currentUser?.username ||
-  currentUser?.email ||
-  "User";
+  const [openSubmenu, setOpenSubmenu] = useState(null);
+  // FIX: Access the role directly from the currentUser object
+  const role = currentUser?.role?.toLowerCase();
+
+  const displayName = currentUser?.username || currentUser?.email || "User";
   const [canProjectPension, setCanProjectPension] = useState(false);
 
+  //displaying user initials
   const initials = displayName
     .split(" ")
-    .map(name => name.charAt(0))
+    .map((name) => name.charAt(0))
     .join("")
     .substring(0, 2)
     .toUpperCase();
-  
+
   const navigate = useNavigate();
   const location = useLocation();
-  
-  const  resolvedRole=resolveRole(currentUser);
-  const role=resolveRole.key??currentUser?.role?.toLowerCase();
+
+  const isActive = (paths) => {
+    return paths.some((path) => location.pathname.startsWith(path));
+  };
+
+  const handleHeadingClick = (index, toggleFunction) => {
+    setActiveIndex((prev) => (prev === index ? null : index));
+    toggleFunction();
+  };
 
   const permissions = {
-    isAdmin:resolvedRole.isSuperUser || role==="admin",
-    isNormalUser:resolvedRole.isNormalUser,
+    isAdmin: ["admin", "superuser"].includes(role),
+    isNormalUser: role === "normaluser",
   };
 
   const isEmployeeManagementPage =
+    location.pathname.startsWith("/employeeList") ||
     location.pathname.startsWith("/addEmployee") ||
     location.pathname.startsWith("/employeeList") ||
     location.pathname.startsWith("/editEmployee");
 
   const isUserManagementPage = location.pathname.startsWith("/userManagement");
 
-  const baseUrl =api.defaults.baseURL;// process.env.REACT_APP_API_BASE_URL;
+  const baseUrl = process.env.REACT_APP_API_BASE_URL;
+
+  // This loads all notifications from the database
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadNotifications = async () => {
+      try {
+        if (!role) return;
+
+        const data = await fetchNotifications(role);
+
+        if (!cancelled) {
+          setNotifications(data);
+          setBellCount(data.filter((n) => !n.read).length);
+        }
+      } catch (err) {
+        console.error("Failed to load notifications:", err);
+        if (!cancelled) setBellCount(0);
+      }
+    };
+
+    loadNotifications();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [role]);
 
   useEffect(() => {
     console.log("MenuBar user role:", role);
-    console.log(`BASE_URL ${baseUrl}`);
-  }, [baseUrl, role]);
+  }, [currentUser, role]);
 
   useEffect(() => {
-    console.log(`LOCATION`);
-    console.log(location)
     if (!role) return;
-
-    if (isEmployeeManagementPage && !manualReportToggle) {
-      setReportOpen(true);
-    } else if (!manualReportToggle) {
-      setReportOpen(false);
-    }
-
-    if (isUserManagementPage && !manualAdminToggle) {
-      setAdminOpen(true);
-    } else if (!manualAdminToggle) {
-      setAdminOpen(false);
-    }
-  }, [
-    role,
-    location.pathname,
-    manualReportToggle,
-    manualAdminToggle,
-    isEmployeeManagementPage,
-    isUserManagementPage,
-  ]);
+    if (isEmployeeManagementPage) setActiveMenu("report");
+    else if (isUserManagementPage) setActiveMenu("admin");
+  }, [role, location.pathname]);
 
   useEffect(() => {
-    if(localStorage.getItem('currentUser') !== null && localStorage.getItem('currentUser') !== undefined) {
-      const token = localStorage.getItem('token');
-      const email = JSON.parse(localStorage.getItem('currentUser')).email;
+    if (
+      localStorage.getItem("currentUser") !== null &&
+      localStorage.getItem("currentUser") !== undefined
+    ) {
+      const token = localStorage.getItem("token");
+      const email = JSON.parse(localStorage.getItem("currentUser")).email;
       const decodedTokenEmail = jwtDecode(token).sub;
-      if (decodedTokenEmail === email) {
+      if (decodedTokenEmail == email) {
         try {
-          axios.get(`${baseUrl}/employee/email/${email}`, {
+          api
+            .get(`${baseUrl}/employee/email/${email}`, {
               headers: {
-                  "Authorization": `Bearer ${token}`
-              }
-          })
-          .then(response => {
+                Authorization: `Bearer ${token}`,
+              },
+            })
+            .then((response) => {
               if (response.status === 200) {
-                  const employementStatus = response.data.employmentStatus;
-                  const employeeAge = response.data.dateOfBirth;
-                  if (employementStatus === 0 && (calculateAge(employeeAge) < 65)) {
-                    setCanProjectPension(true);
-                  }
+                const employementStatus = response.data.employmentStatus;
+                const employeeAge = response.data.dateOfBirth;
+
+                if (
+                  employementStatus === "Permanent" &&
+                  calculateAge(employeeAge) < 65
+                ) {
+                  setCanProjectPension(true);
+                  console.log("Employee date of birth:", employeeAge);
+                  console.log("Employment status:", employementStatus);
+                }
               } else {
-                  console.error("Unexpeted status:", response.status);
+                console.error("Unexpeted status:", response.status);
               }
-          })
-          .catch(error => {
+            })
+            .then((response) => {
+              if (response.status === 200) {
+                const employementStatus = response.data.employmentStatus;
+                const employeeAge = response.data.dateOfBirth;
+                if (employementStatus === 0 && calculateAge(employeeAge) < 65) {
+                  setCanProjectPension(true);
+                }
+              } else {
+                console.error("Unexpeted status:", response.status);
+              }
+            })
+            .catch((error) => {
               console.error("Error:", error);
-          });
+            });
         } catch (error) {
-            console.error("Failed to fetch your employee details:", error)
+          console.error("Failed to fetch your employee details:", error);
         }
       } else {
         console.error("User data may have changed without authorization");
       }
     }
-  }, [baseUrl])
+  }, []);
 
   const calculateAge = (dateOfBirth) => {
-        let today = new Date();
-        let birthDate = new Date(dateOfBirth);
-        let age = today.getFullYear() - birthDate.getFullYear();
-        
-        if (today.getMonth() < birthDate.getMonth()) {
-            age--;
-        } else if ((today.getMonth() === birthDate.getMonth()) && (today.getDay() < birthDate.getDay())){
-            age--;
-        }
+    let today = new Date();
+    let birthDate = new Date(dateOfBirth);
+    let age = today.getFullYear() - birthDate.getFullYear();
 
-        return age;
+    if (today.getMonth() < birthDate.getMonth()) {
+      age--;
+    } else if (
+      today.getMonth() === birthDate.getMonth() &&
+      today.getDay() < birthDate.getDay()
+    ) {
+      age--;
     }
+
+    return age;
+  };
 
   useEffect(() => {
     const handleClickOutside = () => {
-      setShowMenu(false);
+      setShowOptions(false);
     };
 
-    if (showMenu) {
+    if (showOptions) {
       document.removeEventListener("click", handleClickOutside);
     }
-     
+
     return () => {
       document.removeEventListener("click", handleClickOutside);
     };
-  }, [showMenu]);
-
-  const toggleMenu = () => {
-    setShowMenu(prev => !prev);
-  };
-
-  const toggleReport = () => {
-    setManualReportToggle(true);
-    setReportOpen((prev) => !prev);
-    onAccessDenied && onAccessDenied("");
-  };
-
-  const toggleAdmin = () => {
-    setManualAdminToggle(true);
-    setAdminOpen((prev) => !prev);
-    onAccessDenied && onAccessDenied("");
-  };
-
-  const toggleCompany = () => {
-    setCompanyOpen((prev) => !prev);
-    onAccessDenied && onAccessDenied("");
-  };
-
-  const toggleDeductions = (e) => {
-    e.stopPropagation(); 
-    setDeductionsOpen((prev) => !prev);
-  };
-
-  const togglePay = () => {
-    setPayOpen((prev) => !prev);
-    onAccessDenied && onAccessDenied("");
-  };
-
-  const togglePayroll = () => {
-    setPayrollOpen((prev) => !prev);
-    onAccessDenied && onAccessDenied("");
-  }
-
-  const toggleLeave = () => {
-    setLeaveOpen((prev) => !prev);
-    onAccessDenied && onAccessDenied("");
-  }
-
-  const togglePayrollInfo = () => {
-    setPayInfoOpen((prev) => !prev);
-    onAccessDenied && onAccessDenied("");
-  }
+  }, [showOptions]);
 
   const handleSubmenuClick = (path) => {
     navigate(path);
     onAccessDenied && onAccessDenied("");
   };
 
+  const toggleOptions = (e) => {
+    e.stopPropagation();
+    setShowOptions((prev) => !prev);
+  };
+
+  function toggleMenu(menuName) {
+    setActiveMenu((prev) => (prev === menuName ? null : menuName));
+  }
+
   const menuPaths = {
-    0: [
-      "/personal",
-    ],
+    0: ["/personal"],
     1: [
       "/employeeList",
       "/terminateemployee",
@@ -244,27 +237,36 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                 alt="Personal icon"
                 className="menu-icon"
               />
-              <span className="menu-heading">Personal Information</span>
+              <span
+                className="menu-heading"
+                onClick={() => handleSubmenuClick("/personal")}
+              >
+                Personal Information
+              </span>
             </div>
           </li>
-
           {/* Employee Management */}
           {permissions.isAdmin && (
             <li>
-              <div className="menu-item-wrapper" onClick={toggleReport}>
+              <div
+                className="menu-item-wrapper"
+                onClick={() => toggleMenu("report")}
+              >
                 <img
                   src="/images/cases.png"
                   alt="Employee Management"
                   className="menu-icon"
-                                                 />
+                />
                 <span className="menu-heading">
                   Employee Management
-                  <span className="menu-dropdown">{reportOpen ? "▲" : "▼"}</span>
+                  <span className="menu-dropdown">
+                    {activeMenu === "report" ? "▲" : "▼"}
+                  </span>
                 </span>
               </div>
-              {reportOpen && (
+              {activeMenu === "report" && (
                 <ul className="submenu show">
-                   <li>
+                  <li>
                     <span
                       className="menu-subitem"
                       onClick={() => handleSubmenuClick("/employeeList")}
@@ -304,7 +306,10 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
           {/* ✅ Company Management */}
           {permissions.isAdmin && (
             <li>
-              <div className="menu-item-wrapper" onClick={toggleCompany}>
+              <div
+                className="menu-item-wrapper"
+                onClick={() => toggleMenu("company")}
+              >
                 <img
                   src="/images/building-2.png"
                   alt="Company Management"
@@ -312,10 +317,12 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                 />
                 <span className="menu-heading">
                   Company Management
-                  <span className="menu-dropdown">{companyOpen ? "▲" : "▼"}</span>
+                  <span className="menu-dropdown">
+                    {activeMenu === "company" ? "▲" : "▼"}
+                  </span>
                 </span>
               </div>
-              {companyOpen && (
+              {activeMenu === "company" && (
                 <ul className="submenu show">
                   <li>
                     <span
@@ -325,7 +332,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                       Tax Table Management
                     </span>
                   </li>
-              
+
                   <li>
                     <span
                       className="menu-subitem"
@@ -368,18 +375,21 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
             <li>
               <div
                 className="menu-item-wrapper"
-                onClick={togglePay} // <-- Add this onClick handler
+                onClick={() => toggleMenu("pay")}
               >
                 <img
                   src="/images/hand-coins.png"
                   alt="Payroll icon"
                   className="menu-icon"
                 />
-                <span className="menu-heading">Payroll Management
-                  <span className="menu-dropdown">{payOpen ? "▲" : "▼"}</span>
+                <span className="menu-heading">
+                  Payroll Management
+                  <span className="menu-dropdown">
+                    {activeMenu === "pay" ? "▲" : "▼"}
+                  </span>
                 </span>
               </div>
-              {payOpen && (
+              {activeMenu === "pay" && (
                 <ul className="submenu show">
                   <li>
                     <span
@@ -389,27 +399,42 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                       Earnings
                     </span>
                   </li>
-              
+
                   <li>
-                    <div className="menu-item-wrapper" onClick={toggleDeductions}>
+                    <div
+                      className="menu-item-wrapper"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setOpenSubmenu((prev) =>
+                          prev === "deductions" ? null : "deductions",
+                        );
+                      }}
+                    >
                       <span>Deductions</span>
-                      <span className="menu-dropdown">{deductionsOpen ? "▲" : "▼"}</span>
+                      <span className="menu-dropdown">
+                        {openSubmenu === "deductions" ? "▲" : "▼"}
+                      </span>
                     </div>
-                    {deductionsOpen && (
+                    {openSubmenu === "deductions" && (
                       <ul className="submenu show">
                         <li>
-                          <span className="menu-subitem" onClick={() => handleSubmenuClick("/pension-funds")}>
+                          <span
+                            className="menu-subitem"
+                            onClick={() => handleSubmenuClick("/pension-funds")}
+                          >
                             Pension Funds
                           </span>
                         </li>
-                        {/* <li>
+                        <li>
                           <span
                             className="menu-subitem"
-                            onClick={() => handleSubmenuClick("/assign-pension")}
+                            onClick={() =>
+                              handleSubmenuClick("/assign-pension")
+                            }
                           >
                             Assign Pension
                           </span>
-                        </li> */}
+                        </li>
                         <li>
                           <span
                             className="menu-subitem"
@@ -421,14 +446,14 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                       </ul>
                     )}
                   </li>
-                                    
                   <li>
                     <span
                       className="menu-subitem"
-                      onClick={() => handleSubmenuClick("/company-contributions")}
+                      onClick={() =>
+                        handleSubmenuClick("/company-contributions")
+                      }
                     >
                       Company Contributions
-                    
                     </span>
                   </li>
                   <li>
@@ -454,13 +479,20 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                     >
                       Stock
                     </span>
-                  
+                  </li>
+                  <li>
+                    <span
+                      className="menu-subitem"
+                      onClick={() => navigate("/salarybenchmark")}
+                    >
+                      Salary Benchmark
+                    </span>
                   </li>
                 </ul>
               )}
             </li>
           )}
-          
+
           {/* Document Management */}
           {permissions.isAdmin && (
             <li>
@@ -478,7 +510,10 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
           {/* Admin tools (SuperUser only) */}
           {permissions.isAdmin && (
             <li>
-              <div className="menu-item-wrapper" onClick={toggleAdmin}>
+              <div
+                className="menu-item-wrapper"
+                onClick={() => toggleMenu("admin")}
+              >
                 <img
                   src="/images/user-star.png"
                   alt="Admin Tools icon"
@@ -486,10 +521,12 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                 />
                 <span className="menu-heading">
                   Admin Management tools
-                  <span className="menu-dropdown">{adminOpen ? "▲" : "▼"}</span>
+                  <span className="menu-dropdown">
+                    {activeMenu === "admin" ? "▲" : "▼"}
+                  </span>
                 </span>
               </div>
-              {adminOpen && (
+              {activeMenu === "admin" && (
                 <ul className="submenu show">
                   <li>
                     <span
@@ -507,7 +544,10 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
           {/* NormalUser tools (NormalUser only) */}
           {permissions.isNormalUser && (
             <li>
-              <div className="menu-item-wrapper" onClick={togglePayrollInfo}>
+              <div
+                className="menu-item-wrapper"
+                onClick={() => toggleMenu("payrollInfo")}
+              >
                 <img
                   src="/images/hand-coins.png"
                   alt="Leave"
@@ -515,15 +555,17 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                 />
                 <span className="menu-heading">
                   Payroll Information
-                  <span className="menu-dropdown">{payInfoOpen ? "▲" : "▼"}</span>
+                  <span className="menu-dropdown">
+                    {activeMenu === "payrollInfo" ? "▲" : "▼"}
+                  </span>
                 </span>
               </div>
-              {payInfoOpen && (
+              {activeMenu === "payrollInfo" && (
                 <ul className="submenu show">
                   <li>
                     <span
                       className="menu-subitem"
-                      onClick={() => handleSubmenuClick("/payslip")}
+                      onClick={() => handleSubmenuClick("/payslips")}
                     >
                       Payslips
                     </span>
@@ -536,7 +578,10 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
           {/* NormalUser tools (NormalUser only) */}
           {permissions.isNormalUser && (
             <li>
-              <div className="menu-item-wrapper" onClick={toggleLeave}>
+              <div
+                className="menu-item-wrapper"
+                onClick={() => toggleMenu("leave")}
+              >
                 <img
                   src="/images/file-user.png"
                   alt="Leave"
@@ -544,10 +589,12 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                 />
                 <span className="menu-heading">
                   Leave
-                  <span className="menu-dropdown">{leaveOpen ? "▲" : "▼"}</span>
+                  <span className="menu-dropdown">
+                    {activeMenu === "leave" ? "▲" : "▼"}
+                  </span>
                 </span>
               </div>
-              {leaveOpen && (
+              {activeMenu === "leave" && (
                 <ul className="submenu show">
                   <li>
                     <span
@@ -581,7 +628,10 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
           {/* NormalUser tools (NormalUser only) */}
           {permissions.isNormalUser && (
             <li>
-              <div className="menu-item-wrapper" onClick={togglePayroll}>
+              <div
+                className="menu-item-wrapper"
+                onClick={() => toggleMenu("payroll")}
+              >
                 <img
                   src="/images/calculator.png"
                   alt="Payroll Tools"
@@ -589,73 +639,90 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                 />
                 <span className="menu-heading">
                   Payroll Tools
-                  <span className="menu-dropdown">{payrollOpen ? "▲" : "▼"}</span>
+                  <span className="menu-dropdown">
+                    {activeMenu === "payroll" ? "▲" : "▼"}
+                  </span>
                 </span>
               </div>
-              {canProjectPension && payrollOpen && (
+              {canProjectPension && activeMenu === "payroll" && (
                 <ul className="submenu show">
                   <li>
                     <span
                       className="menu-subitem"
-                      onClick={() => handleSubmenuClick("/projection-calculator")}
+                      onClick={() =>
+                        handleSubmenuClick("/projection-calculator")
+                      }
                     >
                       Projection Calculator
                     </span>
                   </li>
                 </ul>
               )}
-            </li> 
+            </li>
           )}
         </ul>
-                 
       </div>
-      
       <div className="menu-footer">
-        <img
-          src="/images/setitngs_icon.png"
-          alt="Settings icon"
-          className="menu-icon"
-        />
         {/* Container for user details */}
         <div className="user-details-container">
-          <div className="menu-initials-circle" onClick={(e) => {
-            e.stopPropagation();
-            toggleMenu();
-          }}>
-            
+          <div className="menu-initials-circle" onClick={toggleOptions}>
             {initials}
-            {showMenu && (
-                <div className="user-dropdown">
-                  <button
-                    className="dropdown-item"
-                    onClick={() => {
-                      setShowMenu(false);
-                      navigate("/changePassword");
-                    }}
-                  >
-                    Change Password
-                  </button>
+            {showOptions && (
+              <div className="user-dropdown">
+                <button
+                  className="dropdown-item"
+                  onClick={() => {
+                    setShowOptions(false);
+                    navigate("/changePassword");
+                  }}
+                >
+                  Change Password
+                </button>
 
-                  <button
-                    className="dropdown-item logout"
-                    onClick={() => {
-                      setShowMenu(false);
-                      onLogout();
-                    }}
-                  >
-                    Logout
-                  </button>
-                </div>
-              )}
+                <button
+                  className="dropdown-item logout"
+                  onClick={() => {
+                    setShowOptions(false);
+                    onLogout();
+                  }}
+                >
+                  Logout
+                </button>
+              </div>
+            )}
           </div>
           <div className="user-text-details">
-            <div className="user-full-name">
-              {displayName}
+            <div className="user-full-name">{displayName}</div>
+            <div className="user-job-title">{currentUser?.jobTitle}</div>
+          </div>
+
+          <div className="menu-icon-wrapper">
+            <div className="menu-icons-wrapper">
+              <img
+                src="/images/bell.svg"
+                alt="Bell icon"
+                className="menu-icon"
+                onClick={() => {
+                  navigate("/notifications", { state: { role: role } });
+                }}
+              />
+
+              {/* Dynamic unread badge */}
+              {bellCount > 0 && (
+                <span
+                  className="notification-badge"
+                  data-count={bellCount > 99 ? "99+" : bellCount}
+                >
+                  {bellCount > 99 ? "99+" : bellCount}
+                </span>
+              )}
             </div>
-            <div className="user-job-title">
-    {/*Create positions endpoint*/} 
-              {currentUser?.role}
-            </div>
+
+            <img
+              src="/images/setitngs_icon.png"
+              alt="Settings icon"
+              className="menu-icon"
+            />
           </div>
         </div>
       </div>
