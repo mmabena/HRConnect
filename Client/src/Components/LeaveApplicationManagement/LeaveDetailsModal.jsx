@@ -166,11 +166,15 @@ const LeaveDetailsModal = ({
                   {selectedApplication.status === "Pending" ? (
                     <p className="timeline-date">Pending Review</p>
                   ) : (
-                    selectedApplication.decisionDate && (
-                      <p className="timeline-date">
-                        {formatDate(selectedApplication.decisionDate)}
-                      </p>
-                    )
+                    <p className="timeline-date">
+                      {formatDate(
+                        selectedApplication.decisionDate ||
+                          selectedApplication.rejectedDate ||
+                          selectedApplication.approvedDate ||
+                          selectedApplication.updatedAt ||
+                          selectedApplication.modifiedDate,
+                      )}
+                    </p>
                   )}
                 </div>
               </div>
