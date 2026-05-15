@@ -157,6 +157,24 @@
   order: 1;
   flex-grow: 0;
 }
+.filter-btn,
+.apply-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.action-icon {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.apply-btn .action-icon {
+  margin: 0 -1px;
+}
 .leave-card {
   width: 1461px;
   height: 672px;
@@ -250,7 +268,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 2px;
+  gap: 0;
   min-width: 93px;  
   min-height: 30px;
   border-radius: 20px;
@@ -264,6 +282,10 @@
   background: #FEEFC0;
   color: #9A6F00;
   width: 100px;
+}
+.status-dot-icon {
+  flex-shrink: 0;
+  margin-right: -4px;
 }
 
 .status.rejected {
@@ -334,4 +356,117 @@
   background: #355867;
   color: #FFFFFF;
   border: 1px solid #4F6E78;
+}
+.view-link {
+  position: relative;
+
+  width: 36px;
+  height: 30px;
+
+  font-family: 'Anek Bangla';
+  font-style: normal;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 30px;
+  letter-spacing: 0.02em;
+
+  color: #4F6E78;
+
+  cursor: pointer;
+}
+.filter-container {
+  position: relative;
+}
+.filter-menu {
+  position: absolute;
+
+  top: -5px;
+  right: 110%;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  width: 420px;
+
+  padding: 6px 10px;
+
+  background: #FFFFFF;
+  border: 1px solid #E4E7EC;
+  border-radius: 8px;
+
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+
+  z-index: 100;
+
+  animation: filterPopup 0.22s ease-out;
+  transform-origin: right center;
+}
+
+.filter-option {
+  flex: 1;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 8px 12px;
+
+  border-radius: 6px;
+
+  cursor: pointer;
+
+  font-family: 'Anek Bangla';
+  font-size: 14px;
+
+  white-space: nowrap;
+
+  transition: background-color 0.2s ease,
+              color 0.2s ease;
+}
+
+.filter-option:nth-child(1):hover {
+  background-color: #F2F4F7;
+}
+
+.filter-option:nth-child(2):hover {
+  background-color: #FEEFC0;;
+  color: #9A6F00;
+}
+
+.filter-option:nth-child(3):hover {
+  background-color: rgba(99, 133, 73, 0.31);
+  color: #638549;
+}
+
+.filter-option:nth-child(4):hover {
+  background-color: #FADEDE;
+  color: #A32D2D;
+}
+.filter-menu {
+  animation: filterPopup 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: right center;
+}
+
+@keyframes filterPopup {
+  0% {
+    opacity: 0;
+    transform: translateX(12px) translateY(4px) scale(0.92);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0) translateY(0) scale(1);
+  }
+}
+
+.filter-option {
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.18s ease;
+}
+
+.filter-option:hover {
+  transform: translateY(-1px);
 }

@@ -2,22 +2,27 @@ import { useState } from "react";
 import "./annual-editor.css";
 import { updateLeaveType } from "../../api/leaveTypeApi";
 
-const AnnualLeaveEditor = ({ leaveType, onSuccess, onClose, isEditing, setIsEditing }) => {
-
+const AnnualLeaveEditor = ({
+  leaveType,
+  onSuccess,
+  onClose,
+  isEditing,
+  setIsEditing,
+}) => {
   const [activeTab, setActiveTab] = useState("groupA");
   const [editedRules, setEditedRules] = useState({});
   const [customRules, setCustomRules] = useState([]);
   const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState(""); 
+  const [messageType, setMessageType] = useState("");
   const [errorFields, setErrorFields] = useState({});
 
   const buildGroupedRules = () => {
-  return {
-    groupA: leaveType.rules.filter(r => r.groupKey === "GROUP_A"),
-    senior: leaveType.rules.filter(r => r.groupKey === "SENIOR"),
-    executive: leaveType.rules.filter(r => r.groupKey === "EXECUTIVE")
+    return {
+      groupA: leaveType.rules.filter((r) => r.groupKey === "GROUP_A"),
+      senior: leaveType.rules.filter((r) => r.groupKey === "SENIOR"),
+      executive: leaveType.rules.filter((r) => r.groupKey === "EXECUTIVE"),
+    };
   };
-};
 
   const grouped = buildGroupedRules();
 
@@ -25,167 +30,169 @@ const AnnualLeaveEditor = ({ leaveType, onSuccess, onClose, isEditing, setIsEdit
     activeTab === "groupA"
       ? grouped.groupA
       : activeTab === "senior"
-      ? grouped.senior
-      : grouped.executive;
+        ? grouped.senior
+        : grouped.executive;
 
   const currentRules = [...baseRules, ...customRules];
 
   const handleFieldChange = (ruleKey, field, value) => {
-  setEditedRules(prev => ({
-    ...prev,
-    [ruleKey]: {
-      ...prev[ruleKey],
-      [field]: value
-    }
-  }));
-  setErrorFields(prev => {
-  const copy = { ...prev };
-  delete copy[ruleKey];
-  return copy;
-});
-};
- const handleAddRange = () => {
+    setEditedRules((prev) => ({
+      ...prev,
+      [ruleKey]: {
+        ...prev[ruleKey],
+        [field]: value,
+      },
+    }));
+    setErrorFields((prev) => {
+      const copy = { ...prev };
+      delete copy[ruleKey];
+      return copy;
+    });
+  };
+  const handleAddRange = () => {
+    const groupKey =
+      activeTab === "groupA"
+        ? "GROUP_A"
+        : activeTab === "senior"
+          ? "SENIOR"
+          : "EXECUTIVE";
 
-  const groupKey =
-    activeTab === "groupA"
-      ? "GROUP_A"
-      : activeTab === "senior"
-      ? "SENIOR"
-      : "EXECUTIVE";
+    setCustomRules((prev) => [
+      ...prev,
+      {
+        id: "new-" + Date.now(),
+        groupKey: groupKey,
+        minYearsService: 0,
+        maxYearsService: null,
+        daysAllocated: 0,
+      },
+    ]);
+  };
+  const hasChanges =
+    Object.keys(editedRules).length > 0 || customRules.length > 0;
 
-  setCustomRules(prev => [
-    ...prev,
-    {
-      id: "new-" + Date.now(),
-      groupKey: groupKey,             
-      minYearsService: 0,
-      maxYearsService: null,
-      daysAllocated: 0
-    }
-  ]);
-};
-const hasChanges =
-  Object.keys(editedRules).length > 0 || customRules.length > 0;
-
-const showMessage = (text, type = "error") => {
-  setMessage(text);
-  setMessageType(type);
-};
+  const showMessage = (text, type = "error") => {
+    setMessage(text);
+    setMessageType(type);
+  };
 
   const handleRemoveRange = (id) => {
-    setCustomRules(prev => prev.filter(r => r.id !== id));
+    setCustomRules((prev) => prev.filter((r) => r.id !== id));
   };
-const mapBackendError = (message) => {
-  if (!message) return "Something went wrong";
+  const mapBackendError = (message) => {
+    if (!message) return "Something went wrong";
 
-  const msg = message.toLowerCase();
+    const msg = message.toLowerCase();
 
-  if (msg.includes("daysallocated")) {
-    return "Leave days must be greater than 0";
-  }
+    if (msg.includes("daysallocated")) {
+      return "Leave days must be greater than 0";
+    }
 
-  if (msg.includes("maxyearsservice") && msg.includes("less")) {
-    return "Max years cannot be less than minimum years";
-  }
+    if (msg.includes("maxyearsservice") && msg.includes("less")) {
+      return "Max years cannot be less than minimum years";
+    }
 
-  if (msg.includes("gap detected")) {
-    return "Employement year ranges must have no gaps between them. (Min and Max years)";
-  }
+    if (msg.includes("gap detected")) {
+      return "Employement year ranges must have no gaps between them. (Min and Max years)";
+    }
 
-  if (msg.includes("duplicate")) {
-    return "Duplicate year service ranges are not allowed";
-  }
+    if (msg.includes("duplicate")) {
+      return "Duplicate year service ranges are not allowed";
+    }
 
-  return "Unable to save changes. Please check your inputs.";
-};
- const handleSave = async () => {
-  try {
-
-  const allRules = [...leaveType.rules, ...customRules];
-
-const finalRules = allRules.map((r, index) => {
- const ruleKey = r.id ?? `${r.groupKey}-${index}`;
-
-  const edited = editedRules[ruleKey];
-
-  const min = edited?.minYearsService !== undefined
-  ? Number(edited.minYearsService)
-  : r.minYearsService;
-
-  const max = edited?.maxYearsService !== undefined
-  ? (edited.maxYearsService === "" ? null : Number(edited.maxYearsService))
-  : r.maxYearsService;
-
-  const days = edited?.daysAllocated !== undefined
-  ? Number(edited.daysAllocated)
-  : r.daysAllocated;
-
-  return {
-    groupKey: r.groupKey,
-    minYearsService: Number(min.toFixed(2)),
-    maxYearsService: max !== null ? Number(max.toFixed(2)) : null,
-    daysAllocated: Number(days.toFixed(2))
+    return "Unable to save changes. Please check your inputs.";
   };
-});
+  const handleSave = async () => {
+    try {
+      const allRules = [...leaveType.rules, ...customRules];
 
-    const grouped = {};
+      const finalRules = allRules.map((r, index) => {
+        const ruleKey = r.id ?? `${r.groupKey}-${index}`;
 
-    finalRules.forEach(r => {
-      if (!grouped[r.groupKey]) grouped[r.groupKey] = [];
-      grouped[r.groupKey].push(r);
-    });
+        const edited = editedRules[ruleKey];
 
-    Object.keys(grouped).forEach(key => {
-      grouped[key] = grouped[key]
-        .sort((a, b) => a.minYearsService - b.minYearsService)
-        .filter((r, i, arr) =>
-          i === arr.findIndex(x =>
-            x.minYearsService === r.minYearsService &&
-            x.maxYearsService === r.maxYearsService
-          )
-        );
-    });
+        const min =
+          edited?.minYearsService !== undefined
+            ? Number(edited.minYearsService)
+            : r.minYearsService;
 
-    const cleanedRules = Object.values(grouped).flat();
+        const max =
+          edited?.maxYearsService !== undefined
+            ? edited.maxYearsService === ""
+              ? null
+              : Number(edited.maxYearsService)
+            : r.maxYearsService;
 
-    console.log("FINAL PAYLOAD:", JSON.stringify(cleanedRules, null, 2));
+        const days =
+          edited?.daysAllocated !== undefined
+            ? Number(edited.daysAllocated)
+            : r.daysAllocated;
 
-    await updateLeaveType(leaveType.id, {
-      name: leaveType.name,
-      description: leaveType.description,
-      femaleOnly: leaveType.femaleOnly,
-      isActive: leaveType.isActive,
-      rules: cleanedRules
-    });
+        return {
+          groupKey: r.groupKey,
+          minYearsService: Number(min.toFixed(2)),
+          maxYearsService: max !== null ? Number(max.toFixed(2)) : null,
+          daysAllocated: Number(days.toFixed(2)),
+        };
+      });
 
-    showMessage("Leave type updated successfully", "success");
+      const grouped = {};
 
-    setTimeout(() => {
-      onSuccess();
-      onClose();
-    }, 800); 
+      finalRules.forEach((r) => {
+        if (!grouped[r.groupKey]) grouped[r.groupKey] = [];
+        grouped[r.groupKey].push(r);
+      });
 
-  } catch (err) {
-  console.error(err);
+      Object.keys(grouped).forEach((key) => {
+        grouped[key] = grouped[key]
+          .sort((a, b) => a.minYearsService - b.minYearsService)
+          .filter(
+            (r, i, arr) =>
+              i ===
+              arr.findIndex(
+                (x) =>
+                  x.minYearsService === r.minYearsService &&
+                  x.maxYearsService === r.maxYearsService,
+              ),
+          );
+      });
 
-  let message = err.response?.data;
+      const cleanedRules = Object.values(grouped).flat();
 
-  if (typeof message === "object") {
-    message = message.title || JSON.stringify(message);
-  }
+      console.log("FINAL PAYLOAD:", JSON.stringify(cleanedRules, null, 2));
 
-  const friendlyMessage = mapBackendError(message);
-showMessage(friendlyMessage, "error");
-}
-};
+      await updateLeaveType(leaveType.id, {
+        name: leaveType.name,
+        description: leaveType.description,
+        femaleOnly: leaveType.femaleOnly,
+        isActive: leaveType.isActive,
+        rules: cleanedRules,
+      });
 
+      showMessage("Leave type updated successfully", "success");
+
+      setTimeout(() => {
+        onSuccess();
+        onClose();
+      }, 800);
+    } catch (err) {
+      console.error(err);
+
+      let message = err.response?.data;
+
+      if (typeof message === "object") {
+        message = message.title || JSON.stringify(message);
+      }
+
+      const friendlyMessage = mapBackendError(message);
+      showMessage(friendlyMessage, "error");
+    }
+  };
 
   return (
     <div className="annual-wrapper">
       {message && (
-        <div className={`message-text ${messageType}`}>
-          {message}
-        </div>
+        <div className={`message-text ${messageType}`}>{message}</div>
       )}
       <div className="tabs">
         <button
@@ -211,7 +218,6 @@ showMessage(friendlyMessage, "error");
       </div>
 
       <div className="rule-box">
-
         <div className="rule-header">
           <span>Min Years</span>
           <span>Max Years</span>
@@ -219,49 +225,58 @@ showMessage(friendlyMessage, "error");
         </div>
 
         <div className="rule-body">
-
           {currentRules.map((r, index) => {
-
             const ruleKey = r.id ?? `${r.groupKey}-${index}`;
             const edited = editedRules[ruleKey] || {};
 
             return (
               <div key={ruleKey} className="rule-row">
-
                 <input
-                disabled={!isEditing}
+                  disabled={!isEditing}
                   value={
                     edited.minYearsService !== undefined
                       ? edited.minYearsService
                       : r.minYearsService
                   }
                   onChange={(e) =>
-                    handleFieldChange(ruleKey, "minYearsService", e.target.value)
+                    handleFieldChange(
+                      ruleKey,
+                      "minYearsService",
+                      e.target.value,
+                    )
                   }
                 />
 
                 <input
-                disabled={!isEditing}
+                  disabled={!isEditing}
                   value={
                     edited.maxYearsService !== undefined
                       ? edited.maxYearsService
                       : (r.maxYearsService ?? "")
                   }
                   onChange={(e) =>
-                    handleFieldChange(ruleKey, "maxYearsService", e.target.value)
+                    handleFieldChange(
+                      ruleKey,
+                      "maxYearsService",
+                      e.target.value,
+                    )
                   }
                 />
 
                 <div className="days-edit">
                   <input
-                  disabled={!isEditing}
+                    disabled={!isEditing}
                     value={
                       edited.daysAllocated !== undefined
                         ? edited.daysAllocated
                         : r.daysAllocated
                     }
                     onChange={(e) =>
-                      handleFieldChange(ruleKey, "daysAllocated", e.target.value)
+                      handleFieldChange(
+                        ruleKey,
+                        "daysAllocated",
+                        e.target.value,
+                      )
                     }
                   />
 
@@ -281,17 +296,15 @@ showMessage(friendlyMessage, "error");
                     </button>
                   )}
                 </div>
-
               </div>
             );
           })}
-
         </div>
 
-    {isEditing && (
-            <button className="add-range" onClick={handleAddRange}>
-              + Add Range
-            </button>
+        {isEditing && (
+          <button className="add-range" onClick={handleAddRange}>
+            + Add Range
+          </button>
         )}
       </div>
 
@@ -301,37 +314,33 @@ showMessage(friendlyMessage, "error");
           : "No changes yet"}
       </div>
 
-      
       <div className="actions">
+        {!isEditing ? (
+          <>
+            <button className="cancel" onClick={onClose}>
+              Back
+            </button>
 
-  {!isEditing ? (
-    <>
-      <button className="cancel" onClick={onClose}>
-        Back
-      </button>
+            <button className="next" onClick={() => setIsEditing(true)}>
+              Edit
+            </button>
+          </>
+        ) : (
+          <>
+            <button className="cancel" onClick={onClose}>
+              Cancel
+            </button>
 
-      <button className="next" onClick={() => setIsEditing(true)}>
-        Edit
-      </button>
-    </>
-  ) : (
-    <>
-      <button className="cancel" onClick={onClose}>
-        Cancel
-      </button>
-
-      <button
-        className="next"
-        onClick={handleSave}
-        disabled={!hasChanges}
-      >
-        Save Changes
-      </button>
-    </>
-  )}
-
-</div>
-
+            <button
+              className="next"
+              onClick={handleSave}
+              disabled={!hasChanges}
+            >
+              Save Changes
+            </button>
+          </>
+        )}
+      </div>
     </div>
   );
 };
