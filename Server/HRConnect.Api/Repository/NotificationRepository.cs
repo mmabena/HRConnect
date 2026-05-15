@@ -34,8 +34,9 @@ namespace HRConnect.Api.Repository
       var notifications = await _context.Notifications.AsNoTracking().Where(n =>
         (n.EmployeeId == employeeId) &&
         (n.DeliveryChannel == DeliveryChannel.InApp) &&
-        !n.IsRead
-        ).OrderByDescending(n => n.Type).ToListAsync();
+        !n.IsRead)
+        .OrderBy(n => n.Severity)
+        .ToListAsync();
       if (notifications == null)
         return [];
       return notifications.Select(n => n.ToNotificationDto()).ToList();

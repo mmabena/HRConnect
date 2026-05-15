@@ -3,13 +3,11 @@ namespace HRConnect.Api.Models
   using System.ComponentModel.DataAnnotations;
   public enum NotificationSeverity
   {
-    Critical = 0,
-    Warning = 1,
-    Infomation = 2
+    Critical = 0, Warning, Infomation
   }
   public enum NotificationType
   {
-    Payroll, TaxUpload, RoleUpdate, LeaveRequest, LeaveRequestResponse, General
+    Payroll = 0, TaxUpload, RoleUpdate, LeaveRequest, LeaveRequestResponse, General
   }
   [Flags]
   public enum DeliveryChannel

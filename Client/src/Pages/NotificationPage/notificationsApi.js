@@ -9,17 +9,22 @@
 // ─────────────────────────────────────────────
 
 const delay = (ms = 350) => new Promise((res) => setTimeout(res, ms));
+const BASE_URL="http://localhost:5147/api";
 
 // Priority weight – lower = shown first
-const PRIORITY_WEIGHT = {
-  urgent: 1,
-  leave: 2,
-  payroll: 3,
-  payslip: 4,
-  system: 5,
-  info: 6,
+const SERVERITY = {
+  CRITICAL: 0,
+  WARNING:1,
+  INFORMATION: 2,
 };
-
+const NOTIFICATION_TYPE={
+    PAYROLL:1,
+    TAXUPLOAD:2,
+    RoleUpdate:3,
+    LeaveRequest:4,
+    LeaveRequestResponse:5,
+    General:6
+}
 // ── Seed data ────────────────────────────────
 let _db = [
   // ── superuser ────────────────────────────
@@ -30,7 +35,7 @@ let _db = [
     detail: "Annual leave · 3 days · Starting 28 Mar",
     read: false,
     type: "leave",
-    priority: "urgent",
+    priority: "CRITICAL",
     route: "/leaveManagement",
     time: "2m ago",
     dateGroup: "Today",
@@ -42,7 +47,7 @@ let _db = [
     detail: "v4.2.1 — apply before end of business",
     read: false,
     type: "system",
-    priority: "urgent",
+    priority: "CRITICAL",
     time: "18m ago",
     dateGroup: "Today",
   },
@@ -76,7 +81,7 @@ let _db = [
     detail: "PDF available for download in reports",
     read: true,
     type: "info",
-    priority: "info",
+    priority: "INFORMATION",
     time: "Yesterday",
     dateGroup: "Earlier",
   },
@@ -98,7 +103,7 @@ let _db = [
     detail: "Will be active on the 1st of March",
     read: true,
     type: "info",
-    priority: "info",
+    priority: "INFORMATION",
     time: "14 February 2026",
     dateGroup: "Last Month",
   },
@@ -109,7 +114,7 @@ let _db = [
     detail: "Executive",
     read: true,
     type: "info",
-    priority: "info",
+    priority: "INFORMATION",
     time: "25 February 2026",
     dateGroup: "Last Month",
   },
@@ -144,7 +149,7 @@ let _db = [
     detail: "New policy effective 1 April 2026 — please review",
     read: true,
     type: "info",
-    priority: "info",
+    priority: "INFORMATION",
     time: "Yesterday",
     dateGroup: "Earlier",
   },
@@ -154,6 +159,19 @@ let _db = [
 //  API methods
 // ─────────────────────────────────────────────
 
+/**
+ * GET /api/notifications/{employeeId}=
+ * Returns notifications for the given employee, sorted by priority.
+ */
+export const fetchAllNotification=async(employeeId)=>{
+    try{
+        const response=await fetch(`${BASE_URL}/notification/${employeeId}`)
+    }catch(error)
+    {
+        console.error(`Notification API ERROR: ${error} `)
+        throw error;
+    }
+}
 /**
  * GET /api/notifications?role=
  * Returns notifications for the given role, sorted by priority.
@@ -169,8 +187,8 @@ export async function fetchNotifications(role) {
     .filter((n) => n.role.toLowerCase() === normalizedRole)
     .sort(
       (a, b) =>
-        (PRIORITY_WEIGHT[a.priority] ?? 9) -
-        (PRIORITY_WEIGHT[b.priority] ?? 9)
+        (SERVERITY[a.priority] ?? 9) -
+        (SERVERITY[b.priority] ?? 9)
     );
 
   return results.map((n) => ({ ...n }));
