@@ -6,6 +6,7 @@ import api from "../../../src/api/api.js";
 import axios from "axios";
 import { resolveRole } from "../../utils/roleUtils";
 import connection from "../../api/signalrService.js";
+import { ArrowLeftRight  } from 'lucide-react';
 import { fetchMyCompanies, switchCompany } from "../../api/UserCompany.js";
 
 const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
@@ -59,6 +60,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
           ? list.map((uc) => ({
               id: uc.companyId,
               name: uc.companyName,
+              registrationNumber: uc.registrationNumber,
               employeeCount: uc.employeeCount,
               isDefault: uc.isDefault,
             }))
@@ -319,20 +321,19 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
             className="menu-company-active"
             onClick={() => setCompanySwitcherOpen((prev) => !prev)}
           >
-            <div className="menu-company-avatar">
-              {activeCompany?.name?.substring(0, 2).toUpperCase()}
-            </div>
 
             <div className="menu-company-info">
               <div className="menu-company-name">
                 {activeCompany?.name || "Select Company"}
               </div>
 
-              <div className="menu-company-sub">Active Company</div>
+              <div className="menu-company-sub">
+                {activeCompany?.registrationNumber}
+              </div>
             </div>
 
             <div className="menu-company-arrow">
-              {companySwitcherOpen ? "▲" : "▼"}
+              <ArrowLeftRight size={16}  className="company-arrow"/>
             </div>
           </div>
 
@@ -358,9 +359,6 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                     </div>
                   </div>
 
-                  <div className="menu-company-check">
-                    {activeCompany?.id === company.id ? "✓" : ""}
-                  </div>
                 </div>
               ))}
             </div>

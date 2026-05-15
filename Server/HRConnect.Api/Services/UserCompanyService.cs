@@ -50,6 +50,7 @@ namespace HRConnect.Api.Services
                 {
                     CompanyId = company.CompanyId,
                     CompanyName = company.Company.CompanyName,
+                    RegistrationNumber = company.Company.RegistrationNumber,
                     IsDefault = company.IsDefault,
                     IsOriginalCompany = company.CompanyId == originalCompanyId,
                     EmployeeCount = employeeCount

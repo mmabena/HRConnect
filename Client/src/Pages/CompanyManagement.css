@@ -207,16 +207,60 @@
 }
 
 .comp-company-default {
-  position: absolute;
-  right: 60px;
-  padding: 4px 12px;
-  background: rgba(245, 158, 11, 0.15);
-  border: 0.5px solid #7F7747;
-  border-radius: 15px;
-  font-family: 'Anek Bangla';
-  font-size: 15px;
-  color: #FBBF24;
+/* Frame 46861 */
+
+box-sizing: border-box;
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: center;
+padding: 0px 24px;
+gap: 10px;
+
+position: absolute;
+width: 69px;
+height: 26px;
+left: calc(50% - 79px/2 + 331.5px);
+top: 38px;
+
+background: rgba(245, 158, 11, 0.15);
+border: 0.5px solid #7F7747;
+border-radius: 15px;
+
+
+/* Default */
+
+width: 70px;
+height: 28px;
+
+font-family: 'Anek Bangla';
+font-style: normal;
+font-weight: 500;
+font-size: 15px;
+line-height: 15px;
+/* identical to box height, or 100% */
+display: flex;
+align-items: center;
+text-align: center;
+letter-spacing: -0.43px;
+
+color: #FBBF24;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
 }
+
+/* Frame 46861 */
+
+
+
 
 .comp-company-arrow {
   position: absolute;
@@ -293,7 +337,7 @@
 }
 
 .comp-arrow {
-  width: 30px;
+  width: 25px;
   height: 30px;
 
   flex: none;
@@ -301,7 +345,7 @@
   flex-grow: 0;
 
   color: #FFFFFF;
-  stroke-width: 1.8px;
+  stroke-width: 1px;
 
   display: flex;
   align-items: center;
@@ -309,7 +353,8 @@
 }
 
 
-/*  */
+
+
 
 
 

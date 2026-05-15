@@ -14,6 +14,7 @@ namespace HRConnect.Api.Mappers
             {
                 CompanyId = userCompanyModel.CompanyId,
                 CompanyName = userCompanyModel.Company.CompanyName,
+                RegistrationNumber = userCompanyModel.Company.RegistrationNumber,
                 IsDefault = userCompanyModel.IsDefault
             };
         }

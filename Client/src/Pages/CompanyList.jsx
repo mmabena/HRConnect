@@ -125,7 +125,8 @@ const CompanyList = () => {
                     <div className="CL-initials-circle">
                       {company.companyName
                         ?.split(" ")
-                        .map((word) => word[0])
+                        .map((word) => word[0] || "")
+                        .slice(0, 2)
                         .join("")
                         .toUpperCase()}
                     </div>

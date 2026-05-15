@@ -2568,35 +2568,26 @@ input:checked + .slider:before {
 .menu-company-active {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px;
-  border-radius: 10px;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-radius: 12px;
   background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
   cursor: pointer;
-  transition: 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .menu-company-active:hover {
   background: rgba(255,255,255,0.08);
 }
 
-.menu-company-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: #355867;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  font-weight: 600;
-  flex-shrink: 0;
-}
-
 .menu-company-info {
   flex: 1;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
 }
 
 .menu-company-name {
@@ -2613,8 +2604,12 @@ input:checked + .slider:before {
 }
 
 .menu-company-arrow {
-  color: white;
-  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255,255,255,0.7);
+  margin-left: 10px;
+  flex-shrink: 0;
 }
 
 .menu-company-dropdown {
@@ -2625,17 +2620,18 @@ input:checked + .slider:before {
   background: #243843;
   border-radius: 12px;
   overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.06);
   box-shadow: 0 8px 24px rgba(0,0,0,0.25);
   z-index: 1000;
 }
 
 .menu-company-option {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 12px;
+  padding: 7px 16px;
   cursor: pointer;
-  transition: 0.2s ease;
+  transition: background 0.2s ease;
 }
 
 .menu-company-option:hover {
@@ -2643,16 +2639,13 @@ input:checked + .slider:before {
 }
 
 .menu-company-option.active {
-  background: rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.06);
 }
 
 .menu-company-option-left {
   display: flex;
   align-items: center;
-
   width: 100%;
-
-  margin-left: 25px;
 }
 
 .menu-company-option-name {
@@ -2663,8 +2656,10 @@ input:checked + .slider:before {
 .menu-company-option-text {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   width: 100%;
+  align-items: flex-start;
+  text-align: left;
+  margin-left: 10px;
   
 }
 
@@ -2686,4 +2681,16 @@ input:checked + .slider:before {
   align-items: center;
   color: white;
   flex-shrink: 0;
+}
+
+.menu-company-option.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  height: calc(100% - 16px);
+  width: 6px;
+  border-radius: 0 4px 4px 0;
+  background: var(--white);
 }
