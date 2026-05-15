@@ -1,115 +1,141 @@
-import React, { useState, usEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./PensionFundOptionsModal.css";
 import { ArrowRight, ArrowLeft } from "lucide-react";
 
-const PensionFundOptionsModal = ({
-  employee,
-  setEmployee,
-  formErrors,
-  setFormErrors,
-  onNext,
-  onBack,
-}) => {
-       
-  const [employeeDetails, setEmployeeDetails] = useState(null);
-  const [projected, setProjected] = useState(null);
-
+const PensionFundOptionsModal = ({ employee, setEmployee, onNext, onBack }) => {
   const [voluntary, setVoluntary] = useState("");
-  const [frequency, setFrequency] = useState(1);
-  const inputRef = useRef(null);
+  const [frequency, setFrequency] = useState("Once-Off");
 
-  const baseUrl = process.env.REACT_APP_API_BASE_URL;
+  const percentageOptions = [2.5, 5, 7.5, 10, 12.5, 15];
 
-  const percentageMap = {
-    0: 0,
-    1: 2.5,
-    2: 5,
-    3: 7.5,
-    4: 10,
-    5: 12.5,
-    6: 15,
-  };
-
-  const reverseMap = {
-    0: 0,
-    2.5: 1,
-    5: 2,
-    7.5: 3,
-    10: 4,
-    12.5: 5,
-    15: 6,
-  };
-
-  const [pensionIndex, setPensionIndex] = useState(1);
-
-  const selectedPercentage = percentageMap[pensionIndex] / 100;
-
-  // Load employee
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    const email = JSON.parse(localStorage.getItem("currentUser")).email;
-
-    axios
-      .get(`${baseUrl}/employee/email/${email}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => setEmployeeDetails(res.data))
-      .catch(console.error);
-  }, []);
-
-  // Call projection API
-  useEffect(() => {
-    if (!employeeDetails) return;
-
-    axios
-      .post("http://localhost:5147/api/pension/projection", {
-        SelectedPensionPercentage: pensionIndex,
-        DOB: employeeDetails.dateOfBirth,
-        EmploymentStatus: employeeDetails.employmentStatus,
-        Salary: employeeDetails.monthlySalary,
-        VoluntaryContribution: voluntary || 0,
-        VoluntaryContributionFrequency: frequency,
-      })
-      .then((res) => setProjected(res.data))
-      .catch(console.error);
-  }, [employeeDetails, pensionIndex, voluntary, frequency]);
+  const [selectedPercentage, setSelectedPercentage] = useState(2.5);
 
   return (
-    <div className="emp-pension-fund-container">
-      <div className="emp-pension-fund-form-grid">
+    <div className="emp-leave-container">
+      <div className="emp-leave-form-grid">
+        {/* HEADING */}
         <div className="emp-pension-fund-personal-details-heading">
-          <span>Pension Fund Options</span>
+          Pension Fund Options
         </div>
 
         <div className="emp-pension-fund-sub">
-          <span>Select funds and contribution rates</span>
+          Select funds and contribution rates
         </div>
 
-        {/* Pension Fund */}
-        <div className="pensio-section-title">
-            PENSION FUND - SELECT ONE
-        </div>
+        {/* SECTION TITLE */}
+        <div className="pensio-section-title">PENSION FUND - SELECT ONE</div>
 
         <div className="emp-leave-type-line" />
 
-        <div className="pension-card-header"
-        onClick={() =>
-            setEmployee((prev) => ({
+        {/* PENSION CARD */}
+        <div
+          className={`pension-card ${employee?.pensionEnabled ? "active" : ""}`}
+        >
+          <div
+            className="pension-card-header"
+            onClick={() =>
+              setEmployee((prev) => ({
                 ...prev,
                 pensionEnabled: !prev.pensionEnabled,
-            }))
-        }>
-        <div className="pension-fund-options">
+              }))
+            }
+          >
             <input
-          type="checkbox"
-        checked={employee.pensionEnabled || false}
-        readOnly
-        />
+              type="checkbox"
+              checked={employee?.pensionEnabled || false}
+              readOnly
+            />
+
+            <div className="pension-header-text">
+              <span className="pension-title">Pension Fund</span>
+
+              <span
+                className={`pension-subtitle ${
+                  employee?.pensionEnabled ? "active" : ""
+                }`}
+              >
+                Select your employee contribution below
+              </span>
+            </div>
+          </div>
+
+          {employee?.pensionEnabled && (
+            <>
+              <div className="contribution-label">
+                EMPLOYEE CONTRIBUTION RATE
+              </div>
+
+              <div className="pension-percentages">
+                {percentageOptions.map((percentage) => (
+                  <button
+                    key={percentage}
+                    type="button"
+                    className={`pension-percent-btn ${
+                      selectedPercentage === percentage ? "active" : ""
+                    }`}
+                    onClick={() => setSelectedPercentage(percentage)}
+                  >
+                    {percentage}%
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
+        {/* VOLUNTARY */}
+        <div className="voluntary-section-title">VOLUNTARY CONTRIBUTION</div>
+        <div className="emp-leave-type-line" />
+
+        <div className="voluntary-options">
+          <button
+            type="button"
+            className={`voluntary-btn ${
+              frequency === "Once-Off" ? "active" : ""
+            }`}
+            onClick={() => setFrequency("Once-Off")}
+          >
+            Once-Off
+          </button>
+
+          <button
+            type="button"
+            className={`voluntary-btn ${
+              frequency === "Permanent" ? "active" : ""
+            }`}
+            onClick={() => setFrequency("Permanent")}
+          >
+            Permanent
+          </button>
         </div>
-        
+
+        {/* AMOUNT */}
+        <div className="amount-section-title">VOLUNTARY AMOUNT</div>
+
+        <div className="emp-leave-type-line" />
+        <input
+          type="number"
+          placeholder="e.g 500"
+          className="voluntary-input"
+          value={voluntary}
+          onChange={(e) => setVoluntary(e.target.value)}
+        />
+
+        {/* FOOTER */}
+        <div className="pension-footer">
+          <button className="pension-back-btn" onClick={onBack}>
+            <ArrowLeft size={18} />
+            Back
+          </button>
+
+          <button className="pension-next-btn" onClick={onNext}>
+            Next
+            <ArrowRight size={18} />
+          </button>
+        </div>
       </div>
     </div>
   );
 };
+
+export default PensionFundOptionsModal;

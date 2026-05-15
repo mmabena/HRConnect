@@ -1,10 +1,10 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "./AddEmployeeModal.css";
 import BankingDetailsModal from "../../Components/Steps/BankingManagement/BankingDetailsModal.jsx";
 import LeaveTypesModal from "../Steps/LeaveType/LeaveTypesModal.jsx";
-
+import PensionFundOptionsModal from "../Steps/PensionFundOptions/PensionFundOptionsModal.jsx";
 import { addEmployee } from "../../api/Employee";
 
 import useEmployeeForm from "../../hooks/useEmployeeForm";
@@ -106,6 +106,8 @@ const AddEmployeeModal = ({ closeModal }) => {
         contactNumber: employee.contactNumber,
         taxNumber: employee.taxNumber,
         email: employee.email,
+        idNumber: employee.idNumber ?? "",
+        passportNumber: employee.passportNumber ?? "",
         physicalAddress: employee.physicalAddress,
         city: employee.city,
         zipCode: employee.zipCode,
@@ -133,9 +135,11 @@ const AddEmployeeModal = ({ closeModal }) => {
       };
 
       if (employee.idType === "id") {
-        payload.idNumber = employee.idNumber;
+        payload.idNumber = employee.idNumber ?? "";
+        payload.passportNumber = "";
       } else {
-        payload.passportNumber = employee.passportNumber;
+        payload.passportNumber = employee.passportNumber ?? "";
+        payload.idNumber = "";
       }
 
       await addEmployee(payload);
@@ -810,7 +814,17 @@ const AddEmployeeModal = ({ closeModal }) => {
                   onBack={() => setCurrentStep((prev) => prev - 1)}
                 />
               )}
-               
+              {/* Step 4 - Pension Fund Options */}
+              {currentStep === 4 && (
+                <PensionFundOptionsModal
+                  employee={employee}
+                  setEmployee={setEmployee}
+                  formErrors={formErrors}
+                  setFormErrors={setFormErrors}
+                  onNext={() => setCurrentStep(5)}
+                  onBack={() => setCurrentStep((prev) => prev - 1)}
+                />
+              )}
             </div>
           </div>
         </div>

@@ -1,151 +1,285 @@
-.pension-modal {
+/* =========================
+   PENSION FUND MODAL
+========================= */
+
+.emp-pension-fund-container {
   width: 100%;
-  max-width: 900px;
-  margin: 0 auto;
-  background: #ffffff;
-  border-radius: 14px;
-  padding: 32px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 40px;
+  font-family: "Inter", sans-serif;
 }
 
-/* TITLE */
-.pension-modal h2 {
+.emp-pension-fund-form-grid {
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* =========================
+   HEADINGS
+========================= */
+
+.emp-pension-fund-personal-details-heading {
+   color: var(--primary-color, #2c5f6d);
+  font-family: "Anek Bangla";
   font-size: 18px;
   font-weight: 600;
-  color: #2f4858;
-  margin-bottom: 24px;
+   display: flex;
+   
 }
 
-/* SECTION SPACING */
-.field {
-  margin-top: 20px;
+.emp-pension-fund-sub {
+   color: #006088;
+  font-family: "Anek Bangla";
+  font-size: 14px;
+  font-weight: 400;
+   display: flex;
+   margin-top:-10px;
+   margin-bottom:0px;
+}
+
+/* =========================
+   SECTION TITLES
+========================= */
+
+.pensio-section-title,
+.voluntary-section-title,
+.amount-section-title {
+   font-size: 12px;
+  font-weight: 600;
+  color: #7575758c;
+  text-transform: uppercase;
+  display: flex;
+ align-items: flex-start;
+margin-top:18px;
+}
+
+.emp-leave-type-line{
+position: relative;
+margin-top: 5px;
+margin-bottom:20px;
+  background: #7474748c;
+  width: 110%;
+  margin-left: auto;
+  margin-right: auto;
+  height: 1px;
+  border: none;
+}
+/* =========================
+   PENSION CARD
+========================= */
+
+.pension-card {
+ min-height: 18px;
+  width: 110%;
+  background: #1E5C6E1A;
+  border-radius: 5px;
+cursor: pointer;
+  padding: 10px 10px 10px;
+  transition: 0.2s ease;
+  border: 1px solid rgba(79, 110, 120, 0.2);
+}
+
+.pension-card.active {
+  border: 1px solid #8ea8b4;
+  padding: 18px 20px 50px;
+}
+
+.pension-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.pension-card-header input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+   background-color: #4F6E7833;
+  accent-color: #496d7d;
+  margin-top: 2px;
+  cursor: pointer;
+}
+
+.pension-header-text {
   display: flex;
   flex-direction: column;
 }
 
-/* LABELS */
-.field label {
-  font-size: 13px;
-  color: #5a6b75;
-  margin-bottom: 6px;
+.pension-title {
+  font-family: Anek Bangla;
+font-weight: 500;
+font-style: Regular;
+font-size: 16px;
+color:#002D40;
+line-height: 150%;
+letter-spacing: 0.15px;
 }
 
-/* INPUT */
-.field input {
-  height: 42px;
-  border: 1px solid #d0d7de;
-  border-radius: 8px;
-  padding: 0 12px;
-  font-size: 14px;
-  outline: none;
+.pension-subtitle {
+  font-size: 13px;
+  color: #2c5f6d;
+  margin-top: 2px;
   transition: 0.2s ease;
 }
 
-.field input:focus {
-  border-color: #355867;
+.pension-subtitle.active {
+  color: #7FA36A;
 }
 
-/* RADIO GROUP */
-.radio-group {
+/* =========================
+   CONTRIBUTION SECTION
+========================= */
+
+.contribution-label {
+  margin-top: 22px;
+  margin-bottom: 12px;
+  align-items: flex-start;
+  font-size: 11px;
+  font-weight: 600;
+  color: #a4a4a4;
+  text-transform: uppercase;
+  border-bottom: 1px solid #d6d6d6;
+  padding-bottom: 8px;
+}
+
+/* =========================
+   PERCENTAGE BUTTONS
+========================= */
+
+.pension-percentages {
+  display: flex;
+  flex-direction: row;
+align-items: center;
+padding: 0px;
+  gap: 3px;
+ position: absolute;
+  width: 425px;
+height: 20px;
+}
+
+
+
+
+
+
+
+
+
+
+.pension-percent-btn {
+  min-width: 66px;
+  height: 18px;
+  border-radius: 3px;
+  border: 1px solid #7f98a5;
+  background: white;
+  color: #4f6b78;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.pension-percent-btn:hover {
+  background: #edf3f5;
+}
+
+.pension-percent-btn.active {
+  background: #4f6f7e;
+  color: white;
+  border: 1px solid #4f6f7e;
+}
+
+/* =========================
+   VOLUNTARY BUTTONS
+========================= */
+
+.voluntary-options {
   display: flex;
   gap: 20px;
-  margin-top: 20px;
-  align-items: center;
 }
 
-.radio-group label {
-  font-size: 14px;
-  color: #2f4858;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* SLIDER SECTION */
-.MuiBox-root {
-  margin-top: 10px;
-  padding: 10px 5px;
-}
-
-/* SLIDER CUSTOM LOOK */
-.MuiSlider-root {
-  color: #355867 !important;
-}
-
-.MuiSlider-markLabel {
-  font-size: 12px !important;
-}
-
-/* RESULTS CARD */
-.results {
-  margin-top: 25px;
-  background: #f6f9fb;
-  border-radius: 12px;
-  padding: 18px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-.results p {
-  margin: 0;
-  font-size: 14px;
-  color: #2f4858;
-}
-
-/* BOTTOM BUTTONS */
-.modal-buttons {
-  margin-top: 30px;
-  display: flex;
-  justify-content: space-between;
-}
-
-/* BACK BUTTON */
-.modal-buttons button:first-child {
-  background: #ffffff;
-  border: 1px solid #cfd8dc;
-  padding: 10px 18px;
-  border-radius: 8px;
+.voluntary-btn {
+  flex: 1;
+  height: 52px;
+  border-radius: 6px;
+  border: 1px solid #9cb1ba;
+  background: white;
+  color: #4d6977;
+  font-size: 22px;
+  font-weight: 500;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: #2f4858;
-}
-
-/* NEXT BUTTON */
-.modal-buttons button:last-child {
-  background: #355867;
-  color: white;
-  padding: 10px 18px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
   transition: 0.2s ease;
 }
 
-.modal-buttons button:last-child:hover {
-  background: #27424f;
+.voluntary-btn.active {
+  background: #edf5e8;
+  border: 1px solid #a9c09d;
+  color: #7b9b61;
 }
 
-/* RESPONSIVE */
-@media (max-width: 768px) {
-  .results {
-    grid-template-columns: 1fr;
-  }
+/* =========================
+   INPUT
+========================= */
 
-  .pension-modal {
-    padding: 20px;
-  }
+.voluntary-input {
+  width: 100%;
+  height: 58px;
+  border-radius: 6px;
+  border: 1px solid #cfcfcf;
+  padding: 0 18px;
+  font-size: 24px;
+  color: #5a5a5a;
+  outline: none;
+  background: #fff;
+}
 
-  .modal-buttons {
-    flex-direction: column;
-    gap: 10px;
-  }
+.voluntary-input::placeholder {
+  color: #d1d1d1;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+
+.pension-footer {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 50px;
+}
+
+.pension-back-btn,
+.pension-next-btn {
+  width: 170px;
+  height: 54px;
+  border-radius: 10px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.pension-back-btn {
+  background: white;
+  border: 1px solid #d0d0d0;
+  color: #808080;
+}
+
+.pension-next-btn {
+  background: #4f6f7e;
+  color: white;
+}
+
+.pension-next-btn:hover {
+  opacity: 0.95;
 }
