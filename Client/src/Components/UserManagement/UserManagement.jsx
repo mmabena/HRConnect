@@ -6,6 +6,7 @@ import { getStoredUserRole } from "../../utils/roleUtils";
 import useInitialColors from "../../hooks/useInitialColors";
 import { resolveRole } from "../../utils/roleUtils.js";
 import { SlidersHorizontal, SearchIcon } from "lucide-react"
+import {toast} from "react-toastify";
 import {
   FaUser,
   FaUsers,
@@ -122,7 +123,11 @@ const UserManagement = () => {
 
     const user = users[userIndex];
     if(user?.email===employee?.email)
-    setSelectedUserIndex(null)
+    {
+        setSelectedUserIndex(null)
+        toast.error("You Cannot Change Your Own Role");
+        return;
+    }
   };
 
   const handleCloseActions = () => {
@@ -350,7 +355,9 @@ const UserManagement = () => {
             onSuccess={() => {
               loadData();
               handleCloseActions();
+    toast.success("Employee Role Update Successful")
               // Optionally reload users if needed here
+              loadData();
             }}
           />
 

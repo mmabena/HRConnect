@@ -7,7 +7,6 @@ namespace HRConnect.Api.Controllers
   using Microsoft.AspNetCore.Authorization;
   using Microsoft.AspNetCore.Mvc;
 
-
   [ApiController]
   [Route("api/notifications")]
   public class NotificationController : ControllerBase
