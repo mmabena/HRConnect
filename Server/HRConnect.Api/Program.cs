@@ -1,4 +1,3 @@
-
 using System.Text;
 using Audit.Core;
 using Audit.EntityFramework;
@@ -98,7 +97,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
     {
-      options.UseSqlServer(builder.Configuration.GetConnectionString("DBeaverConnection")!);
+      options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!);
       options.AddInterceptors(new AuditSaveChangesInterceptor());
     });
 
@@ -188,7 +187,7 @@ builder.Services.AddQuartz(q =>
   {
     store.UseSqlServer(options =>
         {
-          options.ConnectionString = builder.Configuration.GetConnectionString("DBeaverConnection")!;
+          options.ConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
           options.TablePrefix = "quartz.QRTZ_";
         });
     store.UseSerializer<Quartz.Simpl.SystemTextJsonObjectSerializer>();
@@ -308,7 +307,7 @@ builder.Services.AddRateLimiter(options =>
       factory: _ => new FixedWindowRateLimiterOptions
       {
         PermitLimit = 3,//3 attempts per time frame
-        Window = TimeSpan.FromMinutes(1), //time frame
+        Window = TimeSpan.FromMinutes(1),
         QueueLimit = 0
       });
   });
@@ -345,5 +344,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseRateLimiter();
-app.MapControllers();//.RequireRateLimiting("totp");
+app.MapControllers();
 app.Run();

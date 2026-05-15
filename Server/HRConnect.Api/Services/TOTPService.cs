@@ -51,14 +51,11 @@ namespace HRConnect.Api.Services
 
         byte[] secret = await _mfaService.GetOrCreateUserSecretAsync(user.UserId);
         string code = GenerateCode(secret);
-        Console.BackgroundColor = ConsoleColor.Red;
-        Console.WriteLine($"/////////////////////THIS IS THE OTP {code}");
-        //Create Notification To Ask for TOTP in the app
-        Console.ResetColor();
+
         var inAppNotification = await MakeInAppNotification(userId);
-        var emailNotification = await MakeEmailNotification(userId, code);
+        // var emailNotification = await MakeEmailNotification(userId, code);
         await _notiFactory.ProduceNotificationAsync(inAppNotification);
-        await _notiFactory.ProduceNotificationAsync(emailNotification);
+        // await _notiFactory.ProduceNotificationAsync(emailNotification);
       }
       catch (OperationException ex)
       {
@@ -67,20 +64,19 @@ namespace HRConnect.Api.Services
     }
     public string GenerateCode(byte[] userSecret)
     {
-      Totp otpCode = new(userSecret, step: _stepSeconds, OtpHashMode.Sha256);
-
+      Totp otpCode = new(userSecret, step: 30, OtpHashMode.Sha256);
+#line 68 "TOTPService.cs"
       Console.ForegroundColor = ConsoleColor.Red;
       Console.WriteLine($">>>>>>>>>[[[[[THE TIME-BASED ONE TIME PIN IS {otpCode}]]]]]]<<<<<<");
-
       Console.WriteLine($">>>>>>>>>[[[[[THE TOPT Computed IS {otpCode.ComputeTotp()}]]]]]]<<<<<<");
       Console.ResetColor();
-
+#line default
 
       return otpCode.ComputeTotp();
     }
     public async Task<bool> ValidateCodeAsync(int userId, byte[] userSecret, string code)
     {
-      Totp otpCode = new(userSecret, step: _stepSeconds, OtpHashMode.Sha256);
+      Totp otpCode = new(userSecret, step: 30, OtpHashMode.Sha256);
       //TOTP are generated every 10 minutes (size of out step),
       // VerificationWindow.prev=1 step back (10 minutes back) 
       // VerificationWindow.futu=1 step forward (10 minutes ahead) 
@@ -173,6 +169,9 @@ namespace HRConnect.Api.Services
       if (existing != null)
       {
         existing.Role = (UserRole)existing.TempRole!;
+
+        //this is scratchpad and so should remain clean after use
+        existing.TempRole = null;
         _ = await _userRepo.UpdateUserAsync(userId, existing);
       }
     }

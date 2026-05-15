@@ -68,13 +68,13 @@ namespace HRConnect.Api.Data
 
       // Use this to protector to convert data of your choosing (of type string) in the database
       SecretsProtector.Init(provider.CreateProtector("DbEncryptor"));
-      var stringEncrpter = new ValueConverter<string, string>(
+      var stringEncryptor = new ValueConverter<string, string>(
         x => x == null ? string.Empty : SecretsProtector.Wrap(x),
         x => x == null ? string.Empty : SecretsProtector.UnWrap<string>(x)
         );
 
 #pragma warning disable CS8603
-      var byteEncrpter = new ValueConverter<byte[], byte[]>(
+      var byteEncryptor = new ValueConverter<byte[], byte[]>(
         x => x == null ? null : SecretsProtector.WrapBytes(x),
         x => x == null ? null : SecretsProtector.UnWrapBytes(x)
         );
@@ -83,11 +83,11 @@ namespace HRConnect.Api.Data
       // Using data protect to encrypt notification messages
       modelBuilder.Entity<Notification>()
       .Property(n => n.Message)
-      .HasConversion(stringEncrpter);
+      .HasConversion(stringEncryptor);
 
       modelBuilder.Entity<MFAUserSecret>()
       .Property(m => m.EncryptedUserSecret)
-      .HasConversion(byteEncrpter);
+      .HasConversion(byteEncryptor);
 
       // ================= MAIN CONFIG =================
       modelBuilder.Entity<Employee>()
@@ -308,7 +308,7 @@ namespace HRConnect.Api.Data
           .HasConversion<string>();
 
       // modelBuilder.Entity<Notification>().Property(n => n.DeliveryChannel)
-          // .HasConversion<string>();
+      // .HasConversion<string>();
 
       modelBuilder.Entity<Employee>()
         .HasMany(epre => epre.EmployeePayrollEarning)
