@@ -98,7 +98,6 @@ const ApplyLeave = () => {
   }, []);
   return (
     <div className="leave-page">
-      {/* HEADER */}
       <div className="apply-header">
         <div>
           <h2 className="apply-title">Apply for Leave</h2>
@@ -110,25 +109,11 @@ const ApplyLeave = () => {
         <button className="back-btn">← Back to History</button>
       </div>
 
-      {/* MAIN GRID */}
       <div className="apply-grid">
-        {/* LEFT PANEL */}
         <div className="apply-left">
-          {/* INFO BOX */}
-          <div className="info-box">
-            <span className="info-icon">i</span>
-            <p>
-              {selectedBalance
-                ? `Your current ${selectedBalance.leaveType} balance is ${selectedBalance.availableDays} days. All Applications are viewed within 2 business days.`
-                : "Select a leave type to view your balance."}
-            </p>
-          </div>
-
-          {/* LEAVE DETAILS */}
           <div className="section">
             <p className="section-title">LEAVE DETAILS</p>
 
-            {/* Leave Type */}
             <div className="form-group">
               <label>Leave Type</label>
               <select
@@ -145,65 +130,55 @@ const ApplyLeave = () => {
               </select>
             </div>
 
-            {/* Dates */}
+            <div className="row date-row">
+              <div className="form-group">
+                <label>Start Date</label>
 
-            <div className="row">
-              <div className="row date-row">
-                {/* Start Date */}
-                <div className="form-group">
-                  <label>Start Date</label>
+                <div className="date-wrapper">
+                  <input
+                    type="date"
+                    className="input date-input"
+                    value={startDate}
+                    onChange={(e) => {
+                      setStartDate(e.target.value);
+                    }}
+                  />
 
-                  <div className="date-wrapper">
-                    <input
-                      type="date"
-                      className="input date-input"
-                      value={startDate}
-                      onChange={(e) => {
-                        setStartDate(e.target.value);
-                      }}
-                    />
+                  <span className="formatted-date">
+                    {formatDate(startDate)}
+                  </span>
 
-                    <span className="formatted-date">
-                      {formatDate(startDate)}
-                    </span>
-
-                    <img
-                      src="/images/calendar-range.svg"
-                      alt="calendar icon"
-                      className="calendar-icon"
-                    />
-                  </div>
+                  <img
+                    src="/images/calendar-range.svg"
+                    alt="calendar icon"
+                    className="calendar-icon"
+                  />
                 </div>
+              </div>
 
-                {/* End Date */}
-                <div className="form-group">
-                  <label>End Date</label>
+              <div className="form-group">
+                <label>End Date</label>
 
-                  <div className="date-wrapper">
-                    <input
-                      type="date"
-                      className="input date-input"
-                      value={endDate}
-                      onChange={(e) => {
-                        setEndDate(e.target.value);
-                      }}
-                    />
+                <div className="date-wrapper">
+                  <input
+                    type="date"
+                    className="input date-input"
+                    value={endDate}
+                    onChange={(e) => {
+                      setEndDate(e.target.value);
+                    }}
+                  />
 
-                    <span className="formatted-date">
-                      {formatDate(endDate)}
-                    </span>
+                  <span className="formatted-date">{formatDate(endDate)}</span>
 
-                    <img
-                      src="/images/calendar-range.svg"
-                      alt="calendar icon"
-                      className="calendar-icon"
-                    />
-                  </div>
+                  <img
+                    src="/images/calendar-range.svg"
+                    alt="calendar icon"
+                    className="calendar-icon"
+                  />
                 </div>
               </div>
             </div>
-
-            {/* Days + Balance */}
             <div className="row">
               <div className="form-group">
                 <label>Number of Days</label>
@@ -230,8 +205,6 @@ const ApplyLeave = () => {
               </div>
             </div>
           </div>
-
-          {/* SUPPORTING INFO */}
           <div className="section">
             <p className="section-title">SUPPORTING INFORMATION</p>
 
@@ -279,20 +252,8 @@ const ApplyLeave = () => {
               </div>
             </div>
           </div>
-          {/* ACTION BUTTONS */}
-          <div className="form-actions">
-            <button
-              className="submit-btn"
-              onClick={handleSubmit}
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "Submitting..." : "✓ Submit Application"}
-            </button>
-            <button className="cancel-btn">Cancel</button>
-          </div>
         </div>
 
-        {/* RIGHT PANEL */}
         <div className="apply-right">
           <div className="card">
             <p className="card-title">LEAVE ENTITLEMENTS</p>
@@ -357,8 +318,6 @@ const ApplyLeave = () => {
                 );
               })}
           </div>
-
-          {/* POLICY */}
           <div className="policy-card">
             <p className="card-title">LEAVE POLICY</p>
 
@@ -382,6 +341,16 @@ const ApplyLeave = () => {
             </ul>
           </div>
         </div>
+      </div>
+      <div className="form-actions">
+        <button
+          className="submit-btn"
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "Submitting..." : "✓ Submit Application"}
+        </button>
+        <button className="cancel-btn">Cancel</button>
       </div>
     </div>
   );

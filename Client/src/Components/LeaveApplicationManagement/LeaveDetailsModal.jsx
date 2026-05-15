@@ -13,7 +13,6 @@ const LeaveDetailsModal = ({
   return (
     <div className="leave-modal-overlay">
       <div className="leave-modal">
-        {/* HEADER */}
         <div className="leave-modal-header">
           <div>
             <h2 className="leave-modal-title">
@@ -33,9 +32,7 @@ const LeaveDetailsModal = ({
           </button>
         </div>
 
-        {/* BODY */}
         <div className="leave-modal-body">
-          {/* GRID */}
           <div className="leave-modal-grid">
             <div className="leave-modal-item">
               <span className="leave-modal-label">Employee Name</span>
@@ -88,8 +85,6 @@ const LeaveDetailsModal = ({
           </div>
 
           <div className="leave-modal-divider"></div>
-
-          {/* DESCRIPTION */}
           <div className="leave-modal-section">
             <p className="leave-modal-section-title">Description</p>
 
@@ -98,12 +93,10 @@ const LeaveDetailsModal = ({
             </div>
           </div>
 
-          {/* TIMELINE */}
           <div className="leave-modal-section timeline-section">
             <p className="leave-modal-section-title">Application Timeline</p>
 
             <div className="timeline">
-              {/* APPLICATION SUBMITTED */}
               <div className="timeline-item completed">
                 <div className="timeline-icon">
                   <Check size={14} />
@@ -118,7 +111,6 @@ const LeaveDetailsModal = ({
                 </div>
               </div>
 
-              {/* APPLICATION REVIEW */}
               <div className="timeline-item completed">
                 <div className="timeline-icon">
                   <Check size={14} />
@@ -131,7 +123,6 @@ const LeaveDetailsModal = ({
                 </div>
               </div>
 
-              {/* FINAL STATUS */}
               <div
                 className={`timeline-item ${
                   selectedApplication.status === "Pending"

@@ -33,6 +33,7 @@ import PersonalInformation from "./Components/PersonalInformation.jsx";
 import api from "../src/api/api.js";
 import ChangePositionManagement from "./Components/companyManagement/PositionManagement/ChangePositionManagement.jsx";
 import LeaveTables from "./Components/LeaveTypeManagement/LeaveTables";
+import ApplyLeave from "./Components/LeaveApplicationManagement/ApplyLeave";
 import { resolveRole } from "./utils/roleUtils.js";
 
 function App() {
@@ -196,7 +197,8 @@ function App() {
           <Route path="/taxTableManagement" element={<TaxTableManagement />} />
           <Route path="/leaveManagement" element={<LeaveTables />} />
           <Route path="/taxTableUpload" element={<TaxTableUpload />} />
-          <Route path="/leave-application" element={<LeaveHistory />} />
+          <Route path="/leave-application" element={<ApplyLeave />} />
+          <Route path="/leave-history" element={<LeaveHistory />} />
           <Route path="/positionManagement" element={<PositionManagement />} />
           <Route
             path="/addPositionManagement"

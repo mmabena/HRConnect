@@ -18,30 +18,27 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   const [manualReportToggle, setManualReportToggle] = useState(false);
   const [manualAdminToggle, setManualAdminToggle] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-  
+
   //displaying user initials
-  const displayName =
-  currentUser?.username ||
-  currentUser?.email ||
-  "User";
+  const displayName = currentUser?.username || currentUser?.email || "User";
   const [canProjectPension, setCanProjectPension] = useState(false);
 
   const initials = displayName
     .split(" ")
-    .map(name => name.charAt(0))
+    .map((name) => name.charAt(0))
     .join("")
     .substring(0, 2)
     .toUpperCase();
-  
+
   const navigate = useNavigate();
   const location = useLocation();
-  
-  const  resolvedRole=resolveRole(currentUser);
-  const role=resolveRole.key??currentUser?.role?.toLowerCase();
+
+  const resolvedRole = resolveRole(currentUser);
+  const role = resolveRole.key ?? currentUser?.role?.toLowerCase();
 
   const permissions = {
-    isAdmin:resolvedRole.isSuperUser || role==="admin",
-    isNormalUser:resolvedRole.isNormalUser,
+    isAdmin: resolvedRole.isSuperUser || role === "admin",
+    isNormalUser: resolvedRole.isNormalUser,
   };
 
   const isEmployeeManagementPage =
@@ -51,7 +48,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
 
   const isUserManagementPage = location.pathname.startsWith("/userManagement");
 
-  const baseUrl =api.defaults.baseURL;// process.env.REACT_APP_API_BASE_URL;
+  const baseUrl = api.defaults.baseURL; // process.env.REACT_APP_API_BASE_URL;
 
   useEffect(() => {
     console.log("MenuBar user role:", role);
@@ -60,7 +57,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
 
   useEffect(() => {
     console.log(`LOCATION`);
-    console.log(location)
+    console.log(location);
     if (!role) return;
 
     if (isEmployeeManagementPage && !manualReportToggle) {
@@ -84,53 +81,60 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   ]);
 
   useEffect(() => {
-    if(localStorage.getItem('currentUser') !== null && localStorage.getItem('currentUser') !== undefined) {
-      const token = localStorage.getItem('token');
-      const email = JSON.parse(localStorage.getItem('currentUser')).email;
+    if (
+      localStorage.getItem("currentUser") !== null &&
+      localStorage.getItem("currentUser") !== undefined
+    ) {
+      const token = localStorage.getItem("token");
+      const email = JSON.parse(localStorage.getItem("currentUser")).email;
       const decodedTokenEmail = jwtDecode(token).sub;
       if (decodedTokenEmail === email) {
         try {
-          axios.get(`${baseUrl}/employee/email/${email}`, {
+          axios
+            .get(`${baseUrl}/employee/email/${email}`, {
               headers: {
-                  "Authorization": `Bearer ${token}`
-              }
-          })
-          .then(response => {
+                Authorization: `Bearer ${token}`,
+              },
+            })
+            .then((response) => {
               if (response.status === 200) {
-                  const employementStatus = response.data.employmentStatus;
-                  const employeeAge = response.data.dateOfBirth;
-                  if (employementStatus === 0 && (calculateAge(employeeAge) < 65)) {
-                    setCanProjectPension(true);
-                  }
+                const employementStatus = response.data.employmentStatus;
+                const employeeAge = response.data.dateOfBirth;
+                if (employementStatus === 0 && calculateAge(employeeAge) < 65) {
+                  setCanProjectPension(true);
+                }
               } else {
-                  console.error("Unexpeted status:", response.status);
+                console.error("Unexpeted status:", response.status);
               }
-          })
-          .catch(error => {
+            })
+            .catch((error) => {
               console.error("Error:", error);
-          });
+            });
         } catch (error) {
-            console.error("Failed to fetch your employee details:", error)
+          console.error("Failed to fetch your employee details:", error);
         }
       } else {
         console.error("User data may have changed without authorization");
       }
     }
-  }, [baseUrl])
+  }, [baseUrl]);
 
   const calculateAge = (dateOfBirth) => {
-        let today = new Date();
-        let birthDate = new Date(dateOfBirth);
-        let age = today.getFullYear() - birthDate.getFullYear();
-        
-        if (today.getMonth() < birthDate.getMonth()) {
-            age--;
-        } else if ((today.getMonth() === birthDate.getMonth()) && (today.getDay() < birthDate.getDay())){
-            age--;
-        }
+    let today = new Date();
+    let birthDate = new Date(dateOfBirth);
+    let age = today.getFullYear() - birthDate.getFullYear();
 
-        return age;
+    if (today.getMonth() < birthDate.getMonth()) {
+      age--;
+    } else if (
+      today.getMonth() === birthDate.getMonth() &&
+      today.getDay() < birthDate.getDay()
+    ) {
+      age--;
     }
+
+    return age;
+  };
 
   useEffect(() => {
     const handleClickOutside = () => {
@@ -140,14 +144,14 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
     if (showMenu) {
       document.removeEventListener("click", handleClickOutside);
     }
-     
+
     return () => {
       document.removeEventListener("click", handleClickOutside);
     };
   }, [showMenu]);
 
   const toggleMenu = () => {
-    setShowMenu(prev => !prev);
+    setShowMenu((prev) => !prev);
   };
 
   const toggleReport = () => {
@@ -168,7 +172,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   };
 
   const toggleDeductions = (e) => {
-    e.stopPropagation(); 
+    e.stopPropagation();
     setDeductionsOpen((prev) => !prev);
   };
 
@@ -180,17 +184,17 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   const togglePayroll = () => {
     setPayrollOpen((prev) => !prev);
     onAccessDenied && onAccessDenied("");
-  }
+  };
 
   const toggleLeave = () => {
     setLeaveOpen((prev) => !prev);
     onAccessDenied && onAccessDenied("");
-  }
+  };
 
   const togglePayrollInfo = () => {
     setPayInfoOpen((prev) => !prev);
     onAccessDenied && onAccessDenied("");
-  }
+  };
 
   const handleSubmenuClick = (path) => {
     navigate(path);
@@ -198,9 +202,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   };
 
   const menuPaths = {
-    0: [
-      "/personal",
-    ],
+    0: ["/personal"],
     1: [
       "/employeeList",
       "/terminateemployee",
@@ -255,15 +257,17 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                   src="/images/cases.png"
                   alt="Employee Management"
                   className="menu-icon"
-                                                 />
+                />
                 <span className="menu-heading">
                   Employee Management
-                  <span className="menu-dropdown">{reportOpen ? "▲" : "▼"}</span>
+                  <span className="menu-dropdown">
+                    {reportOpen ? "▲" : "▼"}
+                  </span>
                 </span>
               </div>
               {reportOpen && (
                 <ul className="submenu show">
-                   <li>
+                  <li>
                     <span
                       className="menu-subitem"
                       onClick={() => handleSubmenuClick("/employeeList")}
@@ -311,7 +315,9 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                 />
                 <span className="menu-heading">
                   Company Management
-                  <span className="menu-dropdown">{companyOpen ? "▲" : "▼"}</span>
+                  <span className="menu-dropdown">
+                    {companyOpen ? "▲" : "▼"}
+                  </span>
                 </span>
               </div>
               {companyOpen && (
@@ -324,7 +330,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                       Tax Table Management
                     </span>
                   </li>
-              
+
                   <li>
                     <span
                       className="menu-subitem"
@@ -374,7 +380,8 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                   alt="Payroll icon"
                   className="menu-icon"
                 />
-                <span className="menu-heading">Payroll Management
+                <span className="menu-heading">
+                  Payroll Management
                   <span className="menu-dropdown">{payOpen ? "▲" : "▼"}</span>
                 </span>
               </div>
@@ -388,16 +395,24 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                       Earnings
                     </span>
                   </li>
-              
+
                   <li>
-                    <div className="menu-item-wrapper" onClick={toggleDeductions}>
+                    <div
+                      className="menu-item-wrapper"
+                      onClick={toggleDeductions}
+                    >
                       <span>Deductions</span>
-                      <span className="menu-dropdown">{deductionsOpen ? "▲" : "▼"}</span>
+                      <span className="menu-dropdown">
+                        {deductionsOpen ? "▲" : "▼"}
+                      </span>
                     </div>
                     {deductionsOpen && (
                       <ul className="submenu show">
                         <li>
-                          <span className="menu-subitem" onClick={() => handleSubmenuClick("/pension-funds")}>
+                          <span
+                            className="menu-subitem"
+                            onClick={() => handleSubmenuClick("/pension-funds")}
+                          >
                             Pension Funds
                           </span>
                         </li>
@@ -420,14 +435,15 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                       </ul>
                     )}
                   </li>
-                                    
+
                   <li>
                     <span
                       className="menu-subitem"
-                      onClick={() => handleSubmenuClick("/company-contributions")}
+                      onClick={() =>
+                        handleSubmenuClick("/company-contributions")
+                      }
                     >
                       Company Contributions
-                    
                     </span>
                   </li>
                   <li>
@@ -453,13 +469,12 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                     >
                       Stock
                     </span>
-                  
                   </li>
                 </ul>
               )}
             </li>
           )}
-          
+
           {/* Document Management */}
           {permissions.isAdmin && (
             <li>
@@ -514,7 +529,9 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                 />
                 <span className="menu-heading">
                   Payroll Information
-                  <span className="menu-dropdown">{payInfoOpen ? "▲" : "▼"}</span>
+                  <span className="menu-dropdown">
+                    {payInfoOpen ? "▲" : "▼"}
+                  </span>
                 </span>
               </div>
               {payInfoOpen && (
@@ -556,18 +573,11 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                       Leave Application
                     </span>
                   </li>
+
                   <li>
                     <span
                       className="menu-subitem"
-                      onClick={() => handleSubmenuClick("/leave-balance")}
-                    >
-                      Leave Balance
-                    </span>
-                  </li>
-                  <li>
-                    <span
-                      className="menu-subitem"
-                      onClick={() => handleSubmenuClick("/history")}
+                      onClick={() => handleSubmenuClick("/leave-history")}
                     >
                       History
                     </span>
@@ -588,7 +598,9 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                 />
                 <span className="menu-heading">
                   Payroll Tools
-                  <span className="menu-dropdown">{payrollOpen ? "▲" : "▼"}</span>
+                  <span className="menu-dropdown">
+                    {payrollOpen ? "▲" : "▼"}
+                  </span>
                 </span>
               </div>
               {canProjectPension && payrollOpen && (
@@ -596,19 +608,20 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                   <li>
                     <span
                       className="menu-subitem"
-                      onClick={() => handleSubmenuClick("/projection-calculator")}
+                      onClick={() =>
+                        handleSubmenuClick("/projection-calculator")
+                      }
                     >
                       Projection Calculator
                     </span>
                   </li>
                 </ul>
               )}
-            </li> 
+            </li>
           )}
         </ul>
-                 
       </div>
-      
+
       <div className="menu-footer">
         <img
           src="/images/setitngs_icon.png"
@@ -617,42 +630,42 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
         />
         {/* Container for user details */}
         <div className="user-details-container">
-          <div className="menu-initials-circle" onClick={(e) => {
-            e.stopPropagation();
-            toggleMenu();
-          }}>
-            
+          <div
+            className="menu-initials-circle"
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleMenu();
+            }}
+          >
             {initials}
             {showMenu && (
-                <div className="user-dropdown">
-                  <button
-                    className="dropdown-item"
-                    onClick={() => {
-                      setShowMenu(false);
-                      navigate("/changePassword");
-                    }}
-                  >
-                    Change Password
-                  </button>
+              <div className="user-dropdown">
+                <button
+                  className="dropdown-item"
+                  onClick={() => {
+                    setShowMenu(false);
+                    navigate("/changePassword");
+                  }}
+                >
+                  Change Password
+                </button>
 
-                  <button
-                    className="dropdown-item logout"
-                    onClick={() => {
-                      setShowMenu(false);
-                      onLogout();
-                    }}
-                  >
-                    Logout
-                  </button>
-                </div>
-              )}
+                <button
+                  className="dropdown-item logout"
+                  onClick={() => {
+                    setShowMenu(false);
+                    onLogout();
+                  }}
+                >
+                  Logout
+                </button>
+              </div>
+            )}
           </div>
           <div className="user-text-details">
-            <div className="user-full-name">
-              {displayName}
-            </div>
+            <div className="user-full-name">{displayName}</div>
             <div className="user-job-title">
-    {/*Create positions endpoint*/} 
+              {/*Create positions endpoint*/}
               {currentUser?.role}
             </div>
           </div>
