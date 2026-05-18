@@ -98,5 +98,16 @@ namespace HRConnect.Api.Repository
               .FirstOrDefaultAsync(c => c.ContactNumber == contactNumber);
     }
 
+    /// <summary>
+    /// Retrieves a company by its name.
+    /// </summary>
+    /// <param name="companyName">The name of the company.</param>
+    /// <returns>The matching Company entity, or null if not found.</returns>
+    public async Task<Company?> GetCompanyByNameAsync(string companyName)
+    {
+      return await _context.Companies
+              .FirstOrDefaultAsync(c => c.CompanyName == companyName);
+    }
+
   }
 }

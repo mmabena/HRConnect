@@ -134,7 +134,10 @@ namespace HRConnect.Api.Services
       if (!string.IsNullOrWhiteSpace(companyRequestDto.VATNumber) &&
           await _companyRepo.GetCompanyByVATAsync(companyRequestDto.VATNumber) != null)
         throw new BusinessRuleException("A company with the same VAT number already exists");
-        
+
+      if (!string.IsNullOrWhiteSpace(companyRequestDto.CompanyName) &&
+          await _companyRepo.GetCompanyByNameAsync(companyRequestDto.CompanyName) != null)
+        throw new BusinessRuleException("A company with the same company name already exists");
 
       if (!string.IsNullOrWhiteSpace(companyRequestDto.ContactNumber) &&
           await _companyRepo.GetCompanyByContactNumberAsync(companyRequestDto.ContactNumber) != null)

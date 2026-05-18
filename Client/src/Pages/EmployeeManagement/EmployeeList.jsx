@@ -99,7 +99,7 @@ const EmployeeList = () => {
                   <input
                     type="text"
                     className="search-input"
-                    placeholder="Search text"
+                    placeholder="Search employees..."
                     value={searchQuery}
                     onChange={(e) => {
                       setSearchQuery(e.target.value);

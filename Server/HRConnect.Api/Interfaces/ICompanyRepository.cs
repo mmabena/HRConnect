@@ -12,12 +12,11 @@ namespace HRConnect.Api.Interfaces
     Task<Company?> GetCompanyByIdAsync(string companyId);
     Task<Company> CreateCompanyAsync(Company companyModel);
     Task<List<string>> GetAllCompanyIdsWithPrefix(string prefix);
-
-
     Task<Company?> GetCompanyByRegNumberAsync(string regNumber);
     Task<Company?> GetCompanyByUIFAsync(string uifNumber);
     Task<Company?> GetCompanyByVATAsync(string vatNumber);
     Task<Company?> GetCompanyByContactNumberAsync(string contactNumber);
+    Task<Company?> GetCompanyByNameAsync(string companyName);
 
 
 

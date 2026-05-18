@@ -61,29 +61,45 @@
 }
 
 .CL-search-bar-container {
-  display: flex;
+  gap: 4px;
+  flex: 1 0 0;
+  left: 215%;
+  flex-direction: row;
+  width: 360px;
+  height: 56px;
+  gap: 22px;
   align-items: center;
-  gap: 10px;
-  width: 320px;
-  height: 40px;
-  padding: 0 12px;
-  background: #ffffff;
-  border: 1px solid #dcdcdc;
+  display: flex;
+  min-width: 360px;
+  max-width: 720px;
   border-radius: 8px;
+  background: rgba(53, 88, 103, 0.17);
+  box-sizing: border-box;
+  padding: 0 6px;
 }
 
 .CL-search-icon {
-  width: 18px;
-  height: 18px;
-  opacity: 0.6;
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
 }
 
 .CL-search-input {
-  border: none;
-  outline: none;
   width: 100%;
-  font-size: 14px;
+  height: 100%;
+  border: none;
   background: transparent;
+  font-size: 16px;
+  padding: 0 8px;
+  font-family: 'Anek Bangla', sans-serif;
+  color: #49454F;
+  outline: none;
+}
+
+.CL-search-input::placeholder
+{
+  color: #49454F;
+  opacity: 1;
 }
 
 .CL-add-company-button {

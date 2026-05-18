@@ -48,6 +48,20 @@ const CompanyList = () => {
           </div>
 
           <div className="CL-company-header-right">
+            <div className="CL-search-bar-container">
+            <img
+              src="/images/search.svg"
+              alt="Search"
+              className="CL-search-icon"
+            />
+            <input
+              type="text"
+              className="CL-search-input"
+              placeholder="Search companies..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
             {/* (Optional future actions area) */}
           </div>
         </div>
@@ -63,20 +77,10 @@ const CompanyList = () => {
 
         {/* Top Controls */}
         <div className="CL-company-header-row">
-          <div className="CL-search-bar-container">
-            <img
-              src="/images/search.svg"
-              alt="Search"
-              className="CL-search-icon"
-            />
-            <input
-              type="text"
-              className="CL-search-input"
-              placeholder="Search companies..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+          <div>
+            
           </div>
+          
 
           <button
             className="CL-add-company-button"
