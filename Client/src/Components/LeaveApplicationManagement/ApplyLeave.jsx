@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getEmployeeLeave, applyLeave } from "../../api/leaveApplicationApi";
-import { Upload, Check, ArrowLeft } from "lucide-react";
+import { Upload, Check, ArrowLeft, Trash2 } from "lucide-react";
 import "./ApplyLeave.css";
 import LeaveHistory from "./LeaveHistory";
 
@@ -67,6 +67,9 @@ const ApplyLeave = () => {
         newErrors.startDate = "Start date cannot be after end date";
         newErrors.endDate = "End date cannot be before start date";
       }
+    }
+    if (selectedBalance && requestedDays > selectedBalance.availableDays) {
+      newErrors.leaveBalance = "Requested leave days exceed available balance";
     }
 
     // Description
@@ -285,6 +288,10 @@ const ApplyLeave = () => {
                 />
               </div>
             </div>
+
+            {errors.leaveBalance && (
+              <span className="error-text">{errors.leaveBalance}</span>
+            )}
           </div>
           <div className="section">
             <p className="section-title">SUPPORTING INFORMATION</p>
@@ -323,11 +330,41 @@ const ApplyLeave = () => {
                 />
 
                 <div className="upload-content">
-                  <Upload className="upload-icon" />
+                  {files.length === 0 ? (
+                    <>
+                      <Upload className="upload-icon" />
 
-                  <p>Click to upload or drag a file here</p>
+                      <p>Click to upload or drag a file here</p>
 
-                  <small>PDF, JPG or PNG - max 5MB</small>
+                      <small>PDF, JPG or PNG - max 5MB</small>
+                    </>
+                  ) : (
+                    <div className="uploaded-files">
+                      {files.map((file, index) => (
+                        <div key={index} className="uploaded-file-item">
+                          <div className="uploaded-file-left">
+                            <Check className="file-check-icon" />
+
+                            <span className="uploaded-file-name">
+                              {file.name}
+                            </span>
+                          </div>
+
+                          <button
+                            type="button"
+                            className="remove-file-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+
+                              setFiles(files.filter((_, i) => i !== index));
+                            }}
+                          >
+                            <Trash2 className="remove-file-icon" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
               {errors.documents && (
