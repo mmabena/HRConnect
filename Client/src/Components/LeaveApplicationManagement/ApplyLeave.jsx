@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { getEmployeeLeave, applyLeave } from "../../api/leaveApplicationApi";
+import { Upload, Check, ArrowLeft } from "lucide-react";
 import "./ApplyLeave.css";
+import LeaveHistory from "./LeaveHistory";
 
 const ApplyLeave = () => {
   const [leaveData, setLeaveData] = useState(null);
@@ -8,6 +10,8 @@ const ApplyLeave = () => {
   const [description, setDescription] = useState("");
   const [files, setFiles] = useState([]);
   const employee = JSON.parse(localStorage.getItem("currentEmployee"));
+  const [showHistory, setShowHistory] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const selectedBalance = leaveData?.leaveBalances?.find(
     (l) => l.leaveTypeId === Number(selectedLeaveId),
@@ -36,9 +40,69 @@ const ApplyLeave = () => {
       ? (selectedBalance.availableDays - requestedDays).toFixed(2)
       : null;
   const safeRemaining = remainingBalance < 0 ? 0 : remainingBalance;
+  const validateForm = () => {
+    const newErrors = {};
+
+    // Leave type
+    if (!selectedLeaveId) {
+      newErrors.leaveType = "Leave type is required";
+    }
+
+    // Start date
+    if (!startDate) {
+      newErrors.startDate = "Start date is required";
+    }
+
+    // End date
+    if (!endDate) {
+      newErrors.endDate = "End date is required";
+    }
+
+    // Date comparison
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+
+      if (start > end) {
+        newErrors.startDate = "Start date cannot be after end date";
+        newErrors.endDate = "End date cannot be before start date";
+      }
+    }
+
+    // Description
+    if (!description.trim()) {
+      newErrors.description = "Description is required";
+    }
+    const selectedLeave = leaveData?.leaveBalances?.find(
+      (l) => l.leaveTypeId === Number(selectedLeaveId),
+    );
+
+    const isAnnualLeave =
+      selectedLeave?.leaveType?.toLowerCase() === "annual leave";
+
+    // Supporting document required for non-annual leave
+    if (!isAnnualLeave && files.length === 0) {
+      newErrors.documents =
+        "Supporting document is required for this leave type";
+    }
+
+    // Allowed file types
+    const allowedTypes = ["image/png", "image/jpeg", "application/pdf"];
+
+    const invalidFile = files.find((file) => !allowedTypes.includes(file.type));
+
+    if (invalidFile) {
+      newErrors.documents = "Only PNG, JPG, JPEG and PDF files are allowed";
+    }
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
   const handleSubmit = async () => {
     if (isSubmitting) return;
-
+    if (!validateForm()) {
+      return;
+    }
     setIsSubmitting(true);
 
     try {
@@ -83,6 +147,7 @@ const ApplyLeave = () => {
       year: "numeric",
     });
   };
+
   useEffect(() => {
     const fetchLeave = async () => {
       const employee = JSON.parse(localStorage.getItem("currentEmployee"));
@@ -96,6 +161,9 @@ const ApplyLeave = () => {
 
     fetchLeave();
   }, []);
+  if (showHistory) {
+    return <LeaveHistory />;
+  }
   return (
     <div className="leave-page">
       <div className="apply-header">
@@ -106,7 +174,10 @@ const ApplyLeave = () => {
           </p>
         </div>
 
-        <button className="back-btn">← Back to History</button>
+        <button className="back-btn" onClick={() => setShowHistory(true)}>
+          <ArrowLeft className="back-icon" />
+          Back to History
+        </button>
       </div>
 
       <div className="apply-grid">
@@ -128,6 +199,9 @@ const ApplyLeave = () => {
                   </option>
                 ))}
               </select>
+              {errors.leaveType && (
+                <span className="error-text">{errors.leaveType}</span>
+              )}
             </div>
 
             <div className="row date-row">
@@ -179,6 +253,13 @@ const ApplyLeave = () => {
                 </div>
               </div>
             </div>
+
+            {errors.startDate && (
+              <span className="error-text">{errors.startDate}</span>
+            )}
+            {errors.endDate && (
+              <span className="error-text2">{errors.endDate}</span>
+            )}
             <div className="row">
               <div className="form-group">
                 <label>Number of Days</label>
@@ -216,6 +297,9 @@ const ApplyLeave = () => {
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Briefly describe the reason for your leave request..."
               />
+              {errors.description && (
+                <span className="error-text">{errors.description}</span>
+              )}
             </div>
 
             <div className="form-group">
@@ -239,17 +323,16 @@ const ApplyLeave = () => {
                 />
 
                 <div className="upload-content">
-                  <img
-                    src="/images/arrow_upload_ready.png"
-                    alt="upload icon"
-                    className="upload-icon"
-                  />
+                  <Upload className="upload-icon" />
 
                   <p>Click to upload or drag a file here</p>
 
                   <small>PDF, JPG or PNG - max 5MB</small>
                 </div>
               </div>
+              {errors.documents && (
+                <span className="error-text">{errors.documents}</span>
+              )}
             </div>
           </div>
         </div>
@@ -348,9 +431,24 @@ const ApplyLeave = () => {
           onClick={handleSubmit}
           disabled={isSubmitting}
         >
-          {isSubmitting ? "Submitting..." : "✓ Submit Application"}
+          <Check className="submit-icon" />
+
+          {isSubmitting ? "Submitting..." : "Submit Application"}
         </button>
-        <button className="cancel-btn">Cancel</button>
+
+        <button
+          className="cancel-btn"
+          onClick={() => {
+            setSelectedLeaveId("");
+            setDescription("");
+            setFiles([]);
+            setStartDate("");
+            setEndDate("");
+            setErrors({});
+          }}
+        >
+          Cancel
+        </button>
       </div>
     </div>
   );

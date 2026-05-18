@@ -10,8 +10,8 @@
   height: 80px;
 
   position: relative;
-  top: 3px;
-  left: 5px;
+  top: 15px;
+  left: 50px;
 }
 
 .apply-header > div {
@@ -79,9 +79,16 @@
   font-family: 'Anek Bangla';
   font-size: 20px;           
   line-height: 37px;         
-
   border: none;
   cursor: pointer;
+  gap: 8px;
+}
+.back-icon {
+  width: 24px;
+  height: 24px;
+
+  flex: none;
+  margin: 0 -1px;
 }
 .apply-grid {
   box-sizing: border-box;
@@ -91,8 +98,8 @@
   gap: 40px;
 
   position: relative;
-  left: 55px;
-  top: 0px;
+  left: 100px;
+  top: 20px;
 
   width: calc(100% - 55px);
   max-width: 1450px;
@@ -171,93 +178,12 @@
 
   background: #ffffff;
 }
-.row,
-.date-row {
-  display: flex;
-  align-items: flex-start;
 
-  gap: 67px;
-
-  width: 100%;
-
-  margin-top: 15px;
-}
-
-.row .form-group {
-  width: 380px;
-  max-width: 380px;
-
-  flex: unset;
-}
-.row .form-group .input {
-  width: 335px;
-}
-.date-row .date-wrapper {
-  position: relative;
-  left: -10px;
-}
-.form-group label {
-  font-family: 'Anek Bangla';
-  font-size: 16px;
-  line-height: 26px;
-
-  color: #002D40;
-
-  display: block;
-  margin-bottom: 5px;
-}
-.input.disabled {
-  background: rgba(154, 154, 154, 0.15);
-  border: none;
-
-  height: 40px;
-
-  padding: 5px 10px;
-
-  border-radius: 5px;
-
-  font-family: 'Anek Bangla';
-  font-size: 16px;
-  line-height: 30px;
-  letter-spacing: 0.02em;
-
-  color: #4F6E78;
-}
-.row .form-group:nth-child(2) .input.disabled {
-  background: rgba(197, 206, 211, 0.5);
-
-  font-family: 'Anek Bangla';
-  font-weight: 400;
-  font-size: 16px;
-  line-height: 30px;
-  letter-spacing: 0.02em;
-
-  color: #355867
-}
-input:disabled {
-  -webkit-text-fill-color: inherit; 
-  opacity: 1;                        
-}
-.apply-left .row .form-group:nth-child(2) input.input.disabled {
-  background: rgba(197, 206, 211, 0.5);
-  color: #355867;
-}
-.form-group label {
-  font-family: 'Anek Bangla';
-  font-weight: 400;
-  font-size: 15px;
-  line-height: 26px;
-
-  color: #002D40;
-
-  display: block;
-  margin-bottom: 5px;
-}
 .textarea {
   box-sizing: border-box;
 
-  width: 100%;
-  height: 87px;
+  width: 760px;
+  height: 93px;
 
   background: rgba(255, 255, 255, 0.38);
   border: 1.5px solid rgba(0, 45, 64, 0.41);
@@ -271,7 +197,7 @@ input:disabled {
 
   color: #002D40;
 
-  resize: none; 
+  resize: none;
   outline: none;
 }
 .textarea::placeholder {
@@ -299,7 +225,7 @@ input:disabled {
 
   gap: 5px;
   text-align: center;
-  padding-top: 16px;
+  padding-top: 20px;
 }
 .upload-content p {
   font-family: 'Anek Bangla';
@@ -323,10 +249,10 @@ input:disabled {
   justify-content: flex-start;
   align-items: center;
 
-  gap: 426px;
+  gap: 470px;
 
   width: 100%;          
-  margin-top: 20px;    
+  margin-top: 35px;    
 }
 .submit-btn {
   display: flex;
@@ -351,16 +277,38 @@ input:disabled {
   line-height: 37px;
   letter-spacing: 0.02em;
   position: relative;
-  left: 55px;
+  left: 100px;
 
   color: #FFFFFF;
+}
+.submit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+}
+
+.submit-icon {
+  width: 20px;
+  height: 20px;
+
+  flex: none;
+  margin: 0 -1px;
+}
+
+.cancel-btn:hover {
+  background: #D9D9D9;
+  border-color: #BDBDBD;
+
+  color: #5C5C5C;
 }
 .cancel-btn {
   display: flex;
   justify-content: center;
   align-items: center;
 
-  padding: 0px 10px 5px;
+  padding: 0px 10px 0px;
 
   width: 169px;
   height: 47px;
@@ -387,10 +335,10 @@ input:disabled {
   display: flex;
   flex-direction: column;
 
-  gap: 24px;
+  gap: 50px;
 
   position: relative;
-  left: 0;
+  left: 100px;
   top: 0;
 }
 .card {
@@ -407,8 +355,14 @@ input:disabled {
   font-size: 16px;
   color: #4F6E78;
 
-  margin-bottom: 15px;
+  position: relative;
+
+  margin: 0 0 15px 0;
+
+  text-align: left;
+  align-self: flex-start;
 }
+
 .progress-item {
   display: flex;
   flex-direction: column;
@@ -466,7 +420,7 @@ input:disabled {
   gap: 12px;
 
   width: 501px;
-  height: 336px;
+  height: 310px;
 
   background: rgba(255, 255, 255, 0.8);
   border: 1px solid rgba(0, 0, 0, 0.25);
@@ -509,6 +463,10 @@ input:disabled {
   border-radius: 50%;
   background: #4F6E78;
 }
+.policy-list {
+  position: relative;
+  top: -20px;
+}
 .progress-item {
   display: flex;
   flex-direction: column;
@@ -531,6 +489,7 @@ input:disabled {
   font-family: "Anek Bangla";
   font-size: 13px;
   color: #4f6e78;
+  
 }
 
 .progress-track {
@@ -574,12 +533,12 @@ select.input {
 }
 .date-wrapper {
   position: relative;
- left: 0px;
-  width: 336px;
+  left: 0px;
+  width: 355px;
 }
 
 .date-input {
-  width: 100%;
+  width: 355px;
   height: 40px;
 
   box-sizing: border-box;
@@ -647,4 +606,163 @@ select.input {
   pointer-events: none;
 
   z-index: 1;
+}
+.date-input::-webkit-datetime-edit,
+.date-input::-webkit-datetime-edit-text,
+.date-input::-webkit-datetime-edit-month-field,
+.date-input::-webkit-datetime-edit-day-field,
+.date-input::-webkit-datetime-edit-year-field {
+  color: transparent;
+}
+.date-input:focus {
+  outline: none;
+}
+.apply-left > .row:not(.date-row) {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 62px;
+
+  width: 782px;
+  height: 89px;
+
+  margin-top: 6px;
+}
+
+.apply-left > .row:not(.date-row) .form-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  padding: 0px 5px 5px;
+
+  width: 360px;
+  height: 83px;
+
+  box-sizing: border-box;
+
+  border-radius: 5px;
+}
+
+.apply-left > .row:not(.date-row) .form-group label {
+  display: flex;
+  align-items: center;
+
+  width: 350px;
+  height: 38px;
+
+  margin: 0;
+
+  font-family: 'Anek Bangla';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 26px;
+
+  color: #002D40;
+}
+
+.row .input.disabled {
+  display: flex;
+  align-items: center;
+
+  width: 355px;
+  height: 40px;
+
+  padding: 5px 10px;
+
+  border: none;
+  border-radius: 5px;
+
+  font-family: 'Anek Bangla';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 30px;
+  letter-spacing: 0.02em;
+
+  box-sizing: border-box;
+}
+
+.row .form-group:first-child .input.disabled {
+  background: rgba(154, 154, 154, 0.15);
+
+  color: #4F6E78;
+}
+
+.row .form-group:last-child .input.disabled {
+  background: rgba(197, 206, 211, 0.5);
+
+  color: #355867;
+}
+
+input:disabled {
+  -webkit-text-fill-color: inherit;
+  opacity: 1;
+}
+.row {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 67px;
+}
+
+.row .form-group {
+  display: flex;
+  flex-direction: column;
+
+  width: 337px;
+}
+.upload-box {
+  box-sizing: border-box;
+
+  width: 760px;
+  height: 111px;
+
+  background: rgba(255, 255, 255, 0.38);
+  border: 1.5px dashed rgba(0, 45, 64, 0.73);
+  border-radius: 5px;
+
+  position: relative;
+}
+.upload-box {
+  position: relative;
+}
+.upload-icon {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  margin-top: -30px;
+  left: 365px;
+  top: 15px;
+  color: #707070;
+  stroke-width: 1.8;
+}
+.progress-item:last-child {
+  border-bottom: none;
+}
+
+.policy-list li:last-child {
+  border-bottom: none;
+}
+.error-text {
+  display: block;
+  margin-top: 4px;
+  font-family: 'Anek Bangla';
+  font-size: 13px;
+  line-height: 18px;
+  color: #E12528;
+}
+.error-text2 {
+  display: block;
+
+  margin-top: 2px;
+
+  font-family: 'Anek Bangla';
+  font-size: 13px;
+  line-height: 18px;
+  position: absolute;
+  margin-left: 405px;
+
+  color: #E12528;
 }
