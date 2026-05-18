@@ -8,6 +8,7 @@ namespace HRConnect.Api.Mappers.Notification
     {
       return new NotificationDto
       {
+        NotificationId = notificationModel.NotificationId,
         Subject = notificationModel.Subject,
         Message = notificationModel.Message,
         IsRead = notificationModel.IsRead,

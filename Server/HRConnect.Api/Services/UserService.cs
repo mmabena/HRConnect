@@ -132,7 +132,7 @@ namespace HRConnect.Api.Services
       //SendTotpAndNotify
       var updatedUser = await _userRepo.UpdateUserAsync(id, existing);
 
-#line 135 "UserService,cs)"
+#line 135 "UserService.cs)"
       await _otpService.SendTotpAndNotify(id);
       Console.ForegroundColor = ConsoleColor.Red;
       Console.WriteLine($"Role of updatedUser->{updatedUser?.Role} vs New Role->{updatedUser?.TempRole}");

@@ -12,27 +12,40 @@ namespace HRConnect.Api.Controllers
   public class NotificationController : ControllerBase
   {
     private readonly INotificationService _notificationService;
-    private readonly IUserService _userService;
-    public NotificationController(INotificationService notificationService,
-    IUserService userService)
+    // private readonly IUserService _userService;
+    public NotificationController(INotificationService notificationService
+    /*IUserService userService*/)
     {
       _notificationService = notificationService;
-      _userService = userService;
+      // _userService = userService;
     }
 
     [Authorize(Roles = "SuperUser")]
-    [HttpGet("payroll/{userId}")]
-    public async Task<ActionResult<IList<NotificationDto>>> GetAllPayrollNotifications(int userId)
+    [HttpGet("payroll/{employeeId}")]
+    public async Task<IActionResult> GetAllPayrollNotifications(string employeeId)
     {
-      var notifications = await _notificationService.GetAllEmployeeNotificationsByTypeAsync(NotificationType.Payroll, $"{userId}");
+      var notifications = await _notificationService.GetAllEmployeeNotificationsByTypeAsync(NotificationType.Payroll,
+      employeeId);
 
       if (!notifications.Any())
-        return NotFound();
+        return NotFound("No Notifications To Show");
+      return Ok(notifications);
+    }
+
+    [Authorize(Roles = "SuperUser")]
+    [HttpGet("tax/{employeeId}")]
+    public async Task<IActionResult> GetAllTaxNotifications(string employeeId)
+    {
+      var notifications = await _notificationService.GetAllEmployeeNotificationsByTypeAsync(NotificationType.TaxUpload
+      , employeeId);
+
+      if (!notifications.Any())
+        return NotFound($"No Notifications To Show");
       return Ok(notifications);
     }
 
     [HttpGet("{employeeId}")]
-    public async Task<ActionResult<IList<NotificationDto>>> GetEmployeeNotifications(string employeeId)
+    public async Task<IActionResult> GetEmployeeNotifications(string employeeId)
     {
       var notifications = await _notificationService.GetEmployeeNotificationsAsync(employeeId);
       if (!notifications.Any())
@@ -40,5 +53,13 @@ namespace HRConnect.Api.Controllers
       return Ok(notifications);
     }
 
+    [HttpDelete("{employeeId}/{id}")]
+    public async Task<IActionResult> DeleteNotificationById(string employeeId, int id)
+    {
+      bool isDeleted = await _notificationService.DeleteNotificationByIdAsync(employeeId, id);
+      if (!isDeleted)
+      { return NotFound(); }
+      return Ok("Notification Deleted");
+    }
   }
 }

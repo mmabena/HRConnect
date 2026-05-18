@@ -155,6 +155,17 @@ namespace HRConnect.Api.Repository
       return await _context.Notifications.Where(n => n.EmployeeId == employeeId)
         .ExecuteDeleteAsync() > 0;
     }
+    public async Task<bool> DeleteNotificationByIdAsync(string employeeId, int id)
+    {
+      var notification = await _context.Notifications.Where(n => n.EmployeeId == employeeId)
+      .FirstOrDefaultAsync(n => n.NotificationId == id);
 
+      if (notification == null)
+        return false;
+
+      _ = _context.Notifications.Remove(notification);
+      await _context.SaveChangesAsync();
+      return true;
+    }
   }
 }

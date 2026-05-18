@@ -50,11 +50,12 @@ namespace HRConnect.Api.Utils.Jobs.Notification
 
       // Swap this in when pushing to main 
       // int daysUntilRollover = (payrollExecutionDate.Value.Date - DateTime.Now).Days;
-
+#line 53 "(NotificationJob.cs)"
       int secondsUntilRollover = (DateTime.Now - payrollExecutionDate.Value).Seconds;
       Console.WriteLine($"====SECONDS UNTIL ROLLOVER {secondsUntilRollover}");
       Console.WriteLine($"====SECONDS FROM PAYROLL EXECUTION DATE {payrollExecutionDate.Value.Second}");
       Console.WriteLine($"====Now {DateTime.Now.Second}");
+#line default
       if (secondsUntilRollover > 0)
       {
         var superUserIds = await OrganiseSuperUsersAsync();

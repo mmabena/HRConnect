@@ -1,12 +1,16 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import {toast} from "react-toastify";
 import {
   fetchNotifications,
   markAsRead,
   markAllAsRead,
   deleteNotification,
+  NotificationDto,
+  fetchAllNotifications,
 } from "./notificationsApi";
 import "./NotificationPage.css";
+import { fetchAllEmployees } from "../../api/Employee";
 
 // ─── Meta maps ────────────────────────────────
 const TYPE_META = {
@@ -23,6 +27,7 @@ const NotificationPage = () => {
   const role     = location.state?.role || "normaluser";
 
   const [notifications, setNotifications] = useState([]);
+  const [notis,setNotis]                  =useState([])
   const [loading, setLoading]             = useState(true);
   const [error,   setError]               = useState(null);
   const [activeTab,   setActiveTab]       = useState("all");
@@ -43,6 +48,29 @@ const NotificationPage = () => {
   }, [role]);
 
   useEffect(() => { loadNotifications(); }, [loadNotifications]);
+// Testing fetching notis
+const loadNotis=async()=>{
+
+    try{
+        const currentEmployee=localStorage.getItem("currentEmployee");
+        const employee=JSON.parse(currentEmployee);
+        console.log(`EMPLOYEE ID BEING USED ${employee.employeeId}`)
+        const notiData=await fetchAllNotifications(employee.employeeId); 
+
+        if(!notiData.ok)
+            toast.error("No Notifications")
+        setNotis(notiData);
+    }
+    catch(error)
+    {
+        console.error(`Failed to load noti data in component: ${error}`)
+    }
+}
+useEffect(()=>{
+    loadNotis();
+    console.log(`LOADED NOTIS`)
+    console.log(notis)
+},[notis])
 
   // ── Derived ─────────────────────────────────
   const unreadCount = notifications.filter((n) => !n.read).length;

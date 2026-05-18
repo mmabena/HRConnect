@@ -3,6 +3,7 @@ namespace HRConnect.Api.DTOs.Notification
   using HRConnect.Api.Models;
   public class NotificationDto
   {
+    public int NotificationId { get; set; }
     public string Message { get; set; } = string.Empty;
     public string Subject { get; set; } = string.Empty;
     public bool IsRead { get; set; }

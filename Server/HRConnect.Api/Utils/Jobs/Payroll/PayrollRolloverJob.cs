@@ -33,7 +33,7 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
     private readonly IEmployeePensionEnrollmentService _employeePensionEnrollmentService;
     private readonly IServiceProvider _serviceProvider;
     private readonly IReportsService _reportsService;
-    private readonly ICompanyContributionRepository _contributionRepo;
+    // private readonly ICompanyContributionService contributionService;
     private readonly IUserService _userService;
     private readonly IEmployeeService _employeeService;
     private readonly INotificationService _notificationsService;
@@ -45,8 +45,8 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
 
     public PayrollRolloverJob(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService, IServiceProvider serviceProvider,
       IEmployeePensionEnrollmentService employeePensionEnrollmentService,
-      IReportsService reportsService, ICompanyContributionRepository contributionRepo,
-      IUserService userService, IEmployeeService employeeService,
+      IReportsService reportsService, IUserService userService,
+      IEmployeeService employeeService,
       IEmployeePayrollEarningService employeePayrollEarningService,
       IEmployeeDeductionService employeeDeductionService,
       INotificationService notificationsService, Func<DateTime>? now = null)
@@ -54,7 +54,6 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
       _payrollRunRepo = payrollRunRepo;
       _payrollPeriodService = payrollPeriodService;
       _reportsService = reportsService;
-      _contributionRepo = contributionRepo;
       _serviceProvider = serviceProvider;
       _employeePensionEnrollmentService = employeePensionEnrollmentService;
       _userService = userService;
@@ -225,17 +224,18 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
       await _employeePensionEnrollmentService.RollOverEmloyeePensionEnrollmentAsync();
       await _employeePayrollEarningService.RollOverEmployeePayrollEarningsAsync();
       await _employeeDeductionService.RollOverEmployeePayrollEarningsAsync();
-      await RolloverPayrollDeductions();
+      await RolloverPensionDeductions();
     }
 
     private async Task AllocateCompanyContributionsIfNeeded(int payrollRunId)
     {
-      bool alreadyAllocated = await _contributionRepo.FindAllocatedContribution(payrollRunId);
+      using var scope = _serviceProvider.CreateScope();
+      // bool alreadyAllocated = await _contributionRepo.FindAllocatedContribution(payrollRunId);
+      var companyContributionService = scope.ServiceProvider.GetRequiredService<ICompanyContributionService>();
 
+      bool alreadyAllocated = await companyContributionService.FindAllocatedContribution(payrollRunId);
       if (alreadyAllocated)
         return;
-
-      using var scope = _serviceProvider.CreateScope();
 
       var allocationService = scope.ServiceProvider
         .GetRequiredService<ICompanyContributionAllocationService>();
@@ -246,7 +246,7 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
     ///<summary>
     ///Auxilary function to rollover pay roll records
     ///</summary>
-    private async Task RolloverPayrollDeductions()
+    private async Task RolloverPensionDeductions()
     {
       using IServiceScope pensionDeductionServiceScope = _serviceProvider.CreateScope();
 

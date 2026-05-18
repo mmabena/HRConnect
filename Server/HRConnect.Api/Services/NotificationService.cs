@@ -138,6 +138,13 @@ namespace HRConnect.Api.Services
     {
       return await _notificationRepository.DeleteAllByEmployeeId(employeeId);
     }
+    public async Task<bool> DeleteNotificationByIdAsync(string employeeId, int id)
+    {
+      var deletedEntry = await _notificationRepository.DeleteNotificationByIdAsync(employeeId, id);
+      if (!deletedEntry)
+        return false;
 
+      return true;
+    }
   }
 }

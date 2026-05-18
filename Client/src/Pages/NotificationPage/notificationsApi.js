@@ -12,18 +12,42 @@ const delay = (ms = 350) => new Promise((res) => setTimeout(res, ms));
 const BASE_URL="http://localhost:5147/api";
 
 // Priority weight – lower = shown first
-const SERVERITY = {
+const SEVERITY = {
   CRITICAL: 0,
   WARNING:1,
   INFORMATION: 2,
 };
 const NOTIFICATION_TYPE={
-    PAYROLL:1,
-    TAXUPLOAD:2,
-    RoleUpdate:3,
-    LeaveRequest:4,
-    LeaveRequestResponse:5,
-    General:6
+    PAYROLL:"Payroll",
+    TAXUPLOAD:"TaxUpload",
+    RoleUpdate:"RoleUpdate",
+    LeaveRequest:"LeaveRequest",
+    LeaveRequestResponse:"LeaveRequestResponse",
+    General:"General"
+}
+//Notification DTO only to be used for InApp notifications
+export class NotificationDto{
+// id:Number;
+// message:String;//subject
+// details:String;//msg
+// type:NOTIFICATION_TYPE;
+// priority:SEVERITY;
+// time:Date;
+    constructor(severity,type,rest){
+         //Type and Severity Have to be strictly maintained
+         if(!Object.values(NOTIFICATION_TYPE).includes(type))
+             throw new Error("Failed to assign types to notifications");
+     
+         if(!Object.values(SEVERITY).includes(severity))
+             throw new Error("Failed to assign types to notifications");
+         this.severity=severity;
+         this.type=type;
+         Object.assign(this,rest);
+    }
+}
+function toNotificationDto(data){
+    const {severity,type,...rest}=data;
+    return new NotificationDto(severity,type,rest);
 }
 // ── Seed data ────────────────────────────────
 let _db = [
@@ -163,15 +187,23 @@ let _db = [
  * GET /api/notifications/{employeeId}=
  * Returns notifications for the given employee, sorted by priority.
  */
-export const fetchAllNotification=async(employeeId)=>{
+export const fetchAllNotifications=async(employeeId)=>{
     try{
-        const response=await fetch(`${BASE_URL}/notification/${employeeId}`)
+        const response=await fetch(`${BASE_URL}/notifications/${employeeId}`)
+
+        if(!response.ok){
+            const err =await response.text();
+            throw new Error(`Failed to fetch all notification: ${err}`);
+        }
+        const notifications=await response.json();
+        return notifications.map(toNotificationDto)        
     }catch(error)
     {
         console.error(`Notification API ERROR: ${error} `)
         throw error;
     }
 }
+
 /**
  * GET /api/notifications?role=
  * Returns notifications for the given role, sorted by priority.
@@ -187,8 +219,8 @@ export async function fetchNotifications(role) {
     .filter((n) => n.role.toLowerCase() === normalizedRole)
     .sort(
       (a, b) =>
-        (SERVERITY[a.priority] ?? 9) -
-        (SERVERITY[b.priority] ?? 9)
+        (SEVERITY[a.priority] ?? 9) -
+        (SEVERITY[b.priority] ?? 9)
     );
 
   return results.map((n) => ({ ...n }));
