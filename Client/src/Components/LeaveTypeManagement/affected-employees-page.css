@@ -19,8 +19,6 @@
   width: 606px;
   height: 50px;
 }
-
-
 .impact-tabs button {
   display: flex;
   flex-direction: row;
@@ -103,7 +101,6 @@
 .confirm-impact-btn:active {
   transform: scale(0.98);
 }
-/* TABLE WRAPPER */
 
 .impact-table-wrapper {
   display: flex;
@@ -119,7 +116,6 @@
   border-radius: 0px 0px 10px 10px;
 }
 
-/* TABLE TITLE BAR */
 
 .impact-table-title {
   display: flex;

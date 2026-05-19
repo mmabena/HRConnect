@@ -28,7 +28,7 @@ const LeaveDetailsModal = ({
           </div>
 
           <button className="leave-modal-close" onClick={closeModal}>
-            <X size={20} />
+            <X />
           </button>
         </div>
 
@@ -99,7 +99,7 @@ const LeaveDetailsModal = ({
             <div className="timeline">
               <div className="timeline-item completed">
                 <div className="timeline-icon">
-                  <Check size={14} />
+                  <Check />
                 </div>
 
                 <div className="timeline-content">
@@ -113,7 +113,7 @@ const LeaveDetailsModal = ({
 
               <div className="timeline-item completed">
                 <div className="timeline-icon">
-                  <Check size={14} />
+                  <Check />
                 </div>
 
                 <div className="timeline-content">
@@ -135,9 +135,7 @@ const LeaveDetailsModal = ({
                     selectedApplication.status === "Rejected" ? "rejected" : ""
                   }`}
                 >
-                  {selectedApplication.status === "Approved" && (
-                    <Check size={14} />
-                  )}
+                  {selectedApplication.status === "Approved" && <Check />}
 
                   {selectedApplication.status === "Rejected" && <X size={14} />}
                 </div>

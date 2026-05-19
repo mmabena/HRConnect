@@ -42,23 +42,18 @@ const ApplyLeave = () => {
   const safeRemaining = remainingBalance < 0 ? 0 : remainingBalance;
   const validateForm = () => {
     const newErrors = {};
-
-    // Leave type
     if (!selectedLeaveId) {
       newErrors.leaveType = "Leave type is required";
     }
 
-    // Start date
     if (!startDate) {
       newErrors.startDate = "Start date is required";
     }
 
-    // End date
     if (!endDate) {
       newErrors.endDate = "End date is required";
     }
 
-    // Date comparison
     if (startDate && endDate) {
       const start = new Date(startDate);
       const end = new Date(endDate);
@@ -72,7 +67,6 @@ const ApplyLeave = () => {
       newErrors.leaveBalance = "Requested leave days exceed available balance";
     }
 
-    // Description
     if (!description.trim()) {
       newErrors.description = "Description is required";
     }
@@ -83,13 +77,11 @@ const ApplyLeave = () => {
     const isAnnualLeave =
       selectedLeave?.leaveType?.toLowerCase() === "annual leave";
 
-    // Supporting document required for non-annual leave
     if (!isAnnualLeave && files.length === 0) {
       newErrors.documents =
         "Supporting document is required for this leave type";
     }
 
-    // Allowed file types
     const allowedTypes = ["image/png", "image/jpeg", "application/pdf"];
 
     const invalidFile = files.find((file) => !allowedTypes.includes(file.type));

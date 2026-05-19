@@ -12,6 +12,8 @@ const AffectedEmployeesPage = () => {
   const leaveTypeId = location.state?.leaveTypeId;
 
   const [employees, setEmployees] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const employeesPerPage = 6;
 
   useEffect(() => {
     if (location.state?.employees) {
@@ -31,7 +33,19 @@ const AffectedEmployeesPage = () => {
     return "EXECUTIVE";
   });
 
-  const currentEmployees = groupedEmployees[activeTab] || [];
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab]);
+
+  const activeEmployees = groupedEmployees[activeTab] || [];
+
+  const totalPages = Math.ceil(activeEmployees.length / employeesPerPage);
+
+  const startIndex = (currentPage - 1) * employeesPerPage;
+
+  const endIndex = startIndex + employeesPerPage;
+
+  const currentEmployees = activeEmployees.slice(startIndex, endIndex);
 
   const getTabLabel = (key) => {
     switch (key) {
@@ -52,6 +66,21 @@ const AffectedEmployeesPage = () => {
       navigate("/leaveManagement");
     } catch (err) {
       console.error(err);
+    }
+  };
+  const goToPage = (page) => {
+    setCurrentPage(page);
+  };
+
+  const goToPreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+    }
+  };
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage((prev) => prev + 1);
     }
   };
   return (
@@ -134,6 +163,32 @@ const AffectedEmployeesPage = () => {
                 ))}
               </tbody>
             </table>
+            <div className="pagination2">
+              <button onClick={goToPreviousPage} disabled={currentPage === 1}>
+                {"<"}
+              </button>
+
+              {[...Array(totalPages)].map((_, index) => {
+                const pageNumber = index + 1;
+
+                return (
+                  <button
+                    key={pageNumber}
+                    className={currentPage === pageNumber ? "active" : ""}
+                    onClick={() => goToPage(pageNumber)}
+                  >
+                    {pageNumber}
+                  </button>
+                );
+              })}
+
+              <button
+                onClick={goToNextPage}
+                disabled={currentPage === totalPages || totalPages === 0}
+              >
+                {">"}
+              </button>
+            </div>
           </div>
         </div>
       </div>

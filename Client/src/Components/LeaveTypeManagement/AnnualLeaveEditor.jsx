@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./annual-editor.css";
 import {
   updateLeaveType,
@@ -19,6 +19,8 @@ const AnnualLeaveEditor = ({
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("");
   const [errorFields, setErrorFields] = useState({});
+  const [isCheckingImpact, setIsCheckingImpact] = useState(false);
+  const [affectedEmployees, setAffectedEmployees] = useState([]);
   const navigate = useNavigate();
 
   const buildGroupedRules = () => {
@@ -153,6 +155,27 @@ const AnnualLeaveEditor = ({
       rules: finalRules,
     };
   };
+  useEffect(() => {
+    const checkImpact = async () => {
+      if (!hasChanges) {
+        setAffectedEmployees([]);
+        return;
+      }
+
+      try {
+        const payload = buildPayload();
+
+        const previewData = await previewEntitlementImpact(payload);
+
+        setAffectedEmployees(previewData || []);
+      } catch (err) {
+        console.error(err);
+        setAffectedEmployees([]);
+      }
+    };
+
+    checkImpact();
+  }, [editedRules, customRules]);
   return (
     <div className="annual-wrapper">
       {message && (
@@ -296,24 +319,59 @@ const AnnualLeaveEditor = ({
             </button>
 
             <button
+              className="next"
               disabled={!hasChanges}
               onClick={async () => {
+                setIsCheckingImpact(true);
+                await new Promise((resolve) => setTimeout(resolve, 100));
                 try {
                   const payload = buildPayload();
 
                   const previewData = await previewEntitlementImpact(payload);
 
+                  if (affectedEmployees.length === 0) {
+                    await updateLeaveType(leaveType.id, payload);
+
+                    showMessage(
+                      "Leave entitlement updated successfully",
+                      "success",
+                    );
+
+                    setTimeout(() => {
+                      onSuccess();
+                      onClose();
+                    }, 800);
+
+                    return;
+                  }
+
                   navigate("/affected-employees", {
                     state: {
                       employees: previewData,
+                      payload,
+                      leaveTypeId: leaveType.id,
                     },
                   });
                 } catch (err) {
                   console.error(err);
+
+                  let message = err.response?.data;
+
+                  if (typeof message === "object") {
+                    message = message.title || JSON.stringify(message);
+                  }
+
+                  const friendlyMessage = mapBackendError(message);
+
+                  showMessage(friendlyMessage, "error");
+                } finally {
+                  setIsCheckingImpact(false);
                 }
               }}
             >
-              View Affected Employees
+              {affectedEmployees.length > 0
+                ? "Next: View Affected Employees"
+                : "Save Changes"}
             </button>
           </>
         )}
