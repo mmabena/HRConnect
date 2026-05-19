@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const useEmpPagination = (data, defaultItemsPerPage = 7) => {
+const usePagination = (data, defaultItemsPerPage = 7) => {
   const [activePage, setActivePage] = useState(1);
 
   const [itemsPerPage, setItemsPerPage] = useState(defaultItemsPerPage);
@@ -23,4 +23,4 @@ const useEmpPagination = (data, defaultItemsPerPage = 7) => {
     currentItems,
   };
 };
-export default useEmpPagination;
+export default usePagination;

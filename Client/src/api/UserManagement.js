@@ -55,11 +55,11 @@ export const updateUserRole = async (userId, roleId) => {
   const response = await fetch(`${BASE_URL}/user/${userId}/role`, {
     method: "PUT",
     headers: getAuthHeaders(),
-    body: JSON.stringify({ roleId }),
+    body: JSON.stringify({ roleId })
   });
 
   if (!response.ok) {
-    const errorMessage = await response.text();
+    const errorMessage = await response.json();
     throw new Error(errorMessage || `Failed to update user role: ${response.status}`);
   }
 

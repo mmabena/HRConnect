@@ -36,5 +36,48 @@ namespace HRConnect.Api.Utils
 
       return workingDays;
     }
+
+    public static int CountWorkingDaysForCurrentMonth()
+    {
+      DateTime today = DateTime.Today;
+      int year = today.Year;
+      int month = today.Month;
+
+      int workDays = 0;
+      int daysInMonth = DateTime.DaysInMonth(year, month);
+
+      for (int day = 1; day <= daysInMonth; day++)
+      {
+        DateTime currentDate = new(year, month, day);
+        if (currentDate.DayOfWeek is not DayOfWeek.Saturday and not DayOfWeek.Sunday)
+        {
+          workDays++;
+        }
+      }
+
+      return workDays;
+    }
+
+    public static int CountRemainingWorkingDaysForCurrentMonth()
+    {
+      DateTime today = DateTime.Today;
+      int year = today.Year;
+      int month = today.Month;
+
+      int daysInMonth = DateTime.DaysInMonth(year, month);
+      DateTime lastDay = new(year, month, daysInMonth);
+
+      int workDays = 0;
+
+      for (DateTime date = today; date <= lastDay; date = date.AddDays(1))
+      {
+        if (date.DayOfWeek is not DayOfWeek.Saturday and not DayOfWeek.Sunday)
+        {
+          workDays++;
+        }
+      }
+
+      return workDays;
+    }
   }
 }

@@ -15,8 +15,12 @@ namespace HRConnect.Tests
   using Microsoft.AspNetCore.Identity;
   using Microsoft.EntityFrameworkCore;
   using Microsoft.EntityFrameworkCore.Storage;
-  using Moq;
-  using Xunit;
+  using HRConnect.Api.Utils;
+  using System.Linq;
+  using Microsoft.AspNetCore.Identity;
+  using System.Reflection.Metadata;
+  using System.ComponentModel.DataAnnotations;
+  using System.Runtime.Serialization;
 
   public class EmployeeServiceTests : IDisposable
   {
@@ -30,6 +34,7 @@ namespace HRConnect.Tests
     private readonly Mock<ICompanyRepository> _companyRepoMock;
     private readonly Mock<ILeaveProcessingService> _leaveProcessingServiceMock;
     private readonly Mock<IPasswordHasher<User>> _passwordHasherMock;
+    private readonly ApplicationDBContext _context;
     private readonly EmployeeService _employeeService;
 
     public EmployeeServiceTests()
@@ -37,6 +42,7 @@ namespace HRConnect.Tests
       _companyRepoMock = new Mock<ICompanyRepository>();
       _leaveBalanceServiceMock = new Mock<ILeaveBalanceService>();
       _leaveProcessingServiceMock = new Mock<ILeaveProcessingService>();
+      _passwordHasherMock = new Mock<IPasswordHasher<User>>();
 
       var options = new DbContextOptionsBuilder<ApplicationDBContext>()
         .UseInMemoryDatabase(Guid.NewGuid().ToString())
@@ -147,6 +153,8 @@ namespace HRConnect.Tests
           _positionRepositoryMock.Object,
           _leaveBalanceServiceMock.Object,
           _leaveProcessingServiceMock.Object,
+          _passwordHasherMock.Object,
+          _leaveProcessingServiceMock.Object,
           _passwordHasherMock.Object
       );
     }
@@ -154,6 +162,43 @@ namespace HRConnect.Tests
     [Fact]
     public async Task CreateEmployeeAsyncValidInputReturnsCreatedEmployee()
     {
+      //User and employee are tied by email
+      var mockUser = new User
+      {
+        Email = "john.smith@singular.co.za",
+        PasswordHash = "dummy_hash"
+      };
+      _passwordHasherMock.Setup(h => h.HashPassword(It.IsAny<User>(), It.IsAny<string>()))
+                .Returns("hashedpassword");
+      string managerId = "MNG001";
+      var manager = new Employee { EmployeeId = managerId };
+
+      var dto = new CreateEmployeeRequestDto
+      {
+        Name = "John",
+        Surname = "Smith",
+        Title = Title.Mr,
+        Gender = Gender.Male,
+        IdNumber = "0305055487589",
+        TaxNumber = "1234567890",
+        Nationality = "South African",
+        PhysicalAddress = "123 Main St",
+        Email = "john.smith@singular.co.za",
+        ContactNumber = "0123456789",
+        Branch = Branch.Johannesburg,
+        City = "Johannesburg",
+        ZipCode = "2000",
+        PositionId = 4,
+        MonthlySalary = 20000,
+        EmploymentStatus = EmploymentStatus.Permanent,
+        CareerManagerID = managerId,
+        StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
+        ProfileImage = "profile.jpg",
+        PensionOptionId = 1,
+      };
+
+      _employeeRepoMock.Setup(r => r.GetEmployeeByIdAsync(managerId))
+          .ReturnsAsync(manager);
       const string managerId = "MNG001";
       var request = CreateValidRequest();
       request.CareerManagerID = managerId;
@@ -198,7 +243,8 @@ namespace HRConnect.Tests
         .Setup(repository => repository.GetEmployeeByContactNumberAsync(request.ContactNumber))
         .ReturnsAsync((Employee?)null);
 
-      await Assert.ThrowsAsync<ValidationException>(() => _employeeService.CreateEmployeeAsync(1, request));
+      await Assert.ThrowsAsync<ValidationException>(() =>
+          _employeeService.CreateEmployeeAsync(dto));
     }
 
     [Fact]
@@ -212,9 +258,6 @@ namespace HRConnect.Tests
       var existing = new Employee
       {
         EmployeeId = employeeId,
-        Email = existingEmail,
-        Name = "Existing",
-        Surname = "User",
         PositionId = 1,
         Position = _context.Positions.First(position => position.PositionId == 1),
         StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
@@ -252,6 +295,14 @@ namespace HRConnect.Tests
         EffectiveFrom = DateOnly.FromDateTime(DateTime.UtcNow),
         EffectiveTo = null
       });
+
+      _context.Users.Add(new User
+      {
+        UserId = 1,
+        Email = "test@singular.co.za",
+        PasswordHash = "dummy"
+      });
+
       _context.SaveChanges();
 
       _employeeRepositoryMock

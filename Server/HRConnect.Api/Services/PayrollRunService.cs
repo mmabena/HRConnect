@@ -59,7 +59,9 @@ namespace HRConnect.Api.Services
     /// </summary>
     /// <param name="payrollRecord">Payroll Record derived type being added 
     /// to the current payroll run  </param>
-    /// <param name="employeeId">EmployeeId as a foreign for adding record for particular record</param>
+    /// <param name="employeeId">EmployeeId as a foreign for adding record for particular record
+    /// <b>Required.</b> The identifier of the employee associated with the record. Must be a valid employeeId as this function doesn't assume existence.
+    /// </param>
     /// <returns>Successfully Completed Task</returns>
     /// <exception cref="InvalidDataException">Invalid Type Expected 'PayrollRecord'
     /// </exception>
@@ -74,12 +76,6 @@ namespace HRConnect.Api.Services
 
       if (currentPayRun == null)
         throw new InvalidDataException("No current payroll run found or it is locked");
-
-      // var exists = currentPayRun.Records
-      // .Any(r => r.EmployeeId == employeeId);
-
-      // if (exists)
-      //   return;
 
       payrollRecord.PayrollRun = currentPayRun;
       payrollRecord.EmployeeId = employeeId;
@@ -105,13 +101,13 @@ namespace HRConnect.Api.Services
         ? employeeId
         : record.EmployeeId;
 
-        var exists = currentPayRun.Records
-        .Any(r => r.PayrollRunId == currentPayRun.PayrollRunId
-       && r.EmployeeId == empId);
+      //   var exists = currentPayRun.Records
+      //   .Any(r => r.PayrollRunId == currentPayRun.PayrollRunId
+      //  && r.EmployeeId == empId);
 
-        if (exists)
-          continue;
-
+      //   if (exists)
+      //     continue;
+          
         record.PayrollRun = currentPayRun;
         record.EmployeeId = empId;
         currentPayRun.Records.Add(record);

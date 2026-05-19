@@ -21,7 +21,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   const [leaveOpen, setLeaveOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(null);
   const [payOpen, setPayOpen] = useState(false);
-  const [payinfoOpen, setPayInfoOpen] = useState(false);
+  const [payInfoOpen, setPayInfoOpen] = useState(false);
   const [manualReportToggle, setManualReportToggle] = useState(false);
   const [manualAdminToggle, setManualAdminToggle] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -106,13 +106,16 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
 
   const isUserManagementPage = location.pathname.startsWith("/userManagement");
 
-  const baseUrl = process.env.REACT_APP_API_BASE_URL;
+  const baseUrl =api.defaults.baseURL;// process.env.REACT_APP_API_BASE_URL;
 
   useEffect(() => {
     console.log("MenuBar user role:", role);
-  }, [currentUser, role]);
+    console.log(`BASE_URL ${baseUrl}`);
+  }, [baseUrl, role]);
 
   useEffect(() => {
+    console.log(`LOCATION`);
+    console.log(location)
     if (!role) return;
 
     if (isEmployeeManagementPage && !manualReportToggle) {
@@ -143,7 +146,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
       const token = localStorage.getItem("token");
       const email = JSON.parse(localStorage.getItem("currentUser")).email;
       const decodedTokenEmail = jwtDecode(token).sub;
-      if (decodedTokenEmail == email) {
+      if (decodedTokenEmail === email) {
         try {
           axios
             .get(`${baseUrl}/employee/email/${email}`, {
@@ -553,7 +556,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                             Pension Funds
                           </span>
                         </li>
-                        <li>
+                        {/* <li>
                           <span
                             className="menu-subitem"
                             onClick={() =>
@@ -562,7 +565,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                           >
                             Assign Pension
                           </span>
-                        </li>
+                        </li> */}
                         <li>
                           <span
                             className="menu-subitem"
@@ -668,17 +671,15 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                 />
                 <span className="menu-heading">
                   Payroll Information
-                  <span className="menu-dropdown">
-                    {payinfoOpen ? "▲" : "▼"}
-                  </span>
+                  <span className="menu-dropdown">{payInfoOpen ? "▲" : "▼"}</span>
                 </span>
               </div>
-              {payinfoOpen && (
+              {payInfoOpen && (
                 <ul className="submenu show">
                   <li>
                     <span
                       className="menu-subitem"
-                      onClick={() => handleSubmenuClick("/payslips")}
+                      onClick={() => handleSubmenuClick("/payslip")}
                     >
                       Payslips
                     </span>
@@ -809,8 +810,13 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
             )}
           </div>
           <div className="user-text-details">
-            <div className="user-full-name">{displayName}</div>
-            <div className="user-job-title">{currentUser?.jobTitle}</div>
+            <div className="user-full-name">
+              {displayName}
+            </div>
+            <div className="user-job-title">
+    {/*Create positions endpoint*/} 
+              {currentUser?.role}
+            </div>
           </div>
         </div>
       </div>

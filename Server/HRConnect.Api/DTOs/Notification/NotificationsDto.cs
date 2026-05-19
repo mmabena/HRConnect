@@ -5,10 +5,10 @@ namespace HRConnect.Api.DTOs.Notification
   {
     public string Message { get; set; } = string.Empty;
     public bool IsRead { get; set; }
-    public string Type { get; set; } = string.Empty;
+    public NotificationType Type { get; set; }
     public NotificationSeverity Severity { get; set; }
-    public DateTime DueDate { get; set; }
-    // public DateTime? ExpirationDate { get; set; }
-    // public DateTime CreatedAt { get; set; }
+    public DateTime? DueDate { get; set; }
+    public string DeliveryChannel { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; }
   }
 }

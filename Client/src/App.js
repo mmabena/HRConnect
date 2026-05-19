@@ -11,6 +11,7 @@ import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 import "./Components/MenuBar/MenuBar.css";
 import EmployeeList from "./Pages/EmployeeManagement/EmployeeList";
+import Payslip from "./Pages/PayrollInfo/Payslip"
 import AddEmployeeModal from "./Components/EmployeeManagement/AddEmployeeModal";
 import UserManagement from "./Components/UserManagement";
 import ViewPositionManagement from "./Components/ViewPositionManagement";
@@ -32,7 +33,8 @@ import ProjectionCalculator from "./Pages/PayrollTools/ProjectionCalculator";
 import PersonalInformation from "./Components/PersonalInformation.jsx";
 import api from "../src/api/api.js";
 import ChangePositionManagement from "./Components/companyManagement/PositionManagement/ChangePositionManagement.jsx";
-import { resolveRole } from "./utils/roleUtils";
+import { resolveRole } from "./utils/roleUtils.js";
+import HomePage from "./Pages/HomePage/HomePage.jsx";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
@@ -69,19 +71,20 @@ function App() {
         });
 
         const employee = empResp.data;
-        const resolvedRole = resolveRole(parsedUser?.user || parsedUser);
+        const resolvedRole=resolveRole(parsedUser?.User||parsedUser);
 
         const mergedUser = {
           ...parsedUser,
-          role: resolvedRole.roleName || parsedUser?.role,
-          roleId: resolvedRole.roleId,
+          role:resolveRole.roleName||parsedUser?.role,
+          roleId:resolvedRole.roleId,
           username: `${employee.name} ${employee.surname}`,
           jobTitle: employee.positionTitle,
           employmentStatus: employee.employmentStatus,
           dateOfBirth: employee.dateOfBirth,
           profileImage: employee.profileImage,
         };
-
+        //Store the current employee in the localStorage 
+        localStorage.setItem("currentEmployee",JSON.stringify(employee));
         setCurrentUser(mergedUser);
         localStorage.setItem("currentUser", JSON.stringify(mergedUser));
       } catch (error) {
@@ -97,14 +100,14 @@ function App() {
   };
 
   const handleBackToLogin = () => {
-    navigate("/");
+    navigate("/login");
   };
 
   const handleLogout = () => {
     localStorage.removeItem("currentUser");
     setCurrentUser(null);
     setIsLoggedIn(false);
-    navigate("/");
+    navigate("/login");
   };
 
   // FIXED: Use backend user object directly
@@ -126,12 +129,8 @@ function App() {
         console.warn("Employee endpoint not accessible for this role");
       }
 
-      const resolvedRole = resolveRole(backendUserData);
-
       const mergedUser = {
         ...backendUserData,
-        role: resolvedRole.roleName || backendUserData.role,
-        roleId: resolvedRole.roleId,
         username: employee
           ? `${employee.name} ${employee.surname}`
           : backendUserData.email,
@@ -162,6 +161,12 @@ function App() {
         <Routes>
           <Route
             path="/"
+            element= {
+              <HomePage />
+            }
+          />
+          <Route
+            path="/login"
             element={
               <SignIn
                 onForgotPasswordClick={handleForgotPasswordClick}
@@ -188,6 +193,7 @@ function App() {
       <div>
         <ToastContainer position="top-right" autoClose={3000} />
         <Routes>
+          <Route path="/" element={<HomePage />} />
           <Route path="/dashboard" element={<div>Welcome to Dashboard</div>} />
           <Route path="/addEmployee" element={<AddEmployee />} />
           <Route path="/addEmployeeModal" element={<AddEmployeeModal />} />
@@ -222,10 +228,7 @@ function App() {
             path="/viewPositionManagement/:id"
             element={<ViewPositionManagement />}
           />
-          <Route
-            path="/changePositionManagement"
-            element={<ChangePositionManagement />}
-          />
+          <Route path="/changePositionManagement" element={<ChangePositionManagement />} />
           <Route path="/manageUserPosition" element={<ManageUserPositions />} />
 
           <Route
@@ -248,12 +251,10 @@ function App() {
             path="/projection-calculator"
             element={<ProjectionCalculator />}
           />
-          <Route
-            path="/changeposition"
-            element={<ChangePositionManagement />}
-          />
+          <Route path="/changeposition" element={<ChangePositionManagement />} />
           <Route path="/manageUserPosition" element={<ManageUserPositions />} />
           <Route path="/personal" element={<PersonalInformation />} />
+          <Route path="/payslip" element= {<Payslip/>}/>
         </Routes>
       </div>
     </div>
@@ -261,3 +262,4 @@ function App() {
 }
 
 export default App;
+

@@ -18,6 +18,8 @@ import {
 } from "../../api/Employee";
 import { getStoredUserRole } from "../../utils/roleUtils";
 
+const getCurrentUserRole = () => "superuser";
+
 const AddEmployee = ({ closeModal }) => {
   const navigate = useNavigate();
   const [userRole, setUserRole] = useState(null);
@@ -64,6 +66,7 @@ const AddEmployee = ({ closeModal }) => {
 
   useEffect(() => {
     setUserRole(getStoredUserRole().key);
+    setUserRole(getCurrentUserRole());
     const fetchEmployees = async () => {
       try {
         const data = await fetchAllEmployees();

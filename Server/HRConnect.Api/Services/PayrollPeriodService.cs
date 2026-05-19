@@ -25,7 +25,7 @@ namespace HRConnect.Api.Services
     }
     public async Task<PayrollPeriod?> GetActivePeriod(DateTime dateTime)
     {
-      var period = await _payrollPeriodRepository.GetActivePeriod(dateTime);
+      var period = await _payrollPeriodRepository.GetPeriodByDate(dateTime);
       if (period == null)
         return null;
       return period;

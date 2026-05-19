@@ -11,8 +11,6 @@ namespace HRConnect.Api.Services
   using HRConnect.Api.Utils;
   using System.Globalization;
   using HRConnect.Api.Mappers;
-  using System.Data.Common;
-  using System.Runtime.InteropServices;
   using System.Security.Cryptography;
   using HRConnect.Api.Data;
   using Microsoft.AspNetCore.Identity;
@@ -251,10 +249,6 @@ namespace HRConnect.Api.Services
       existingEmployee.IsActive = employeeDto.IsActive;
 
       var updatedEmployee = await _employeeRepo.UpdateEmployeeAsync(existingEmployee);
-      if (updatedEmployee != null)
-      {
-        await EnsureUserRecordAsync(updatedEmployee, previousEmail);
-      }
 
       // Position change requires recalculation of leave balances and notification email
       if (positionChanged)
@@ -427,7 +421,6 @@ namespace HRConnect.Api.Services
                 Branch: {employee.Branch}
                 Your HRConnect user account has been created with the default NormalUser role.
                 Use the Forgot Password flow on the login page to set your password before first sign-in.
-                
                 We are glad to have you onboard. :-)";
 
       await _emailService.SendEmailAsync(employee.Email, subject, body);

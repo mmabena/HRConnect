@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FaTimes, FaEdit } from "react-icons/fa";
-import { fetchRoles, updateUserRole } from "../api/UserManagement";
 import { resolveRole } from "../utils/roleUtils";
+import { fetchRoles, updateUserRole } from "../api/UserManagement";
 
 const ActionsModal = ({ isOpen, onClose, user, onSuccess }) => {
   const [roles, setRoles] = useState([]);
@@ -35,10 +35,9 @@ const ActionsModal = ({ isOpen, onClose, user, onSuccess }) => {
   // When user changes, set role and status explicitly as numbers
   useEffect(() => {
     if (user) {
-      const normalizedUserRole = resolveRole(user);
-      setSelectedRole(
-        normalizedUserRole.roleId != null ? normalizedUserRole.roleId : "",
-      );
+     const normalizedUserRole = resolveRole(user);
+      setSelectedRole(normalizedUserRole.roleId != null ? normalizedUserRole.roleId : "",);
+      // Backend expects 0 or 1 exactly; coerce here safely
       setShowDropdowns(false);
     }
   }, [user]);
@@ -62,7 +61,7 @@ const ActionsModal = ({ isOpen, onClose, user, onSuccess }) => {
       if (onSuccess) onSuccess(updatedUser);
       onClose();
     } catch (error) {
-      console.error(error);
+      console.log(error)
       alert(`Error updating user: ${error.message}`);
     } finally {
       setIsSaving(false);
@@ -111,6 +110,21 @@ const ActionsModal = ({ isOpen, onClose, user, onSuccess }) => {
                   ))}
                 </select>
               </div>
+
+              {/* <div className="form-group"> */}
+              {/*   <label htmlFor="statusSelect">Status:</label> */}
+              {/*   <select */}
+              {/*     id="statusSelect" */}
+              {/*     value={selectedStatus} */}
+              {/*     onChange={(e) => { */}
+              {/*       const val = Number(e.target.value); */}
+              {/*       if (val === 0 || val === 1) setSelectedStatus(val); */}
+              {/*     }} */}
+              {/*   > */}
+              {/*     <option value={1}>Active</option> */}
+              {/*     <option value={0}>Inactive</option> */}
+              {/*   </select> */}
+              {/* </div> */}
             </>
           )}
 

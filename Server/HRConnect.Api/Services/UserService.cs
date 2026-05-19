@@ -1,3 +1,4 @@
+
 namespace HRConnect.Api.Services
 {
   using System;
@@ -9,6 +10,7 @@ namespace HRConnect.Api.Services
   using HRConnect.Api.DTOs.User;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
+  using HRConnect.Api.Utils;
   using HRConnect.Api.Mappers;
   using HRConnect.Api.Utils;
   using Microsoft.EntityFrameworkCore;
@@ -40,7 +42,7 @@ namespace HRConnect.Api.Services
 
     public async Task<List<User>> GetAllUsersAsync()
     {
-      await SyncEmployeeUsersAsync();
+      await SyncEmployeeUserAsync();
       return await _userRepo.GetAllUsersAsync();
     }
 
@@ -81,13 +83,12 @@ namespace HRConnect.Api.Services
     public async Task<List<UserRoleOptionDto>> GetRoleOptionsAsync()
     {
       return await Task.FromResult(
-        Enum.GetValues<UserRole>()
+          Enum.GetValues<UserRole>()
           .Select(role => new UserRoleOptionDto
           {
             RoleId = (int)role,
             Name = role.ToString()
-          })
-          .ToList());
+          }).ToList());
     }
 
     public async Task<User?> UpdateUserAsync(int id, UpdateUserRequestDto dto)
@@ -120,7 +121,7 @@ namespace HRConnect.Api.Services
     {
       if (!Enum.IsDefined(typeof(UserRole), dto.RoleId))
       {
-        throw new ArgumentException("Invalid role id.");
+        throw new ArgumentException("Invalid role id");
       }
 
       var existing = await _userRepo.GetUserByIdAsync(id);
@@ -128,7 +129,6 @@ namespace HRConnect.Api.Services
       {
         return null;
       }
-
       existing.Role = (UserRole)dto.RoleId;
       return await _userRepo.UpdateUserAsync(id, existing);
     }
@@ -137,19 +137,17 @@ namespace HRConnect.Api.Services
     {
       if (string.IsNullOrWhiteSpace(employeeId))
       {
-        throw new ArgumentException("Employee id is required.");
+        throw new ArgumentException("Employee Id is requird");
       }
-
       if (!Enum.IsDefined(typeof(UserRole), dto.RoleId))
       {
-        throw new ArgumentException("Invalid role id.");
+        throw new ArgumentException("Invalid role Id.");
       }
-
       var employee = await _context.Employees
-        .AsNoTracking()
-        .FirstOrDefaultAsync(existingEmployee => existingEmployee.EmployeeId == employeeId);
+              .AsNoTracking()
+              .FirstOrDefaultAsync(existingEmployee => existingEmployee.EmployeeId == employeeId);
 
-      if (employee == null)
+      if (employeeId == null)
       {
         return null;
       }
@@ -166,7 +164,7 @@ namespace HRConnect.Api.Services
       return user;
     }
 
-    public async Task SyncEmployeeUsersAsync()
+    public async Task SyncEmployeeUserAsync()
     {
       var employees = await _context.Employees
         .AsNoTracking()
@@ -176,9 +174,7 @@ namespace HRConnect.Api.Services
         .ToListAsync();
 
       if (employees.Count == 0)
-      {
         return;
-      }
 
       var existingUserEmails = await _context.Users
         .Select(user => user.Email)
@@ -198,7 +194,6 @@ namespace HRConnect.Api.Services
       {
         return;
       }
-
       await _context.Users.AddRangeAsync(missingUsers);
       await _context.SaveChangesAsync();
     }
@@ -208,15 +203,16 @@ namespace HRConnect.Api.Services
       return _userRepo.DeleteUserAsync(id);
     }
 
+
     public async Task<CurrentUserDto?> GetCurrentUserAsync(string email)
     {
       if (string.IsNullOrWhiteSpace(email))
         return null;
 
       var user = await _userRepo.GetUserByEmailAsync(email);
-      
-      if (user == null) 
-      return null;
+
+      if (user == null)
+        return null;
 
       var employee = await _userRepo.GetEmployeeByEmailAsync(email);
 
@@ -256,9 +252,8 @@ namespace HRConnect.Api.Services
       {
         Email = email.Trim(),
         Role = UserRole.NormalUser,
-        CreatedAt = DateTime.UtcNow,
+        CreatedAt = DateTime.Now
       };
-
       user.PasswordHash = _passwordHasher.HashPassword(user, GenerateTemporaryPassword());
       return user;
     }
@@ -278,7 +273,6 @@ namespace HRConnect.Api.Services
       var newUser = CreateNormalUser(normalizedEmail);
       await _context.Users.AddAsync(newUser);
       await _context.SaveChangesAsync();
-
       return newUser;
     }
 
@@ -297,18 +291,17 @@ namespace HRConnect.Api.Services
         passwordChars.Add(GetRandomCharacter(AllPasswordChars));
       }
 
-      for (var i = passwordChars.Count - 1; i > 0; i--)
+      for (int i = passwordChars.Count - 1; i > 0; --i)
       {
         var swapIndex = RandomNumberGenerator.GetInt32(i + 1);
         (passwordChars[i], passwordChars[swapIndex]) = (passwordChars[swapIndex], passwordChars[i]);
       }
-
       return new string(passwordChars.ToArray());
     }
-
     private static char GetRandomCharacter(char[] alphabet)
     {
       return alphabet[RandomNumberGenerator.GetInt32(alphabet.Length)];
     }
   }
 }
+

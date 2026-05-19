@@ -35,32 +35,34 @@ const UserManagement = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [loggedInUser, setLoggedInUser] = useState(null);
 
-  const loadData = async () => {
-    try {
-      setIsLoading(true);
-      const { users, roles } = await fetchUsersAndRoles();
+    const loadData = async () => {
+      try {
+        setIsLoading(true);
+        const { users, roles } = await fetchUsersAndRoles();
 
-      setRoles(roles || []);
-      const mappedUsers = (users || []).map((user) => ({
-        ...user,
-        name: user.name || user.email,
-        role: user.role || roles.find((r) => Number(r.roleId) === Number(user.roleId))?.name || "Unknown Role",
-        status: "Active",
-        statusValue: USER_STATUS.ACTIVE,
-      }));
+        setRoles(roles || []);
+        const mappedUsers = (users || []).map((user) => ({
+          ...user,
+          //name: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
+          name: user.name || user.email,
+          role: user.role || roles.find((r) => Number(r.roleId) === Number(user.roleId))?.name || "Unknown Role",
+        //   status: user.status === USER_STATUS.ACTIVE ? "Active" : "Inactive",
+          status:"Active",
+          statusValue: USER_STATUS.ACTIVE, }));
 
-      setUsers(mappedUsers);
-      setLoggedInUser(mappedUsers[0] || null);
-      setCurrentUserRole(getStoredUserRole().roleName || "User");
-    } catch (error) {
-      console.error("Failed to load data:", error);
-      alert("Failed to load user data. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+        setUsers(mappedUsers);
+          setLoggedInUser(mappedUsers[0]||null);
+          setCurrentUserRole(getStoredUserRole().roleName || "User");
 
-  useEffect(() => {
+      } catch (error) {
+        console.error("Failed to load data:", error);
+        alert("Failed to load user data. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    useEffect(()=>{
     loadData();
   }, []);
 
@@ -81,7 +83,7 @@ const UserManagement = () => {
     }
     const user = users[selectedUserIndex];
     if (user) {
-      setEditRole(user.roleId ?? "");
+      setEditRole(user.roleId ?? ""); // store roleId for select value
       setEditStatus(Number(user.statusValue));
       setShowEditEmployeeModal(true);
       handleCloseActions();
@@ -91,21 +93,30 @@ const UserManagement = () => {
   const saveEmployeeDetails = async () => {
     try {
       const user = users[selectedUserIndex];
-      const normalizedEditRole = resolveRole(editRole);
-      const selectedRole = roles.find(
-        (r) => Number(r.roleId) === normalizedEditRole.roleId,
+      //const selectedRole = roles.find((r) => r.roleId === editRole || r.name === editRole);
+      const normalizedEditRole=resolveRole(editRole);
+
+      const selectedRole=roles.find(
+        (r)=>Number(r.roleId)===normalizedEditRole.roleId
       );
 
-      if (!user || !selectedRole) throw new Error("Invalid user or role");
-
       await updateUserRole(user.userId, selectedRole.roleId);
+    //   if (!user || !selectedRole) throw new Error("Invalid user or role");
+
+      await updatedUsers(user.userId, {
+        roleId: selectedRole.roleId,
+        status: editStatus,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+      });
 
       const updatedUsers = [...users];
       updatedUsers[selectedUserIndex] = {
         ...user,
         role: selectedRole.name,
-        status: "Active",
-        statusValue: USER_STATUS.ACTIVE,
+        status:"Active",
+        statusValue:USER_STATUS.ACTIVE,
         roleId: selectedRole.roleId,
       };
       setUsers(updatedUsers);
@@ -122,9 +133,12 @@ const UserManagement = () => {
       const user = users[selectedUserIndex];
       if (!user) throw new Error("Invalid user");
 
-      if (updatedData.roleId != null) {
-        await updateUserRole(user.userId, updatedData.roleId);
-      }
+    //   await updateUser(user.userId, {
+    //     ...user,
+    //     ...updatedData,
+    //   });
+    if(updatedData.roleId !=null)
+        await updateUserRole(user.userId,updatedData.roleId);
 
       const updatedUsers = [...users];
       updatedUsers[selectedUserIndex] = {
@@ -177,18 +191,16 @@ const UserManagement = () => {
       <div className="grey-box">
         <div className="top-bar-container">
           <div
-            className={`top-bar clickable-tab ${
-              activeTab === "myProfile" ? "active-tab" : ""
-            }`}
+            className={`top-bar clickable-tab ${activeTab === "myProfile" ? "active-tab" : ""
+              }`}
             onClick={() => setActiveTab("myProfile")}
           >
             <FaUser size={20} />
             <h3>My Profile</h3>
           </div>
           <div
-            className={`top-bar clickable-tab ${
-              activeTab === "userProfile" ? "active-tab" : ""
-            }`}
+            className={`top-bar clickable-tab ${activeTab === "userProfile" ? "active-tab" : ""
+              }`}
             onClick={() => setActiveTab("userProfile")}
           >
             <FaUser size={20} />
@@ -262,6 +274,7 @@ const UserManagement = () => {
             onSuccess={() => {
               loadData();
               handleCloseActions();
+              // Optionally reload users if needed here
             }}
           />
 
