@@ -10,7 +10,7 @@ import {
   deleteAllPensionOptions
 } from "../../api/PensionFund";
 
-import "./PensionOptionsList.css";
+import "./PensionFund.css";
 
 import PayrollNavbar from "../PayrollNavbar";
 

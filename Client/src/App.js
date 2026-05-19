@@ -31,8 +31,8 @@ import ProjectionCalculator from "./Pages/PayrollTools/ProjectionCalculator";
 import PersonalInformation from "./Components/PersonalInformation.jsx";
 import api from "../src/api/api.js";
 import ChangePositionManagement from "./Components/companyManagement/PositionManagement/ChangePositionManagement.jsx";
-import PensionOptionsList from "./Components/PensionPages/PensionOptionsList";
-import PensionFundsList from "./Components/PensionPages/PensionFundsList";
+import PensionFund from "./Components/PensionPages/PensionFund.jsx";
+
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
@@ -226,8 +226,7 @@ function App() {
           <Route path="/changeposition" element={<ChangePositionManagement />} />
           <Route path="/manageUserPosition" element={<ManageUserPositions/>} />
           <Route path="/personal" element={<PersonalInformation />} />
-          <Route path="/pension-management" element={<PensionFundsList />} />
-          <Route path="/pension-options" element={<PensionOptionsList />} />
+          <Route path="/pension-management" element={<PensionFund />} />
         </Routes>
       </div>
     </div>
