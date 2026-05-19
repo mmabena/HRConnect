@@ -1,7 +1,7 @@
 namespace HRConnect.Api.Hubs
 {
-     using Microsoft.AspNetCore.SignalR;
-using System.Threading.Tasks;
+    using Microsoft.AspNetCore.SignalR;
+    using System.Threading.Tasks;
     public class UserPositionHub : Hub
     {
         

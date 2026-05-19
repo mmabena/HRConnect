@@ -13,27 +13,42 @@ const LeaveTypesModal = ({
 }) => {
   const [leaveOptions, setLeaveOptions] = useState([]);
 
-  const statutoryLeaves = [
+ // Fetch leave options (job grade groups) on component mount
+  useEffect(() => {
+    const fetchJobGradeGroups = async () => {
+      try {
+        const data = await getJobGradeGroups();
+
+        const cleaned = (data || []).map((g) => ({
+          groupKey: g.groupKey || g.code || g.group_key,
+        }));
+
+        setLeaveOptions(cleaned);
+      } catch (error) {
+        console.error("Error fetching job grade groups:", error);
+      }
+    };
+
+    fetchJobGradeGroups();
+  }, []);
+
+   const statutoryLeaves = [
     { key: "sick", label: "Sick Leave", desc: "30 Days" },
     { key: "family", label: "Family Responsibility Leave", desc: "3 Days per year" },
     { key: "maternity", label: "Maternity Leave", desc: "121 Days" },
     { key: "unpaid", label: "Unpaid Leave", desc: "By arrangement" },
   ];
 
-  useEffect(() => {
-    fetchJobGradeGroups();
-  }, []);
 
-  const fetchJobGradeGroups = async () => {
-    try {
-      const data = await getJobGradeGroups();
-      console.log("JOB GRADE GROUPS API DATA:", data);
 
-      setLeaveOptions(data);
-    } catch (error) {
-      console.error("Error fetching job grade groups:", error);
-    }
-  };
+  
+// Filter out maternityleave for male employees
+  const isMale = employee.gender?.toLowerCase() === "male";
+
+  const filteredStatutoryLeaves = statutoryLeaves.filter((leave) => {
+    if (isMale && leave.key === "maternity") return false;
+    return true;
+  });
 
  // ORDER CONTROL (IMPORTANT)
   const order = ["GROUP_A", "SENIOR", "EXECUTIVE"];

@@ -10,10 +10,14 @@ const PensionFundOptionsModal = ({ employee, setEmployee, onNext, onBack }) => {
 
   const [selectedPercentage, setSelectedPercentage] = useState(2.5);
 
-  return (
-    <div className="emp-leave-container">
-      <div className="emp-leave-form-grid">
-        {/* HEADING */}
+return (
+  <div className="emp-pension-fund-container">
+    <div className="emp-leave-form-grid">
+
+      {/* =========================
+          GROUP 1: HEADER SECTION
+      ========================= */}
+      <div className="pension-header-group">
         <div className="emp-pension-fund-personal-details-heading">
           Pension Fund Options
         </div>
@@ -21,71 +25,82 @@ const PensionFundOptionsModal = ({ employee, setEmployee, onNext, onBack }) => {
         <div className="emp-pension-fund-sub">
           Select funds and contribution rates
         </div>
+      </div>
 
-        {/* SECTION TITLE */}
-        <div className="pensio-section-title">PENSION FUND - SELECT ONE</div>
-
-        <div className="emp-leave-type-line" />
+      {/* =========================
+          GROUP 2: FORM CONTENT
+      ========================= */}
+      <div className="pension-content-group">
 
         {/* PENSION CARD */}
-        <div
-          className={`pension-card ${employee?.pensionEnabled ? "active" : ""}`}
-        >
-          <div
-            className="pension-card-header"
-            onClick={() =>
-              setEmployee((prev) => ({
-                ...prev,
-                pensionEnabled: !prev.pensionEnabled,
-              }))
-            }
-          >
-            <input
-              type="checkbox"
-              checked={employee?.pensionEnabled || false}
-              readOnly
-            />
+        <div className="pension-card-container">
 
-            <div className="pension-header-text">
-              <span className="pension-title">Pension Fund</span>
-
-              <span
-                className={`pension-subtitle ${
-                  employee?.pensionEnabled ? "active" : ""
-                }`}
-              >
-                Select your employee contribution below
-              </span>
-            </div>
+          <div className="pensio-section-title">
+            PENSION FUND - SELECT ONE
           </div>
 
-          {employee?.pensionEnabled && (
-            <>
-              <div className="contribution-label">
-                EMPLOYEE CONTRIBUTION RATE
-              </div>
+          <div
+            className={`pension-card ${
+              employee?.pensionEnabled ? "active" : ""
+            }`}
+          >
+            <div
+              className="pension-card-header"
+              onClick={() =>
+                setEmployee((prev) => ({
+                  ...prev,
+                  pensionEnabled: !prev.pensionEnabled,
+                }))
+              }
+            >
+              <input
+                type="checkbox"
+                checked={employee?.pensionEnabled || false}
+                readOnly
+              />
 
-              <div className="pension-percentages">
-                {percentageOptions.map((percentage) => (
-                  <button
-                    key={percentage}
-                    type="button"
-                    className={`pension-percent-btn ${
-                      selectedPercentage === percentage ? "active" : ""
-                    }`}
-                    onClick={() => setSelectedPercentage(percentage)}
-                  >
-                    {percentage}%
-                  </button>
-                ))}
+              <div className="pension-header-text">
+                <span className="pension-title">Pension Fund</span>
+
+                <span
+                  className={`pension-subtitle ${
+                    employee?.pensionEnabled ? "active" : ""
+                  }`}
+                >
+                  Select your employee contribution below
+                </span>
               </div>
-            </>
-          )}
+            </div>
+
+            {employee?.pensionEnabled && (
+              <>
+                <div className="contribution-label">
+                  EMPLOYEE CONTRIBUTION RATE
+                </div>
+
+                <div className="pension-percentages">
+                  {percentageOptions.map((percentage) => (
+                    <button
+                      key={percentage}
+                      type="button"
+                      className={`pension-percent-btn ${
+                        selectedPercentage === percentage ? "active" : ""
+                      }`}
+                      onClick={() => setSelectedPercentage(percentage)}
+                    >
+                      {percentage}%
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
         {/* VOLUNTARY */}
-        <div className="voluntary-section-title">VOLUNTARY CONTRIBUTION</div>
-        <div className="emp-leave-type-line" />
+        <div className="voluntary-section-title">
+          VOLUNTARY CONTRIBUTION
+        </div>
 
         <div className="voluntary-options">
           <button
@@ -110,9 +125,10 @@ const PensionFundOptionsModal = ({ employee, setEmployee, onNext, onBack }) => {
         </div>
 
         {/* AMOUNT */}
-        <div className="amount-section-title">VOLUNTARY AMOUNT</div>
+        <div className="amount-section-title">
+          VOLUNTARY AMOUNT
+        </div>
 
-        <div className="emp-leave-type-line" />
         <input
           type="number"
           placeholder="e.g 500"
@@ -120,9 +136,9 @@ const PensionFundOptionsModal = ({ employee, setEmployee, onNext, onBack }) => {
           value={voluntary}
           onChange={(e) => setVoluntary(e.target.value)}
         />
-
+  </div>
         {/* FOOTER */}
-        <div className="pension-footer">
+        <div className="emp-button-row">
           <button className="pension-back-btn" onClick={onBack}>
             <ArrowLeft size={18} />
             Back
@@ -133,9 +149,11 @@ const PensionFundOptionsModal = ({ employee, setEmployee, onNext, onBack }) => {
             <ArrowRight size={18} />
           </button>
         </div>
+
       </div>
     </div>
-  );
+
+);
 };
 
 export default PensionFundOptionsModal;

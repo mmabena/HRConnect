@@ -64,6 +64,51 @@ const useEmployeeValidation = () => {
     if (employee.disability && !employee.disabilityType?.trim())
       errors.disabilityType = "Disability description required";
 
+    // =========================
+    // BANKING VALIDATIONS
+    // =========================
+
+    if (!employee.bankName?.trim()) {
+      errors.bankName = "Bank name is required";
+    }
+
+    if (!employee.accountNumber?.trim()) {
+      errors.accountNumber = "Account number is required";
+    } else if (!/^\d+$/.test(employee.accountNumber)) {
+      errors.accountNumber = "Account number must contain only numbers";
+    } else if (
+      employee.accountNumber.length < 6 ||
+      employee.accountNumber.length > 12
+    ) {
+      errors.accountNumber = "Account number must be between 6 and 12 digits";
+    }
+
+    if (!employee.branchCode?.trim()) {
+      errors.branchCode = "Branch code is required";
+    } else if (!/^\d{6}$/.test(employee.branchCode)) {
+      errors.branchCode = "Branch code must be 6 digits";
+    }
+
+    if (!employee.accountType?.trim()) {
+      errors.accountType = "Account type is required";
+    }
+
+    if (!employee.paymentMethod?.trim()) {
+      errors.paymentMethod = "Payment method is required";
+    }
+
+    if (!employee.accountHolderName?.trim()) {
+      errors.accountHolderName = "Account holder name is required";
+    }
+
+    if (!employee.payFrequency?.trim()) {
+      errors.payFrequency = "Pay frequency is required";
+    }
+
+    if (!employee.payDate) {
+      errors.payDate = "Pay date is required";
+    }
+
     return errors;
   };
 

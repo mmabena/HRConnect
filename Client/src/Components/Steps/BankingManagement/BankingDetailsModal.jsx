@@ -22,8 +22,10 @@ const BankingDetailsModal = ({
 
   const payFrequencies = ["Weekly", "Bi-Weekly", "Monthly"];
 
-  const referenceType = ["Salary", "Bonus", "Other"];
+  const referenceType = ["Salary", "Other"];
 
+
+  // Handle input changes for banking details
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -48,13 +50,23 @@ const BankingDetailsModal = ({
     }));
   };
 
+
+  // Validate banking details before proceeding to next step
   const validateBanking = () => {
     const errors = {};
 
-    if (!employee.bankName) errors.bankName = "Bank is required";
+    if (!employee.bankName) errors.bankName = "Bank name is required";
 
-    if (!employee.accountNumber)
+    if (!employee.accountNumber?.trim()) {
       errors.accountNumber = "Account number is required";
+    } else if (!/^\d+$/.test(employee.accountNumber)) {
+      errors.accountNumber = "Account number must contain only numbers";
+    } else if (
+      employee.accountNumber.length < 6 ||
+      employee.accountNumber.length > 12
+    ) {
+      errors.accountNumber = "Account number must be between 6 and 12 digits";
+    }
 
     if (!employee.branchCode) errors.branchCode = "Branch code is required";
 
@@ -65,11 +77,19 @@ const BankingDetailsModal = ({
 
     if (!employee.paymentMethod)
       errors.paymentMethod = "Payment method is required";
-    
+
+    if (!employee.reference) errors.reference = "Reference type is required";
+
+    if (!employee.payFrequency)
+      errors.payFrequency = "Pay frequency is required";
+
+    if (!employee.payDate) errors.payDate = "Pay date is required";
 
     return errors;
   };
 
+
+  // Fetch bank branch codes on component mount
   useEffect(() => {
     const fetchBankCodes = async () => {
       try {
@@ -93,28 +113,29 @@ const BankingDetailsModal = ({
     fetchBankCodes();
   }, []);
 
+  // Auto-populate account holder name based on employee's name and surname
   useEffect(() => {
-  if (employee.name && employee.surname) {
-    
-    // Split first names into array
-    const names = employee.name.trim().split(" ");
+    if (employee.name && employee.surname) {
+      // Split first names into array
+      const names = employee.name.trim().split(" ");
 
-    // Get initials
-    const initials = names
-      .map((name) => name.charAt(0).toUpperCase())
-      .join(" ");
+      // Get initials
+      const initials = names
+        .map((name) => name.charAt(0).toUpperCase())
+        .join(" ");
 
-    // Build full account holder name
-    const fullName = `${employee.title || ""} ${initials} ${employee.surname}`.trim();
+      // Build full account holder name
+      const fullName =
+        `${employee.title || ""} ${initials} ${employee.surname}`.trim();
 
-    setEmployee((prev) => ({
-      ...prev,
-      accountHolderName: fullName,
-    }));
-  }
-}, [employee.name, employee.surname, employee.title]);
+      setEmployee((prev) => ({
+        ...prev,
+        accountHolderName: fullName,
+      }));
+    }
+  }, [employee.name, employee.surname, employee.title]);
 
-
+  // Handle clicking the "Next" button
   const handleNext = () => {
     const errors = validateBanking();
 
@@ -124,8 +145,6 @@ const BankingDetailsModal = ({
 
     onNext();
   };
-  
-
 
   return (
     <div className="emp-name-surname-container">
@@ -164,8 +183,11 @@ const BankingDetailsModal = ({
               alt="Dropdown icon"
               className="dropdown-icon"
             />
-            
           </div>
+
+          {formErrors.bankName && (
+            <span className="emp-error-message">{formErrors.bankName}</span>
+          )}
         </div>
 
         {/* ACCOUNT + BRANCH */}
@@ -176,7 +198,15 @@ const BankingDetailsModal = ({
               name="accountNumber"
               placeholder="Account Number"
               value={employee.accountNumber || ""}
-              onChange={handleChange}
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, "");
+
+                setEmployee((prev) => ({
+                  ...prev,
+                  accountNumber: value,
+                }));
+              }}
+              maxLength={12}
               className={`emp-account-name-input ${
                 formErrors.accountNumber ? "emp-error-input" : ""
               }`}
@@ -314,6 +344,9 @@ const BankingDetailsModal = ({
               alt="Dropdown icon"
               className="dropdown-icon"
             />
+            {formErrors.reference && (
+              <span className="emp-error-message">{formErrors.reference}</span>
+            )}
           </div>
         </div>
 
@@ -340,6 +373,12 @@ const BankingDetailsModal = ({
               alt="Dropdown icon"
               className="dropdown-icon"
             />
+
+            {formErrors.payFrequency && (
+              <span className="emp-error-message">
+                {formErrors.payFrequency}
+              </span>
+            )}
           </div>
 
           <div className="emp-input-wrapper">
@@ -359,13 +398,10 @@ const BankingDetailsModal = ({
                   alt="Calendar icon"
                   className="dropdown-icon"
                 />
-                
               </div>
-                {formErrors.payDate && (
-              <span className="emp-error-message">
-                {formErrors.payDate}
-              </span>
-            )}
+              {formErrors.payDate && (
+                <span className="emp-error-message">{formErrors.payDate}</span>
+              )}
             </div>
           </div>
         </div>

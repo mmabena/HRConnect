@@ -66,6 +66,53 @@ const AddEmployeeModal = ({ closeModal }) => {
       payDate: "",
     });
 
+  // =========================
+  // WIZARD CONFIG BASED ON EMPLOYMENT STATUS
+  // =========================
+
+  const wizardConfig = {
+    Permanent: [
+      "Personal Details",
+      "Banking Details",
+      "Leave",
+      "Pension",
+      "Medical Aid",
+      "Preview",
+    ],
+    FixedTerm: ["Personal Details", "Banking Details", "Leave", "Preview"],
+    Contract: ["Personal Details", "Banking Details", "Leave", "Preview"],
+  };
+
+  const defaultSteps = [
+    "Personal Details",
+    "Banking Details",
+    "Leave",
+    "Pension",
+    "Medical Aid",
+    "Preview",
+  ];
+
+  const activeSteps = wizardConfig[employee.employeeStatus] || defaultSteps;
+
+  const steps = (wizardConfig[employee.employeeStatus] || defaultSteps).map(
+    (label, index) => ({
+      step: index + 1,
+      label,
+    }),
+  );
+
+  const currentStepLabel = steps[currentStep - 1]?.label || "";
+
+  const totalSteps = steps.length;
+
+  const nextStep = () => {
+    if (currentStep < totalSteps) setCurrentStep((s) => s + 1);
+  };
+
+  const prevStep = () => {
+    if (currentStep > 1) setCurrentStep((s) => s - 1);
+  };
+
   const fileInputRef = useRef(null);
   const [fileName, setFileName] = useState(
     "Click to upload or drag a file here PDF, JPG or PNG · max 5MB",
@@ -169,15 +216,6 @@ const AddEmployeeModal = ({ closeModal }) => {
 
   if (dataLoading) return <div>Loading...</div>;
 
-  const wizardSteps = [
-    { step: 1, label: "Personal Details" },
-    { step: 2, label: "Banking Details" },
-    { step: 3, label: "Leave" },
-    { step: 4, label: "Pension" },
-    { step: 5, label: "Medical Aid" },
-    { step: 6, label: "Preview" },
-  ];
-
   return (
     // Outer shell — always full width, vertical layout
     <div className="emp-modal-shell">
@@ -197,7 +235,7 @@ const AddEmployeeModal = ({ closeModal }) => {
       {/* ── WIZARD — always visible ── */}
       <div className="emp-wizard-container">
         <div className="emp-wizard-frame">
-          {wizardSteps.map(({ step, label }, index, arr) => (
+          {steps.map(({ step, label }, index, arr) => (
             <React.Fragment key={step}>
               <div className="emp-step-wrapper">
                 <div
@@ -666,7 +704,27 @@ const AddEmployeeModal = ({ closeModal }) => {
                     <select
                       name="jobTitle"
                       value={employee.jobTitle}
-                      onChange={onInputChange}
+                      onChange={(e) => {
+                        const selectedId = e.target.value;
+
+                        const selectedPosition = positions.find(
+                          (p) => String(p.positionId) === String(selectedId),
+                        );
+
+                        setEmployee((prev) => ({
+                          ...prev,
+
+                          // existing behaviour
+                          jobTitle: selectedId,
+
+                          // new behaviour - auto-populate job grade group based on selected position
+                          jobGradeGroup:
+                            selectedPosition?.jobGradeGroup || null,
+                        }));
+
+                        // still call your generic handler if needed
+                        onInputChange(e);
+                      }}
                       className={`emp-name-input ${formErrors.jobTitle ? "emp-error-input" : ""}`}
                     >
                       <option value="">Select Job Title</option>
@@ -783,7 +841,11 @@ const AddEmployeeModal = ({ closeModal }) => {
                   {/* Next Button */}
                   <button
                     className="emp-save-button"
-                    onClick={() => setCurrentStep(2)}
+                    onClick={() => {
+                      if (totalSteps > 1) {
+                        setCurrentStep(currentStep + 1);
+                      }
+                    }}
                     disabled={loading}
                   >
                     Next
@@ -792,37 +854,36 @@ const AddEmployeeModal = ({ closeModal }) => {
                 </div>
               )}
 
-              {/* Step 2 — Banking Details */}
-              {currentStep === 2 && (
+              {currentStepLabel === "Banking Details" && (
                 <BankingDetailsModal
                   employee={employee}
                   setEmployee={setEmployee}
                   formErrors={formErrors}
                   setFormErrors={setFormErrors}
-                  onNext={() => setCurrentStep(3)}
-                  onBack={() => setCurrentStep((prev) => prev - 1)}
+                  onNext={nextStep}
+                  onBack={prevStep}
                 />
               )}
-              {/* Step 3 — Leave type */}
-              {currentStep === 3 && (
+
+              {currentStepLabel === "Leave" && (
                 <LeaveTypesModal
                   employee={employee}
                   setEmployee={setEmployee}
                   formErrors={formErrors}
                   setFormErrors={setFormErrors}
-                  onNext={() => setCurrentStep(4)}
-                  onBack={() => setCurrentStep((prev) => prev - 1)}
+                  onNext={nextStep}
+                  onBack={prevStep}
                 />
               )}
-              {/* Step 4 - Pension Fund Options */}
-              {currentStep === 4 && (
+
+              {currentStepLabel === "Pension" && (
                 <PensionFundOptionsModal
                   employee={employee}
                   setEmployee={setEmployee}
                   formErrors={formErrors}
                   setFormErrors={setFormErrors}
-                  onNext={() => setCurrentStep(5)}
-                  onBack={() => setCurrentStep((prev) => prev - 1)}
+                  onNext={nextStep}
+                  onBack={prevStep}
                 />
               )}
             </div>

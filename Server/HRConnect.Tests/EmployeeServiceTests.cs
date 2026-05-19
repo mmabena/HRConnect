@@ -15,15 +15,12 @@ namespace HRConnect.Tests
   using Microsoft.EntityFrameworkCore.Storage;
   using HRConnect.Api.Utils;
   using System.Linq;
-<<<<<<< HEAD
   using Microsoft.AspNetCore.SignalR;
   using HRConnect.Api.Hubs;
-=======
   using Microsoft.AspNetCore.Identity;
   using System.Reflection.Metadata;
   using System.ComponentModel.DataAnnotations;
   using System.Runtime.Serialization;
->>>>>>> origin/feature/HRC021
 
   public class EmployeeServiceTests : IDisposable
   {
@@ -32,10 +29,7 @@ namespace HRConnect.Tests
     private readonly Mock<IEmailService> _emailServiceMock;
     private readonly Mock<ILeaveBalanceService> _leaveBalanceServiceMock;
     private readonly Mock<ILeaveProcessingService> _leaveProcessingServiceMock;
-<<<<<<< HEAD
-=======
     private readonly Mock<IPasswordHasher<User>> _passwordHasherMock;
->>>>>>> origin/feature/HRC021
     private readonly ApplicationDBContext _context;
     private readonly EmployeeService _employeeService;
 
@@ -48,11 +42,8 @@ namespace HRConnect.Tests
       _positionRepoMock = new Mock<IPositionRepository>();
       _leaveBalanceServiceMock = new Mock<ILeaveBalanceService>();
       _leaveProcessingServiceMock = new Mock<ILeaveProcessingService>();
-<<<<<<< HEAD
      
-=======
       _passwordHasherMock = new Mock<IPasswordHasher<User>>();
->>>>>>> origin/feature/HRC021
 
       var options = new DbContextOptionsBuilder<ApplicationDBContext>()
           .UseInMemoryDatabase(Guid.NewGuid().ToString())
@@ -151,14 +142,11 @@ namespace HRConnect.Tests
           _emailServiceMock.Object,
           _positionRepoMock.Object,
           _leaveBalanceServiceMock.Object,
-<<<<<<< HEAD
-          _leaveProcessingServiceMock.Object
+          _leaveProcessingServiceMock.Object,
        
 
-=======
           _leaveProcessingServiceMock.Object,
           _passwordHasherMock.Object
->>>>>>> origin/feature/HRC021
       );
     }
 
