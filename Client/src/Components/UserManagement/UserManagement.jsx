@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import RolesModal from "./RoleModal.jsx"; // Import the new RolesModal
+import RolesModal from "./RoleModal.jsx"; 
 import { fetchUsersAndRoles, updateUserRole } from "../../api/UserManagement";
 import { fetchAllEmployees } from '../../api/Employee.js'
 import { getStoredUserRole } from "../../utils/roleUtils";
@@ -31,7 +31,6 @@ const USER_STATUS = {
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
-  const [activeTab, setActiveTab] = useState("userProfile");
   const [currentUserRole, setCurrentUserRole] = useState("User");
   const [selectedUserIndex, setSelectedUserIndex] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -39,13 +38,11 @@ const UserManagement = () => {
   const [editRole, setEditRole] = useState("");
   const [editStatus, setEditStatus] = useState(USER_STATUS.ACTIVE);
   const [isLoading, setIsLoading] = useState(true);
-  const [loggedInUser, setLoggedInUser] = useState(null);
+//    const [loggedInUser, setLoggedInUser] = useState(null);
 
-  const [activeFilter,setActiveFilter]=useState(null);
   const [filteredUsers,setFilteredUsers]=useState([])
   const [isFilterOpen,setIsFilterOpen]=useState(false)
-  const [filters,setFilters]=useState(null)//keyword we're using for filtering
-
+  const [filters,setFilters]=useState(null)
   const { COLORS } = useInitialColors();
 
   const loadData = async () => {
@@ -72,7 +69,7 @@ const UserManagement = () => {
 
       setUsers(mappedUsers);
       setFilteredUsers(mappedUsers);
-      setLoggedInUser(mappedUsers[0] || null);
+    //   setLoggedInUser(mappedUsers[0] || null);
       setCurrentUserRole(getStoredUserRole().roleName || "User");
 
     } catch (error) {
@@ -139,12 +136,12 @@ const UserManagement = () => {
       alert("Access denied: Admin rights required");
       return;
     }
-    const user = users[selectedUserIndex];
-    if (user) {
-      setEditRole(user.roleId ?? "");
-      setShowEditEmployeeModal(true);
-      handleCloseActions();
-    }
+//     const user = users[selectedUserIndex];
+//     if (user) {
+//       setEditRole(user.roleId ?? "");
+//       setShowEditEmployeeModal(true);
+//       handleCloseActions();
+//     }
   };
 
   const saveEmployeeDetails = async () => {
@@ -213,15 +210,6 @@ const UserManagement = () => {
 
   const handleFilter=(val)=>{
     setFilters(val)
-//   setActiveFilter(val)
-
-//   if(!val){
-//     setFilteredUsers(users)
-//     return;
-//   }
-
-//   const filteredResult=users.filter(user=>user.branch===val)
-//   setFilteredUsers(filteredResult)
   }
 
   const {
@@ -355,8 +343,7 @@ const UserManagement = () => {
             onSuccess={() => {
               loadData();
               handleCloseActions();
-    toast.success("Employee Role Update Successful")
-              // Optionally reload users if needed here
+              toast.success("Employee Role Update Successful")
               loadData();
             }}
           />

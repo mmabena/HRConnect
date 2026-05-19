@@ -64,7 +64,7 @@ namespace HRConnect.Api.Services
     }
     public string GenerateCode(byte[] userSecret)
     {
-      Totp otpCode = new(userSecret, step: 30, OtpHashMode.Sha256);
+      Totp otpCode = new(userSecret, step: _stepSeconds, OtpHashMode.Sha256);
 #line 68 "TOTPService.cs"
       Console.ForegroundColor = ConsoleColor.Red;
       Console.WriteLine($">>>>>>>>>[[[[[THE TIME-BASED ONE TIME PIN IS {otpCode}]]]]]]<<<<<<");
@@ -76,7 +76,7 @@ namespace HRConnect.Api.Services
     }
     public async Task<bool> ValidateCodeAsync(int userId, byte[] userSecret, string code)
     {
-      Totp otpCode = new(userSecret, step: 30, OtpHashMode.Sha256);
+      Totp otpCode = new(userSecret, step: _stepSeconds, OtpHashMode.Sha256);
       //TOTP are generated every 10 minutes (size of out step),
       // VerificationWindow.prev=1 step back (10 minutes back) 
       // VerificationWindow.futu=1 step forward (10 minutes ahead) 

@@ -70,14 +70,14 @@ useEffect(()=>{
     loadNotis();
     console.log(`LOADED NOTIS`)
     console.log(notis)
-},[notis])
+},[])
 
   // ── Derived ─────────────────────────────────
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   const typeOptions = [
     "all",
-    ...Array.from(new Set(notifications.map((n) => n.type))),
+    ...Array.from(new Set(notis.map((n) => n.type))),
   ];
 
   const filtered = notifications.filter((n) => {
@@ -185,7 +185,9 @@ useEffect(()=>{
           <div className="notif-state">
             <span>⚠️</span>
             <p>{error}</p>
-            <button className="notif-retry" onClick={loadNotifications}>Retry</button>
+            <button className="notif-retry" onClick={()=>{
+                loadNotifications()
+                }}>Retry</button>
           </div>
         )}
 

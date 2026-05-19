@@ -19,22 +19,22 @@ namespace HRConnect.Api.Services
       _notificationDispatcher = notificationDispatcher;
     }
 
-    public async Task<IList<NotificationDto>> GetEmployeeNotificationsAsync(string employeeId)
+    public async Task<IEnumerable<NotificationDto>> GetEmployeeNotificationsAsync(string employeeId)
     {
-      IList<NotificationDto> notifications = await _notificationRepository.GetEmployeeNotificationsAsync(employeeId);
-      return notifications;
+      IEnumerable<Notification> notifications = await _notificationRepository.GetEmployeeNotificationsAsync(employeeId);
+      return notifications.Select(n => n.ToNotificationDto());
     }
     public async Task<IEnumerable<NotificationDto>> GetAllEmployeeNotificationsByTypeAsync(NotificationType type, string employeeId)
     {
-      IEnumerable<NotificationDto> notifications = await _notificationRepository.GetAllEmployeeNotificationsByTypeAsync(type, employeeId);
+      IEnumerable<Notification> notifications = await _notificationRepository.GetAllEmployeeNotificationsByTypeAsync(type, employeeId);
 
-      return notifications;
+      return notifications.Select(n => n.ToNotificationDto());
     }
     public async Task<IEnumerable<NotificationDto>> GetAllEmployeeNotificationsBySeverityAsync(NotificationSeverity severity, string employeeId)
     {
-      IEnumerable<NotificationDto> notifications = await _notificationRepository.GetAllEmployeeNotificationsBySeverityAsync(employeeId, severity);
+      IEnumerable<Notification> notifications = await _notificationRepository.GetAllEmployeeNotificationsBySeverityAsync(employeeId, severity);
 
-      return notifications;
+      return notifications.Select(n => n.ToNotificationDto());
     }
     public async Task MarkBatchedNotificationsReadByTypeAsync(NotificationType type, List<string> employeeIds)
     {
@@ -42,14 +42,14 @@ namespace HRConnect.Api.Services
     }
     public async Task MarkNotificationReadByTypeAsync(NotificationType type, string employeeId)
     {
-      IEnumerable<NotificationDto> notification = await _notificationRepository
+      IEnumerable<Notification> notification = await _notificationRepository
       .GetAllEmployeeNotificationsByTypeAsync(type, employeeId);
 
-      foreach (NotificationDto n in notification)
+      foreach (Notification n in notification)
       {
         n.IsRead = true;
-        BuildIdempotencyKey(n.ToNotificationFromDto());
-        await _notificationRepository.MarkAsReadAsync(n.ToNotificationFromDto());
+        BuildIdempotencyKey(n);
+        await _notificationRepository.MarkAsReadAsync(n);
       }
     }
     public async Task CreateAndDispatchAsync(Notification notification)

@@ -13,9 +13,9 @@ const BASE_URL="http://localhost:5147/api";
 
 // Priority weight – lower = shown first
 const SEVERITY = {
-  CRITICAL: 0,
-  WARNING:1,
-  INFORMATION: 2,
+  CRITICAL: "Critical",
+  WARNING:"Warning",
+  INFORMATION: "Information",
 };
 const NOTIFICATION_TYPE={
     PAYROLL:"Payroll",
@@ -27,19 +27,13 @@ const NOTIFICATION_TYPE={
 }
 //Notification DTO only to be used for InApp notifications
 export class NotificationDto{
-// id:Number;
-// message:String;//subject
-// details:String;//msg
-// type:NOTIFICATION_TYPE;
-// priority:SEVERITY;
-// time:Date;
     constructor(severity,type,rest){
          //Type and Severity Have to be strictly maintained
          if(!Object.values(NOTIFICATION_TYPE).includes(type))
-             throw new Error("Failed to assign types to notifications");
+             throw new Error("Invalid type of notifications");
      
          if(!Object.values(SEVERITY).includes(severity))
-             throw new Error("Failed to assign types to notifications");
+             throw new Error("Invalid severity for notifications");
          this.severity=severity;
          this.type=type;
          Object.assign(this,rest);

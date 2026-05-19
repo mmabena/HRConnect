@@ -29,7 +29,7 @@ namespace HRConnect.Api.Repository
       return false;
     }
 
-    public async Task<IList<NotificationDto>> GetEmployeeNotificationsAsync(string employeeId)
+    public async Task<IEnumerable<Notification>> GetEmployeeNotificationsAsync(string employeeId)
     {
       var notifications = await _context.Notifications.AsNoTracking().Where(n =>
         (n.EmployeeId == employeeId) &&
@@ -39,7 +39,7 @@ namespace HRConnect.Api.Repository
         .ToListAsync();
       if (notifications == null)
         return [];
-      return notifications.Select(n => n.ToNotificationDto()).ToList();
+      return notifications;
     }
     /// <summary>
     /// This metod acts as a deduplication safe guard when creating and dispatching 
@@ -100,29 +100,29 @@ namespace HRConnect.Api.Repository
 
       _ = await Save();
     }
-    public async Task<IEnumerable<NotificationDto>> GetAllUnreadAsync(string? employeeId)
+    public async Task<IEnumerable<Notification>> GetAllUnreadAsync(string? employeeId)
     {
       var notifications = await _context.Notifications.
             Where(n => !n.IsRead &&
             (n.EmployeeId == null || n.EmployeeId == employeeId))
       .OrderByDescending(n => n.CreatedAt).ToListAsync();
       // throw new NotImplementedException();
-      return notifications.Select(n => n.ToNotificationDto()).ToList();
+      return notifications;
     }
-    public async Task<IEnumerable<NotificationDto>> GetAllEmployeeNotificationsByTypeAsync(NotificationType type, string employeeId)
+    public async Task<IEnumerable<Notification>> GetAllEmployeeNotificationsByTypeAsync(NotificationType type, string employeeId)
     {
       var notifications = await _context.Notifications.Where(n =>
                   (n.EmployeeId == employeeId) &&
                   (n.Type == type)).ToListAsync();
-      return notifications.Select(n => n.ToNotificationDto());
+      return notifications;
     }
     //Critical,Warning,Information
-    public async Task<IEnumerable<NotificationDto>> GetAllEmployeeNotificationsBySeverityAsync(string employeeId, NotificationSeverity severity)
+    public async Task<IEnumerable<Notification>> GetAllEmployeeNotificationsBySeverityAsync(string employeeId, NotificationSeverity severity)
     {
       var notifications = await _context.Notifications.Where(n =>
                   (n.EmployeeId == employeeId) &&
                   (n.Severity == severity)).ToListAsync();
-      return notifications.Select(n => n.ToNotificationDto());
+      return notifications;
     }
     public async Task<Notification?> TryCreateUnreadAsync(Notification notification)
     {
