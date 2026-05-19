@@ -6,6 +6,7 @@ import { getJobGradeGroups } from "../../../api/JobGradeGroup";
 const LeaveTypesModal = ({
   employee,
   setEmployee,
+  positions,
   formErrors,
   setFormErrors,
   onNext,
@@ -13,36 +14,97 @@ const LeaveTypesModal = ({
 }) => {
   const [leaveOptions, setLeaveOptions] = useState([]);
 
- // Fetch leave options (job grade groups) on component mount
+  // =========================
+  // FETCH JOB GRADE GROUPS
+  // =========================
+ useEffect(() => {
+  const fetchJobGradeGroups = async () => {
+    try {
+      const data = await getJobGradeGroups();
+
+      console.log("API DATA:", data);
+
+      const apiData = Array.isArray(data)
+        ? data
+        : data?.data || [];
+
+      // FLATTEN jobGrades
+      const cleaned = apiData.flatMap((group) =>
+        (group.jobGrades || []).map((grade) => ({
+          jobGradeId: String(grade.jobGradeId).trim(),
+
+          positionName: grade.name,
+
+          groupKey: String(group.groupKey || "")
+            .trim()
+            .toUpperCase(),
+        }))
+      );
+
+      console.log("CLEANED OPTIONS:", cleaned);
+
+      setLeaveOptions(cleaned);
+    } catch (error) {
+      console.error("Error fetching job grade groups:", error);
+    }
+  };
+
+  fetchJobGradeGroups();
+}, []);
+  // =========================
+  // AUTO SELECT LEAVE TYPE
+  // =========================
   useEffect(() => {
-    const fetchJobGradeGroups = async () => {
-      try {
-        const data = await getJobGradeGroups();
+  if (!leaveOptions.length || !positions?.length) return;
 
-        const cleaned = (data || []).map((g) => ({
-          groupKey: g.groupKey || g.code || g.group_key,
-        }));
+  const jobTitle = employee?.jobTitle;
 
-        setLeaveOptions(cleaned);
-      } catch (error) {
-        console.error("Error fetching job grade groups:", error);
-      }
+  if (!jobTitle) return;
+
+  const selectedPosition = positions.find(
+    (p) => String(p.positionId) === String(jobTitle)
+  );
+
+  if (!selectedPosition?.jobGradeId) return;
+
+  const matchedOption = leaveOptions.find(
+    (o) =>
+      String(o.jobGradeId) ===
+      String(selectedPosition.jobGradeId)
+  );
+
+  if (!matchedOption) return;
+
+  setEmployee((prev) => {
+    // IMPORTANT: ensure state actually changes
+    if (prev.leaveType === matchedOption.groupKey) return prev;
+
+    return {
+      ...prev,
+      leaveType: matchedOption.groupKey,
+      leaveTypeName: getGroupTitle(matchedOption.groupKey),
     };
+  });
+}, [
+  employee?.jobTitle,
+  positions,
+  leaveOptions,
+]);
 
-    fetchJobGradeGroups();
-  }, []);
-
-   const statutoryLeaves = [
+  // =========================
+  // STATUTORY LEAVES
+  // =========================
+  const statutoryLeaves = [
     { key: "sick", label: "Sick Leave", desc: "30 Days" },
-    { key: "family", label: "Family Responsibility Leave", desc: "3 Days per year" },
+    {
+      key: "family",
+      label: "Family Responsibility Leave",
+      desc: "3 Days per year",
+    },
     { key: "maternity", label: "Maternity Leave", desc: "121 Days" },
     { key: "unpaid", label: "Unpaid Leave", desc: "By arrangement" },
   ];
 
-
-
-  
-// Filter out maternityleave for male employees
   const isMale = employee.gender?.toLowerCase() === "male";
 
   const filteredStatutoryLeaves = statutoryLeaves.filter((leave) => {
@@ -50,10 +112,14 @@ const LeaveTypesModal = ({
     return true;
   });
 
- // ORDER CONTROL (IMPORTANT)
+  // =========================
+  // ORDER CONTROL
+  // =========================
   const order = ["GROUP_A", "SENIOR", "EXECUTIVE"];
 
-  //TITLE MAPPING
+  // =========================
+  // LABEL MAPPING
+  // =========================
   const getGroupTitle = (groupKey) => {
     switch (groupKey) {
       case "GROUP_A":
@@ -67,24 +133,19 @@ const LeaveTypesModal = ({
     }
   };
 
-  // LEAVE RANGE RULES
   const getLeaveRanges = (groupKey) => {
     switch (groupKey) {
       case "GROUP_A":
         return "0-3yrs: 15 Days, 3-5yrs: 18 Days, 5+yrs: 22 Days";
-
       case "SENIOR":
         return "0-3yrs: 18 Days, 3-5yrs: 21 Days, 5+yrs: 25 Days";
-
       case "EXECUTIVE":
         return "0-3yrs: 20 Days, 3-5yrs: 23 Days, 5+yrs: 27 Days";
-
       default:
         return "No leave data available";
     }
   };
 
-  //SELECT HANDLER
   const handleSelect = (option) => {
     setEmployee((prev) => ({
       ...prev,
@@ -93,10 +154,15 @@ const LeaveTypesModal = ({
     }));
   };
 
-
+  // =========================
+  // VALIDATION
+  // =========================
   const handleNext = () => {
     if (!employee.leaveType) {
-      setFormErrors({ leaveType: "Please select a leave type" });
+      setFormErrors((prev) => ({
+        ...prev,
+        leaveType: "Please select a leave type",
+      }));
       return;
     }
 
@@ -106,7 +172,6 @@ const LeaveTypesModal = ({
   return (
     <div className="emp-leave-container">
       <div className="emp-leave-form-grid">
-
         <div className="emp-leave-personal-details-heading">
           <span>Leave Configuration</span>
         </div>
@@ -115,41 +180,71 @@ const LeaveTypesModal = ({
           <span>Assign leave entitlement</span>
         </div>
 
-        {/* ANNUAL LEAVE */}
         <div className="leave-section-title">
           ANNUAL LEAVE TYPE - SELECT ONE
         </div>
 
         <div className="emp-leave-type-line" />
 
-        <div className="leave-options">
-          {[...leaveOptions]
+        {/* =========================
+            LEAVE OPTIONS
+        ========================= */}
+          <div className="leave-options">
+
+          {[...new Map(
+            leaveOptions.map((item) => [item.groupKey, item])
+          ).values()]
             .sort(
               (a, b) =>
-                order.indexOf(a.groupKey) - order.indexOf(b.groupKey)
+                order.indexOf(a.groupKey) -
+                order.indexOf(b.groupKey)
             )
-            .map((option) => (
-              <div
-                key={option.groupKey}
-                className={`leave-card ${
-                  employee.leaveType === option.groupKey ? "active" : ""
-                }`}
-                onClick={() => handleSelect(option)}
-              >
-                <input
-                  type="radio"
-                  checked={employee.leaveType === option.groupKey}
-                  readOnly
-                />
+            .map((option) => {
 
-                <div className="leave-text">
-                  <h4>{getGroupTitle(option.groupKey)}</h4>
-                  <p>{getLeaveRanges(option.groupKey)}</p>
+              const isActive =
+                String(employee.leaveType)
+                  .trim()
+                  .toUpperCase() ===
+                String(option.groupKey)
+                  .trim()
+                  .toUpperCase();
+
+              console.log(
+                "CARD:",
+                option.groupKey,
+                "ACTIVE:",
+                isActive
+              );
+
+              return (
+                <div
+                  key={option.groupKey}
+                  className={`leave-card ${
+                    isActive ? "active" : ""
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    checked={isActive}
+                    readOnly
+                  />
+
+                  <div className="leave-text">
+                    <h4>
+                      {getGroupTitle(option.groupKey)}
+                    </h4>
+
+                    <p>
+                      {getLeaveRanges(option.groupKey)}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
         </div>
-        {/* STATUTORY */}
+        {/* =========================
+            STATUTORY LEAVES
+        ========================= */}
         <div className="leave-section-title">
           STATUTORY LEAVE (AUTO - INCLUDED)
         </div>
@@ -157,7 +252,7 @@ const LeaveTypesModal = ({
         <div className="emp-leave-type-line" />
 
         <div className="leave-grid-cards">
-          {statutoryLeaves.map((item) => (
+          {filteredStatutoryLeaves.map((item) => (
             <div key={item.key} className="leave-small-card">
               <h4>{item.label}</h4>
               <p>{item.desc}</p>
@@ -173,16 +268,15 @@ const LeaveTypesModal = ({
         {/* BUTTONS */}
         <div className="emp-button-row">
           <button className="emp-leave-back-button" onClick={onBack}>
-            <ArrowLeft size={20} className="back-save-button-icon" />
+            <ArrowLeft size={20} />
             Back
           </button>
 
           <button className="emp-leave-next-button" onClick={handleNext}>
             Next
-            <ArrowRight size={20} className="next-save-button-icon" />
+            <ArrowRight size={20} />
           </button>
         </div>
-
       </div>
     </div>
   );

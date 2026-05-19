@@ -867,6 +867,7 @@ const AddEmployeeModal = ({ closeModal }) => {
 
               {currentStepLabel === "Leave" && (
                 <LeaveTypesModal
+                positions={positions} 
                   employee={employee}
                   setEmployee={setEmployee}
                   formErrors={formErrors}
