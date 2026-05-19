@@ -1,6 +1,10 @@
 import { useState } from "react";
 import "./annual-editor.css";
-import { updateLeaveType } from "../../api/leaveTypeApi";
+import {
+  updateLeaveType,
+  previewEntitlementImpact,
+} from "../../api/leaveTypeApi";
+import { useNavigate } from "react-router-dom";
 
 const AnnualLeaveEditor = ({
   leaveType,
@@ -15,6 +19,7 @@ const AnnualLeaveEditor = ({
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("");
   const [errorFields, setErrorFields] = useState({});
+  const navigate = useNavigate();
 
   const buildGroupedRules = () => {
     return {
@@ -34,7 +39,12 @@ const AnnualLeaveEditor = ({
         : grouped.executive;
 
   const currentRules = [...baseRules, ...customRules];
-
+  const getRuleKey = (rule) => {
+    return (
+      rule.id ??
+      `${rule.groupKey}-${rule.minYearsService}-${rule.maxYearsService}`
+    );
+  };
   const handleFieldChange = (ruleKey, field, value) => {
     setEditedRules((prev) => ({
       ...prev,
@@ -102,93 +112,47 @@ const AnnualLeaveEditor = ({
 
     return "Unable to save changes. Please check your inputs.";
   };
-  const handleSave = async () => {
-    try {
-      const allRules = [...leaveType.rules, ...customRules];
+  const buildPayload = () => {
+    const allRules = [...leaveType.rules, ...customRules];
 
-      const finalRules = allRules.map((r, index) => {
-        const ruleKey = r.id ?? `${r.groupKey}-${index}`;
+    const finalRules = allRules.map((r) => {
+      const ruleKey = getRuleKey(r);
 
-        const edited = editedRules[ruleKey];
+      const edited = editedRules[ruleKey];
 
-        const min =
-          edited?.minYearsService !== undefined
-            ? Number(edited.minYearsService)
-            : r.minYearsService;
+      const min =
+        edited?.minYearsService !== undefined
+          ? Number(edited.minYearsService)
+          : r.minYearsService;
 
-        const max =
-          edited?.maxYearsService !== undefined
-            ? edited.maxYearsService === ""
-              ? null
-              : Number(edited.maxYearsService)
-            : r.maxYearsService;
+      const max =
+        edited?.maxYearsService !== undefined
+          ? edited.maxYearsService === ""
+            ? null
+            : Number(edited.maxYearsService)
+          : r.maxYearsService;
 
-        const days =
-          edited?.daysAllocated !== undefined
-            ? Number(edited.daysAllocated)
-            : r.daysAllocated;
+      const days =
+        edited?.daysAllocated !== undefined
+          ? Number(edited.daysAllocated)
+          : r.daysAllocated;
 
-        return {
-          groupKey: r.groupKey,
-          minYearsService: Number(min.toFixed(2)),
-          maxYearsService: max !== null ? Number(max.toFixed(2)) : null,
-          daysAllocated: Number(days.toFixed(2)),
-        };
-      });
+      return {
+        groupKey: r.groupKey,
+        minYearsService: Number(min.toFixed(2)),
+        maxYearsService: max !== null ? Number(max.toFixed(2)) : null,
+        daysAllocated: Number(days.toFixed(2)),
+      };
+    });
 
-      const grouped = {};
-
-      finalRules.forEach((r) => {
-        if (!grouped[r.groupKey]) grouped[r.groupKey] = [];
-        grouped[r.groupKey].push(r);
-      });
-
-      Object.keys(grouped).forEach((key) => {
-        grouped[key] = grouped[key]
-          .sort((a, b) => a.minYearsService - b.minYearsService)
-          .filter(
-            (r, i, arr) =>
-              i ===
-              arr.findIndex(
-                (x) =>
-                  x.minYearsService === r.minYearsService &&
-                  x.maxYearsService === r.maxYearsService,
-              ),
-          );
-      });
-
-      const cleanedRules = Object.values(grouped).flat();
-
-      console.log("FINAL PAYLOAD:", JSON.stringify(cleanedRules, null, 2));
-
-      await updateLeaveType(leaveType.id, {
-        name: leaveType.name,
-        description: leaveType.description,
-        femaleOnly: leaveType.femaleOnly,
-        isActive: leaveType.isActive,
-        rules: cleanedRules,
-      });
-
-      showMessage("Leave type updated successfully", "success");
-
-      setTimeout(() => {
-        onSuccess();
-        onClose();
-      }, 800);
-    } catch (err) {
-      console.error(err);
-
-      let message = err.response?.data;
-
-      if (typeof message === "object") {
-        message = message.title || JSON.stringify(message);
-      }
-
-      const friendlyMessage = mapBackendError(message);
-      showMessage(friendlyMessage, "error");
-    }
+    return {
+      name: leaveType.name,
+      description: leaveType.description,
+      femaleOnly: leaveType.femaleOnly,
+      isActive: leaveType.isActive,
+      rules: finalRules,
+    };
   };
-
   return (
     <div className="annual-wrapper">
       {message && (
@@ -226,7 +190,7 @@ const AnnualLeaveEditor = ({
 
         <div className="rule-body">
           {currentRules.map((r, index) => {
-            const ruleKey = r.id ?? `${r.groupKey}-${index}`;
+            const ruleKey = getRuleKey(r);
             const edited = editedRules[ruleKey] || {};
 
             return (
@@ -332,11 +296,24 @@ const AnnualLeaveEditor = ({
             </button>
 
             <button
-              className="next"
-              onClick={handleSave}
               disabled={!hasChanges}
+              onClick={async () => {
+                try {
+                  const payload = buildPayload();
+
+                  const previewData = await previewEntitlementImpact(payload);
+
+                  navigate("/affected-employees", {
+                    state: {
+                      employees: previewData,
+                    },
+                  });
+                } catch (err) {
+                  console.error(err);
+                }
+              }}
             >
-              Save Changes
+              View Affected Employees
             </button>
           </>
         )}

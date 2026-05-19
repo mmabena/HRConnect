@@ -84,3 +84,22 @@ export const toggleLeaveTypeStatus = async (id) => {
 
   return response.data;
 };
+export const previewEntitlementImpact = async (data) => {
+  try {
+    const response = await axios.post(
+      `${BASE_URL}/preview-entitlement-impact`,
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error previewing entitlement impact:", error);
+    throw error;
+  }
+};

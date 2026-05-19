@@ -9,6 +9,7 @@ namespace HRConnect.Api.Services
     using Microsoft.EntityFrameworkCore;
     using System.Threading.Tasks;
     using HRConnect.Api.Interfaces;
+    using System.Runtime.CompilerServices;
 
     public class LeaveTypeManagementService : ILeaveTypeManagementService
     {
@@ -358,6 +359,101 @@ namespace HRConnect.Api.Services
                     DaysAllocated = r.DaysAllocated
                 }).ToList()
             };
+        }
+        private static decimal CalculateYearsOfService(
+    DateOnly startDate)
+        {
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
+            if (startDate > today)
+                return 0;
+
+            var totalDays =
+                today.DayNumber - startDate.DayNumber;
+
+            return Math.Round(
+                totalDays / 365.25m,
+                2);
+        }
+        public async Task<List<EntitlementImpactPreviewDto>> PreviewEntitlementImpactAsync(UpdateLeaveTypeRequest request)
+        {
+            var result = new List<EntitlementImpactPreviewDto>();
+
+            var annualLeave = await _context.LeaveTypes
+                .FirstOrDefaultAsync(l =>
+                l.Code == "AL" &&
+                l.IsActive);
+
+            if (annualLeave == null)
+                return result;
+
+            var employees = await _context.Employees
+            .Include(e => e.Position)
+            .ThenInclude(p => p.JobGrade)
+            .ToListAsync();
+
+            foreach (var employee in employees)
+            {
+                if (employee.Position == null)
+                    continue;
+
+                var groupKey = await _context.JobGradeGroupMaps
+                    .Where(x =>
+                        x.JobGradeId == employee.Position.JobGradeId)
+                    .Select(x => x.GroupKey)
+                    .FirstOrDefaultAsync();
+
+                if (groupKey == null)
+                    continue;
+
+                var yearsOfService = CalculateYearsOfService(employee.StartDate);
+
+                //Current Rule
+                var currrentRule = await _context.LeaveEntitlementRules
+                    .Where(r =>
+                        r.LeaveTypeId == annualLeave.Id &&
+                        r.GroupKey == groupKey &&
+                        r.MinYearsService <= yearsOfService &&
+                        (r.MaxYearsService == null ||
+                        yearsOfService < r.MaxYearsService) &&
+                        r.IsActive)
+                        .OrderByDescending(r => r.MinYearsService)
+                        .FirstOrDefaultAsync();
+
+                if (currrentRule == null)
+                    continue;
+
+                //New rule from request
+                var newRule = request.Rules
+                    .Where(r =>
+                        r.GroupKey == groupKey &&
+                        r.MinYearsService <= yearsOfService &&
+                        (r.MaxYearsService == null ||
+                        yearsOfService < r.MaxYearsService))
+                        .OrderByDescending(r => r.MinYearsService)
+                        .FirstOrDefault();
+
+                if (newRule == null)
+                    continue;
+
+                //only return impacted employees
+                if (currrentRule.DaysAllocated == newRule.DaysAllocated)
+                    continue;
+
+                result.Add(new EntitlementImpactPreviewDto
+                {
+                    EmployeeId = employee.EmployeeId,
+                    EmployeeName = $"{employee.Name} {employee.Surname}",
+                    Position = employee.Position.PositionTitle,
+                    GroupKey = groupKey,
+                    YearsOfService = yearsOfService,
+                    PreviousEntitlement = currrentRule.DaysAllocated,
+                    NewEntitlement = newRule.DaysAllocated
+                });
+            }
+            return result.OrderBy(x => x.GroupKey)
+                .ThenBy(x => x.EmployeeName)
+                .ToList();
         }
     }
 }

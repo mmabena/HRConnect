@@ -35,6 +35,7 @@ import ChangePositionManagement from "./Components/companyManagement/PositionMan
 import LeaveTables from "./Components/LeaveTypeManagement/LeaveTables";
 import ApplyLeave from "./Components/LeaveApplicationManagement/ApplyLeave";
 import { resolveRole } from "./utils/roleUtils.js";
+import AffectedEmployeesPage from "./Components/LeaveTypeManagement/AffectedEmployeesPage";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
@@ -199,6 +200,7 @@ function App() {
           <Route path="/taxTableUpload" element={<TaxTableUpload />} />
           <Route path="/leave-application" element={<ApplyLeave />} />
           <Route path="/leave-history" element={<LeaveHistory />} />
+          <Route path="/affected-employees" element={<AffectedEmployeesPage />}/>
           <Route path="/positionManagement" element={<PositionManagement />} />
           <Route
             path="/addPositionManagement"
