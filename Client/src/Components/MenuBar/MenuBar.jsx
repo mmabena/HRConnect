@@ -34,7 +34,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // FIX: Access the role directly from the currentUser object
+  // FIX: Access the role directly from the currentUser object deductionsOpen
   const role = currentUser?.role?.toLowerCase();
 
   const permissions = {
@@ -393,10 +393,13 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                     {deductionsOpen && (
                       <ul className="submenu show">
                         <li>
-                          <span className="menu-subitem" onClick={() => handleSubmenuClick("/pension-funds")}>
-                            Pension Funds
-                          </span>
-                        </li>
+                    <span
+                      className="menu-subitem"
+                      onClick={() => handleSubmenuClick("/pension-management")}
+                    >
+                      Pension Fund Management
+                    </span>
+                    </li>
                         <li>
                           <span
                             className="menu-subitem"

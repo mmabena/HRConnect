@@ -9,6 +9,7 @@ import EditCompany from "./Components/companyManagement/editCompany.jsx";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
+import './styles/global.css';
 import "./Components/MenuBar/MenuBar.css";
 import EmployeeList from "./Pages/EmployeeManagement/EmployeeList";
 import AddEmployeeModal from "./Components/EmployeeManagement/AddEmployeeModal";
@@ -30,6 +31,8 @@ import ProjectionCalculator from "./Pages/PayrollTools/ProjectionCalculator";
 import PersonalInformation from "./Components/PersonalInformation.jsx";
 import api from "../src/api/api.js";
 import ChangePositionManagement from "./Components/companyManagement/PositionManagement/ChangePositionManagement.jsx";
+import PensionOptionsList from "./Components/PensionPages/PensionOptionsList";
+import PensionFundsList from "./Components/PensionPages/PensionFundsList";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
@@ -94,6 +97,7 @@ function App() {
     setIsLoggedIn(false);
     navigate("/");
   };
+
 
   // FIXED: Use backend user object directly
   const handleLoginSuccess = async (backendUserData) => {
@@ -222,6 +226,8 @@ function App() {
           <Route path="/changeposition" element={<ChangePositionManagement />} />
           <Route path="/manageUserPosition" element={<ManageUserPositions/>} />
           <Route path="/personal" element={<PersonalInformation />} />
+          <Route path="/pension-management" element={<PensionFundsList />} />
+          <Route path="/pension-options" element={<PensionOptionsList />} />
         </Routes>
       </div>
     </div>

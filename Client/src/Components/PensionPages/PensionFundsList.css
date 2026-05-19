@@ -1,0 +1,62 @@
+.pension-page {
+  padding: 30px;
+  background: #f6f8fc;
+}
+
+.page-title {
+  font-size: 28px;
+  margin-bottom: 20px;
+}
+
+.funds-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* FUND CARD */
+.fund-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+/* HEADER */
+.fund-header h3 {
+  margin: 0;
+}
+
+.fund-header p {
+  color: #666;
+  margin: 5px 0;
+}
+
+.tax-code {
+  font-size: 12px;
+  color: #999;
+}
+
+/* OPTIONS SECTION */
+.options-section {
+  margin-top: 15px;
+}
+
+.options-list {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* OPTION BADGES */
+.option-pill {
+  background: #e6f0ff;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.no-options {
+  color: #aaa;
+}
