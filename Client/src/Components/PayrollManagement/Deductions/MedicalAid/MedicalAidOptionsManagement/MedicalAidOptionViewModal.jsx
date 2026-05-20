@@ -5,7 +5,7 @@ import formatToLocalCurrency from "../../../../../utils/formatToLocalCurrency";
 import formatSalaryBracket from "../../../../../utils/formatSalaryBracket";
 import medicalAidOptionDynamicCalculator from "../../../../../utils/medicalAidOptionDynamicCalculator";
 import Divider from './Divider';
-
+import {Pencil, X, Check, Minus} from 'lucide-react';
 
 function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categories = [], categoryArray = [], onSave}) {
 
@@ -225,14 +225,15 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
         const totalChild2 = calculateChild2Total(riskChild2, msaChild2) ? null : calculateChild2Total(riskChild2, msaChild2);
 
         return (
+          <>
           <table className="modal-view-table">
             <thead>
               <tr>
                 <th className="model-view-table-header-cell">Component</th>
-                <th className="model-view-table-header-cell">Principal</th>
-                <th className="model-view-table-header-cell">Adult</th>
-                <th className="model-view-table-header-cell">Child</th>
-                <th className="model-view-table-header-cell">Child 2</th>
+                <th className="model-view-table-header-cell" id="static-column">Principal</th>
+                <th className="model-view-table-header-cell" id="static-column">Adult</th>
+                <th className="model-view-table-header-cell" id="static-column">Child</th>
+                <th className="model-view-table-header-cell" id="static-column">Child 2</th>
               </tr>
             </thead>
 
@@ -280,20 +281,32 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
                 <td><Cell value={editable ? msaAdult : fmtCurrency(msaAdult)} field="monthlyMsaContributionAdult" optionId={oid} editable={editable} type="number"/></td>
                 <td><Cell value={editable ? msaChild : fmtCurrency(msaChild)} field="monthlyMsaContributionChild" optionId={oid} editable={editable} type="number"/></td>
               </tr>
-              {/* Section: Totals*/}
-              <tr className="modal-view-section-row">
-                <td colSpan='5' className="modal-view-section-cell">TOTAL MONTHLY DEDUCTION</td>
-              </tr>
-              <tr className="modal-view-totals-row">
-                <td className="modal-view-label-cell">Total</td>
-                <td className="modal-view-label-cell">{totalPrincipal}</td>
-                <td className="modal-view-label-cell">{totalAdult}</td>
-                <td className="modal-view-label-cell">{totalChild}</td>
-                <td className="modal-view-label-cell">{totalChild ?? `Free`}</td>
-              </tr>
             </tbody>
-
           </table>
+              <>
+                  {/* --{Section: Totals}---*/}
+                  <div className="model-view-total-contrib-multicolumn">
+                      {/*implementation using columns - within the model-view-total-contrib div*/}
+                        <div className="total-contrib-column-card">
+                          <span className="span-header-title">PRINCIPAL</span>
+                          <span className="span-header-label">{totalPrincipal === 0 || totalPrincipal === null || totalPrincipal === '0' ? totalAdult : totalPrincipal}</span>
+                        </div>
+                        <div className="total-contrib-column-card">
+                            <span className="span-header-title">ADULT</span>
+                            <span className="span-header-label">{totalAdult}</span>
+                        </div>
+                        <div className="total-contrib-column-card">
+                            <span className="span-header-title">CHILD</span>
+                            <span className="span-header-label">{totalChild}</span>
+                        </div>
+                        <div className="total-contrib-column-card">
+                            <span className="span-header-title">CHILD 2+</span>
+                            <span className="span-header-label">{totalChild ?? `Free`}</span>
+                        </div>
+                  </div>
+              </>
+          </>
+          
         );
 
       };
@@ -344,7 +357,7 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
               </div>
                 {/* Header Controls Holder */}
               <div className="modal-header-control-holder">
-                <button className="modal-button-close" onClick={onClose} aria-label="Close">&times;</button>
+                <button className="modal-button-close" onClick={onClose} aria-label="Close"><X /></button>
               </div>
 
 
@@ -411,10 +424,10 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
                 {renderOptionTable()}
 
                 <Divider />
-
-                {renderPagination()}
-
-                {renderEditProgress()}
+                  {/*                 
+                  {renderPagination()}
+                  {renderEditProgress()} 
+                  */}
               </>
             )}
           </div>
@@ -429,7 +442,8 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
               onClick={handleToggleEdit}
               id="modal-footer-action-button"
             >
-              {isEditing ? 'Cancel Edit' : 'Edit Plan'}
+              {isEditing ? 
+                  <>'Cancel Edit'</> : <>'Edit Plan'</>}
             </button>
 
             {isEditing && (
