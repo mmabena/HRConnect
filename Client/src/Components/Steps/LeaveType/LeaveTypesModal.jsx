@@ -14,82 +14,93 @@ const LeaveTypesModal = ({
 }) => {
   const [leaveOptions, setLeaveOptions] = useState([]);
 
+  const employeeTypeRaw =
+    employee?.employeeType ||
+    employee?.employmentType ||
+    employee?.employeeStatus;
+
+  const employeeType = employeeTypeRaw
+    ?.toString()
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "-"); // NORMALISE EVERYTHING
+
+  const isContract = employeeType === "contract";
+
+  const isFixedTerm =
+    employeeType === "fixed-term" || employeeType === "fixedterm";
+
+  const isPermanent = !isContract && !isFixedTerm;
+
   // =========================
   // FETCH JOB GRADE GROUPS
   // =========================
- useEffect(() => {
-  const fetchJobGradeGroups = async () => {
-    try {
-      const data = await getJobGradeGroups();
+  useEffect(() => {
+    const fetchJobGradeGroups = async () => {
+      try {
+        const data = await getJobGradeGroups();
 
-      console.log("API DATA:", data);
+        console.log("API DATA:", data);
 
-      const apiData = Array.isArray(data)
-        ? data
-        : data?.data || [];
+        const apiData = Array.isArray(data) ? data : data?.data || [];
 
-      // FLATTEN jobGrades
-      const cleaned = apiData.flatMap((group) =>
-        (group.jobGrades || []).map((grade) => ({
-          jobGradeId: String(grade.jobGradeId).trim(),
+        // FLATTEN jobGrades
+        const cleaned = apiData.flatMap((group) =>
+          (group.jobGrades || []).map((grade) => ({
+            jobGradeId: String(grade.jobGradeId).trim(),
 
-          positionName: grade.name,
+            positionName: grade.name,
 
-          groupKey: String(group.groupKey || "")
-            .trim()
-            .toUpperCase(),
-        }))
-      );
+            groupKey: String(group.groupKey || "")
+              .trim()
+              .toUpperCase(),
+          })),
+        );
 
-      console.log("CLEANED OPTIONS:", cleaned);
+        console.log("CLEANED OPTIONS:", cleaned);
 
-      setLeaveOptions(cleaned);
-    } catch (error) {
-      console.error("Error fetching job grade groups:", error);
-    }
-  };
+        setLeaveOptions(cleaned);
+      } catch (error) {
+        console.error("Error fetching job grade groups:", error);
+      }
+    };
 
-  fetchJobGradeGroups();
-}, []);
+    fetchJobGradeGroups();
+  }, []);
+
   // =========================
   // AUTO SELECT LEAVE TYPE
   // =========================
   useEffect(() => {
-  if (!leaveOptions.length || !positions?.length) return;
+    if (!leaveOptions.length || !positions?.length) return;
 
-  const jobTitle = employee?.jobTitle;
+    const jobTitle = employee?.jobTitle;
 
-  if (!jobTitle) return;
+    if (!jobTitle) return;
 
-  const selectedPosition = positions.find(
-    (p) => String(p.positionId) === String(jobTitle)
-  );
+    const selectedPosition = positions.find(
+      (p) => String(p.positionId) === String(jobTitle),
+    );
 
-  if (!selectedPosition?.jobGradeId) return;
+    if (!selectedPosition?.jobGradeId) return;
 
-  const matchedOption = leaveOptions.find(
-    (o) =>
-      String(o.jobGradeId) ===
-      String(selectedPosition.jobGradeId)
-  );
+    const matchedOption = leaveOptions.find(
+      (o) => String(o.jobGradeId) === String(selectedPosition.jobGradeId),
+    );
 
-  if (!matchedOption) return;
+    if (!matchedOption) return;
 
-  setEmployee((prev) => {
-    // IMPORTANT: ensure state actually changes
-    if (prev.leaveType === matchedOption.groupKey) return prev;
+    setEmployee((prev) => {
+      // IMPORTANT: ensure state actually changes
+      if (prev.leaveType === matchedOption.groupKey) return prev;
 
-    return {
-      ...prev,
-      leaveType: matchedOption.groupKey,
-      leaveTypeName: getGroupTitle(matchedOption.groupKey),
-    };
-  });
-}, [
-  employee?.jobTitle,
-  positions,
-  leaveOptions,
-]);
+      return {
+        ...prev,
+        leaveType: matchedOption.groupKey,
+        leaveTypeName: getGroupTitle(matchedOption.groupKey),
+      };
+    });
+  }, [employee?.jobTitle, positions, leaveOptions]);
 
   // =========================
   // STATUTORY LEAVES
@@ -180,85 +191,116 @@ const LeaveTypesModal = ({
           <span>Assign leave entitlement</span>
         </div>
 
-        <div className="leave-section-title">
-          ANNUAL LEAVE TYPE - SELECT ONE
+        <div
+          className={`leave-section-title ${
+            isPermanent ? "permanent-title" : "non-permanent-title"
+          }`}
+        >
+          {isPermanent && "ANNUAL LEAVE TYPE - SELECT ONE"}
+
+          {isFixedTerm && "LEAVE TYPE"}
+
+          {isContract && "LEAVE TYPE"}
         </div>
 
-        <div className="emp-leave-type-line" />
+        {/* =========================
+    CONTRACT / FIXED-TERM VIEW
+========================= */}
+        {(isContract || isFixedTerm) && (
+          <>
+          <div className="leave-options-non-permanent">
+            <div className="leave-info-banner">
+              Fixed-term and contract employees receive predefined leave
+              allocations for the duration of employment.
+            </div>
+
+            
+              {/* FIXED-TERM CARD */}
+              <div
+                className={`leave-card-non-permanent ${isFixedTerm ? "active" : ""}`}
+              >
+                <input type="radio" checked={isFixedTerm} readOnly />
+
+                <div className="leave-text">
+                  <h4>Fixed-Term Leave</h4>
+                  <p>
+                    1.25 days per month worked for the duration of the contract
+                  </p>
+                </div>
+              </div>
+
+              {/* CONTRACT CARD */}
+              <div
+                className={`leave-card-non-permanent ${isContract ? "active" : ""}`}
+              >
+                <input type="radio" checked={isContract} readOnly />
+
+                <div className="leave-text">
+                  <h4>Contract Leave</h4>
+                  <p>Leave as specified in the contract of employment</p>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
 
         {/* =========================
             LEAVE OPTIONS
         ========================= */}
+        {isPermanent && (
           <div className="leave-options">
+            {[
+              ...new Map(
+                leaveOptions.map((item) => [item.groupKey, item]),
+              ).values(),
+            ]
+              .sort(
+                (a, b) => order.indexOf(a.groupKey) - order.indexOf(b.groupKey),
+              )
+              .map((option) => {
+                const isActive =
+                  String(employee.leaveType).trim().toUpperCase() ===
+                  String(option.groupKey).trim().toUpperCase();
 
-          {[...new Map(
-            leaveOptions.map((item) => [item.groupKey, item])
-          ).values()]
-            .sort(
-              (a, b) =>
-                order.indexOf(a.groupKey) -
-                order.indexOf(b.groupKey)
-            )
-            .map((option) => {
+                console.log("CARD:", option.groupKey, "ACTIVE:", isActive);
 
-              const isActive =
-                String(employee.leaveType)
-                  .trim()
-                  .toUpperCase() ===
-                String(option.groupKey)
-                  .trim()
-                  .toUpperCase();
+                return (
+                  <div
+                    key={option.groupKey}
+                    className={`leave-card ${isActive ? "active" : ""}`}
+                  >
+                    <input type="radio" checked={isActive} readOnly />
 
-              console.log(
-                "CARD:",
-                option.groupKey,
-                "ACTIVE:",
-                isActive
-              );
+                    <div className="leave-text">
+                      <h4>{getGroupTitle(option.groupKey)}</h4>
 
-              return (
-                <div
-                  key={option.groupKey}
-                  className={`leave-card ${
-                    isActive ? "active" : ""
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    checked={isActive}
-                    readOnly
-                  />
-
-                  <div className="leave-text">
-                    <h4>
-                      {getGroupTitle(option.groupKey)}
-                    </h4>
-
-                    <p>
-                      {getLeaveRanges(option.groupKey)}
-                    </p>
+                      <p>{getLeaveRanges(option.groupKey)}</p>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-        </div>
+                );
+              })}
+          </div>
+        )}
+
         {/* =========================
             STATUTORY LEAVES
         ========================= */}
-        <div className="leave-section-title">
-          STATUTORY LEAVE (AUTO - INCLUDED)
-        </div>
-
-        <div className="emp-leave-type-line" />
-
-        <div className="leave-grid-cards">
-          {filteredStatutoryLeaves.map((item) => (
-            <div key={item.key} className="leave-small-card">
-              <h4>{item.label}</h4>
-              <p>{item.desc}</p>
+        {isPermanent && (
+          <>
+            <div className="leave-section-title">
+              STATUTORY LEAVE (AUTO - INCLUDED)
             </div>
-          ))}
-        </div>
+
+            <div className="leave-grid-cards">
+              {filteredStatutoryLeaves.map((item) => (
+                <div key={item.key} className="leave-small-card">
+                  <h4>{item.label}</h4>
+                  <p>{item.desc}</p>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
 
         {/* ERROR */}
         {formErrors.leaveType && (

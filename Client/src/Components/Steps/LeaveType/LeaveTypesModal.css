@@ -8,10 +8,10 @@
   max-width: 444px;
   gap: 17px;
   border-radius: 5px;
-  margin-top:-90px;
+  margin-top: -90px;
+
+  min-height: 300px;
 }
-
-
 
 /* MAIN HEADING */
 .emp-leave-personal-details-heading span {
@@ -19,9 +19,8 @@
   font-family: "Anek Bangla";
   font-size: 18px;
   font-weight: 600;
-   display: flex;
-   margin-top:50px;
-
+  display: flex;
+  margin-top: 50px;
 }
 
 /* SUB HEADING */
@@ -30,9 +29,9 @@
   font-family: "Anek Bangla";
   font-size: 14px;
   font-weight: 400;
-   display: flex;
-   margin-top:-8px;
-   margin-bottom:30px;
+  display: flex;
+  margin-top: -8px;
+  margin-bottom: 30px;
 }
 
 /* SECTION TITLE */
@@ -42,21 +41,45 @@
   color: #7575758c;
   text-transform: uppercase;
   display: flex;
- align-items: flex-start;
-margin-top:25px;
+  align-items: flex-start;
+  margin-top: 25px;
+     width: 444px;
+  height: 26px;
+
+  border-bottom: 1px solid rgba(154, 154, 154, 0.55);
+  margin-bottom: 30px;
+  margin-left: 1px;
 }
 
-.emp-leave-type-line{
-position: relative;
-margin-top: 5px;
-margin-bottom:20px;
-  background: #7474748c;
-  width: 110%;
-  margin-left: auto;
-  margin-right: auto;
-  height: 1px;
-  border: none;
+.non-permanent-title{
+  margin-top:-2px;
+  width: 540px;
 }
+
+
+
+
+
+/* INFO BANNER */
+.leave-info-banner {
+  background: rgba(229, 141, 53, 0.1);
+  border: 0.5px solid #9a6f00;
+  border-radius: 5px;
+  color: #8a5a00;
+  font-size: 11px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  flex-direction: row;
+  display: flex;
+  align-items: center;
+  width: 540px;
+  height: 38px;
+  padding: 0px 17px 0px 9px;
+  gap: 5px;
+  margin-bottom:15px;
+}
+
+
 
 /* LEAVE OPTIONS LIST */
 .leave-options {
@@ -64,6 +87,15 @@ margin-bottom:20px;
   flex-direction: column;
   gap: 12px;
 }
+
+.leave-options-non-permanent {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom:200px;
+
+}
+
 
 /* LEAVE CARD */
 .leave-card {
@@ -79,48 +111,65 @@ margin-bottom:20px;
   transition: 0.2s ease;
  
 }
-
-.leave-card:hover {
-  border-color: #2c5f6d;
-  background: #1E5C6E33;
-}
-
-.leave-card.active {
-  border: 1.5px solid #2c5f6d;
-  background: #1E5C6E33;
-}
-
-.leave-card input[type="radio"] {
- margin-left: -18px;
-  margin-right: 2px;
-  display:flex;
-  align-items: flex-start;
-      width: 18px;
-    height: 15px;
-    margin-top:-18px;
+.leave-card-non-permanent {
+  display: flex;
+  align-items: center;
+  width: 540px;
+  height: 57px;
+  bottom: 10px;
+  padding: 12px 30px;
+  border: 1px solid #cacaca;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.2s ease;
   
+  
+  
+}
+
+.leave-card:hover,
+.leave-card-non-permanent:hover {
+  border-color: #2c5f6d;
+  background: #1e5c6e33;
+}
+
+.leave-card.active,
+.leave-card-non-permanent.active {
+  border: 1.5px solid #2c5f6d;
+  background: #1e5c6e33;
+}
+
+.leave-card input[type="radio"],
+.leave-card-non-permanent input[type="radio"] {
+  margin-left: -18px;
+  margin-right: 2px;
+  display: flex;
+  align-items: flex-start;
+  width: 18px;
+  height: 15px;
+  margin-top: -18px;
 }
 .leave-text {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   text-align: left;
-
 }
 
 /* TEXT INSIDE CARD */
-.leave-card h4 {
-font-family: Anek Bangla;
-font-weight: 500;
-font-style: Regular;
-font-size: 15px;
-color:#002D40;
-line-height: 150%;
-letter-spacing: 0.15px;
-
+.leave-card h4,
+.leave-card-non-permanent h4 {
+  font-family: Anek Bangla;
+  font-weight: 500;
+  font-style: Regular;
+  font-size: 15px;
+  color: #002d40;
+  line-height: 150%;
+  letter-spacing: 0.15px;
 }
 
-.leave-card p {
+.leave-card p,
+.leave-card-non-permanent p {
   margin: 2px 0 0;
   font-size: 12px;
   color: #2c5f6d;
@@ -132,79 +181,72 @@ letter-spacing: 0.15px;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
-    column-gap: 34px;
-    row-gap: 17px;
-
+  column-gap: 34px;
+  row-gap: 17px;
 }
-.leave-small-card h4{
-font-family: Anek Bangla;
-font-weight: 450;
-font-style: Regular;
-font-size: 15px;
-/* leading-trim: NONE; */
-line-height: 100%;
-letter-spacing: 2%;
- color:#2c5f6d;
-
+.leave-small-card h4 {
+  font-family: Anek Bangla;
+  font-weight: 450;
+  font-style: Regular;
+  font-size: 15px;
+  /* leading-trim: NONE; */
+  line-height: 100%;
+  letter-spacing: 2%;
+  color: #2c5f6d;
 }
 /* SMALL CARDS */
 .leave-small-card {
-display: flex;
-flex-direction: column;
-justify-content: center;
-align-items: flex-start;
-padding: 10px 5px 5px 10px;
- width: 205px;
-height: 68px;
-flex: none;
-order: 0;
-flex-grow: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 10px 5px 5px 10px;
+  width: 205px;
+  height: 68px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
 
-
-background:#9A9A9A1A;
-border: 1px solid rgba(53, 88, 103, 0.5);
-border-radius: 5px;
+  background: #9a9a9a1a;
+  border: 1px solid rgba(53, 88, 103, 0.5);
+  border-radius: 5px;
 }
-
-
-
 
 .leave-small-card p {
   margin: 4px 0 0;
   font-size: 12px;
-color:#2c5f6d;
-;
+  color: #2c5f6d;
 }
 
-.emp-leave-back-button{
- box-sizing: border-box;
-display: flex;
-flex-direction: row;
-justify-content: center;
-align-items: center;
-padding: 10px 10px 5px;
-color: #5C5C5C;
-position: absolute;
-width: 187px;
-height: 47px;
-margin-top:50px;
-left:50px;
-background: rgba(255, 255, 255, 0.7);
-opacity: 0.9;
-border: 1px solid rgba(112, 112, 112, 0.5);
-border-radius: 10px;
+.emp-leave-back-button {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 10px 5px;
+  color: #5c5c5c;
+  position: absolute;
+  width: 187px;
+  height: 47px;
+  margin-top: 50px;
+  left: 50px;
+  background: rgba(255, 255, 255, 0.7);
+  opacity: 0.9;
+  border: 1px solid rgba(112, 112, 112, 0.5);
+  border-radius: 10px;
 }
 
-.emp-leave-next-button{
+.emp-leave-next-button {
   position: relative;
   display: flex;
   width: 187px;
   height: 47px;
-  top:53px;
+  top: 53px;
   padding: 0 10px 0px 10px;
   justify-content: center;
   align-items: center;
-  left:360px;
+  left: 360px;
   color: var(--white);
   text-align: center;
   font-family: "Anek Bangla", sans-serif;
@@ -222,13 +264,11 @@ border-radius: 10px;
   font-size: 16px;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  margin-top:-50px;
+  margin-top: -50px;
 }
-
 
 /* ERROR */
 .error {
   color: red;
   font-size: 12px;
 }
-

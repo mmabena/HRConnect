@@ -5,6 +5,7 @@ import "./AddEmployeeModal.css";
 import BankingDetailsModal from "../../Components/Steps/BankingManagement/BankingDetailsModal.jsx";
 import LeaveTypesModal from "../Steps/LeaveType/LeaveTypesModal.jsx";
 import PensionFundOptionsModal from "../Steps/PensionFundOptions/PensionFundOptionsModal.jsx";
+
 import { addEmployee } from "../../api/Employee";
 
 import useEmployeeForm from "../../hooks/useEmployeeForm";
@@ -887,6 +888,7 @@ const AddEmployeeModal = ({ closeModal }) => {
                   onBack={prevStep}
                 />
               )}
+
             </div>
           </div>
         </div>
