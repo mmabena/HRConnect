@@ -59,7 +59,9 @@ namespace HRConnect.Api.Services
     /// </summary>
     /// <param name="payrollRecord">Payroll Record derived type being added 
     /// to the current payroll run  </param>
-    /// <param name="employeeId">EmployeeId as a foreign for adding record for particular record</param>
+    /// <param name="employeeId">EmployeeId as a foreign for adding record for particular record
+    /// <b>Required.</b> The identifier of the employee associated with the record. Must be a valid employeeId as this function doesn't assume existence.
+    /// </param>
     /// <returns>Successfully Completed Task</returns>
     /// <exception cref="InvalidDataException">Invalid Type Expected 'PayrollRecord'
     /// </exception>
@@ -74,12 +76,6 @@ namespace HRConnect.Api.Services
 
       if (currentPayRun == null)
         throw new InvalidDataException("No current payroll run found or it is locked");
-
-      var exists = currentPayRun.Records
-      .Any(r => r.EmployeeId == employeeId);
-
-      if (exists)
-        return;
 
       payrollRecord.PayrollRun = currentPayRun;
       payrollRecord.EmployeeId = employeeId;
@@ -105,12 +101,6 @@ namespace HRConnect.Api.Services
         ? employeeId
         : record.EmployeeId;
 
-        var exists = currentPayRun.Records
-        .Any(r => r.PayrollRunId == currentPayRun.PayrollRunId
-       && r.EmployeeId == empId);
-
-        if (exists)
-          continue;
 
         record.PayrollRun = currentPayRun;
         record.EmployeeId = empId;
@@ -134,55 +124,6 @@ namespace HRConnect.Api.Services
         expiredRun.IsFinalised = false;
         await _payrollRunRepo.UpdateExpiredRun(expiredRun);
       }
-    }
-
-    public async Task<int> AddBulkRecordsToCurrentRunAsync(List<PayrollRecord> payrollRecords, List<string> employeeIds)
-    {
-        // Validate inputs
-        if (payrollRecords == null || payrollRecords.Count == 0)
-            throw new ArgumentException("Payroll records list cannot be null or empty");
-
-        if (employeeIds == null || employeeIds.Count == 0)
-            throw new ArgumentException("Employee IDs list cannot be null or empty");
-
-        if (payrollRecords.Count != employeeIds.Count)
-            throw new ArgumentException("Payroll records and employee IDs lists must have the same length");
-
-        // Get the current payroll run ONCE
-        var payperiod = await _payrollPeriodService.GetLastPeriodAsync();
-        if (payperiod == null)
-            throw new InvalidDataException("No payroll period found or it is locked");
-
-        var currentPayRun = payperiod.Runs
-            .Where(r => !r.IsLocked)
-            .OrderByDescending(r => r.PayrollRunNumber)
-            .FirstOrDefault();
-
-        if (currentPayRun == null)
-            throw new InvalidDataException("No current payroll run found or it is locked");
-
-        Console.WriteLine($"Processing {payrollRecords.Count} records for payroll run {currentPayRun.PayrollRunNumber}");
-
-        // Add all records to the current run
-        for (int i = 0; i < payrollRecords.Count; i++)
-        {
-            var record = payrollRecords[i];
-            var employeeId = employeeIds[i];
-
-            // Set payroll run and employee ID for each record
-            record.PayrollRun = currentPayRun;
-            record.EmployeeId = employeeId;
-
-            // Add to current run's records collection
-            currentPayRun.Records.Add(record);
-        }
-
-        Console.WriteLine($"Added {payrollRecords.Count} records to payroll run {currentPayRun.PayrollRunNumber}");
-
-        // SAVE ONCE - all records at the same time
-        await _payrollRunRepo.UpdateRun(currentPayRun);
-
-        return payrollRecords.Count;
     }
   }
 }

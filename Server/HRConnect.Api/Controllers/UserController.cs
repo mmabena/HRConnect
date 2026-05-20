@@ -1,9 +1,11 @@
-using HRConnect.Api.DTOs.User;
-using HRConnect.Api.Mappers;
-using Microsoft.AspNetCore.Mvc;
 
 namespace HRConnect.Api.Controllers
 {
+  using HRConnect.Api.DTOs.User;
+  using HRConnect.Api.Mappers;
+  using Microsoft.AspNetCore.Mvc;
+  using Microsoft.AspNetCore.Authorization;
+
   [Route("api/user")]
   [ApiController]
   public class UserController : ControllerBase
@@ -54,6 +56,13 @@ namespace HRConnect.Api.Controllers
       return Ok(user.ToUserDto());
     }
 
+    [HttpGet("roles")]
+    public async Task<IActionResult> GetRoleOptions()
+    {
+      var roles = await _userService.GetRoleOptionsAsync();
+      return Ok(roles);
+    }
+
     [HttpPut("{UserId}")]
     public async Task<IActionResult> UpdateUser(int UserId, [FromBody] UpdateUserRequestDto updatedUser)
     {
@@ -70,6 +79,41 @@ namespace HRConnect.Api.Controllers
       }
     }
 
+    [HttpPut("{userId}/role")]
+    [Authorize(Roles = "SuperUser")]
+    public async Task<IActionResult> UpdateUserRole(int userId, [FromBody] UpdateUserRoleRequestDto request)
+    {
+      try
+      {
+        var result = await _userService.UpdateUserRoleAsync(userId, request);
+        if (result == null)
+          return NotFound();
+        return Ok(result.ToUserDto());
+      }
+      catch (ArgumentException ex)
+      {
+        ModelState.AddModelError("Validation", ex.Message);
+        return ValidationProblem(ModelState);
+      }
+    }
+
+    [HttpPut("employee/{employeeId}/role")]
+    [Authorize(Roles = "SuperUser")]
+    public async Task<IActionResult> UpdateEmployeeUserRole(string employeeId, [FromBody] UpdateUserRoleRequestDto request)
+    {
+      try
+      {
+        var result = await _userService.UpdateEmployeeUserRoleAsync(employeeId, request);
+        if (result == null)
+          return NotFound();
+        return Ok(result.ToUserDto());
+      }
+      catch (ArgumentException ex)
+      {
+        ModelState.AddModelError("Validation", ex.Message);
+        return ValidationProblem(ModelState);
+      }
+    }
     [HttpDelete("{UserId}")]
     public async Task<IActionResult> DeleteUser(int UserId)
     {

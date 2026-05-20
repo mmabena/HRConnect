@@ -6,13 +6,21 @@
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Interfaces.Payroll.Earning;
   using HRConnect.Api.Mappers.Payroll.Earning;
+  using HRConnect.Api.Models;
+  using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Models.Payroll.Earning;
   using HRConnect.Api.Utils;
   using HRConnect.Api.Utils.ValidationHelpers.PayrollEarning;
 
-  public class PayrollEarningService(IPayrollEarningRepository payrollEarningRepository) : IPayrollEarningService
+  public class PayrollEarningService(IPayrollEarningRepository payrollEarningRepository,
+    IEmployeePayrollEarningRepository employeePayrollEarningRepository, IPayrollRunRepository payrollRunRepository,
+    IEmployeeRepository employeeRepository, ITaxDeductionService taxDeductionService) : IPayrollEarningService
   {
     private readonly IPayrollEarningRepository _payrollEarningRepository = payrollEarningRepository;
+    private readonly IEmployeePayrollEarningRepository _employeePayrollEarningRepository = employeePayrollEarningRepository;
+    private readonly IEmployeeRepository _employeeRepository = employeeRepository;
+    private readonly IPayrollRunRepository _payrollRunRepository = payrollRunRepository;
+    private readonly ITaxDeductionService _taxDeductionService = taxDeductionService;
 
     ///<summary>
     ///Add a new payroll earning to the system. Payroll earning codes are auto generated and cannot be user input. 
@@ -117,10 +125,13 @@
       payrollEarning.IsActive = payrollEarningUpdateDto.IsActive ?? payrollEarning.IsActive;
 
       PayrollEarning updatedPayrollEarning = await _payrollEarningRepository.UpdateAsync(payrollEarning);
+
+      await HandlePayrollEarningUpdate(updatedPayrollEarning);
+
       return updatedPayrollEarning.ToPayrollEarningDto();
     }
 
-    /// <summary>
+    ///<summary>
     ///Auxilary method to check if the short description or long description of a payroll earning already exists in the database. I
     ///</summary>
     ///<param name="shortDescription">The short description of the payroll earning</param>
@@ -132,6 +143,107 @@
       if (descriptionExists)
       {
         throw new ValidationException("A payroll earning with the same short description and long description already exists");
+      }
+    }
+
+    ///<summary>
+    ///Auxilary method to update payroll earning for employees in the current pyaroll run 
+    ///</summary>
+    ///<param name="payrollEarning">Payroll run model</param>
+    ///<exception cref="NotFoundException"></exception>
+    private async Task HandlePayrollEarningUpdate(PayrollEarning payrollEarning)
+    {
+      PayrollRun? currentPayrollRun = await _payrollRunRepository.GetCurrentRunAsync() ?? throw new NotFoundException("Current payroll run not found");
+      List<EmployeePayrollEarning> employeePayrollEarnings = await _employeePayrollEarningRepository.GetByPayrollRunIdAsync(currentPayrollRun.PayrollRunId);
+
+      foreach (EmployeePayrollEarning employeePayrollEarning in employeePayrollEarnings)
+      {
+        Employee? employee = await _employeeRepository.GetEmployeeByIdAsync(employeePayrollEarning.EmployeeId);
+        if (employee != null)
+        {
+          employeePayrollEarning.TaxCode = payrollEarning.TaxCode;
+          decimal[] employeePayrollEarningAmounts = await CalculateAmountForPayrollEarning(payrollEarning, employee.EmployeeId, employeePayrollEarning.OverTimeHoursWorked,
+            employeePayrollEarning.Amount);
+          employeePayrollEarning.Amount = employeePayrollEarningAmounts[0];
+          employeePayrollEarning.CalculatedAmountAfterTax = employeePayrollEarningAmounts[1];
+        }
+      }
+
+      try
+      {
+        await _employeePayrollEarningRepository.UpdateRangeAsync(employeePayrollEarnings);
+      }
+      catch (Exception ex)
+      {
+        Console.WriteLine(ex.ToString());
+      }
+    }
+
+    ///<summary>
+    ///Calculates the amount for a given employee payroll earning based on the associated payroll earning's tax code and hourly rate (if applicable). 
+    ///</summary>
+    ///<param name="employeePayrollEarning"></param>
+    ///<returns>
+    ///The calculated amount for the given employee payroll earning.
+    ///</returns>
+    ///<exception cref="NotFoundException">Payroll earning not found</exception>
+    private async Task<decimal[]> CalculateAmountForPayrollEarning(PayrollEarning payrollEarning, string employeeId, int? OverTimeHoursWorked, decimal Amount)
+    {
+      Employee employee = await _employeeRepository.GetEmployeeByIdAsync(employeeId)
+        ?? throw new NotFoundException($"Employee with id {employeeId} not found");
+      int age = CalculateAge.UsingDOB(employee.DateOfBirth);
+
+      if (payrollEarning.IsActive)
+      {
+        decimal workingDays = 21.67m;
+        decimal employeeSalaryHourlyRate = Math.Round(employee.MonthlySalary / (workingDays * 8), 2);
+        decimal taxableAmount = 0m;
+        decimal tax;
+
+        if (payrollEarning.TaxCode == 3601 &&
+          payrollEarning.OvertimeHourMultiplier == null &&
+          OverTimeHoursWorked == null &&
+          payrollEarning.CanProRata) //Regular earning
+        {
+          if (payrollEarning.Taxable && (payrollEarning.TaxPercentage != null))
+          {
+            tax = await _taxDeductionService.CalculateTaxAsync(Amount, age);
+            taxableAmount = tax * Math.Round((decimal)payrollEarning.TaxPercentage / 100, 2);
+          }
+
+          return [Amount, Amount - taxableAmount];
+        }
+        else if (payrollEarning.TaxCode == 3601
+          && payrollEarning.OvertimeHourMultiplier.HasValue
+          && OverTimeHoursWorked.HasValue) //Over time 
+        {
+          decimal overtimeEarnings = Math.Round(employeeSalaryHourlyRate * payrollEarning.OvertimeHourMultiplier.Value * OverTimeHoursWorked.Value, 2);
+          if (payrollEarning.Taxable && payrollEarning.TaxPercentage != null)
+          {
+            tax = await _taxDeductionService.CalculateTaxAsync(overtimeEarnings, age);
+            taxableAmount = tax * Math.Round((decimal)payrollEarning.TaxPercentage / 100, 2);
+          }
+
+          return [overtimeEarnings, overtimeEarnings - taxableAmount];
+        }
+        else
+        {
+          if (payrollEarning.Taxable && payrollEarning.TaxPercentage != null)
+          {
+            tax = await _taxDeductionService.CalculateTaxAsync(Amount, age);
+            taxableAmount = tax * Math.Round((decimal)payrollEarning.TaxPercentage / 100, 2);
+
+            return [Amount, Amount - taxableAmount];
+          }
+          else
+          {
+            return [Amount, Amount];
+          }
+        }
+      }
+      else
+      {
+        return [0, 0];
       }
     }
   }

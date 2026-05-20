@@ -59,8 +59,8 @@ namespace HRConnect.Api.Services
           {
             EmployeeId = employee.EmployeeId,
             MonthlySalary = employee.MonthlySalary,
-            PassportNumber = employee.PassportNumber,
-            IdNumber = employee.IdNumber,
+            PassportNumber = employee.PassportNumber ?? string.Empty,
+            IdNumber = employee.IdNumber ?? string.Empty,
             UifEmployeeAmount = employeeAmount,
             UifEmployerAmount = employerAmount,
             EmployerSdlContribution = sdlDeduction,

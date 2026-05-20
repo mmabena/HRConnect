@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
+import { resolveRole } from "../../utils/roleUtils";
+import api from "../../api/api";
 
 const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   const [reportOpen, setReportOpen] = useState(false);
@@ -12,7 +14,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   const [payrollOpen, setPayrollOpen] = useState(false);
   const [leaveOpen, setLeaveOpen] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
-  const [payinfoOpen, setPayInfoOpen] = useState(false);
+  const [payInfoOpen, setPayInfoOpen] = useState(false);
   const [manualReportToggle, setManualReportToggle] = useState(false);
   const [manualAdminToggle, setManualAdminToggle] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -33,13 +35,13 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   
   const navigate = useNavigate();
   const location = useLocation();
-
-  // FIX: Access the role directly from the currentUser object
-  const role = currentUser?.role?.toLowerCase();
+  
+  const  resolvedRole=resolveRole(currentUser);
+  const role=resolveRole.key??currentUser?.role?.toLowerCase();
 
   const permissions = {
-    isAdmin: ["admin", "superuser"].includes(role),
-    isNormalUser: role === "normaluser"
+    isAdmin:resolvedRole.isSuperUser || role==="admin",
+    isNormalUser:resolvedRole.isNormalUser,
   };
 
   const isEmployeeManagementPage =
@@ -49,13 +51,16 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
 
   const isUserManagementPage = location.pathname.startsWith("/userManagement");
 
-  const baseUrl = process.env.REACT_APP_API_BASE_URL;
+  const baseUrl =api.defaults.baseURL;// process.env.REACT_APP_API_BASE_URL;
 
   useEffect(() => {
     console.log("MenuBar user role:", role);
-  }, [currentUser, role]);
+    console.log(`BASE_URL ${baseUrl}`);
+  }, [baseUrl, role]);
 
   useEffect(() => {
+    console.log(`LOCATION`);
+    console.log(location)
     if (!role) return;
 
     if (isEmployeeManagementPage && !manualReportToggle) {
@@ -83,7 +88,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
       const token = localStorage.getItem('token');
       const email = JSON.parse(localStorage.getItem('currentUser')).email;
       const decodedTokenEmail = jwtDecode(token).sub;
-      if (decodedTokenEmail == email) {
+      if (decodedTokenEmail === email) {
         try {
           axios.get(`${baseUrl}/employee/email/${email}`, {
               headers: {
@@ -111,7 +116,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
         console.error("User data may have changed without authorization");
       }
     }
-  }, [])
+  }, [baseUrl])
 
   const calculateAge = (dateOfBirth) => {
         let today = new Date();
@@ -397,14 +402,14 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                             Pension Funds
                           </span>
                         </li>
-                        <li>
+                        {/* <li>
                           <span
                             className="menu-subitem"
                             onClick={() => handleSubmenuClick("/assign-pension")}
                           >
                             Assign Pension
                           </span>
-                        </li>
+                        </li> */}
                         <li>
                           <span
                             className="menu-subitem"
@@ -511,15 +516,15 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                 />
                 <span className="menu-heading">
                   Payroll Information
-                  <span className="menu-dropdown">{payinfoOpen ? "▲" : "▼"}</span>
+                  <span className="menu-dropdown">{payInfoOpen ? "▲" : "▼"}</span>
                 </span>
               </div>
-              {payinfoOpen && (
+              {payInfoOpen && (
                 <ul className="submenu show">
                   <li>
                     <span
                       className="menu-subitem"
-                      onClick={() => handleSubmenuClick("/payslips")}
+                      onClick={() => handleSubmenuClick("/payslip")}
                     >
                       Payslips
                     </span>
@@ -649,7 +654,8 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
               {displayName}
             </div>
             <div className="user-job-title">
-              {currentUser?.jobTitle}
+    {/*Create positions endpoint*/} 
+              {currentUser?.role}
             </div>
           </div>
         </div>

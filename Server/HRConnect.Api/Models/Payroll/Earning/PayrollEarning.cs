@@ -4,9 +4,9 @@
 
   public class PayrollEarning
   {
-    public required string PayrollEarningId { get; set; }
-    public required string ShortDescription { get; set; }
-    public required string LongDescription { get; set; }
+    public required string PayrollEarningId { get; set; } = string.Empty;
+    public required string ShortDescription { get; set; } = string.Empty;
+    public required string LongDescription { get; set; } = string.Empty;
     public bool Taxable { get; set; }
     public int TaxCode { get; set; }
     [Column(TypeName = "decimal(18,2)")]
@@ -16,5 +16,7 @@
     public bool CanProRata { get; set; }
     public bool IsOnGoing { get; set; }
     public bool IsActive { get; set; }
+
+    public ICollection<EmployeePayrollEarning> EmployeePayrollEarning { get; set; } = [];
   }
 }
