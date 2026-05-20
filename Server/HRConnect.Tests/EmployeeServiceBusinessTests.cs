@@ -132,7 +132,7 @@ namespace HRConnect.Tests
       {
         Id = 1,
         LeaveTypeId = 1,
-        JobGradeId = 1,
+        GroupKey = "GROUP_A",
         DaysAllocated = 15,
         MinYearsService = 0,
         IsActive = true
@@ -195,8 +195,8 @@ namespace HRConnect.Tests
       });
 
       db.LeaveEntitlementRules.AddRange(
-          new LeaveEntitlementRule { Id = 1, LeaveTypeId = 1, JobGradeId = 1, DaysAllocated = 15, IsActive = true },
-          new LeaveEntitlementRule { Id = 2, LeaveTypeId = 1, JobGradeId = 2, DaysAllocated = 20, IsActive = true });
+          new LeaveEntitlementRule { Id = 1, LeaveTypeId = 1, GroupKey = "GROUP_A", DaysAllocated = 15, IsActive = true },
+          new LeaveEntitlementRule { Id = 2, LeaveTypeId = 1, GroupKey = "SENIOR", DaysAllocated = 20, IsActive = true });
 
       db.Users.Add(
               new User { UserId = 1, Email = "test@singular.co.za", PasswordHash = "dummy" }

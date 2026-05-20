@@ -42,6 +42,11 @@ namespace HRConnect.Tests
         private static async Task<Employee> SeedEmployee(ApplicationDBContext db)
         {
             db.JobGrades.Add(new JobGrade { JobGradeId = 1, Name = "G1" });
+            db.JobGradeGroupMaps.Add(new JobGradeGroupMap
+            {
+                JobGradeId = 1,
+                GroupKey = "GROUP_A"
+            });
 
             db.Positions.Add(new Position
             {
@@ -84,7 +89,7 @@ namespace HRConnect.Tests
             {
                 Id = 1,
                 LeaveTypeId = 1,
-                JobGradeId = 1,
+                GroupKey = "GROUP_A",
                 MinYearsService = 0,
                 MaxYearsService = null,
                 DaysAllocated = 15,
@@ -210,6 +215,11 @@ namespace HRConnect.Tests
 
             // Employee in different grade
             db.JobGrades.Add(new JobGrade { JobGradeId = 2, Name = "G2" });
+            db.JobGradeGroupMaps.Add(new JobGradeGroupMap
+            {
+                JobGradeId = 2,
+                GroupKey = "SENIOR"
+            });
 
             db.Positions.Add(new Position
             {
@@ -287,7 +297,7 @@ namespace HRConnect.Tests
             {
                 Id = 1,
                 LeaveTypeId = 1,
-                JobGradeId = 1,
+                GroupKey = "GROUP_A",
                 MinYearsService = 5,
                 MaxYearsService = 3,
                 DaysAllocated = 10,

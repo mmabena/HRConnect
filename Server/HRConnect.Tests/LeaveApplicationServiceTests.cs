@@ -13,6 +13,9 @@ namespace HRConnect.Tests
     using Microsoft.Extensions.Configuration;
     using Xunit;
     using System.Collections.Generic;
+    using Moq;
+    using Microsoft.AspNetCore.SignalR;
+    using HRConnect.Api.Hubs;
 
     public class LeaveApplicationServiceTests
     {
@@ -46,7 +49,22 @@ namespace HRConnect.Tests
                 .AddInMemoryCollection(settings)
                 .Build();
         }
+        private static LeaveApplicationService CreateService(
+            ApplicationDBContext context,
+            IEmailService email)
+        {
+            var cloudinaryMock = new Mock<ICloudinaryService>();
 
+            var hubMock =
+                new Mock<IHubContext<LeaveHub>>();
+
+            return new LeaveApplicationService(
+                context,
+                email,
+                GetFakeConfiguration(),
+                cloudinaryMock.Object,
+                hubMock.Object);
+        }
         private static async Task<(ApplicationDBContext, Employee)> SetupEmployee()
         {
             var context = GetInMemoryDb();
@@ -108,7 +126,7 @@ namespace HRConnect.Tests
             var (context, employee) = await SetupEmployee();
             var email = new TrackingEmailService();
 
-            var service = new LeaveApplicationService(context, email, GetFakeConfiguration());
+            var service = CreateService(context, email);
 
             var request = new CreateApplicationRequest
             {
@@ -130,7 +148,7 @@ namespace HRConnect.Tests
         {
             var context = GetInMemoryDb();
             var email = new TrackingEmailService();
-            var service = new LeaveApplicationService(context, email, GetFakeConfiguration());
+            var service = CreateService(context, email);
 
             var request = new CreateApplicationRequest
             {
@@ -148,7 +166,7 @@ namespace HRConnect.Tests
         public async Task ApplyForLeaveShouldRejectInvalidDateRange()
         {
             var (context, employee) = await SetupEmployee();
-            var service = new LeaveApplicationService(context, new TrackingEmailService(), GetFakeConfiguration());
+            var service = CreateService(context, new TrackingEmailService());
 
             var request = new CreateApplicationRequest
             {
@@ -166,7 +184,7 @@ namespace HRConnect.Tests
         public async Task ApplyForLeaveShouldRejectCrossYearRequests()
         {
             var (context, employee) = await SetupEmployee();
-            var service = new LeaveApplicationService(context, new TrackingEmailService(), GetFakeConfiguration());
+            var service = CreateService(context, new TrackingEmailService());
 
             var request = new CreateApplicationRequest
             {
@@ -184,7 +202,7 @@ namespace HRConnect.Tests
         public async Task ApplyForLeaveShouldRejectInsufficientBalance()
         {
             var (context, employee) = await SetupEmployee();
-            var service = new LeaveApplicationService(context, new TrackingEmailService(), GetFakeConfiguration());
+            var service = CreateService(context, new TrackingEmailService());
 
             var balance = context.EmployeeLeaveBalances.First();
             balance.AvailableDays = 0;
@@ -206,7 +224,7 @@ namespace HRConnect.Tests
         public async Task ApproveLeaveShouldUpdateBalance()
         {
             var (context, employee) = await SetupEmployee();
-            var service = new LeaveApplicationService(context, new TrackingEmailService(), GetFakeConfiguration());
+            var service = CreateService(context, new TrackingEmailService());
 
             var application = new LeaveApplication
             {
@@ -236,7 +254,7 @@ namespace HRConnect.Tests
         public async Task RejectLeaveShouldUpdateStatus()
         {
             var (context, employee) = await SetupEmployee();
-            var service = new LeaveApplicationService(context, new TrackingEmailService(), GetFakeConfiguration());
+            var service = CreateService(context, new TrackingEmailService());
 
             var application = new LeaveApplication
             {
@@ -266,7 +284,7 @@ namespace HRConnect.Tests
         public async Task ApproveShouldFailWithInvalidToken()
         {
             var (context, employee) = await SetupEmployee();
-            var service = new LeaveApplicationService(context, new TrackingEmailService(), GetFakeConfiguration());
+            var service = CreateService(context, new TrackingEmailService());
 
             var application = new LeaveApplication
             {
@@ -292,7 +310,7 @@ namespace HRConnect.Tests
         public async Task ApproveShouldFailIfTokenExpired()
         {
             var (context, employee) = await SetupEmployee();
-            var service = new LeaveApplicationService(context, new TrackingEmailService(), GetFakeConfiguration());
+            var service = CreateService(context, new TrackingEmailService());
 
             var token = Guid.NewGuid();
 

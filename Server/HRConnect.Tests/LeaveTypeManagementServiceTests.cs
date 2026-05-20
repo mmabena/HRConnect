@@ -92,7 +92,7 @@ namespace HRConnect.Tests
                 {
                     new LeaveEntitlementRuleRequest
                     {
-                        JobGradeId = 1,
+                        GroupKey = "GROUP_A",
                         MinYearsService = 0,
                         MaxYearsService = null,
                         DaysAllocated = 15
@@ -132,7 +132,7 @@ namespace HRConnect.Tests
                 {
                     new LeaveEntitlementRuleRequest
                     {
-                        JobGradeId = 1,
+                        GroupKey = "GROUP_A",
                         MinYearsService = 0,
                         DaysAllocated = 15
                     }
@@ -168,7 +168,7 @@ namespace HRConnect.Tests
                 {
                     new LeaveEntitlementRuleRequest
                     {
-                        JobGradeId = 1,
+                        GroupKey = "GROUP_A",
                         MinYearsService = 0,
                         DaysAllocated = 15
                     }
@@ -204,7 +204,7 @@ namespace HRConnect.Tests
                 {
                     new LeaveEntitlementRuleRequest
                     {
-                        JobGradeId = 1,
+                        GroupKey = "GROUP_A",
                         MinYearsService = 0,
                         DaysAllocated = 20
                     }
@@ -239,7 +239,7 @@ namespace HRConnect.Tests
             {
                 new LeaveEntitlementRuleRequest
                 {
-                    JobGradeId = 1,
+                    GroupKey = "GROUP_A",
                     MinYearsService = -1,
                     DaysAllocated = 10
                 }
@@ -256,14 +256,14 @@ namespace HRConnect.Tests
             {
                 new LeaveEntitlementRuleRequest
                 {
-                    JobGradeId = 1,
+                    GroupKey = "GROUP_A",
                     MinYearsService = 0,
                     MaxYearsService = 3,
                     DaysAllocated = 10
                 },
                 new LeaveEntitlementRuleRequest
                 {
-                    JobGradeId = 1,
+                    GroupKey = "GROUP_A",
                     MinYearsService = 2,
                     MaxYearsService = 5,
                     DaysAllocated = 15

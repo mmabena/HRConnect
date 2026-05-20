@@ -267,7 +267,7 @@ namespace HRConnect.Tests
       _context.LeaveEntitlementRules.Add(new LeaveEntitlementRule
       {
         LeaveTypeId = 1,
-        JobGradeId = 1,
+        GroupKey = "SENIOR",
         MinYearsService = 0,
         MaxYearsService = null,
         DaysAllocated = 15,
