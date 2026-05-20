@@ -22,7 +22,7 @@ import usePagination from "../../hooks/useEmpPagination.js";
 import useDropdown from "../../hooks/useDropdown";
 import FilterTable from "../FilterTable.jsx";
 
-// Status constants
+
 const USER_STATUS = {
   ACTIVE: 1,
   INACTIVE: 0,
@@ -38,7 +38,7 @@ const UserManagement = () => {
   const [editRole, setEditRole] = useState("");
   const [editStatus, setEditStatus] = useState(USER_STATUS.ACTIVE);
   const [isLoading, setIsLoading] = useState(true);
-//    const [loggedInUser, setLoggedInUser] = useState(null);
+   const [loggedInUser, setLoggedInUser] = useState(null);
 
   const [filteredUsers,setFilteredUsers]=useState([])
   const [isFilterOpen,setIsFilterOpen]=useState(false)
@@ -69,7 +69,9 @@ const UserManagement = () => {
 
       setUsers(mappedUsers);
       setFilteredUsers(mappedUsers);
-    //   setLoggedInUser(mappedUsers[0] || null);
+      setLoggedInUser(mappedUsers[0] || null);
+      console.log('logged in user')
+      console.log(loggedInUser)
       setCurrentUserRole(getStoredUserRole().roleName || "User");
 
     } catch (error) {

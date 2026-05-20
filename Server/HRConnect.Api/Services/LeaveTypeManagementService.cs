@@ -4,6 +4,8 @@ namespace HRConnect.Api.Services
   using System.Collections.Generic;
   using System.Linq;
   using HRConnect.Api.DTOs;
+  using Microsoft.AspNetCore.DataProtection;
+  using Moq;
   using HRConnect.Api.Models;
   using HRConnect.Api.Data;
   using Microsoft.EntityFrameworkCore;

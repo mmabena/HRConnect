@@ -52,7 +52,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
 
   const isUserManagementPage = location.pathname.startsWith("/userManagement");
 
-  const baseUrl = process.env.REACT_APP_API_BASE_URL;
+  const baseUrl = api.defaults.baseURL;// process.env.REACT_APP_API_BASE_URL;
 
   // This loads all notifications from the database
   useEffect(() => {

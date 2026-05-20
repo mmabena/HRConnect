@@ -11,6 +11,7 @@ import {
 } from "./notificationsApi";
 import "./NotificationPage.css";
 import { fetchAllEmployees } from "../../api/Employee";
+import { fetchUsersAndRoles } from "../../api/UserManagement";
 
 // ─── Meta maps ────────────────────────────────
 const TYPE_META = {
@@ -25,7 +26,6 @@ const NotificationPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const role     = location.state?.role || "normaluser";
-
   const [notifications, setNotifications] = useState([]);
   const [notis,setNotis]                  =useState([])
   const [loading, setLoading]             = useState(true);
@@ -48,15 +48,18 @@ const NotificationPage = () => {
   }, [role]);
 
   useEffect(() => { loadNotifications(); }, [loadNotifications]);
+
 // Testing fetching notis
-const loadNotis=async()=>{
+const loadNotis=useCallback(async()=>{
 
     try{
-        const currentEmployee=localStorage.getItem("currentEmployee");
-        const employee=JSON.parse(currentEmployee);
-        console.log(`EMPLOYEE ID BEING USED ${employee.employeeId}`)
-        const notiData=await fetchAllNotifications(employee.employeeId); 
-
+        const currentUser=localStorage.getItem("currentUser")
+        const user=JSON.parse(currentUser);
+         
+        console.log(`USER ID BEING USED ${user.id}`)
+        console.log(currentUser)
+        const notiData=await fetchAllNotifications(user.id); 
+        console.log(notiData)
         if(!notiData.ok)
             toast.error("No Notifications")
         setNotis(notiData);
@@ -65,13 +68,9 @@ const loadNotis=async()=>{
     {
         console.error(`Failed to load noti data in component: ${error}`)
     }
-}
-useEffect(()=>{
-    loadNotis();
-    console.log(`LOADED NOTIS`)
-    console.log(notis)
-},[])
+},[]);
 
+useEffect(()=>{loadNotis();},[loadNotis])
   // ── Derived ─────────────────────────────────
   const unreadCount = notifications.filter((n) => !n.read).length;
 

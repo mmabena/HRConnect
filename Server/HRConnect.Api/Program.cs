@@ -157,13 +157,13 @@ builder.Services.AddQuartz(q =>
   q.AddTrigger(opts => opts
   .ForJob(RolloverJobKey)
   .WithIdentity("PayrollRollover-Trigger")
-  .WithCronSchedule("0 0 0 1 * ?", x =>
+  .WithCronSchedule("30 0/1 * * * ?", x =>
   x.WithMisfireHandlingInstructionFireAndProceed()));
 
   q.AddTrigger(opts => opts
   .ForJob(NotificationJobKey)
   .WithIdentity("NotificationJob-Trigger")
-  .WithCronSchedule("0 0 0 1 * ?", x =>
+  .WithCronSchedule("5,10,15,20,25 0/1 * * * ?", x =>
   x.WithMisfireHandlingInstructionIgnoreMisfires()));
 
   // 0 -> 0 seconds
@@ -286,6 +286,12 @@ builder.Services.AddScoped<ITOTPService, TOTPService>();
 builder.Services.AddScoped<ITOTPRepository, TOTPRepository>();
 builder.Services.AddScoped<IMFAUserSecretsService, MFAUserSecretsService>();
 builder.Services.AddScoped<IMFAUserSecretsRepository, MFAUserSecretsRepository>();
+
+builder.Services.AddHttpClient<IUserEmployeeHttpClient, UserEmployeeHttpClient>((provider, client) =>
+{
+  IConfiguration config = provider.GetRequiredService<IConfiguration>();
+  client.BaseAddress = new Uri(config["Services:Api"]!);
+});
 builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowReact",

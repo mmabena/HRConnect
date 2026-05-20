@@ -181,9 +181,10 @@ let _db = [
  * GET /api/notifications/{employeeId}=
  * Returns notifications for the given employee, sorted by priority.
  */
-export const fetchAllNotifications=async(employeeId)=>{
+export const fetchAllNotifications=async(userId)=>{
     try{
-        const response=await fetch(`${BASE_URL}/notifications/${employeeId}`)
+        console.log(`API NOTI User Id ${userId}`)
+        const response=await fetch(`${BASE_URL}/notifications/${userId}`)
 
         if(!response.ok){
             const err =await response.text();

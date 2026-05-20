@@ -51,20 +51,22 @@ namespace HRConnect.Api.Utils.Jobs.Notification
       // Swap this in when pushing to main 
       // int daysUntilRollover = (payrollExecutionDate.Value.Date - DateTime.Now).Days;
 #line 53 "(NotificationJob.cs)"
-      int secondsUntilRollover = (DateTime.Now - payrollExecutionDate.Value).Seconds;
+      double secondsUntilRollover = (DateTime.Now - payrollExecutionDate.Value)
+                                     .TotalSeconds;
       Console.WriteLine($"====SECONDS UNTIL ROLLOVER {secondsUntilRollover}");
       Console.WriteLine($"====SECONDS FROM PAYROLL EXECUTION DATE {payrollExecutionDate.Value.Second}");
       Console.WriteLine($"====Now {DateTime.Now.Second}");
 #line default
+
       if (secondsUntilRollover > 0)
       {
-        var superUserIds = await OrganiseSuperUsersAsync();
+        var superUserIds = await _userService.OrganiseSuperUsersAsync();
         foreach (var su in superUserIds)
         {
           //every user in these iterations is a super user
           var notification = new CreateNotificationDto
           {
-            Message = $"Finalise Payroll. Payroll Will Rollover In {secondsUntilRollover}",
+            Message = $"Finalise Payroll. Payroll Will Rollover In {secondsUntilRollover} days",
             Subject = "Finalise Payroll",
             Severity = NotificationSeverity.Critical,
             Type = NotificationType.Payroll,

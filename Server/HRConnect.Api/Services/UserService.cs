@@ -18,6 +18,7 @@ namespace HRConnect.Api.Services
     private readonly ApplicationDBContext _context;
     private readonly ITOTPService _otpService;
     private readonly IUserRepository _userRepo;
+    private readonly IEmployeeRepository _employeeRepo;
     private readonly Microsoft.AspNetCore.Identity.IPasswordHasher<User> _passwordHasher;
     //These are valid characters for the a password hash
     private static readonly char[] UpperCaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
@@ -29,12 +30,13 @@ namespace HRConnect.Api.Services
       .Concat(DigitChars)
       .Concat(SpecialChars)
       .ToArray();
-    public UserService(ApplicationDBContext context, ITOTPService otpService, IUserRepository userRepo, Microsoft.AspNetCore.Identity.IPasswordHasher<User> passwordHasher)
+    public UserService(ApplicationDBContext context, ITOTPService otpService, IUserRepository userRepo, Microsoft.AspNetCore.Identity.IPasswordHasher<User> passwordHasher, IEmployeeRepository employeeRepo)
     {
       _context = context;
       _userRepo = userRepo;
       _passwordHasher = passwordHasher;
       _otpService = otpService;
+      _employeeRepo = employeeRepo;
     }
 
     public async Task<List<User>> GetAllUsersAsync()
@@ -286,6 +288,22 @@ namespace HRConnect.Api.Services
         (passwordChars[i], passwordChars[swapIndex]) = (passwordChars[swapIndex], passwordChars[i]);
       }
       return new string(passwordChars.ToArray());
+    }
+    public async Task<List<string>> OrganiseSuperUsersAsync()
+    {
+      var users = await GetAllUsersAsync();
+
+      //Only returns users with SuperUser role
+      users = users.FindAll(u => u.Role == UserRole.SuperUser);
+      List<string> employeeIds = new();
+
+      foreach (var u in users)
+      {
+        var e = await _employeeRepo.GetEmployeeByEmailAsync(u.Email);
+        if (e is not null)
+          employeeIds.Add(e.EmployeeId);
+      }
+      return employeeIds;
     }
   }
 }

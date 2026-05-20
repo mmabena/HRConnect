@@ -16,5 +16,7 @@ namespace HRConnect.Api.Interfaces
     Task SyncEmployeeUserAsync();
     // Change password while logged in
     Task<bool> ChangePasswordAsync(ChangePasswordRequestDto dto);
+
+    Task<List<string>> OrganiseSuperUsersAsync();
   }
 }

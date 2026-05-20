@@ -207,7 +207,7 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
         {
           await RolloverPayrollRun(payperiod, nextRun);
         }
-        await ClearPayrollNotifications();
+        // await ClearPayrollNotifications();
 
       }
       catch (InvalidOperationException ex)

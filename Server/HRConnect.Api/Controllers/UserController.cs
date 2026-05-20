@@ -40,10 +40,10 @@ namespace HRConnect.Api.Controllers
       return Ok(users.Select(s => s.ToUserDto()));
     }
 
-    [HttpGet("{UserId}")]
-    public async Task<IActionResult> GetUserById(int UserId)
+    [HttpGet("{userId}")]
+    public async Task<IActionResult> GetUserById(int userId)
     {
-      var user = await _userService.GetUserByIdAsync(UserId);
+      var user = await _userService.GetUserByIdAsync(userId);
       if (user == null) return NotFound();
       return Ok(user.ToUserDto());
     }
@@ -63,7 +63,7 @@ namespace HRConnect.Api.Controllers
       return Ok(roles);
     }
 
-    [HttpPut("{UserId}")]
+    [HttpPut("{userId}")]
     public async Task<IActionResult> UpdateUser(int UserId, [FromBody] UpdateUserRequestDto updatedUser)
     {
       try
@@ -114,7 +114,7 @@ namespace HRConnect.Api.Controllers
         return ValidationProblem(ModelState);
       }
     }
-    [HttpDelete("{UserId}")]
+    [HttpDelete("{userId}")]
     public async Task<IActionResult> DeleteUser(int UserId)
     {
       var deleted = await _userService.DeleteUserAsync(UserId);

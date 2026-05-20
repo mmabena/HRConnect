@@ -2,10 +2,10 @@ namespace HRConnect.Api.Services
 {
   using System.Collections.Generic;
   using System.Threading.Tasks;
-  using HRConnect.Api.Interfaces;
-  using HRConnect.Api.Models.CompanyContributions;
   using HRConnect.Api.DTOs.CompanyContribution;
+  using HRConnect.Api.Interfaces;
   using HRConnect.Api.Mappers;
+  using HRConnect.Api.Models.CompanyContributions;
 
   public class CompanyContributionService : ICompanyContributionService
   {
@@ -15,11 +15,11 @@ namespace HRConnect.Api.Services
     {
       _companyContributionRepo = companyContributionRepo;
     }
+
     /// <summary>
     /// Retrieves all company contribution definitions.
     /// </summary>
     /// <returns>List of company contribution definitions.</returns>
-
     public async Task<List<CompanyContributionDto>> GetAllCompanyContributionAsync()
     {
       var list = await _companyContributionRepo.GetAllAsync();
@@ -33,6 +33,7 @@ namespace HRConnect.Api.Services
 
       return companyContributions;
     }
+
     /// <summary>
     /// Retrieves a single company contribution by ID.
     /// </summary>
@@ -40,19 +41,25 @@ namespace HRConnect.Api.Services
     public async Task<CompanyContributionDto?> GetCompanyContributionByIdAsync(int id)
     {
       var contributions = await _companyContributionRepo.GetByIdAsync(id);
-      if (contributions == null) return null;
+      if (contributions == null)
+        return null;
 
       return contributions.ToCompanyContributionDto();
     }
+
     /// <summary>
     /// Creates a new company contribution rule.
     /// </summary>
     /// <param name="companyContributionModel">The company contribution model to create.</param>
     /// <returns>The created company contribution definition.</returns>
-    public async Task<CompanyContributionDto> CreateCompanyContributionAsync(CompanyContribution companyContributionModel)
+    public async Task<CompanyContributionDto> CreateCompanyContributionAsync(
+      CompanyContribution companyContributionModel
+    )
     {
-      var createdContribution = await _companyContributionRepo.CreateCompanyContributionAsync(companyContributionModel);
-      return createdContribution.ToCompanyContributionDto();
+      var createdContribution = await _companyContributionRepo.CreateCompanyContributionAsync(
+        companyContributionModel
+      );
+      return createdContribution?.ToCompanyContributionDto();
     }
 
     /// <summary>
@@ -60,9 +67,13 @@ namespace HRConnect.Api.Services
     /// </summary>
     /// <param name="companyContributionModel">The company contribution model to update.</param>
     /// <returns>The updated company contribution definition.</returns>
-    public async Task<CompanyContributionDto> UpdateCompanyContributionAsync(CompanyContribution companyContributionModel)
+    public async Task<CompanyContributionDto> UpdateCompanyContributionAsync(
+      CompanyContribution companyContributionModel
+    )
     {
-      var updatedContribution = await _companyContributionRepo.UpdateCompanyContributionAsync(companyContributionModel);
+      var updatedContribution = await _companyContributionRepo.UpdateCompanyContributionAsync(
+        companyContributionModel
+      );
       return updatedContribution.ToCompanyContributionDto();
     }
 

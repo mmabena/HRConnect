@@ -21,11 +21,11 @@ namespace HRConnect.Api.Controllers
     }
 
     [Authorize(Roles = "SuperUser")]
-    [HttpGet("payroll/{employeeId}")]
-    public async Task<IActionResult> GetAllPayrollNotifications(string employeeId)
+    [HttpGet("payroll/{userId}")]
+    public async Task<IActionResult> GetAllPayrollNotifications(int userId)
     {
       var notifications = await _notificationService.GetAllEmployeeNotificationsByTypeAsync(NotificationType.Payroll,
-      employeeId);
+      userId);
 
       if (!notifications.Any())
         return NotFound("No Notifications To Show");
@@ -33,30 +33,30 @@ namespace HRConnect.Api.Controllers
     }
 
     [Authorize(Roles = "SuperUser")]
-    [HttpGet("tax/{employeeId}")]
-    public async Task<IActionResult> GetAllTaxNotifications(string employeeId)
+    [HttpGet("tax/{userId}")]
+    public async Task<IActionResult> GetAllTaxNotifications(int userId)
     {
       var notifications = await _notificationService.GetAllEmployeeNotificationsByTypeAsync(NotificationType.TaxUpload
-      , employeeId);
+      , userId);
 
       if (!notifications.Any())
         return NotFound($"No Notifications To Show");
       return Ok(notifications);
     }
 
-    [HttpGet("{employeeId}")]
-    public async Task<IActionResult> GetEmployeeNotifications(string employeeId)
+    [HttpGet("{userId}")]
+    public async Task<IActionResult> GetEmployeeNotifications(int userId)
     {
-      var notifications = await _notificationService.GetEmployeeNotificationsAsync(employeeId);
+      var notifications = await _notificationService.GetEmployeeNotificationsAsync(userId);
       if (!notifications.Any())
         return NotFound();
       return Ok(notifications);
     }
 
-    [HttpDelete("{employeeId}/{id}")]
-    public async Task<IActionResult> DeleteNotificationById(string employeeId, int id)
+    [HttpDelete("{userId}/{id}")]
+    public async Task<IActionResult> DeleteNotificationById(int userId, int id)
     {
-      bool isDeleted = await _notificationService.DeleteNotificationByIdAsync(employeeId, id);
+      bool isDeleted = await _notificationService.DeleteNotificationByIdAsync(userId, id);
       if (!isDeleted)
       { return NotFound(); }
       return Ok("Notification Deleted");
