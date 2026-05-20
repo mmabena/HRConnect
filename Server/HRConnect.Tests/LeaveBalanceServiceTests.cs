@@ -8,6 +8,7 @@ namespace HRConnect.Tests
   using HRConnect.Api.Data;
   using Microsoft.AspNetCore.Identity;
   using HRConnect.Api.Models;
+  using Microsoft.AspNetCore.DataProtection;
   using HRConnect.Api.Services;
   using Microsoft.EntityFrameworkCore;
   using Xunit;
@@ -33,8 +34,14 @@ namespace HRConnect.Tests
           .ConfigureWarnings(w =>
               w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.InMemoryEventId.TransactionIgnoredWarning))
           .Options;
-
-      return new ApplicationDBContext(options);
+      // Create a mock IDataProtectionProvider
+      var mockProvider = new Mock<IDataProtectionProvider>();
+      // Setup CreateProtector to return a dummy protector
+      var mockProtector = new Mock<IDataProtector>();
+      mockProtector.Setup(p => p.Protect(It.IsAny<byte[]>())).Returns<byte[]>(b => b);
+      mockProtector.Setup(p => p.Unprotect(It.IsAny<byte[]>())).Returns<byte[]>(b => b);
+      mockProvider.Setup(p => p.CreateProtector(It.IsAny<string>())).Returns(mockProtector.Object);
+      return new ApplicationDBContext(options, mockProtector.Object);
     }
 
     // 🔥 IMPORTANT: return CONCRETE types (fixes CA1859)

@@ -3,6 +3,7 @@ namespace HRConnect.Tests
   using Xunit;
   using Moq;
   using HRConnect.Api.Services;
+  using Microsoft.AspNetCore.DataProtection;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
   using HRConnect.Api.DTOs.Employee;
@@ -43,8 +44,14 @@ namespace HRConnect.Tests
       var options = new DbContextOptionsBuilder<ApplicationDBContext>()
           .UseInMemoryDatabase(Guid.NewGuid().ToString())
           .Options;
-
-      _context = new ApplicationDBContext(options);
+      // Create a mock IDataProtectionProvider
+      var mockProvider = new Mock<IDataProtectionProvider>();
+      // Setup CreateProtector to return a dummy protector
+      var mockProtector = new Mock<IDataProtector>();
+      mockProtector.Setup(p => p.Protect(It.IsAny<byte[]>())).Returns<byte[]>(b => b);
+      mockProtector.Setup(p => p.Unprotect(It.IsAny<byte[]>())).Returns<byte[]>(b => b);
+      mockProvider.Setup(p => p.CreateProtector(It.IsAny<string>())).Returns(mockProtector.Object);
+      _context = new ApplicationDBContext(options, mockProtector.Object);
 
       _context.OccupationalLevels.Add(new OccupationalLevel
       {

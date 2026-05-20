@@ -4,7 +4,10 @@ namespace HRConnect.Tests
   using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Utils.Jobs.Payroll;
+  using HRConnect.Api.Interfaces.Payroll.Earning;
   using HRConnect.Api.Interfaces.Pension;
+  using HRConnect.Api.Interfaces.Payroll.Deduction;
+  using HRConnect.Api.Interfaces.Notification;
   using System;
   using Microsoft.Extensions.DependencyInjection;
   using HRConnect.Api.Models.PayrollDeduction;
@@ -18,6 +21,12 @@ namespace HRConnect.Tests
     private readonly Mock<IReportsService> _reportsService;
     private readonly Mock<ICompanyContributionRepository> _contributionRepoMock;
     private readonly Mock<ICompanyContributionAllocationService> _contributionAllocService;
+    private readonly Mock<IServiceProvider> _serviceProvider;
+    private readonly Mock<IUserService> _userService;
+    private readonly Mock<IEmployeeService> _employeeService;
+    private readonly Mock<IEmployeeDeductionService> _employeeDeductionService;
+    private readonly Mock<IEmployeePayrollEarningService> _employeePayrollEarningService;
+    private readonly Mock<INotificationService> _notificationsService;
     private Func<DateTime> _now;
 
     //These are not injected into they are however used for mocking scoped services
@@ -29,11 +38,19 @@ namespace HRConnect.Tests
     {
       _payrollRunRepo = new Mock<IPayrollRunRepository>();
       _payrollPeriodService = new Mock<IPayrollPeriodService>();
-      _payrollPeriodRepo = new Mock<IPayrollPeriodRepository>();
-      _reportsService = new Mock<IReportsService>();
+
       _employeePensionEnrollmentService = new Mock<IEmployeePensionEnrollmentService>();
-      _contributionRepoMock = new Mock<ICompanyContributionRepository>();
-      _contributionAllocService = new Mock<ICompanyContributionAllocationService>();
+      _reportsService = new Mock<IReportsService>();
+      _userService = new Mock<IUserService>();
+      _employeeService = new Mock<IEmployeeService>();
+      _employeePayrollEarningService = new Mock<IEmployeePayrollEarningService>();
+      _employeeDeductionService = new Mock<IEmployeeDeductionService>();
+      _notificationsService = new Mock<INotificationService>();
+      _payrollPeriodRepo = new Mock<IPayrollPeriodRepository>();
+      // _contributionRepoMock = new Mock<ICompanyContributionRepository>();
+      // _contributionAllocService = new Mock<ICompanyContributionAllocationService>();
+      //  _serviceProvider = serviceProvider;
+
       _now = () => DateTime.Now;
 
       // //Mock a scope for the service provider that will be used by the injected depenedency
@@ -121,12 +138,16 @@ namespace HRConnect.Tests
       var fakeTime = new DateTime(2026, 3, 31, 23, 59, 59);//23:59 March 31st
       _now = () => fakeTime;
       var job = new PayrollRolloverJob(
-        _payrollRunRepo.Object,
-        _payrollPeriodService.Object,
-        serviceProvider,
-        _employeePensionEnrollmentService.Object,
-        _reportsService.Object,
-        _contributionRepoMock.Object,
+      _payrollRunRepo.Object,
+      _payrollPeriodService.Object,
+      serviceProvider,
+      _employeePensionEnrollmentService.Object,
+      _reportsService.Object,
+      _userService.Object,
+      _employeeService.Object,
+      _employeePayrollEarningService.Object,
+      _employeeDeductionService.Object,
+      _notificationsService.Object,
         _now
       );
       //Act now
@@ -169,12 +190,16 @@ namespace HRConnect.Tests
         .ReturnsAsync(period); ;
 
       var job = new PayrollRolloverJob(
-        _payrollRunRepo.Object,
-        _payrollPeriodService.Object,
-        serviceProvider,
-        _employeePensionEnrollmentService.Object,
-        _reportsService.Object,
-        _contributionRepoMock.Object,
+      _payrollRunRepo.Object,
+      _payrollPeriodService.Object,
+      serviceProvider,
+      _employeePensionEnrollmentService.Object,
+      _reportsService.Object,
+      _userService.Object,
+      _employeeService.Object,
+      _employeePayrollEarningService.Object,
+      _employeeDeductionService.Object,
+      _notificationsService.Object,
         _now
       );
 
@@ -218,12 +243,16 @@ namespace HRConnect.Tests
       .ReturnsAsync(period);
 
       var job = new PayrollRolloverJob(
-        _payrollRunRepo.Object,
-        _payrollPeriodService.Object,
-        serviceProvider,
-        _employeePensionEnrollmentService.Object,
-        _reportsService.Object,
-        _contributionRepoMock.Object,
+      _payrollRunRepo.Object,
+      _payrollPeriodService.Object,
+      serviceProvider,
+      _employeePensionEnrollmentService.Object,
+      _reportsService.Object,
+      _userService.Object,
+      _employeeService.Object,
+      _employeePayrollEarningService.Object,
+      _employeeDeductionService.Object,
+      _notificationsService.Object,
         _now
       );
 
@@ -262,12 +291,16 @@ namespace HRConnect.Tests
                                                           //Act
 
       var job = new PayrollRolloverJob(
-        _payrollRunRepo.Object,
-        _payrollPeriodService.Object,
-        serviceProvider,
-        _employeePensionEnrollmentService.Object,
-        _reportsService.Object,
-        _contributionRepoMock.Object,
+_payrollRunRepo.Object,
+      _payrollPeriodService.Object,
+      serviceProvider,
+      _employeePensionEnrollmentService.Object,
+      _reportsService.Object,
+      _userService.Object,
+      _employeeService.Object,
+      _employeePayrollEarningService.Object,
+      _employeeDeductionService.Object,
+      _notificationsService.Object,
         _now
       );
       if (IsLastMomentOfTheMonth(_now()))
@@ -294,12 +327,16 @@ namespace HRConnect.Tests
       var serviceProvider = services.BuildServiceProvider();
 
       var job = new PayrollRolloverJob(
-        _payrollRunRepo.Object,
+      _payrollRunRepo.Object,
         _payrollPeriodService.Object,
         serviceProvider,
         _employeePensionEnrollmentService.Object,
         _reportsService.Object,
-        _contributionRepoMock.Object,
+        _userService.Object,
+        _employeeService.Object,
+        _employeePayrollEarningService.Object,
+        _employeeDeductionService.Object,
+        _notificationsService.Object,
         null
         );
 

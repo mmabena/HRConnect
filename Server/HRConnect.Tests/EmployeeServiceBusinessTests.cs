@@ -10,6 +10,7 @@ namespace HRConnect.Tests
   using HRConnect.Api.Models;
   using HRConnect.Api.Services;
   using Microsoft.EntityFrameworkCore;
+  using Microsoft.AspNetCore.DataProtection;
   using Xunit;
   using HRConnect.Api.DTOs.Employee;
   using Moq;
@@ -33,10 +34,17 @@ namespace HRConnect.Tests
 
     private static ApplicationDBContext GetDb()
     {
-      return new ApplicationDBContext(
-          new DbContextOptionsBuilder<ApplicationDBContext>()
-              .UseInMemoryDatabase(Guid.NewGuid().ToString())
-              .Options);
+      var options = new DbContextOptionsBuilder<ApplicationDBContext>()
+          .UseInMemoryDatabase(Guid.NewGuid().ToString())
+          .Options;
+      // Create a mock IDataProtectionProvider
+      var mockProvider = new Mock<IDataProtectionProvider>();
+      // Setup CreateProtector to return a dummy protector
+      var mockProtector = new Mock<IDataProtector>();
+      mockProtector.Setup(p => p.Protect(It.IsAny<byte[]>())).Returns<byte[]>(b => b);
+      mockProtector.Setup(p => p.Unprotect(It.IsAny<byte[]>())).Returns<byte[]>(b => b);
+      mockProvider.Setup(p => p.CreateProtector(It.IsAny<string>())).Returns(mockProtector.Object);
+      return new ApplicationDBContext(options, mockProtector.Object); ;
     }
 
     private static LeaveBalanceService GetBalanceService(ApplicationDBContext db)

@@ -4,6 +4,7 @@
   using HRConnect.Api.DTOs.Payroll.Pension;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
+  using Microsoft.AspNetCore.DataProtection;
   using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Models.PayrollDeduction;
   using HRConnect.Api.Models.Pension;
@@ -35,7 +36,15 @@
       DbContextOptions<ApplicationDBContext> options = new DbContextOptionsBuilder<ApplicationDBContext>()
         .UseInMemoryDatabase("TestDb")
         .Options;
-      using var _context = new ApplicationDBContext(options);
+
+      // Create a mock IDataProtectionProvider
+      var mockProvider = new Mock<IDataProtectionProvider>();
+      // Setup CreateProtector to return a dummy protector
+      var mockProtector = new Mock<IDataProtector>();
+      mockProtector.Setup(p => p.Protect(It.IsAny<byte[]>())).Returns<byte[]>(b => b);
+      mockProtector.Setup(p => p.Unprotect(It.IsAny<byte[]>())).Returns<byte[]>(b => b);
+      mockProvider.Setup(p => p.CreateProtector(It.IsAny<string>())).Returns(mockProtector.Object);
+      using var _context = new ApplicationDBContext(options, mockProtector.Object);
 
       _ = _context.PensionOptions.Add(new PensionOption
       {
