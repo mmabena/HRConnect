@@ -37,7 +37,6 @@ namespace HRConnect.Tests
       return new ApplicationDBContext(options);
     }
 
-    // 🔥 IMPORTANT: return CONCRETE types (fixes CA1859)
     private static LeaveBalanceService CreateLeaveBalanceService(ApplicationDBContext context)
         => new LeaveBalanceService(context);
 
@@ -61,7 +60,6 @@ namespace HRConnect.Tests
       );
     }
 
-    // ---------------- BASIC TEST ----------------
 
     [Fact]
     public async Task Initialize_ShouldCreateBalance()
@@ -116,8 +114,6 @@ namespace HRConnect.Tests
 
       Assert.Single(context.EmployeeLeaveBalances);
     }
-
-    // ---------------- DUPLICATE PROTECTION ----------------
 
     [Fact]
     public async Task Initialize_ShouldNotDuplicate()
@@ -175,7 +171,6 @@ namespace HRConnect.Tests
       Assert.Single(context.EmployeeLeaveBalances);
     }
 
-    // ---------------- PROMOTION ----------------
 
     [Fact]
     public async Task Promotion_ShouldPreserveTakenDays()
@@ -185,9 +180,17 @@ namespace HRConnect.Tests
       context.JobGrades.AddRange(
           new JobGrade { JobGradeId = 1, Name = "G1" },
           new JobGrade { JobGradeId = 2, Name = "G2" });
-      context.JobGrades.AddRange(
-new JobGrade { JobGradeId = 1, Name = "G1" },
-new JobGrade { JobGradeId = 2, Name = "G2" });
+      context.JobGradeGroupMaps.AddRange(
+new JobGradeGroupMap
+{
+  JobGradeId = 1,
+  GroupKey = "GROUP_A"
+},
+new JobGradeGroupMap
+{
+  JobGradeId = 2,
+  GroupKey = "SENIOR"
+});
 
       context.OccupationalLevels.Add(new OccupationalLevel { OccupationalLevelId = 1, Description = "Level 1" });
 
@@ -273,7 +276,6 @@ new JobGrade { JobGradeId = 2, Name = "G2" });
       Assert.Equal(5, context.EmployeeLeaveBalances.First().TakenDays);
     }
 
-    // ---------------- RESET ----------------
 
     [Fact]
     public async Task Reset_ShouldCapCarryoverAtFive()
@@ -337,7 +339,6 @@ new JobGrade { JobGradeId = 2, Name = "G2" });
       Assert.Equal(5, context.EmployeeLeaveBalances.First().CarryoverDays);
     }
 
-    // ---------------- VALIDATION ----------------
 
     [Fact]
     public async Task Initialize_ShouldThrowIfEmployeeNotFound()

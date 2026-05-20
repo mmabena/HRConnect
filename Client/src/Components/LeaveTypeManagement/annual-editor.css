@@ -162,6 +162,95 @@
   background: #f9fbfb;
 }
 
+.impact-change-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+
+  gap: 10px;
+}
+
+.impact-change-text {
+  font-family: 'Instrument Sans', sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 26px;
+
+  color: #355867;
+}
+.impact-change-line {
+  margin-top: -20px;
+}
+
+.impact-employee-line {
+  margin-top: -2px;
+  text-align: left;
+}
+
+.impact-old-days {
+  font-family: 'Instrument Sans', sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 26px;
+
+  color: #002D40;
+}
+
+.impact-arrow {
+  font-family: 'Instrument Sans', sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 26px;
+
+  color: #355867;
+}
+
+.impact-new-days {
+  font-family: 'Instrument Sans', sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 26px;
+
+  color: #002D40;
+}
+.impact-arrow {
+  width: 28px;
+  height: 20px;
+
+  color: #355867;
+
+  flex-shrink: 0;
+}
+
+.impact-employee-line {
+  margin-top: 2px;
+
+  font-family: 'Instrument Sans', sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 26px;
+
+  color: #355867;
+}
+
+.impact-employee-count {
+  color: #D9534F;
+  font-weight: 700;
+}
+
+.impact-no-change {
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+
+  color: #355867;
+}
+
 
 .actions {
   display: flex;

@@ -58,6 +58,7 @@ namespace HRConnect.Tests
         Name = "Grade"
       });
 
+
       _context.Positions.AddRange(
           new Position { PositionId = 1, JobGradeId = 1, OccupationalLevelId = 1 },
           new Position { PositionId = 2, JobGradeId = 1, OccupationalLevelId = 1 },
@@ -273,6 +274,12 @@ namespace HRConnect.Tests
         DaysAllocated = 15,
         IsActive = true
       });
+      _context.JobGradeGroupMaps.Add(
+    new JobGradeGroupMap
+    {
+      JobGradeId = 1,
+      GroupKey = "SENIOR"
+    });
       _context.EmployeeAccrualRateHistories.Add(new EmployeeAccrualRateHistory
       {
         EmployeeId = "EMP001",

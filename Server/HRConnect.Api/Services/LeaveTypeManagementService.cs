@@ -314,18 +314,27 @@ namespace HRConnect.Api.Services
 
                     if (!current.MaxYearsService.HasValue)
                     {
-                        errors.Add($"Rule for group {group.Key} cannot have unlimited MaxYearsService when additional rules exist.");
+                        errors.Add(
+                            $"Rule for group {group.Key} cannot have unlimited MaxYearsService when additional rules exist.");
+
                         continue;
                     }
 
                     if (next.MinYearsService < current.MaxYearsService.Value)
                     {
-                        errors.Add($"Overlapping service ranges detected for group {group.Key}.");
+                        errors.Add(
+                            $"Overlapping service ranges detected for group {group.Key}.");
                     }
-
                     if (next.MinYearsService > current.MaxYearsService.Value)
                     {
-                        errors.Add($"Gap detected in service ranges for group {group.Key}. Ranges must be continuous.");
+                        errors.Add(
+                            $"Gap detected in service ranges for group {group.Key}. Ranges must be continuous.");
+                    }
+
+                    if (next.DaysAllocated <= current.DaysAllocated)
+                    {
+                        errors.Add(
+                            $"DaysAllocated cannot decrease as years of service increase for group {group.Key}.");
                     }
                 }
             }

@@ -5,6 +5,7 @@ import {
   previewEntitlementImpact,
 } from "../../api/leaveTypeApi";
 import { useNavigate } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
 
 const AnnualLeaveEditor = ({
   leaveType,
@@ -96,8 +97,12 @@ const AnnualLeaveEditor = ({
 
     const msg = message.toLowerCase();
 
-    if (msg.includes("daysallocated")) {
+    if (msg.includes("daysallocated must be greater")) {
       return "Leave days must be greater than 0";
+    }
+
+    if (msg.includes("cannot decrease")) {
+      return "Leave days cannot decrease as years of service increases";
     }
 
     if (msg.includes("maxyearsservice") && msg.includes("less")) {
@@ -105,7 +110,11 @@ const AnnualLeaveEditor = ({
     }
 
     if (msg.includes("gap detected")) {
-      return "Employement year ranges must have no gaps between them. (Min and Max years)";
+      return "Employment year ranges must have no gaps between them";
+    }
+
+    if (msg.includes("overlapping")) {
+      return "Employment year ranges cannot overlap";
     }
 
     if (msg.includes("duplicate")) {
@@ -176,6 +185,43 @@ const AnnualLeaveEditor = ({
 
     checkImpact();
   }, [editedRules, customRules]);
+  const impactedRule = currentRules.find((r) => {
+    const ruleKey = getRuleKey(r);
+
+    return (
+      editedRules[ruleKey]?.daysAllocated !== undefined ||
+      editedRules[ruleKey]?.minYearsService !== undefined ||
+      editedRules[ruleKey]?.maxYearsService !== undefined
+    );
+  });
+
+  const impactedRuleKey = impactedRule ? getRuleKey(impactedRule) : null;
+
+  const impactedEditedValues = impactedRuleKey
+    ? editedRules[impactedRuleKey]
+    : null;
+
+  const previousDays = impactedRule?.daysAllocated ?? 0;
+
+  const newDays =
+    impactedEditedValues?.daysAllocated !== undefined
+      ? impactedEditedValues.daysAllocated
+      : previousDays;
+
+  const minYears =
+    impactedEditedValues?.minYearsService !== undefined
+      ? impactedEditedValues.minYearsService
+      : impactedRule?.minYearsService;
+
+  const maxYears =
+    impactedEditedValues?.maxYearsService !== undefined
+      ? impactedEditedValues.maxYearsService
+      : impactedRule?.maxYearsService;
+
+  const yearsLabel =
+    maxYears !== null && maxYears !== ""
+      ? `${minYears} - ${maxYears} years`
+      : `${minYears}+ years`;
   return (
     <div className="annual-wrapper">
       {message && (
@@ -296,11 +342,34 @@ const AnnualLeaveEditor = ({
       </div>
 
       <div className="impact-box">
-        {Object.keys(editedRules).length > 0
-          ? "Changes detected. Employees will be recalculated."
-          : "No changes yet"}
-      </div>
+        {!impactedRule ? (
+          "No changes yet"
+        ) : affectedEmployees.length === 0 ? (
+          <div className="impact-no-change">
+            No employees will be affected by these changes.
+          </div>
+        ) : (
+          <>
+            <div className="impact-change-line">
+              <span className="impact-change-text">
+                You are changing leave days from
+              </span>
+              <span className="impact-old-days">{previousDays}</span>
+              <ArrowRight className="impact-arrow" />
+              <span className="impact-new-days">{newDays}</span>
+              for {yearsLabel}
+            </div>
 
+            <div className="impact-employee-line">
+              This will affect{" "}
+              <span className="impact-employee-count">
+                {affectedEmployees.length}
+              </span>{" "}
+              Employees
+            </div>
+          </>
+        )}
+      </div>
       <div className="actions">
         {!isEditing ? (
           <>
@@ -323,13 +392,14 @@ const AnnualLeaveEditor = ({
               disabled={!hasChanges}
               onClick={async () => {
                 setIsCheckingImpact(true);
-                await new Promise((resolve) => setTimeout(resolve, 100));
+
                 try {
                   const payload = buildPayload();
-
+                  await updateLeaveType(leaveType.id, payload, true);
+                  
                   const previewData = await previewEntitlementImpact(payload);
 
-                  if (affectedEmployees.length === 0) {
+                  if (previewData.length === 0) {
                     await updateLeaveType(leaveType.id, payload);
 
                     showMessage(

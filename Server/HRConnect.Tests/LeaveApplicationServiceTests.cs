@@ -55,21 +55,39 @@ namespace HRConnect.Tests
         {
             var cloudinaryMock = new Mock<ICloudinaryService>();
 
-            var hubMock =
+            var clientProxyMock = new Mock<IClientProxy>();
+
+            clientProxyMock
+                .Setup(x => x.SendCoreAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<object[]>(),
+                    default))
+                .Returns(Task.CompletedTask);
+
+            var hubClientsMock = new Mock<IHubClients>();
+
+            hubClientsMock
+                .Setup(x => x.Group(It.IsAny<string>()))
+                .Returns(clientProxyMock.Object);
+
+            var hubContextMock =
                 new Mock<IHubContext<LeaveHub>>();
+
+            hubContextMock
+                .Setup(x => x.Clients)
+                .Returns(hubClientsMock.Object);
 
             return new LeaveApplicationService(
                 context,
                 email,
                 GetFakeConfiguration(),
                 cloudinaryMock.Object,
-                hubMock.Object);
+                hubContextMock.Object);
         }
         private static async Task<(ApplicationDBContext, Employee)> SetupEmployee()
         {
             var context = GetInMemoryDb();
 
-            // Create manager
             var manager = new Employee
             {
                 EmployeeId = Guid.NewGuid().ToString(),
@@ -83,7 +101,6 @@ namespace HRConnect.Tests
 
             context.Employees.Add(manager);
 
-            // Create employee linked to manager
             var employee = new Employee
             {
                 EmployeeId = Guid.NewGuid().ToString(),
@@ -305,7 +322,6 @@ namespace HRConnect.Tests
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 service.ApproveLeaveAsync(application.Id, Guid.NewGuid()));
         }
-
         [Fact]
         public async Task ApproveShouldFailIfTokenExpired()
         {
