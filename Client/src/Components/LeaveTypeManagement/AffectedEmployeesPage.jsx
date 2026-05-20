@@ -124,13 +124,21 @@ const AffectedEmployeesPage = () => {
                 </button>
               )}
             </div>
+            <div className="impact-action-buttons">
+              <button
+                className="back-btn2"
+                onClick={() => navigate("/leaveManagement")}
+              >
+                Back
+              </button>
 
-            <button
-              className="confirm-impact-btn"
-              onClick={handleConfirmChanges}
-            >
-              Confirm Changes
-            </button>
+              <button
+                className="confirm-impact-btn"
+                onClick={handleConfirmChanges}
+              >
+                Confirm Changes
+              </button>
+            </div>
           </div>
 
           <div className="impact-table-wrapper">
@@ -163,7 +171,7 @@ const AffectedEmployeesPage = () => {
                 ))}
               </tbody>
             </table>
-            <div className="pagination2">
+            <div className="pagination">
               <button onClick={goToPreviousPage} disabled={currentPage === 1}>
                 {"<"}
               </button>

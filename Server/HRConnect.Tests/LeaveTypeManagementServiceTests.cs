@@ -35,9 +35,9 @@ namespace HRConnect.Tests
             var context = GetInMemoryDb();
 
             context.LeaveTypes.AddRange(
-                new LeaveType { Id = 1, Name = "Annual", Code = "AL", Description = "Annual Leave", IsActive = true },
-                new LeaveType { Id = 2, Name = "Sick", Code = "SL", Description = "Sick Leave", IsActive = true }
-            );
+    new LeaveType { Id = 1, Name = "Annual", Code = "AL", Description = "Annual Leave", IsActive = true },
+    new LeaveType { Id = 2, Name = "Sick", Code = "SL", Description = "Sick Leave", IsActive = true }
+);
 
             await context.SaveChangesAsync();
 
@@ -80,14 +80,6 @@ namespace HRConnect.Tests
         {
             var context = GetInMemoryDb();
 
-            context.JobGradeGroupMaps.Add(new JobGradeGroupMap
-            {
-                JobGradeId = 1,
-                GroupKey = "G1"
-            });
-
-            await context.SaveChangesAsync();
-
             var service = CreateService(context);
 
             var request = new CreateLeaveTypeRequest
@@ -97,15 +89,15 @@ namespace HRConnect.Tests
                 Description = "Annual Leave",
                 FemaleOnly = false,
                 Rules = new List<LeaveEntitlementRuleRequest>
-        {
-            new LeaveEntitlementRuleRequest
-            {
-                GroupKey = "G1",
-                MinYearsService = 0,
-                MaxYearsService = null,
-                DaysAllocated = 15
-            }
-        }
+                {
+                    new LeaveEntitlementRuleRequest
+                    {
+                        JobGradeId = 1,
+                        MinYearsService = 0,
+                        MaxYearsService = null,
+                        DaysAllocated = 15
+                    }
+                }
             };
 
             var result = await service.CreateLeaveTypeAsync(request);
@@ -128,12 +120,6 @@ namespace HRConnect.Tests
                 IsActive = true
             });
 
-            context.JobGradeGroupMaps.Add(new JobGradeGroupMap
-            {
-                JobGradeId = 1,
-                GroupKey = "G1"
-            });
-
             await context.SaveChangesAsync();
 
             var service = CreateService(context);
@@ -143,14 +129,14 @@ namespace HRConnect.Tests
                 Name = "Annual",
                 Code = "AL2",
                 Rules = new List<LeaveEntitlementRuleRequest>
-        {
-            new LeaveEntitlementRuleRequest
-            {
-                GroupKey = "G1",
-                MinYearsService = 0,
-                DaysAllocated = 15
-            }
-        }
+                {
+                    new LeaveEntitlementRuleRequest
+                    {
+                        JobGradeId = 1,
+                        MinYearsService = 0,
+                        DaysAllocated = 15
+                    }
+                }
             };
 
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
@@ -170,12 +156,6 @@ namespace HRConnect.Tests
                 Description = "Annual Leave",
                 IsActive = true
             });
-            context.JobGradeGroupMaps.Add(new JobGradeGroupMap
-            {
-                JobGradeId = 1,
-                GroupKey = "G1"
-            });
-
             await context.SaveChangesAsync();
 
             var service = CreateService(context);
@@ -185,14 +165,14 @@ namespace HRConnect.Tests
                 Name = "New Annual",
                 Code = "AL",
                 Rules = new List<LeaveEntitlementRuleRequest>
-        {
-            new LeaveEntitlementRuleRequest
-            {
-                GroupKey = "G1",
-                MinYearsService = 0,
-                DaysAllocated = 15
-            }
-        }
+                {
+                    new LeaveEntitlementRuleRequest
+                    {
+                        JobGradeId = 1,
+                        MinYearsService = 0,
+                        DaysAllocated = 15
+                    }
+                }
             };
 
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
@@ -212,11 +192,6 @@ namespace HRConnect.Tests
                 Description = "Annual Leave",
                 IsActive = true
             });
-            context.JobGradeGroupMaps.Add(new JobGradeGroupMap
-            {
-                JobGradeId = 1,
-                GroupKey = "G1"
-            });
 
             await context.SaveChangesAsync();
 
@@ -226,14 +201,14 @@ namespace HRConnect.Tests
             {
                 Name = "Updated Annual",
                 Rules = new List<LeaveEntitlementRuleRequest>
-        {
-            new LeaveEntitlementRuleRequest
-            {
-                GroupKey = "G1",
-                MinYearsService = 0,
-                DaysAllocated = 20
-            }
-        }
+                {
+                    new LeaveEntitlementRuleRequest
+                    {
+                        JobGradeId = 1,
+                        MinYearsService = 0,
+                        DaysAllocated = 20
+                    }
+                }
             };
 
             var result = await service.UpdateLeaveTypeAsync(1, request);
@@ -264,7 +239,7 @@ namespace HRConnect.Tests
             {
                 new LeaveEntitlementRuleRequest
                 {
-                    GroupKey = "G1",
+                    JobGradeId = 1,
                     MinYearsService = -1,
                     DaysAllocated = 10
                 }
@@ -281,14 +256,14 @@ namespace HRConnect.Tests
             {
                 new LeaveEntitlementRuleRequest
                 {
-                    GroupKey = "G1",
+                    JobGradeId = 1,
                     MinYearsService = 0,
                     MaxYearsService = 3,
                     DaysAllocated = 10
                 },
                 new LeaveEntitlementRuleRequest
                 {
-                    GroupKey = "G1",
+                    JobGradeId = 1,
                     MinYearsService = 2,
                     MaxYearsService = 5,
                     DaysAllocated = 15

@@ -43,12 +43,6 @@ namespace HRConnect.Tests
         {
             db.JobGrades.Add(new JobGrade { JobGradeId = 1, Name = "G1" });
 
-            db.JobGradeGroupMaps.Add(new JobGradeGroupMap
-            {
-                JobGradeId = 1,
-                GroupKey = "G1"
-            });
-
             db.Positions.Add(new Position
             {
                 PositionId = 1,
@@ -85,11 +79,12 @@ namespace HRConnect.Tests
                 AccruedDays = 10,
                 AvailableDays = 8
             });
+
             db.LeaveEntitlementRules.Add(new LeaveEntitlementRule
             {
                 Id = 1,
                 LeaveTypeId = 1,
-                GroupKey = "G1",
+                JobGradeId = 1,
                 MinYearsService = 0,
                 MaxYearsService = null,
                 DaysAllocated = 15,
@@ -109,6 +104,9 @@ namespace HRConnect.Tests
             await db.SaveChangesAsync();
             return employee;
         }
+
+        // ---------------- VALIDATION ----------------
+
         [Fact]
         public async Task ShouldThrow_WhenNegativeDays()
         {
@@ -150,10 +148,11 @@ namespace HRConnect.Tests
                 service.UpdateLeaveEntitlementRuleAsync(new UpdateLeaveRuleRequest
                 {
                     RuleId = 1,
-                    NewDaysAllocated = 1 
+                    NewDaysAllocated = 1 // less than taken = 2
                 }));
         }
 
+        // ---------------- SUCCESS CASE ----------------
 
         [Fact]
         public async Task ShouldUpdateRuleAndRecalculate()
@@ -177,6 +176,8 @@ namespace HRConnect.Tests
             Assert.Equal(20, segment.AnnualEntitlement);
         }
 
+        // ---------------- EMAIL ----------------
+
         [Fact]
         public async Task ShouldSendEmails_OnRuleChange()
         {
@@ -195,6 +196,8 @@ namespace HRConnect.Tests
             Assert.Equal(1, email.Count);
         }
 
+        // ---------------- SERVICE FILTERING ----------------
+
         [Fact]
         public async Task ShouldOnlyUpdateMatchingJobGrade()
         {
@@ -202,15 +205,11 @@ namespace HRConnect.Tests
             var email = new TrackingEmailService();
             var service = CreateService(db, email);
 
+            // Employee in correct grade
             await SeedEmployee(db);
 
+            // Employee in different grade
             db.JobGrades.Add(new JobGrade { JobGradeId = 2, Name = "G2" });
-
-            db.JobGradeGroupMaps.Add(new JobGradeGroupMap
-            {
-                JobGradeId = 2,
-                GroupKey = "G2"
-            });
 
             db.Positions.Add(new Position
             {
@@ -239,6 +238,7 @@ namespace HRConnect.Tests
                 NewDaysAllocated = 25
             });
 
+            // Only one employee should be affected
             Assert.Equal(1, email.Count);
         }
 
@@ -251,6 +251,7 @@ namespace HRConnect.Tests
 
             var employee = await SeedEmployee(db);
 
+            // Update rule to require higher service
             var rule = db.LeaveEntitlementRules.First();
             rule.MinYearsService = 5;
 
@@ -262,8 +263,11 @@ namespace HRConnect.Tests
                 NewDaysAllocated = 20
             });
 
+            // No emails because employee not eligible
             Assert.Equal(0, email.Count);
         }
+
+        // ---------------- EDGE ----------------
 
         [Fact]
         public async Task ShouldThrow_WhenInvalidServiceRange()
@@ -279,19 +283,13 @@ namespace HRConnect.Tests
                 IsActive = true
             });
 
-            db.JobGradeGroupMaps.Add(new JobGradeGroupMap
-            {
-                JobGradeId = 1,
-                GroupKey = "G1"
-            });
-
             db.LeaveEntitlementRules.Add(new LeaveEntitlementRule
             {
                 Id = 1,
                 LeaveTypeId = 1,
-                GroupKey = "G1",
+                JobGradeId = 1,
                 MinYearsService = 5,
-                MaxYearsService = 3, 
+                MaxYearsService = 3,
                 DaysAllocated = 10,
                 IsActive = true
             });
