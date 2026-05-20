@@ -4,7 +4,8 @@ import { useNavigate } from "react-router-dom";
 import api from "../api/api.js";
 import { fetchMyCompanies, switchCompany } from "../api/UserCompany";
 import { jwtDecode } from "jwt-decode";
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight } from "lucide-react";
+import { ChevronUp, ChevronDown } from "lucide-react";
 
 const getCurrentUser = async () => {
   try {
@@ -21,6 +22,8 @@ const CompanyManagement = () => {
   const [companies, setCompanies] = useState([]);
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [startIndex, setStartIndex] = useState(0);
+  const PAGE_SIZE = 2;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -32,13 +35,15 @@ const CompanyManagement = () => {
         const list = data?.companies ?? data ?? [];
 
         const mappedCompanies = Array.isArray(list)
-          ? list.map((uc) => ({
-              id: uc.companyId,
-              name: uc.companyName,
-              employeeCount: uc.employeeCount,
-              isDefault: uc.isDefault,
-              isOriginalCompany: uc.isOriginalCompany,
-            }))
+          ? list
+              .map((uc) => ({
+                id: uc.companyId,
+                name: uc.companyName,
+                employeeCount: uc.employeeCount,
+                isDefault: uc.isDefault,
+                isOriginalCompany: uc.isOriginalCompany,
+              }))
+              .sort((a, b) => b.isOriginalCompany - a.isOriginalCompany)
           : [];
 
         setCompanies(mappedCompanies);
@@ -94,6 +99,16 @@ const CompanyManagement = () => {
 
   return (
     <div className="comp-page-container">
+      {/* Background Circles */}
+      <div className="comp-circle-wrapper">
+        <div className="comp-circle1"></div>
+        <div className="comp-circle2"></div>
+      </div>
+      <div className="comp-circle3"></div>
+      <div className="comp-circle4"></div>
+      <div className="comp-circle5"></div>
+      <div className="comp-circle6"></div>
+      <div className="comp-circle7"></div>
       {/* Top Header */}
       <div className="comp-top-bar">
         {/* Logo */}
@@ -109,13 +124,10 @@ const CompanyManagement = () => {
                 <span className="comp-user-initials">{initials}</span>
               </div>
 
-              {/* Name */}
               <span className="comp-user-name-surname">{displayName}</span>
 
-              {/* Dot */}
               <span className="comp-user-dot">•</span>
 
-              {/* Position */}
               <span className="comp-user-position">{user?.jobTitle}</span>
             </div>
           </div>
@@ -126,35 +138,62 @@ const CompanyManagement = () => {
       <div className="comp-content-container">
         <h1 className="comp-company-title">Select a Company</h1>
 
-        <div className="comp-company-list">
-          {companies.map((company) => (
-            <div
-              key={company.id}
-              className={`comp-company-card ${
-                selectedCompany === company.id ? "active" : ""
-              }`}
-              onClick={() => setSelectedCompany(company.id)}
-            >
-              <div className="comp-company-left">
-                <div className="comp-company-icon">{getInitials(company.name)}</div>
+        <div className="comp-company-section">
+          <div className="comp-company-list">
+            {companies
+              .slice(startIndex, startIndex + PAGE_SIZE)
+              .map((company) => (
+                <div
+                  key={company.id}
+                  className={`comp-company-card ${
+                    selectedCompany === company.id ? "active" : ""
+                  }`}
+                  onClick={() => setSelectedCompany(company.id)}
+                >
+                  <div className="comp-company-left">
+                    <div className="comp-company-icon">
+                      {getInitials(company.name)}
+                    </div>
 
-                <div className="comp-company-info">
-                  <div className="comp-company-name">{company.name}</div>
-                  <div className="comp-company-employees">
-                    {company.employeeCount} Employees
+                    <div className="comp-company-info">
+                      <div className="comp-company-name">{company.name}</div>
+
+                      <div className="comp-company-employees">
+                        {company.employeeCount} Employees
+                      </div>
+                    </div>
+                  </div>
+
+                  {company.isOriginalCompany && (
+                    <div className="comp-company-default">Default</div>
+                  )}
+
+                  <div className="comp-company-arrow">
+                    <ArrowRight size={30} className="comp-arrow" />
                   </div>
                 </div>
-              </div>
+              ))}
+          </div>
 
-              {company.isOriginalCompany && (
-                <div className="comp-company-default">Default</div>
-              )}
+          <div className="comp-company-nav">
+            <button
+              onClick={() => setStartIndex((prev) => Math.max(prev - 1, 0))}
+              disabled={startIndex === 0}
+            >
+              <ChevronUp />
+            </button>
 
-              <div className="comp-company-arrow">
-                <ArrowRight size={30} className="comp-arrow"/>
-              </div>
-            </div>
-          ))}
+            <button
+              onClick={() =>
+                setStartIndex((prev) =>
+                  Math.min(prev + 1, companies.length - PAGE_SIZE),
+                )
+              }
+              disabled={startIndex + PAGE_SIZE >= companies.length}
+            >
+              <ChevronDown />
+            </button>
+          </div>
         </div>
 
         <button
@@ -164,7 +203,7 @@ const CompanyManagement = () => {
         >
           <span className="comp-enter-text">Enter Dashboard</span>
           <span className="comp-enter-icon">
-            <ArrowRight size={30} className="comp-arrow"/>
+            <ArrowRight size={30} className="comp-arrow" />
           </span>
         </button>
       </div>
@@ -179,7 +218,7 @@ const CompanyManagement = () => {
   );
 };
 
-// Utility
+
 const getInitials = (name) => {
   if (!name) return "";
   const words = name.split(" ");

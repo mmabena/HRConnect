@@ -56,9 +56,10 @@ const AddCompanyModal = ({ closeModal }) => {
 
       await addCompany(payload);
 
-      toast.success("Company created successfully");
+      
       closeModal();
       window.location.reload(); // Use signal R
+      toast.success("Company created successfully");
     } catch (error) {
       if (error.response && error.response.data?.errors) {
         setFormErrors(error.response.data.errors);

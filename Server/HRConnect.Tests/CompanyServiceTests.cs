@@ -36,22 +36,24 @@ namespace HRConnect.Tests
         }
 
         [Fact]
-        public async Task CreateCompanyAsync_ValidInput_ReturnsCreatedCompany()
+        public async Task CreateCompanyAsync_ValidInput_ReturnsCorrectCompany()
         {
+            // Arrange
             var companyRequestDto = new CreateCompanyRequestDto
             {
-                CompanyName = "Singular Systems",
+                CompanyName = "Duplicate Systems",
                 RegistrationNumber = "12345678901234",
                 UIFNumber = "1234567890",
                 ContactNumber = "0123456789",
-                VATNumber = "VAT1234567"
+                VATNumber = "VAT1234567",
+                CompanyAddress = "123 Real Lane, Johannesburg"
             };
 
-            _companyRepoMock.Setup(r => r.GetAllCompanyIdsWithPrefix("SIN"))
-                .ReturnsAsync(new List<string>{ "SIN001"});
+            _companyRepoMock.Setup(r => r.GetAllCompanyIdsWithPrefix("DUP"))
+                .ReturnsAsync(new List<string>{ "DUP001"});
 
             Company? savedcompany = null;
-
+            
             _companyRepoMock.Setup(r => r.CreateCompanyAsync(It.IsAny<Company>()))
                 .ReturnsAsync((Company c) =>
                 {
@@ -59,117 +61,132 @@ namespace HRConnect.Tests
                     return c;
                 });
 
+            // Act
             var result = await _companyService.CreateCompanyAsync(companyRequestDto);
 
+            // Assert
             Assert.NotNull(result);
-            Assert.Equal("Singular Systems", result.CompanyName);
-            Assert.Equal("SIN002", savedcompany!.CompanyId);
+            Assert.Equal("Duplicate Systems", result.CompanyName);
+            Assert.Equal("DUP002", savedcompany!.CompanyId);
         }
 
         [Fact]
-        public async Task CreateCompanyAsync_MissingCompanyName_ThrowsArgumentException()
+        public async Task CreateCompanyAsync_MissingCompanyName_ThrowsValidationException()
         {
+            // Arrange
             var companyRequestDto = new CreateCompanyRequestDto
             {
                 CompanyName = "",
                 RegistrationNumber = "12345678901234",
                 UIFNumber = "1234567890",
-                ContactNumber = "0123456789"
+                ContactNumber = "0123456789",
+                CompanyAddress = "123 Real Lane, Johannesburg"
             };
 
-            await Assert.ThrowsAsync<ArgumentException>(() =>
+            // Act & Assert
+            await Assert.ThrowsAsync<ValidationException>(() =>
                 _companyService.CreateCompanyAsync(companyRequestDto));
         }
 
         [Fact]
-        public async Task CreateCompanyAsync_DuplicateRegistrationNumber_ThrowsInvalidOperationException()
+        public async Task CreateCompanyAsync_DuplicateRegistrationNumber_ThrowsBusinessRuleException()
         {
+            // Arrange
             var companyRequestDto = new CreateCompanyRequestDto
             {
-                CompanyName = "Singular Systems",
+                CompanyName = "Duplicate Systems",
                 RegistrationNumber = "12345678901234",
                 UIFNumber = "1234567890",
-                ContactNumber = "0123456789"
+                ContactNumber = "0123456789",
+                CompanyAddress = "123 Real Lane, Johannesburg"
             };
 
             _companyRepoMock.Setup(r => r.GetCompanyByRegNumberAsync(companyRequestDto.RegistrationNumber))
                 .ReturnsAsync(new Company { RegistrationNumber = companyRequestDto.RegistrationNumber });
 
-            await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            // Act & Assert
+            await Assert.ThrowsAsync<BusinessRuleException>(() =>
                 _companyService.CreateCompanyAsync(companyRequestDto));
         }
 
         [Fact]
-        public async Task CreateCompanyAsync_DeplicateUIFNumber_ThrowsInvalidOperationException()
+        public async Task CreateCompanyAsync_DeplicateUIFNumber_ThrowsBusinessRuleException()
         {
+            // Arrange
             var companyRequestDto  = new CreateCompanyRequestDto
             {
-                CompanyName = "Singular Systems",
+                CompanyName = "Duplicate Systems",
                 RegistrationNumber = "12345678901234",
                 UIFNumber = "1234567890",
-                ContactNumber = "0123456789"
+                ContactNumber = "0123456789",
+                CompanyAddress = "123 Real Lane, Johannesburg"
             };
 
             _companyRepoMock.Setup(r => r.GetCompanyByUIFAsync(companyRequestDto.UIFNumber))
                 .ReturnsAsync(new Company { UIFNumber = companyRequestDto.UIFNumber });
-
-            await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            // Act & Assert
+            await Assert.ThrowsAsync<BusinessRuleException>(() =>
                 _companyService.CreateCompanyAsync(companyRequestDto));
         }
 
         [Fact]
-        public async Task CreateCompanyAsync_DeplicateVATNumber_ThrowsInvalidOperationException()
+        public async Task CreateCompanyAsync_DeplicateVATNumber_ThrowsBusinessRuleException()
         {
+            // Arrange
             var companyRequestDto  = new CreateCompanyRequestDto
             {
-                CompanyName = "Singular Systems",
+                CompanyName = "Duplicate Systems",
                 RegistrationNumber = "12345678901234",
                 UIFNumber = "1234567890",
                 VATNumber = "VAT1254785",
-                ContactNumber = "0123456789"
+                ContactNumber = "0123456789",
+                CompanyAddress = "123 Real Lane, Johannesburg"
             };
 
             _companyRepoMock.Setup(r => r.GetCompanyByVATAsync(companyRequestDto.VATNumber))
                 .ReturnsAsync(new Company { VATNumber = companyRequestDto.VATNumber });
-
-            await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            // Act & Assert
+            await Assert.ThrowsAsync<BusinessRuleException>(() =>
                 _companyService.CreateCompanyAsync(companyRequestDto));
         }
 
         [Fact]
-        public async Task CreateCompanyAsync_DeplicateContactNumber_ThrowsInvalidOperationException()
+        public async Task CreateCompanyAsync_DeplicateContactNumber_ThrowsBusinessRuleException()
         {
+            // Arrange
             var companyRequestDto  = new CreateCompanyRequestDto
             {
-                CompanyName = "Singular Systems",
+                CompanyName = "Duplicate Systems",
                 RegistrationNumber = "12345678901234",
                 UIFNumber = "1234567890",
                 VATNumber = "VAT1254785",
-                ContactNumber = "0123456789"
+                ContactNumber = "0123456789",
+                CompanyAddress = "123 Real Lane, Johannesburg"
             };
 
             _companyRepoMock.Setup(r => r.GetCompanyByContactNumberAsync(companyRequestDto.ContactNumber))
                 .ReturnsAsync(new Company { ContactNumber = companyRequestDto.ContactNumber });
-
-            await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            // Act & Assert
+            await Assert.ThrowsAsync<BusinessRuleException>(() =>
                 _companyService.CreateCompanyAsync(companyRequestDto));
         }
 
-    
 
         [Fact]
         public async Task CreateCompanyAsync_GeneratesIncrementedCompanyId()
         {
+            // Arrange
             var companyRequestDto = new CreateCompanyRequestDto
             {
-                CompanyName = "Singular Systems",
+                CompanyName = "Duplicate Systems",
                 RegistrationNumber = "12345678901234",
                 UIFNumber = "1234567890",
-                ContactNumber = "0123456789"
+                ContactNumber = "0123456789",
+                CompanyAddress = "123 Real Lane, Johannesburg"
             };
 
-            _companyRepoMock.Setup(r => r.GetAllCompanyIdsWithPrefix("SIN"))
-                .ReturnsAsync(new List<string> { "SIN001", "SIN002" });
+            _companyRepoMock.Setup(r => r.GetAllCompanyIdsWithPrefix("DUP"))
+                .ReturnsAsync(new List<string> { "DUP001", "DUP002" });
 
             Company? capturedCompany = null;
 
@@ -179,11 +196,11 @@ namespace HRConnect.Tests
                     capturedCompany = c;
                     return c;
                 });
-
+            // Act
             await _companyService.CreateCompanyAsync(companyRequestDto);
-
+            // Assert
             Assert.NotNull(capturedCompany);
-            Assert.Equal("SIN003", capturedCompany.CompanyId);
+            Assert.Equal("DUP003", capturedCompany.CompanyId);
         }
 
         public void Dispose()

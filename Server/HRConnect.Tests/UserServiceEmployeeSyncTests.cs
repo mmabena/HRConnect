@@ -54,7 +54,7 @@ namespace HRConnect.Tests.Services
 
       await _context.SaveChangesAsync();
 
-      await _userService.SyncEmployeeUsersAsync();
+      await _userService.SyncEmployeeUserAsync();
 
       var users = await _context.Users.ToListAsync();
 
