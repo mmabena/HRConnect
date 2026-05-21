@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import api from "../../../src/api/api.js";
+import { toast } from "react-toastify";
 import axios from "axios";
 import { resolveRole } from "../../utils/roleUtils";
 import connection from "../../api/signalrService.js";
@@ -83,9 +84,9 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   const handleCompanySwitch = async (company) => {
     try {
       await switchCompany(company.id);
-
       setActiveCompany(company);
       setCompanySwitcherOpen(false);
+      toast.success("Company switched successfully.");
     } catch (error) {
       console.error("Failed to switch company:", error);
     }
@@ -210,6 +211,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
       console.log("Company switched:", data);
 
       window.location.reload();
+      
     });
 
     return () => {

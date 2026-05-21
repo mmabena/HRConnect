@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { addCompany } from "../../api/Company";
 import { toast } from "react-toastify";
 import "./AddCompanyModal.css";
+import connection from "../../api/signalrService.js";
 import { Plus, Check } from "lucide-react";
 
 const AddCompanyModal = ({ closeModal }) => {
@@ -55,10 +56,7 @@ const AddCompanyModal = ({ closeModal }) => {
       };
 
       await addCompany(payload);
-
-      
       closeModal();
-      window.location.reload(); // Use signal R
       toast.success("Company created successfully");
     } catch (error) {
       if (error.response && error.response.data?.errors) {
@@ -73,6 +71,26 @@ const AddCompanyModal = ({ closeModal }) => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const startConnection = async () => {
+      try {
+        await connection.start();
+        console.log("SignalR Connected");
+      } catch (err) {
+        console.error("SignalR Connection Error:", err)
+      }
+    };
+    startConnection();
+
+    connection.on("CompanyCreated", (data) => {
+      console.log("Company Switched:", data);
+
+      window.location.reload();
+    });
+
+    return () => {connection.off("CompanyCreated")};
+  }, []);
 
   return (
     <div className="ACM-overlay">

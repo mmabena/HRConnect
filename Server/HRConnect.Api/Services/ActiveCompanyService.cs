@@ -16,6 +16,11 @@ namespace HRConnect.Api.Services
             _context = context;
         }
 
+        /// <summary>
+        /// Gets the active company ID for the logged in user. 
+        /// </summary>
+        /// <param name="userId">The user ID.</param>
+        /// <returns>The active company ID.</returns>
         public async Task<string> GetActiveCompanyIdAsync(int userId)
         {
             var companies = await _context.UserCompanies

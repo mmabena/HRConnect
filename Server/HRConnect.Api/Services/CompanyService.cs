@@ -8,7 +8,9 @@ namespace HRConnect.Api.Services
   using System.Globalization;
   using HRConnect.Api.DTOs.Company;
   using System.IO;
+  using Microsoft.AspNetCore.SignalR;
   using HRConnect.Api.Data;
+  using HRConnect.Api.Hubs;
   using HRConnect.Api.Mappers;
   using Microsoft.EntityFrameworkCore;
   using HRConnect.Api.Interfaces;
@@ -16,11 +18,13 @@ namespace HRConnect.Api.Services
   {
     private readonly ApplicationDBContext _context;
     private readonly ICompanyRepository _companyRepo;
+    private readonly IHubContext<CompanyHub> _companyHubContext;
 
-    public CompanyService(ApplicationDBContext context, ICompanyRepository companyRepo)
+    public CompanyService(ApplicationDBContext context, ICompanyRepository companyRepo, IHubContext<CompanyHub> companyHubContext)
     {
       _context = context;
       _companyRepo = companyRepo;
+      _companyHubContext = companyHubContext;
     }
     /// <summary>
     /// Retrieves all companies from the system.
@@ -74,7 +78,22 @@ namespace HRConnect.Api.Services
       var new_company = companyRequestDto.ToCompanyFromCreateDTO();
 
       var createdCompany = await _companyRepo.CreateCompanyAsync(new_company);
-      return createdCompany.ToCompanyDto();
+
+      await _companyHubContext.Clients.All.SendAsync(
+        "CompanyCreated",
+        new
+        {
+          CompanyId = companyRequestDto.CompanyId,
+          CompanyName = companyRequestDto.CompanyId,
+          RegistrationNumber = companyRequestDto.CompanyId,
+          UIFNumber = companyRequestDto.CompanyId,
+          VATNumber = companyRequestDto.CompanyId,
+          ContactNumber = companyRequestDto.CompanyId,
+          CompanyAddress = companyRequestDto.CompanyId
+        }
+      );
+
+      return createdCompany.ToCompanyDto(); 
     }
     /// <summary>
     /// Generates a unique Company ID based on the company name prefix.

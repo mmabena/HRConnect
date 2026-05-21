@@ -15,7 +15,6 @@ namespace HRConnect.Api.DTOs.Company
     public string ContactNumber { get; set; } = string.Empty;
     public string CompanyAddress { get; set; } = string.Empty;
 
-
     //EMployee Count for company management page frontend
     public int EmployeeCount { get; set; }
   }

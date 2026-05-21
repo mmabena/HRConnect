@@ -62,7 +62,6 @@ const CompanyList = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-            {/* (Optional future actions area) */}
           </div>
         </div>
 
@@ -97,7 +96,6 @@ const CompanyList = () => {
           <div className="CL-table-top-bar">
             <span className="CL-table-title">Registered Companies</span>
           </div>
-
           <div className="CL-company-table-grid">
             {/* Headers */}
             <div className="CL-table-header">Company</div>
@@ -106,25 +104,20 @@ const CompanyList = () => {
             <div className="CL-table-header">VAT Number</div>
             <div className="CL-table-header action-header">Actions</div>
 
-            {/* Loading */}
             {loading && (
               <div className="CL-no-data-row">Loading companies...</div>
             )}
 
-            {/* Error */}
             {error && <div className="CL-no-data-row">{error}</div>}
 
-            {/* No Data */}
             {!loading && !error && filteredCompanies.length === 0 && (
               <div className="CL-no-data-row">No companies found.</div>
             )}
 
-            {/* Rows */}
             {!loading &&
               !error &&
               filteredCompanies.map((company) => (
                 <React.Fragment key={company.companyId}>
-                  {/* Company */}
                   <div className="CL-table-cell company-name-cell">
                     <div className="CL-initials-circle">
                       {company.companyName
@@ -181,5 +174,4 @@ const CompanyList = () => {
     </div>
   );
 };
-
 export default CompanyList;

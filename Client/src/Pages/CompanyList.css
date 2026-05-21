@@ -169,10 +169,8 @@
 
 .CL-company-table-grid {
   display: grid;
-
   /* Matches your Figma column widths */
   grid-template-columns: 2fr 1.5fr 1.5fr 1fr 1fr;
-
   background: #ffffff;
 }
 
@@ -181,11 +179,9 @@
 .CL-table-header {
   background: #355867;
   color: #ffffff;
-
   font-family: 'Anek Bangla', sans-serif;
   font-weight: 700;
   font-size: 16px;
-
   padding: 15px;
   display: flex;
   align-items: center;
@@ -225,11 +221,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-
   background: rgba(138, 164, 174, 0.37);
   border: 1px solid rgba(53, 88, 103, 0.53);
   border-radius: 50%;
-
   font-weight: 600;
   font-size: 18px;
   color: #355867;

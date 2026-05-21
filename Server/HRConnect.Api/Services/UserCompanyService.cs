@@ -27,7 +27,11 @@ namespace HRConnect.Api.Services
             _context = context;
             _companyHubContext = companyHubContext;
         }
-
+        /// <summary>
+        /// Retrives the list of companies assigned to the user. 
+        /// </summary>
+        /// <param name="userId">The user ID.</param>
+        /// <returns>The list of companies assigned to the user.</returns>
         public async Task<List<UserCompanyDto>> GetMyCompaniesAsync(int userId)
         {
             var companies = await _userCompanyRepo.GetUserCompaniesByUserIdAsync(userId);
@@ -36,7 +40,7 @@ namespace HRConnect.Api.Services
 
             var employee = await _context.Employees
                 .FirstOrDefaultAsync(e => e.Email == user.Email);
-            
+
             var originalCompanyId = employee?.CompanyId;
 
             var result = new List<UserCompanyDto>();
@@ -59,6 +63,12 @@ namespace HRConnect.Api.Services
             return result;
 
         }
+        /// <summary>
+        /// Create a new company assignment to a user.
+        /// </summary>
+        /// <param name="userId">The user ID.</param>
+        /// <param name="userCompanyRequestDto">The company assignement model to assign a user to a company.</param>
+        /// <returns>The created UserCompany relationship.</returns>
         public async Task AssignCompanyToUserAsync(int userId, CreateUserCompanyDto userCompanyRequestDto)
         {
             await ValidateAssigning(userId, userCompanyRequestDto.CompanyId);
@@ -73,6 +83,12 @@ namespace HRConnect.Api.Services
 
             await _userCompanyRepo.CreateUserCompanyAsync(createdUserCompany);
         }
+        /// <summary>
+        /// Switches the active company for a user.
+        /// </summary>
+        /// <param name="userId">The user ID.</param>
+        /// <param name="companyId">The company ID.</param>
+        /// <returns>A verification message along with the updated UserCompany information.</returns>
         public async Task SwitchCompanyAsync(int userId, string companyId)
         {
             var isLinked = await _userCompanyRepo.UserCompanyExistsAsync(userId, companyId);
@@ -102,7 +118,6 @@ namespace HRConnect.Api.Services
                     CompanyId = companyId
                 }
             );
-
         }
         private async Task ValidateAssigning(int userId, string companyId)
         {
