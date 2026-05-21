@@ -33,7 +33,6 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
     private readonly IEmployeePensionEnrollmentService _employeePensionEnrollmentService;
     private readonly IServiceProvider _serviceProvider;
     private readonly IReportsService _reportsService;
-    // private readonly ICompanyContributionService contributionService;
     private readonly IUserService _userService;
     private readonly IEmployeeService _employeeService;
     private readonly INotificationService _notificationsService;
@@ -87,7 +86,7 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
 
       var newPayrun = new PayrollRun
       {
-        PayrollRunNumber = 1,//PayrollUtil.SetPayrunNumber(),
+        PayrollRunNumber = 1,
         PeriodId = newPeriod.PayrollPeriodId,
         PeriodDate = DateTime.Now,
         IsFinalised = false
@@ -102,8 +101,8 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
     {
       var users = await _userService.GetAllUsersAsync();
 
-      //Only returns users with SuperUser role
-      users = users.FindAll(u => u.Role == UserRole.SuperUser);
+      users = users.FindAll(u => u.Role == UserRole.SuperUser ||
+      u.TempRole == UserRole.SuperUser);
       List<string> employeeIds = new();
 
       foreach (var u in users)
@@ -145,7 +144,6 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
       // new DateTime(currentDate.Year, currentDate.Month,
       // DateTime.DaysInMonth(currentDate.Year, currentDate.Month)))
       //   {
-      //     Console.WriteLine("Safe Guard: Today Is Not The Last Day Of The Month.");
       //     return;
       //   }
 
@@ -167,7 +165,6 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
           return;
         }
 
-        //Finalise and lock a run if it isn't finalised and is still running
         if (!currentPayRun.IsFinalised && !currentPayRun.IsLocked)
         {
           currentPayRun.IsFinalised = true;
@@ -212,7 +209,6 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
       }
       catch (InvalidOperationException ex)
       {
-        Console.WriteLine($"Invalid Operation on locked entity \n{ex}");
         var jobException = new JobExecutionException(ex);
         throw jobException;
       }
@@ -230,7 +226,6 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
     private async Task AllocateCompanyContributionsIfNeeded(int payrollRunId)
     {
       using var scope = _serviceProvider.CreateScope();
-      // bool alreadyAllocated = await _contributionRepo.FindAllocatedContribution(payrollRunId);
       var companyContributionService = scope.ServiceProvider.GetRequiredService<ICompanyContributionService>();
 
       bool alreadyAllocated = await companyContributionService.FindAllocatedContribution(payrollRunId);

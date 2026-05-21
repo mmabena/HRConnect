@@ -22,18 +22,17 @@ namespace HRConnect.Api.Services
   public class TOTPService : ITOTPService
   {
     private readonly ITOTPRepository _totpRepo;
-    private readonly int _stepSeconds;
     private readonly IUserRepository _userRepo;
     private readonly IMFAUserSecretsService _mfaService;
     private readonly IEmployeeService _employeeService;
     private readonly INotificationFactory _notiFactory;
+    private readonly int _stepSeconds;
     public TOTPService(ITOTPRepository totpRepo, IUserRepository userRepo,
     IMFAUserSecretsService mfaService, IEmployeeService employeeService,
      INotificationFactory notiFactory, IConfiguration configuration)
     {
       _totpRepo = totpRepo;
       _employeeService = employeeService;
-      //Use configured step minutes or fall back to 10 minutes
       _stepSeconds = ResolveStepDuration(configuration);
       _userRepo = userRepo;
       _mfaService = mfaService;
@@ -53,9 +52,10 @@ namespace HRConnect.Api.Services
         string code = GenerateCode(secret);
 
         var inAppNotification = await MakeInAppNotification(userId);
-        // var emailNotification = await MakeEmailNotification(userId, code);
+        var emailNotification = await MakeEmailNotification(userId, code);
+
         await _notiFactory.ProduceNotificationAsync(inAppNotification);
-        // await _notiFactory.ProduceNotificationAsync(emailNotification);
+        await _notiFactory.ProduceNotificationAsync(emailNotification);
       }
       catch (OperationException ex)
       {
@@ -87,34 +87,41 @@ namespace HRConnect.Api.Services
         return false;
 
 
-      // mark this code as being used so that it cannot be reused within verification 
       await MarkUsedCodeAsync(userId, timeStepMatched);
       return true;
     }
-    //This is our way of trying to prevent against replay and ensure keys are used only once 
+    /// <summary>
+    ///  A replay store is used to check where a pin code has been previously used 
+    /// before to prevent a basic briute force replay attack
+    /// </summary>
+    /// <param name="userId">User To check against</param>
+    /// <param name="stepCount">The time step point the pin should be alive until
+    /// </param>
+    /// <returns>truthy value if the pin has been used</returns>
     public async Task<bool> IsReplayAsync(int userId, long stepCount)
     {
       return await _totpRepo.IsReplay(userId, stepCount);
     }
+
     public async Task MarkUsedCodeAsync(int userId, long stepCount)
     {
       await _totpRepo.MarkUsedAsync(userId, stepCount);
     }
+
     private int ResolveStepDuration(IConfiguration configuration)
     {
-      int minutes = configuration.GetValue("Totp:StepMinutes", 10);
-      if (minutes < 0) minutes = 10;
+      int minutes = configuration.GetValue("Totp:StepMinutes", 1);
+      if (minutes <= 0) minutes = 10;
 
       int seconds = Math.Max(minutes, 1) * 60;
       if (seconds <= 0) return seconds * 600;
 
-      return seconds;
+      return 30;
     }
     private async Task<CreateNotificationDto> MakeInAppNotification(int userId)
     {
       var (employee, user) = await GetEmployeeFromUserIdAsync(userId);
-      ///Create notifications to send the notifications
-      // string message = $"You Role Has Been Updated from {user.Role} to {user.TempRole}";
+
       CreateNotificationDto dto = new CreateNotificationDto
       {
         Subject = "Your new Role is ready",
@@ -128,6 +135,7 @@ namespace HRConnect.Api.Services
 
       return dto;
     }
+
     private async Task<CreateNotificationDto> MakeEmailNotification(int userId, string otp)
     {
       var (employee, user) = await GetEmployeeFromUserIdAsync(userId);
@@ -155,14 +163,17 @@ namespace HRConnect.Api.Services
       return (employeeDto, user);
     }
 
+    /// <summary>
+    /// Method used by UserService to confirm that the newly assigned role to a user has been confirmed by the employee.
+    /// and accepted by the system
+    /// </summary>
+    /// <param name="userId"></param>
     public async Task ConfirmUserRoleUpdateAsync(int userId)
     {
       User? existing = await _userRepo.GetUserByIdAsync(userId);
       if (existing != null)
       {
         existing.Role = (UserRole)existing.TempRole!;
-
-        existing.TempRole = null;
         _ = await _userRepo.UpdateUserAsync(userId, existing);
       }
     }

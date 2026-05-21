@@ -5,8 +5,9 @@ namespace HRConnect.Api.Utils.Jobs.Notification
   using HRConnect.Api.Interfaces.Notification;
   using HRConnect.Api.DTOs.Notification;
   using HRConnect.Api.Models;
+  using HRConnect.Api.DTOs.Employee;
+  using HRConnect.Api.Services;
 
-  // Prevent multiple of these jobs from running concurrently
   [DisallowConcurrentExecution]
   public class NotificationJob : IJob
   {
@@ -14,64 +15,67 @@ namespace HRConnect.Api.Utils.Jobs.Notification
     private readonly INotificationFactory _notificationFactory;
     private readonly IEmployeeService _employeeService;
     private readonly IUserService _userService;
-    // private static readonly int DAYS_TO_ROLLOVER_NOTIFICATION = 5;
+    private readonly INotificationService _notificationService;
+    private static readonly int DAYS_TO_ROLLOVER_NOTIFICATION = 5;
     public NotificationJob(IJobScheduleService jobScheduleService, INotificationFactory notificationFactory, IUserService userService,
-    IEmployeeService employeeService)
+    IEmployeeService employeeService, INotificationService notificationService)
     {
       _jobScheduleService = jobScheduleService;
       _notificationFactory = notificationFactory;
       _userService = userService;
       _employeeService = employeeService;
+      _notificationService = notificationService;
     }
 
     public async Task<List<string>> OrganiseSuperUsersAsync()
     {
-      var users = await _userService.GetAllUsersAsync();
+      List<User> users = await _userService.GetAllUsersAsync();
 
-      //Only returns users with SuperUser role
-      users = users.FindAll(u => u.Role == UserRole.SuperUser);
-      List<string> employeeIds = new();
+      users = users.FindAll(u => u.Role == UserRole.SuperUser ||
+      u.TempRole == UserRole.SuperUser);
+      List<string> employeeIds = [];
 
-      foreach (var u in users)
+      foreach (User u in users)
       {
-        var e = await _employeeService.GetEmployeeByEmailAsync(u.Email);
+        EmployeeDto? e = await _employeeService.GetEmployeeByEmailAsync(u.Email);
         if (e is not null)
+        {
           employeeIds.Add(e.EmployeeId);
+        }
       }
+      await _notificationService.MarkBatchedNotificationsReadByTypeAsync(NotificationType.Payroll, employeeIds);
       return employeeIds;
     }
 
     public async Task Execute(IJobExecutionContext context)
     {
-      var payrollExecutionDate = await _jobScheduleService.GetNextJobScheduleAsync("PayrollRolloverJob");
+      DateTimeOffset? payrollExecutionDate = await _jobScheduleService.GetNextJobScheduleAsync("PayrollRolloverJob");
 
       if (payrollExecutionDate == null)
-        return; //No days found
+        return;
 
-      // Swap this in when pushing to main 
-      // int daysUntilRollover = (payrollExecutionDate.Value.Date - DateTime.Now).Days;
-#line 53 "(NotificationJob.cs)"
-      double secondsUntilRollover = (DateTime.Now - payrollExecutionDate.Value)
-                                     .TotalSeconds;
-      Console.WriteLine($"====SECONDS UNTIL ROLLOVER {secondsUntilRollover}");
-      Console.WriteLine($"====SECONDS FROM PAYROLL EXECUTION DATE {payrollExecutionDate.Value.Second}");
-      Console.WriteLine($"====Now {DateTime.Now.Second}");
-#line default
+      DateTimeOffset now = DateTimeOffset.Now;
+      double daysUntilRollover = (payrollExecutionDate.Value.Date - now.Date).Days;
+      double secondsUntilRollover = (payrollExecutionDate.Value - DateTime.Now).TotalSeconds;
 
+      if (daysUntilRollover >= 1 &&
+       daysUntilRollover <= DAYS_TO_ROLLOVER_NOTIFICATION)
+      {
+        //Use this if check for testing notification job if neccessary 
+      }
       if (secondsUntilRollover > 0)
       {
-        var superUserIds = await _userService.OrganiseSuperUsersAsync();
+        var superUserIds = await OrganiseSuperUsersAsync();
         foreach (var su in superUserIds)
         {
-          //every user in these iterations is a super user
-          var notification = new CreateNotificationDto
+          CreateNotificationDto notification = new()
           {
-            Message = $"Finalise Payroll. Payroll Will Rollover In {secondsUntilRollover} days",
+            Message = $"Finalise Payroll. Payroll Will Rollover In {daysUntilRollover} days",
             Subject = "Finalise Payroll",
             Severity = NotificationSeverity.Critical,
             Type = NotificationType.Payroll,
             DeliveryChannel = DeliveryChannel.InApp,
-            DueDate = payrollExecutionDate,
+            DueDate = payrollExecutionDate.Value.DateTime,
             EmployeeId = $"{su}"
           };
           await _notificationFactory.ProduceNotificationAsync(notification);

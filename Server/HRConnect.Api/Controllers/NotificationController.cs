@@ -1,7 +1,5 @@
 namespace HRConnect.Api.Controllers
 {
-  using HRConnect.Api.DTOs.Notification;
-  using HRConnect.Api.Interfaces;
   using HRConnect.Api.Interfaces.Notification;
   using HRConnect.Api.Models;
   using Microsoft.AspNetCore.Authorization;
@@ -12,12 +10,9 @@ namespace HRConnect.Api.Controllers
   public class NotificationController : ControllerBase
   {
     private readonly INotificationService _notificationService;
-    // private readonly IUserService _userService;
-    public NotificationController(INotificationService notificationService
-    /*IUserService userService*/)
+    public NotificationController(INotificationService notificationService)
     {
       _notificationService = notificationService;
-      // _userService = userService;
     }
 
     [Authorize(Roles = "SuperUser")]

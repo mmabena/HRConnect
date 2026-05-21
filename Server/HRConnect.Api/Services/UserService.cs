@@ -131,7 +131,7 @@ namespace HRConnect.Api.Services
       }
       // existing.Role = (UserRole)dto.RoleId;
       existing.TempRole = (UserRole)dto.RoleId;
-      //SendTotpAndNotify
+      // SendTotpAndNotify
       var updatedUser = await _userRepo.UpdateUserAsync(id, existing);
 
 #line 135 "UserService.cs)"

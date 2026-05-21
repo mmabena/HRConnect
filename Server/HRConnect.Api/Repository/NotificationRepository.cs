@@ -4,8 +4,6 @@ namespace HRConnect.Api.Repository
   using HRConnect.Api.Interfaces.Notification;
   using HRConnect.Api.Models;
   using HRConnect.Api.Data;
-  using HRConnect.Api.Mappers.Notification;
-  using HRConnect.Api.DTOs.Notification;
   using Microsoft.EntityFrameworkCore;
 
   public class NotificationRepository : INotificationRepository
@@ -31,7 +29,7 @@ namespace HRConnect.Api.Repository
 
     public async Task<IEnumerable<Notification>> GetEmployeeNotificationsAsync(string employeeId)
     {
-      var notifications = await _context.Notifications.AsNoTracking().Where(n =>
+      List<Notification> notifications = await _context.Notifications.AsNoTracking().Where(n =>
         (n.EmployeeId == employeeId) &&
         (n.DeliveryChannel == DeliveryChannel.InApp) &&
         !n.IsRead)
@@ -51,7 +49,6 @@ namespace HRConnect.Api.Repository
     /// <returns>Notification Object</returns>
     public async Task<Notification?> ExistsAsync(NotificationType type, string employeeId, string? message, NotificationSeverity severity)
     {
-      // return await _context.Notifications.FindAsync(type, message, employeeId, severity);
       return await _context.Notifications.Where(n =>
       (n.Type == type) &&
       (n.Message == message) &&
@@ -71,7 +68,7 @@ namespace HRConnect.Api.Repository
     public async Task MarkBatchAsReadAsync(List<string> employeeIds, NotificationType type)
     {
       //Prefer batching updating as SQL has a parameter limit of ~2100
-      foreach (var idBatch in employeeIds.Chunk(500))
+      foreach (string[] idBatch in employeeIds.Chunk(500))
       {
         await _context.Notifications.Where(n =>
         idBatch.Contains(n.EmployeeId) &&
@@ -80,13 +77,11 @@ namespace HRConnect.Api.Repository
         .ExecuteUpdateAsync(s =>
         s.SetProperty(n => n.IsRead, true));
       }
-
-      //Read Notifications are automatically deleted
       await DeleteAllReadByTypeAsync(type);
+      await _context.SaveChangesAsync();
     }
     public async Task MarkAsReadAsync(Notification notification)
     {
-      // _ = _context.Notifications.Update(notification);
       //attatching entity into the entity tracker 
       _ = _context.Attach(notification);
 
@@ -94,9 +89,6 @@ namespace HRConnect.Api.Repository
 
       _context.Entry(notification).Property(n => n.IsRead)
       .IsModified = true;
-
-      //Read Notifications are automatically deleted
-      //  await DeleteAllReadAsync();
 
       _ = await Save();
     }
@@ -106,7 +98,6 @@ namespace HRConnect.Api.Repository
             Where(n => !n.IsRead &&
             (n.EmployeeId == null || n.EmployeeId == employeeId))
       .OrderByDescending(n => n.CreatedAt).ToListAsync();
-      // throw new NotImplementedException();
       return notifications;
     }
     public async Task<IEnumerable<Notification>> GetAllEmployeeNotificationsByTypeAsync(NotificationType type, string employeeId)
@@ -116,7 +107,6 @@ namespace HRConnect.Api.Repository
                   (n.Type == type)).ToListAsync();
       return notifications;
     }
-    //Critical,Warning,Information
     public async Task<IEnumerable<Notification>> GetAllEmployeeNotificationsBySeverityAsync(string employeeId, NotificationSeverity severity)
     {
       var notifications = await _context.Notifications.Where(n =>
@@ -132,8 +122,8 @@ namespace HRConnect.Api.Repository
       if (existsUnread == null)
         return existsUnread;
 
-      await _context.Notifications.AddAsync(notification);
-      await _context.SaveChangesAsync();
+      _ = await _context.Notifications.AddAsync(notification);
+      _ = await _context.SaveChangesAsync();
 
       await tsx.CommitAsync();
       return notification;
@@ -157,14 +147,14 @@ namespace HRConnect.Api.Repository
     }
     public async Task<bool> DeleteNotificationByIdAsync(string employeeId, int id)
     {
-      var notification = await _context.Notifications.Where(n => n.EmployeeId == employeeId)
+      Notification? notification = await _context.Notifications.Where(n => n.EmployeeId == employeeId)
       .FirstOrDefaultAsync(n => n.NotificationId == id);
 
       if (notification == null)
         return false;
 
       _ = _context.Notifications.Remove(notification);
-      await _context.SaveChangesAsync();
+      _ = await _context.SaveChangesAsync();
       return true;
     }
   }

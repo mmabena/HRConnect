@@ -27,7 +27,6 @@ using HRConnect.Api.Utils.Notification;
 using HRConnect.Api.Interfaces.Payroll.Earning;
 using HRConnect.Api.Interfaces.Payroll.Deduction;
 using HRConnect.Api.Utils.Jobs;
-using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
 using HRConnect.Api.Utils.Notification.Channels;
 
@@ -97,7 +96,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
     {
-      options.UseSqlServer(builder.Configuration.GetConnectionString("DBeaverConnection")!);
+      options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!);
       options.AddInterceptors(new AuditSaveChangesInterceptor());
     });
 
@@ -152,12 +151,11 @@ builder.Services.AddQuartz(q =>
   q.AddJob<NotificationJob>(opts =>
   opts.WithIdentity(NotificationJobKey)
   .StoreDurably());
-  //Triggers that will need to be fired to run background job
-  // using Cron Schedule
+
   q.AddTrigger(opts => opts
   .ForJob(RolloverJobKey)
   .WithIdentity("PayrollRollover-Trigger")
-  .WithCronSchedule("30 0/1 * * * ?", x =>
+  .WithCronSchedule("10 0/2 * * * ?", x =>
   x.WithMisfireHandlingInstructionFireAndProceed()));
 
   q.AddTrigger(opts => opts
@@ -165,7 +163,7 @@ builder.Services.AddQuartz(q =>
   .WithIdentity("NotificationJob-Trigger")
   .WithCronSchedule("5,10,15,20,25 0/1 * * * ?", x =>
   x.WithMisfireHandlingInstructionIgnoreMisfires()));
-
+  //Cron Schedule for Payroll Rollover Job
   // 0 -> 0 seconds
   // 0 -> 0 minutes
   // 0 -> 0 hours
@@ -182,12 +180,11 @@ builder.Services.AddQuartz(q =>
        .ForJob(employeePensionEnrollmentJob)
        .StartNow());
 
-  //Adding persistence to quartz to be able to be run in the back
   q.UsePersistentStore(store =>
   {
     store.UseSqlServer(options =>
         {
-          options.ConnectionString = builder.Configuration.GetConnectionString("DBeaverConnection")!;
+          options.ConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
           options.TablePrefix = "quartz.QRTZ_";
         });
     store.UseSerializer<Quartz.Simpl.SystemTextJsonObjectSerializer>();
@@ -199,9 +196,6 @@ builder.Services.AddQuartzHostedService(q =>
 {
   q.WaitForJobsToComplete = true;
 });
-//Get the config step minutes for Time-Based One Time Pin (TOTP)
-builder.Services.Configure<ToptConfigOptions>(
-  builder.Configuration.GetSection("Totp"));
 
 builder.Configuration.AddUserSecrets<Program>();
 builder.Services.AddSingleton(provider =>
@@ -258,8 +252,7 @@ builder.Services.AddScoped<IStatutoryContributionRepository, StatutoryContributi
 builder.Services.AddScoped<IStatutoryContributionService, StatutoryContributionService>();
 builder.Services.AddTransient<IPensionProjectionService, PensionProjectionService>();
 builder.Services.AddScoped<IMedicalOptionRepository, MedicalOptionRepository>();
-builder.Services.AddScoped<HRConnect.Api.Interfaces.IMedicalOptionService,
-  HRConnect.Api.Services.MedicalOptionService>();
+builder.Services.AddScoped<IMedicalOptionService, MedicalOptionService>();
 builder.Services.AddScoped<IPensionOptionRepository, PensionOptionRepository>();
 builder.Services.AddScoped<IEmployeePensionEnrollmentRepository, EmployeePensionEnrollmentRepository>();
 builder.Services.AddTransient<IEmployeePensionEnrollmentService, EmployeePensionEnrollmentService>();
@@ -269,7 +262,6 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<INotificationFactory, NotificationFactory>();
 builder.Services.AddScoped<INotificationDispatcher, NotificationDispatcher>();
-//Individual Delivery Channels
 builder.Services.AddScoped<INotificationDeliveryChannel, InAppDeliveryChannel>();
 builder.Services.AddScoped<INotificationDeliveryChannel, EmailDeliveryChannel>();
 builder.Services.AddScoped<IJobScheduleService, JobScheduleService>();
@@ -281,13 +273,12 @@ builder.Services.AddScoped<IDeductionRepository, DeductionRepository>();
 builder.Services.AddScoped<IDeductionService, DeductionService>();
 builder.Services.AddScoped<IEmployeeDeductionRepository, EmployeeDeductionRepository>();
 builder.Services.AddScoped<IEmployeeDeductionService, EmployeeDeductionService>();
-// builder.Services.AddSingleton<ISecretsProtector, SecretsProtector>();
 builder.Services.AddScoped<ITOTPService, TOTPService>();
 builder.Services.AddScoped<ITOTPRepository, TOTPRepository>();
 builder.Services.AddScoped<IMFAUserSecretsService, MFAUserSecretsService>();
 builder.Services.AddScoped<IMFAUserSecretsRepository, MFAUserSecretsRepository>();
 
-builder.Services.AddHttpClient<IUserEmployeeHttpClient, UserEmployeeHttpClient>((provider, client) =>
+builder.Services.AddHttpClient<IUserHttpClient, UserHttpClient>((provider, client) =>
 {
   IConfiguration config = provider.GetRequiredService<IConfiguration>();
   client.BaseAddress = new Uri(config["Services:Api"]!);
