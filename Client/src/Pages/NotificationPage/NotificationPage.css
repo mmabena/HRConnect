@@ -322,7 +322,7 @@
   gap: 7px;
 }
 
-.message {
+.subject {
   font-size: 13px;
   font-weight: 600;
   color: var(--text-primary);
@@ -331,7 +331,7 @@
   flex: 1;
   margin: 0;
 }
-.notif-card.read .message {
+.notif-card.read .subject {
   font-weight: 400;
   color: var(--text-secondary);
 }
@@ -440,7 +440,7 @@
     height: 36px;
     font-size: 15px;
   }
-  .message {
+  .subject {
     font-size: 12.5px;
   }
 }

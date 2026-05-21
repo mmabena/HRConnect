@@ -55,6 +55,7 @@ const UserManagement = () => {
       const mappedUsers = (users || []).map((user) => {
 
         const employee = employees.find(e => e.email === user.email)
+        localStorage.setItem("currentEmployee",JSON.stringify(employee))
         console.log('local storage itself');
         console.log(localStorage)
         return {
@@ -69,7 +70,7 @@ const UserManagement = () => {
 
       setUsers(mappedUsers);
       setFilteredUsers(mappedUsers);
-      setLoggedInUser(mappedUsers[0] || null);
+    
       console.log('logged in user')
       console.log(loggedInUser)
       setCurrentUserRole(getStoredUserRole().roleName || "User");

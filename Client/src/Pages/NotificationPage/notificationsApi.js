@@ -12,12 +12,12 @@ const delay = (ms = 350) => new Promise((res) => setTimeout(res, ms));
 const BASE_URL="http://localhost:5147/api";
 
 // Priority weight – lower = shown first
-const SEVERITY = {
+export const SEVERITY = {
   CRITICAL: "Critical",
   WARNING:"Warning",
   INFORMATION: "Information",
 };
-const NOTIFICATION_TYPE={
+export const  NOTIFICATION_TYPE={
     PAYROLL:"Payroll",
     TAXUPLOAD:"TaxUpload",
     RoleUpdate:"RoleUpdate",
@@ -29,8 +29,8 @@ const NOTIFICATION_TYPE={
 export class NotificationDto{
     constructor(severity,type,rest){
          //Type and Severity Have to be strictly maintained
-         if(!Object.values(NOTIFICATION_TYPE).includes(type))
-             throw new Error("Invalid type of notifications");
+        //  if(!Object.values(NOTIFICATION_TYPE).includes(type))
+        //      throw new Error("Invalid type of notifications");
      
          if(!Object.values(SEVERITY).includes(severity))
              throw new Error("Invalid severity for notifications");

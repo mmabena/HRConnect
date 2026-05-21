@@ -8,6 +8,8 @@ import {
   deleteNotification,
   NotificationDto,
   fetchAllNotifications,
+  NOTIFICATION_TYPE,
+  SEVERITY,
 } from "./notificationsApi";
 import "./NotificationPage.css";
 import { fetchAllEmployees } from "../../api/Employee";
@@ -72,15 +74,15 @@ const loadNotis=useCallback(async()=>{
 
 useEffect(()=>{loadNotis();},[loadNotis])
   // ── Derived ─────────────────────────────────
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const unreadCount = notis.filter((n) => !n.isRead).length;
 
   const typeOptions = [
     "all",
     ...Array.from(new Set(notis.map((n) => n.type))),
   ];
 
-  const filtered = notifications.filter((n) => {
-    const tabOk  = activeTab  === "unread" ? !n.read : true;
+  const filtered = notis.filter((n) => {
+    const tabOk  = activeTab  === "unread" ? !n.isRead : true;
     const typeOk = filterType === "all"    ? true    : n.type === filterType;
     return tabOk && typeOk;
   });
@@ -93,11 +95,11 @@ useEffect(()=>{loadNotis();},[loadNotis])
 
   // ── Handlers ────────────────────────────────
   const handleClick = async (note) => {
-    if (!note.read) {
+    if (!note.isRead) {
       try {
         await markAsRead(note.id);
-        setNotifications((prev) =>
-          prev.map((n) => (n.id === note.id ? { ...n, read: true } : n))
+        setNotis((prev) =>
+          prev.map((n) => (n.id === note.id ? { ...n, isRead: true } : n))
         );
       } catch (_) {}
     }
@@ -107,17 +109,17 @@ useEffect(()=>{loadNotis();},[loadNotis])
   const handleMarkAll = async () => {
     try {
       await markAllAsRead(role);
-      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+      setNotis((prev) => prev.map((n) => ({ ...n, isRead: true })));
     } catch (_) {}
   };
 
   const handleDelete = async (e, id) => {
     e.stopPropagation();
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
+    setNotis((prev) => prev.filter((n) => n.id !== id));
     try {
       await deleteNotification(id);
     } catch (_) {
-      loadNotifications();
+      loadNotis();
     }
   };
 
@@ -144,7 +146,7 @@ useEffect(()=>{loadNotis();},[loadNotis])
           onClick={() => setActiveTab("all")}
         >
           All
-          <em>{notifications.length}</em>
+          <em>{notis.length}</em>
         </span>
         <span
           className={activeTab === "unread" ? "active" : ""}
@@ -185,7 +187,7 @@ useEffect(()=>{loadNotis();},[loadNotis])
             <span>⚠️</span>
             <p>{error}</p>
             <button className="notif-retry" onClick={()=>{
-                loadNotifications()
+                loadNotis()
                 }}>Retry</button>
           </div>
         )}
@@ -203,19 +205,18 @@ useEffect(()=>{loadNotis();},[loadNotis])
         {!loading && !error &&
           Object.keys(grouped).map((group) => (
             <div key={group}>
-              <p className="group-title">{group}</p>
 
               {grouped[group].map((note, i) => {
                 const meta = TYPE_META[note.type] || TYPE_META.info;
                 return (
                   <div
                     key={note.id}
-                    className={`notif-card ${note.read ? "read" : "unread"}`}
+                    className={`notif-card ${note.isRead ? "read" : "unread"}`}
                     style={{ animationDelay: `${i * 55}ms` }}
                     onClick={() => handleClick(note)}
                   >
                     {/* Left accent bar for unread */}
-                    {!note.read && <div className="notif-accent" />}
+                    {!note.isRead && <div className="notif-accent" />}
 
                     {/* Icon */}
                     <div className={`notif-icon ${meta.color}`}>
@@ -225,24 +226,24 @@ useEffect(()=>{loadNotis();},[loadNotis])
                     {/* Content */}
                     <div className="notif-content">
                       <div className="notif-msg-row">
-                        <p className="message">{note.message}</p>
-                        {note.priority === "urgent" && (
+                        <p className="subject">{note.subject}</p>
+                        {note.priority === SEVERITY.CRITICAL && (
                           <span className="notif-urgent">Urgent</span>
                         )}
                       </div>
-                      {note.detail && (
-                        <p className="notif-detail">{note.detail}</p>
-                      )}
+                      
+                        <p className="notif-detail">{note.message}</p>
+                      
                       <div className="notif-meta-row">
-                        <span className="notif-type-tag">{meta.label}</span>
+                        <span className="notif-type-tag">{note.type}</span>
                         <span className="notif-sep">·</span>
-                        <span className="time">{note.time}</span>
+                        <span className="time">{note.createAt}</span>
                       </div>
                     </div>
 
                     {/* Right */}
                     <div className="notif-right">
-                      {!note.read && <span className="dot" />}
+                      {!note.isRead && <span className="dot" />}
                       <button
                         className="notif-delete"
                         onClick={(e) => handleDelete(e, note.id)}
