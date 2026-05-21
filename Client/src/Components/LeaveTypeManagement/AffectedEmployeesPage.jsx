@@ -13,7 +13,10 @@ const AffectedEmployeesPage = () => {
 
   const [employees, setEmployees] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const employeesPerPage = 6;
+  const [itemsPerPage, setItemsPerPage] = useState(6);
+  const [showPageOptions, setShowPageOptions] = useState(false);
+
+  const pageOptions = [6, 10, 20, 50];
 
   useEffect(() => {
     if (location.state?.employees) {
@@ -39,11 +42,11 @@ const AffectedEmployeesPage = () => {
 
   const activeEmployees = groupedEmployees[activeTab] || [];
 
-  const totalPages = Math.ceil(activeEmployees.length / employeesPerPage);
+  const totalPages = Math.ceil(activeEmployees.length / itemsPerPage);
 
-  const startIndex = (currentPage - 1) * employeesPerPage;
+  const startIndex = (currentPage - 1) * itemsPerPage;
 
-  const endIndex = startIndex + employeesPerPage;
+  const endIndex = startIndex + itemsPerPage;
 
   const currentEmployees = activeEmployees.slice(startIndex, endIndex);
 
@@ -70,17 +73,17 @@ const AffectedEmployeesPage = () => {
       console.error(err);
     }
   };
-  const goToPage = (page) => {
+  const handlePageClick = (page) => {
     setCurrentPage(page);
   };
 
-  const goToPreviousPage = () => {
+  const handlePrev = () => {
     if (currentPage > 1) {
       setCurrentPage((prev) => prev - 1);
     }
   };
 
-  const goToNextPage = () => {
+  const handleNext = () => {
     if (currentPage < totalPages) {
       setCurrentPage((prev) => prev + 1);
     }
@@ -181,31 +184,98 @@ const AffectedEmployeesPage = () => {
                 ))}
               </tbody>
             </table>
-            <div className="pagination">
-              <button onClick={goToPreviousPage} disabled={currentPage === 1}>
-                {"<"}
-              </button>
+            <div className="impact-pagination-shell">
+              <div className="impact-pagination-left-section">
+                <span className="impact-pagination-range-text">
+                  <strong className="impact-pagination-range-bold">
+                    {activeEmployees.length === 0 ? 0 : startIndex + 1} -{" "}
+                    {Math.min(endIndex, activeEmployees.length)}
+                  </strong>{" "}
+                  of {activeEmployees.length}
+                </span>
 
-              {[...Array(totalPages)].map((_, index) => {
-                const pageNumber = index + 1;
+                <div
+                  className="impact-pagination-page-size-box"
+                  onClick={() => setShowPageOptions(!showPageOptions)}
+                >
+                  <span className="impact-pagination-page-size-number">
+                    {itemsPerPage}
+                  </span>
 
-                return (
-                  <button
-                    key={pageNumber}
-                    className={currentPage === pageNumber ? "active" : ""}
-                    onClick={() => goToPage(pageNumber)}
-                  >
-                    {pageNumber}
-                  </button>
-                );
-              })}
+                  <img
+                    src="/images/arrow_drop_down_circle.png"
+                    alt="Dropdown"
+                    className="impact-pagination-dropdown-icon"
+                  />
 
-              <button
-                onClick={goToNextPage}
-                disabled={currentPage === totalPages || totalPages === 0}
-              >
-                {">"}
-              </button>
+                  {showPageOptions && (
+                    <ul className="impact-pagination-dropdown-menu">
+                      {pageOptions.map((option) => (
+                        <li
+                          key={option}
+                          className="impact-pagination-dropdown-item"
+                          onClick={(e) => {
+                            e.stopPropagation();
+
+                            setItemsPerPage(option);
+                            setShowPageOptions(false);
+                            setCurrentPage(1);
+                          }}
+                        >
+                          {option}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                <span className="impact-pagination-page-size-label">
+                  Per page
+                </span>
+              </div>
+
+              <div className="impact-pagination-right-section">
+                <img
+                  src="/images/arrow_drop_down_circle.png"
+                  alt="Previous"
+                  className={`impact-pagination-arrow-button impact-pagination-arrow-prev ${
+                    currentPage === 1 ? "impact-pagination-arrow-disabled" : ""
+                  }`}
+                  onClick={handlePrev}
+                />
+
+                <div className="impact-pagination-page-number-group">
+                  {Array.from({ length: totalPages }, (_, i) => (
+                    <button
+                      key={i + 1}
+                      className={`impact-pagination-page-button ${
+                        currentPage === i + 1
+                          ? "impact-pagination-page-button-active"
+                          : ""
+                      }`}
+                      onClick={() => handlePageClick(i + 1)}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                </div>
+
+                <img
+                  src="/images/arrow_drop_down_circle.png"
+                  alt="Next"
+                  className={`impact-pagination-arrow-button impact-pagination-arrow-next ${
+                    currentPage === totalPages || totalPages === 0
+                      ? "impact-pagination-arrow-disabled"
+                      : ""
+                  }`}
+                  onClick={handleNext}
+                />
+
+                <div className="impact-pagination-total-info">
+                  {activeEmployees.length} Affected Employee
+                  {activeEmployees.length !== 1 ? "s" : ""}
+                </div>
+              </div>
             </div>
           </div>
         </div>
