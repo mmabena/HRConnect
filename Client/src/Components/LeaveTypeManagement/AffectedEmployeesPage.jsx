@@ -22,16 +22,16 @@ const AffectedEmployeesPage = () => {
   }, [location.state]);
 
   const groupedEmployees = {
+    ALL: employees,
+
     GROUP_A: employees.filter((x) => x.groupKey === "GROUP_A"),
+
     SENIOR: employees.filter((x) => x.groupKey === "SENIOR"),
+
     EXECUTIVE: employees.filter((x) => x.groupKey === "EXECUTIVE"),
   };
 
-  const [activeTab, setActiveTab] = useState(() => {
-    if (groupedEmployees.GROUP_A.length > 0) return "GROUP_A";
-    if (groupedEmployees.SENIOR.length > 0) return "SENIOR";
-    return "EXECUTIVE";
-  });
+  const [activeTab, setActiveTab] = useState("ALL");
 
   useEffect(() => {
     setCurrentPage(1);
@@ -49,6 +49,8 @@ const AffectedEmployeesPage = () => {
 
   const getTabLabel = (key) => {
     switch (key) {
+      case "ALL":
+        return "All Employees";
       case "GROUP_A":
         return "Unskilled - Middle";
       case "SENIOR":
@@ -97,6 +99,12 @@ const AffectedEmployeesPage = () => {
         <div className="lt-page-container">
           <div className="impact-top-section">
             <div className="impact-tabs">
+              <button
+                className={activeTab === "ALL" ? "active" : ""}
+                onClick={() => setActiveTab("ALL")}
+              >
+                All ({employees.length})
+              </button>
               {groupedEmployees.GROUP_A.length > 0 && (
                 <button
                   className={activeTab === "GROUP_A" ? "active" : ""}
@@ -142,7 +150,9 @@ const AffectedEmployeesPage = () => {
           </div>
 
           <div className="impact-table-wrapper">
-            <div className="impact-table-title">Employee Impact Table</div>
+            <div className="impact-table-title">
+              {getTabLabel(activeTab)} Impact Table
+            </div>
 
             <table className="impact-table">
               <thead>

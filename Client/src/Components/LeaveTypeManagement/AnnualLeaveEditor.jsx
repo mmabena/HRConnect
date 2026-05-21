@@ -5,7 +5,6 @@ import {
   previewEntitlementImpact,
 } from "../../api/leaveTypeApi";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
 
 const AnnualLeaveEditor = ({
   leaveType,
@@ -22,6 +21,7 @@ const AnnualLeaveEditor = ({
   const [errorFields, setErrorFields] = useState({});
   const [isCheckingImpact, setIsCheckingImpact] = useState(false);
   const [affectedEmployees, setAffectedEmployees] = useState([]);
+  const [lastEditedRuleKey, setLastEditedRuleKey] = useState(null);
   const navigate = useNavigate();
 
   const buildGroupedRules = () => {
@@ -41,7 +41,14 @@ const AnnualLeaveEditor = ({
         ? grouped.senior
         : grouped.executive;
 
-  const currentRules = [...baseRules, ...customRules];
+  const currentRules = [
+    ...baseRules,
+    ...customRules.filter((r) => {
+      if (activeTab === "groupA") return r.groupKey === "GROUP_A";
+      if (activeTab === "senior") return r.groupKey === "SENIOR";
+      return r.groupKey === "EXECUTIVE";
+    }),
+  ];
   const getRuleKey = (rule) => {
     return (
       rule.id ??
@@ -49,6 +56,7 @@ const AnnualLeaveEditor = ({
     );
   };
   const handleFieldChange = (ruleKey, field, value) => {
+    setLastEditedRuleKey(ruleKey);
     setEditedRules((prev) => ({
       ...prev,
       [ruleKey]: {
@@ -123,6 +131,24 @@ const AnnualLeaveEditor = ({
 
     return "Unable to save changes. Please check your inputs.";
   };
+  const validateFrontendRules = () => {
+    const payload = buildPayload();
+
+    for (const rule of payload.rules) {
+      if (rule.daysAllocated <= 0) {
+        return "Leave days must be greater than 0";
+      }
+
+      if (
+        rule.maxYearsService !== null &&
+        rule.maxYearsService < rule.minYearsService
+      ) {
+        return "Max years cannot be less than minimum years";
+      }
+    }
+
+    return null;
+  };
   const buildPayload = () => {
     const allRules = [...leaveType.rules, ...customRules];
 
@@ -155,7 +181,6 @@ const AnnualLeaveEditor = ({
         daysAllocated: Number(days.toFixed(2)),
       };
     });
-
     return {
       name: leaveType.name,
       description: leaveType.description,
@@ -179,49 +204,42 @@ const AnnualLeaveEditor = ({
         setAffectedEmployees(previewData || []);
       } catch (err) {
         console.error(err);
-        setAffectedEmployees([]);
       }
     };
 
     checkImpact();
   }, [editedRules, customRules]);
-  const impactedRule = currentRules.find((r) => {
+  const allRules = [...leaveType.rules, ...customRules];
+
+  const changedRules = allRules.filter((r) => {
     const ruleKey = getRuleKey(r);
+    const edited = editedRules[ruleKey];
+
+    if (!edited) return false;
 
     return (
-      editedRules[ruleKey]?.daysAllocated !== undefined ||
-      editedRules[ruleKey]?.minYearsService !== undefined ||
-      editedRules[ruleKey]?.maxYearsService !== undefined
+      (edited.minYearsService !== undefined &&
+        Number(edited.minYearsService) !== r.minYearsService) ||
+      (edited.maxYearsService !== undefined &&
+        Number(edited.maxYearsService) !== r.maxYearsService) ||
+      (edited.daysAllocated !== undefined &&
+        Number(edited.daysAllocated) !== r.daysAllocated)
     );
   });
 
-  const impactedRuleKey = impactedRule ? getRuleKey(impactedRule) : null;
+  const totalChangedRules = changedRules.length;
 
-  const impactedEditedValues = impactedRuleKey
-    ? editedRules[impactedRuleKey]
-    : null;
+  const changedGroups = [...new Set(changedRules.map((r) => r.groupKey))];
 
-  const previousDays = impactedRule?.daysAllocated ?? 0;
+  const formattedGroups = changedGroups.map((group) => {
+    if (group === "GROUP_A") return "Unskilled-Middle";
+    if (group === "SENIOR") return "Senior";
+    if (group === "EXECUTIVE") return "Executive";
 
-  const newDays =
-    impactedEditedValues?.daysAllocated !== undefined
-      ? impactedEditedValues.daysAllocated
-      : previousDays;
+    return group;
+  });
 
-  const minYears =
-    impactedEditedValues?.minYearsService !== undefined
-      ? impactedEditedValues.minYearsService
-      : impactedRule?.minYearsService;
-
-  const maxYears =
-    impactedEditedValues?.maxYearsService !== undefined
-      ? impactedEditedValues.maxYearsService
-      : impactedRule?.maxYearsService;
-
-  const yearsLabel =
-    maxYears !== null && maxYears !== ""
-      ? `${minYears} - ${maxYears} years`
-      : `${minYears}+ years`;
+  const shouldNavigateToAffectedEmployees = affectedEmployees.length > 0;
   return (
     <div className="annual-wrapper">
       {message && (
@@ -258,7 +276,7 @@ const AnnualLeaveEditor = ({
         </div>
 
         <div className="rule-body">
-          {currentRules.map((r, index) => {
+          {currentRules.map((r) => {
             const ruleKey = getRuleKey(r);
             const edited = editedRules[ruleKey] || {};
 
@@ -342,7 +360,7 @@ const AnnualLeaveEditor = ({
       </div>
 
       <div className="impact-box">
-        {!impactedRule ? (
+        {!hasChanges ? (
           "No changes yet"
         ) : affectedEmployees.length === 0 ? (
           <div className="impact-no-change">
@@ -351,13 +369,17 @@ const AnnualLeaveEditor = ({
         ) : (
           <>
             <div className="impact-change-line">
+              <span className="impact-change-text">You modified</span>
+
+              <span className="impact-employee-count">{totalChangedRules}</span>
+
               <span className="impact-change-text">
-                You are changing leave days from
+                rule{totalChangedRules > 1 ? "s" : ""}
               </span>
-              <span className="impact-old-days">{previousDays}</span>
-              <ArrowRight className="impact-arrow" />
-              <span className="impact-new-days">{newDays}</span>
-              for {yearsLabel}
+            </div>
+
+            <div className="impact-change-line">
+              Affected groups: {formattedGroups.join(", ")}
             </div>
 
             <div className="impact-employee-line">
@@ -365,7 +387,8 @@ const AnnualLeaveEditor = ({
               <span className="impact-employee-count">
                 {affectedEmployees.length}
               </span>{" "}
-              Employees
+              employee
+              {affectedEmployees.length > 1 ? "s" : ""}
             </div>
           </>
         )}
@@ -394,9 +417,14 @@ const AnnualLeaveEditor = ({
                 setIsCheckingImpact(true);
 
                 try {
+                  const validationError = validateFrontendRules();
+
+                  if (validationError) {
+                    showMessage(validationError, "error");
+                    return;
+                  }
                   const payload = buildPayload();
-                  await updateLeaveType(leaveType.id, payload, true);
-                  
+
                   const previewData = await previewEntitlementImpact(payload);
 
                   if (previewData.length === 0) {
@@ -439,7 +467,7 @@ const AnnualLeaveEditor = ({
                 }
               }}
             >
-              {affectedEmployees.length > 0
+              {shouldNavigateToAffectedEmployees
                 ? "Next: View Affected Employees"
                 : "Save Changes"}
             </button>

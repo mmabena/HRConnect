@@ -154,87 +154,37 @@
 .impact-box {
   border: 1px solid rgba(53, 88, 103, 0.35);
   border-radius: 8px;
-  height: 95px;
-  padding: 40px;
-  margin-top: 10px;
-  font-size: 13px;
-  color: #355867;
-  background: #f9fbfb;
-}
+  padding: 20px 24px;
+  margin-top: 16px;
 
+  background: #f9fbfb;
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
 .impact-change-line {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+  gap: 8px;
 
-  gap: 10px;
-}
-
-.impact-change-text {
   font-family: 'Instrument Sans', sans-serif;
-  font-style: normal;
-  font-weight: 500;
   font-size: 14px;
-  line-height: 26px;
-
+  font-weight: 500;
   color: #355867;
-}
-.impact-change-line {
-  margin-top: -20px;
 }
 
 .impact-employee-line {
-  margin-top: -2px;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #355867;
   text-align: left;
 }
 
-.impact-old-days {
-  font-family: 'Instrument Sans', sans-serif;
-  font-style: normal;
-  font-weight: 700;
-  font-size: 14px;
-  line-height: 26px;
-
-  color: #002D40;
-}
-
-.impact-arrow {
-  font-family: 'Instrument Sans', sans-serif;
-  font-style: normal;
-  font-weight: 700;
-  font-size: 18px;
-  line-height: 26px;
-
-  color: #355867;
-}
-
-.impact-new-days {
-  font-family: 'Instrument Sans', sans-serif;
-  font-style: normal;
-  font-weight: 700;
-  font-size: 14px;
-  line-height: 26px;
-
-  color: #002D40;
-}
-.impact-arrow {
-  width: 28px;
-  height: 20px;
-
-  color: #355867;
-
-  flex-shrink: 0;
-}
-
-.impact-employee-line {
-  margin-top: 2px;
-
-  font-family: 'Instrument Sans', sans-serif;
-  font-style: normal;
+.impact-change-text {
   font-weight: 500;
-  font-size: 14px;
-  line-height: 26px;
-
   color: #355867;
 }
 
@@ -243,11 +193,23 @@
   font-weight: 700;
 }
 
+.impact-old-days,
+.impact-new-days {
+  font-weight: 700;
+  color: #002D40;
+}
+
+.impact-arrow {
+  width: 20px;
+  height: 20px;
+  color: #355867;
+  flex-shrink: 0;
+}
+
 .impact-no-change {
   font-family: 'Instrument Sans', sans-serif;
   font-size: 14px;
   font-weight: 500;
-
   color: #355867;
 }
 
