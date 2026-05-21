@@ -65,13 +65,6 @@ namespace HRConnect.Api.Services
     public string GenerateCode(byte[] userSecret)
     {
       Totp otpCode = new(userSecret, step: _stepSeconds, OtpHashMode.Sha256);
-#line 68 "TOTPService.cs"
-      Console.ForegroundColor = ConsoleColor.Red;
-      Console.WriteLine($">>>>>>>>>[[[[[THE TIME-BASED ONE TIME PIN IS {otpCode}]]]]]]<<<<<<");
-      Console.WriteLine($">>>>>>>>>[[[[[THE TOPT Computed IS {otpCode.ComputeTotp()}]]]]]]<<<<<<");
-      Console.ResetColor();
-#line default
-
       return otpCode.ComputeTotp();
     }
     public async Task<bool> ValidateCodeAsync(int userId, byte[] userSecret, string code)
@@ -95,7 +88,6 @@ namespace HRConnect.Api.Services
 
 
       // mark this code as being used so that it cannot be reused within verification 
-      // window
       await MarkUsedCodeAsync(userId, timeStepMatched);
       return true;
     }
@@ -170,7 +162,6 @@ namespace HRConnect.Api.Services
       {
         existing.Role = (UserRole)existing.TempRole!;
 
-        //this is scratchpad and so should remain clean after use
         existing.TempRole = null;
         _ = await _userRepo.UpdateUserAsync(userId, existing);
       }

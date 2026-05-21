@@ -3,7 +3,7 @@ namespace HRConnect.Api.Interfaces.Notification
   using HRConnect.Api.DTOs.Notification;
   using HRConnect.Api.Models;
 
-  public interface INotificationService
+public interface INotificationService
   {
     Task MarkNotificationReadByTypeAsync(NotificationType type, int userId);
     Task<IEnumerable<NotificationDto>> GetEmployeeNotificationsAsync(int userId);
@@ -18,6 +18,7 @@ namespace HRConnect.Api.Interfaces.Notification
       NotificationType type,
       int userId
     );
+
     Task TryCreateAndDispatch(Notification notification);
     Task<bool> DeleteAllReadAsync();
     Task<bool> DeleteAllByEmployeeIdAsync(int userId);

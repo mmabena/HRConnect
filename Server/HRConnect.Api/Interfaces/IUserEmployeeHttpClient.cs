@@ -4,6 +4,6 @@ namespace HRConnect.Api.Interfaces
 
   public interface IUserEmployeeHttpClient
   {
-    Task<string> ResolveEmployeeIdFromUserIdAsync(int userId);
+    Task<string> ResolveEmployeeFromUserIdAsync(int userId);
   }
 }

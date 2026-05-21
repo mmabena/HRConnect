@@ -15,21 +15,24 @@ namespace HRConnect.Api.Services
     private readonly INotificationRepository _notificationRepository;
     private readonly INotificationDispatcher _notificationDispatcher;
     private readonly IUserEmployeeHttpClient _userHttpClient;
+    private readonly IEmployeeService _employeeService;
     public NotificationService(
       INotificationRepository notificationRepository,
       INotificationDispatcher notificationDispatcher,
-      IUserEmployeeHttpClient userHttpClient
+      IUserEmployeeHttpClient userHttpClient,
+IEmployeeService employeeService
     )
     {
       _notificationRepository = notificationRepository;
       _notificationDispatcher = notificationDispatcher;
       _userHttpClient = userHttpClient;
+      _employeeService=employeeService;
+
     }
 
     public async Task<IEnumerable<NotificationDto>> GetEmployeeNotificationsAsync(int userId)
     {
-
-      string employeeId = await _userHttpClient.ResolveEmployeeIdFromUserIdAsync(userId);
+      string employeeId = await ResolveEmployeeId(userId);
       IEnumerable<Notification> notifications =
         await _notificationRepository.GetEmployeeNotificationsAsync(employeeId);
       return notifications.Select(n => n.ToNotificationDto());
@@ -40,8 +43,7 @@ namespace HRConnect.Api.Services
      int userId
     )
     {
-
-      string employeeId = await _userHttpClient.ResolveEmployeeIdFromUserIdAsync(userId);
+      string employeeId = await ResolveEmployeeId(userId);
       IEnumerable<Notification> notifications =
         await _notificationRepository.GetAllEmployeeNotificationsByTypeAsync(type, employeeId);
 
@@ -53,8 +55,7 @@ namespace HRConnect.Api.Services
     int userId
     )
     {
-
-      string employeeId = await _userHttpClient.ResolveEmployeeIdFromUserIdAsync(userId);
+      string employeeId = await ResolveEmployeeId(userId);
       IEnumerable<Notification> notifications =
         await _notificationRepository.GetAllEmployeeNotificationsBySeverityAsync(
           employeeId,
@@ -74,8 +75,7 @@ namespace HRConnect.Api.Services
 
     public async Task MarkNotificationReadByTypeAsync(NotificationType type, int userId)
     {
-
-      string employeeId = await _userHttpClient.ResolveEmployeeIdFromUserIdAsync(userId);
+      string employeeId = await ResolveEmployeeId(userId);
       IEnumerable<Notification> notification =
         await _notificationRepository.GetAllEmployeeNotificationsByTypeAsync(type, employeeId);
 
@@ -183,14 +183,13 @@ namespace HRConnect.Api.Services
 
     public async Task<bool> DeleteAllByEmployeeIdAsync(int userId)
     {
-
-      string employeeId = await _userHttpClient.ResolveEmployeeIdFromUserIdAsync(userId);
+      string employeeId = await ResolveEmployeeId(userId);
       return await _notificationRepository.DeleteAllByEmployeeId(employeeId);
     }
 
     public async Task<bool> DeleteNotificationByIdAsync(int userId, int id)
     {
-      string employeeId = await _userHttpClient.ResolveEmployeeIdFromUserIdAsync(userId);
+      string employeeId = await ResolveEmployeeId(userId);
 
       var deletedEntry = await _notificationRepository.DeleteNotificationByIdAsync(employeeId, id);
       if (!deletedEntry)
@@ -199,23 +198,12 @@ namespace HRConnect.Api.Services
       return true;
     }
 
-    // public async Task<string> ResolveEmployeeIdFromUserIdAsync(int userId)
-    // {
-    //   try
-    //   {
-    //     User? user = await _httpClient.GetFromJsonAsync<User>($"users/{userId}") ??
-    //      throw new KeyNotFoundException($"User Not Found: ");
-
-    //     EmployeeDto employee = await _httpClient.GetFromJsonAsync<EmployeeDto>($"employee/email/{user.Email}") ??
-    //        throw new KeyNotFoundException($"User Not Found: ");
-
-    //     return employee.EmployeeId;
-    //   }
-
-    //   catch (InvalidDataException ex)
-    //   {
-    //     throw new InvalidDataException($"No Employee Exists For This User: {ex?.Message}");
-    //   }
-    // }
+    private async Task<string> ResolveEmployeeId(int userId)
+    {
+      var userEmail = await _userHttpClient.ResolveEmployeeFromUserIdAsync(userId);
+      var employee = await _employeeService.GetEmployeeByEmailAsync(userEmail);
+      if(employee == null) return string.Empty;
+      return employee.EmployeeId;
+    }
   }
 }

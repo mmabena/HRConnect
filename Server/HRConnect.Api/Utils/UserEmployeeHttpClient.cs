@@ -2,8 +2,7 @@ namespace HRConnect.Api.Utils
 {
   using System.Collections.Generic;
   using HRConnect.Api.Interfaces;
-  using HRConnect.Api.Models;
-  using HRConnect.Api.DTOs.Employee;
+  using HRConnect.Api.DTOs.User;
   using System.Threading.Tasks;
   using System.Net.Http.Json;
   using System.Text.Json;
@@ -16,7 +15,7 @@ namespace HRConnect.Api.Utils
     {
       _httpClient = httpClient;
     }
-    public async Task<string> ResolveEmployeeIdFromUserIdAsync(int userId)
+    public async Task<string> ResolveEmployeeFromUserIdAsync(int userId)
     {
       try
       {
@@ -29,7 +28,7 @@ namespace HRConnect.Api.Utils
           throw new KeyNotFoundException($"User with ID {userId} not found.");
         }
 
-        User? user = await userResponse.Content.ReadFromJsonAsync<User>();
+        UserRegisterDto? user = await userResponse.Content.ReadFromJsonAsync<UserRegisterDto>();
         if (user == null)
         {
           throw new KeyNotFoundException($"User with ID {userId} not found.");
@@ -38,21 +37,21 @@ namespace HRConnect.Api.Utils
         Console.WriteLine($">>>>>>>>>>>>>>USER STUFF {user?.Email}");
 
         // Fetch employee by email
-        var employeeResponse = await _httpClient.GetAsync($"employee/email/{user.Email}");
-        Console.WriteLine($"Status Code for employee/email/{user.Email}: {employeeResponse.StatusCode}");
+        // var employeeResponse = await _httpClient.GetAsync($"employee/email/{user!.Email}");
+        // Console.WriteLine($"========================Status Code for employee/email/{user!.Email}: {employeeResponse.StatusCode}");
 
-        if (employeeResponse.StatusCode == System.Net.HttpStatusCode.NotFound)
-        {
-          throw new KeyNotFoundException($"Employee not found for User ID {userId}.");
-        }
+        // if (employeeResponse.StatusCode == System.Net.HttpStatusCode.NotFound)
+        // {
+        //   throw new KeyNotFoundException($"Employee not found for User ID {userId}.");
+        // }
 
-        EmployeeDto? employee = await employeeResponse.Content.ReadFromJsonAsync<EmployeeDto>();
-        if (employee == null)
-        {
-          throw new KeyNotFoundException($"Employee not found for User ID {userId}.");
-        }
+        // EmployeeDto? employee = await employeeResponse.Content.ReadFromJsonAsync<EmployeeDto>();
+        // if (employee == null)
+        // {
+        //   throw new KeyNotFoundException($"Employee not found for User ID {userId}.");
+        // }
 
-        return employee.EmployeeId ?? string.Empty;
+        return user.Email ?? "";
       }
       catch (JsonException ex)
       {
