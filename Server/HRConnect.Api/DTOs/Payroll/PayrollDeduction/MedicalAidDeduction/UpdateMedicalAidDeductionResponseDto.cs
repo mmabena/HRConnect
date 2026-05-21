@@ -4,10 +4,10 @@
   {
     public int Id { get; set; }
     public int PayrollRunId { get; set; }
-    public string EmployeeId { get; set; }
-    public string Name { get; set; }
-    public string Surname { get; set; }
-    public string Branch { get; set; }
+    public string EmployeeId { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string Surname { get; set; } = string.Empty;
+    public string Branch { get; set; } = string.Empty;
     public decimal Salary { get; set; }
     public DateTime EmployeeStartDate { get; set; }
     // This is the Medical Start Date
@@ -15,9 +15,9 @@
     // this is the end date of the medical aid (caters for the event when the member changes plans or terminates their medical aid)
     public DateTime? TerminationDate { get; set; }
     public int MedicalOptionId { get; set; }
-    public string OptionName { get; set; }
+    public string OptionName { get; set; } = string.Empty;
     public int MedicalCategoryId { get; set; }
-    public string OptionCategoryName { get; set; }
+    public string OptionCategoryName { get; set; } = string.Empty;
     // Number of Deps
     public int PrincipalCount { get; set; }
     public int AdultCount { get; set; }

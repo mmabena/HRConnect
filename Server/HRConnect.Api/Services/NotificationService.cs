@@ -20,6 +20,12 @@ namespace HRConnect.Api.Services
 
       return notifications;
     }
+
+    public async Task MarkBatchedNotificationsReadByTypeAsync(NotificationType type, List<string> employeeIds)
+    {
+      await _notificationRepository.MarkBatchAsReadAsync(employeeIds, type);
+    }
+
     public async Task<IEnumerable<NotificationDto>> GetAllEmployeeNotificationsBySeverityAsync(NotificationSeverity severity, string employeeId)
     {
       var notifications = await _notificationRepository.GetAllEmployeeNotificationsBySeverityAsync(employeeId, severity);
