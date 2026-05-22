@@ -10,7 +10,9 @@ namespace HRConnect.Api.Services
   using HRConnect.Api.Interfaces.Notification;
   using HRConnect.Api.Mappers.Notification;
   using HRConnect.Api.Models;
+  using HRConnect.Api.Utils.Hubs;
   using HRConnect.Api.Utils.Notification;
+  using Microsoft.AspNetCore.SignalR;
 
   public class NotificationService : INotificationService
   {
@@ -18,18 +20,20 @@ namespace HRConnect.Api.Services
     private readonly INotificationDispatcher _notificationDispatcher;
     private readonly IUserHttpClient _userHttpClient;
     private readonly IEmployeeService _employeeService;
+    // private readonly IHubContext<UserRoleHub>_hubContext;
     public NotificationService(
       INotificationRepository notificationRepository,
       INotificationDispatcher notificationDispatcher,
       IUserHttpClient userHttpClient,
       IEmployeeService employeeService
+      // IHubContext<UserRoleHub> hubContext
     )
     {
       _notificationRepository = notificationRepository;
       _notificationDispatcher = notificationDispatcher;
       _userHttpClient = userHttpClient;
       _employeeService = employeeService;
-
+      // _hubContext = hubContext
     }
 
     public async Task<IEnumerable<NotificationDto>> GetEmployeeNotificationsAsync(int userId)
@@ -100,16 +104,22 @@ namespace HRConnect.Api.Services
     public async Task TryCreateAndDispatch(Notification notification)
     {
       BuildIdempotencyKey(notification);
+
       bool isPersistent = NotificationsRules.ShouldPersist(notification.Severity);
+      bool isWarning = NotificationsRules.RequiresAction(notification.Type);
       Notification? created = null;
 
       if (isPersistent)
       {
         created = await _notificationRepository.TryCreateUnreadAsync(notification);
       }
-      else
+      else if (isWarning)
       {
-        _ = await _notificationRepository.AddNotificationAsync(notification);
+// #line 115 "(===================>NotificationService.cs)"
+//         Console.ForegroundColor = ConsoleColor.Blue;
+//         Console.WriteLine($"SHOULD update this notification");
+//         created = await _notificationRepository.AddNotificationAsync(notification);
+// #line default 
       }
 
       if (created != null)

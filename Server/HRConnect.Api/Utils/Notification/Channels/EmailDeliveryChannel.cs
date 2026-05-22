@@ -28,7 +28,7 @@ namespace HRConnect.Api.Utils.Notification.Channels
       {
         Console.ForegroundColor = ConsoleColor.Cyan;
 
-        await _emailService.SendEmailAsync(employeeDto.Email, notification.Subject, notification.Message);
+        // await _emailService.SendEmailAsync(employeeDto.Email, notification.Subject, notification.Message);
 
 #line 33 "EmailDeliverySerivce.cs"
         Console.WriteLine($"SENT EMAIL TO ${notification.EmployeeId}:{employeeDto.Email} SAYING {notification.Message}");

@@ -10,7 +10,8 @@ namespace HRConnect.Api.Services
   using HRConnect.Api.DTOs.Notification;
   using HRConnect.Api.Interfaces.Notification;
   using System.Threading.Tasks;
-
+  using HRConnect.Api.Utils.Hubs;
+  using Microsoft.AspNetCore.SignalR;
   /// <remarks>
   /// * IUserRepository has been injected as a dependency to. 
   /// * This is done to avoid circular dependency injection.
@@ -29,7 +30,8 @@ namespace HRConnect.Api.Services
     private readonly int _stepSeconds;
     public TOTPService(ITOTPRepository totpRepo, IUserRepository userRepo,
     IMFAUserSecretsService mfaService, IEmployeeService employeeService,
-     INotificationFactory notiFactory, IConfiguration configuration)
+     INotificationFactory notiFactory, IConfiguration configuration,
+     )
     {
       _totpRepo = totpRepo;
       _employeeService = employeeService;
@@ -175,6 +177,7 @@ namespace HRConnect.Api.Services
       {
         existing.Role = (UserRole)existing.TempRole!;
         _ = await _userRepo.UpdateUserAsync(userId, existing);
+
       }
     }
   }
