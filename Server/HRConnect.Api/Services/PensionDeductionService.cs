@@ -98,8 +98,14 @@ namespace HRConnect.Api.Services
       PensionDeduction? employeePensionDeduction = await _pensionDeductionRepository
         .GetByEmployeeIdAndIsNotLockedAsync(pensionDeductionUpdateDto.EmployeeId);
 
+      if (existingEmployee.PensionOptionId == null)
+      {
+        throw new InvalidOperationException("Employee has no pension option assigned.");
+      }
+
       decimal pensionOptionPercentage = await
-        GetEmployeePensionOptionPercentageAsync(pensionDeductionUpdateDto.PensionOptionId ?? (int)existingEmployee.PensionOptionId!); ValidatePensionDeductionDtos.ValidateVoluntaryContribution((decimal)pensionDeductionUpdateDto.VoluntaryContribution!, existingEmployee.MonthlySalary, pensionOptionPercentage);
+        GetEmployeePensionOptionPercentageAsync(pensionDeductionUpdateDto.PensionOptionId ?? (int)existingEmployee.PensionOptionId);
+      ValidatePensionDeductionDtos.ValidateVoluntaryContribution(pensionDeductionUpdateDto.VoluntaryContribution ?? 0, existingEmployee.MonthlySalary, pensionOptionPercentage);
 
       if (employeePensionDeduction != null)
       {
@@ -200,7 +206,7 @@ namespace HRConnect.Api.Services
 
       if (existingEmployee != null)
       {
-        PayrollRun? currentPayrollRunId = await _payrollRunRepository.GetCurrentRunAsync();
+        PayrollRun? currentPayrollRunId = await _payrollRunRepository.GetCurrentRunAsync() ?? throw new NotFoundException("Current payroll run not found");
 
         PensionDeduction employeesPensionDeduction = new()
         {
@@ -208,7 +214,7 @@ namespace HRConnect.Api.Services
           FirstName = existingEmployee.Name,
           LastName = existingEmployee.Surname,
           DateJoinedCompany = existingEmployee.StartDate,
-          IdNumber = existingEmployee.IdNumber!,
+          IdNumber = existingEmployee.IdNumber ?? "",
           Passport = existingEmployee.PassportNumber,
           TaxNumber = existingEmployee.TaxNumber,
           PensionableSalary = existingEmployee.MonthlySalary,
@@ -272,7 +278,7 @@ namespace HRConnect.Api.Services
       foreach (EmployeePensionEnrollment enrollment in employeePensionEnrollments)
       {
         Employee? employee = await _employeeRepository.GetEmployeeByIdAsync(enrollment.EmployeeId);
-        if (employee != null && employee.IsActive)
+        if (employee != null && employee.PensionOptionId != null && employee.IsActive)
         {
           decimal pensionCategoryPercentage = await _pensionOptionRepository.GetPensionOptionPercentageByIdAsync((int)employee.PensionOptionId!);
 
@@ -282,7 +288,7 @@ namespace HRConnect.Api.Services
             FirstName = employee.Name,
             LastName = employee.Surname,
             DateJoinedCompany = employee.StartDate,
-            IdNumber = employee.IdNumber!,
+            IdNumber = employee.IdNumber ?? "",
             Passport = employee.PassportNumber,
             TaxNumber = employee.TaxNumber,
             PensionableSalary = employee.MonthlySalary,

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./LeaveTypesModal.css";
-import { ArrowRight, ArrowLeft } from "lucide-react";
+import { ArrowRight, ArrowLeft, check } from "lucide-react";
 import { getJobGradeGroups } from "../../../api/JobGradeGroup";
 
 const LeaveTypesModal = ({
@@ -208,13 +208,12 @@ const LeaveTypesModal = ({
 ========================= */}
         {(isContract || isFixedTerm) && (
           <>
-          <div className="leave-options-non-permanent">
-            <div className="leave-info-banner">
-              Fixed-term and contract employees receive predefined leave
-              allocations for the duration of employment.
-            </div>
+            <div className="leave-options-non-permanent">
+              <div className="leave-info-banner">
+                Fixed-term and contract employees receive predefined leave
+                allocations for the duration of employment.
+              </div>
 
-            
               {/* FIXED-TERM CARD */}
               <div
                 className={`leave-card-non-permanent ${isFixedTerm ? "active" : ""}`}

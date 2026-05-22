@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import "./AddEmployeeModal.css";
 import BankingDetailsModal from "../../Components/Steps/BankingManagement/BankingDetailsModal.jsx";
 import LeaveTypesModal from "../Steps/LeaveType/LeaveTypesModal.jsx";
+import PreviewModal from "../Steps/Preview/PreviewModal.jsx";
 import PensionFundOptionsModal from "../Steps/PensionFundOptions/PensionFundOptionsModal.jsx";
 
 import { addEmployee } from "../../api/Employee";
@@ -888,6 +889,16 @@ const AddEmployeeModal = ({ closeModal }) => {
                   onBack={prevStep}
                 />
               )}
+
+              {
+                currentStepLabel === "Preview" && (
+                  <PreviewModal
+                    employee={employee}
+                    onBack={prevStep}
+                    onSave={handleSave}
+                  />
+                )
+              }
 
             </div>
           </div>

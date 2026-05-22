@@ -5,12 +5,12 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
   using HRConnect.Api.Interfaces.Pension;
   using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Models.PayrollDeduction;
-  using HRConnect.Api.Models.Pension;
   using Microsoft.Extensions.DependencyInjection;
   using Microsoft.EntityFrameworkCore;
-  using HRConnect.Api.Services;
   using HRConnect.Api.Utils;
   using HRConnect.Api.Data;
+  using HRConnect.Api.Interfaces.Payroll.Earning;
+  using HRConnect.Api.Interfaces.Payroll.Deduction;
 
   /// <summary>
   /// Payroll Rollover Job class to handle the locking, rolling over and 
@@ -32,6 +32,8 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
     private readonly IPayrollPeriodService _payrollPeriodService;
     private readonly IPayrollRunRepository _payrollRunRepo;
     private readonly IEmployeePensionEnrollmentService _employeePensionEnrollmentService;
+    private readonly IEmployeePayrollEarningService _employeePayrollEarningService;
+    private readonly IEmployeeDeductionService _employeeDeductionService;
     private readonly IServiceProvider _serviceProvider;
     private readonly IReportsService _reportsService;
     private readonly IBankingDetailService _bankingDetailService;
@@ -42,7 +44,8 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
     private readonly Func<DateTime> _now;
     public PayrollRolloverJob(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService, IServiceProvider serviceProvider,
       IEmployeePensionEnrollmentService employeePensionEnrollmentService,
-      IReportsService reportsService, IBankingDetailService bankingDetailService, ApplicationDBContext context, Func<DateTime>? now = null)
+      IReportsService reportsService, IBankingDetailService bankingDetailService, IEmployeePayrollEarningService employeePayrollEarningService,
+      IEmployeeDeductionService employeeDeductionService, ApplicationDBContext context, Func<DateTime> now = null)
     {
       _payrollRunRepo = payrollRunRepo;
       _payrollPeriodService = payrollPeriodService;
@@ -52,6 +55,8 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
       _serviceProvider = serviceProvider;
       _employeePensionEnrollmentService = employeePensionEnrollmentService;
       _bankingDetailService = bankingDetailService;
+      _employeePayrollEarningService = employeePayrollEarningService;
+      _employeeDeductionService = employeeDeductionService;
     }
     /// <summary>
     /// Rolls over to a new period <see cref="PayrollPeriod"/> and creates and new valid payroll run <see cref="PayrollRun"/>  
@@ -111,6 +116,8 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
     public async Task Execute(IJobExecutionContext context)
     {
       await _employeePensionEnrollmentService.LockEmployeePensionEnrollmentsAsync();
+      await _employeePayrollEarningService.LockEmployeePayrollEarningsAsync();
+      await _employeeDeductionService.LockEmployeeDeductionsAsync();
       DateTime currentDate = DateTime.Now;
       int runId = ((currentDate.Month + 8) % 12) + 1;
 
@@ -199,6 +206,8 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
       }
 
       await _employeePensionEnrollmentService.RollOverEmloyeePensionEnrollmentAsync();
+      await _employeePayrollEarningService.RollOverEmployeePayrollEarningsAsync();
+      await _employeeDeductionService.RollOverEmployeePayrollEarningsAsync();
       await RolloverPayrollDeductions();
     }
 

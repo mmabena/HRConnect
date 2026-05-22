@@ -34,6 +34,7 @@ import ChangePositionManagement from "./Components/companyManagement/PositionMan
 import LeaveTables from "./Components/LeaveTypeManagement/LeaveTables";
 import { resolveRole } from "./utils/roleUtils.js";
 import BankingDetailsModal from "./Components/Steps/BankingManagement/BankingDetailsModal.jsx";
+import HomePage from "./Pages/HomePage/HomePage.jsx";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
@@ -93,14 +94,14 @@ function App() {
   };
 
   const handleBackToLogin = () => {
-    navigate("/");
+    navigate("/login");
   };
 
   const handleLogout = () => {
     localStorage.removeItem("currentUser");
     setCurrentUser(null);
     setIsLoggedIn(false);
-    navigate("/");
+    navigate("/login");
   };
 
   // FIXED: Use backend user object directly
@@ -152,6 +153,12 @@ function App() {
         <Routes>
           <Route
             path="/"
+            element= {
+              <HomePage />
+            }
+          />
+          <Route
+            path="/login"
             element={
               <SignIn
                 onForgotPasswordClick={handleForgotPasswordClick}
@@ -176,6 +183,7 @@ function App() {
       <div>
         <ToastContainer position="top-right" autoClose={3000} />
         <Routes>
+          <Route path="/" element={<HomePage />} />
           <Route path="/dashboard" element={<div>Welcome to Dashboard</div>} />
           <Route path="/addEmployee" element={<AddEmployee />} />
           <Route path="/addEmployeeModal" element={<AddEmployeeModal />} />
