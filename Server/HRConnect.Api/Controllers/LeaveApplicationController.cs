@@ -2,9 +2,9 @@ namespace HRConnect.Api.Controllers
 {
     using System;
     using System.Threading.Tasks;
-    using Microsoft.AspNetCore.Mvc;
     using HRConnect.Api.DTOs;
     using HRConnect.Api.Interfaces;
+    using Microsoft.AspNetCore.Mvc;
 
     [ApiController]
     [Route("api/[controller]")]

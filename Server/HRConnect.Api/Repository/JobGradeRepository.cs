@@ -1,11 +1,11 @@
 namespace HRConnect.Api.Repository
 {
-    using HRConnect.Api.Interfaces;
-    using HRConnect.Api.Models;
-    using HRConnect.Api.Data;
-    using Microsoft.EntityFrameworkCore;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using HRConnect.Api.Data;
+    using HRConnect.Api.Interfaces;
+    using HRConnect.Api.Models;
+    using Microsoft.EntityFrameworkCore;
     public class JobGradeRepository : IJobGradeRepository
     {
         private readonly ApplicationDBContext _context;

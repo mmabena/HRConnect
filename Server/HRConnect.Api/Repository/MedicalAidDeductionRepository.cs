@@ -1,3 +1,4 @@
+#pragma warning disable CS0472 // The result of the expression is always the same since a value of this type is never equal to 'null'
 namespace HRConnect.Api.Repository
 {
   using HRConnect.Api.Data;
@@ -33,8 +34,10 @@ namespace HRConnect.Api.Repository
       return await _context.MedicalAidDeductions
         .AsNoTracking()
         .Include(p => p.PayrollRun)
-        .Where(p => p.EmployeeId == employeeId && p.PayrollRun.PayrollRunId != null &&
-        !p.PayrollRun.IsFinalised && !p.PayrollRun.IsLocked)
+        .Where(p => p.EmployeeId == employeeId &&
+                    p.PayrollRun != null &&
+                    p.PayrollRun.PayrollRunId != null &&
+                    !p.PayrollRun.IsFinalised && !p.PayrollRun.IsLocked)
         .ToListAsync();
     }
 
@@ -47,7 +50,7 @@ namespace HRConnect.Api.Repository
       return await _context.MedicalAidDeductions
         .AsNoTracking()
         .Include(p => p.PayrollRun)
-        .Where(p => p.Id != null && p.PayrollRun.PayrollRunId != null &&
+        .Where(p => p.Id != null && p.PayrollRun!.PayrollRunId != null &&
         !p.PayrollRun.IsFinalised && !p.PayrollRun.IsLocked)
         .ToListAsync();
     }

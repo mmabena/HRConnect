@@ -1,11 +1,12 @@
+#pragma warning disable CS8634 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match 'class' constraint.
 namespace HRConnect.Api.Services
 {
     using HRConnect.Api.Data;
     using HRConnect.Api.DTOs;
     using HRConnect.Api.Interfaces;
     using HRConnect.Api.Models;
-    using Microsoft.EntityFrameworkCore;
     using HRConnect.Api.Utils;
+    using Microsoft.EntityFrameworkCore;
 
     public class LeaveBalanceService : ILeaveBalanceService
     {
@@ -56,7 +57,7 @@ namespace HRConnect.Api.Services
                     var rule = await _context.LeaveEntitlementRules
                         .Where(r =>
                             r.LeaveTypeId == leaveType.Id &&
-                            r.JobGradeId == employee.Position.JobGradeId &&
+                            r.JobGradeId == employee.Position!.JobGradeId &&
                             r.MinYearsService <= yearsOfService &&
                             (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
                             r.IsActive)
@@ -215,7 +216,7 @@ namespace HRConnect.Api.Services
             var employee = await _context.Employees
                 .Include(e => e.LeaveBalances)
                 .Include(e => e.Position)
-                    .ThenInclude(p => p.JobGrade)
+                    .ThenInclude(p => p!.JobGrade)
                 .FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
 
             if (employee == null)
@@ -670,7 +671,7 @@ namespace HRConnect.Api.Services
             var rule = await _context.LeaveEntitlementRules
                 .Where(r =>
                 r.LeaveTypeId == annualLeave.Id &&
-                r.JobGradeId == employee.Position.JobGradeId &&
+                r.JobGradeId == employee.Position!.JobGradeId &&
                 r.MinYearsService <= yearsOfService &&
                 (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
                 r.IsActive)
@@ -682,7 +683,7 @@ namespace HRConnect.Api.Services
                 .LoadAsync();
 
             await _context.Entry(employee.Position)
-                .Reference(p => p.JobGrade)
+                .Reference(p => p!.JobGrade)
                 .LoadAsync();
 
             await _context.EmployeeAccrualRateHistories.AddAsync(
@@ -690,7 +691,7 @@ namespace HRConnect.Api.Services
                 {
                     EmployeeId = employee.EmployeeId,
                     PositionId = employee.PositionId,
-                    PositionName = employee.Position.PositionTitle,
+                    PositionName = employee.Position!.PositionTitle,
                     AnnualEntitlement = rule.DaysAllocated,
                     DailyRate = (rule.DaysAllocated / 12m) / 21.67m,
                     EffectiveFrom = employee.StartDate,

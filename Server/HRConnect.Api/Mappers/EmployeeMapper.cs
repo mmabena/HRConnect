@@ -4,8 +4,8 @@ namespace HRConnect.Api.Mappers
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using HRConnect.Api.Models;
     using HRConnect.Api.DTOs.Employee;
+    using HRConnect.Api.Models;
     public static class EmployeeMapper
     {
         public static EmployeeDto ToEmployeeDto(this Employee employeeModel)
@@ -16,8 +16,8 @@ namespace HRConnect.Api.Mappers
                 Title = employeeModel.Title,
                 Name = employeeModel.Name,
                 Surname = employeeModel.Surname,
-                IdNumber = employeeModel.IdNumber,
-                PassportNumber = employeeModel.PassportNumber,
+                IdNumber = employeeModel.IdNumber!,
+                PassportNumber = employeeModel.PassportNumber!,
                 Nationality = employeeModel.Nationality,
                 Gender = employeeModel.Gender,
                 ContactNumber = employeeModel.ContactNumber,
@@ -36,8 +36,8 @@ namespace HRConnect.Api.Mappers
                 PositionTitle = employeeModel.Position != null
                 ? employeeModel.Position.PositionTitle : null,
                 EmploymentStatus = employeeModel.EmploymentStatus,
-                CareerManagerID = employeeModel.CareerManagerID,
-                ProfileImage = employeeModel.ProfileImage,
+                CareerManagerID = employeeModel.CareerManagerID!,
+                ProfileImage = employeeModel.ProfileImage!,
                 CreatedAt = employeeModel.CreatedAt,
                 UpdatedAt = employeeModel.UpdatedAt,
                 IsActive = employeeModel.IsActive,

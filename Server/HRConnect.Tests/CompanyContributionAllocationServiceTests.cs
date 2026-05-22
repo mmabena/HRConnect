@@ -1,18 +1,18 @@
 namespace HRConnect.Tests
 {
-    using Xunit;
-    using Moq;
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using System.Collections.Generic;
-    using Microsoft.EntityFrameworkCore;
-    using HRConnect.Api.Services;
     using HRConnect.Api.Data;
-    using HRConnect.Api.Models;
-    using HRConnect.Api.Models.Payroll;
-    using HRConnect.Api.Models.CompanyContributions;
     using HRConnect.Api.Interfaces;
+    using HRConnect.Api.Models;
+    using HRConnect.Api.Models.CompanyContributions;
+    using HRConnect.Api.Models.Payroll;
+    using HRConnect.Api.Services;
+    using Microsoft.EntityFrameworkCore;
+    using Moq;
+    using Xunit;
 
     public class CompanyContributionAllocationServiceTests : IDisposable
     {

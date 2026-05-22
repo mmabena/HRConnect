@@ -59,7 +59,7 @@ namespace HRConnect.Api.Services
       var createdContribution = await _companyContributionRepo.CreateCompanyContributionAsync(
         companyContributionModel
       );
-      return createdContribution?.ToCompanyContributionDto();
+      return createdContribution?.ToCompanyContributionDto()!;
     }
 
     /// <summary>
@@ -74,7 +74,7 @@ namespace HRConnect.Api.Services
       var updatedContribution = await _companyContributionRepo.UpdateCompanyContributionAsync(
         companyContributionModel
       );
-      return updatedContribution.ToCompanyContributionDto();
+      return updatedContribution!.ToCompanyContributionDto();
     }
 
     /// <summary>

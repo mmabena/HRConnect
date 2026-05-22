@@ -145,7 +145,7 @@ namespace HRConnect.Api.Services
         .ValidateAllCategoryVariantsComprehensiveAsync(
         categoryId, bulkUpdateDto, _medicalOptionRepository, dbData.Select(dto => new MedicalOption
         {
-          MedicalOptionId = dto.MedicalOptionId,
+          MedicalOptionId = dto!.MedicalOptionId,
           MedicalOptionName = dto.MedicalOptionName,
           MedicalOptionCategoryId = dto.MedicalOptionCategoryId,
           SalaryBracketMin = dto.SalaryBracketMin,
@@ -302,7 +302,7 @@ namespace HRConnect.Api.Services
         createOptionsPayload,
         _medicalOptionRepository,
         categoryInfo,
-        existingOptions,
+        existingOptions!,
         testDate ?? DateTime.Now);
       if (!validationResult.IsValid)
       {

@@ -3,9 +3,9 @@
   public class TerminateMedicalAidDeductionResponseDto
   {
     public int Id { get; set; }
-    public string EmployeeId {get; set; }
+    public string EmployeeId {get; set; } = string.Empty;
     public int MedicalOptionId { get; set; }
-    public string OptionName { get; set; }
+    public string OptionName { get; set; }  = string.Empty;
     
     //Before Termination
     public int PreviousPrincipalCount { get; set; }

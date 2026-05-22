@@ -1,10 +1,10 @@
 namespace HRConnect.Api.Repository
 {
-  using HRConnect.Api.Interfaces.Notification;
-  using HRConnect.Api.Models;
   using HRConnect.Api.Data;
-  using HRConnect.Api.Mappers.Notification;
   using HRConnect.Api.DTOs.Notification;
+  using HRConnect.Api.Interfaces.Notification;
+  using HRConnect.Api.Mappers.Notification;
+  using HRConnect.Api.Models;
   using Microsoft.EntityFrameworkCore;
 
   public class NotificationRepository : INotificationRepository

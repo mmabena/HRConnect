@@ -1,16 +1,16 @@
 namespace HRConnect.Tests
 {
-  using Moq;
-  using HRConnect.Api.Models.Payroll;
+  using System;
   using HRConnect.Api.Interfaces;
-  using HRConnect.Api.Utils.Jobs.Payroll;
+  using HRConnect.Api.Interfaces.Notification;
+  using HRConnect.Api.Interfaces.Payroll.Deduction;
   using HRConnect.Api.Interfaces.Payroll.Earning;
   using HRConnect.Api.Interfaces.Pension;
-  using HRConnect.Api.Interfaces.Payroll.Deduction;
-  using HRConnect.Api.Interfaces.Notification;
-  using System;
-  using Microsoft.Extensions.DependencyInjection;
+  using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Models.PayrollDeduction;
+  using HRConnect.Api.Utils.Jobs.Payroll;
+  using Microsoft.Extensions.DependencyInjection;
+  using Moq;
 
   public class PayrollTests
   {

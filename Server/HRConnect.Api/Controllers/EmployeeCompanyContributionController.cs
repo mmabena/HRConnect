@@ -1,9 +1,9 @@
 namespace HRConnect.Api.Controllers
 {
-    using Microsoft.AspNetCore.Mvc;
-    using HRConnect.Api.Services;
-    using HRConnect.Api.Models.CompanyContributions;
     using HRConnect.Api.Interfaces;
+    using HRConnect.Api.Models.CompanyContributions;
+    using HRConnect.Api.Services;
+    using Microsoft.AspNetCore.Mvc;
 
     [Route("api/employeeCompanyContribution")]
     [ApiController]

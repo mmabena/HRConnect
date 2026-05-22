@@ -1,11 +1,11 @@
 namespace HRConnect.Api.Utils.Jobs.Notification
 {
   using global::Quartz;
+  using HRConnect.Api.Data;
+  using HRConnect.Api.DTOs.Notification;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Interfaces.Notification;
   using HRConnect.Api.Models;
-  using HRConnect.Api.DTOs.Notification;
-  using HRConnect.Api.Data;
 
   // Prevent multiple of these jobs from running concurrently
   [DisallowConcurrentExecution]

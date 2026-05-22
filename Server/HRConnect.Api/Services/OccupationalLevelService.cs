@@ -1,15 +1,15 @@
 namespace HRConnect.Api.Services
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
     using HRConnect.Api.DTOs.OccupationalLevel;
     using HRConnect.Api.Interfaces;
     using HRConnect.Api.Mappers;
     using HRConnect.Api.Models;
     using HRConnect.Api.Utils;
     using Microsoft.EntityFrameworkCore;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
 
     public class OccupationalLevelService : IOccupationalLevelService
     {

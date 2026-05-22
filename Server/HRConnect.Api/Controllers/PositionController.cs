@@ -1,11 +1,11 @@
 namespace HRConnect.Api.Controllers
 {
   using System.Collections.Generic;
-  using Microsoft.AspNetCore.Authorization;
   using System.Runtime.ExceptionServices;
   using System.Threading.Tasks;
   using HRConnect.Api.DTOs.Position;
   using HRConnect.Api.Interfaces;
+  using Microsoft.AspNetCore.Authorization;
   using Microsoft.AspNetCore.Mvc;
 
   [Route("api/positions")]

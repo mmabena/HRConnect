@@ -2,8 +2,8 @@
 {
   using System.Text.RegularExpressions;
   using DTOs.MedicalOption;
-  using HRConnect.Api.Models;
   using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Models;
 
   public static partial class MedicalOptionUtils
   {

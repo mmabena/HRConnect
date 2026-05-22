@@ -3,7 +3,7 @@
 public class TerminateMedicalAidDeductionDto
 {
   public DateTime TerminationDate {get; set;} = DateTime.Now.ToLocalTime();
-  public string TerminationReason {get; set;}
+  public string TerminationReason {get; set;}  = string.Empty;
   public int OptionId {get; set;}
   public int PrincipalCount { get; set; }
   public int AdultCount { get; set; } 

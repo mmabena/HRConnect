@@ -1,7 +1,7 @@
 namespace HRConnect.Api.Interfaces
 {
-  using HRConnect.Api.Models;
   using HRConnect.Api.DTOs.User;
+  using HRConnect.Api.Models;
   public interface IUserService
   {
     Task<List<User>> GetAllUsersAsync();

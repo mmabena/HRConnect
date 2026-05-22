@@ -1,9 +1,9 @@
 namespace HRConnect.Api.Interfaces
 {
-  using HRConnect.Api.Models;
   using System.Collections.Generic;
   using System.Threading.Tasks;
   using HRConnect.Api.DTOs.OccupationalLevel;
+  using HRConnect.Api.Models;
 
 
     public interface IOccupationalLevelService

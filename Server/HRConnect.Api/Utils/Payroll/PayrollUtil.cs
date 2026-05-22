@@ -1,8 +1,8 @@
 namespace HRConnect.Api.Utils.Payroll
 {
+  using System.IO;
   using HRConnect.Api.Models.Payroll;
   using OfficeOpenXml;
-  using System.IO;
 
   public class PayrollUtil
   {

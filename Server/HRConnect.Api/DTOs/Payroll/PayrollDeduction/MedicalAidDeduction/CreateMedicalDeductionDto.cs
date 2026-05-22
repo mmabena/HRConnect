@@ -3,18 +3,18 @@
 
   public class CreateMedicalDeductionDto
   {  
-     public string EmployeeId { get; set; }
-     public string Name { get; set; }
-     public string Surname { get; set; }
-     public string Branch { get; set; }
+     public string EmployeeId { get; set; } = string.Empty;
+     public string Name { get; set; } = string.Empty;
+     public string Surname { get; set; } = string.Empty;
+     public string Branch { get; set; } = string.Empty;
      public decimal Salary { get; set; }
      public DateTime EmployeeStartDate { get; set; }
      public DateTime EffectiveDate { get; set; } 
      public DateTime? TerminationDate { get; set; }
      public int MedicalOptionId { get; set; }
-     public string OptionName { get; set; }
+     public string OptionName { get; set; } = string.Empty;
      public int MedicalCategoryId { get; set; }
-     public string OptionCategory { get; set; }
+     public string OptionCategory { get; set; } = string.Empty;
      public int PrincipalCount { get; set; }
      public int AdultCount { get; set; }
      public int ChildrenCount { get; set; }

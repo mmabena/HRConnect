@@ -1,8 +1,8 @@
 namespace HRConnect.Api.Mappers
 {
-    using HRConnect.Api.Models;
-  using System.Collections.Generic;
+    using System.Collections.Generic;
   using HRConnect.Api.DTOs.JobGrade;
+  using HRConnect.Api.Models;
     public static class JobGradeMapper
     {
 

@@ -1,3 +1,4 @@
+#pragma warning disable CS0472 // The result of the expression is always the same since a value of this type is never equal to 'null'
 namespace HRConnect.Api.Services;
 
 using HRConnect.Api.DTOs.MedicalOption;
@@ -76,7 +77,7 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
 
     //get category information
     var category =
-      await _medicalOptionRepository.GetCategoryByIdAsync(medicalOption.MedicalOptionCategoryId);
+      await _medicalOptionRepository.GetCategoryByIdAsync(medicalOption!.MedicalOptionCategoryId);
 
     //check for dups
     var dupFound = await _medicalAidDeductionRepository.GetActiveMedicalAidDeductionByEmpIdAsync(employeeId);
@@ -94,7 +95,7 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
     decimal? totalAdultPremium = null;
     decimal? totalChildPremium = null;
 
-    switch (category.MedicalOptionCategoryName)
+    switch (category?.MedicalOptionCategoryName)
     {
       case "Network Choice":
       case "First Choice":
@@ -131,12 +132,12 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
 
       case "Essential":
         // MSA + Risk + Principal
-        principalPremium = Math.Abs((decimal)medicalOption.MonthlyMsaContributionPrincipal +
-                                (decimal)medicalOption.MonthlyRiskContributionPrincipal);
-        adultPremium = Math.Abs((decimal)medicalOption.MonthlyMsaContributionAdult +
-                               (decimal)medicalOption.MonthlyRiskContributionAdult);
-        childPremium = Math.Abs((decimal)medicalOption.MonthlyMsaContributionChild +
-                               (decimal)medicalOption.MonthlyRiskContributionChild);
+        principalPremium = Math.Abs((decimal)medicalOption.MonthlyMsaContributionPrincipal! +
+                                (decimal)medicalOption.MonthlyRiskContributionPrincipal!);
+        adultPremium = Math.Abs((decimal)medicalOption.MonthlyMsaContributionAdult! +
+                               (decimal)medicalOption.MonthlyRiskContributionAdult!);
+        childPremium = Math.Abs((decimal)medicalOption.MonthlyMsaContributionChild! +
+                               (decimal)medicalOption.MonthlyRiskContributionChild!);
         child2Premium = 0;
         break;
 
@@ -151,32 +152,32 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
       case "Double":
         //MSA + Risk | No Principal and Child2
         principalPremium = 0;
-        adultPremium = Math.Abs((decimal)medicalOption.MonthlyMsaContributionAdult +
-                                      (decimal)medicalOption.MonthlyRiskContributionAdult);
-        childPremium = Math.Abs((decimal)medicalOption.MonthlyMsaContributionChild +
-                                      (decimal)medicalOption.MonthlyRiskContributionChild);
+        adultPremium = Math.Abs((decimal)medicalOption.MonthlyMsaContributionAdult! +
+                                      (decimal)medicalOption.MonthlyRiskContributionAdult!);
+        childPremium = Math.Abs((decimal)medicalOption.MonthlyMsaContributionChild! +
+                                      (decimal)medicalOption.MonthlyRiskContributionChild!);
         break;
 
       case "Alliance":
         //MAS + Risk | No Principal and Child2
         principalPremium = 0;
-        adultPremium = Math.Abs((decimal)medicalOption.MonthlyMsaContributionAdult +
-                                      (decimal)medicalOption.MonthlyRiskContributionAdult);
-        childPremium = Math.Abs((decimal)medicalOption.MonthlyMsaContributionChild +
-                                      (decimal)medicalOption.MonthlyRiskContributionChild);
+        adultPremium = Math.Abs((decimal)medicalOption.MonthlyMsaContributionAdult! +
+                                      (decimal)medicalOption.MonthlyRiskContributionAdult!);
+        childPremium = Math.Abs((decimal)medicalOption.MonthlyMsaContributionChild! +
+                                      (decimal)medicalOption.MonthlyRiskContributionChild!);
         child2Premium = 0;
         break;
 
       default:
         //Calculate
-        principalPremium = Math.Abs(((decimal)medicalOption.MonthlyMsaContributionPrincipal == null ?
-                (decimal)medicalOption.MonthlyMsaContributionAdult : (decimal)medicalOption.MonthlyMsaContributionPrincipal) + 
-                ((decimal)medicalOption.MonthlyRiskContributionPrincipal == null ? (decimal)medicalOption.MonthlyMsaContributionAdult :
+        principalPremium = Math.Abs(((decimal)medicalOption?.MonthlyMsaContributionPrincipal! == null ?
+                (decimal)medicalOption!.MonthlyMsaContributionAdult! : (decimal)medicalOption.MonthlyMsaContributionPrincipal) + 
+                ((decimal)medicalOption!.MonthlyRiskContributionPrincipal! == null ? (decimal)medicalOption!.MonthlyMsaContributionAdult! :
                 (decimal)medicalOption.MonthlyRiskContributionPrincipal));
-        adultPremium = Math.Abs(((decimal)medicalOption.MonthlyMsaContributionAdult == null ? 0 : (decimal)medicalOption.MonthlyMsaContributionAdult)
-        + (decimal)medicalOption.MonthlyRiskContributionAdult);
-        childPremium = Math.Abs(((decimal)medicalOption.MonthlyMsaContributionChild == null ? 0 : (decimal)medicalOption.MonthlyMsaContributionChild)
-          + (decimal)medicalOption.MonthlyRiskContributionChild);
+        adultPremium = Math.Abs(((decimal)medicalOption!.MonthlyMsaContributionAdult! == null ? 0 : (decimal)medicalOption.MonthlyMsaContributionAdult)
+        + (decimal)medicalOption.MonthlyRiskContributionAdult!);
+        childPremium = Math.Abs(((decimal)medicalOption.MonthlyMsaContributionChild! == null ? 0 : (decimal)medicalOption.MonthlyMsaContributionChild)
+          + (decimal)medicalOption!.MonthlyRiskContributionChild!);
         child2Premium = 0;
         break;
     }
@@ -205,7 +206,7 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
       else
       {
         // Variant lies between 4 and 5
-        totalChildPremium = Math.Abs((decimal)childPremium * request.ChildrenCount);
+        totalChildPremium = Math.Abs((decimal)childPremium! * request.ChildrenCount);
       }
     }
     decimal principalPremiumEstimate = MedicalAidDeductionUtil.CalculatePrincipalPremium(medicalOption);
@@ -289,13 +290,10 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
     if (updatePayload.MedicalCategoryId <= 0 || updatePayload.MedicalCategoryId == null )
       throw new ArgumentException(
         "Medical category ID must be a valid positive integer, and cannot be null");
-    if (updatePayload.OptionName.ToString() == null || updatePayload.OptionName.ToString() == "" || 
-        updatePayload.OptionName.ToString().Trim().Length < 0)
+    if (string.IsNullOrEmpty(updatePayload.OptionName))
       throw new ArgumentException("Option name cannot be empty");
 
-    if (updatePayload.OptionCategory.ToString().Trim() == null || 
-        updatePayload.OptionCategory.ToString().Trim() == "" || 
-        updatePayload.OptionCategory.ToString().Trim().Length < 0)
+    if (string.IsNullOrEmpty(updatePayload.OptionCategory))
       throw new ArgumentException("Option category cannot be empty");
     
     if (updatePayload.PrincipalCount < 0 || updatePayload.AdultCount < 0 || updatePayload.ChildrenCount < 0)

@@ -3,13 +3,13 @@ namespace HRConnect.Api.Controllers
     using System;
     using System.Linq;
     using System.Threading.Tasks;
+    using HRConnect.Api.DTOs;
+    using HRConnect.Api.DTOs.Employee;
+    using HRConnect.Api.Interfaces;
     using HRConnect.Api.Mappers;
     using HRConnect.Api.Models;
-    using Microsoft.AspNetCore.Mvc;
-    using HRConnect.Api.Interfaces;
-    using HRConnect.Api.DTOs.Employee;
     using Microsoft.AspNetCore.Authorization;
-    using HRConnect.Api.DTOs;
+    using Microsoft.AspNetCore.Mvc;
     [Route("api/employee")]
     [ApiController]
     public class EmployeeController : ControllerBase
