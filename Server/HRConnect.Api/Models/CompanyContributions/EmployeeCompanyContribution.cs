@@ -1,7 +1,7 @@
 namespace HRConnect.Api.Models.CompanyContributions
 {
-    using HRConnect.Api.Models.Payroll;
     using System.ComponentModel.DataAnnotations.Schema;
+    using HRConnect.Api.Models.Payroll;
     
     public class EmployeeCompanyContribution : PayrollRecord
     {

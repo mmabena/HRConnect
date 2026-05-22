@@ -1,22 +1,22 @@
 namespace HRConnect.Tests
 {
   using System;
-  using System.Linq;
-  using System.Threading.Tasks;
   using System.Collections.Generic;
-  using Microsoft.AspNetCore.Identity;
+  using System.Linq;
+  using System.Reflection.Metadata;
+  using System.Threading;
+  using System.Threading.Tasks;
   using HRConnect.Api.Data;
+  using HRConnect.Api.DTOs.Employee;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
   using HRConnect.Api.Services;
-  using Microsoft.EntityFrameworkCore;
-  using Xunit;
-  using HRConnect.Api.DTOs.Employee;
-  using Moq;
   using HRConnect.Api.Utils;
-  using System.Threading;
+  using Microsoft.AspNetCore.Identity;
+  using Microsoft.EntityFrameworkCore;
   using Microsoft.EntityFrameworkCore.Storage;
-  using System.Reflection.Metadata;
+  using Moq;
+  using Xunit;
 
   public class EmployeeServiceBusinessTests
   {

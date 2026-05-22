@@ -2723,7 +2723,7 @@
         // Validate Risk + MSA = Total (when MSA present)
         if (hasMsa)
         {
-          var adultTotal = (decimal)entity.MonthlyRiskContributionAdult + (decimal)entity.MonthlyMsaContributionAdult.Value;
+          var adultTotal = (decimal)entity.MonthlyRiskContributionAdult! + (decimal)entity.MonthlyMsaContributionAdult!.Value;
           if (Math.Abs(adultTotal - entity.TotalMonthlyContributionsAdult) > tolerance)
           {
             result.IsValid = false;
@@ -2731,7 +2731,7 @@
             return result;
           }
 
-          var childTotal = (decimal)entity.MonthlyRiskContributionChild + (decimal)entity.MonthlyMsaContributionChild.Value;
+          var childTotal = (decimal)entity.MonthlyRiskContributionChild! + (decimal)entity.MonthlyMsaContributionChild!.Value;
           if (Math.Abs(childTotal - (decimal)entity.TotalMonthlyContributionsChild) > tolerance)
           {
             result.IsValid = false;
@@ -2741,8 +2741,8 @@
 
           if (hasPrincipal)
           {
-            var principalTotal = (decimal)entity.MonthlyRiskContributionPrincipal.Value + (decimal)entity.MonthlyMsaContributionPrincipal.Value;
-            if (Math.Abs(principalTotal - (decimal)entity.TotalMonthlyContributionsPrincipal.Value) > tolerance)
+            var principalTotal = (decimal)entity.MonthlyRiskContributionPrincipal!.Value + (decimal)entity.MonthlyMsaContributionPrincipal!.Value;
+            if (Math.Abs(principalTotal - (decimal)entity.TotalMonthlyContributionsPrincipal!.Value) > tolerance)
             {
               result.IsValid = false;
               result.ErrorMessage = "Principal: Risk + MSA must equal Total contribution";
@@ -2753,21 +2753,21 @@
         // Validate Risk = Total (when no MSA)
         else
         {
-          if (Math.Abs((decimal)entity.MonthlyRiskContributionAdult - (decimal)entity.TotalMonthlyContributionsAdult) > tolerance)
+          if (Math.Abs((decimal)entity.MonthlyRiskContributionAdult! - (decimal)entity.TotalMonthlyContributionsAdult) > tolerance)
           {
             result.IsValid = false;
             result.ErrorMessage = "Adult: Risk must equal Total contribution for non-MSA variants";
             return result;
           }
 
-          if (Math.Abs((decimal)entity.MonthlyRiskContributionChild - (decimal)entity.TotalMonthlyContributionsChild) > tolerance)
+          if (Math.Abs((decimal)entity.MonthlyRiskContributionChild! - (decimal)entity.TotalMonthlyContributionsChild) > tolerance)
           {
             result.IsValid = false;
             result.ErrorMessage = "Child: Risk must equal Total contribution for non-MSA variants";
             return result;
           }
 
-          if (hasPrincipal && Math.Abs((decimal)entity.MonthlyRiskContributionPrincipal.Value - (decimal)entity.TotalMonthlyContributionsPrincipal.Value) > tolerance)
+          if (hasPrincipal && Math.Abs((decimal)entity.MonthlyRiskContributionPrincipal!.Value - (decimal)entity.TotalMonthlyContributionsPrincipal!.Value) > tolerance)
           {
             result.IsValid = false;
             result.ErrorMessage = "Principal: Risk must equal Total contribution for non-MSA variants";

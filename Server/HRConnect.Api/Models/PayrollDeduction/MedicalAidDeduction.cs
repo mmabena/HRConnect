@@ -5,9 +5,9 @@ namespace HRConnect.Api.Models.PayrollDeduction
 
   public class MedicalAidDeduction : PayrollRecord
   {
-    public string Name { get; set; }
-    public string Surname { get; set; }
-    public string Branch { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Surname { get; set; } = string.Empty;
+    public string Branch { get; set; } = string.Empty;
     [Column(TypeName = "decimal(15, 2)")]
     public decimal Salary { get; set; }
     public DateTime EmployeeStartDate { get; set; }
@@ -18,7 +18,7 @@ namespace HRConnect.Api.Models.PayrollDeduction
     //FK
     [ForeignKey(nameof(MedicalOption))]
     public int MedicalOptionId { get; set; }
-    public string OptionName { get; set; }
+    public string OptionName { get; set; } = string.Empty;
     //FK
     [ForeignKey(nameof(MedicalOptionCategory))]
     public int MedicalCategoryId { get; set; }
@@ -41,7 +41,7 @@ namespace HRConnect.Api.Models.PayrollDeduction
     public DateTime UpdatedDate { get; set; }
     public string? TerminationReason { get; set; } = string.Empty;// Reason for termination (Moving to another premium?, moving to another medical aid provider, etc.)
 
-    public MedicalOption MedicalOption { get; set; }
-    public MedicalOptionCategory MedicalOptionCategory { get; set; }
+    public MedicalOption MedicalOption { get; set; } = null!;
+    public MedicalOptionCategory MedicalOptionCategory { get; set; } = null!;
   }
 }

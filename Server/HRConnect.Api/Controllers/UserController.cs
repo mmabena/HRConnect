@@ -3,8 +3,8 @@ namespace HRConnect.Api.Controllers
 {
   using HRConnect.Api.DTOs.User;
   using HRConnect.Api.Mappers;
-  using Microsoft.AspNetCore.Mvc;
   using Microsoft.AspNetCore.Authorization;
+  using Microsoft.AspNetCore.Mvc;
 
   [Route("api/user")]
   [ApiController]

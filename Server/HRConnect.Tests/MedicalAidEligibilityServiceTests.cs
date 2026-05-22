@@ -86,7 +86,7 @@ namespace HRConnect.Tests
       var employeeId = "EMP999";
       var request = new RequestEligibileOptionsDto { NumberOfPrincipals = 1 };
   
-      _mockEmployeeService.Setup(s => s.GetEmployeeByIdAsync(employeeId)).ReturnsAsync((EmployeeDto)null);
+      _mockEmployeeService.Setup(s => s.GetEmployeeByIdAsync(employeeId)).ReturnsAsync((EmployeeDto)null!);
   
       await Assert.ThrowsAsync<KeyNotFoundException>(
         () => _service.GetEligibleMedicalOptionsForEmployeeAsync(employeeId, request));

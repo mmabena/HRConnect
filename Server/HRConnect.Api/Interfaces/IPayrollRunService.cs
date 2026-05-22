@@ -1,7 +1,7 @@
 namespace HRConnect.Api.Interfaces
 {
-  using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.DTOs.Payroll;
+  using HRConnect.Api.Models.Payroll;
 
   /// <summary>
   /// Payroll Service functionality needed for adding payroll records to the payroll.

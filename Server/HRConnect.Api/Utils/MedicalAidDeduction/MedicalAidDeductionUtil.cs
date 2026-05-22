@@ -14,7 +14,7 @@
     /// </summary>
     public static decimal CalculatePrincipalPremium(MedicalOptionDto? option)
     {
-      return option.TotalMonthlyContributionsPrincipal ?? option.TotalMonthlyContributionsAdult ;
+      return (decimal)(option?.TotalMonthlyContributionsPrincipal ?? option?.TotalMonthlyContributionsAdult)! ;
     }
 
     /// <summary>
@@ -24,7 +24,7 @@
     {
       if (numberOfAdults <= 0) return 0m;
 
-      decimal adultContribution = option.TotalMonthlyContributionsAdult;
+      decimal adultContribution = (decimal)option?.TotalMonthlyContributionsAdult!;
       return adultContribution * numberOfAdults;
     }
 
@@ -35,7 +35,7 @@
     {
       if (numberOfChildren <= 0) return 0m;
 
-      decimal childContribution = option.TotalMonthlyContributionsChild;
+      decimal childContribution = (decimal)option?.TotalMonthlyContributionsChild!;
       if (option.MedicalOptionName.Contains("Network") &&
           (int.TryParse(option.MedicalOptionName[^1].ToString(), out int index) && index > 0 && index < 4))
       {

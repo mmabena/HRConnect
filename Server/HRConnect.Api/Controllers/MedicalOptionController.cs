@@ -1,7 +1,7 @@
 namespace HRConnect.Api.Controllers
 {
-  using HRConnect.Api.Interfaces;
   using HRConnect.Api.DTOs.MedicalOption;
+  using HRConnect.Api.Interfaces;
   using Microsoft.AspNetCore.Authorization;
   using Microsoft.AspNetCore.Mvc;
   /// <summary>

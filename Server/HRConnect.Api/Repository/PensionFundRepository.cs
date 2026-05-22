@@ -2,13 +2,13 @@
 
 namespace HRConnect.Api.Repository
 {
+  using System.Collections.Generic;
+  using System.Threading;
+  using System.Threading.Tasks;
+  using HRConnect.Api.Data;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
-  using HRConnect.Api.Data;
   using Microsoft.EntityFrameworkCore;
-  using System.Collections.Generic;
-  using System.Threading.Tasks;
-  using System.Threading;
   public class PensionFundRepository(ApplicationDBContext context) : IPensionFundRepository
   {
     public async Task<IEnumerable<PensionFund>> GetPensionFundsAsync(CancellationToken cancellationToken)

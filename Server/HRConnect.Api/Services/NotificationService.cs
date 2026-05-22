@@ -1,9 +1,9 @@
 namespace HRConnect.Api.Services
 {
-  using HRConnect.Api.Models;
   using System.Threading.Tasks;
-  using HRConnect.Api.Interfaces.Notification;
   using HRConnect.Api.DTOs.Notification;
+  using HRConnect.Api.Interfaces.Notification;
+  using HRConnect.Api.Models;
   using HRConnect.Api.Utils.Notification;
   public class NotificationService : INotificationService
   {

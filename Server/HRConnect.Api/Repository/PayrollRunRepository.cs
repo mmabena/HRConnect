@@ -1,7 +1,7 @@
 namespace HRConnect.Api.Repository
 {
-  using HRConnect.Api.Interfaces;
   using HRConnect.Api.Data;
+  using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models.Payroll;
   using Microsoft.EntityFrameworkCore;
 

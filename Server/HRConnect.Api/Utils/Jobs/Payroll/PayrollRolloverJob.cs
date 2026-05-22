@@ -3,13 +3,13 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
   using global::Quartz;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Interfaces.Notification;
+  using HRConnect.Api.Interfaces.Payroll.Deduction;
+  using HRConnect.Api.Interfaces.Payroll.Earning;
   using HRConnect.Api.Interfaces.Pension;
   using HRConnect.Api.Models;
   using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Models.PayrollDeduction;
   using Microsoft.Extensions.DependencyInjection;
-  using HRConnect.Api.Interfaces.Payroll.Earning;
-  using HRConnect.Api.Interfaces.Payroll.Deduction;
 
   /// <summary>
   /// Payroll Rollover Job class to handle the locking, rolling over and 

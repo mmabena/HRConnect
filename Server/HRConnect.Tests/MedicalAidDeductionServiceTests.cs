@@ -1,20 +1,20 @@
 namespace HRConnect.Tests;
 
-using Microsoft.Extensions.DependencyInjection;
-using Xunit;
-using Moq;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System;
-using HRConnect.Api.Services;
-using HRConnect.Api.Interfaces;
-using HRConnect.Api.DTOs.Payroll.PayrollDeduction.MedicalAidDeduction;
-using HRConnect.Api.DTOs.MedicalOption;
 using HRConnect.Api.DTOs.Employee;
+using HRConnect.Api.DTOs.MedicalOption;
+using HRConnect.Api.DTOs.Payroll.PayrollDeduction.MedicalAidDeduction;
+using HRConnect.Api.Interfaces;
 using HRConnect.Api.Models;
-using HRConnect.Api.Models.PayrollDeduction;
 using HRConnect.Api.Models.Payroll;
+using HRConnect.Api.Models.PayrollDeduction;
+using HRConnect.Api.Services;
 using HRConnect.Tests.SampleData;
+using Microsoft.Extensions.DependencyInjection;
+using Moq;
+using Xunit;
 
 public class MedicalAidDeductionServiceTests
 {
@@ -244,7 +244,7 @@ public class MedicalAidDeductionServiceTests
         var request = new CreateMedicalAidDeductionRequestDto { PrincipalCount = 1 };
 
         _mockEmployeeService.Setup(s => s.GetEmployeeByIdAsync(employeeId))
-            .ReturnsAsync((EmployeeDto)null);
+            .ReturnsAsync((EmployeeDto)null!);
 
         var exception = await Assert.ThrowsAsync<KeyNotFoundException>(() =>
             _service.AddNewMedicalAidDeductions(employeeId, medicalOptionId, request));

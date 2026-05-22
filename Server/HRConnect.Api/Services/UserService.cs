@@ -7,9 +7,9 @@ namespace HRConnect.Api.Services
   using HRConnect.Api.Data;
   using HRConnect.Api.DTOs.User;
   using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Mappers;
   using HRConnect.Api.Models;
   using HRConnect.Api.Utils;
-  using HRConnect.Api.Mappers;
   using Microsoft.EntityFrameworkCore;
 
   public class UserService : IUserService
@@ -147,7 +147,7 @@ namespace HRConnect.Api.Services
         return null;
       }
 
-      if (string.IsNullOrWhiteSpace(employee.Email))
+      if (string.IsNullOrWhiteSpace(employee!.Email))
       {
         throw new ArgumentException("Employee does not have an email address.");
       }

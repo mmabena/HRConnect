@@ -1,7 +1,7 @@
 namespace HRConnect.Api.Controllers
 {
-  using HRConnect.Api.Interfaces;
   using HRConnect.Api.DTOs.StatutoryContribution;
+  using HRConnect.Api.Interfaces;
   using Microsoft.AspNetCore.Mvc;
 
   [Route("api/statutoryContribution")]

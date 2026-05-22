@@ -1,14 +1,14 @@
 namespace HRConnect.Api.Data
 {
-  using HRConnect.Api.Models;
-  using HRConnect.Api.Models.Payroll;
-  using HRConnect.Api.Models.PayrollDeduction;
-  using HRConnect.Api.Models.CompanyContributions;
-  using HRConnect.Api.Models.Pension;
-  using Microsoft.EntityFrameworkCore;
   using AppAny.Quartz.EntityFrameworkCore.Migrations;
   using AppAny.Quartz.EntityFrameworkCore.Migrations.SqlServer;
+  using HRConnect.Api.Models;
+  using HRConnect.Api.Models.CompanyContributions;
+  using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Models.Payroll.Earning;
+  using HRConnect.Api.Models.PayrollDeduction;
+  using HRConnect.Api.Models.Pension;
+  using Microsoft.EntityFrameworkCore;
 
   public class ApplicationDBContext(DbContextOptions dbContextOptions) : DbContext(dbContextOptions)
   {

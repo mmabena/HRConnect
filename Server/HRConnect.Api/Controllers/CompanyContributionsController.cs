@@ -2,11 +2,11 @@ namespace HRConnect.Api.Controllers
 {
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Authorization;
-    using HRConnect.Api.Interfaces;
     using HRConnect.Api.DTOs.CompanyContribution;
+    using HRConnect.Api.Interfaces;
     using HRConnect.Api.Models.CompanyContributions;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
     [Route("api/companyContribution")]
     [ApiController]
     public class CompanyContributionsController : ControllerBase

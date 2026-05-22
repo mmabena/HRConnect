@@ -85,7 +85,7 @@ public static class DummyPayrollRun
             IsFinalised = false,
             IsLocked = false,
             FinalisedDate = null,
-            Period = null, // Can be null for minimal testing
+            Period = null!, // Can be null for minimal testing
             Records = new List<PayrollRecord>()
         };
     }

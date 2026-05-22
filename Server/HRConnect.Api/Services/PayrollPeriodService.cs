@@ -1,10 +1,10 @@
 namespace HRConnect.Api.Services
 {
+  using HRConnect.Api.DTOs.Payroll;
   using HRConnect.Api.Interfaces;
-  using HRConnect.Api.Utils.Payroll;
   using HRConnect.Api.Mappers.Payroll;
   using HRConnect.Api.Models.Payroll;
-  using HRConnect.Api.DTOs.Payroll;
+  using HRConnect.Api.Utils.Payroll;
 
   public class PayrollPeriodService : IPayrollPeriodService
   {

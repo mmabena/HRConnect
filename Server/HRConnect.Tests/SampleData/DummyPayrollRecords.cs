@@ -1,8 +1,8 @@
 namespace HRConnect.Tests.SampleData;
 
+using HRConnect.Api.DTOs.Employee;
 using HRConnect.Api.Models.Payroll;
 using HRConnect.Api.Models.PayrollDeduction;
-using HRConnect.Api.DTOs.Employee;
 
 /// <summary>
 /// Sample payroll record generators for testing purposes

@@ -1,9 +1,9 @@
 namespace HRConnect.Api.Services
 {
     using HRConnect.Api.Data;
+    using HRConnect.Api.Interfaces;
     using HRConnect.Api.Models.CompanyContributions;
     using Microsoft.EntityFrameworkCore;
-    using HRConnect.Api.Interfaces;
 
     public class EmployeeCompanyContributionService : IEmployeeCompanyContributionService
     {

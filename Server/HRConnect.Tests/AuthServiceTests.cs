@@ -1,11 +1,11 @@
 namespace HRConnect.Tests.Services
 {
-  using Moq;
-  using HRConnect.Api.Services;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
+  using HRConnect.Api.Services;
   using Microsoft.AspNetCore.Identity;
   using Microsoft.Extensions.Configuration;
+  using Moq;
   public class AuthServiceTests
   {
     private readonly Mock<IUserRepository> _userRepoMock;

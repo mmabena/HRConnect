@@ -1,7 +1,7 @@
 namespace HRConnect.Api.Interfaces.Notification
 {
-  using HRConnect.Api.Models;
   using HRConnect.Api.DTOs.Notification;
+  using HRConnect.Api.Models;
   public interface INotificationRepository
   {
     Task AddNotificationAsync(Notification notification);
