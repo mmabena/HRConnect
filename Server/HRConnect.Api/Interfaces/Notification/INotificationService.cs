@@ -21,5 +21,7 @@ namespace HRConnect.Api.Interfaces.Notification
     Task<bool> DeleteAllReadAsync();
     Task<bool> DeleteAllByEmployeeIdAsync(int userId);
     Task<bool> DeleteNotificationByIdAsync(int userId, int id);
+
+    Task MarkAllAsReadByUserId(int userId);
   }
 }

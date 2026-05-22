@@ -13,6 +13,7 @@ namespace HRConnect.Api.Services
   using HRConnect.Api.Utils.Hubs;
   using HRConnect.Api.Utils.Notification;
   using Microsoft.AspNetCore.SignalR;
+  using Quartz.Util;
 
   public class NotificationService : INotificationService
   {
@@ -26,7 +27,7 @@ namespace HRConnect.Api.Services
       INotificationDispatcher notificationDispatcher,
       IUserHttpClient userHttpClient,
       IEmployeeService employeeService
-      // IHubContext<UserRoleHub> hubContext
+    // IHubContext<UserRoleHub> hubContext
     )
     {
       _notificationRepository = notificationRepository;
@@ -115,11 +116,11 @@ namespace HRConnect.Api.Services
       }
       else if (isWarning)
       {
-// #line 115 "(===================>NotificationService.cs)"
-//         Console.ForegroundColor = ConsoleColor.Blue;
-//         Console.WriteLine($"SHOULD update this notification");
-//         created = await _notificationRepository.AddNotificationAsync(notification);
-// #line default 
+        // #line 115 "(===================>NotificationService.cs)"
+        //         Console.ForegroundColor = ConsoleColor.Blue;
+        //         Console.WriteLine($"SHOULD update this notification");
+        //         created = await _notificationRepository.AddNotificationAsync(notification);
+        // #line default 
       }
 
       if (created != null)
@@ -138,7 +139,13 @@ namespace HRConnect.Api.Services
 
       return await _notificationRepository.DeleteAllReadAsync();
     }
-
+    public async Task MarkAllAsReadByUserId(int userId)
+    {
+      string employeeId = await ResolveEmployeeId(userId);
+      if (employeeId.IsNullOrWhiteSpace())
+        return;
+      await _notificationRepository.MarkAllAsReadByEmployeeId(employeeId);
+    }
     public async Task<bool> DeleteAllByEmployeeIdAsync(int userId)
     {
       string employeeId = await ResolveEmployeeId(userId);
@@ -167,5 +174,7 @@ namespace HRConnect.Api.Services
 
       return employee.EmployeeId;
     }
+
+
   }
 }

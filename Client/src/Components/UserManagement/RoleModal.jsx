@@ -8,6 +8,7 @@ import { Check, UserRound, UserLock, ArrowRight } from "lucide-react";
 
 const RolesModal = ({ isOpen, onClose, user, onSuccess }) => {
   const [roles, setRoles] = useState([]);
+  const [isClicked,setIsClicked]=useState(false);
   const [selectedRole, setSelectedRole] = useState(0);
   const [showDropdowns, setShowDropdowns] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -125,19 +126,13 @@ const RolesModal = ({ isOpen, onClose, user, onSuccess }) => {
                 <p>CURRENT ROLE</p>
                 <div className="current-role-banner">
                     <span>
-                {selectedRole===0 ? 
-                <p className="status normaluser">
-                    Normal User
+                <p className={`status ${user.roleId}}`}>
+                    {user.role}
                 </p>
-                :
-                <p className="status superuser">
-                    Super User
-                </p>
-                }
                 <p className="status">
                     Change To  <ArrowRight/> 
                 </p>
-                {selectedRole===1 ?
+                {user.roleId===1 ?
                  <p className="status normaluser">
                     Normal User
                  </p>
@@ -156,7 +151,6 @@ const RolesModal = ({ isOpen, onClose, user, onSuccess }) => {
                 className={`role-btn superuser ${selectedRole === 1 ? "active" : ""}`}
                 onClick={() => {
                   setSelectedRole(1)
-                  console.log(`Super User Button Has Role ${selectedRole}`)
                 }}>
                 <UserLock />
                 Super User
@@ -165,7 +159,6 @@ const RolesModal = ({ isOpen, onClose, user, onSuccess }) => {
               <button className={`role-btn normaluser ${selectedRole === 0 ? "active" : ""}`}
                 onClick={() => {
                   setSelectedRole(0)
-                  console.log(`Normal User Button Has Role ${selectedRole}`)
                 }}>
                 <UserLock />
                 Normal User

@@ -5,6 +5,7 @@ namespace HRConnect.Api.Repository
   using HRConnect.Api.Models;
   using HRConnect.Api.Data;
   using Microsoft.EntityFrameworkCore;
+  using Castle.Components.DictionaryAdapter.Xml;
 
   public class NotificationRepository : INotificationRepository
   {
@@ -31,8 +32,7 @@ namespace HRConnect.Api.Repository
     {
       List<Notification> notifications = await _context.Notifications.AsNoTracking().Where(n =>
         (n.EmployeeId == employeeId) &&
-        (n.DeliveryChannel == DeliveryChannel.InApp) &&
-        !n.IsRead)
+        (n.DeliveryChannel == DeliveryChannel.InApp))
         .OrderBy(n => n.Severity)
         .ToListAsync();
       if (notifications == null)
@@ -91,6 +91,16 @@ namespace HRConnect.Api.Repository
       .IsModified = true;
 
       _ = await Save();
+    }
+    public async Task MarkAllAsReadByEmployeeId(string employeeId)
+    {
+      await _context.Notifications.Where(n =>
+      (n.EmployeeId == employeeId) &&
+      !new[] { NotificationType.Payroll, NotificationType.TaxUpload }.Contains(n.Type)
+      ).ExecuteUpdateAsync(s => s.SetProperty(n => n.IsRead,
+      n => true));
+
+      await _context.SaveChangesAsync();
     }
     public async Task<IEnumerable<Notification>> GetAllUnreadAsync(string? employeeId)
     {

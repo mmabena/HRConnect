@@ -10,6 +10,7 @@ import {
   fetchAllNotifications,
   NOTIFICATION_TYPE,
   SEVERITY,
+  markAllNotificationsAsRead,
 } from "./notificationsApi";
 import "./NotificationPage.css";
 import { fetchAllEmployees } from "../../api/Employee";
@@ -63,7 +64,7 @@ const loadNotis=useCallback(async()=>{
         const notiData=await fetchAllNotifications(user.id); 
         console.log(notiData)
         if(!notiData.ok)
-            toast.error("No Notifications")
+            console.error("No Notifications")
         setNotis(notiData);
     }
     catch(error)
@@ -108,7 +109,10 @@ useEffect(()=>{loadNotis();},[loadNotis])
 
   const handleMarkAll = async () => {
     try {
-      await markAllAsRead(role);
+    //   await markAllAsRead(role);
+        const currentUser=localStorage.getItem("currentUser")
+        const user=JSON.parse(currentUser);
+        await markAllNotificationsAsRead(user.id)
       setNotis((prev) => prev.map((n) => ({ ...n, isRead: true })));
     } catch (_) {}
   };

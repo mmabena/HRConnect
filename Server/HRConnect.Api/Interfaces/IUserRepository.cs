@@ -10,5 +10,6 @@ namespace HRConnect.Api.Interfaces
     Task<bool> DeleteUserAsync(int id);
     Task<User?> GetUserByEmailAsync(string email);
     Task<bool> IsEmailUniqueAsync(string email);
+    Task SaveChangesAsync();
   }
 }

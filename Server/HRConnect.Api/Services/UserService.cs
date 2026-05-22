@@ -20,7 +20,7 @@ namespace HRConnect.Api.Services
     private readonly IUserRepository _userRepo;
     private readonly IEmployeeRepository _employeeRepo;
     private readonly Microsoft.AspNetCore.Identity.IPasswordHasher<User> _passwordHasher;
-    
+
     //These are valid characters for the a password hash
     private static readonly char[] UpperCaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
     private static readonly char[] LowerCaseChars = "abcdefghijklmnopqrstuvwxyz".ToCharArray();
@@ -306,5 +306,6 @@ namespace HRConnect.Api.Services
       }
       return employeeIds;
     }
+
   }
 }

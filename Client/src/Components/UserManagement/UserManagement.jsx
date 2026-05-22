@@ -38,7 +38,15 @@ const UserManagement = () => {
   const [editRole, setEditRole] = useState("");
   const [editStatus, setEditStatus] = useState(USER_STATUS.ACTIVE);
   const [isLoading, setIsLoading] = useState(true);
-   const [loggedInUser, setLoggedInUser] = useState(null);
+  const [loggedInUser, setLoggedInUser] = useState(null);
+
+  const storedCurrentUserRaw = localStorage.getItem("currentUser");
+  const storedCurrentUserParsed = storedCurrentUserRaw
+    ? JSON.parse(storedCurrentUserRaw)
+    : null;
+  const currentUserFromStorage =
+    storedCurrentUserParsed?.user || storedCurrentUserParsed;
+  const currentUserEmail = currentUserFromStorage?.email?.toLowerCase();
 
   const [filteredUsers,setFilteredUsers]=useState([])
   const [isFilterOpen,setIsFilterOpen]=useState(false)
@@ -50,31 +58,55 @@ const UserManagement = () => {
       setIsLoading(true);
       const { users, roles } = await fetchUsersAndRoles();
       const employees = await fetchAllEmployees();
-      console.log(employees);
-      setRoles(roles || []);
-      const mappedUsers = (users || []).map((user) => {
 
-        const employee = employees.find(e => e.email === user.email)
-        localStorage.setItem("currentEmployee",JSON.stringify(employee))
-        console.log('local storage itself');
-        console.log(localStorage)
+      setRoles(roles || []);
+
+      let currentEmployeeMatch = null;
+
+      const mappedUsers = (users || []).map((user) => {
+        const employee = employees.find(
+          (e) => e.email?.toLowerCase() === user.email?.toLowerCase()
+        );
+
+        if (
+          currentUserEmail &&
+          user.email?.toLowerCase() === currentUserEmail
+        ) {
+          currentEmployeeMatch = employee;
+        }
+
         return {
           ...user,
-          branch: `${employee.branch}` || "Uknown Branch",
-          name: `${employee.name} ${employee.surname}` || user.email,
-          role: user.role || roles.find((r) => Number(r.roleId) === Number(user.roleId))?.name || "Unknown Role",
+          branch: employee?.branch || "Unknown Branch",
+          name:
+            `${employee?.name || ""} ${employee?.surname || ""}`.trim() ||
+            user.email,
+          role:
+            user.role ||
+            roles.find((r) => Number(r.roleId) === Number(user.roleId))?.name ||
+            "Unknown Role",
           status: "Active",
           statusValue: USER_STATUS.ACTIVE,
-        }
+        };
       });
+
+      if (currentEmployeeMatch) {
+        localStorage.setItem(
+          "currentEmployee",
+          JSON.stringify(currentEmployeeMatch)
+        );
+
+        if (storedCurrentUserParsed?.user) {
+          localStorage.setItem(
+            "currentUser",
+            JSON.stringify(storedCurrentUserParsed.user)
+          );
+        }
+      }
 
       setUsers(mappedUsers);
       setFilteredUsers(mappedUsers);
-    
-      console.log('logged in user')
-      console.log(loggedInUser)
       setCurrentUserRole(getStoredUserRole().roleName || "User");
-
     } catch (error) {
       console.error("Failed to load data:", error);
       alert("Failed to load user data. Please try again.");
@@ -117,17 +149,27 @@ const UserManagement = () => {
   const hasAdminRights = (role) => ["Admin", "SuperUser"].includes(role || "");
 
   const handleShowActions = (userIndex) => {
-    const currentEmployee=localStorage.getItem("currentEmployee");
-    const employee=JSON.parse(currentEmployee);
-    setSelectedUserIndex(userIndex);
+    if (userIndex === -1) return;
+
+    const currentEmployee = localStorage.getItem("currentEmployee");
+    const employee = currentEmployee ? JSON.parse(currentEmployee) : null;
 
     const user = users[userIndex];
-    if(user?.email===employee?.email)
-    {
-        setSelectedUserIndex(null)
-        toast.error("You Cannot Change Your Own Role");
-        return;
+
+    if (
+      currentUserEmail &&
+      user?.email?.toLowerCase() === currentUserEmail
+    ) {
+      toast.error("You Cannot Change Your Own Role");
+      return;
     }
+
+    if (user?.email === employee?.email) {
+      toast.error("You Cannot Change Your Own Role");
+      return;
+    }
+
+    setSelectedUserIndex(userIndex);
   };
 
   const handleCloseActions = () => {
@@ -139,12 +181,6 @@ const UserManagement = () => {
       alert("Access denied: Admin rights required");
       return;
     }
-//     const user = users[selectedUserIndex];
-//     if (user) {
-//       setEditRole(user.roleId ?? "");
-//       setShowEditEmployeeModal(true);
-//       handleCloseActions();
-//     }
   };
 
   const saveEmployeeDetails = async () => {
@@ -328,7 +364,13 @@ const UserManagement = () => {
                     <td className="action-buttons">
                       <button
                         className="actions-trigger-btn"
-                        onClick={() => handleShowActions(idx)} >
+                        onClick={() => {
+                          const userIndex = users.findIndex(
+                            (u) => u.userId === user.userId
+                          );
+                          handleShowActions(userIndex);
+                        }}
+                      >
                         <FaEllipsisV />
                         Actions
                       </button>

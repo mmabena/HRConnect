@@ -30,7 +30,7 @@ namespace HRConnect.Api.Services
     private readonly int _stepSeconds;
     public TOTPService(ITOTPRepository totpRepo, IUserRepository userRepo,
     IMFAUserSecretsService mfaService, IEmployeeService employeeService,
-     INotificationFactory notiFactory, IConfiguration configuration,
+     INotificationFactory notiFactory, IConfiguration configuration
      )
     {
       _totpRepo = totpRepo;
@@ -177,7 +177,7 @@ namespace HRConnect.Api.Services
       {
         existing.Role = (UserRole)existing.TempRole!;
         _ = await _userRepo.UpdateUserAsync(userId, existing);
-
+        await _userRepo.SaveChangesAsync();
       }
     }
   }

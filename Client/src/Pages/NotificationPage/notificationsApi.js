@@ -178,8 +178,6 @@ let _db = [
 // ─────────────────────────────────────────────
 
 /**
- * GET /api/notifications/{employeeId}=
- * Returns notifications for the given employee, sorted by priority.
  */
 export const fetchAllNotifications=async(userId)=>{
     try{
@@ -221,6 +219,7 @@ export async function fetchNotifications(role) {
   return results.map((n) => ({ ...n }));
 }
 
+
 /**
  * PATCH /api/notifications/:id/read
  * Marks a single notification as read.
@@ -231,6 +230,23 @@ export async function markAsRead(id) {
   if (!item) throw new Error(`Notification ${id} not found`);
   item.read = true;
   return { ...item };
+}
+/**
+ * 
+ */
+export const  markAllNotificationsAsRead=async(userId)=>
+{
+    try{
+        console.log(`API NOTI User Id ${userId}`)
+    const response = await fetch(`${BASE_URL}/notifications/read/${userId}`,
+        {
+            method:"PUT"
+    });
+    }catch(error)
+    {
+        console.error(`Mark All Notis API Error: ${error}`);
+        throw error
+    }
 }
 
 /**

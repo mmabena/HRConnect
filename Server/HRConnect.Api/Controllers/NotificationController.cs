@@ -38,7 +38,12 @@ namespace HRConnect.Api.Controllers
         return NotFound($"No Notifications To Show");
       return Ok(notifications);
     }
-
+    [HttpPut("read/{userId}")]
+    public async Task<IActionResult> MarkAllReadByUserId(int userId)
+    {
+      await _notificationService.MarkAllAsReadByUserId(userId);
+      return Ok();
+    }
     [HttpGet("{userId}")]
     public async Task<IActionResult> GetEmployeeNotifications(int userId)
     {

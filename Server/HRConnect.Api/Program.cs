@@ -29,7 +29,6 @@ using HRConnect.Api.Interfaces.Payroll.Deduction;
 using HRConnect.Api.Utils.Jobs;
 using System.Threading.RateLimiting;
 using HRConnect.Api.Utils.Notification.Channels;
-using HRConnect.Api.Utils.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -97,7 +96,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
     {
-      options.UseSqlServer(builder.Configuration.GetConnectionString("DBeaverConnection")!);
+      options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!);
       options.AddInterceptors(new AuditSaveChangesInterceptor());
     });
 
@@ -138,8 +137,6 @@ builder.Services.AddAuthorizationBuilder()
     .AddPolicy("SuperUserOnly", policy => policy.RequireRole("SuperUser"))
     .AddPolicy("NormalUserOnly", policy => policy.RequireRole("NormalUser"))
     .AddPolicy("SuperOrNormalUser", policy => policy.RequireRole("SuperUser", "NormalUser"));
-
-builder.Services.AddSignalR();
 
 builder.Services.AddQuartz(q =>
 {
@@ -187,7 +184,7 @@ builder.Services.AddQuartz(q =>
   {
     store.UseSqlServer(options =>
         {
-          options.ConnectionString = builder.Configuration.GetConnectionString("DBeaverConnection")!;
+          options.ConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
           options.TablePrefix = "quartz.QRTZ_";
         });
     store.UseSerializer<Quartz.Simpl.SystemTextJsonObjectSerializer>();
@@ -345,5 +342,4 @@ app.UseAuthorization();
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseRateLimiter();
 app.MapControllers();
-app.MapHub<UserRoleHub>("/hub/userroles");
 app.Run();
