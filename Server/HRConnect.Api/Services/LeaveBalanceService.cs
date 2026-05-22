@@ -131,6 +131,21 @@ namespace HRConnect.Api.Services
                     await RecalculateFamilyResponsibilityLeaveAsync(employee.EmployeeId);
                     continue;
                 }
+                if (leaveType.Code == "ML")
+                {
+                    var maternityBalance = new EmployeeLeaveBalance
+                    {
+                        EmployeeId = employee.EmployeeId,
+                        LeaveTypeId = leaveType.Id,
+                        AccruedDays = 120,
+                        TakenDays = 0,
+                        AvailableDays = 120
+                    };
+
+                    balancesToAdd.Add(maternityBalance);
+
+                    continue;
+                }
 
                 balancesToAdd.Add(new EmployeeLeaveBalance
                 {
