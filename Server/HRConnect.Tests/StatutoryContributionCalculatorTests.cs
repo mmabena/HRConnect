@@ -1,6 +1,5 @@
 namespace HRConnect.Tests
 {
-  using System.Reflection;
   using FluentAssertions;
   using HRConnect.Api.Utils;
 

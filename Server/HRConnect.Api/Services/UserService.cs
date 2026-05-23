@@ -117,7 +117,6 @@ namespace HRConnect.Api.Services
       return await _userRepo.UpdateUserAsync(id, existing);
     }
 
-
     public async Task<User?> UpdateUserRoleAsync(int id, UpdateUserRoleRequestDto dto)
     {
       if (!Enum.IsDefined(typeof(UserRole), dto.RoleId))

@@ -10,8 +10,6 @@ namespace HRConnect.Api.Services
   using HRConnect.Api.DTOs.Notification;
   using HRConnect.Api.Interfaces.Notification;
   using System.Threading.Tasks;
-  using HRConnect.Api.Utils.Hubs;
-  using Microsoft.AspNetCore.SignalR;
   /// <remarks>
   /// * IUserRepository has been injected as a dependency to. 
   /// * This is done to avoid circular dependency injection.
