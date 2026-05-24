@@ -10,9 +10,7 @@ namespace HRConnect.Api.Services
   using HRConnect.Api.Interfaces.Notification;
   using HRConnect.Api.Mappers.Notification;
   using HRConnect.Api.Models;
-  using HRConnect.Api.Utils.Hubs;
   using HRConnect.Api.Utils.Notification;
-  using Microsoft.AspNetCore.SignalR;
   using Quartz.Util;
 
   public class NotificationService : INotificationService
@@ -21,20 +19,17 @@ namespace HRConnect.Api.Services
     private readonly INotificationDispatcher _notificationDispatcher;
     private readonly IUserHttpClient _userHttpClient;
     private readonly IEmployeeService _employeeService;
-    // private readonly IHubContext<UserRoleHub>_hubContext;
     public NotificationService(
       INotificationRepository notificationRepository,
       INotificationDispatcher notificationDispatcher,
       IUserHttpClient userHttpClient,
       IEmployeeService employeeService
-    // IHubContext<UserRoleHub> hubContext
     )
     {
       _notificationRepository = notificationRepository;
       _notificationDispatcher = notificationDispatcher;
       _userHttpClient = userHttpClient;
       _employeeService = employeeService;
-      // _hubContext = hubContext
     }
 
     public async Task<IEnumerable<NotificationDto>> GetEmployeeNotificationsAsync(int userId)
