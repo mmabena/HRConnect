@@ -289,12 +289,14 @@ namespace HRConnect.Api.Services
       }
       return new string(passwordChars.ToArray());
     }
-    public async Task<List<string>> OrganiseSuperUsersAsync()
+
+    ///<summary>
+    ///Utitlity function used to get the EmployeeId for all SuperUsers 
+    public async Task<List<string>> OrganiseSuperUsersAsync(UserRole role = UserRole.SuperUser)
     {
       var users = await GetAllUsersAsync();
 
-      //Only returns users with SuperUser role
-      users = users.FindAll(u => u.Role == UserRole.SuperUser);
+      users = users.FindAll(u => u.Role == role);
       List<string> employeeIds = new();
 
       foreach (var u in users)
@@ -305,6 +307,5 @@ namespace HRConnect.Api.Services
       }
       return employeeIds;
     }
-
   }
 }

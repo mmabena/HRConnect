@@ -65,7 +65,7 @@ namespace HRConnect.Api.Utils.Jobs.Notification
       }
       if (secondsUntilRollover > 0)
       {
-        var superUserIds = await OrganiseSuperUsersAsync();
+        var superUserIds = await _userService.OrganiseSuperUsersAsync();
         foreach (var su in superUserIds)
         {
           CreateNotificationDto notification = new()

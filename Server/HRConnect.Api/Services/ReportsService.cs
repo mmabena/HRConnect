@@ -102,7 +102,7 @@ namespace HRConnect.Api.Services
       catch (Exception exception)
       {
         Console.WriteLine($"FAILED TO WRITE TO PATH DIRECTORY \n{exception}");
-        throw exception;
+        throw;
       }
     }
   }

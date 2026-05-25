@@ -54,7 +54,8 @@ namespace HRConnect.Api.Repository
       catch (DbException exception)
       {
         await transaction.RollbackAsync();
-        throw exception;
+        Console.WriteLine($"Failed PayrollPeriod Database Transaction:{exception.InnerException?.Message}");
+        throw;
       }
     }
     public async Task UpdateAsync(PayrollPeriod payrollPeriod)

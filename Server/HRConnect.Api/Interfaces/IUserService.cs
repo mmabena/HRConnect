@@ -14,9 +14,7 @@ namespace HRConnect.Api.Interfaces
     Task<bool> DeleteUserAsync(int id);
     Task<List<UserRoleOptionDto>> GetRoleOptionsAsync();
     Task SyncEmployeeUserAsync();
-    // Change password while logged in
     Task<bool> ChangePasswordAsync(ChangePasswordRequestDto dto);
-
-    Task<List<string>> OrganiseSuperUsersAsync();
+    Task<List<string>> OrganiseSuperUsersAsync(UserRole role = UserRole.SuperUser);
   }
 }
