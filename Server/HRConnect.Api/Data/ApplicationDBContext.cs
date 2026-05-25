@@ -5,6 +5,7 @@ namespace HRConnect.Api.Data
   using HRConnect.Api.Models.PayrollDeduction;
   using HRConnect.Api.Models.CompanyContributions;
   using HRConnect.Api.Models.Pension;
+  using HRConnect.Api.Models.SalaryBudget;
   using Microsoft.EntityFrameworkCore;
   using AppAny.Quartz.EntityFrameworkCore.Migrations;
   using AppAny.Quartz.EntityFrameworkCore.Migrations.SqlServer;
@@ -50,6 +51,13 @@ namespace HRConnect.Api.Data
     public DbSet<EmployeePayrollEarning> EmployeePayrollEarnings { get; set; }
     public DbSet<Deduction> Deductions { get; set; }
     public DbSet<EmployeeDeduction> EmployeeDeductions { get; set; }
+
+    /// <summary>
+    /// Salary Budgets
+    /// </summary>
+    public DbSet<SalaryBudget> SalaryBudgets { get; set; }
+
+    /// <param name="modelBuilder"></param>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
       base.OnModelCreating(modelBuilder);
