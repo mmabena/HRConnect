@@ -1,0 +1,46 @@
+/* =========================
+   PENSION FUND MODAL
+========================= */
+
+.emp-medical-aid-container {
+ width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  flex-direction: column;
+  max-width: 444px;
+  gap: 17px;
+  border-radius: 5px;
+  margin-top:-550px;
+}
+
+.emp-medical-aid-form-grid {
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* =========================
+   HEADINGS
+========================= */
+
+.emp-medical-aid-personal-details-heading {
+   color: var(--primary-color, #2c5f6d);
+  font-family: "Anek Bangla";
+  font-size: 17px;
+  font-weight: 550;
+   display: flex;
+   
+}
+
+.emp-medical-aid-sub {
+   color: #006088;
+  font-family: "Anek Bangla";
+  font-size: 14px;
+  font-weight: 400;
+   display: flex;
+   margin-top:-10px;
+   margin-bottom:0px;
+}

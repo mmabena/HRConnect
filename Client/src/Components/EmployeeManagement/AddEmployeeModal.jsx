@@ -6,7 +6,7 @@ import BankingDetailsModal from "../../Components/Steps/BankingManagement/Bankin
 import LeaveTypesModal from "../Steps/LeaveType/LeaveTypesModal.jsx";
 import PreviewModal from "../Steps/Preview/PreviewModal.jsx";
 import PensionFundOptionsModal from "../Steps/PensionFundOptions/PensionFundOptionsModal.jsx";
-
+import MedicalAidModal from "../Steps/MedicalAid/MedicalAidModal.jsx";
 import { addEmployee } from "../../api/Employee";
 
 import useEmployeeForm from "../../hooks/useEmployeeForm";
@@ -881,6 +881,17 @@ const AddEmployeeModal = ({ closeModal }) => {
 
               {currentStepLabel === "Pension" && (
                 <PensionFundOptionsModal
+                  employee={employee}
+                  setEmployee={setEmployee}
+                  formErrors={formErrors}
+                  setFormErrors={setFormErrors}
+                  onNext={nextStep}
+                  onBack={prevStep}
+                />
+              )}
+
+              {currentStepLabel === "Medical Aid" && (
+                <MedicalAidModal
                   employee={employee}
                   setEmployee={setEmployee}
                   formErrors={formErrors}
