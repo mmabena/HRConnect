@@ -4,6 +4,8 @@ namespace HRConnect.Tests
     using Moq;
     using HRConnect.Api.Services;
     using HRConnect.Api.Interfaces;
+    using Microsoft.AspNetCore.SignalR;
+    using HRConnect.Api.Hubs;
     using HRConnect.Api.Models;
     using HRConnect.Api.DTOs.Company;
     using HRConnect.Api.Data;
@@ -17,6 +19,9 @@ namespace HRConnect.Tests
     {
         private readonly Mock<ICompanyRepository> _companyRepoMock;
         private readonly ApplicationDBContext _context;
+        private readonly Mock<IHubContext<CompanyHub>> _companyHubContextMock;
+        private readonly Mock<IHubClients> _hubClientsMock;
+        private readonly Mock<IClientProxy> _clientProxyMock;
         private readonly CompanyService _companyService;
 
         public CompanyServiceTests()
@@ -29,9 +34,22 @@ namespace HRConnect.Tests
 
             _context = new ApplicationDBContext(options);
 
+            _companyHubContextMock = new Mock<IHubContext<CompanyHub>>();
+            _hubClientsMock = new Mock<IHubClients>();
+            _clientProxyMock = new Mock<IClientProxy>();
+
+            _hubClientsMock
+                .Setup(clients => clients.All)
+                .Returns(_clientProxyMock.Object);
+
+            _companyHubContextMock
+                .Setup(x => x.Clients)
+                .Returns(_hubClientsMock.Object);
+
             _companyService = new CompanyService(
                 _context,
-                _companyRepoMock.Object
+                _companyRepoMock.Object,
+                _companyHubContextMock.Object
             );
         }
 
@@ -50,10 +68,10 @@ namespace HRConnect.Tests
             };
 
             _companyRepoMock.Setup(r => r.GetAllCompanyIdsWithPrefix("DUP"))
-                .ReturnsAsync(new List<string>{ "DUP001"});
+                .ReturnsAsync(new List<string> { "DUP001" });
 
             Company? savedcompany = null;
-            
+
             _companyRepoMock.Setup(r => r.CreateCompanyAsync(It.IsAny<Company>()))
                 .ReturnsAsync((Company c) =>
                 {
@@ -113,7 +131,7 @@ namespace HRConnect.Tests
         public async Task CreateCompanyAsync_DeplicateUIFNumber_ThrowsBusinessRuleException()
         {
             // Arrange
-            var companyRequestDto  = new CreateCompanyRequestDto
+            var companyRequestDto = new CreateCompanyRequestDto
             {
                 CompanyName = "Duplicate Systems",
                 RegistrationNumber = "12345678901234",
@@ -133,7 +151,7 @@ namespace HRConnect.Tests
         public async Task CreateCompanyAsync_DeplicateVATNumber_ThrowsBusinessRuleException()
         {
             // Arrange
-            var companyRequestDto  = new CreateCompanyRequestDto
+            var companyRequestDto = new CreateCompanyRequestDto
             {
                 CompanyName = "Duplicate Systems",
                 RegistrationNumber = "12345678901234",
@@ -154,7 +172,7 @@ namespace HRConnect.Tests
         public async Task CreateCompanyAsync_DeplicateContactNumber_ThrowsBusinessRuleException()
         {
             // Arrange
-            var companyRequestDto  = new CreateCompanyRequestDto
+            var companyRequestDto = new CreateCompanyRequestDto
             {
                 CompanyName = "Duplicate Systems",
                 RegistrationNumber = "12345678901234",

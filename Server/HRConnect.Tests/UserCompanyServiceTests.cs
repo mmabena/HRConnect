@@ -151,6 +151,139 @@ namespace HRConnect.Tests
                 _userCompanySerice.AssignCompanyToUserAsync(userId, userCompanyRequestDto)
              );
         }
+
+        [Fact]
+        public async Task AssignCompanyToUserAsync_UserIsNotSuperUser_ThrowUnauthorizedAccessException()
+        {
+            // Arrange 
+            var userId = 1;
+
+            var company1 = new Company
+            {
+                CompanyId = "DUP001",
+                CompanyName = "Duplicate Systems"
+            };
+
+            var company2 = new Company
+            {
+                CompanyId = "DUP002",
+                CompanyName = "Another Company"
+            };
+
+            var usercompanies = new List<UserCompany>
+            {
+                new UserCompany
+                {
+                    UserId = userId,
+                    CompanyId = "DUP001",
+                    IsDefault = true
+                },
+
+            };
+
+
+            var userCompanyRequestDto = new CreateUserCompanyDto
+            {
+                CompanyId = "DUP002",
+                IsDefault = true
+            };
+
+            _userRepoMock
+                .Setup(r => r.GetUserByIdAsync(userId))
+                .ReturnsAsync(new User
+                {
+                    UserId = userId,
+                    Email = "james@singular.co.za",
+                    Role = UserRole.NormalUser
+                });
+
+            _companyRepoMock
+                .Setup(r => r.GetCompanyByIdAsync("DUP002"))
+                .ReturnsAsync(new Company
+                {
+                    CompanyId = "DUP002",
+                    CompanyName = "Another Company"
+                });
+
+            _userCompanyRepoMock
+                .Setup(r => r.GetUserCompaniesByUserIdAsync(userId))
+                .ReturnsAsync(usercompanies);
+
+            //Act & Assert
+            await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
+                _userCompanySerice.AssignCompanyToUserAsync(userId, userCompanyRequestDto)
+             );
+        }
+
+        [Fact]
+        public async Task AssignCompanyToUserAsync_UserIsAlreadyAssignedToCompany_ThrowInvalidOperationException()
+        {
+            // Arrange 
+            var userId = 1;
+
+            var company1 = new Company
+            {
+                CompanyId = "DUP001",
+                CompanyName = "Duplicate Systems"
+            };
+
+            var company2 = new Company
+            {
+                CompanyId = "DUP002",
+                CompanyName = "Another Company"
+            };
+
+            var usercompanies = new List<UserCompany>
+            {
+                new UserCompany
+                {
+                    UserId = userId,
+                    CompanyId = "DUP001",
+                    IsDefault = true
+                },
+
+                new UserCompany
+                {
+                    UserId = userId,
+                    CompanyId = "DUP002",
+                    IsDefault = false
+                },
+
+            };
+
+
+            var userCompanyRequestDto = new CreateUserCompanyDto
+            {
+                CompanyId = "DUP002",
+                IsDefault = true
+            };
+
+            _userRepoMock
+                .Setup(r => r.GetUserByIdAsync(userId))
+                .ReturnsAsync(new User
+                {
+                    UserId = userId,
+                    Email = "james@singular.co.za",
+                    Role = UserRole.SuperUser
+                });
+
+            _companyRepoMock
+                .Setup(r => r.GetCompanyByIdAsync("DUP002"))
+                .ReturnsAsync(new Company
+                {
+                    CompanyId = "DUP002",
+                    CompanyName = "Another Company"
+                });
+
+            _userCompanyRepoMock
+                .Setup(r => r.GetUserCompaniesByUserIdAsync(userId))
+                .ReturnsAsync(usercompanies);
+
+            //Act & Assert
+            await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                _userCompanySerice.AssignCompanyToUserAsync(userId, userCompanyRequestDto)
+             );
+        }
         public void Dispose()
         {
             _context.Dispose();
