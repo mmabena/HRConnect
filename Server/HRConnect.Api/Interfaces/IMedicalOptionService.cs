@@ -1,6 +1,7 @@
 ﻿ namespace HRConnect.Api.Interfaces
 {
-  using HRConnect.Api.DTOs.MedicalOption;
+  using DTOs.MedicalOption;
+  using Models;
 
   /// <summary>
   /// Defines the contract for managing medical options and their categories within the HR Connect system.
@@ -49,174 +50,98 @@
     Task<List<MedicalOptionCategoryDto>> GetGroupedMedicalOptionsAsync();
 
     /// <summary>
-    /// Retrieves a specific medical option by its unique identifier.
+    /// Retrieves a specific group of medical options by its unique identifier (CategoryId).
     /// </summary>
-    /// <param name="id">The unique identifier of the medical option to retrieve.</param>
-    /// <returns>The medical option data transfer object if found; otherwise, null.</returns>
-    /// <exception cref="System.ArgumentException">Thrown when the provided id is invalid.</exception>
-    /// <exception cref="System.Exception">Thrown when database access fails.</exception>
-    /// <example>
-    /// <code>
-    /// var medicalOption = await _medicalOptionService.GetMedicalOptionByIdAsync(123);
-    /// if (medicalOption != null)
-    /// {
-    ///     Console.WriteLine($"Option: {medicalOption.MedicalOptionName}");
-    ///     Console.WriteLine($"Category ID: {medicalOption.MedicalOptionCategoryId}");
-    /// }
-    /// </code>
-    /// </example>
+    /// <param name="id">The unique identifier of the medical option.</param>
+    /// <returns>The medical option if found; otherwise, null.</returns>
     Task<MedicalOptionDto?> GetMedicalOptionByIdAsync(int id);
 
-    /// <summary>
-    /// Retrieves a medical option category by its unique identifier, including all associated medical options.
-    /// </summary>
-    /// <param name="categoryId">The unique identifier of the medical option category to retrieve.</param>
-    /// <returns>The medical option category with its associated options if found; otherwise, null.</returns>
-    /// <exception cref="System.ArgumentException">Thrown when the provided categoryId is invalid.</exception>
-    /// <exception cref="System.Exception">Thrown when database access fails.</exception>
-    /// <example>
-    /// <code>
-    /// var category = await _medicalOptionService.GetMedicalOptionCategoryByIdAsync(5);
-    /// if (category != null)
-    /// {
-    ///     Console.WriteLine($"Category: {category.MedicalOptionCategoryName}");
-    ///     Console.WriteLine($"Total options: {category.MedicalOptions.Count}");
-    /// }
-    /// </code>
-    /// </example>
+    /// <summary>Retrieves a medical option category by its identifier, including all associated options.</summary>
+    /// <param name="categoryId">The unique identifier of the medical option category.</param>
+    /// <returns>The medical option category with its options if found; otherwise, null.</returns>
     Task<MedicalOptionDto?> GetMedicalOptionCategoryByIdAsync(int categoryId);
 
-    /// <summary>
-    /// Checks if a medical option category exists in the system.
-    /// </summary>
+    /// <summary>Checks if a medical option category exists in the system.</summary>
     /// <param name="categoryId">The unique identifier of the medical option category to check.</param>
     /// <returns>True if the category exists; otherwise, false.</returns>
-    /// <exception cref="System.ArgumentException">Thrown when the provided categoryId is invalid.</exception>
-    /// <exception cref="System.Exception">Thrown when database access fails.</exception>
-    /// <example>
-    /// <code>
-    /// bool categoryExists = await _medicalOptionService.MedicalOptionCategoryExistsAsync(5);
-    /// if (!categoryExists)
-    /// {
-    ///     Console.WriteLine("Category does not exist");
-    /// }
-    /// </code>
-    /// </example>
     Task<Boolean> MedicalOptionCategoryExistsAsync(int categoryId);
 
-    /// <summary>
-    /// Checks if a specific medical option exists in the system.
-    /// </summary>
+    /// <summary>Checks if a specific medical option exists in the system.</summary>
     /// <param name="optionId">The unique identifier of the medical option to check.</param>
     /// <returns>True if the medical option exists; otherwise, false.</returns>
-    /// <exception cref="System.ArgumentException">Thrown when the provided optionId is invalid.</exception>
-    /// <exception cref="System.Exception">Thrown when database access fails.</exception>
-    /// <example>
-    /// <code>
-    /// bool optionExists = await _medicalOptionService.MedicalOptionExistsAsync(123);
-    /// if (optionExists)
-    /// {
-    ///     Console.WriteLine("Medical option is available");
-    /// }
-    /// </code>
-    /// </example>
     Task<Boolean> MedicalOptionExistsAsync(int optionId);
 
-    /// <summary>
-    /// Retrieves all medical options that belong to a specific category.
-    /// </summary>
+    /// <summary>Retrieves all medical options that belong to a specific category.</summary>
     /// <param name="categoryId">The unique identifier of the medical option category.</param>
-    /// <returns>A list of medical options within the specified category; empty list if category has no options.</returns>
-    /// <exception cref="System.ArgumentException">Thrown when the provided categoryId is invalid.</exception>
-    /// <exception cref="System.Exception">Thrown when database access fails.</exception>
-    /// <example>
-    /// <code>
-    /// var options = await _medicalOptionService.GetAllOptionsUnderCategoryAsync(5);
-    /// Console.WriteLine($"Found {options.Count} options in category");
-    /// foreach (var option in options.Where(o => o != null))
-    /// {
-    ///     Console.WriteLine($"- {option.MedicalOptionName}");
-    /// }
-    /// </code>
-    /// </example>
+    /// <returns>A list of medical options within the category; empty list if none found.</returns>
     Task<List<MedicalOptionDto?>> GetAllOptionsUnderCategoryAsync(int categoryId);
 
-    /// <summary>
-    /// Verifies that a medical option belongs to a specified category.
-    /// </summary>
+    /// <summary>Verifies that a medical option belongs to a specified category.</summary>
     /// <param name="categoryId">The unique identifier of the medical option category.</param>
     /// <param name="optionId">The unique identifier of the medical option.</param>
-    /// <returns>True if the medical option exists within the specified category; otherwise, false.</returns>
-    /// <exception cref="System.ArgumentException">Thrown when either categoryId or optionId is invalid.</exception>
-    /// <exception cref="System.Exception">Thrown when database access fails.</exception>
-    /// <example>
-    /// <code>
-    /// bool isValidHierarchy = await _medicalOptionService.MedicalOptionExistsWithinCategoryAsync(5, 123);
-    /// if (isValidHierarchy)
-    /// {
-    ///     Console.WriteLine("Option belongs to the specified category");
-    /// }
-    /// else
-    /// {
-    ///     Console.WriteLine("Invalid category-option relationship");
-    /// }
-    /// </code>
-    /// </example>
+    /// <returns>True if the option exists within the category; otherwise, false.</returns>
     Task<Boolean> MedicalOptionExistsWithinCategoryAsync(int categoryId, int optionId);
 
-    /// <summary>
-    /// Performs bulk updates of medical options within a specific category.
-    /// </summary>
+    /// <summary>Performs bulk updates of medical options within a specific category.</summary>
     /// <param name="categoryId">The unique identifier of the medical option category containing the options to update.</param>
-    /// <param name="bulkUpdateDto">Collection of medical option variant updates to apply.</param>
+    /// <param name="bulkUpdateDto">Collection of medical option updates to apply.</param>
     /// <param name="testDate">Optional test date for temporal validation; if null, current date is used.</param>
     /// <returns>A read-only list of updated medical option data transfer objects.</returns>
-    /// <exception cref="System.ArgumentNullException">Thrown when bulkUpdateDto is null.</exception>
-    /// <exception cref="System.ArgumentException">Thrown when categoryId is invalid or bulkUpdateDto is empty.</exception>
-    /// <exception cref="System.InvalidOperationException">Thrown when validation fails for any of the updates.</exception>
-    /// <exception cref="System.Exception">Thrown when database access fails or transaction encounters an error.</exception>
-    /// <remarks>
-    /// This method performs comprehensive validation including:
-    /// - Category existence verification
-    /// - Option existence and category membership validation
-    /// - Salary bracket consistency checks
-    /// - Contribution amount validations
-    /// - Business rule enforcement
-    /// 
-    /// The operation is performed within a transaction to ensure data consistency.
-    /// If any validation fails, the entire operation is rolled back.
-    /// </remarks>
-    /// <example>
-    /// <code>
-    /// var updates = new List&lt;UpdateMedicalOptionVariantsDto&gt;
-    /// {
-    ///     new UpdateMedicalOptionVariantsDto
-    ///     {
-    ///         MedicalOptionId = 123,
-    ///         SalaryBracketMin = 5000,
-    ///         SalaryBracketMax = 10000,
-    ///         MonthlyRiskContributionPrincipal = 150.50m,
-    ///         TotalMonthlyContributionsAdult = 200.00m
-    ///     },
-    ///     new UpdateMedicalOptionVariantsDto
-    ///     {
-    ///         MedicalOptionId = 124,
-    ///         SalaryBracketMin = 10001,
-    ///         SalaryBracketMax = 20000,
-    ///         MonthlyRiskContributionPrincipal = 250.75m,
-    ///         TotalMonthlyContributionsAdult = 300.00m
-    ///     }
-    /// };
-    /// 
-    /// var updatedOptions = await _medicalOptionService.BulkUpdateMedicalOptionsByCategoryAsync(
-    ///     categoryId: 5, 
-    ///     bulkUpdateDto: updates, 
-    ///     testDate: DateTime.Now);
-    ///     
-    /// Console.WriteLine($"Successfully updated {updatedOptions.Count} medical options");
-    /// </code>
-    /// </example>
-    public Task<IReadOnlyList<MedicalOptionDto>> BulkUpdateMedicalOptionsByCategoryAsync(
-      int categoryId, IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto, DateTime? testDate = null);
-  }  
+    /// <remarks>Validates category existence, option membership, salary brackets, and contribution amounts. Transaction-backed for data consistency.</remarks>
+    Task<IReadOnlyList<MedicalOptionDto>> BulkUpdateMedicalOptionsByCategoryAsync(
+      int categoryId, IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto,
+      DateTime? testDate = null);
+
+    /// <summary>Retrieves all medical option categories and options whose salary brackets match the specified salary amount.</summary>
+    /// <param name="salaryAmount">The employee's salary to match against salary brackets.</param>
+    /// <returns>A read-only list of medical option categories with matching options.</returns>
+    Task<IReadOnlyList<MedicalOptionCategoryDto>> GetAllOptionsWithinEmployeeSalary(
+      decimal salaryAmount);
+
+    /// <summary>Retrieves all eligible medical options available to a specific employee.</summary>
+    /// <param name="employeeId">The unique identifier of the employee.</param>
+    /// <returns>A list of medical options grouped by category ID for the employee.</returns>
+    Task<List<IGrouping<int, MedicalOptionDto>>> GetEmployeeEligibleOptions(string employeeId);
+
+    /// <summary>Retrieves all category options for a specified category by ID.</summary>
+    /// <param name="id">The unique identifier of the medical option category.</param>
+    /// <returns>A list of medical option categories with their options.</returns>
+    Task<List<MedicalOptionCategoryDto>> GetAllCategoryOptionsById(int id);
+
+    /// <summary>Retrieves all medical option categories, grouped by ID.</summary>
+    /// <returns>A list of medical option categories grouped by their identifiers.</returns>
+    Task<List<IGrouping<int, MedicalOptionCategory>>> GetAllMedicalOptionCategories();
+
+    /// <summary>Retrieves a specific medical option category by its ID.</summary>
+    /// <param name="id">The unique identifier of the medical option category.</param>
+    /// <returns>The medical option category details if found; otherwise, null.</returns>
+    Task<List<MedicalOptionCategoryOnlyDto>> GetCategoryById(int id);
+    
+    /// <summary>Retrieves the current database copy of all medical options.</summary>
+    /// <returns>A read-only list of all medical options from the database.</returns>
+    Task<IReadOnlyList<MedicalOptionDto>> GetCurrentDbCopy();
+
+    /// <summary>Creates a new medical option category.</summary>
+    /// <param name="createCategoryPayload">The medical option category data to create.</param>
+    /// <returns>The newly created medical option category.</returns>
+    Task<MedicalOptionCategoryDto> CreateMedicalOptionCategory(
+      CreateMedicalOptionCategoryDto createCategoryPayload);
+
+    /// <summary>Creates multiple medical options within an existing category.</summary>
+    /// <param name="id">The unique identifier of the existing medical option category.</param>
+    /// <param name="createOptionsPayload">Collection of medical options to create.</param>
+    /// <param name="testDate">Optional test date for temporal validation; if null, current date is used.</param>
+    /// <returns>A read-only list of created medical option variants.</returns>
+    Task<IReadOnlyList<CreateMedicalOptionVariantsDto>> CreateBulkOptionsByExistingCategoryId(
+      int id,
+      IReadOnlyCollection<CreateMedicalOptionVariantsDto> createOptionsPayload,
+      DateTime? testDate = null);
+
+    /// <summary>Updates an existing medical option category.</summary>
+    /// <param name="id">The unique identifier of the medical option category to update.</param>
+    /// <param name="updateCategoryPayload">The updated medical option category data.</param>
+    /// <returns>The updated medical option category.</returns>
+    Task<MedicalOptionCategoryDto> UpdateExistingCategoryById(int id,
+      UpdateMedicalOptionCategoryDto updateCategoryPayload);
+  }
 }

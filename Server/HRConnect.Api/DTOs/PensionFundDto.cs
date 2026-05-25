@@ -3,9 +3,9 @@
   public class PensionFundDto
   {
     public int PensionFundId { get; set; }
-    public string EmployeeId { get; set; }
+    public string EmployeeId { get; set; } = string.Empty;
 
-    public string EmployeeName { get; set; }
+    public string EmployeeName { get; set; } = string.Empty;
 
     public decimal MonthlySalary { get; set; }
 

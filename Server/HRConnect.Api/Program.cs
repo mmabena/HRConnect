@@ -3,7 +3,11 @@ using System.Text;
 using Audit.Core;
 using Audit.EntityFramework;
 using HRConnect.Api.Data;
+// using Resend;
 using HRConnect.Api.Interfaces;
+using HRConnect.Api.Interfaces.Notification;
+using HRConnect.Api.Interfaces.Payroll.Deduction;
+using HRConnect.Api.Interfaces.Payroll.Earning;
 using HRConnect.Api.Interfaces.Pension;
 using HRConnect.Api.Middleware;
 using HRConnect.Api.Models;
@@ -11,8 +15,11 @@ using HRConnect.Api.Repositories;
 using HRConnect.Api.Repository;
 using HRConnect.Api.Services;
 using HRConnect.Api.Utils;
-using HRConnect.Api.Utils.Jobs.Payroll;
+using HRConnect.Api.Utils.Factories;
+using HRConnect.Api.Utils.Jobs;
 using HRConnect.Api.Utils.Jobs.Notification;
+using HRConnect.Api.Utils.Jobs.Payroll;
+using HRConnect.Api.Utils.Notification;
 using HRConnect.Api.Utils.Payroll;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -21,12 +28,6 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using OfficeOpenXml;
 using Quartz;
-using HRConnect.Api.Interfaces.Notification;
-using HRConnect.Api.Utils.Factories;
-using HRConnect.Api.Utils.Notification;
-using HRConnect.Api.Interfaces.Payroll.Earning;
-using HRConnect.Api.Interfaces.Payroll.Deduction;
-using HRConnect.Api.Utils.Jobs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -94,7 +95,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
     {
-      options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!);
+      options.UseSqlServer(builder.Configuration.GetConnectionString("SomeeConnection")!);
       options.AddInterceptors(new AuditSaveChangesInterceptor());
     });
 
@@ -182,7 +183,7 @@ builder.Services.AddQuartz(q =>
   {
     store.UseSqlServer(options =>
         {
-          options.ConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
+          options.ConnectionString = builder.Configuration.GetConnectionString("SomeeConnection")!;
           options.TablePrefix = "quartz.QRTZ_";
         });
     store.UseSerializer<Quartz.Simpl.SystemTextJsonObjectSerializer>();
@@ -274,6 +275,11 @@ builder.Services.AddScoped<IDeductionService, DeductionService>();
 builder.Services.AddScoped<IEmployeeDeductionRepository, EmployeeDeductionRepository>();
 builder.Services.AddScoped<IEmployeeDeductionService, EmployeeDeductionService>();
 
+builder.Services.AddScoped<IMedicalOptionService,
+  MedicalOptionService>();
+builder.Services.AddScoped<IMedicalAidEligibilityService, MedicalAidEligibilityService>();
+builder.Services.AddScoped<IMedicalAidDeductionRepository, MedicalAidDeductionRepository>();
+builder.Services.AddScoped<IMedicalAidDeductionService, MedicalAidDeductionService>();
 builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowReact",

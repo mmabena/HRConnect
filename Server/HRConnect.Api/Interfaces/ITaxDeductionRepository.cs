@@ -1,9 +1,9 @@
 namespace HRConnect.Api.Repositories
 {
-  using HRConnect.Api.Models;
   using System;
   using System.Collections.Generic;
   using System.Threading.Tasks;
+  using HRConnect.Api.Models;
 
   /// <summary>
   /// Repository interface for accessing TaxTableUploads and TaxDeductions in the database.

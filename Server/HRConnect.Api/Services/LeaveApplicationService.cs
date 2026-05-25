@@ -71,7 +71,7 @@ namespace HRConnect.Api.Services
             {
                 EmployeeId = request.EmployeeId,
                 LeaveTypeId = request.LeaveTypeId,
-                Description = request.Description,
+                Description = request.Description!,
                 StartDate = request.StartDate,
                 EndDate = request.EndDate,
                 DaysRequested = daysRequested,

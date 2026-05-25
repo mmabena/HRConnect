@@ -2,8 +2,8 @@ namespace HRConnect.Api.Controllers
 {
     using HRConnect.Api.DTOs.JobGrade;
     using HRConnect.Api.Interfaces;
-    using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
 
     [ApiController]
     [Route("api/jobgrades")]

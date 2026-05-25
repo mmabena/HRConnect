@@ -1,11 +1,11 @@
 namespace HRConnect.Api.Repository
 {
+    using System.Collections.Generic;
+    using System.Threading.Tasks;
     using HRConnect.Api.Data;
     using HRConnect.Api.Interfaces;
     using HRConnect.Api.Models;
     using Microsoft.EntityFrameworkCore;
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
     public class OccupationalLevelRepository : IOccupationalLevelRepository
     {
         private readonly ApplicationDBContext _context;

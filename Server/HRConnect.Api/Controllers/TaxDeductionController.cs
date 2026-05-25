@@ -3,11 +3,11 @@ namespace HRConnect.Api.Controllers
   using System;
   using System.Collections.Generic;
   using System.Threading.Tasks;
-  using Microsoft.AspNetCore.Mvc;
-  using Microsoft.AspNetCore.Http;
   using HRConnect.Api.DTOs;
   using HRConnect.Api.Interfaces;
   using Microsoft.AspNetCore.Authorization;
+  using Microsoft.AspNetCore.Http;
+  using Microsoft.AspNetCore.Mvc;
 
   [ApiController]
   [Route("api/tax-deductions")]

@@ -1,7 +1,7 @@
 namespace HRConnect.Api.Repository
 {
-  using HRConnect.Api.Interfaces;
   using HRConnect.Api.Data;
+  using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models.Payroll;
   using Microsoft.EntityFrameworkCore;
 
@@ -67,7 +67,7 @@ namespace HRConnect.Api.Repository
 
     public Task UpdateRun(PayrollRun payrollRun)
     {
-      //Update the current run to be marked as Finalised 
+      //Update the current run to be marked as Finalised
       _context.PayrollRuns.Update(payrollRun);
 
       return Task.CompletedTask;

@@ -76,7 +76,7 @@
         // Check for overlap (next.min should be > current.max)
         if (current.salaryBracketMax.HasValue && next.salaryBracketMin.HasValue || 
             !(next is null)) {
-          if (next.salaryBracketMin <= current.salaryBracketMax.Value)
+          if (next.salaryBracketMin <= current.salaryBracketMax!.Value)
             return false;
         }
         

@@ -1,8 +1,8 @@
 namespace HRConnect.Api.Interfaces
 {
   using System.Threading.Tasks;
-  using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.DTOs.Payroll;
+  using HRConnect.Api.Models.Payroll;
 
   public interface IPayrollPeriodService
   {

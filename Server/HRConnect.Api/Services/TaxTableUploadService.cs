@@ -1,5 +1,10 @@
 namespace HRConnect.Api.Services
 {
+  using System;
+  using System.Collections.Generic;
+  using System.IO;
+  using System.Linq;
+  using System.Threading.Tasks;
   using HRConnect.Api.Data;
   using HRConnect.Api.DTOs;
   using HRConnect.Api.Interfaces;
@@ -9,11 +14,6 @@ namespace HRConnect.Api.Services
   using Microsoft.AspNetCore.Http;
   using Microsoft.EntityFrameworkCore;
   using OfficeOpenXml;
-  using System;
-  using System.Collections.Generic;
-  using System.IO;
-  using System.Linq;
-  using System.Threading.Tasks;
 
   /// <summary>
   /// This service is responsible for handling tax table upload operations which includes:

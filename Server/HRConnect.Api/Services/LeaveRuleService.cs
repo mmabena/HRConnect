@@ -4,8 +4,8 @@ namespace HRConnect.Api.Services
   using HRConnect.Api.DTOs;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
-  using Microsoft.EntityFrameworkCore;
   using HRConnect.Api.Utils;
+  using Microsoft.EntityFrameworkCore;
 
   public class LeaveRuleService : ILeaveRuleService
   {
@@ -53,7 +53,7 @@ namespace HRConnect.Api.Services
           .Include(e => e.Position)
           .Include(e => e.LeaveBalances)
           .Where(e =>
-              (new[] { 2, 3, 4, 6 }.Contains(e.Position.JobGradeId) &&
+              (new[] { 2, 3, 4, 6 }.Contains(e.Position!.JobGradeId) &&
                new[] { 2, 3, 4, 6 }.Contains(rule.JobGradeId))
               ||
               e.Position.JobGradeId == rule.JobGradeId)
@@ -108,7 +108,7 @@ namespace HRConnect.Api.Services
           .Include(e => e.LeaveBalances)
               .ThenInclude(lb => lb.LeaveType)
           .Where(e =>
-              (new[] { 2, 3, 4, 6 }.Contains(e.Position.JobGradeId) &&
+              (new[] { 2, 3, 4, 6 }.Contains(e.Position!.JobGradeId) &&
                new[] { 2, 3, 4, 6 }.Contains(rule.JobGradeId))
               ||
               e.Position.JobGradeId == rule.JobGradeId)

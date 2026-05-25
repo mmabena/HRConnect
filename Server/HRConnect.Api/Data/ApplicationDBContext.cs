@@ -1,14 +1,14 @@
 namespace HRConnect.Api.Data
 {
-  using HRConnect.Api.Models;
-  using HRConnect.Api.Models.Payroll;
-  using HRConnect.Api.Models.PayrollDeduction;
-  using HRConnect.Api.Models.CompanyContributions;
-  using HRConnect.Api.Models.Pension;
-  using Microsoft.EntityFrameworkCore;
   using AppAny.Quartz.EntityFrameworkCore.Migrations;
   using AppAny.Quartz.EntityFrameworkCore.Migrations.SqlServer;
+  using HRConnect.Api.Models;
+  using HRConnect.Api.Models.CompanyContributions;
+  using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Models.Payroll.Earning;
+  using HRConnect.Api.Models.PayrollDeduction;
+  using HRConnect.Api.Models.Pension;
+  using Microsoft.EntityFrameworkCore;
 
   public class ApplicationDBContext(DbContextOptions dbContextOptions) : DbContext(dbContextOptions)
   {
@@ -200,6 +200,19 @@ namespace HRConnect.Api.Data
         entity.Property(e => e.EffectiveTo);
       });
 
+      // Medical Aid Deduction Delete Behavior
+      modelBuilder.Entity<MedicalAidDeduction>()
+        .HasOne(m => m.MedicalOption)
+        .WithMany()
+        .HasForeignKey(m => m.MedicalOptionId)
+        .OnDelete(DeleteBehavior.NoAction);
+
+      modelBuilder.Entity<MedicalAidDeduction>()
+        .HasOne(m => m.MedicalOptionCategory)
+        .WithMany()
+        .HasForeignKey(m => m.MedicalCategoryId)
+        .OnDelete(DeleteBehavior.NoAction);
+
       // StatutoryContributionType defaults
       modelBuilder.Entity<StatutoryContributionType>().Property(e => e.EmployeeRate)
         .HasColumnType("decimal(18,4)")
@@ -239,7 +252,7 @@ namespace HRConnect.Api.Data
       modelBuilder.Entity<PayrollPeriod>().Property(p => p.IsLocked).IsConcurrencyToken();
       modelBuilder.Entity<PayrollRecord>().Property(p => p.IsLocked).IsConcurrencyToken();
 
-      // Medical Aid Deduction Delete Nehavior
+      // Medical Aid Deduction Delete Behavior
       modelBuilder.Entity<MedicalAidDeduction>()
         .HasOne(m => m.MedicalOption)
         .WithMany()
@@ -271,7 +284,6 @@ namespace HRConnect.Api.Data
         .HasForeignKey(po => po.PensionOptionId)
         .OnDelete(DeleteBehavior.Cascade)
         .IsRequired();
-
 
       modelBuilder.Entity<EmployeePensionEnrollment>().HasOne<PayrollRun>()
       .WithMany()
