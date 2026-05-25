@@ -181,16 +181,16 @@ namespace HRConnect.Tests
           new JobGrade { JobGradeId = 1, Name = "G1" },
           new JobGrade { JobGradeId = 2, Name = "G2" });
       context.JobGradeGroupMaps.AddRange(
-new JobGradeGroupMap
-{
-  JobGradeId = 1,
-  GroupKey = "GROUP_A"
-},
-new JobGradeGroupMap
-{
-  JobGradeId = 2,
-  GroupKey = "SENIOR"
-});
+          new JobGradeGroupMap
+          {
+            JobGradeId = 1,
+            GroupKey = "GROUP_A"
+          },
+          new JobGradeGroupMap
+          {
+            JobGradeId = 2,
+            GroupKey = "SENIOR"
+          });
 
       context.OccupationalLevels.Add(new OccupationalLevel { OccupationalLevelId = 1, Description = "Level 1" });
 

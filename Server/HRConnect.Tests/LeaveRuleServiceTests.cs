@@ -110,8 +110,6 @@ namespace HRConnect.Tests
             return employee;
         }
 
-        // ---------------- VALIDATION ----------------
-
         [Fact]
         public async Task ShouldThrow_WhenNegativeDays()
         {
@@ -153,11 +151,9 @@ namespace HRConnect.Tests
                 service.UpdateLeaveEntitlementRuleAsync(new UpdateLeaveRuleRequest
                 {
                     RuleId = 1,
-                    NewDaysAllocated = 1 // less than taken = 2
+                    NewDaysAllocated = 1 
                 }));
         }
-
-        // ---------------- SUCCESS CASE ----------------
 
         [Fact]
         public async Task ShouldUpdateRuleAndRecalculate()
@@ -180,9 +176,6 @@ namespace HRConnect.Tests
             Assert.Equal(20, rule.DaysAllocated);
             Assert.Equal(20, segment.AnnualEntitlement);
         }
-
-        // ---------------- EMAIL ----------------
-
         [Fact]
         public async Task ShouldSendEmails_OnRuleChange()
         {
@@ -201,8 +194,6 @@ namespace HRConnect.Tests
             Assert.Equal(1, email.Count);
         }
 
-        // ---------------- SERVICE FILTERING ----------------
-
         [Fact]
         public async Task ShouldOnlyUpdateMatchingJobGrade()
         {
@@ -210,10 +201,8 @@ namespace HRConnect.Tests
             var email = new TrackingEmailService();
             var service = CreateService(db, email);
 
-            // Employee in correct grade
             await SeedEmployee(db);
 
-            // Employee in different grade
             db.JobGrades.Add(new JobGrade { JobGradeId = 2, Name = "G2" });
             db.JobGradeGroupMaps.Add(new JobGradeGroupMap
             {
@@ -248,7 +237,6 @@ namespace HRConnect.Tests
                 NewDaysAllocated = 25
             });
 
-            // Only one employee should be affected
             Assert.Equal(1, email.Count);
         }
 
@@ -261,7 +249,6 @@ namespace HRConnect.Tests
 
             var employee = await SeedEmployee(db);
 
-            // Update rule to require higher service
             var rule = db.LeaveEntitlementRules.First();
             rule.MinYearsService = 5;
 
@@ -273,11 +260,8 @@ namespace HRConnect.Tests
                 NewDaysAllocated = 20
             });
 
-            // No emails because employee not eligible
             Assert.Equal(0, email.Count);
         }
-
-        // ---------------- EDGE ----------------
 
         [Fact]
         public async Task ShouldThrow_WhenInvalidServiceRange()

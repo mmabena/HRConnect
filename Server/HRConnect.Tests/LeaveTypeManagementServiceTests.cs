@@ -35,9 +35,9 @@ namespace HRConnect.Tests
             var context = GetInMemoryDb();
 
             context.LeaveTypes.AddRange(
-    new LeaveType { Id = 1, Name = "Annual", Code = "AL", Description = "Annual Leave", IsActive = true },
-    new LeaveType { Id = 2, Name = "Sick", Code = "SL", Description = "Sick Leave", IsActive = true }
-);
+            new LeaveType { Id = 1, Name = "Annual", Code = "AL", Description = "Annual Leave", IsActive = true },
+            new LeaveType { Id = 2, Name = "Sick", Code = "SL", Description = "Sick Leave", IsActive = true }
+        );
 
             await context.SaveChangesAsync();
 
@@ -79,7 +79,14 @@ namespace HRConnect.Tests
         public async Task CreateLeaveTypeShouldCreateSuccessfully()
         {
             var context = GetInMemoryDb();
+            context.JobGradeGroupMaps.Add(
+                new JobGradeGroupMap
+                {
+                    JobGradeId = 1,
+                    GroupKey = "GROUP_A"
+                });
 
+            await context.SaveChangesAsync();
             var service = CreateService(context);
 
             var request = new CreateLeaveTypeRequest
@@ -194,7 +201,14 @@ namespace HRConnect.Tests
             });
 
             await context.SaveChangesAsync();
+            context.JobGradeGroupMaps.Add(
+                new JobGradeGroupMap
+                {
+                    JobGradeId = 1,
+                    GroupKey = "GROUP_A"
+                });
 
+            await context.SaveChangesAsync();
             var service = CreateService(context);
 
             var request = new UpdateLeaveTypeRequest

@@ -41,8 +41,6 @@ namespace HRConnect.Tests
             return new LeaveProcessingService(db, email, balanceService);
         }
 
-        // ---------------- SICK LEAVE ----------------
-
         [Fact]
         public async Task SickLeave_ShouldAccruePerMonth_Under6Months()
         {
@@ -162,8 +160,6 @@ namespace HRConnect.Tests
             Assert.Equal(30, balance.AccruedDays);
         }
 
-        // ---------------- FAMILY RESPONSIBILITY ----------------
-
         [Fact]
         public async Task FamilyResponsibility_ShouldCallBalanceService()
         {
@@ -181,11 +177,8 @@ namespace HRConnect.Tests
 
             await service.RecalculateAllFamilyResponsibilityLeaveAsync();
 
-            // No exception = pass (delegation test)
             Assert.True(true);
         }
-
-        // ---------------- CARRYOVER EMAIL ----------------
 
         [Fact]
         public async Task CarryOverNotification_ShouldSendEmails_WhenAboveThreshold()
@@ -220,15 +213,9 @@ namespace HRConnect.Tests
 
             await db.SaveChangesAsync();
 
-            // Force December 1 logic bypass by calling directly
             await service.ProcessCarryOverNotificationAsync();
-
-            // Might be zero if not Dec 1 — valid behavior
             Assert.True(email.EmailsSent >= 0);
         }
-
-        // ---------------- ANNUAL RESET ----------------
-
         [Fact]
         public async Task AnnualReset_ShouldApplyCarryoverCap()
         {
@@ -360,11 +347,8 @@ namespace HRConnect.Tests
                 AccruedDays = 10,
                 TakenDays = 2
             });
-
             await db.SaveChangesAsync();
-
             await service.ProcessAnnualResetAsync(2025);
-
             Assert.Single(db.AnnualLeaveAccrualHistories);
         }
     }

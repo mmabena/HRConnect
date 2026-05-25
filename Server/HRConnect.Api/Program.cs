@@ -245,6 +245,7 @@ builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 builder.Services.AddScoped<IPensionFundRepository, PensionFundRepository>();
 builder.Services.AddScoped<ILeaveTypeManagementService, LeaveTypeManagementService>();
 builder.Services.AddScoped<ILeaveApplicationService, LeaveApplicationService>();
+builder.Services.AddScoped<IJobGradeGroupService, JobGradeGroupService>();
 
 builder.Services.AddHostedService<LeaveAutomationBackgroundService>();
 
