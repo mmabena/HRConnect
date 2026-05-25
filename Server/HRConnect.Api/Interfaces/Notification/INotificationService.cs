@@ -12,16 +12,12 @@ namespace HRConnect.Api.Interfaces.Notification
       NotificationSeverity severity,
       int userId
     );
-    Task<IEnumerable<NotificationDto>> GetAllEmployeeNotificationsByTypeAsync(
-      NotificationType type,
-      int userId
-    );
-
+    Task<IEnumerable<NotificationDto>> GetAllEmployeeNotificationsByTypeAsync
+      (NotificationType type, int userId);
     Task TryCreateAndDispatch(Notification notification);
     Task<bool> DeleteAllReadAsync();
     Task<bool> DeleteAllByEmployeeIdAsync(int userId);
     Task<bool> DeleteNotificationByIdAsync(int userId, int id);
-
     Task MarkAllAsReadByUserId(int userId);
   }
 }

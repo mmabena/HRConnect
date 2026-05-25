@@ -5,7 +5,6 @@ namespace HRConnect.Api.Repository
   using HRConnect.Api.Models;
   using HRConnect.Api.Data;
   using Microsoft.EntityFrameworkCore;
-  using Castle.Components.DictionaryAdapter.Xml;
 
   public class NotificationRepository : INotificationRepository
   {
@@ -129,7 +128,7 @@ namespace HRConnect.Api.Repository
       using var tsx = await _context.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
 
       var existsUnread = await TryAndAquireAsync(notification.IdempotencyKey);
-      if (existsUnread == null)
+      if (existsUnread != null)
         return existsUnread;
 
       _ = await _context.Notifications.AddAsync(notification);

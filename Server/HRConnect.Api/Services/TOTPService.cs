@@ -23,12 +23,7 @@ namespace HRConnect.Api.Services
     private readonly ITOTPRepository _totpRepo;
     private readonly IUserRepository _userRepo;
     private readonly IMFAUserSecretsService _mfaService;
-    private readonly IEmployeeService _employeeService;
-    private readonly INotificationFactory _notiFactory;
-    private readonly int _stepSeconds;
-    public TOTPService(ITOTPRepository totpRepo, IUserRepository userRepo,
-    IMFAUserSecretsService mfaService, IEmployeeService employeeService,
-     INotificationFactory notiFactory, IConfiguration configuration
+    private readonly IEmployeeService _employeeService; private readonly INotificationFactory _notiFactory; private readonly int _stepSeconds; public TOTPService(ITOTPRepository totpRepo, IUserRepository userRepo, IMFAUserSecretsService mfaService, IEmployeeService employeeService, INotificationFactory notiFactory, IConfiguration configuration
      )
     {
       _totpRepo = totpRepo;
@@ -128,7 +123,7 @@ namespace HRConnect.Api.Services
         Message = $"You Role Has Been Updated from {user.Role} to {user.TempRole}",
         EmployeeId = employee.EmployeeId,
         Type = NotificationType.RoleUpdate,
-        Severity = NotificationSeverity.Critical,
+        Severity = NotificationSeverity.Warning,
         DeliveryChannel = DeliveryChannel.InApp,
         DueDate = DateTime.Now
       };
@@ -146,7 +141,7 @@ namespace HRConnect.Api.Services
         Message = message,
         EmployeeId = employee.EmployeeId,
         Type = NotificationType.RoleUpdate,
-        Severity = NotificationSeverity.Critical,
+        Severity = NotificationSeverity.Information,
         DeliveryChannel = DeliveryChannel.Email,
         DueDate = DateTime.Now
       };

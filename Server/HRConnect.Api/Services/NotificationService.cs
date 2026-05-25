@@ -109,7 +109,6 @@ namespace HRConnect.Api.Services
       {
         created = await _notificationRepository.TryCreateUnreadAsync(notification);
       }
-      else if (isWarning)
       {
         // #line 115 "(===================>NotificationService.cs)"
         //         Console.ForegroundColor = ConsoleColor.Blue;
@@ -126,7 +125,6 @@ namespace HRConnect.Api.Services
       }
       _ = await _notificationRepository.AddNotificationAsync(notification);
       await _notificationDispatcher.DispatchNotificationAsync(notification);
-      // return created?.ToNotificationDto() ?? null;
     }
 
     public async Task<bool> DeleteAllReadAsync()
@@ -169,7 +167,5 @@ namespace HRConnect.Api.Services
 
       return employee.EmployeeId;
     }
-
-
   }
 }
