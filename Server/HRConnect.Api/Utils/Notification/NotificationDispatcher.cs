@@ -19,14 +19,13 @@ namespace HRConnect.Api.Utils.Notification
         {
           await strategy.SendNotificationAsync(notification);
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
-          Console.WriteLine($"Failed To Send Notifaction Through Channel {strategy.Name}");
-          Console.WriteLine($"{ex.Message}");
+          throw new InvalidDataException($"Failed To Send/Dispatch Through Channel {ex?.Message}");
         }
       }
-
     }
+
     /// <summary>
     /// Resolves injected dependencies to only enumerate through delivery channels that are needed for the batch of notifications going out 
     /// </summary>

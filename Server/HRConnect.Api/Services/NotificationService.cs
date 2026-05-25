@@ -109,13 +109,6 @@ namespace HRConnect.Api.Services
       {
         created = await _notificationRepository.TryCreateUnreadAsync(notification);
       }
-      {
-        // #line 115 "(===================>NotificationService.cs)"
-        //         Console.ForegroundColor = ConsoleColor.Blue;
-        //         Console.WriteLine($"SHOULD update this notification");
-        //         created = await _notificationRepository.AddNotificationAsync(notification);
-        // #line default 
-      }
 
       if (created != null)
       {
@@ -157,10 +150,13 @@ namespace HRConnect.Api.Services
       return true;
     }
 
+    ///<summary>
+    ///Helper function to resolve an <see cref="Employee.EmployeeId"> from a given 
+    ///<see cref="User.UserId"> as the notification system uses EmployeeIds
+    ///<summary>
     private async Task<string> ResolveEmployeeId(int userId)
     {
       UserRegisterDto user = await _userHttpClient.ResolveUserFromId(userId);
-      Console.WriteLine($"Email Being Used To Fetch Employee: {user.Email}");
       EmployeeDto? employee = await _employeeService.GetEmployeeByEmailAsync(user.Email);
       if (employee == null)
         return string.Empty;

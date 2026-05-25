@@ -95,9 +95,14 @@ namespace HRConnect.Api.Services
 
         await package.SaveAsAsync(new FileInfo(filePath));
       }
-      catch (Exception ex)
+      catch (IOException exception)
       {
-        Console.WriteLine($"FAILED TO WRITE TO PATH DIRECTORY \n{ex}");
+        throw new IOException($"Failed To Create Monthly Reports: {exception.Message}");
+      }
+      catch (Exception exception)
+      {
+        Console.WriteLine($"FAILED TO WRITE TO PATH DIRECTORY \n{exception}");
+        throw exception;
       }
     }
   }
