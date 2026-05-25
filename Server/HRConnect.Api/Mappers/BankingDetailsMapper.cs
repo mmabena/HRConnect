@@ -6,7 +6,7 @@ namespace HRConnect.Api.Mappers
 
     public static class BankingDetailsMapper
     {
-        // CREATE → ENTITY
+        
         public static BankingDetail ToBankingDetails(this CreateBankingDetailDto dto, string encryptedAccount, string hash, string last4)
         {
             return new BankingDetail
@@ -46,11 +46,10 @@ namespace HRConnect.Api.Mappers
                 BankName = entity.BankName,
                 AccountType = entity.AccountType,
 
-                // For security reasons, we do not return the actual account number.
-                //  Instead, we return a masked version or simply indicate that it exists.
+               
                 AccountNumber = "**** **** " + entity.AccountNumberLast4Digits,
 
-                // Include the branch code if available
+              
                 BranchCode = entity.BankBranchCode?.UniversalCode ?? "N/A",
                 NetSalary = entity.NetSalary,
                 IsActive = entity.IsActive,

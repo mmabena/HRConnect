@@ -2,14 +2,18 @@ namespace HRConnect.Api.Hubs
 {
     using Microsoft.AspNetCore.SignalR;
     using System.Threading.Tasks;
+    using Microsoft.AspNetCore.Authorization;
+
+    [Authorize(Roles = "SuperUser")]
     public class UserPositionHub : Hub
     {
-        
-        // This method will be called by the client when an employee's position changes
-        public async Task SendPositionUpdate(int employeeId, string newPosition)
+        public async Task SendPositionUpdate(string employeeId, string newPosition)
         {
-            // Broadcast to all connected clients except the sender
-            await Clients.Others.SendAsync("ReceivePositionUpdate", employeeId, newPosition);
+            await Clients.Others.SendAsync(
+                "ReceivePositionUpdate",
+                employeeId,
+                newPosition
+            );
         }
     }
 }
