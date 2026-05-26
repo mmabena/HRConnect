@@ -1,4 +1,3 @@
-/*
 namespace HRConnect.Tests
 {
   using Moq;
@@ -307,4 +306,3 @@ namespace HRConnect.Tests
     }
   }
 }
-*/
