@@ -1,15 +1,12 @@
 namespace HRConnect.Api.Controllers
 {
+  using System;
+  using System.Threading.Tasks;
   using HRConnect.Api.DTOs;
   using HRConnect.Api.Interfaces;
+  using Microsoft.AspNetCore.Authorization;
   using Microsoft.AspNetCore.Http;
   using Microsoft.AspNetCore.Mvc;
-  using System;
-  using System.Globalization;
-  using System.IO;
-  using System.Linq;
-  using System.Threading.Tasks;
-  using Microsoft.AspNetCore.Authorization;
 
   /// <summary>
   /// Handles tax table retrieval and upload operations

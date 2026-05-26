@@ -3,14 +3,12 @@ namespace HRConnect.Api.Services
   using System;
   using System.Collections.Generic;
   using System.Linq;
-  using HRConnect.Api.DTOs;
-  using Microsoft.AspNetCore.DataProtection;
-  using Moq;
-  using HRConnect.Api.Models;
-  using HRConnect.Api.Data;
-  using Microsoft.EntityFrameworkCore;
   using System.Threading.Tasks;
+  using HRConnect.Api.Data;
+  using HRConnect.Api.DTOs;
   using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Models;
+  using Microsoft.EntityFrameworkCore;
 
   public class LeaveTypeManagementService : ILeaveTypeManagementService
   {

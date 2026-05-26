@@ -1,8 +1,6 @@
 namespace HRConnect.Tests
 {
   using System;
-  using Moq;
-  using System.Collections.Generic;
   using System.Linq;
   using System.Threading.Tasks;
   using HRConnect.Api.Data;
@@ -12,12 +10,11 @@ namespace HRConnect.Tests
   using HRConnect.Api.Services;
   using Microsoft.EntityFrameworkCore;
   using Xunit;
-  using HRConnect.Api.Interfaces;
   using HRConnect.Api.Utils;
   using HRConnect.Api.DTOs.Employee;
   using HRConnect.Api.Repository;
-  using Microsoft.AspNetCore.Identity;
-  using System.Reflection.Metadata;
+  using Moq;
+  using Xunit;
 
   public class LeaveBalanceServiceTests
   {

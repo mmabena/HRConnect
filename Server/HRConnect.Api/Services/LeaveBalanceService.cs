@@ -1,11 +1,12 @@
+#pragma warning disable CS8634 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match 'class' constraint.
 namespace HRConnect.Api.Services
 {
   using HRConnect.Api.Data;
   using HRConnect.Api.DTOs;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
-  using Microsoft.EntityFrameworkCore;
   using HRConnect.Api.Utils;
+  using Microsoft.EntityFrameworkCore;
 
   public class LeaveBalanceService : ILeaveBalanceService
   {

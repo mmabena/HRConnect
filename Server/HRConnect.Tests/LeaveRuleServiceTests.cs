@@ -1,17 +1,17 @@
 namespace HRConnect.Tests
 {
-  using Moq;
   using System;
   using System.Linq;
   using System.Threading.Tasks;
-  using Microsoft.AspNetCore.DataProtection;
   using HRConnect.Api.Data;
   using HRConnect.Api.DTOs;
   using HRConnect.Api.Models;
   using HRConnect.Api.Services;
+  using HRConnect.Api.Utils;
   using Microsoft.EntityFrameworkCore;
   using Xunit;
-  using HRConnect.Api.Utils;
+  using Microsoft.AspNetCore.DataProtection;
+  using Moq;
 
   public class LeaveRuleServiceTests
   {
@@ -28,13 +28,10 @@ namespace HRConnect.Tests
 
     private static ApplicationDBContext GetDb()
     {
-      // return new ApplicationDBContext(
-      //     new DbContextOptionsBuilder<ApplicationDBContext>()
-      //         .UseInMemoryDatabase(Guid.NewGuid().ToString())
-      //         .Options);
+
       var options = new DbContextOptionsBuilder<ApplicationDBContext>()
-   .UseInMemoryDatabase(Guid.NewGuid().ToString())
-   .Options;
+.UseInMemoryDatabase(Guid.NewGuid().ToString())
+.Options;
       // Create a mock IDataProtectionProvider
       var mockProvider = new Mock<IDataProtectionProvider>();
       // Setup CreateProtector to return a dummy protector

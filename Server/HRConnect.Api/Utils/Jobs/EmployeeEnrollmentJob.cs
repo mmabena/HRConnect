@@ -1,9 +1,9 @@
 ﻿namespace HRConnect.Api.Utils.Jobs
 {
   using System.Threading.Tasks;
-  using Quartz;
-  using HRConnect.Api.Interfaces.Pension;
   using HRConnect.Api.Interfaces.Payroll.Earning;
+  using HRConnect.Api.Interfaces.Pension;
+  using Quartz;
 
   public class EmployeeEnrollmentJob(IServiceProvider serviceProvider) : IJob
   {

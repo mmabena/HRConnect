@@ -1,7 +1,7 @@
 namespace HRConnect.Api.Interfaces
 {
-  using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.DTOs.Payroll;
+  using HRConnect.Api.Models.Payroll;
 
   /// <summary>
   /// Payroll Service functionality needed for adding payroll records to the payroll.
@@ -44,7 +44,8 @@ namespace HRConnect.Api.Interfaces
     /// <exception cref="InvalidDataException">Invalid Type Expected 'PayrollRecord'
     /// </exception>
     Task AddRecordToCurrentRunAsync(PayrollRecord payrollRecord, string employeeId);
-    Task AddRecordsCollectionToRunAsync(IList<PayrollRecord> recordsCollection, string? employeeId);
+
+    Task AddRecordsCollectionToRunAsync(IList<PayrollRecord> recordsCollection, string? employeeId=null);
     // Task<IEnumerable<PayrollRun?>> GetAllPayRecordsFromPayRunAsync(int payrollRunNumber);
     Task LockAllOlderPayrollRuns();
   }

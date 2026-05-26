@@ -4,6 +4,9 @@ using Audit.EntityFramework;
 using HRConnect.Api.Data;
 using HRConnect.Api.Interfaces;
 using HRConnect.Api.Interfaces.TOTP;
+using HRConnect.Api.Interfaces.Notification;
+using HRConnect.Api.Interfaces.Payroll.Deduction;
+using HRConnect.Api.Interfaces.Payroll.Earning;
 using HRConnect.Api.Interfaces.Pension;
 using HRConnect.Api.Middleware;
 using HRConnect.Api.Models;
@@ -11,8 +14,11 @@ using HRConnect.Api.Repositories;
 using HRConnect.Api.Repository;
 using HRConnect.Api.Services;
 using HRConnect.Api.Utils;
-using HRConnect.Api.Utils.Jobs.Payroll;
+using HRConnect.Api.Utils.Factories;
+using HRConnect.Api.Utils.Jobs;
 using HRConnect.Api.Utils.Jobs.Notification;
+using HRConnect.Api.Utils.Jobs.Payroll;
+using HRConnect.Api.Utils.Notification;
 using HRConnect.Api.Utils.Payroll;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -21,12 +27,6 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using OfficeOpenXml;
 using Quartz;
-using HRConnect.Api.Interfaces.Notification;
-using HRConnect.Api.Utils.Factories;
-using HRConnect.Api.Utils.Notification;
-using HRConnect.Api.Interfaces.Payroll.Earning;
-using HRConnect.Api.Interfaces.Payroll.Deduction;
-using HRConnect.Api.Utils.Jobs;
 using System.Threading.RateLimiting;
 using HRConnect.Api.Utils.Notification.Channels;
 
@@ -283,6 +283,13 @@ builder.Services.AddHttpClient<IUserHttpClient, UserHttpClient>((provider, clien
   IConfiguration config = provider.GetRequiredService<IConfiguration>();
   client.BaseAddress = new Uri(config["Services:Api"]!);
 });
+
+builder.Services.AddScoped<IMedicalOptionService,
+  MedicalOptionService>();
+builder.Services.AddScoped<IMedicalAidEligibilityService, MedicalAidEligibilityService>();
+builder.Services.AddScoped<IMedicalAidDeductionRepository, MedicalAidDeductionRepository>();
+builder.Services.AddScoped<IMedicalAidDeductionService, MedicalAidDeductionService>();
+
 builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowReact",
@@ -342,4 +349,3 @@ app.UseAuthorization();
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseRateLimiter();
 app.MapControllers();
-app.Run();

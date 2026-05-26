@@ -1,11 +1,11 @@
 namespace HRConnect.Api.Repositories
 {
-  using HRConnect.Api.Data;
-  using HRConnect.Api.Models;
-  using Microsoft.EntityFrameworkCore;
   using System.Collections.Generic;
   using System.Linq;
   using System.Threading.Tasks;
+  using HRConnect.Api.Data;
+  using HRConnect.Api.Models;
+  using Microsoft.EntityFrameworkCore;
 
   /// <summary>
   /// Repository implementation for EF Core access to TaxDeductions and related TaxTableUploads.

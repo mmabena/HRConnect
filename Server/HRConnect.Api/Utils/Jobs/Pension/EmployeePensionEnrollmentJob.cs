@@ -1,8 +1,8 @@
 ﻿namespace HRConnect.Api.Utils.Jobs.Pension
 {
+  using global::Quartz;
   using System.Text.Json;
   using System.Threading.Tasks;
-  using Quartz;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
   using HRConnect.Api.Models.Payroll;

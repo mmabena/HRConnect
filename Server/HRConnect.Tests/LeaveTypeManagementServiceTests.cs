@@ -2,17 +2,16 @@ namespace HRConnect.Tests
 {
   using System;
   using System.Collections.Generic;
-  using System.Linq;
   using System.Threading.Tasks;
   using HRConnect.Api.Data;
   using HRConnect.Api.DTOs;
   using Microsoft.AspNetCore.DataProtection;
+  using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
   using HRConnect.Api.Services;
   using Microsoft.EntityFrameworkCore;
-  using Xunit;
   using Moq;
-  using HRConnect.Api.Interfaces;
+  using Xunit;
 
   public class LeaveTypeManagementServiceTests
   {

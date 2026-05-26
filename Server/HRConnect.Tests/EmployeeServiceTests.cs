@@ -9,17 +9,14 @@ namespace HRConnect.Tests
   using HRConnect.Api.DTOs.Employee;
   using System;
   using System.Collections.Generic;
-  using System.Threading.Tasks;
-  using Microsoft.EntityFrameworkCore;
-  using HRConnect.Api.Data;
-  using System.Threading;
-  using Microsoft.EntityFrameworkCore.Storage;
-  using HRConnect.Api.Utils;
   using System.Linq;
+  using System.Threading;
+  using System.Threading.Tasks;
+  using HRConnect.Api.Data;
+  using HRConnect.Api.Utils;
   using Microsoft.AspNetCore.Identity;
-  using System.Reflection.Metadata;
-  using System.ComponentModel.DataAnnotations;
-  using System.Runtime.Serialization;
+  using Microsoft.EntityFrameworkCore;
+  using Microsoft.EntityFrameworkCore.Storage;
 
   public class EmployeeServiceTests : IDisposable
   {

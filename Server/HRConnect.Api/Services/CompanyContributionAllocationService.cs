@@ -2,9 +2,9 @@ namespace HRConnect.Api.Services
 {
   using HRConnect.Api.Data;
   using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Models;
   using HRConnect.Api.Models.CompanyContributions;
   using HRConnect.Api.Models.Payroll;
-  using HRConnect.Api.Models;
   using Microsoft.EntityFrameworkCore;
 
   public class CompanyContributionAllocationService : ICompanyContributionAllocationService
@@ -19,6 +19,7 @@ namespace HRConnect.Api.Services
       _context = context;
       _CompanyContributionRepo = CompanyContributionRepo;
     }
+
     /// <summary>
     /// Allocates company contribution records for eligible employees.
     /// </summary>

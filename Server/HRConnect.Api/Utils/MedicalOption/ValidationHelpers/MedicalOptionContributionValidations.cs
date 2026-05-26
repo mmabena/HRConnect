@@ -1,4 +1,4 @@
-﻿namespace HRConnect.Api.Utils.MedicalOption.ValidationHelpers
+namespace HRConnect.Api.Utils.MedicalOption.ValidationHelpers
 {
   using DTOs.MedicalOption;
   using Models;
@@ -130,12 +130,12 @@
         var childTotal = entity.MonthlyRiskContributionChild +
                          entity.MonthlyMsaContributionChild!.Value;
 
-        if (Math.Abs((decimal)(adultTotal!
-                               - entity.TotalMonthlyContributionsAdult)) > tolerance)
+        if (Math.Abs((decimal)(adultTotal
+                               - entity.TotalMonthlyContributionsAdult)!) > tolerance)
           return false;
 
-        if (Math.Abs((decimal)(childTotal!
-                               - entity.TotalMonthlyContributionsChild)) > tolerance)
+        if (Math.Abs((decimal)(childTotal
+                               - entity.TotalMonthlyContributionsChild)!) > tolerance)
           return false;
 
         if (hasPrincipal)
@@ -150,13 +150,13 @@
       else
       {
         // Risk should equal Total when no MSA
-        if (Math.Abs((decimal)(entity.MonthlyRiskContributionAdult!
-                               - entity.TotalMonthlyContributionsAdult)) >
+        if (Math.Abs((decimal)(entity.MonthlyRiskContributionAdult
+                               - entity.TotalMonthlyContributionsAdult)!) >
             tolerance)
           return false;
 
-        if (Math.Abs((decimal)(entity.MonthlyRiskContributionChild!
-                               - entity.TotalMonthlyContributionsChild)) >
+        if (Math.Abs((decimal)(entity.MonthlyRiskContributionChild
+                               - entity.TotalMonthlyContributionsChild)!) >
             tolerance)
           return false;
 

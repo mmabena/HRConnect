@@ -1,10 +1,10 @@
 namespace HRConnect.Api.Services
 {
-  using System.Text;
-  using System.Security.Claims;
-  using System.IdentityModel.Tokens.Jwt;
-  using HRConnect.Api.Interfaces;
   using System.Collections.Concurrent;
+  using System.IdentityModel.Tokens.Jwt;
+  using System.Security.Claims;
+  using System.Text;
+  using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
   using Microsoft.AspNetCore.Identity;
   using Microsoft.IdentityModel.Tokens;

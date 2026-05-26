@@ -16,7 +16,7 @@ namespace HRConnect.Api.Repository
     public async Task<bool> FindAllocatedContribution(int payrollRunId)
     {
       return await _context.EmployeeCompanyContributions
-           .AnyAsync(e => e.PayrollRunId == payrollRunId);
+        .AnyAsync(e => e.PayrollRunId == payrollRunId);
     }
 
     public async Task<List<CompanyContribution>> GetAllAsync()

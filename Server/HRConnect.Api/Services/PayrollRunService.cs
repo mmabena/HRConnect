@@ -1,9 +1,9 @@
 namespace HRConnect.Api.Services
 {
-  using HRConnect.Api.Interfaces;
-  using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.DTOs.Payroll;
+  using HRConnect.Api.Interfaces;
   using HRConnect.Api.Mappers.Payroll;
+  using HRConnect.Api.Models.Payroll;
 
   public class PayrollRunService : IPayrollRunService
   {
@@ -100,6 +100,7 @@ namespace HRConnect.Api.Services
         var empId = !string.IsNullOrWhiteSpace(employeeId)
         ? employeeId
         : record.EmployeeId;
+
 
         record.PayrollRun = currentPayRun;
         record.EmployeeId = empId;

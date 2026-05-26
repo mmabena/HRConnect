@@ -1,10 +1,11 @@
-﻿namespace HRConnect.Tests
+namespace HRConnect.Tests
 {
+  using System.Threading.Tasks;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
   using HRConnect.Api.Services;
   using Moq;
-
+  using Xunit;
 
   public class PensionFundServiceTests
   {

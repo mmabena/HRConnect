@@ -17,8 +17,6 @@ namespace HRConnect.Api.Controllers
     {
       _jobGradeService = jobGradeService;
     }
-
-    // GET /api/jobgrade
     [HttpGet]
     public async Task<List<JobGradeDto>> GetAllJobGrades()
     {
@@ -37,7 +35,6 @@ namespace HRConnect.Api.Controllers
       return Ok(jobGrade);
     }
 
-    // POST /api/jobgrade
     [HttpPost]
     public async Task<ActionResult<JobGradeDto>> CreateJobGrade([FromBody] CreateJobGradeDto createJobGradeDto)
     {
@@ -49,7 +46,6 @@ namespace HRConnect.Api.Controllers
           createdJobGrade);
     }
 
-    // PUT /api/jobgrade/{id}
     [HttpPut("{id}")]
     public async Task<ActionResult<JobGradeDto>> UpdateJobGrade(int id, [FromBody] UpdateJobGradeDto updateJobGradeDto)
     {

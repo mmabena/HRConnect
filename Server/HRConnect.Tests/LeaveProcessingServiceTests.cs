@@ -6,7 +6,6 @@ namespace HRConnect.Tests
   using Microsoft.AspNetCore.DataProtection;
   using System.Threading.Tasks;
   using HRConnect.Api.Data;
-  using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
   using HRConnect.Api.Services;
   using Microsoft.EntityFrameworkCore;

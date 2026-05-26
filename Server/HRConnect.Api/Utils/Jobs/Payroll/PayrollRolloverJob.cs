@@ -3,13 +3,13 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
   using global::Quartz;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Interfaces.Notification;
+  using HRConnect.Api.Interfaces.Payroll.Deduction;
+  using HRConnect.Api.Interfaces.Payroll.Earning;
   using HRConnect.Api.Interfaces.Pension;
   using HRConnect.Api.Models;
   using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Models.PayrollDeduction;
   using Microsoft.Extensions.DependencyInjection;
-  using HRConnect.Api.Interfaces.Payroll.Earning;
-  using HRConnect.Api.Interfaces.Payroll.Deduction;
 
   /// <summary>
   /// Payroll Rollover Job class to handle the locking, rolling over and 
@@ -140,12 +140,12 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
       DateTime currentDate = DateTime.Now;
       int runId = ((currentDate.Month + 8) % 12) + 1;
 
-      //   if (currentDate.Date !=
-      // new DateTime(currentDate.Year, currentDate.Month,
-      // DateTime.DaysInMonth(currentDate.Year, currentDate.Month)))
-      //   {
-      //     return;
-      //   }
+      if (currentDate.Date !=
+        new DateTime(currentDate.Year, currentDate.Month,
+        DateTime.DaysInMonth(currentDate.Year, currentDate.Month)))
+      {
+        return;
+      }
 
       try
       {

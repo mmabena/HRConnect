@@ -7,9 +7,9 @@ namespace HRConnect.Api.Services
   using HRConnect.Api.Data;
   using HRConnect.Api.DTOs.User;
   using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Mappers;
   using HRConnect.Api.Models;
   using HRConnect.Api.Utils;
-  using HRConnect.Api.Mappers;
   using Microsoft.EntityFrameworkCore;
   using HRConnect.Api.Interfaces.TOTP;
 

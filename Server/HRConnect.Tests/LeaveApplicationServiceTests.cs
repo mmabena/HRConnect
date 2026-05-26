@@ -9,7 +9,6 @@ namespace HRConnect.Tests
   using HRConnect.Api.DTOs;
   using HRConnect.Api.Models;
   using HRConnect.Api.Services;
-  using HRConnect.Api.Interfaces;
   using Microsoft.EntityFrameworkCore;
   using HRConnect.Api.Utils;
   using Microsoft.Extensions.Configuration;

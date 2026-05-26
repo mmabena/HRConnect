@@ -2,16 +2,16 @@ namespace HRConnect.Api.Services
 {
   using System;
   using System.Collections.Generic;
+  using System.Globalization;
   using System.Linq;
+  using System.Security.Cryptography;
   using System.Threading.Tasks;
+  using HRConnect.Api.Data;
   using HRConnect.Api.DTOs.Employee;
   using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Mappers;
   using HRConnect.Api.Models;
   using HRConnect.Api.Utils;
-  using System.Globalization;
-  using HRConnect.Api.Mappers;
-  using System.Security.Cryptography;
-  using HRConnect.Api.Data;
   using Microsoft.AspNetCore.Identity;
   using Microsoft.EntityFrameworkCore;
 

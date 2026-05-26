@@ -6,7 +6,6 @@ namespace HRConnect.Api.Utils.Jobs.Notification
   using HRConnect.Api.DTOs.Notification;
   using HRConnect.Api.Models;
   using HRConnect.Api.DTOs.Employee;
-  using HRConnect.Api.Services;
 
   [DisallowConcurrentExecution]
   public class NotificationJob : IJob
