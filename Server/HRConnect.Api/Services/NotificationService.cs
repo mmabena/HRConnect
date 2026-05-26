@@ -64,15 +64,27 @@ namespace HRConnect.Api.Services
 
       return notifications.Select(n => n.ToNotificationDto());
     }
-
+    ///<summary>
+    /// Function is used to mark a batch of Notifications Read. This is done on a Notification Type
+    /// <see cref="NotificationType"/>
+    /// This is slightly faster than <see cref="INotificationService.MarkBatchedNotificationsReadByTypeAsync(NotificationType,
+    /// List{string})"> as there is no overhead to find employee Id from userId
+    /// <paramref name="type">Notification Types to be marked read</paramref>
+    /// <paramref name="employeeIds">List (Batch of +-500 ) of employee Ids to delete.</paramref>
+    /// </summary>
     public async Task MarkBatchedNotificationsReadByTypeAsync(
       NotificationType type,
-      List<string> employeeIds
-    )
+      List<string> employeeIds)
     {
       await _notificationRepository.MarkBatchAsReadAsync(employeeIds, type);
     }
 
+    ///<summary>
+    /// This is used to conditionally create a notification in the database.
+    /// To prevent duplication of notifications, Idempotency Keys (<see
+    /// cref="BuildIdempotencyKey(Notification)") are used to ensure uniqueness.
+    /// This is not a database level validation 
+    ///</summary>
     public async Task MarkNotificationReadByTypeAsync(NotificationType type, int userId)
     {
       string employeeId = await ResolveEmployeeId(userId);
@@ -97,12 +109,17 @@ namespace HRConnect.Api.Services
       request.IdempotencyKey = Convert.ToHexString(hash);
     }
 
+    ///<summary>
+    /// This is used to conditionally create a notification in the database.
+    /// To prevent duplication of notifications, Idempotency Keys (<see
+    /// cref="BuildIdempotencyKey(Notification)") are used to ensure uniqueness.
+    /// This is not a database level validation 
+    ///</summary>
     public async Task TryCreateAndDispatch(Notification notification)
     {
       BuildIdempotencyKey(notification);
 
       bool isPersistent = NotificationsRules.ShouldPersist(notification.Severity);
-      bool isWarning = NotificationsRules.RequiresAction(notification.Type);
       Notification? created = null;
 
       if (isPersistent)
@@ -112,7 +129,6 @@ namespace HRConnect.Api.Services
 
       if (created != null)
       {
-
         await _notificationDispatcher.DispatchNotificationAsync(created);
         return;
       }
@@ -122,9 +138,9 @@ namespace HRConnect.Api.Services
 
     public async Task<bool> DeleteAllReadAsync()
     {
-
       return await _notificationRepository.DeleteAllReadAsync();
     }
+
     public async Task MarkAllAsReadByUserId(int userId)
     {
       string employeeId = await ResolveEmployeeId(userId);
@@ -132,6 +148,7 @@ namespace HRConnect.Api.Services
         return;
       await _notificationRepository.MarkAllAsReadByEmployeeId(employeeId);
     }
+
     public async Task<bool> DeleteAllByEmployeeIdAsync(int userId)
     {
       string employeeId = await ResolveEmployeeId(userId);

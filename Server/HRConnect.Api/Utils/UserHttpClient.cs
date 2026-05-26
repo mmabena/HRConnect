@@ -7,9 +7,16 @@ namespace HRConnect.Api.Utils
   using System.Net.Http.Json;
   using System.Text.Json;
 
+  /// <summary>
+  /// This is used to make requests to the User And Employee Serivces that the Notification service
+  /// requires to map UserIds to EmployeeIds. The User service cannot be injected into the Notification
+  /// service as creates very tight coupling and may introduce Circular Dependency issues
+  /// </summary>
+  /// <remarks>
+  /// Mitigating the over head introduced by making requesting and parsing JSON is still a work in progress
+  /// </remarks>
   public class UserHttpClient : IUserHttpClient
   {
-
     private readonly HttpClient _httpClient;
     public UserHttpClient(HttpClient httpClient)
     {

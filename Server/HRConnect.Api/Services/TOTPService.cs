@@ -42,7 +42,7 @@ namespace HRConnect.Api.Services
     /// Method has mulitple related responsibilities for sending Time-Base
     /// One-Time-Pin. <see cref="MFAUserSecretsService.GetOrCreateUserSecretAsync(int)"
     ///is used to create user secret of which the pin is based off of.. 
-    ///
+    ///</summary>
     ///<remarks><a href="datatracker.ietf.org/doc/html/rfc6238">
     /// See RFC6238 for algorithm details and recommended implementations
     /// </a>
@@ -90,7 +90,6 @@ namespace HRConnect.Api.Services
 
       if (!isValid)
         return false;
-
 
       await MarkUsedCodeAsync(userId, timeStepMatched);
       return true;
@@ -149,7 +148,7 @@ namespace HRConnect.Api.Services
     private async Task<CreateNotificationDto> MakeEmailNotification(int userId, string otp)
     {
       var (employee, user) = await GetEmployeeFromUserIdAsync(userId);
-      string message = $"You Role Has Been Updated from {user.Role} to {user.TempRole}.\nHere is your One-Time-Pin: {otp} (This pin expires after {_stepSeconds / 60} minutes)";
+      string message = $"Your Role Has Been Updated from {user.Role} to {user.TempRole}.\nHere is your One-Time-Pin: {otp} (This pin expires after {_stepSeconds / 60} minutes)";
       CreateNotificationDto dto = new CreateNotificationDto
       {
         Subject = "Employee Role Change",

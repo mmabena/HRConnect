@@ -4,6 +4,10 @@ namespace HRConnect.Api.Services
   using HRConnect.Api.Models;
   using OtpNet;
 
+/// <summary>
+/// This class talks to the TOTPService to get or generate a user secret
+/// of which the OTP can be derived and verified.
+/// </summary>
   public class MFAUserSecretsService : IMFAUserSecretsService
   {
     private readonly IMFAUserSecretsRepository _userSecretRepo;

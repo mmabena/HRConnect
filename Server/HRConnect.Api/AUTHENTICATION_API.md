@@ -169,8 +169,13 @@ http://localhost:5147/api
     "SmtpPort": 587,
     "SenderEmail": "your-email@gmail.com",
     "SenderPassword": "your-app-password"
+  },
+  "Totp": {
+    "StepMinutes": "lifetime of your time-based one-time-pin in minutes"
+    "If nothing is provided, falls back to 10 minutes per one-time-pin"
   }
 }
+
 ```
 
 ### Email Configuration
