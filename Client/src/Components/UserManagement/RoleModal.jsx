@@ -68,7 +68,6 @@ const RolesModal = ({ isOpen, onClose, user, onSuccess }) => {
     }
     catch (error) {
       console.log(`Failed To Load User From Employee Data ${error}`)
-      // alert("Failed to load user data. Please try again.");
     }
   }
   useEffect(() => {

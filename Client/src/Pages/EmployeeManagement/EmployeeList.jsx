@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { fetchAllEmployees } from "../../api/Employee";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import AddEmployeeModal from "../../Components/EmployeeManagement/AddEmployeeModal";
+import AddEmployeeModal from "../../components/EmployeeManagement/AddEmployeeModal";
 import useEmployees from "../../hooks/useEmployees";
 import useEmployeeFilter from "../../hooks/useEmployeeFilter";
 import useEmpPagination from "../../hooks/useEmpPagination";
@@ -9,7 +9,7 @@ import useDropdown from "../../hooks/useDropdown";
 import useInitialColors from "../../hooks/useInitialColors";
 import { Plus, SlidersHorizontal } from "lucide-react";
 
-import "../../Components/MenuBar/MenuBar.css";
+import "../../components/MenuBar/MenuBar.css";
 import "./EmployeeList.css";
 
 const EmployeeList = () => {

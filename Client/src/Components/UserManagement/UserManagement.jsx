@@ -176,13 +176,6 @@ const UserManagement = () => {
     setSelectedUserIndex(null);
   };
 
-  const openEditEmployeeModal = () => {
-    if (!hasAdminRights(currentUserRole)) {
-      alert("Access denied: Admin rights required");
-      return;
-    }
-  };
-
   const saveEmployeeDetails = async () => {
     try {
       const user = users[selectedUserIndex];
@@ -216,34 +209,6 @@ const UserManagement = () => {
     } catch (error) {
       console.error("Update failed:", error);
       alert(`Failed to update user: ${error.message}`);
-    }
-  };
-
-  const handleSaveUser = async (updatedData) => {
-    try {
-      const user = users[selectedUserIndex];
-      if (!user) throw new Error("Invalid user");
-
-      if (updatedData.roleId != null)
-        await updateUserRole(user.userId, updatedData.roleId);
-
-      const updatedUsers = [...users];
-      updatedUsers[selectedUserIndex] = {
-        ...user,
-        ...updatedData,
-        status:
-          updatedData.statusValue !== undefined
-            ? updatedData.statusValue === USER_STATUS.ACTIVE
-              ? "Active"
-              : "Inactive"
-            : user.status,
-      };
-      setUsers(updatedUsers);
-      return true;
-    } catch (error) {
-      console.error("Update failed:", error);
-      alert(`Failed to update user: ${error.message}`);
-      return false;
     }
   };
 
@@ -292,7 +257,6 @@ const UserManagement = () => {
 
   return (
     <div className="menu-background">
-      {/* Removed MenuBar here */}
       <div className="top-bar">
         <h2>User Management</h2>
         <button
@@ -328,7 +292,6 @@ const UserManagement = () => {
                 User Profile
               </span>
             </div>
-            {/*2nd Row on is the rest of the table*/}
             <table className="styled-table">
               <thead>
                 <tr className="heading">
