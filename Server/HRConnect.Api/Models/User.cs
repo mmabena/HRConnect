@@ -14,6 +14,5 @@ namespace HRConnect.Api.Models
     public UserRole Role { get; set; }
     public UserRole? TempRole { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    // public MFAUserSecret? MFAUserSecret { get; set; }
   }
 }
