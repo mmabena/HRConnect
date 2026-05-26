@@ -285,6 +285,10 @@
 
 /* --{ Action button container styling }--*/
 .modal-footer-cancel-action-button{
+    background-color: rgba(255,255,255,0.7);
+    border-color: rgba(112,112,112,0.5);
+    border-width: 1px;
+    opacity: 90%;
     display: flex;
     flex-wrap:wrap;
     position:relative;
@@ -300,7 +304,7 @@
 }
 
 .modal-footer-edit-action-button{
-    background-color: aqua;
+    background-color: rgba(53,88,103,1);
     border-radius: 10px;
     border-style: none;
     display: flex;
@@ -417,11 +421,21 @@
     flex-wrap:wrap;
     width: 25%;
     top: -1px;
-    margin-left: 20.5%;
+    margin-left: 10.5%;
+    align-items: baseline;
+    align-self: center;
 }
 
 .start-editing-button-text-container{
     display: inline;
+    font-weight:400;
+    font-size: 16px;
+    line-height: 100%;
+    color:white;
+    margin-left: 5.5%;
+    align-items: baseline;
+    align-self: center;
+    justify-self: center;
 }
 
 .modal-view-table {
