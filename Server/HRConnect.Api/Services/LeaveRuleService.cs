@@ -55,13 +55,14 @@ namespace HRConnect.Api.Services
 
             foreach (var employee in employees)
             {
-                var years = CalculateYearsOfService(employee.StartDate);
+                var yearsOfService =
+    CalculateYearsOfService.UsingStartDate(employee.StartDate);
 
-                if (years < rule.MinYearsService)
+                if (yearsOfService < rule.MinYearsService)
                     continue;
 
                 if (rule.MaxYearsService.HasValue &&
-                    years >= rule.MaxYearsService.Value)
+                    yearsOfService >= rule.MaxYearsService.Value)
                     continue;
 
                 var balance = employee.LeaveBalances
@@ -111,13 +112,14 @@ namespace HRConnect.Api.Services
 
             foreach (var employee in employees)
             {
-                var years = CalculateYearsOfService(employee.StartDate);
+                var yearsOfService =
+    CalculateYearsOfService.UsingStartDate(employee.StartDate);
 
-                if (years < rule.MinYearsService)
+                if (yearsOfService < rule.MinYearsService)
                     continue;
 
                 if (rule.MaxYearsService.HasValue &&
-                    years >= rule.MaxYearsService.Value)
+                    yearsOfService >= rule.MaxYearsService.Value)
                     continue;
 
                 var balance = employee.LeaveBalances
@@ -157,16 +159,6 @@ namespace HRConnect.Api.Services
             }
 
             await _context.SaveChangesAsync();
-        }
-        private decimal CalculateYearsOfService(DateOnly startDate)
-        {
-            var today = DateOnly.FromDateTime(DateTime.UtcNow);
-
-            if (startDate > today)
-                return 0;
-
-            var totalDays = today.DayNumber - startDate.DayNumber;
-            return Math.Round(totalDays / 365.25m, 2);
         }
     }
 }

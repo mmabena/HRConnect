@@ -226,7 +226,7 @@ namespace HRConnect.Api.Services
             .FirstAsync(l => l.Code == "AL" && l.IsActive);
 
         var yearsOfService =
-            CalculateYearsOfService(fullEmployee.StartDate);
+            CalculateYearsOfService.UsingStartDate(fullEmployee.StartDate);
 
         var newRule = await _context.LeaveEntitlementRules
             .Where(r =>
@@ -507,16 +507,6 @@ namespace HRConnect.Api.Services
     private async Task ValidateCareerManagerAsync(string employeeId, string? careerManagerId)
     {
       await EmployeeValidationHelpers.ValidateCareerManagerAsync(_employeeRepo, employeeId, careerManagerId);
-    }
-    private decimal CalculateYearsOfService(DateOnly startDate)
-    {
-      var today = DateOnly.FromDateTime(DateTime.UtcNow);
-
-      if (startDate > today)
-        return 0;
-
-      var totalDays = today.DayNumber - startDate.DayNumber;
-      return Math.Round(totalDays / 365.25m, 2);
     }
 
     private static string GenerateTemporaryPassword()

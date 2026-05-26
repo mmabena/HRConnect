@@ -48,7 +48,8 @@ namespace HRConnect.Api.Services
             if (groupKey == null)
                 throw new InvalidOperationException("JobGrade not mapped to any group.");
 
-            var yearsOfService = CalculateYearsOfService(employee.StartDate);
+            var yearsOfService =
+    CalculateYearsOfService.UsingStartDate(employee.StartDate);
 
             var leaveTypes = await _context.LeaveTypes
                 .Where(l => l.IsActive)
@@ -605,21 +606,6 @@ namespace HRConnect.Api.Services
             };
         }
         /// <summary>
-        /// Calculates the years of service for an employee based on their start date.
-        /// </summary>
-        /// <param name="startDate"></param>
-        /// <returns></returns>
-        private decimal CalculateYearsOfService(DateOnly startDate)
-        {
-            var today = DateOnly.FromDateTime(DateTime.UtcNow);
-
-            if (startDate > today)
-                return 0;
-
-            var totalDays = today.DayNumber - startDate.DayNumber;
-            return Math.Round(totalDays / 365.25m, 2);
-        }
-        /// <summary>
         /// Calculates the carryover amount for annual leave based on the remaining balance at the end of the year.
         /// </summary>
         /// <param name="remaining"></param>
@@ -734,8 +720,15 @@ namespace HRConnect.Api.Services
             var annualLeave = await _context.LeaveTypes
                 .FirstAsync(l => l.Code == "AL" && l.IsActive);
 
-            var yearsOfService = CalculateYearsOfService(employee.StartDate);
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
+            var yearsOfService =
+                today.Year - employee.StartDate.Year;
+
+            if (today < employee.StartDate.AddYears(yearsOfService))
+            {
+                yearsOfService--;
+            }
             var rule = await _context.LeaveEntitlementRules
                 .Where(r =>
                     r.LeaveTypeId == annualLeave.Id &&
@@ -845,7 +838,7 @@ namespace HRConnect.Api.Services
                     l.IsActive);
 
             var yearsOfService =
-                CalculateYearsOfService(employee.StartDate);
+                CalculateYearsOfService.UsingStartDate(employee.StartDate);
 
             var applicableRule = await _context.LeaveEntitlementRules
                 .Where(r =>
@@ -936,7 +929,7 @@ namespace HRConnect.Api.Services
                     continue;
 
                 var yearsOfService =
-                    CalculateYearsOfService(employee.StartDate);
+                    CalculateYearsOfService.UsingStartDate(employee.StartDate);
 
                 var applicableRule =
                     await _context.LeaveEntitlementRules

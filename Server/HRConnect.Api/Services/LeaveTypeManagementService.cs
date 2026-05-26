@@ -10,6 +10,7 @@ namespace HRConnect.Api.Services
     using System.Threading.Tasks;
     using HRConnect.Api.Interfaces;
     using System.Runtime.CompilerServices;
+    using HRConnect.Api.Utils;
 
     public class LeaveTypeManagementService : ILeaveTypeManagementService
     {
@@ -369,21 +370,6 @@ namespace HRConnect.Api.Services
                 }).ToList()
             };
         }
-        private static decimal CalculateYearsOfService(
-    DateOnly startDate)
-        {
-            var today = DateOnly.FromDateTime(DateTime.UtcNow);
-
-            if (startDate > today)
-                return 0;
-
-            var totalDays =
-                today.DayNumber - startDate.DayNumber;
-
-            return Math.Round(
-                totalDays / 365.25m,
-                2);
-        }
         public async Task<List<EntitlementImpactPreviewDto>> PreviewEntitlementImpactAsync(UpdateLeaveTypeRequest request)
         {
             var result = new List<EntitlementImpactPreviewDto>();
@@ -415,7 +401,8 @@ namespace HRConnect.Api.Services
                 if (groupKey == null)
                     continue;
 
-                var yearsOfService = CalculateYearsOfService(employee.StartDate);
+                var yearsOfService =
+    CalculateYearsOfService.UsingStartDate(employee.StartDate);
 
                 //Current Rule
                 var currrentRule = await _context.LeaveEntitlementRules
