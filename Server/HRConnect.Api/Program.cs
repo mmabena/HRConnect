@@ -327,7 +327,6 @@ using (var scope = app.Services.CreateScope())
 
   //initialise a payperiod and payrun on app start up
   await initialiser.InitialisePayrollPeriod();
-
   await userService.SyncEmployeeUserAsync();
 }
 
@@ -349,3 +348,4 @@ app.UseAuthorization();
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseRateLimiter();
 app.MapControllers();
+app.Run();
