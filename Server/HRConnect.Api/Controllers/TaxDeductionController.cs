@@ -3,11 +3,11 @@ namespace HRConnect.Api.Controllers
   using System;
   using System.Collections.Generic;
   using System.Threading.Tasks;
-  using Microsoft.AspNetCore.Mvc;
-  using Microsoft.AspNetCore.Http;
   using HRConnect.Api.DTOs;
   using HRConnect.Api.Interfaces;
   using Microsoft.AspNetCore.Authorization;
+  using Microsoft.AspNetCore.Http;
+  using Microsoft.AspNetCore.Mvc;
 
   [ApiController]
   [Route("api/tax-deductions")]
@@ -29,7 +29,7 @@ namespace HRConnect.Api.Controllers
     /// Calculates the tax payable based on tax year, remuneration and age
     /// </summary>
     [HttpGet("calculate")]
-    public async Task<ActionResult<decimal>> CalculateTax([FromQuery] decimal remuneration,[FromQuery] int age)
+    public async Task<ActionResult<decimal>> CalculateTax([FromQuery] decimal remuneration, [FromQuery] int age)
     {
       try
       {

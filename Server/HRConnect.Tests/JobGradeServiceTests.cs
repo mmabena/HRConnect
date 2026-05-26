@@ -1,10 +1,10 @@
 namespace HRConnect.Tests.Services
 {
-  using Moq;
-  using HRConnect.Api.Services;
+  using System.Reflection;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
-    using System.Reflection;
+  using HRConnect.Api.Services;
+    using Moq;
 
     public class JobGradeServiceTests
   {

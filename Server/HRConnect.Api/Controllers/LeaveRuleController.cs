@@ -5,17 +5,17 @@ namespace HRConnect.Api.Controllers
     using HRConnect.Api.DTOs;
     using HRConnect.Api.Interfaces;
 
-    [ApiController]
-    [Route("api/leave-rules")]
-    //[Authorize(Roles = "SuperUser")]
-    public class LeaveRuleController : ControllerBase
-    {
-        private readonly ILeaveRuleService _leaveRuleService;
+  [ApiController]
+  [Route("api/leave-rules")]
+  [Authorize(Roles = "SuperUser")]
+  public class LeaveRuleController : ControllerBase
+  {
+    private readonly ILeaveRuleService _leaveRuleService;
 
-        public LeaveRuleController(ILeaveRuleService leaveRuleService)
-        {
-            _leaveRuleService = leaveRuleService;
-        }
+    public LeaveRuleController(ILeaveRuleService leaveRuleService)
+    {
+      _leaveRuleService = leaveRuleService;
+    }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateRule(

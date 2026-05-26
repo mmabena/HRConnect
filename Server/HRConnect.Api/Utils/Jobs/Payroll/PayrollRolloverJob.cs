@@ -3,9 +3,11 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
   using global::Quartz;
   using HRConnect.Api.Data;
   using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Interfaces.Notification;
   using HRConnect.Api.Interfaces.Payroll.Deduction;
   using HRConnect.Api.Interfaces.Payroll.Earning;
   using HRConnect.Api.Interfaces.Pension;
+  using HRConnect.Api.Models;
   using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Models.PayrollDeduction;
   using HRConnect.Api.Utils;
@@ -35,31 +37,39 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
     private readonly IPayrollPeriodService _payrollPeriodService;
     private readonly IPayrollRunRepository _payrollRunRepo;
     private readonly IEmployeePensionEnrollmentService _employeePensionEnrollmentService;
-    private readonly IEmployeePayrollEarningService _employeePayrollEarningService;
-    private readonly IEmployeeDeductionService _employeeDeductionService;
     private readonly IServiceProvider _serviceProvider;
     private readonly IReportsService _reportsService;
     private readonly IBankingDetailService _bankingDetailService;
-    private readonly ApplicationDBContext _context;
+    // private readonly ICompanyContributionService contributionService;
+    private readonly IUserService _userService;
+    private readonly IEmployeeService _employeeService;
+    private readonly INotificationService _notificationsService;
     private static readonly int MAX_RUNS = 12;
-
+    private readonly IEmployeePayrollEarningService _employeePayrollEarningService;
+    private readonly IEmployeeDeductionService _employeeDeductionService;
     //This makes mocking and using testing time-related edge cases a lot easier
     private readonly Func<DateTime> _now;
+
     public PayrollRolloverJob(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService, IServiceProvider serviceProvider,
       IEmployeePensionEnrollmentService employeePensionEnrollmentService,
-      IReportsService reportsService, IBankingDetailService bankingDetailService, IEmployeePayrollEarningService employeePayrollEarningService,
-      IEmployeeDeductionService employeeDeductionService, ApplicationDBContext context, Func<DateTime> now = null)
+      IReportsService reportsService, IBankingDetailService bankingDetailService, IUserService userService,
+      IEmployeeService employeeService,
+      IEmployeePayrollEarningService employeePayrollEarningService,
+      IEmployeeDeductionService employeeDeductionService,
+      INotificationService notificationsService, Func<DateTime>? now = null)
     {
       _payrollRunRepo = payrollRunRepo;
       _payrollPeriodService = payrollPeriodService;
       _reportsService = reportsService;
-      _context = context;
-      _now = now ?? (() => DateTime.Now);
       _serviceProvider = serviceProvider;
       _employeePensionEnrollmentService = employeePensionEnrollmentService;
       _bankingDetailService = bankingDetailService;
-      _employeePayrollEarningService = employeePayrollEarningService;
+      _userService = userService;
+      _employeeService = employeeService;
       _employeeDeductionService = employeeDeductionService;
+      _employeePayrollEarningService = employeePayrollEarningService;
+      _notificationsService = notificationsService;
+      _now = now ?? (() => DateTime.Now);
     }
     /// <summary>
     /// Rolls over to a new period <see cref="PayrollPeriod"/> and creates and new valid payroll run <see cref="PayrollRun"/>  
@@ -81,7 +91,7 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
         EndDate = (oldPeriod?.EndDate ?? DateTime.Now).AddYears(1)
       };
 
-      await _payrollPeriodService.CreatePeriodAsync(newPeriod);
+      _ = await _payrollPeriodService.CreatePeriodAsync(newPeriod);
 
       var newPayrun = new PayrollRun
       {
@@ -92,11 +102,29 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
       };
       newPeriod.Runs.Add(newPayrun);
 
-      await _payrollRunRepo.CreatePayrollRunAsync(newPayrun);
+      _ = await _payrollRunRepo.CreatePayrollRunAsync(newPayrun);
 
       return newPeriod;
     }
+    public async Task ClearPayrollNotifications()
+    {
+      var users = await _userService.GetAllUsersAsync();
 
+      //Only returns users with SuperUser role
+      users = users.FindAll(u => u.Role == UserRole.SuperUser);
+      List<string> employeeIds = new();
+
+      foreach (var u in users)
+      {
+        var e = await _employeeService.GetEmployeeByEmailAsync(u.Email);
+        if (e != null)
+        {
+          employeeIds.Add(e.EmployeeId);
+        }
+      }
+      await _notificationsService.MarkBatchedNotificationsReadByTypeAsync(NotificationType.Payroll,
+      employeeIds);
+    }
     public async Task RolloverPayrollRun(PayrollPeriod payrollPeriod, int runId)
     {
       PayrollRun newRun = new PayrollRun
@@ -110,17 +138,14 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
       };
 
       payrollPeriod.Runs.Add(newRun);
-      await _payrollRunRepo.CreatePayrollRunAsync(newRun);
+      _ = await _payrollRunRepo.CreatePayrollRunAsync(newRun);
 
       await AllocateCompanyContributionsIfNeeded(newRun.PayrollRunId);
-
     }
 
     public async Task Execute(IJobExecutionContext context)
     {
       await _employeePensionEnrollmentService.LockEmployeePensionEnrollmentsAsync();
-      await _employeePayrollEarningService.LockEmployeePayrollEarningsAsync();
-      await _employeeDeductionService.LockEmployeeDeductionsAsync();
       DateTime currentDate = DateTime.Now;
       int runId = ((currentDate.Month + 8) % 12) + 1;
 
@@ -195,6 +220,8 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
         await _bankingDetailService.LockAllBankingDetailsAsync();
 
 
+        // await ClearPayrollNotifications();
+
       }
       catch (InvalidOperationException ex)
       {
@@ -207,33 +234,32 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
         var jobException = new JobExecutionException(ex);
         throw jobException;
       }
-
       await _employeePensionEnrollmentService.RollOverEmloyeePensionEnrollmentAsync();
       await _employeePayrollEarningService.RollOverEmployeePayrollEarningsAsync();
       await _employeeDeductionService.RollOverEmployeePayrollEarningsAsync();
-      await RolloverPayrollDeductions();
+      await RolloverPensionDeductions();
     }
 
     private async Task AllocateCompanyContributionsIfNeeded(int payrollRunId)
     {
-      var alreadyAllocated = await _context.EmployeeCompanyContributions
-        .AnyAsync(e => e.PayrollRunId == payrollRunId);
+      using var scope = _serviceProvider.CreateScope();
+      // bool alreadyAllocated = await _contributionRepo.FindAllocatedContribution(payrollRunId);
+      var companyContributionService = scope.ServiceProvider.GetRequiredService<ICompanyContributionService>();
 
+      bool alreadyAllocated = await companyContributionService.FindAllocatedContribution(payrollRunId);
       if (alreadyAllocated)
         return;
-
-      using var scope = _serviceProvider.CreateScope();
 
       var allocationService = scope.ServiceProvider
         .GetRequiredService<ICompanyContributionAllocationService>();
 
-      await allocationService.AllocateAsync(payrollRunId);
+      _ = await allocationService.AllocateAsync(payrollRunId);
     }
 
     ///<summary>
     ///Auxilary function to rollover pay roll records
     ///</summary>
-    private async Task RolloverPayrollDeductions()
+    private async Task RolloverPensionDeductions()
     {
       using IServiceScope pensionDeductionServiceScope = _serviceProvider.CreateScope();
 

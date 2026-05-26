@@ -1,0 +1,291 @@
+/* Wrapper */
+.CL-wrapper-container {
+  width: 100%;
+  max-width: 1496px;
+  margin: 0 auto;
+  padding: 20px 50px;
+  font-family: 'Anek Bangla', sans-serif;
+}
+
+/* ================= HEADER ================= */
+
+.CL-company-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 10px;
+}
+
+.CL-company-title-main {
+  font-weight: 700;
+  font-size: 36px;
+  line-height: 67px;
+  letter-spacing: 0.02em;
+  color: #006088;
+}
+
+/* ================= NAV BAR ================= */
+
+.CL-company-nav {
+  display: flex;
+  gap: 75px;
+  padding: 10px 0;
+  margin-bottom: 20px;
+}
+
+.CL-nav-item {
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 37px;
+  letter-spacing: 0.02em;
+  color: #002D40;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.CL-nav-item:hover {
+  opacity: 0.7;
+}
+
+/* Active tab (Company Details) */
+.CL-nav-item.active {
+  color: #638549;
+}
+
+/* ================= SEARCH ================= */
+
+.CL-company-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.CL-search-bar-container {
+  gap: 4px;
+  flex: 1 0 0;
+  left: 215%;
+  flex-direction: row;
+  width: 360px;
+  height: 56px;
+  gap: 22px;
+  align-items: center;
+  display: flex;
+  min-width: 360px;
+  max-width: 720px;
+  border-radius: 8px;
+  background: rgba(53, 88, 103, 0.17);
+  box-sizing: border-box;
+  padding: 0 6px;
+}
+
+.CL-search-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.CL-search-input {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  padding: 0 8px;
+  font-family: 'Anek Bangla', sans-serif;
+  color: #49454F;
+  outline: none;
+}
+
+.CL-search-input::placeholder
+{
+  color: #49454F;
+  opacity: 1;
+}
+
+.CL-add-company-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 187px;
+  height: 47px;
+  padding: 5px 10px;
+  background: #638549;
+  opacity: 0.9;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Anek Bangla', sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+  letter-spacing: 0.02em;
+  color: #ffffff;
+}
+
+.CL-add-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.CL-add-company-button:hover {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+.CL-add-company-button:active {
+  transform: scale(0.98);
+}
+
+
+/* ================= CONTAINER ================= */
+
+.CL-content-container {
+  margin-top: 20px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* ================= TOP BAR ================= */
+
+.CL-table-top-bar {
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+
+  height: 59px;
+  background: rgba(53, 88, 103, 0.15);
+  border-radius: 10px 10px 0 0;
+}
+
+.CL-table-title {
+  font-family: 'Anek Bangla', sans-serif;
+  font-size: 20px;
+  font-weight: 500;
+  color: #002d40;
+}
+
+/* ================= GRID TABLE ================= */
+
+.CL-company-table-grid {
+  display: grid;
+  /* Matches your Figma column widths */
+  grid-template-columns: 2fr 1.5fr 1.5fr 1fr 1fr;
+  background: #ffffff;
+}
+
+/* ================= HEADERS ================= */
+
+.CL-table-header {
+  background: #355867;
+  color: #ffffff;
+  font-family: 'Anek Bangla', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  padding: 15px;
+  display: flex;
+  align-items: center;
+}
+
+.CL-action-header {
+  justify-content: center;
+}
+
+/* ================= ROW CELLS ================= */
+
+.CL-table-cell {
+  padding: 15px;
+  display: flex;
+  align-items: center;
+
+  background: #ffffff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+
+  font-family: 'Anek Bangla', sans-serif;
+  font-size: 16px;
+  color: #002d40;
+}
+
+/* ================= COMPANY CELL ================= */
+
+.CL-company-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.CL-initials-circle {
+  width: 50px;
+  height: 50px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(138, 164, 174, 0.37);
+  border: 1px solid rgba(53, 88, 103, 0.53);
+  border-radius: 50%;
+  font-weight: 600;
+  font-size: 18px;
+  color: #355867;
+}
+
+.CL-company-name-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-left: 15px;
+}
+
+.CL-company-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #355867;
+}
+
+.CL-company-sub {
+  font-size: 13px;
+  color: #8aa4ae;
+  display: flex;
+  align-items: center;
+  text-align: left;
+}
+
+/* ================= STATUS ================= */
+
+.CL-status-badge {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.CL-status-badge.active {
+  background: rgba(99, 133, 73, 0.35);
+  color: #638549;
+}
+
+/* ================= ACTION ================= */
+
+.CL-view-edit-cell {
+  justify-content: center;
+}
+
+.CL-edit-btn {
+  font-size: 16px;
+  font-weight: 500;
+  color: #006088;
+  text-decoration: none;
+}
+
+.CL-edit-btn:hover {
+  text-decoration: underline;
+}
+
+/* ================= EMPTY STATE ================= */
+
+.CL-no-data-row {
+  grid-column: 1 / -1;
+  padding: 20px;
+  text-align: center;
+  color: #8aa4ae;
+}

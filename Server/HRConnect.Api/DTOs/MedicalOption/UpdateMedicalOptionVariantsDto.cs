@@ -16,5 +16,5 @@
     public decimal TotalMonthlyContributionsAdult { get; set; }
     public decimal TotalMonthlyContributionsChild { get; set; }
     public decimal? TotalMonthlyContributionsChild2 { get; set; }
-  } 
+  }
 }

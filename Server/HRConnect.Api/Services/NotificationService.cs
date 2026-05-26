@@ -1,9 +1,9 @@
 namespace HRConnect.Api.Services
 {
-  using HRConnect.Api.Models;
   using System.Threading.Tasks;
-  using HRConnect.Api.Interfaces.Notification;
   using HRConnect.Api.DTOs.Notification;
+  using HRConnect.Api.Interfaces.Notification;
+  using HRConnect.Api.Models;
   using HRConnect.Api.Utils.Notification;
   public class NotificationService : INotificationService
   {
@@ -20,6 +20,12 @@ namespace HRConnect.Api.Services
 
       return notifications;
     }
+
+    public async Task MarkBatchedNotificationsReadByTypeAsync(NotificationType type, List<string> employeeIds)
+    {
+      await _notificationRepository.MarkBatchAsReadAsync(employeeIds, type);
+    }
+
     public async Task<IEnumerable<NotificationDto>> GetAllEmployeeNotificationsBySeverityAsync(NotificationSeverity severity, string employeeId)
     {
       var notifications = await _notificationRepository.GetAllEmployeeNotificationsBySeverityAsync(employeeId, severity);

@@ -2,17 +2,23 @@ using System.Text;
 using Audit.Core;
 using Audit.EntityFramework;
 using HRConnect.Api.Data;
+// using Resend;
 using HRConnect.Api.Interfaces;
+using HRConnect.Api.Interfaces.Notification;
+using HRConnect.Api.Interfaces.Payroll.Deduction;
+using HRConnect.Api.Interfaces.Payroll.Earning;
 using HRConnect.Api.Interfaces.Pension;
 using HRConnect.Api.Middleware;
 using HRConnect.Api.Models;
 using HRConnect.Api.Repositories;
 using HRConnect.Api.Repository;
+using HRConnect.Api.Hubs;
 using HRConnect.Api.Services;
 using HRConnect.Api.Hubs;
 using HRConnect.Api.Utils;
 using HRConnect.Api.Utils.Security;
-using HRConnect.Api.Utils.Jobs.Payroll;
+using HRConnect.Api.Utils.Factories;
+using HRConnect.Api.Utils.Jobs;
 using HRConnect.Api.Utils.Jobs.Notification;
 using HRConnect.Api.Utils.Jobs.Pension;
 using HRConnect.Api.Interfaces.Payroll.Earning;
@@ -20,6 +26,8 @@ using HRConnect.Api.Interfaces.Payroll.Deduction;
 using HRConnect.Api.Utils.Jobs;
 using HRConnect.Api.Utils.BankingDetailsValidation;
 using HRConnect.Api.Utils.Settings;
+using HRConnect.Api.Utils.Jobs.Payroll;
+using HRConnect.Api.Utils.Notification;
 using HRConnect.Api.Utils.Payroll;
 
 using HRConnect.Api.Utils.Jobs.Payroll;
@@ -231,6 +239,11 @@ builder.Services.AddScoped<ITaxDeductionRepository, TaxDeductionRepository>();
 builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
 builder.Services.AddScoped<IPositionRepository, PositionRepository>();
 builder.Services.AddScoped<IPositionService, PositionService>();
+builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
+builder.Services.AddScoped<ICompanyService, CompanyService>();
+builder.Services.AddScoped<IActiveCompanyService, ActiveCompanyService>();
+builder.Services.AddScoped<IUserCompanyService, UserCompanyService>();
+builder.Services.AddScoped<IUserCompanyRepository, UserCompanyRepository>();
 builder.Services.AddScoped<ICompanyContributionRepository, CompanyContributionRepository>();
 builder.Services.AddScoped<IEmployeeCompanyContributionRepository, EmployeeCompanyContributionRepository>();
 builder.Services.AddScoped<ICompanyContributionAllocationService, CompanyContributionAllocationService>();
@@ -291,6 +304,11 @@ builder.Services.AddScoped<IEmployeeDeductionService, EmployeeDeductionService>(
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<HashingHelper>();
 
+builder.Services.AddScoped<IMedicalOptionService,
+  MedicalOptionService>();
+builder.Services.AddScoped<IMedicalAidEligibilityService, MedicalAidEligibilityService>();
+builder.Services.AddScoped<IMedicalAidDeductionRepository, MedicalAidDeductionRepository>();
+builder.Services.AddScoped<IMedicalAidDeductionService, MedicalAidDeductionService>();
 builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowReact",
@@ -338,4 +356,5 @@ app.UseAuthorization();
 app.UseMiddleware<ExceptionMiddleware>();
 app.MapControllers();
 app.MapHub<UserPositionHub>("/UserPositionHub");
+app.MapHub<CompanyHub>("/companyHub");
 app.Run();

@@ -110,17 +110,19 @@ namespace HRConnect.Api.Controllers
             }
         }
 
-        [HttpGet("employees")]
-        public async Task<IActionResult> GetEmployeesWithLeave()
-            => Ok(await _service.GetAllEmployeesWithLeaveAsync());
+    [HttpGet("employees")]
+    public async Task<IActionResult> GetEmployeesWithLeave()
+    {
+      var result = await _service.GetAllEmployeesWithLeaveAsync();
+      return Ok(result);
+    }
+    [HttpGet("employees/{employeeId}")]
+    public async Task<IActionResult> GetEmployeeWithLeave(string employeeId)
+    {
+      var result = await _service.GetEmployeeWithLeaveByIdAsync(employeeId);
 
-        [HttpGet("employees/{employeeId}")]
-        public async Task<IActionResult> GetEmployeeWithLeave(string employeeId)
-        {
-            var result = await _service.GetEmployeeWithLeaveByIdAsync(employeeId);
-
-            if (result == null)
-                return NotFound("Employee not found");
+      if (result == null)
+        return NotFound("Employee not found");
 
             return Ok(result);
         }
