@@ -172,14 +172,15 @@ const ApplyLeave = () => {
     fetchLeave();
   }, []);
   useEffect(() => {
-    if (successMessage) {
+    if (successMessage || errors.submit) {
       const timer = setTimeout(() => {
         setSuccessMessage("");
+        setErrors({});
       }, 5000);
 
       return () => clearTimeout(timer);
     }
-  }, [successMessage]);
+  }, [successMessage, errors.submit]);
   if (showHistory) {
     return <LeaveHistory />;
   }
