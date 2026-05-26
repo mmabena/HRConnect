@@ -206,7 +206,7 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
         return <span className={`cell-value ${className}`}>{value ?? '-'}</span>
     };
 
-    const renderOptionTable = () => {
+    const renderViewOptionTable = () => {
         if(!currentOption) return null;
         const oid = currentOption.medicalOptionId;
         const editable = isEditing;
@@ -375,7 +375,7 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
                     {/* Header Content Holder */}
                     <div className="modal-header-content-holder">
                         <div className="modal-header-main-text">{title}</div>
-                        <div className="modal-header-main-secondary-text">{currentGroup?.categoryName ?? ''}</div>
+                        <div className="modal-header-main-secondary-text">{ isEditing ? ((currentGroup?.categoryName).toUpperCase() + " PLANS"?? '') : ((currentGroup?.categoryName).toUpperCase() ?? '')}</div>
                     </div>
                     {/* Header Controls Holder */}
                     <div className="modal-header-control-holder">
@@ -385,75 +385,91 @@ function MedicalAidOptionViewModal({isOpen, onClose, title, data = [], categorie
 
                 </div>
                 {/* Body */}
-                <div className="medicalAidOptions-modalBody">
-                    {data.length === 0 ? (
-                        <p className="medicalAidOptions-modalEmpty">No data available.</p>
-                    ) : (
-                        <>
-                            {/* Option Selector */}
-                            {isEditing ? (
-                                /* Edit Mode */
-                                <div className="option-selector">
-                                    <label>EDITING OPTION:</label>
-                                    <span className="option-name-edit">{currentOption.medicalOptionName ?? ''}</span>
-                                </div>
-
-                            ) : (
-                                /* View Mode */
-                                // Updated UI Logic
-                                <div className="option-selector">
-                                    <div className="medical-option-name-container" id="medical-option-name">
-                                        <p className="medical-option-name-static">MEDICAL OPTION</p>
-                                        <div className="medical-option-name-dynamic">{currentOption.medicalOptionName ?? ''}</div>
-                                    </div>
-                                    <div className="medical-option-salary-bracket-container">
-                                        <p className="medical-option-salary-bracket-static-label">INCOME CATEGORY</p>
-                                        <div className="medical-option-salary-bracket-dynamic-label">{formatSalaryBracket(
-                                            currentOption.salaryBracketMin,
-                                            currentOption.salaryBracketMax,
-                                            formatToLocalCurrency
-                                        )}</div>
+                { !isEditing ?
+                    <div className="medicalAidOptions-modalBody">
+                        {data.length === 0 ? (
+                            <p className="medicalAidOptions-modalEmpty">No data available.</p>
+                        ) : (
+                            <>
+                                {/* Option Selector */}
+                                {isEditing ? (
+                                    /* Edit Mode */
+                                    <div className="option-selector">
+                                        <label>EDITING OPTION:</label>
+                                        <span className="option-name-edit">{currentOption.medicalOptionName ?? ''}</span>
                                     </div>
 
+                                ) : (
+                                    /* View Mode */
+                                    // Updated UI Logic
+                                    <div className="option-selector">
+                                        <div className="medical-option-name-container" id="medical-option-name">
+                                            <p className="medical-option-name-static">MEDICAL OPTION</p>
+                                            <div className="medical-option-name-dynamic">{currentOption.medicalOptionName ?? ''}</div>
+                                        </div>
+                                        <div className="medical-option-salary-bracket-container">
+                                            <p className="medical-option-salary-bracket-static-label">INCOME CATEGORY</p>
+                                            <div className="medical-option-salary-bracket-dynamic-label">{formatSalaryBracket(
+                                                currentOption.salaryBracketMin,
+                                                currentOption.salaryBracketMax,
+                                                formatToLocalCurrency
+                                            )}</div>
+                                        </div>
+
+                                    </div>
+                                    /*<div className="option-selector">
+                                      <label htmlFor="option-dropdown">MEDICAL OPTION</label>
+                                      <select
+                                        id="option-dropdown"
+                                        value={currentOption?.medicalOptionId ?? ''}
+                                        onChange={(e) => {
+                                          const idx = currentGroup.options.findIndex(
+                                            (o) => o.medicalOptionId === Number(e.target.value)
+                                          );
+                                          if (idx >= 0) goToPage(idx);
+                                          }}
+                                        className="category-dropdown"
+                                      >
+                                        {currentGroup?.options.map((opt) => (
+                                          <option key={opt.medicalOptionId} value={opt.medicalOptionId}>
+                                            {opt.medicalOptionName}
+                                          </option>
+                                        ))}
+                                      </select>
+                                    </div>*/
+                                )}
+
+                                <div className="section-divider">
+                                    <p id="monthly-contrib-breakdown">MONTHLY CONTRIBUTION BREAKDOWN</p>
+                                    <Divider />
                                 </div>
-                                /*<div className="option-selector">
-                                  <label htmlFor="option-dropdown">MEDICAL OPTION</label>
-                                  <select
-                                    id="option-dropdown"
-                                    value={currentOption?.medicalOptionId ?? ''}
-                                    onChange={(e) => {
-                                      const idx = currentGroup.options.findIndex(
-                                        (o) => o.medicalOptionId === Number(e.target.value)
-                                      );
-                                      if (idx >= 0) goToPage(idx);
-                                      }}
-                                    className="category-dropdown"
-                                  >
-                                    {currentGroup?.options.map((opt) => (
-                                      <option key={opt.medicalOptionId} value={opt.medicalOptionId}>
-                                        {opt.medicalOptionName}
-                                      </option>
-                                    ))}
-                                  </select>
-                                </div>*/
-                            )}
 
-                            <div className="section-divider">
-                                <p id="monthly-contrib-breakdown">MONTHLY CONTRIBUTION BREAKDOWN</p>
-                                <Divider />
-                            </div>
-
-                            {renderOptionTable()}
+                                {renderViewOptionTable()}
 
 
-                            {/* -- Removing Pagination
+                                {/* -- Removing Pagination
                 {renderPagination()}
 
                 {renderEditProgress()}
                 -- */}
-                        </>
-                    )}
-                </div>
+                            </>
+                        )}
+                    </div> 
+                    :
+                    <>
+                      {/*header span | with note on free annotation */}
+                      <span className="bulk-edit-span-header">
+                        <p className="bulk-edit-span-header-text">
+                          Edit all {currentGroup?.categoryName} plans below. Each plan shows its full Risk / MSA breakdown. 
+                          Changes apply when you click Save All.<br /><b>Note:</b> To denote a free amount use '0' on the appropriate field</p>
+                      </span>
+
+                      {/*List of selected category's options with all details to edit*/}
+                      
+                    </>
+
+                }
+                
 
 
                 <div className="medicalAidOptions-modalFooter">
