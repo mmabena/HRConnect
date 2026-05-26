@@ -1,8 +1,8 @@
-# HRConnect Backend - Notification Infrastruture Documentation
+# HRConnect Backend - Notification Infrastructure Documentation
 
 ## Overview 
 
-This document describes how the notifications system should be used in the system and how ti is architectured. The pipeline is as follows
+This document describes how the notifications system should be used in the system and how it is architected. The pipeline is as follows
 
  ```mermaid
  flowchart LR 
@@ -20,7 +20,7 @@ This document describes how the notifications system should be used in the syste
  ```
 
 ## Usage
-Following creating a notification, with 1 or more delivery channels, the factory needs to be called (via Depenedency Injection)
+Following creating a notification, with 1 or more delivery channels, the factory needs to be called (via Dependency Injection)
 to be able to introduce the notification into the pipeline 
 
 ```C#
@@ -28,7 +28,7 @@ to be able to introduce the notification into the pipeline
  INotification.ProduceNotificationAsync(CreateNotificationDto);
 ```
 ### Service and Dispatchers
-The service class is responsible for making notificationsa and saving them to the database using 
+The service class is responsible for making notifications and saving them to the database using 
 ```INotificationService.TryCreateAndDispatch(Notification)```.
 Idempotency Keys are used to create uniqueness and prevent duplicate notifications for an employee.
 The keys is a hash calculated from parts of the notification like so,
@@ -36,7 +36,7 @@ The keys is a hash calculated from parts of the notification like so,
 // NotificationService.cs (see line:103)
 $"{request.Type}:{request.EmployeeId}:{request.DeliveryChannel}:{request.Message.Trim()}"
 ```
-where Delivery Channels are flagged enums like InApp, Email and potentially more future delivery 
+where Delivery Channels are flagged Enums like In-App, Email and potentially more future delivery 
 channels.
 Since the Delivery Channels are flagged, they can be piped together to instruct the dispatcher to
 send to multiple Delivery Channels
