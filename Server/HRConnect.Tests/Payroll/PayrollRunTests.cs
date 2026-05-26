@@ -339,7 +339,6 @@ _payrollRunRepo.Object,
         _notificationsService.Object,
         null
         );
-
     }
   }
 }
