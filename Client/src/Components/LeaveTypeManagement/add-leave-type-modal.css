@@ -221,21 +221,7 @@ position: relative;
   color: #002D40;
   cursor: pointer;
 }
-.next {
-  display: flex;
-  justify-content: center;
-  align-items: center;
 
-  width: 250px;
-  height: 37px;
-
-  background: #355867;
-  border: none;
-  border-radius: 5px;
-
-  color: white;
-  cursor: pointer;
-}
 .femaleOnly {
   position: relative;
   top: -22px;

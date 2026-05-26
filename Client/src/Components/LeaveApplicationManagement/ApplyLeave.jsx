@@ -12,6 +12,7 @@ const ApplyLeave = () => {
   const employee = JSON.parse(localStorage.getItem("currentEmployee"));
   const [showHistory, setShowHistory] = useState(false);
   const [errors, setErrors] = useState({});
+  const [successMessage, setSuccessMessage] = useState("");
 
   const selectedBalance = leaveData?.leaveBalances?.find(
     (l) => l.leaveTypeId === Number(selectedLeaveId),
@@ -66,16 +67,16 @@ const ApplyLeave = () => {
     if (selectedBalance && requestedDays > selectedBalance.availableDays) {
       newErrors.leaveBalance = "Requested leave days exceed available balance";
     }
-
-    if (!description.trim()) {
-      newErrors.description = "Description is required";
-    }
     const selectedLeave = leaveData?.leaveBalances?.find(
       (l) => l.leaveTypeId === Number(selectedLeaveId),
     );
 
     const isAnnualLeave =
       selectedLeave?.leaveType?.toLowerCase() === "annual leave";
+
+    if (!isAnnualLeave && !description.trim()) {
+      newErrors.description = "Description is required";
+    }
 
     if (!isAnnualLeave && files.length === 0) {
       newErrors.documents =
@@ -123,12 +124,26 @@ const ApplyLeave = () => {
 
       await applyLeave(formData);
 
-      alert("Leave application submitted successfully");
+      setSuccessMessage("Leave submitted successfully");
 
-      window.location.reload();
+      setErrors({});
+
+      setSelectedLeaveId("");
+      setDescription("");
+      setFiles([]);
+      setStartDate("");
+      setEndDate("");
+
+      const refreshedLeave = await getEmployeeLeave(employeeId);
+
+      setLeaveData(refreshedLeave);
     } catch (error) {
       console.error(error);
-      alert("Submission failed");
+      setErrors({
+        submit:
+          error?.response?.data?.message ||
+          "Failed to submit leave application",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -156,6 +171,15 @@ const ApplyLeave = () => {
 
     fetchLeave();
   }, []);
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        setSuccessMessage("");
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
   if (showHistory) {
     return <LeaveHistory />;
   }
@@ -178,6 +202,13 @@ const ApplyLeave = () => {
       <div className="apply-grid">
         <div className="apply-left">
           <div className="section">
+            {successMessage && (
+              <div className="success-message">{successMessage}</div>
+            )}
+
+            {errors.submit && (
+              <div className="submit-error-message">{errors.submit}</div>
+            )}
             <p className="section-title">LEAVE DETAILS</p>
 
             <div className="form-group">

@@ -623,7 +623,7 @@
 
 
 
-.pagination-wrapper {
+/* .pagination-wrapper {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -631,7 +631,7 @@
   margin-left: 300px;
   max-width: 1100px;
   margin-right: 50px;
-}
+} */
 
 
 .pagination-left {
@@ -1736,14 +1736,14 @@
   width: 24px;
   height: 24px;
   transform: rotate(90deg);
-  /* rotates arrow 90 degrees */
   cursor: pointer;
 }
 
+  /* rotates arrow 90 degrees */
 .pagination-arrow.next {
   transform: rotate(-90deg);
-  /* flips for "next" direction */
-}
+  
+}/* flips for "next" direction */
 .pagination-arrow.disabled {
   opacity: 0.4;
   cursor: not-allowed;

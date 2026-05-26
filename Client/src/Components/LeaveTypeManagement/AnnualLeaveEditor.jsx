@@ -147,6 +147,43 @@ const AnnualLeaveEditor = ({
       }
     }
 
+    const groupedRules = {};
+
+    payload.rules.forEach((rule) => {
+      if (!groupedRules[rule.groupKey]) {
+        groupedRules[rule.groupKey] = [];
+      }
+
+      groupedRules[rule.groupKey].push(rule);
+    });
+
+    for (const groupKey in groupedRules) {
+      const rules = groupedRules[groupKey].sort(
+        (a, b) => a.minYearsService - b.minYearsService,
+      );
+
+      for (let i = 0; i < rules.length - 1; i++) {
+        const current = rules[i];
+        const next = rules[i + 1];
+
+        if (current.maxYearsService === null) {
+          return "Unlimited ranges must be the final range";
+        }
+
+        if (next.minYearsService < current.maxYearsService) {
+          return "Employment year ranges cannot overlap";
+        }
+
+        if (next.minYearsService > current.maxYearsService) {
+          return "Employment year ranges must have no gaps between them";
+        }
+
+        if (next.daysAllocated <= current.daysAllocated) {
+          return "Leave days cannot decrease as years of service increases";
+        }
+      }
+    }
+
     return null;
   };
   const buildPayload = () => {
@@ -196,6 +233,13 @@ const AnnualLeaveEditor = ({
         return;
       }
 
+      const validationError = validateFrontendRules();
+
+      if (validationError) {
+        setAffectedEmployees([]);
+        return;
+      }
+
       try {
         const payload = buildPayload();
 
@@ -204,6 +248,7 @@ const AnnualLeaveEditor = ({
         setAffectedEmployees(previewData || []);
       } catch (err) {
         console.error(err);
+        setAffectedEmployees([]);
       }
     };
 

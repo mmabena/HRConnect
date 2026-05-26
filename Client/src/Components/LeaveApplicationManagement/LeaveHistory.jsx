@@ -285,7 +285,7 @@ const LeaveHistory = () => {
             </tbody>
           </table>
 
-          <div className="pagination">
+          <div className="pagination2">
             <button onClick={goToPreviousPage} disabled={currentPage === 1}>
               {"<"}
             </button>
@@ -296,7 +296,7 @@ const LeaveHistory = () => {
               return (
                 <button
                   key={pageNumber}
-                  className={currentPage === pageNumber ? "active" : ""}
+                  className={currentPage === pageNumber ? "pagination2-active" : ""}
                   onClick={() => goToPage(pageNumber)}
                 >
                   {pageNumber}

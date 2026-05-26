@@ -320,7 +320,7 @@
 .status-dot-icon {
   flex-shrink: 0;
 }
-.pagination {
+.pagination2 {
   position: absolute;
 
   width: 182px;
@@ -334,7 +334,7 @@
   align-items: center;
   gap: 7px;
 }
-.pagination button {
+.pagination2 button {
   box-sizing: border-box;
 
   display: flex;
@@ -352,7 +352,7 @@
 
   cursor: pointer;
 }
-.pagination button.active {
+.pagination2 button.pagination2-active {
   background: #355867;
   color: #FFFFFF;
   border: 1px solid #4F6E78;
