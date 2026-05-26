@@ -1,17 +1,17 @@
 namespace HRConnect.Api.Services
 {
 
-  using HRConnect.Api.DTOs.JobGrade;
-  using HRConnect.Api.Interfaces;
-  using HRConnect.Api.Mappers;
-  using HRConnect.Api.Models;
-  using System;
-  using System.Collections.Generic;
-  using System.Linq;
-  using System.Threading.Tasks;
-  public class JobGradeService : IJobGradeService
-  {
-    private readonly IJobGradeRepository _jobGradeRepo;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using HRConnect.Api.DTOs.JobGrade;
+    using HRConnect.Api.Interfaces;
+    using HRConnect.Api.Mappers;
+    using HRConnect.Api.Models;
+    public class JobGradeService : IJobGradeService
+    {
+        private readonly IJobGradeRepository _jobGradeRepo;
 
     public JobGradeService(IJobGradeRepository jobGradeRepo)
     {

@@ -311,7 +311,7 @@ namespace HRConnect.Tests
       //Arrange 
       var services = new ServiceCollection();
       // register other dependencies if needed
-     services.AddScoped<ICompanyContributionAllocationService>(
+      services.AddScoped<ICompanyContributionAllocationService>(
           _ => _contributionAllocService.Object
           );
       var serviceProvider = services.BuildServiceProvider();

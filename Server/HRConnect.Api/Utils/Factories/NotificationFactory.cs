@@ -1,7 +1,7 @@
 namespace HRConnect.Api.Utils.Factories
 {
-  using HRConnect.Api.Interfaces.Notification;
   using HRConnect.Api.DTOs.Notification;
+  using HRConnect.Api.Interfaces.Notification;
   using HRConnect.Api.Mappers.Notification;
 
   public class NotificationFactory : INotificationFactory

@@ -3,12 +3,12 @@ namespace HRConnect.Api.Services
   using System;
   using System.Collections.Generic;
   using System.Linq;
-  using HRConnect.Api.DTOs;
-  using HRConnect.Api.Models;
-  using HRConnect.Api.Data;
-  using Microsoft.EntityFrameworkCore;
   using System.Threading.Tasks;
+  using HRConnect.Api.Data;
+  using HRConnect.Api.DTOs;
   using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Models;
+  using Microsoft.EntityFrameworkCore;
 
   public class LeaveTypeManagementService : ILeaveTypeManagementService
   {
@@ -45,7 +45,7 @@ namespace HRConnect.Api.Services
             EmployeeId = e.EmployeeId,
             FullName = e.Name + " " + e.Surname,
             Email = e.Email,
-            Position = e.Position.PositionTitle,
+            Position = e.Position!.PositionTitle,
             LeaveBalances = e.LeaveBalances.Select(lb => new LeaveBalanceSummary
             {
               LeaveType = lb.LeaveType.Name,

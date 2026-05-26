@@ -1,7 +1,7 @@
 namespace HRConnect.Api.Services
 {
-  using HRConnect.Api.Interfaces;
   using System.Linq;
+  using HRConnect.Api.Interfaces;
   using Quartz;
   public class JobScheduleService : IJobScheduleService
   {

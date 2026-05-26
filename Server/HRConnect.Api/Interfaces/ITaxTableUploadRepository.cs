@@ -1,8 +1,8 @@
 namespace HRConnect.Api.Repositories
 {
-  using HRConnect.Api.Models;
   using System.Collections.Generic;
   using System.Threading.Tasks;
+  using HRConnect.Api.Models;
 
   /// <summary>
   /// Provides data access operations for <see cref="TaxTableUpload"/> entities.

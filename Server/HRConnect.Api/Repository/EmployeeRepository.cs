@@ -2,10 +2,10 @@ namespace HRConnect.Api.Repository
 {
   using System.Collections.Generic;
   using System.Threading.Tasks;
-  using HRConnect.Api.Interfaces;
-  using HRConnect.Api.Models;
   using HRConnect.Api.Data;
   using HRConnect.Api.DTOs.Employee;
+  using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Models;
   using Microsoft.EntityFrameworkCore;
   using Microsoft.EntityFrameworkCore.Storage;
   /// <summary>

@@ -1,13 +1,14 @@
-using HRConnect.Api.DTOs.User;
-using HRConnect.Api.Mappers;
-using Microsoft.AspNetCore.Mvc;
-using HRConnect.Api.Data;
-using System.Security.Claims;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
-
 namespace HRConnect.Api.Controllers
 {
+  using HRConnect.Api.DTOs.User;
+  using HRConnect.Api.Mappers;
+  using Microsoft.AspNetCore.Mvc;
+  using HRConnect.Api.Data;
+  using System.Security.Claims;
+  using Microsoft.EntityFrameworkCore;
+  using Microsoft.AspNetCore.Authorization;
+
+
   [Route("api/user")]
   [ApiController]
   public class UserController : ControllerBase

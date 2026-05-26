@@ -2,8 +2,8 @@ using System;
 using System.IO;
 using System.Linq;
 using HRConnect.Api.DTOs.Employee;
-using HRConnect.Api.Models;
 using HRConnect.Api.Interfaces;
+using HRConnect.Api.Models;
 using HRConnect.Api.Services;
 
 namespace HRConnect.Api.Utils

@@ -1,8 +1,8 @@
 namespace HRConnect.Api.Interfaces
 {
-  using HRConnect.Api.DTOs.Position;
-  using System.Collections.Generic;
-  using System.Threading.Tasks;
+    using HRConnect.Api.DTOs.Position;
+    using System.Collections.Generic;
+    using System.Threading.Tasks;
 
   public interface IPositionService
   {

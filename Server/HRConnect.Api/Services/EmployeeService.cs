@@ -2,17 +2,17 @@ namespace HRConnect.Api.Services
 {
   using System;
   using System.Collections.Generic;
+  using System.Globalization;
   using System.Linq;
+  using System.Security.Cryptography;
   using System.Threading.Tasks;
+  using HRConnect.Api.Data;
   using HRConnect.Api.DTOs.Employee;
   using HRConnect.Api.DTOs.UserCompany;
   using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Mappers;
   using HRConnect.Api.Models;
   using HRConnect.Api.Utils;
-  using System.Globalization;
-  using HRConnect.Api.Mappers;
-  using System.Security.Cryptography;
-  using HRConnect.Api.Data;
   using Microsoft.AspNetCore.Identity;
   using Microsoft.EntityFrameworkCore;
 
@@ -86,7 +86,7 @@ namespace HRConnect.Api.Services
       return employees.Select(e => e.ToEmployeeDto()).ToList();
     }
     /// <summary>
-    /// Retrieves a single employee by their Employee ID.
+    /// Retrieves a single employee by their Employee ID. User and company scoped to ensure data isolation and security.
     /// </summary>
     /// <param name="EmployeeId">The employee identifier.</param>
     /// <returns>The employee if found; otherwise null.</returns>
@@ -104,6 +104,23 @@ namespace HRConnect.Api.Services
         
       if (employee.CompanyId != activeCompanyId)
           throw new UnauthorizedAccessException("Access denied to this employee.");
+
+      return employee?.ToEmployeeDto();
+    }
+    /// <summary>
+    /// Retrieves a single employee by their Employee ID. Not user/company scoped 
+    /// </summary>
+    /// <param name="EmployeeId">The employee identifier.</param>
+    /// <returns>The employee if found; otherwise null.</returns>
+    public async Task<EmployeeDto?> GetEmployeeByIdInternalAsync(string employeeId)
+    {
+      //Recalculate leave balances for the employee before returning the data
+      await _leaveBalanceService.RecalculateAnnualLeaveAsync(employeeId);
+
+      var employee = await _employeeRepo.GetEmployeeByIdAsync(employeeId);
+
+      if (employee == null)
+          throw new ValidationException("Employee does not exist");
 
       return employee?.ToEmployeeDto();
     }
@@ -133,7 +150,7 @@ namespace HRConnect.Api.Services
       // Ensure no duplicates exist
       await CheckDuplicates(employeeRequestDto);
 
-      await ValidateCareerManagerAsync(null, employeeRequestDto.CareerManagerID);
+      await ValidateCareerManagerAsync(null!, employeeRequestDto.CareerManagerID);
       // If ID number exists, auto-extract DOB and Gender
       ExtractIdInfo(employeeRequestDto);
       // Ensure Title and Gender combination is valid

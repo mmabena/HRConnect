@@ -1,8 +1,10 @@
+#pragma warning disable CS0219 // Variable is assigned but its value is never used
 namespace HRConnect.Api.Services
 {
-  using System.Text;
-  using System.Security.Claims;
+  using System.Collections.Concurrent;
   using System.IdentityModel.Tokens.Jwt;
+  using System.Security.Claims;
+  using System.Text;
   using HRConnect.Api.Interfaces;
   using System.Globalization;
   using System.Collections.Concurrent;

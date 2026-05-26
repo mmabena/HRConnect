@@ -1,9 +1,9 @@
 namespace HRConnect.Api.Controllers
 {
-  using Microsoft.AspNetCore.Mvc;
-  using Microsoft.AspNetCore.Authorization;
-  using HRConnect.Api.DTOs;
-  using HRConnect.Api.Interfaces;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Authorization;
+    using HRConnect.Api.DTOs;
+    using HRConnect.Api.Interfaces;
 
   [ApiController]
   [Route("api/leave-rules")]

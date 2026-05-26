@@ -2,10 +2,10 @@ namespace HRConnect.Api.Services
 {
   using System.Collections.Generic;
   using System.Threading.Tasks;
-  using HRConnect.Api.Interfaces;
-  using HRConnect.Api.Models.CompanyContributions;
   using HRConnect.Api.DTOs.CompanyContribution;
+  using HRConnect.Api.Interfaces;
   using HRConnect.Api.Mappers;
+  using HRConnect.Api.Models.CompanyContributions;
 
   public class CompanyContributionService : ICompanyContributionService
   {
@@ -73,6 +73,16 @@ namespace HRConnect.Api.Services
     public async Task DeleteCompanyContributionAsync(int companyContributionId)
     {
       await _companyContributionRepo.DeleteCompanyContributionAsync(companyContributionId);
+    }
+
+     /// <summary>
+    /// Find any allocated company contribution for the given payroll run
+    /// </summary>
+    /// <param name="payrollRunId">Id for given payroll run</param>
+    /// <returns></returns>
+    public async Task<bool> FindAllocatedContribution(int payrollRunId)
+    {
+      return await _companyContributionRepo.FindAllocatedContribution(payrollRunId);
     }
 
   }

@@ -1,10 +1,10 @@
 namespace HRConnect.Api.Controllers
 {
-  using System.Threading.Tasks;
-  using Microsoft.AspNetCore.Mvc;
-  using Microsoft.AspNetCore.Authorization;
-  using HRConnect.Api.DTOs;
-  using HRConnect.Api.Interfaces;
+    using System.Threading.Tasks;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Authorization;
+    using HRConnect.Api.DTOs;
+    using HRConnect.Api.Interfaces;
 
   [ApiController]
   [Route("api/leave-types")]

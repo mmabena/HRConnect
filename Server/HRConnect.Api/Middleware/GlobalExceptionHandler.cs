@@ -1,10 +1,10 @@
 ﻿namespace HRConnect.Api.Middleware
 {
-  using Microsoft.AspNetCore.Http;
   using System.Text.Json;
   using HRConnect.Api.DTOs;
-  using Microsoft.Extensions.Logging;
+  using Microsoft.AspNetCore.Http;
   using Microsoft.EntityFrameworkCore;
+  using Microsoft.Extensions.Logging;
 
   /// <summary>
   /// ASP.NET Core middleware for centralized exception handling across the API.

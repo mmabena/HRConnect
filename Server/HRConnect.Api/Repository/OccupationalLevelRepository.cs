@@ -1,14 +1,19 @@
 namespace HRConnect.Api.Repository
 {
-  using HRConnect.Api.Data;
-  using HRConnect.Api.Interfaces;
-  using HRConnect.Api.Models;
-  using Microsoft.EntityFrameworkCore;
-  using System.Collections.Generic;
-  using System.Threading.Tasks;
-  public class OccupationalLevelRepository(ApplicationDBContext context) : IOccupationalLevelRepository
-  {
-    private readonly ApplicationDBContext _context = context;
+    using System.Collections.Generic;
+    using System.Threading.Tasks;
+    using HRConnect.Api.Data;
+    using HRConnect.Api.Interfaces;
+    using HRConnect.Api.Models;
+    using Microsoft.EntityFrameworkCore;
+    public class OccupationalLevelRepository : IOccupationalLevelRepository
+    {
+        private readonly ApplicationDBContext _context;
+
+        public OccupationalLevelRepository(ApplicationDBContext context)
+        {
+            _context = context;
+        }
 
     public async Task<List<OccupationalLevel>> GetAllOccupationalLevelsAsync()
     {

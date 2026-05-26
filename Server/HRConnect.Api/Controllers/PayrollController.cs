@@ -1,8 +1,8 @@
 namespace HRConnect.Api.Controllers
 {
+  using HRConnect.Api.DTOs.Payroll;
   using HRConnect.Api.Interfaces;
   using Microsoft.AspNetCore.Mvc;
-  using HRConnect.Api.DTOs.Payroll;
   [Route("api/payroll")]
   [ApiController]
   public class PayrollController : ControllerBase

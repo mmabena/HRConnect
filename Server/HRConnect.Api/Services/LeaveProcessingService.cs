@@ -1,15 +1,15 @@
 namespace HRConnect.Api.Services
 {
-  using HRConnect.Api.Data;
-  using HRConnect.Api.Interfaces;
-  using HRConnect.Api.Models;
-  using Microsoft.EntityFrameworkCore;
-  using HRConnect.Api.Utils;
-  public class LeaveProcessingService : ILeaveProcessingService
-  {
-    private readonly ApplicationDBContext _context;
-    private readonly IEmailService _emailService;
-    private readonly ILeaveBalanceService _leaveBalanceService;
+    using HRConnect.Api.Data;
+    using HRConnect.Api.Interfaces;
+    using HRConnect.Api.Models;
+    using HRConnect.Api.Utils;
+    using Microsoft.EntityFrameworkCore;
+    public class LeaveProcessingService : ILeaveProcessingService
+    {
+        private readonly ApplicationDBContext _context;
+        private readonly IEmailService _emailService;
+        private readonly ILeaveBalanceService _leaveBalanceService;
 
     public LeaveProcessingService(
         ApplicationDBContext context,

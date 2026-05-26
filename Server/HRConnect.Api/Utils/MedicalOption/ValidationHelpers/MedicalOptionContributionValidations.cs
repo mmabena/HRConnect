@@ -126,23 +126,23 @@
       {
         // Risk + MSA should equal Total
         var adultTotal = entity.MonthlyRiskContributionAdult +
-                         entity.MonthlyMsaContributionAdult.Value;
+                         entity.MonthlyMsaContributionAdult!.Value;
         var childTotal = entity.MonthlyRiskContributionChild +
-                         entity.MonthlyMsaContributionChild.Value;
+                         entity.MonthlyMsaContributionChild!.Value;
 
         if (Math.Abs((decimal)(adultTotal
-                               - entity.TotalMonthlyContributionsAdult)) > tolerance)
+                               - entity.TotalMonthlyContributionsAdult)!) > tolerance)
           return false;
 
         if (Math.Abs((decimal)(childTotal
-                               - entity.TotalMonthlyContributionsChild)) > tolerance)
+                               - entity.TotalMonthlyContributionsChild)!) > tolerance)
           return false;
 
         if (hasPrincipal)
         {
-          var principalTotal = entity.MonthlyRiskContributionPrincipal.Value +
-                               entity.MonthlyMsaContributionPrincipal.Value;
-          if (Math.Abs(principalTotal - entity.TotalMonthlyContributionsPrincipal.Value) >
+          var principalTotal = entity.MonthlyRiskContributionPrincipal!.Value +
+                               entity.MonthlyMsaContributionPrincipal!.Value;
+          if (Math.Abs(principalTotal - entity.TotalMonthlyContributionsPrincipal!.Value) >
               tolerance)
             return false;
         }
@@ -151,18 +151,18 @@
       {
         // Risk should equal Total when no MSA
         if (Math.Abs((decimal)(entity.MonthlyRiskContributionAdult
-                               - entity.TotalMonthlyContributionsAdult)) >
+                               - entity.TotalMonthlyContributionsAdult)!) >
             tolerance)
           return false;
 
         if (Math.Abs((decimal)(entity.MonthlyRiskContributionChild
-                               - entity.TotalMonthlyContributionsChild)) >
+                               - entity.TotalMonthlyContributionsChild)!) >
             tolerance)
           return false;
 
         if (hasPrincipal &&
-            Math.Abs(entity.MonthlyRiskContributionPrincipal.Value -
-                     entity.TotalMonthlyContributionsPrincipal.Value) > tolerance)
+            Math.Abs(entity.MonthlyRiskContributionPrincipal!.Value -
+                     entity.TotalMonthlyContributionsPrincipal!.Value) > tolerance)
           return false;
       }
 

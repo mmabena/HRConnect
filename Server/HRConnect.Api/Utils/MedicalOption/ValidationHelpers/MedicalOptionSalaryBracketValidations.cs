@@ -74,10 +74,9 @@
         var next = sortedRecords[i + 1];
 
         // Check for overlap (next.min should be > current.max)
-        if (current.salaryBracketMax.HasValue && next.salaryBracketMin.HasValue ||
-            !(next is null))
-        {
-          if (next.salaryBracketMin <= current.salaryBracketMax.Value)
+        if (current.salaryBracketMax.HasValue && next.salaryBracketMin.HasValue || 
+            !(next is null)) {
+          if (next.salaryBracketMin <= current.salaryBracketMax!.Value)
             return false;
         }
 

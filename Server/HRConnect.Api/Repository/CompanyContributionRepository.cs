@@ -13,6 +13,14 @@ namespace HRConnect.Api.Repository
     {
       _context = context;
     }
+
+    public async Task<bool> FindAllocatedContribution(int payrollRunId)
+    {
+      return await _context.EmployeeCompanyContributions
+        .AnyAsync(e => e.PayrollRunId == payrollRunId);
+    }
+
+
     /// <summary>
     /// Retrieves all company contribution records.
     /// </summary>
@@ -21,6 +29,8 @@ namespace HRConnect.Api.Repository
     {
       return await _context.CompanyContributions.ToListAsync();
     }
+
+
     /// <summary>
     /// Retrieves a company contribution by its unique identifier.
     /// </summary>

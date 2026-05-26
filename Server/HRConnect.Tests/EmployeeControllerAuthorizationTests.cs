@@ -2,16 +2,15 @@ namespace HRConnect.Tests
 {
     using System.Globalization;
     using System.Security.Claims;
+    using System.Threading.Tasks;
+    using HRConnect.Api.Controllers;
+    using HRConnect.Api.DTOs.Employee; 
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Moq;
     using Xunit;
-    using HRConnect.Api.Controllers;
-    using HRConnect.Api.Interfaces;
-    using HRConnect.Api.DTOs.Employee;
     using System.Collections.Generic;
-    using System.Threading.Tasks;
-
+    using HRConnect.Api.Interfaces;
     public class EmployeeControllerAuthorizationTests
     {
         private static ClaimsPrincipal CreateUser(string role, int userId = 1)
