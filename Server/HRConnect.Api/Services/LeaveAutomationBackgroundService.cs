@@ -76,6 +76,7 @@ namespace HRConnect.Api.Services
 
           await leaveProcessingService.ProcessCarryOverNotificationAsync();
           await leaveProcessingService.ProcessAnnualResetAsync();
+          await leaveProcessingService.ProcessExpiredPendingLeaveApplicationsAsync();
 
           var leaveBalanceService = scope.ServiceProvider
           .GetRequiredService<ILeaveBalanceService>();

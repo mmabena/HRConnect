@@ -7,5 +7,6 @@ namespace HRConnect.Api.Interfaces
         Task RecalculateAllFamilyResponsibilityLeaveAsync();
         Task ProcessCarryOverNotificationAsync();
         Task ProcessAnnualResetAsync(int? overrideYear = null);
+        Task ProcessExpiredPendingLeaveApplicationsAsync();
     }
 }

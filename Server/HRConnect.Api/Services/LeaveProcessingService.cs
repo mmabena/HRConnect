@@ -5,20 +5,25 @@ namespace HRConnect.Api.Services
     using HRConnect.Api.Models;
     using Microsoft.EntityFrameworkCore;
     using HRConnect.Api.Utils;
+    using Microsoft.AspNetCore.SignalR;
+    using HRConnect.Api.Hubs;
     public class LeaveProcessingService : ILeaveProcessingService
     {
         private readonly ApplicationDBContext _context;
         private readonly IEmailService _emailService;
         private readonly ILeaveBalanceService _leaveBalanceService;
+        private readonly IHubContext<LeaveHub> _hubContext;
 
         public LeaveProcessingService(
             ApplicationDBContext context,
             IEmailService emailService,
-            ILeaveBalanceService leaveBalanceService)
+            ILeaveBalanceService leaveBalanceService,
+            IHubContext<LeaveHub> hubContext)
         {
             _context = context;
             _emailService = emailService;
             _leaveBalanceService = leaveBalanceService;
+            _hubContext = hubContext;
         }
         /// <summary>
         /// Recalculates the sick leave balance for all employees based on their tenure and the sick leave policy.
@@ -196,6 +201,68 @@ namespace HRConnect.Api.Services
                 return 0;
 
             return remaining <= 5 ? remaining : 5;
+        }
+        public async Task ProcessExpiredPendingLeaveApplicationsAsync()
+        {
+            var expiryCutoff = DateTime.UtcNow.AddDays(-2);
+
+            var expiredApplications = await _context.LeaveApplications
+                .Include(a => a.Documents)
+                .Where(a =>
+                    a.Status == LeaveApplication.LeaveApplicationStatus.Pending &&
+                    a.AppliedDate <= expiryCutoff)
+                .ToListAsync();
+
+            foreach (var application in expiredApplications)
+            {
+                var employee = await _context.Employees
+                    .FirstOrDefaultAsync(e => e.EmployeeId == application.EmployeeId);
+
+                if (employee == null)
+                    continue;
+
+                var leaveType = await _context.LeaveTypes
+                    .FirstOrDefaultAsync(l => l.Id == application.LeaveTypeId);
+
+                if (leaveType == null)
+                    continue;
+
+                application.Status = LeaveApplication.LeaveApplicationStatus.Rejected;
+
+                application.DecisionDate = DateTime.UtcNow;
+
+                application.RejectionReason =
+                    "Leave application automatically rejected because it was not reviewed within 2 days.";
+
+                application.DecisionBy = "System Auto-Reject";
+
+                var subject = "Leave Application Rejected";
+
+                var body = EmailTemplates.GenerateDecisionEmailHtml(
+                    employee,
+                    leaveType,
+                    application,
+                    false
+                );
+
+                await _emailService.SendEmailAsync(
+                    employee.Email,
+                    subject,
+                    body
+                );
+
+                await _hubContext.Clients
+                    .Group(application.EmployeeId)
+                    .SendAsync(
+                        "LeaveUpdated",
+                        new
+                        {
+                            employeeId = application.EmployeeId,
+                            applicationId = application.Id,
+                            status = application.Status.ToString()
+                        });
+            }
+            await _context.SaveChangesAsync();
         }
     }
 }
