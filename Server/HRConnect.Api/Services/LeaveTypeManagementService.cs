@@ -16,11 +16,13 @@ namespace HRConnect.Api.Services
     {
         private readonly ApplicationDBContext _context;
         private readonly ILeaveBalanceService _leaveBalanceService;
+        private readonly IEmailService _emailService;
 
-        public LeaveTypeManagementService(ApplicationDBContext context, ILeaveBalanceService leaveBalanceService)
+        public LeaveTypeManagementService(ApplicationDBContext context, ILeaveBalanceService leaveBalanceService, IEmailService emailService)
         {
             _context = context;
             _leaveBalanceService = leaveBalanceService;
+            _emailService = emailService;
         }
         /// <summary>
         /// Retrieves a list of all leave types along with their associated entitlement rules from the database,
@@ -240,6 +242,10 @@ namespace HRConnect.Api.Services
                 throw new InvalidOperationException(string.Join(" | ", errors));
 
             ValidateRules(request.Rules);
+            var impactedEmployees =
+    leaveType.Code == "AL"
+        ? await PreviewEntitlementImpactAsync(request)
+        : new List<EntitlementImpactPreviewDto>();
 
             leaveType.Name = request.Name;
             leaveType.Description = request.Description;
@@ -271,6 +277,40 @@ namespace HRConnect.Api.Services
 
             await _leaveBalanceService
                 .RecalculateAnnualLeaveBulkAsync(employeeIds);
+
+            if (leaveType.Code == "AL")
+            {
+
+                foreach (var impacted in impactedEmployees)
+                {
+                    var employee = await _context.Employees
+                        .Include(e => e.LeaveBalances)
+                            .ThenInclude(lb => lb.LeaveType)
+                        .FirstOrDefaultAsync(e =>
+                            e.EmployeeId == impacted.EmployeeId);
+
+                    if (employee == null)
+                        continue;
+
+                    var annualBalance = employee.LeaveBalances
+                        .FirstOrDefault(lb =>
+                            lb.LeaveType.Code == "AL");
+
+                    if (annualBalance == null)
+                        continue;
+
+                    var emailBody =
+                        EmailTemplates.GenerateRuleChangeEmail(
+                            employee,
+                            impacted.NewEntitlement,
+                            annualBalance.AvailableDays);
+
+                    await _emailService.SendEmailAsync(
+                        employee.Email,
+                        "Annual Leave Entitlement Updated",
+                        emailBody);
+                }
+            }
 
             return await GetLeaveTypeByIdAsync(leaveType.Id);
         }
