@@ -1,6 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import "./MedicalAidModal.css";
-import { ArrowRight, ArrowLeft, Plus, Info, Check } from "lucide-react";
+import {
+  ArrowRight,
+  ArrowLeft,
+  Plus,
+  Info,
+  Check,
+  X,
+} from "lucide-react";
+
 import { getMedicalAidPlans } from "../../../api/MedicalAidPlan";
 
 const MedicalAidModal = ({
@@ -11,113 +19,417 @@ const MedicalAidModal = ({
   setMedicalAidInfo,
 }) => {
   const [plans, setPlans] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const salary = medicalAidInfo?.salary || 0;
+
   const [dependents, setDependents] = useState(
     medicalAidInfo?.dependents || []
   );
 
-  const relationshipOptions = ["Spouse", "Child", "Parent", "Sibling", "Other"];
+  const [showDependentModal, setShowDependentModal] = useState(false);
 
-  // load plans
+  const [newDependent, setNewDependent] = useState({
+    fullName: "",
+    lastName: "",
+    gender: "Male",
+    idNumber: "",
+    relationship: "Child",
+  });
+
+  const relationshipOptions = [
+    "Spouse",
+    "Child",
+    "Parent",
+    "Sibling",
+    "Other",
+  ];
+
+  const genderOptions = ["Male", "Female"];
+
+  // =========================
+  // LOAD DATA
+  // =========================
   useEffect(() => {
     const loadPlans = async () => {
       try {
+        setLoading(true);
+
         const result = await getMedicalAidPlans();
-        setPlans(result || []);
+
+        setPlans(Array.isArray(result) ? result : []);
       } catch (error) {
         console.log("Failed to load medical aid plans", error);
+        setPlans([]);
+      } finally {
+        setLoading(false);
       }
     };
 
     loadPlans();
   }, []);
 
-  // select plan
+  // =========================
+  // FILTER BY SALARY
+  // =========================
+  const filteredPlans = useMemo(() => {
+    return plans
+      .map((category) => {
+        const options = (category.medicalOptions || []).filter((opt) => {
+          const min = opt.salaryBracketMin ?? 0;
+          const max = opt.salaryBracketMax ?? Infinity;
+
+          return salary >= min && salary <= max;
+        });
+
+        return {
+          ...category,
+          medicalOptions: options,
+        };
+      })
+      .filter((cat) => cat.medicalOptions.length > 0);
+  }, [plans, salary]);
+
+  // =========================
+  // SELECT PLAN
+  // =========================
   const selectPlan = (plan) => {
     setMedicalAidInfo((prev) => ({
       ...prev,
-      planId: plan.id,
-      medicalAidPlan: plan.name,
+      planId: plan.medicalOptionId,
+      medicalAidPlan: plan.medicalOptionName,
       selectedPlan: plan,
     }));
   };
 
-  // add dependent
+  // =========================
+  // ADD DEPENDENT
+  // =========================
   const addDependent = () => {
-    const newList = [
-      ...dependents,
-      { fullName: "", relationship: "Child" },
-    ];
+    const updatedDependents = [...dependents, newDependent];
 
-    setDependents(newList);
+    setDependents(updatedDependents);
 
     setMedicalAidInfo((prev) => ({
       ...prev,
-      dependents: newList,
+      dependents: updatedDependents,
     }));
-  };
 
-  // update dependent
-  const updateDependent = (index, field, value) => {
-    const newList = [...dependents];
-    newList[index][field] = value;
+    setNewDependent({
+      fullName: "",
+      lastName: "",
+      gender: "Male",
+      idNumber: "",
+      relationship: "Child",
+    });
 
-    setDependents(newList);
-
-    setMedicalAidInfo((prev) => ({
-      ...prev,
-      dependents: newList,
-    }));
+    setShowDependentModal(false);
   };
 
   return (
     <div className="emp-medical-aid-container">
-      <div className="emp-medical-aid-form-grid">
+
+      {/* HEADER */}
+      <div className="emp-medical-aid-header-frame">
 
         <div className="emp-medical-aid-personal-details-heading">
           <span>Medical Aid</span>
         </div>
 
         <div className="emp-medical-aid-sub">
-          <span>Add dependents then choose a plan</span>
+          <span>Add dependents and select a medical plan</span>
         </div>
 
-      
-        <div className="medical-section-title">DEPENDENTS</div>
+      </div>
 
-        <div className="medical-info-banner">
-          <Info size={16} />
-          <span>Add spouse, children or dependents</span>
-        </div>
+      {/* CONTENT */}
+      <div className="emp-medical-aid-content-frame">
 
-        {dependents.length === 0 && (
-          <div className="medical-empty-state">
-            No dependents added yet
+        <div className="emp-medical-aid-form-grid">
+
+          {/* DEPENDENTS */}
+          <div className="medical-section-title">
+            DEPENDENTS
           </div>
-        )}
 
-        <div className="medical-dependent-list">
-          {dependents.map((dep, index) => (
-            <div className="medical-dependent-card" key={index}>
+          <div className="medical-info-banner">
+            <Info size={16} />
+            <span>
+              Add spouse, children or other dependents before selecting a medical plan.
+            </span>
+          </div>
+
+          {/* EMPTY STATE */}
+          {dependents.length === 0 && (
+            <div className="medical-empty-state">
+              No dependents added yet.
+            </div>
+          )}
+
+          {/* DEPENDENTS LIST */}
+          <div className="medical-dependent-list">
+
+            {dependents.map((dep, index) => (
+              <div
+                className="medical-dependent-card"
+                key={index}
+              >
+                <div className="medical-dependent-grid">
+
+                  <div>
+                    <strong>
+                      {dep.fullName} {dep.lastName}
+                    </strong>
+                  </div>
+
+                  <div>{dep.relationship}</div>
+
+                  <div>{dep.gender}</div>
+
+                  <div>{dep.idNumber}</div>
+
+                </div>
+              </div>
+            ))}
+
+          </div>
+
+          {/* ADD BUTTON */}
+          <button
+            className="medical-add-dependent-button"
+            onClick={() => setShowDependentModal(true)}
+          >
+            <Plus size={18} />
+            Add Dependent or Child
+          </button>
+
+          {/* =========================
+              MEDICAL PLANS
+          ========================= */}
+          <div className="medical-section-title">
+            MEDICAL AID PLANS
+          </div>
+
+          {loading ? (
+            <div className="medical-loading-state">
+              Loading medical aid plans...
+            </div>
+          ) : filteredPlans.length === 0 ? (
+            <div className="medical-empty-state">
+              No plans available for your salary
+            </div>
+          ) : (
+            <div className="medical-category-container">
+
+              {filteredPlans.map((category) => (
+                <div
+                  key={category.medicalOptionCategoryId}
+                  className="medical-category-section"
+                >
+
+                  <div className="medical-plan-grid">
+
+                    {category.medicalOptions.map((plan) => {
+                      const selected =
+                        String(medicalAidInfo?.planId) ===
+                        String(plan.medicalOptionId);
+
+                      return (
+                        <div
+                          key={plan.medicalOptionId}
+                          className={`medical-plan-card ${
+                            selected ? "selected" : ""
+                          }`}
+                          onClick={() => selectPlan(plan)}
+                        >
+
+                          {selected && (
+                            <div className="medical-selected-badge">
+                              Selected
+                            </div>
+                          )}
+
+                          <h4>{plan.medicalOptionName}</h4>
+
+                          <div className="medical-plan-status">
+                            <Check size={14} />
+                            <span>Available</span>
+                          </div>
+
+                          <div className="medical-salary-bracket">
+                            R{plan.salaryBracketMin} -{" "}
+                            {plan.salaryBracketMax
+                              ? `R${plan.salaryBracketMax}`
+                              : "Above"}
+                          </div>
+
+                          <div className="medical-plan-pricing">
+
+                            <div className="medical-price-box">
+                              <span>Principal</span>
+                              <h5>
+                                R{" "}
+                                {Number(
+                                  plan.totalMonthlyContributionsPrincipal || 0
+                                ).toFixed(2)}
+                              </h5>
+                            </div>
+
+                            <div className="medical-price-box">
+                              <span>Adult</span>
+                              <h5>
+                                R{" "}
+                                {Number(
+                                  plan.totalMonthlyContributionsAdult || 0
+                                ).toFixed(2)}
+                              </h5>
+                            </div>
+
+                            <div className="medical-price-box">
+                              <span>Child</span>
+                              <h5>
+                                R{" "}
+                                {Number(
+                                  plan.totalMonthlyContributionsChild || 0
+                                ).toFixed(2)}
+                              </h5>
+                            </div>
+
+                          </div>
+
+                        </div>
+                      );
+                    })}
+
+                  </div>
+                </div>
+              ))}
+
+            </div>
+          )}
+
+          {/* BUTTONS */}
+          <div className="emp-button-row">
+
+            <button onClick={onPrevious}>
+              <ArrowLeft size={20} />
+              Back
+            </button>
+
+            <button onClick={onNext}>
+              Next
+              <ArrowRight size={20} />
+            </button>
+
+          </div>
+
+        </div>
+      </div>
+
+      {/* =========================
+          DEPENDENT MODAL
+      ========================= */}
+      {showDependentModal && (
+        <div className="medical-dependent-modal-overlay">
+
+          <div className="medical-dependent-modal">
+
+            {/* HEADER */}
+            <div className="medical-dependent-modal-header">
+
+              <span>Add Dependent</span>
+
+              <X
+                size={18}
+                cursor="pointer"
+                onClick={() => setShowDependentModal(false)}
+              />
+
+            </div>
+
+            {/* BODY */}
+            <div className="medical-dependent-modal-body">
+
               <div className="medical-dependent-grid">
 
                 <div className="medical-input-group">
-                  <label>Full Name</label>
+                  <label>FIRST NAME</label>
+
                   <input
                     type="text"
-                    placeholder="Enter name"
-                    value={dep.fullName}
+                    placeholder="First Name"
+                    value={newDependent.fullName}
                     onChange={(e) =>
-                      updateDependent(index, "fullName", e.target.value)
+                      setNewDependent((prev) => ({
+                        ...prev,
+                        fullName: e.target.value,
+                      }))
                     }
                   />
                 </div>
 
                 <div className="medical-input-group">
-                  <label>Relationship</label>
-                  <select
-                    value={dep.relationship}
+                  <label>LAST NAME</label>
+
+                  <input
+                    type="text"
+                    placeholder="Last Name"
+                    value={newDependent.lastName}
                     onChange={(e) =>
-                      updateDependent(index, "relationship", e.target.value)
+                      setNewDependent((prev) => ({
+                        ...prev,
+                        lastName: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+
+                <div className="medical-input-group">
+                  <label>GENDER</label>
+
+                  <select
+                    value={newDependent.gender}
+                    onChange={(e) =>
+                      setNewDependent((prev) => ({
+                        ...prev,
+                        gender: e.target.value,
+                      }))
+                    }
+                  >
+                    {genderOptions.map((g) => (
+                      <option key={g} value={g}>
+                        {g}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="medical-input-group">
+                  <label>ID NUMBER</label>
+
+                  <input
+                    type="text"
+                    placeholder="ID Number"
+                    value={newDependent.idNumber}
+                    onChange={(e) =>
+                      setNewDependent((prev) => ({
+                        ...prev,
+                        idNumber: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+
+                <div className="medical-input-group">
+                  <label>RELATIONSHIP</label>
+
+                  <select
+                    value={newDependent.relationship}
+                    onChange={(e) =>
+                      setNewDependent((prev) => ({
+                        ...prev,
+                        relationship: e.target.value,
+                      }))
                     }
                   >
                     {relationshipOptions.map((r) => (
@@ -129,75 +441,33 @@ const MedicalAidModal = ({
                 </div>
 
               </div>
+
             </div>
-          ))}
-        </div>
 
-        <button className="medical-add-dependent-button" onClick={addDependent}>
-          <Plus size={18} />
-          Add Dependent
-        </button>
+            {/* FOOTER */}
+            <div className="medical-dependent-modal-footer">
 
-        {/* plans */}
-        <div className="medical-section-title">MEDICAL PLANS</div>
-
-        <div className="medical-plan-grid">
-          {plans.map((plan) => {
-            const selected =
-              String(medicalAidInfo?.planId) === String(plan.id);
-
-            return (
-              <div
-                key={plan.id}
-                className={`medical-plan-card ${selected ? "selected" : ""}`}
-                onClick={() => selectPlan(plan)}
+              <button
+                className="medical-btn-cancel"
+                onClick={() => setShowDependentModal(false)}
               >
-                {selected && (
-                  <div className="medical-selected-badge">selected</div>
-                )}
+                Cancel
+              </button>
 
-                <h4>{plan.name}</h4>
+              <button
+                className="medical-btn-primary"
+                onClick={addDependent}
+              >
+                Add Dependent
+              </button>
 
-                <div className="medical-plan-status">
-                  <Check size={14} />
-                  <span>Available</span>
-                </div>
+            </div>
 
-                <div className="medical-plan-pricing">
-                  <div className="medical-price-box">
-                    <span>Principal</span>
-                    <h5>R {plan.principalAmount}</h5>
-                  </div>
+          </div>
 
-                  <div className="medical-price-box">
-                    <span>Adult</span>
-                    <h5>R {plan.adultDependantAmount}</h5>
-                  </div>
-
-                  <div className="medical-price-box">
-                    <span>Child</span>
-                    <h5>R {plan.childDependantAmount}</h5>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
         </div>
+      )}
 
-        {/* buttons */}
-        <div className="emp-button-row">
-          <button className="emp-medical-aid-back-button" onClick={onPrevious}>
-            <ArrowLeft size={20} />
-            Back
-          </button>
-
-          <button className="emp-medical-aid-next-button" onClick={onNext}>
-            Next
-            <ArrowRight size={20} />
-          </button>
-        </div>
-
-      </div>
     </div>
   );
 };
