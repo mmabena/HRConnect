@@ -171,8 +171,13 @@ http://localhost:5147/api
     "SenderPassword": "your-app-password"
   },
   "Totp": {
-    "StepMinutes": "lifetime of your time-based one-time-pin in minutes"
-    "If nothing is provided, falls back to 10 minutes per one-time-pin"
+    "StepMinutes": 10//lifetime of your time-based one-time-pin in minutes
+    //If nothing is provided, falls back to 10 minutes per one-time-pin
+  }, 
+  {
+    "Services":{
+        "Api":"http://<IP:port>/api/" //recommended: "http://localhost:5147/api/"
+    }
   }
 }
 
