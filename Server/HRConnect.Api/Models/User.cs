@@ -17,7 +17,7 @@ namespace HRConnect.Api.Models
     // MOVE THIS TO A LIST FOR A 1-MANY
     public UserRole Role { get; set; }
     public UserRole? TempRole { get; set; }
-    // public ICollection<UserRole> UserRoles{get;set;}
+    public ICollection<UserRoles> UserRoles { get; set; } = [];
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
   }
 }

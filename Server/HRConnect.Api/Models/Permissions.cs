@@ -8,12 +8,12 @@ namespace HRConnect.Api.Models
   public class Permissions
   {
     [Key]
-    public int PermissionsId { get; set; }//IsUnique
-    public string PermissionsKey { get; set; } = string.Empty;
+    public int PermissionsId { get; }//IsUnique
+    public string Key { get; set; } = string.Empty;//This dshould be unique to prevent 
+    // permissions duplication
     public string Description { get; set; } = string.Empty;
-    //Category?
-    public RoleName RoleName { get; set; }
+    public string Category { get; set; } = string.Empty;
+    // public Role Role { get; set; } = null!;
+    public ICollection<RolePermissions> RolePermissions { get; set; } = [];
   }
 }
-//Recommended additions
-//IsSystemRole to prevent accidental deletion of core permissions 

@@ -57,6 +57,11 @@ namespace HRConnect.Api.Data
     public DbSet<EmployeeDeduction> EmployeeDeductions { get; set; }
     public DbSet<TOTPState> TOTPStates { get; set; }
     public DbSet<MFAUserSecret> UserSecrets { get; set; }
+    public DbSet<Roles> Roles { get; set; }
+    public DbSet<UserRoles> UserRoles { get; set; }
+    public DbSet<RolePermissions> RolePermissions { get; set; }
+    public DbSet<PermissionAuditLog> PermissionAuditLogs { get; set; }
+    public DbSet<Permissions> Permissions { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
       base.OnModelCreating(modelBuilder);
@@ -315,8 +320,6 @@ namespace HRConnect.Api.Data
       .HasForeignKey(t => t.PayrollRunId)
       .HasPrincipalKey(p => p.PayrollRunId);
 
-      // modelBuilder.Entity<Notification>().Property(n => n.Severity)
-      //     .HasConversion<string>();
       modelBuilder.Entity<Notification>().Property(n => n.Type)
           .HasConversion<string>();
 
@@ -397,10 +400,94 @@ namespace HRConnect.Api.Data
       .WithOne()
       .HasForeignKey<MFAUserSecret>(m => m.UserId);
 
-      // modelBuilder.Entity<TOTPState>()
-      // .Property(u => u.UserId)
-      // .ValueGeneratedNever();
+      //Roles
+      modelBuilder.Entity<Roles>(role =>
+      {
+        role.HasKey(r => r.RoleId);
+        role.Property(r => r.Name).IsRequired();
 
+        //Role names must be unique
+        role.HasIndex(r => r.Name).IsUnique();
+
+        //Self Referencing table, cannot delete a parent to a child role
+        role.HasOne(r => r.ParentRole)
+        .WithMany(r => r.ChildRoles)
+        .HasForeignKey(r => r.ParentRoleId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+        //Roles has a 1-to-many relation ot user role
+        role.HasMany(r => r.UserRoles)
+        .WithOne(r => r.Role)
+        .HasForeignKey(r => r.RolesId)
+        .OnDelete(DeleteBehavior.Cascade);
+      });
+
+      //Permissions
+      modelBuilder.Entity<Permissions>(entity =>
+      {
+        entity.HasKey(p => p.PermissionsId);
+        entity.HasIndex(p => p.Key).IsUnique();
+        //many-to-many with RolePermissions join
+        entity.HasMany(p => p.RolePermissions)
+        .WithOne(p => p.Permissions)
+        .HasForeignKey(p => p.PermissionsId)
+        .OnDelete(DeleteBehavior.Cascade);
+      });
+
+      //RolePermissions (Roles and Permissions Joining table)
+      modelBuilder.Entity<RolePermissions>(entity =>
+      {
+        entity.HasKey(r => new { r.RoleId, r.PermissionsId });
+
+        //Relations for Roles part of the index
+        entity.HasOne(r => r.Role)
+        .WithMany(r => r.RolePermissions)
+        .HasForeignKey(r => r.RoleId)
+        .OnDelete(DeleteBehavior.Cascade);
+
+        //Relations for Permissions part of the index
+        entity.HasOne(r => r.Permissions)
+        .WithMany(r => r.RolePermissions)
+        .HasForeignKey(r => r.PermissionsId)
+        .OnDelete(DeleteBehavior.Cascade);
+      });
+
+      //UserRoles
+      modelBuilder.Entity<UserRoles>(entity =>
+      {
+        entity.HasIndex(u => new { u.UserId, u.RolesId });
+        //1-to-many (User->UserRoles)
+        entity.HasOne(u => u.User)
+        .WithMany(u => u.UserRoles)
+        .HasForeignKey(u => u.UserId)
+        .OnDelete(DeleteBehavior.Cascade);
+
+        //1-to-many (Role->UserRoles)
+        entity.HasOne(u => u.Role)
+        .WithMany(u => u.UserRoles)
+        .HasForeignKey(u => u.RolesId)
+        .OnDelete(DeleteBehavior.Cascade);
+      });
+
+      //Audit
+      modelBuilder.Entity<PermissionAuditLog>(entity =>
+      {
+        entity.HasIndex(a => a.Id);
+
+        //Logging Roles
+        // many to one (Log->Roles)
+        entity.HasOne(a => a.Role)
+        .WithMany()
+        .HasForeignKey(a => a.RoleId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+        //Logging Permissions
+        //many to one (Log -> Permissions)
+        entity.HasOne(a => a.Permissions)
+        .WithMany()
+        .HasForeignKey(a => a.PermissionId)
+        .OnDelete(DeleteBehavior.Restrict);
+      });
     }
 
     //Override 'SaveChangesAsync' for Payroll Records to enforce locked records on a payroll run 
