@@ -15,6 +15,6 @@ namespace HRConnect.Api.Interfaces
     Task<List<UserRoleOptionDto>> GetRoleOptionsAsync();
     Task SyncEmployeeUserAsync();
     Task<bool> ChangePasswordAsync(ChangePasswordRequestDto dto);
-    Task<List<string>> OrganiseSuperUsersAsync(UserRole role = UserRole.SuperUser);
+    Task<List<string>> OrganiseSuperUsersAsync(Userrole role = Userrole.SuperUser);
   }
 }

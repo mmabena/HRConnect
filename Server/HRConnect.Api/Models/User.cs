@@ -1,6 +1,6 @@
 namespace HRConnect.Api.Models
 {
-  public enum UserRole
+  public enum Userrole
   {
     NormalUser,
     SuperUser,
@@ -15,8 +15,8 @@ namespace HRConnect.Api.Models
     public string PasswordHash { get; set; } = string.Empty;
     // TODO 
     // MOVE THIS TO A LIST FOR A 1-MANY
-    public UserRole Role { get; set; }
-    public UserRole? TempRole { get; set; }
+    public Userrole Role { get; set; }
+    public Userrole? TempRole { get; set; }
     public ICollection<UserRoles> UserRoles { get; set; } = [];
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
   }

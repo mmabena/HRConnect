@@ -437,6 +437,8 @@ namespace HRConnect.Api.Data
       //RolePermissions (Roles and Permissions Joining table)
       modelBuilder.Entity<RolePermissions>(entity =>
       {
+        entity.ToTable("RolePermissions");
+
         entity.HasKey(r => new { r.RoleId, r.PermissionsId });
 
         //Relations for Roles part of the index
@@ -455,7 +457,9 @@ namespace HRConnect.Api.Data
       //UserRoles
       modelBuilder.Entity<UserRoles>(entity =>
       {
-        entity.HasIndex(u => new { u.UserId, u.RolesId });
+        entity.ToTable("UserRoles");
+
+        entity.HasKey(x => new { x.UserId, x.RolesId });
         //1-to-many (User->UserRoles)
         entity.HasOne(u => u.User)
         .WithMany(u => u.UserRoles)

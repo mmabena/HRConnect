@@ -184,7 +184,7 @@ namespace HRConnect.Api.Services
       User? existing = await _userRepo.GetUserByIdAsync(userId);
       if (existing != null)
       {
-        existing.Role = (UserRole)existing.TempRole!;
+        existing.Role = (Userrole)existing.TempRole!;
         _ = await _userRepo.UpdateUserAsync(userId, existing);
         await _userRepo.SaveChangesAsync();
       }

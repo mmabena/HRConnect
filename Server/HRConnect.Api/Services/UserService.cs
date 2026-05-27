@@ -83,7 +83,7 @@ namespace HRConnect.Api.Services
     public async Task<List<UserRoleOptionDto>> GetRoleOptionsAsync()
     {
       return await Task.FromResult(
-          Enum.GetValues<UserRole>()
+          Enum.GetValues<Userrole>()
           .Select(role => new UserRoleOptionDto
           {
             RoleId = (int)role,
@@ -119,7 +119,7 @@ namespace HRConnect.Api.Services
 
     public async Task<User?> UpdateUserRoleAsync(int id, UpdateUserRoleRequestDto dto)
     {
-      if (!Enum.IsDefined(typeof(UserRole), dto.RoleId))
+      if (!Enum.IsDefined(typeof(Userrole), dto.RoleId))
       {
         throw new ArgumentException("Invalid role id");
       }
@@ -129,7 +129,7 @@ namespace HRConnect.Api.Services
       {
         return null;
       }
-      existing.TempRole = (UserRole)dto.RoleId;
+      existing.TempRole = (Userrole)dto.RoleId;
       var updatedUser = await _userRepo.UpdateUserAsync(id, existing);
       await _otpService.SendTotpAndNotify(id);
 
@@ -142,7 +142,7 @@ namespace HRConnect.Api.Services
       {
         throw new ArgumentException("Employee Id is requird");
       }
-      if (!Enum.IsDefined(typeof(UserRole), dto.RoleId))
+      if (!Enum.IsDefined(typeof(Userrole), dto.RoleId))
       {
         throw new ArgumentException("Invalid role Id.");
       }
@@ -161,7 +161,7 @@ namespace HRConnect.Api.Services
       }
 
       var user = await EnsureUserForEmailAsync(employee.Email);
-      user.Role = (UserRole)dto.RoleId;
+      user.Role = (Userrole)dto.RoleId;
 
       await _context.SaveChangesAsync();
       return user;
@@ -230,7 +230,7 @@ namespace HRConnect.Api.Services
       var user = new User
       {
         Email = email.Trim(),
-        Role = UserRole.NormalUser,
+        Role = Userrole.NormalUser,
         CreatedAt = DateTime.Now
       };
       user.PasswordHash = _passwordHasher.HashPassword(user, GenerateTemporaryPassword());
@@ -284,7 +284,7 @@ namespace HRConnect.Api.Services
 
     ///<summary>
     ///Utitlity function used to get the EmployeeId for all SuperUsers 
-    public async Task<List<string>> OrganiseSuperUsersAsync(UserRole role = UserRole.SuperUser)
+    public async Task<List<string>> OrganiseSuperUsersAsync(Userrole role = Userrole.SuperUser)
     {
       var users = await GetAllUsersAsync();
 

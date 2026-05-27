@@ -407,7 +407,7 @@ namespace HRConnect.Api.Services
       var newUser = new User
       {
         Email = currentEmail,
-        Role = UserRole.NormalUser,
+        Role = Userrole.NormalUser,
         CreatedAt = DateTime.Now
       };
 

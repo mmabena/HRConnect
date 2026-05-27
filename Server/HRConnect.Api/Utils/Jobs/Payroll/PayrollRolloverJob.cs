@@ -101,8 +101,8 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
     {
       var users = await _userService.GetAllUsersAsync();
 
-      users = users.FindAll(u => u.Role == UserRole.SuperUser ||
-      u.TempRole == UserRole.SuperUser);
+      users = users.FindAll(u => u.Role == Userrole.SuperUser ||
+      u.TempRole == Userrole.SuperUser);
       List<string> employeeIds = new();
 
       foreach (var u in users)

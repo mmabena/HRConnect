@@ -30,8 +30,8 @@ namespace HRConnect.Api.Utils.Jobs.Notification
     {
       List<User> users = await _userService.GetAllUsersAsync();
 
-      users = users.FindAll(u => u.Role == UserRole.SuperUser ||
-      u.TempRole == UserRole.SuperUser);
+      users = users.FindAll(u => u.Role == Userrole.SuperUser ||
+      u.TempRole == Userrole.SuperUser);
       List<string> employeeIds = [];
 
       foreach (User u in users)
