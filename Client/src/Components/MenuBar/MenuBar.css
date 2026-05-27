@@ -2510,7 +2510,6 @@ input:checked + .slider:before {
 /* Dropdown label */
 
 .drop-field-label {
-
   font-family: 'Anek Bangla', sans-serif;
   font-style: normal;
   font-weight: 400;
@@ -2557,4 +2556,141 @@ input:checked + .slider:before {
 
 .logout {
   color: #d9534f;
+}
+
+.menu-company-switcher {
+  position: relative;
+  width: 100%;
+  margin-bottom: 14px;
+  overflow: visible;
+}
+
+.menu-company-active {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.menu-company-active:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+.menu-company-info {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.menu-company-name {
+  font-size: 14px;
+  color: white;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.menu-company-sub {
+  font-size: 11px;
+  color: rgba(255,255,255,0.6);
+}
+
+.menu-company-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255,255,255,0.7);
+  margin-left: 10px;
+  flex-shrink: 0;
+}
+
+.menu-company-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 100%;
+  background: #243843;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  z-index: 1000;
+}
+
+.menu-company-option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 7px 16px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.menu-company-option:hover {
+  background: rgba(255,255,255,0.06);
+}
+
+.menu-company-option.active {
+  background: rgba(255,255,255,0.06);
+}
+
+.menu-company-option-left {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.menu-company-option-name {
+  font-size: 13px;
+  color: white;
+}
+
+.menu-company-option-text {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: flex-start;
+  text-align: left;
+  margin-left: 10px;
+  
+}
+
+.menu-company-option-sub {
+  font-size: 11px;
+  color: rgba(255,255,255,0.6);
+  width: 100%;
+}
+
+.menu-company-option-name,
+.menu-company-option-sub {
+  line-height: 1.2;
+}
+
+.menu-company-check {
+  width: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.menu-company-option.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  height: calc(100% - 16px);
+  width: 6px;
+  border-radius: 0 4px 4px 0;
+  background: var(--white);
 }

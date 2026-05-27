@@ -7,9 +7,9 @@
     [Key]
     public int PensionFundId { get; set; }
 
-    public string EmployeeId { get; set; }=string.Empty;
+    public string EmployeeId { get; set; } = string.Empty;
 
-    public string EmployeeName { get; set; }= string.Empty;
+    public string EmployeeName { get; set; } = string.Empty;
 
     public decimal MonthlySalary { get; set; }
 
@@ -22,6 +22,6 @@
     public int PensionOptionId { get; set; }
     public PensionOption? PensionOptions { get; set; }
     public Employee? Employee { get; set; }
-   // public ICollection<Employee>? Employees { get; set; }
+    // public ICollection<Employee>? Employees { get; set; }
   }
 }

@@ -782,6 +782,55 @@ namespace HRConnect.Api.Migrations
                     b.ToTable("BankingDetails");
                 });
 
+            modelBuilder.Entity("HRConnect.Api.Models.Company", b =>
+                {
+                    b.Property<string>("CompanyId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("CompanyAddress")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CompanyName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ContactNumber")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("RegistrationNumber")
+                        .IsRequired()
+                        .HasMaxLength(14)
+                        .HasColumnType("nvarchar(14)");
+
+                    b.Property<string>("UIFNumber")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("VATNumber")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("CompanyId");
+
+                    b.HasIndex("CompanyId")
+                        .IsUnique();
+
+                    b.HasIndex("RegistrationNumber")
+                        .IsUnique();
+
+                    b.HasIndex("UIFNumber")
+                        .IsUnique();
+
+                    b.HasIndex("VATNumber")
+                        .IsUnique()
+                        .HasFilter("[VATNumber] IS NOT NULL");
+
+                    b.ToTable("Companies");
+                });
+
             modelBuilder.Entity("HRConnect.Api.Models.CompanyContributions.CompanyContribution", b =>
                 {
                     b.Property<int>("CompanyContributionId")
@@ -835,6 +884,10 @@ namespace HRConnect.Api.Migrations
                     b.Property<string>("City")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CompanyId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ContactNumber")
                         .IsRequired()
@@ -926,6 +979,8 @@ namespace HRConnect.Api.Migrations
                     b.HasKey("EmployeeId");
 
                     b.HasIndex("CareerManagerID");
+
+                    b.HasIndex("CompanyId");
 
                     b.HasIndex("PensionOptionId");
 
@@ -1589,7 +1644,8 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PayrollRunId");
+                    b.HasIndex("PayrollRunId", "EmployeeId")
+                        .IsUnique();
 
                     b.ToTable((string)null);
 
@@ -1996,6 +2052,27 @@ namespace HRConnect.Api.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("HRConnect.Api.Models.UserCompany", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CompanyId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("bit");
+
+                    b.HasKey("UserId", "CompanyId");
+
+                    b.HasIndex("CompanyId");
+
+                    b.ToTable("UserCompanies");
+                });
+
             modelBuilder.Entity("HRConnect.Api.Models.CompanyContributions.EmployeeCompanyContribution", b =>
                 {
                     b.HasBaseType("HRConnect.Api.Models.Payroll.PayrollRecord");
@@ -2057,9 +2134,6 @@ namespace HRConnect.Api.Migrations
                     b.Property<int>("ChildrenCount")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
@@ -2069,31 +2143,16 @@ namespace HRConnect.Api.Migrations
                     b.Property<DateTime>("EmployeeStartDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("FinalisedDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
-
-                    b.Property<int>("MedicalAidDeductionId")
-                        .HasColumnType("int")
-                        .HasColumnName("MedicalAidDeductionId");
 
                     b.Property<int>("MedicalCategoryId")
                         .HasColumnType("int");
 
-                    b.Property<int>("MedicalOptionCategoryId")
+                    b.Property<int>("MedicalOptionId")
                         .HasColumnType("int");
 
-                    b.Property<int>("MedicalOptionId")
-                        .HasColumnType("int")
-                        .HasColumnName("MedicalOptionId");
-
                     b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("OptionCategory")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -2128,9 +2187,6 @@ namespace HRConnect.Api.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("TotalDeductionAmount")
-                        .HasColumnType("decimal(15, 2)");
-
-                    b.Property<decimal?>("TotalDependentsPremium")
                         .HasColumnType("decimal(15, 2)");
 
                     b.Property<DateTime>("UpdatedDate")
@@ -2343,6 +2399,12 @@ namespace HRConnect.Api.Migrations
                         .HasForeignKey("CareerManagerID")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("HRConnect.Api.Models.Company", "Company")
+                        .WithMany("Employees")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("HRConnect.Api.Models.PensionOption", "PensionOption")
                         .WithMany("Employees")
                         .HasForeignKey("PensionOptionId")
@@ -2355,6 +2417,8 @@ namespace HRConnect.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("CareerManager");
+
+                    b.Navigation("Company");
 
                     b.Navigation("PensionOption");
 
@@ -2611,6 +2675,25 @@ namespace HRConnect.Api.Migrations
                     b.Navigation("OccupationalLevels");
                 });
 
+            modelBuilder.Entity("HRConnect.Api.Models.UserCompany", b =>
+                {
+                    b.HasOne("HRConnect.Api.Models.Company", "Company")
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HRConnect.Api.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Company");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction.MedicalAidDeduction", b =>
                 {
                     b.HasOne("HRConnect.Api.Models.MedicalOptionCategory", "MedicalOptionCategory")
@@ -2658,6 +2741,11 @@ namespace HRConnect.Api.Migrations
             modelBuilder.Entity("HRConnect.Api.Models.BankBranchCode", b =>
                 {
                     b.Navigation("BankingDetails");
+                });
+
+            modelBuilder.Entity("HRConnect.Api.Models.Company", b =>
+                {
+                    b.Navigation("Employees");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.Employee", b =>

@@ -1,12 +1,13 @@
 namespace HRConnect.Api.Interfaces.Notification
 {
-  using HRConnect.Api.Models;
   using HRConnect.Api.DTOs.Notification;
+  using HRConnect.Api.Models;
   public interface INotificationRepository
   {
     Task AddNotificationAsync(Notification notification);
     // Task AddNotificationBatchAsync(Notification notification);
     Task<Notification?> ExistsAsync(NotificationType type, string employeeId, string? message, NotificationSeverity severity);
+    Task MarkBatchAsReadAsync(List<string> employeeIds, NotificationType type);
     Task<bool> MarkAsReadAsync(Notification notification);
     //May not be necessary for production
 

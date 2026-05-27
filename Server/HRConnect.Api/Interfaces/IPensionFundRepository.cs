@@ -1,9 +1,9 @@
 ﻿namespace HRConnect.Api.Interfaces
 {
-  using HRConnect.Api.Models;
   using System.Collections.Generic;
-  using System.Threading.Tasks;
   using System.Threading;
+  using System.Threading.Tasks;
+  using HRConnect.Api.Models;
 
   public interface IPensionFundRepository
   {

@@ -1,25 +1,31 @@
 namespace HRConnect.Tests
 {
   using Moq;
+  using HRConnect.Api.Interfaces.Payroll.Deduction;
   using HRConnect.Api.Models.Payroll;
+  using HRConnect.Api.Interfaces.Payroll.Earning;
   using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Data;
+  using Microsoft.EntityFrameworkCore;
   using HRConnect.Api.Utils.Jobs.Payroll;
   using HRConnect.Api.Interfaces.Pension;
   using System;
   using Microsoft.Extensions.DependencyInjection;
   using HRConnect.Api.Models.PayrollDeduction;
 
-  public class PayrollTests
+  public class PayrollTests : IDisposable
   {
     private readonly Mock<IPayrollRunRepository> _payrollRunRepo;
     private readonly Mock<IPayrollPeriodRepository> _payrollPeriodRepo;
-    private readonly Mock<IReportsService> _reportsService;
     private readonly Mock<IPayrollPeriodService> _payrollPeriodService;
     private readonly Mock<IEmployeePensionEnrollmentService> _employeePensionEnrollmentService;
-    private readonly Mock<IBankingDetailService> _bankingDetailService;
+    private readonly Mock<IReportsService> _reportsService;
     private readonly Mock<ICompanyContributionRepository> _contributionRepoMock;
     private readonly Mock<ICompanyContributionAllocationService> _contributionAllocService;
     private Func<DateTime> _now;
+    private readonly Mock<IEmployeePayrollEarningService> _earningServiceMock;
+    private readonly Mock<IEmployeeDeductionService> _deductionServiceMock;
+    private readonly ApplicationDBContext _context;
 
     //These are not injected into they are however used for mocking scoped services
     //in the job
@@ -35,8 +41,15 @@ namespace HRConnect.Tests
       _employeePensionEnrollmentService = new Mock<IEmployeePensionEnrollmentService>();
       _contributionRepoMock = new Mock<ICompanyContributionRepository>();
       _contributionAllocService = new Mock<ICompanyContributionAllocationService>();
-      _bankingDetailService = new Mock<IBankingDetailService>();
       _now = () => DateTime.Now;
+      _earningServiceMock = new Mock<IEmployeePayrollEarningService>();
+      _deductionServiceMock = new Mock<IEmployeeDeductionService>();
+
+      var options = new DbContextOptionsBuilder<ApplicationDBContext>()
+          .UseInMemoryDatabase(Guid.NewGuid().ToString())
+          .Options;
+
+      _context = new ApplicationDBContext(options);
 
       // //Mock a scope for the service provider that will be used by the injected depenedency
       // _serviceProviderMock = new Mock<IServiceProvider>();

@@ -4,17 +4,17 @@ namespace HRConnect.Api.Interfaces
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
-    public interface IPositionService
-    {
-        Task<List<PositionDto>> GetAllPositionsAsync();
+  public interface IPositionService
+  {
+    Task<List<PositionDto>> GetAllPositionsAsync();
 
-        Task<PositionDto?> GetPositionByIdAsync(int id);
+    Task<PositionDto?> GetPositionByIdAsync(int id);
 
-        Task<PositionDto?> GetPositionByTitleAsync(string title);
+    Task<PositionDto?> GetPositionByTitleAsync(string title);
 
-        Task<PositionDto> AddPositionAsync(CreatePositionDto createPositionDto);
+    Task<PositionDto> AddPositionAsync(CreatePositionDto createPositionDto);
 
-        Task<PositionDto?> UpdatePositionAsync(int id, UpdatePositionDto updatePositionDto);
+    Task<PositionDto?> UpdatePositionAsync(int id, UpdatePositionDto updatePositionDto);
 
-    }
+  }
 }

@@ -1,10 +1,10 @@
 namespace HRConnect.Api.Repository
 {
-  using HRConnect.Api.Interfaces.Notification;
-  using HRConnect.Api.Models;
   using HRConnect.Api.Data;
-  using HRConnect.Api.Mappers.Notification;
   using HRConnect.Api.DTOs.Notification;
+  using HRConnect.Api.Interfaces.Notification;
+  using HRConnect.Api.Mappers.Notification;
+  using HRConnect.Api.Models;
   using Microsoft.EntityFrameworkCore;
 
   public class NotificationRepository : INotificationRepository
@@ -43,6 +43,20 @@ namespace HRConnect.Api.Repository
       (n.Severity == severity) &&
       n.IsRead == false)//Avoid to duplicate unread messages
       .FirstOrDefaultAsync();
+    }
+    public async Task MarkBatchAsReadAsync(List<string> employeeIds, NotificationType type)
+    {
+      //Prefer batching updating as SQL has a parameter limit of ~2100
+      foreach (var idBatch in employeeIds.Chunk(500))
+      {
+        await _context.Notifications.Where(n =>
+            idBatch.Contains(n.EmployeeId) &&
+            (n.Type == type) &&
+            !n.IsRead)
+          .ExecuteUpdateAsync(s =>
+            s.SetProperty(n => n.IsRead, true));
+
+      }
     }
     public async Task<bool> MarkAsReadAsync(Notification notification)
     {

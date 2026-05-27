@@ -179,8 +179,8 @@
       (
         entity.MedicalOptionId,
         entityOptionName,
-        (decimal)entity.SalaryBracketMin,
-        (decimal)entity.SalaryBracketMax
+        (decimal)entity.SalaryBracketMin!,
+        (decimal)entity.SalaryBracketMax!
       );
     }
   }

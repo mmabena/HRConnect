@@ -1,13 +1,14 @@
-﻿namespace HRConnect.Api.Repository
+namespace HRConnect.Api.Repository
 {
-  using HRConnect.Api.DTOs.MedicalOption;
-  using HRConnect.Api.Data;
-  using HRConnect.Api.Interfaces;
-  using HRConnect.Api.Models;
-  using Microsoft.EntityFrameworkCore;
-  using HRConnect.Api.Mappers;
-  using Microsoft.Data.SqlClient;
+  using Data;
+  using DTOs.MedicalOption;
   using EFCore.BulkExtensions;
+  using Interfaces;
+  using Mappers;
+  using Microsoft.Data.SqlClient;
+  using Microsoft.EntityFrameworkCore;
+  using Models;
+  using Utils.MedicalOption;
 
   /// <summary>
   /// Repository implementation for managing medical options and their categories in the HR Connect system.
@@ -18,20 +19,20 @@
   /// This repository serves as the data access layer for medical options, implementing the
   /// IMedicalOptionRepository interface. It uses Entity Framework Core for database operations
   /// and EFCore.BulkExtensions for efficient bulk updates.
-  /// 
+  ///
   /// Key responsibilities:
   /// - Database query execution and entity mapping
   /// - Transaction management for bulk operations
   /// - Data validation at the repository level
   /// - Efficient bulk update operations using EFCore.BulkExtensions
   /// - Navigation property eager loading to prevent N+1 query problems
-  /// 
+  ///
   /// Performance considerations:
   /// - Uses Include() for eager loading navigation properties
   /// - Implements bulk operations for large-scale updates
   /// - Validates input parameters before database operations
   /// - Uses dictionary-based lookups for O(1) performance in bulk updates
-  /// 
+  ///
   /// Error handling:
   /// - Throws ArgumentException for invalid input parameters
   /// - Throws KeyNotFoundException when entities are not found
@@ -57,79 +58,18 @@
     }
 
     /// <summary>
-    /// Retrieves medical options grouped by their category ID from the database.
-    /// This method uses Entity Framework Core to query medical options with their
-    /// associated category data and groups them by their MedicalOptionCategoryId
-    /// (marked as the Key in the Grouping interface).
+    /// Retrieves medical options grouped by category ID with eager-loaded category data.
     /// </summary>
-    /// <returns>
-    /// A list of IGrouping&lt;int, MedicalOption&gt; where:
-    /// - Key: the MedicalOptionCategoryId (int)
-    /// - Group: Collection of MedicalOptions entities belonging to that category
-    /// 
-    /// <para>
-    /// Each MedicalOption includes the eagerly loaded MedicalOptionCategory navigation property.
-    /// </para>
-    /// 
-    /// <para>
-    /// Example structure:
-    /// [
-    ///   IGrouping&lt;Key=1, [MedicalOption, MedicalOption]&gt;,
-    ///   IGrouping&lt;Key=2, [MedicalOption, MedicalOption, MedicalOption, MedicalOption]&gt;,
-    ///   IGrouping&lt;Key=3, [MedicalOption, MedicalOption, MedicalOption]&gt;
-    /// ]
-    /// </para>
-    /// </returns>
-    /// <remarks>
-    /// <para>
-    /// Uses Entity Framework's Include() method to eagerly load the MedicalOptionCategory
-    /// navigation property, preventing N+1 query problems when accessing category information.
-    /// </para>
-    /// <para>
-    /// The GroupBy() operation is performed in-memory after data retrieval, which is efficient
-    /// for typical medical option datasets (ranging between small to slightly large datasets).
-    /// For very large datasets, consider using a database-specific grouping function or
-    /// implementing a custom grouping strategy.
-    /// </para>
-    /// <para>
-    /// This method returns the raw entity grouping. For client consumption, use the service layer
-    /// to transform this info into MedicalOptionCategoryDto objects.
-    /// </para>
-    /// </remarks>
-    /// <example>
-    /// // Repository usage
-    /// <code>
-    /// var repository = new MedicalOptionRepository(context);
-    /// var groupedOptions = await repository.GetGroupedMedicalOptionsAsync();
-    /// 
-    /// // Process the grouped results
-    /// foreach (var group in groupedOptions)
-    /// {
-    ///     int categoryId = group.Key;
-    ///     var categoryName = group.First().MedicalOptionCategory?.MedicalOptionCategoryName;
-    ///     var optionCount = group.Count();
-    ///     
-    ///     Console.WriteLine($"Category {categoryId} ({categoryName}): {optionCount} options");
-    /// }
-    /// </code>
-    /// </example>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown when the database context is disposed or unavailable.
-    /// </exception>
-    /// <exception cref="SqlException">
-    /// Thrown when there's a database connectivity or query execution error.
-    /// </exception>
-    /// <exception cref="OperationCanceledException">
-    /// Thrown when the operation is cancelled via the cancellation token.
-    /// </exception>
-    /// <exception cref="KeyNotFoundException">
-    /// Thrown when no medical options are found in the database.
-    /// </exception>
+    /// <returns>List of IGrouping&lt;int, MedicalOption&gt; grouped by MedicalOptionCategoryId.</returns>
+    /// <exception cref="KeyNotFoundException">Thrown when no medical options are found.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when the database context is unavailable.</exception>
     public async Task<List<IGrouping<int, MedicalOption>>> GetGroupedMedicalOptionsAsync()
     {
       var groupedMedicalOptions = await _context.MedicalOptions
         .Include(mo => mo.MedicalOptionCategory)
-        .Where(mo => mo.MedicalOptionCategory != null /*&& mo.MedicalOptionCategoryId != null*/) //this will always evaluate to true. 'int' != 'int?' or 'null'
+        .Where(mo =>
+          mo.MedicalOptionCategory !=
+          null)
         .GroupBy(mo => mo.MedicalOptionCategoryId)
         .ToListAsync();
 
@@ -142,35 +82,12 @@
     }
 
     /// <summary>
-    /// Retrieves a specific medical option by its unique identifier.
+    /// Retrieves a medical option by ID with its category data.
     /// </summary>
-    /// <param name="id">The unique identifier of the medical option to retrieve.</param>
-    /// <returns>The medical option data transfer object if found; otherwise, null.</returns>
-    /// <exception cref="ArgumentException">Thrown when the provided id is invalid (less than or equal to 0).</exception>
-    /// <exception cref="KeyNotFoundException">Thrown when no medical option with the specified ID is found.</exception>
-    /// <exception cref="InvalidOperationException">Thrown when the database context is disposed.</exception>
-    /// <exception cref="SqlException">Thrown when there's a database connectivity or query execution error.</exception>
-    /// <remarks>
-    /// This method uses Entity Framework Core to query the database and eagerly loads
-    /// the MedicalOptionCategory navigation property to prevent additional database queries
-    /// when accessing category information.
-    /// 
-    /// The result is automatically mapped to a MedicalOptionDto using the ToMedicalOptionDto()
-    /// extension method from the mapping layer.
-    /// </remarks>
-    /// <example>
-    /// <code>
-    /// var repository = new MedicalOptionRepository(context);
-    /// var medicalOption = await repository.GetMedicalOptionByIdAsync(123);
-    /// 
-    /// if (medicalOption != null)
-    /// {
-    ///     Console.WriteLine($"Option: {medicalOption.MedicalOptionName}");
-    ///     Console.WriteLine($"Category ID: {medicalOption.MedicalOptionCategoryId}");
-    ///     Console.WriteLine($"Adult Contribution: {medicalOption.TotalMonthlyContributionsAdult:C}");
-    /// }
-    /// </code>
-    /// </example>
+    /// <param name="id">The medical option ID.</param>
+    /// <returns>MedicalOptionDto if found.</returns>
+    /// <exception cref="ArgumentException">Thrown when id is invalid (≤ 0).</exception>
+    /// <exception cref="KeyNotFoundException">Thrown when the option is not found.</exception>
     public async Task<MedicalOptionDto?> GetMedicalOptionByIdAsync(int id)
     {
       if (id <= 0)
@@ -180,8 +97,8 @@
       }
 
       var medicalOption = await _context.MedicalOptions
-          .Include(opt => opt.MedicalOptionCategory)
-          .FirstOrDefaultAsync(opt => opt.MedicalOptionId == id);
+        .Include(opt => opt.MedicalOptionCategory)
+        .FirstOrDefaultAsync(opt => opt.MedicalOptionId == id);
 
       if (medicalOption == null)
       {
@@ -192,34 +109,13 @@
     }
 
     /// <summary>
-    /// Retrieves medical option details by category ID.
+    /// Retrieves the first medical option found in a category.
     /// </summary>
-    /// <param name="id">The category ID to search for medical options.</param>
-    /// <returns>The first medical option found in the specified category as a MedicalOptionDto; otherwise, null.</returns>
-    /// <exception cref="ArgumentException">Thrown when the provided category ID is invalid (less than or equal to 0).</exception>
-    /// <exception cref="KeyNotFoundException">Thrown when no medical options are found for the specified category ID.</exception>
-    /// <exception cref="InvalidOperationException">Thrown when the database context is disposed.</exception>
-    /// <exception cref="SqlException">Thrown when there's a database connectivity or query execution error.</exception>
-    /// <remarks>
-    /// This method retrieves the first medical option found within the specified category.
-    /// It eagerly loads the MedicalOptionCategory navigation property to prevent additional
-    /// database queries when accessing category information.
-    /// 
-    /// Note: This method returns only the first matching option, not all options in the category.
-    /// Use GetAllOptionsUnderCategoryAsync() to retrieve all options within a category.
-    /// </remarks>
-    /// <example>
-    /// <code>
-    /// var repository = new MedicalOptionRepository(context);
-    /// var medicalOption = await repository.GetMedicalOptionCategoryByIdAsync(5);
-    /// 
-    /// if (medicalOption != null)
-    /// {
-    ///     Console.WriteLine($"Found option: {medicalOption.MedicalOptionName}");
-    ///     Console.WriteLine($"In category: {medicalOption.MedicalOptionCategoryId}");
-    /// }
-    /// </code>
-    /// </example>
+    /// <param name="id">The category ID.</param>
+    /// <returns>MedicalOptionDto for the first option in the category.</returns>
+    /// <remarks>Returns only the first matching option. Use GetAllOptionsUnderCategoryAsync() for all options in a category.</remarks>
+    /// <exception cref="ArgumentException">Thrown when id is invalid (≤ 0).</exception>
+    /// <exception cref="KeyNotFoundException">Thrown when no options are found for the category.</exception>
     public async Task<MedicalOptionDto?> GetMedicalOptionCategoryByIdAsync(int id)
     {
       if (id <= 0)
@@ -228,8 +124,8 @@
       }
 
       var medicalOptions = await _context.MedicalOptions
-          .Include(mo => mo.MedicalOptionCategory)
-          .FirstOrDefaultAsync(mo => mo.MedicalOptionCategoryId == id);
+        .Include(mo => mo.MedicalOptionCategory)
+        .FirstOrDefaultAsync(mo => mo.MedicalOptionCategoryId == id);
 
       if (medicalOptions is null)
       {
@@ -240,38 +136,12 @@
     }
 
     /// <summary>
-    /// Retrieves multiple medical options by their IDs in a single database operation.
+    /// Retrieves multiple medical options by IDs in a single query.
     /// </summary>
     /// <param name="ids">List of medical option IDs to retrieve.</param>
-    /// <returns>List of MedicalOptionDto objects corresponding to the provided IDs.</returns>
-    /// <exception cref="ArgumentException">Thrown when the IDs list is null or empty.</exception>
-    /// <exception cref="KeyNotFoundException">Thrown when no medical options are found for any of the provided IDs.</exception>
-    /// <exception cref="InvalidOperationException">Thrown when the database context is disposed.</exception>
-    /// <exception cref="SqlException">Thrown when there's a database connectivity or query execution error.</exception>
-    /// <remarks>
-    /// This method is more efficient than making multiple individual calls to GetMedicalOptionByIdAsync()
-    /// when you need to retrieve multiple medical options. It uses the SQL IN clause to fetch all
-    /// matching records in a single database query.
-    /// 
-    /// The method eagerly loads the MedicalOptionCategory navigation property for all options
-    /// to prevent N+1 query problems when accessing category information.
-    /// 
-    /// All returned options are automatically mapped to MedicalOptionDto objects using the
-    /// ToMedicalOptionDto() extension method.
-    /// </remarks>
-    /// <example>
-    /// <code>
-    /// var repository = new MedicalOptionRepository(context);
-    /// var optionIds = new List&lt;int&gt; { 1, 2, 3, 4, 5 };
-    /// var medicalOptions = await repository.GetMedicalOptionsByIdsAsync(optionIds);
-    /// 
-    /// Console.WriteLine($"Retrieved {medicalOptions.Count} medical options:");
-    /// foreach (var option in medicalOptions)
-    /// {
-    ///     Console.WriteLine($"- {option.MedicalOptionName} (Category: {option.MedicalOptionCategoryId})");
-    /// }
-    /// </code>
-    /// </example>
+    /// <returns>List of MedicalOptionDto objects for the provided IDs.</returns>
+    /// <exception cref="ArgumentException">Thrown when ids is null or empty.</exception>
+    /// <exception cref="KeyNotFoundException">Thrown when no options are found for the provided IDs.</exception>
     public async Task<List<MedicalOptionDto>> GetMedicalOptionsByIdsAsync(List<int> ids)
     {
       if (ids == null || ids.Count == 0)
@@ -280,9 +150,9 @@
       }
 
       var medicalOptions = await _context.MedicalOptions
-          .Where(mo => ids.Contains(mo.MedicalOptionId))
-          .Include(mo => mo.MedicalOptionCategory)
-          .ToListAsync();
+        .Where(mo => ids.Contains(mo.MedicalOptionId))
+        .Include(mo => mo.MedicalOptionCategory)
+        .ToListAsync();
 
       if (medicalOptions.Count == 0)
       {
@@ -293,36 +163,12 @@
     }
 
     /// <summary>
-    /// Retrieves a medical option category by its unique identifier.
+    /// Retrieves a category entity by ID. Returns the raw entity, not a DTO.
     /// </summary>
-    /// <param name="id">The category ID to search for.</param>
-    /// <returns>The MedicalOptionCategory entity if found; otherwise, null.</returns>
-    /// <exception cref="ArgumentException">Thrown when the provided category ID is invalid (less than or equal to 0).</exception>
-    /// <exception cref="KeyNotFoundException">Thrown when no category with the specified ID is found.</exception>
-    /// <exception cref="InvalidOperationException">Thrown when the database context is disposed.</exception>
-    /// <exception cref="SqlException">Thrown when there's a database connectivity or query execution error.</exception>
-    /// <remarks>
-    /// This method returns the raw MedicalOptionCategory entity, not a DTO. This is useful
-    /// when you need access to the full entity with all its properties and navigation properties
-    /// for further database operations or complex business logic.
-    /// 
-    /// Unlike other methods that return DTOs, this method returns the entity itself, which
-    /// can be used for update operations or when you need access to entity-specific features.
-    /// </remarks>
-    /// <example>
-    /// <code>
-    /// var repository = new MedicalOptionRepository(context);
-    /// var category = await repository.GetCategoryByIdAsync(5);
-    /// 
-    /// if (category != null)
-    /// {
-    ///     Console.WriteLine($"Category: {category.MedicalOptionCategoryName}");
-    ///     // Use the entity for further operations
-    ///     category.MedicalOptionCategoryName = "Updated Category Name";
-    ///     await context.SaveChangesAsync();
-    /// }
-    /// </code>
-    /// </example>
+    /// <param name="id">The category ID.</param>
+    /// <returns>MedicalOptionCategory entity if found.</returns>
+    /// <exception cref="ArgumentException">Thrown when id is invalid (≤ 0).</exception>
+    /// <exception cref="KeyNotFoundException">Thrown when the category is not found.</exception>
     public async Task<MedicalOptionCategory?> GetCategoryByIdAsync(int id)
     {
       if (id <= 0)
@@ -331,7 +177,7 @@
       }
 
       var category = await _context.MedicalOptionCategories
-          .FirstOrDefaultAsync(c => c.MedicalOptionCategoryId == id);
+        .FirstOrDefaultAsync(c => c.MedicalOptionCategoryId == id);
 
       if (category == null)
       {
@@ -343,41 +189,12 @@
     }
 
     /// <summary>
-    /// Retrieves all medical options under a category variant based on option name pattern matching.
+    /// Retrieves options by name pattern matching across all categories.
     /// </summary>
-    /// <param name="optionName">The option name pattern to search for (supports partial matching).</param>
-    /// <returns>List of MedicalOptionDto objects containing the specified option name pattern.</returns>
+    /// <param name="optionName">The option name pattern to search for (case-sensitive partial match).</param>
+    /// <returns>List of MedicalOptionDto objects matching the pattern.</returns>
     /// <exception cref="ArgumentException">Thrown when optionName is null, empty, or whitespace.</exception>
-    /// <exception cref="KeyNotFoundException">Thrown when no medical options are found containing the specified option name.</exception>
-    /// <exception cref="InvalidOperationException">Thrown when the database context is disposed.</exception>
-    /// <exception cref="SqlException">Thrown when there's a database connectivity or query execution error.</exception>
-    /// <remarks>
-    /// This method performs a case-sensitive Contains() operation on the MedicalOptionName field,
-    /// allowing for partial matching. It's useful for finding all variants of a particular medical
-    /// option type across different categories.
-    /// 
-    /// The method eagerly loads the MedicalOptionCategory navigation property to prevent additional
-    /// database queries when accessing category information.
-    /// 
-    /// All returned options are automatically mapped to MedicalOptionDto objects.
-    /// </remarks>
-    /// <example>
-    /// <code>
-    /// var repository = new MedicalOptionRepository(context);
-    /// 
-    /// // Find all options containing "Hospital" in their name
-    /// var hospitalOptions = await repository.GetAllMedicalOptionsUnderCategoryVariantAsync("Hospital");
-    /// 
-    /// Console.WriteLine($"Found {hospitalOptions.Count} hospital-related options:");
-    /// foreach (var option in hospitalOptions.Where(o => o != null))
-    /// {
-    ///     Console.WriteLine($"- {option.MedicalOptionName} (Category: {option.MedicalOptionCategoryId})");
-    /// }
-    /// 
-    /// // Find all options containing "Dental"
-    /// var dentalOptions = await repository.GetAllMedicalOptionsUnderCategoryVariantAsync("Dental");
-    /// </code>
-    /// </example>
+    /// <exception cref="KeyNotFoundException">Thrown when no options match the pattern.</exception>
     public async Task<List<MedicalOptionDto?>> GetAllMedicalOptionsUnderCategoryVariantAsync(
       string optionName)
     {
@@ -388,11 +205,11 @@
       }
 
       var medicalOptions = await _context.MedicalOptions
-          .Include(mo => mo.MedicalOptionCategory)
-          .Where(mo => mo.MedicalOptionName.Contains(optionName))
-          .ToListAsync();
+        .Include(mo => mo.MedicalOptionCategory)
+        .Where(mo => mo.MedicalOptionName.Contains(optionName))
+        .ToListAsync();
 
-      if (medicalOptions.Count == 0)
+      if (medicalOptions.Count == 0) // move to service layer where used
       {
         throw new KeyNotFoundException($"No medical options found containing " +
                                        $"'{optionName}'");
@@ -402,37 +219,11 @@
     }
 
     /// <summary>
-    /// Checks if a medical option category exists in the database.
+    /// Checks if a category exists.
     /// </summary>
     /// <param name="categoryId">The category ID to validate.</param>
     /// <returns>True if the category exists; otherwise, false.</returns>
-    /// <exception cref="ArgumentException">Thrown when the provided category ID is invalid (less than or equal to 0).</exception>
-    /// <exception cref="InvalidOperationException">Thrown when the database context is disposed.</exception>
-    /// <exception cref="SqlException">Thrown when there's a database connectivity or query execution error.</exception>
-    /// <remarks>
-    /// This method uses Entity Framework's AnyAsync() method for efficient existence checking,
-    /// which generates an optimized SQL query that stops as soon as a matching record is found.
-    /// 
-    /// This is more efficient than retrieving the full category entity when you only need
-    /// to validate existence, as it avoids loading unnecessary data into memory.
-    /// </remarks>
-    /// <example>
-    /// <code>
-    /// var repository = new MedicalOptionRepository(context);
-    /// 
-    /// // Validate category before performing operations
-    /// int categoryId = 5;
-    /// if (await repository.MedicalOptionCategoryExistsAsync(categoryId))
-    /// {
-    ///     Console.WriteLine($"Category {categoryId} exists, proceeding with operations...");
-    ///     // Perform category-related operations
-    /// }
-    /// else
-    /// {
-    ///     Console.WriteLine($"Category {categoryId} does not exist");
-    /// }
-    /// </code>
-    /// </example>
+    /// <exception cref="ArgumentException">Thrown when categoryId is invalid (≤ 0).</exception>
     public async Task<bool> MedicalOptionCategoryExistsAsync(int categoryId)
     {
       if (categoryId <= 0)
@@ -442,41 +233,15 @@
       }
 
       return await _context.MedicalOptionCategories
-          .AnyAsync(moc => moc.MedicalOptionCategoryId == categoryId);
+        .AnyAsync(moc => moc.MedicalOptionCategoryId == categoryId);
     }
 
     /// <summary>
-    /// Checks if a specific medical option exists in the database.
+    /// Checks if an option exists.
     /// </summary>
     /// <param name="optionId">The medical option ID to validate.</param>
-    /// <returns>True if the medical option exists; otherwise, false.</returns>
-    /// <exception cref="ArgumentException">Thrown when the provided option ID is invalid (less than or equal to 0).</exception>
-    /// <exception cref="InvalidOperationException">Thrown when the database context is disposed.</exception>
-    /// <exception cref="SqlException">Thrown when there's a database connectivity or query execution error.</exception>
-    /// <remarks>
-    /// This method uses Entity Framework's AnyAsync() method for efficient existence checking,
-    /// which generates an optimized SQL query that stops as soon as a matching record is found.
-    /// 
-    /// This is more efficient than retrieving the full medical option entity when you only need
-    /// to validate existence, as it avoids loading unnecessary data into memory.
-    /// </remarks>
-    /// <example>
-    /// <code>
-    /// var repository = new MedicalOptionRepository(context);
-    /// 
-    /// // Validate medical option before performing operations
-    /// int optionId = 123;
-    /// if (await repository.MedicalOptionExistsAsync(optionId))
-    /// {
-    ///     Console.WriteLine($"Medical option {optionId} exists, proceeding with operations...");
-    ///     // Perform option-related operations
-    /// }
-    /// else
-    /// {
-    ///     Console.WriteLine($"Medical option {optionId} does not exist");
-    /// }
-    /// </code>
-    /// </example>
+    /// <returns>True if the option exists; otherwise, false.</returns>
+    /// <exception cref="ArgumentException">Thrown when optionId is invalid (≤ 0).</exception>
     public async Task<bool> MedicalOptionExistsAsync(int optionId)
     {
       if (optionId <= 0)
@@ -485,51 +250,16 @@
       }
 
       return await _context.MedicalOptions
-          .AnyAsync(o => o.MedicalOptionId == optionId);
+        .AnyAsync(o => o.MedicalOptionId == optionId);
     }
 
     /// <summary>
-    /// Retrieves all medical options belonging to a specific category.
+    /// Retrieves all options in a category. Returns empty list if category exists but has no options.
     /// </summary>
-    /// <param name="categoryId">The category ID to filter medical options by.</param>
-    /// <returns>List of MedicalOptionDto objects belonging to the specified category.</returns>
-    /// <exception cref="ArgumentException">Thrown when the provided category ID is invalid (less than or equal to 0).</exception>
-    /// <exception cref="KeyNotFoundException">Thrown when the specified category does not exist.</exception>
-    /// <exception cref="InvalidOperationException">Thrown when the database context is disposed.</exception>
-    /// <exception cref="SqlException">Thrown when there's a database connectivity or query execution error.</exception>
-    /// <remarks>
-    /// This method first validates that the category exists using MedicalOptionCategoryExistsAsync(),
-    /// then retrieves all medical options belonging to that category. This two-step approach ensures
-    /// data integrity and provides clear error messages when the category doesn't exist.
-    /// 
-    /// The method returns an empty list if the category exists but contains no medical options.
-    /// All returned options are automatically mapped to MedicalOptionDto objects.
-    /// 
-    /// This method does not eagerly load the MedicalOptionCategory navigation property since
-    /// the category is already known to exist and the category ID is provided.
-    /// </remarks>
-    /// <example>
-    /// <code>
-    /// var repository = new MedicalOptionRepository(context);
-    /// 
-    /// try
-    /// {
-    ///     var categoryOptions = await repository.GetAllOptionsUnderCategoryAsync(5);
-    ///     Console.WriteLine($"Found {categoryOptions.Count} options in category 5:");
-    ///     
-    ///     foreach (var option in categoryOptions)
-    ///     {
-    ///         Console.WriteLine($"- {option.MedicalOptionName}");
-    ///         Console.WriteLine($"  Adult Contribution: {option.TotalMonthlyContributionsAdult:C}");
-    ///         Console.WriteLine($"  Child Contribution: {option.TotalMonthlyContributionsChild:C}");
-    ///     }
-    /// }
-    /// catch (KeyNotFoundException ex)
-    /// {
-    ///     Console.WriteLine($"Error: {ex.Message}");
-    /// }
-    /// </code>
-    /// </example>
+    /// <param name="categoryId">The category ID.</param>
+    /// <returns>List of MedicalOptionDto objects in the category.</returns>
+    /// <exception cref="ArgumentException">Thrown when categoryId is invalid (≤ 0).</exception>
+    /// <exception cref="KeyNotFoundException">Thrown when the category does not exist.</exception>
     public async Task<List<MedicalOptionDto?>> GetAllOptionsUnderCategoryAsync(int categoryId)
     {
       if (categoryId <= 0)
@@ -545,49 +275,19 @@
       }
 
       var allOptions = await _context.MedicalOptions
-          .Where(co => co.MedicalOptionCategoryId == categoryId)
-          .ToListAsync();
+        .Where(co => co.MedicalOptionCategoryId == categoryId)
+        .ToListAsync();
 
       return allOptions.Select(mo => mo?.ToMedicalOptionDto()).ToList();
     }
 
     /// <summary>
-    /// Validates that a specific medical option exists within a particular category.
+    /// Validates that an option exists within a specific category.
     /// </summary>
-    /// <param name="categoryId">The category ID to check within.</param>
-    /// <param name="optionId">The medical option ID to validate.</param>
-    /// <returns>True if the medical option exists within the specified category; otherwise, false.</returns>
-    /// <exception cref="ArgumentException">Thrown when either categoryId or optionId is invalid (less than or equal to 0).</exception>
-    /// <exception cref="InvalidOperationException">Thrown when the database context is disposed.</exception>
-    /// <exception cref="SqlException">Thrown when there's a database connectivity or query execution error.</exception>
-    /// <remarks>
-    /// This method validates the relationship between a medical option and its category,
-    /// ensuring data integrity when linking options to categories. It uses Entity Framework's
-    /// AnyAsync() method with a compound condition to check both the category membership
-    /// and option existence in a single database query.
-    /// 
-    /// This is useful for preventing invalid associations in business logic and ensuring
-    /// that operations are performed on valid category-option relationships.
-    /// </remarks>
-    /// <example>
-    /// <code>
-    /// var repository = new MedicalOptionRepository(context);
-    /// 
-    /// // Validate the relationship before performing operations
-    /// int categoryId = 5;
-    /// int optionId = 123;
-    /// 
-    /// if (await repository.MedicalOptionExistsWithinCategoryAsync(categoryId, optionId))
-    /// {
-    ///     Console.WriteLine($"Option {optionId} belongs to category {categoryId}");
-    ///     // Proceed with operations that depend on this relationship
-    /// }
-    /// else
-    /// {
-    ///     Console.WriteLine($"Option {optionId} does not belong to category {categoryId}");
-    /// }
-    /// </code>
-    /// </example>
+    /// <param name="categoryId">The category ID.</param>
+    /// <param name="optionId">The option ID to validate.</param>
+    /// <returns>True if the option belongs to the category; otherwise, false.</returns>
+    /// <exception cref="ArgumentException">Thrown when categoryId or optionId is invalid (≤ 0).</exception>
     public async Task<bool> MedicalOptionExistsWithinCategoryAsync(
       int categoryId, int optionId)
     {
@@ -603,105 +303,19 @@
       }
 
       return await _context.MedicalOptions
-          .AnyAsync(o => o.MedicalOptionCategoryId == categoryId &&
-                         o.MedicalOptionId == optionId);
+        .AnyAsync(o => o.MedicalOptionCategoryId == categoryId &&
+                       o.MedicalOptionId == optionId);
     }
 
     /// <summary>
-    /// Performs bulk updates of medical options within a specific category using EFCore.BulkExtensions.
+    /// Bulk updates medical options in a category with salary bracket validation.
     /// </summary>
-    /// <param name="categoryId">The category ID containing the medical options to update.</param>
-    /// <param name="bulkUpdateDto">Collection of UpdateMedicalOptionVariantsDto objects containing the new values.</param>
-    /// <returns>Read-only list of updated MedicalOptionDto objects representing the modified medical options.</returns>
-    /// <exception cref="ArgumentException">Thrown when categoryId is invalid (less than or equal to 0) or bulkUpdateDto is null or empty.</exception>
-    /// <exception cref="KeyNotFoundException">Thrown when no medical options are found for the specified category with the provided option IDs.</exception>
-    /// <exception cref="ArgumentException">Thrown when salary bracket validation fails (minimum must be less than maximum).</exception>
-    /// <exception cref="InvalidOperationException">Thrown when the database context is disposed.</exception>
-    /// <exception cref="SqlException">Thrown when there's a database connectivity or bulk operation error.</exception>
-    /// <remarks>
-    /// <para>
-    /// This method implements an efficient bulk update strategy using the following approach:
-    /// </para>
-    /// <list type="number">
-    /// <item><description>Validates input parameters and category existence</description></item>
-    /// <item><description>Retrieves existing medical options that match the provided option IDs within the category</description></item>
-    /// <item><description>Creates a dictionary for O(1) lookup performance when matching update DTOs to entities</description></item>
-    /// <item><description>Validates salary bracket ranges for each update</description></item>
-    /// <item><description>Updates entities using the UpdateFromDto() extension method</description></item>
-    /// <item><description>Performs bulk update using EFCore.BulkExtensions with optimized batch size and property selection</description></item>
-    /// <item><description>Maps results to DTOs to avoid circular reference issues</description></item>
-    /// </list>
-    /// 
-    /// <para>
-    /// Performance optimizations:
-    /// </para>
-    /// <list type="bullet">
-    /// <item><description>Uses dictionary-based lookups instead of nested loops for O(n) performance</description></item>
-    /// <item><description>Bulk update with batch size of 1000 for optimal database performance</description></item>
-    /// <item><description>Explicit property inclusion to minimize data transfer</description></item>
-    /// <item><description>Single database round-trip for all updates</description></item>
-    /// </list>
-    /// 
-    /// <para>
-    /// Validation rules:
-    /// </para>
-    /// <list type="bullet">
-    /// <item><description>SalaryBracketMin must be less than SalaryBracketMax</description></item>
-    /// <item><description>All option IDs must exist within the specified category</description></item>
-    /// <item><description>Category ID must be valid and exist in the database</description></item>
-    /// </list>
-    /// 
-    /// <para>
-    /// The operation is performed atomically - either all updates succeed or all fail.
-    /// If any validation fails, the entire operation is rolled back.
-    /// </para>
-    /// </remarks>
-    /// <example>
-    /// <code>
-    /// var repository = new MedicalOptionRepository(context);
-    /// 
-    /// // Prepare bulk update data
-    /// var updates = new List&lt;UpdateMedicalOptionVariantsDto&gt;
-    /// {
-    ///     new UpdateMedicalOptionVariantsDto
-    ///     {
-    ///         MedicalOptionId = 123,
-    ///         SalaryBracketMin = 5000,
-    ///         SalaryBracketMax = 10000,
-    ///         MonthlyRiskContributionPrincipal = 150.50m,
-    ///         TotalMonthlyContributionsAdult = 200.00m
-    ///     },
-    ///     new UpdateMedicalOptionVariantsDto
-    ///     {
-    ///         MedicalOptionId = 124,
-    ///         SalaryBracketMin = 10001,
-    ///         SalaryBracketMax = 20000,
-    ///         MonthlyRiskContributionPrincipal = 250.75m,
-    ///         TotalMonthlyContributionsAdult = 300.00m
-    ///     }
-    /// };
-    /// 
-    /// try
-    /// {
-    ///     var updatedOptions = await repository.BulkUpdateByCategoryIdAsync(5, updates);
-    ///     Console.WriteLine($"Successfully updated {updatedOptions.Count} medical options");
-    ///     
-    ///     foreach (var option in updatedOptions)
-    ///     {
-    ///         Console.WriteLine($"Updated: {option.MedicalOptionName}");
-    ///         Console.WriteLine($"New Adult Contribution: {option.TotalMonthlyContributionsAdult:C}");
-    ///     }
-    /// }
-    /// catch (ArgumentException ex)
-    /// {
-    ///     Console.WriteLine($"Validation error: {ex.Message}");
-    /// }
-    /// catch (KeyNotFoundException ex)
-    /// {
-    ///     Console.WriteLine($"Data error: {ex.Message}");
-    /// }
-    /// </code>
-    /// </example>
+    /// <param name="categoryId">The category ID containing options to update.</param>
+    /// <param name="bulkUpdateDto">Collection of UpdateMedicalOptionVariantsDto with new values.</param>
+    /// <returns>Read-only list of updated MedicalOptionDto objects.</returns>
+    /// <remarks>Validates salary bracket ranges (min &lt; max). Uses EFCore.BulkExtensions for efficiency.</remarks>
+    /// <exception cref="ArgumentException">Thrown when categoryId is invalid (≤ 0), bulkUpdateDto is null/empty, or salary brackets are invalid.</exception>
+    /// <exception cref="KeyNotFoundException">Thrown when no options are found for the category with provided IDs.</exception>
     public async Task<IReadOnlyList<MedicalOptionDto>> BulkUpdateByCategoryIdAsync(
       int categoryId, IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto)
     {
@@ -722,9 +336,9 @@
         .ToList();
 
       var existingOptions = await _context.MedicalOptions
-          .Where(o => o.MedicalOptionCategoryId == categoryId &&
-                      optionIdsToUpdate.Contains(o.MedicalOptionId))
-          .ToListAsync();
+        .Where(o => o.MedicalOptionCategoryId == categoryId &&
+                    optionIdsToUpdate.Contains(o.MedicalOptionId))
+        .ToListAsync();
 
       if (existingOptions.Count == 0)
       {
@@ -745,9 +359,10 @@
           if (updateDto.SalaryBracketMin >= updateDto.SalaryBracketMax)
           {
             throw new ArgumentException(
-                $"Invalid salary bracket range for option ID {entity.MedicalOptionId}: " +
-                "Minimum must be less than maximum");
+              $"Invalid salary bracket range for option ID {entity.MedicalOptionId}: " +
+              "Minimum must be less than maximum");
           }
+
           entity.UpdateFromDto(updateDto);
         }
       }
@@ -757,21 +372,21 @@
       {
         BatchSize = 1000,
         PropertiesToInclude = new List<string>
-            {
-                nameof(MedicalOption.SalaryBracketMin),
-                nameof(MedicalOption.SalaryBracketMax),
-                nameof(MedicalOption.MonthlyMsaContributionAdult),
-                nameof(MedicalOption.MonthlyMsaContributionChild),
-                nameof(MedicalOption.MonthlyMsaContributionPrincipal),
-                nameof(MedicalOption.MonthlyRiskContributionAdult),
-                nameof(MedicalOption.MonthlyRiskContributionChild),
-                nameof(MedicalOption.MonthlyRiskContributionChild2),
-                nameof(MedicalOption.MonthlyRiskContributionPrincipal),
-                nameof(MedicalOption.TotalMonthlyContributionsAdult),
-                nameof(MedicalOption.TotalMonthlyContributionsChild),
-                nameof(MedicalOption.TotalMonthlyContributionsChild2),
-                nameof(MedicalOption.TotalMonthlyContributionsPrincipal)
-            }
+        {
+          nameof(MedicalOption.SalaryBracketMin),
+          nameof(MedicalOption.SalaryBracketMax),
+          nameof(MedicalOption.MonthlyMsaContributionAdult),
+          nameof(MedicalOption.MonthlyMsaContributionChild),
+          nameof(MedicalOption.MonthlyMsaContributionPrincipal),
+          nameof(MedicalOption.MonthlyRiskContributionAdult),
+          nameof(MedicalOption.MonthlyRiskContributionChild),
+          nameof(MedicalOption.MonthlyRiskContributionChild2),
+          nameof(MedicalOption.MonthlyRiskContributionPrincipal),
+          nameof(MedicalOption.TotalMonthlyContributionsAdult),
+          nameof(MedicalOption.TotalMonthlyContributionsChild),
+          nameof(MedicalOption.TotalMonthlyContributionsChild2),
+          nameof(MedicalOption.TotalMonthlyContributionsPrincipal)
+        }
       });
 
       // Map to DTOs to avoid circular reference
@@ -780,5 +395,288 @@
 
       return responseDtos.AsReadOnly();
     }
+
+    /// <summary>
+    /// Retrieves options eligible for an employee based on salary amount grouped by category.
+    /// </summary>
+    /// <param name="salaryAmount">The employee's salary to match against salary brackets.</param>
+    /// <returns>Options grouped by MedicalOptionCategoryId where salary falls within the bracket.</returns>
+    public async Task<List<IGrouping<int, MedicalOption>>> GetAllOptionsWithinEmployeeSalary(
+      decimal salaryAmount)
+    {
+      return await _context.MedicalOptions
+        .Include(o => o.MedicalOptionCategory)
+        .Where(o => o.SalaryBracketMin != null)
+        .Where(o =>
+          salaryAmount >= o.SalaryBracketMin &&
+          (!o.SalaryBracketMax.HasValue || salaryAmount <= o.SalaryBracketMax))
+        .GroupBy(o => o.MedicalOptionCategory.MedicalOptionCategoryId)
+        .ToListAsync();
+    }
+
+    /// <summary>
+    /// Retrieves medical options eligible for an employee. Depends on employee salary and enrolment period.
+    /// </summary>
+    /// <param name="employeeId">The employee ID.</param>
+    /// <returns>Eligible options grouped by category.</returns>
+    public async Task<List<IGrouping<int, MedicalOptionDto>>> GetEmployeeEligibleOptions(
+      string employeeId)
+    {
+      // Get employee salary from employee service via context or join
+      // For now, we get the employee's current salary bracket and return options they qualify for
+      var employee = await _context.Employees
+        .FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
+
+      if (employee == null)
+      {
+        throw new KeyNotFoundException($"Employee with ID {employeeId} not found");
+      }
+
+      var employeeSalary = employee.MonthlySalary;
+
+      // Get all medical options that fall within the employee's salary bracket
+      var eligibleOptions = await _context.MedicalOptions
+        .Include(o => o.MedicalOptionCategory)
+        .Where(o => o.SalaryBracketMin <= employeeSalary &&
+                    (o.SalaryBracketMax == null || o.SalaryBracketMax >= employeeSalary))
+        .Select(o => o.ToMedicalOptionDto())
+        .ToListAsync();
+
+      // Group by category ID
+      return [.. eligibleOptions.GroupBy(o => o.MedicalOptionCategoryId)];
+    }
+
+    /// <summary>
+    /// Retrieves all options in a category, grouped by category ID.
+    /// </summary>
+    /// <param name="id">The category ID.</param>
+    /// <returns>Options grouped by MedicalOptionCategoryId.</returns>
+    public async Task<List<IGrouping<int, MedicalOption>>> GetAllCategoryOptionsById(int id)
+    {
+      return await _context.MedicalOptions
+        .Include(c => c.MedicalOptionCategory)
+        .Where(c => c.MedicalOptionCategoryId == id)
+        .GroupBy(c => c.MedicalOptionCategoryId)
+        .ToListAsync();
+    }
+
+    /// <summary>
+    /// Retrieves all medical option categories grouped by ID.
+    /// </summary>
+    /// <returns>Categories grouped by MedicalOptionCategoryId.</returns>
+    public async Task<List<IGrouping<int, MedicalOptionCategory>>> GetAllMedicalOptionCategories()
+    {
+      var categories = await _context.MedicalOptionCategories.ToListAsync();
+      
+      if (categories == null || categories.Count == 0)
+      {
+        return new List<IGrouping<int, MedicalOptionCategory>>();
+      }
+      
+      return categories.GroupBy(c => c.MedicalOptionCategoryId).ToList();
+    }
+
+    /// <summary>
+    /// Retrieves categories by ID as a list (typically single result).
+    /// </summary>
+    /// <param name="id">The category ID.</param>
+    /// <returns>List of matching categories.</returns>
+    public async Task<List<MedicalOptionCategory>> GetCategoryById(int id)
+    {
+      return await _context.MedicalOptionCategories
+        .Where(c => c.MedicalOptionCategoryId == id)
+        .ToListAsync();
+    }
+
+    /// <summary>
+    /// Retrieves a snapshot of all medical options from the database.
+    /// </summary>
+    /// <returns>Read-only list of all MedicalOptionDto objects.</returns>
+    public async Task<IReadOnlyList<MedicalOptionDto>> GetCurrentDbCopy()
+    {
+      var currentDbState = await _context.MedicalOptions
+        .Include(opt => opt.MedicalOptionCategory)
+        .ToListAsync();
+
+      var response = currentDbState
+        .Select(options => options.ToMedicalOptionDto()).ToList();
+
+      return response.AsReadOnly();
+    }
+
+    /// <summary>
+    /// Creates a new medical option category.
+    /// </summary>
+    /// <param name="createCategoryPayload">Category details to create.</param>
+    /// <returns>Created MedicalOptionCategoryDto.</returns>
+    public async Task<MedicalOptionCategoryDto> CreateMedicalOptionCategory(
+      CreateMedicalOptionCategoryDto createCategoryPayload)
+    {
+      ArgumentNullException.ThrowIfNull(createCategoryPayload);
+
+      // Check if category name already exists
+      var existingCategory = await _context.MedicalOptionCategories
+        .FirstOrDefaultAsync(c => c.MedicalOptionCategoryName == createCategoryPayload.MedicalOptionCategoryName);
+
+      if (existingCategory != null)
+      {
+        throw new InvalidOperationException($"Medical option category with name '{createCategoryPayload.MedicalOptionCategoryName}' already exists");
+      }
+
+      // Create new category entity
+      var newCategory = new MedicalOptionCategory
+      {
+        MedicalOptionCategoryName = createCategoryPayload.MedicalOptionCategoryName
+      };
+
+      await _context.MedicalOptionCategories.AddAsync(newCategory);
+      await _context.SaveChangesAsync();
+
+      // Map to DTO and return
+      return new MedicalOptionCategoryDto
+      {
+        MedicalOptionCategoryId = newCategory.MedicalOptionCategoryId,
+        MedicalOptionCategoryName = newCategory.MedicalOptionCategoryName,
+        MedicalOptions = new List<MedicalOptionDto>()
+      };
+    }
+
+    /// <summary>
+    /// Bulk creates medical options in an existing category. Only allowed during update period (Nov-Dec).
+    /// </summary>
+    /// <param name="id">The category ID.</param>
+    /// <param name="createOptionsPayload">Collection of options to create.</param>
+    /// <returns>List of created CreateMedicalOptionVariantsDto objects.</returns>
+    /// <exception cref="KeyNotFoundException">Thrown when category is not found.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when outside the update period or duplicate names exist.</exception>
+    public async Task<List<CreateMedicalOptionVariantsDto>> CreateBulkOptionsByExistingCategoryId(
+      int id,
+      IReadOnlyCollection<CreateMedicalOptionVariantsDto> createOptionsPayload)
+    {
+      // Validate category Exists
+      var categoryExists = await MedicalOptionCategoryExistsAsync(id);
+    
+      if (!categoryExists)
+        throw new KeyNotFoundException($"Medical option category with ID {id} not found");
+      
+      //2. Validate Update Period (as per the business rules)
+      if (!MedicalOptionValidator.ValidateUpdatePeriod(DateTime.Now))
+        throw new InvalidOperationException(
+          "bulk create operations are only allowed during the update period (November-December)");
+      
+      //3. Get existing options in category to check for duplicates
+      var existingOptions = await _context.MedicalOptions
+        .Where(opt => opt.MedicalOptionCategoryId == id)
+        .ToListAsync();
+    
+      var existingOptionNames = existingOptions.Select(o => o.MedicalOptionName).ToHashSet();
+    
+      //4. validate payload and check for duplicates
+      ArgumentNullException.ThrowIfNull(createOptionsPayload);
+      
+      //5. Create list to hold all new MedicalOption entities
+      var newMedicalOptions = new List<MedicalOption>();
+      
+      foreach (var optionDto in createOptionsPayload)
+      {
+        // Check if option name already exists in category
+        if (existingOptionNames.Contains(optionDto.MedicalOptionName))
+          throw new InvalidOperationException(
+            $"Medical option '{optionDto.MedicalOptionName}' already exists in this category");
+        
+        // Create new entity from DTO
+        var newMedicalOption = new MedicalOption
+        {
+          MedicalOptionName = optionDto.MedicalOptionName,
+          MedicalOptionCategoryId = id,
+          SalaryBracketMin = optionDto.SalaryBracketMin,
+          SalaryBracketMax = optionDto.SalaryBracketMax,
+          MonthlyRiskContributionPrincipal = optionDto.MonthlyRiskContributionPrincipal,
+          MonthlyRiskContributionAdult = optionDto.MonthlyRiskContributionAdult,
+          MonthlyRiskContributionChild = optionDto.MonthlyRiskContributionChild,
+          MonthlyRiskContributionChild2 = optionDto.MonthlyRiskContributionChild2,
+          MonthlyMsaContributionPrincipal = optionDto.MonthlyMsaContributionPrincipal,
+          MonthlyMsaContributionAdult = optionDto.MonthlyMsaContributionAdult,
+          MonthlyMsaContributionChild = optionDto.MonthlyMsaContributionChild,
+          TotalMonthlyContributionsPrincipal = optionDto.TotalMonthlyContributionsPrincipal,
+          TotalMonthlyContributionsAdult = optionDto.TotalMonthlyContributionsAdult,
+          TotalMonthlyContributionsChild = optionDto.TotalMonthlyContributionsChild,
+          TotalMonthlyContributionsChild2 = optionDto.TotalMonthlyContributionsChild2
+        };
+        
+        newMedicalOptions.Add(newMedicalOption);
+      }
+      
+      //6. Perform bulk insert using EFCore.BulkExtensions
+      await _context.BulkInsertAsync(newMedicalOptions);
+      
+      //7. Return the original DTOs (or you could return the created entities)
+      return [.. createOptionsPayload];
+    }
+
+    /// <summary>
+    /// Updates an existing medical option category.
+    /// </summary>
+    /// <param name="id">The category ID to update.</param>
+    /// <param name="updateCategoryPayload">Updated category details.</param>
+    /// <returns>Updated MedicalOptionCategoryDto.</returns>
+    public async Task<MedicalOptionCategoryDto> UpdateExistingCategoryById(int id,
+      UpdateMedicalOptionCategoryDto updateCategoryPayload)
+    {
+      if (id <= 0)
+      {
+        throw new ArgumentOutOfRangeException(nameof(id), "Category ID must be greater than 0");
+      }
+
+      ArgumentNullException.ThrowIfNull(updateCategoryPayload);
+
+      // Find existing category
+      var existingCategory = await _context.MedicalOptionCategories
+        .FirstOrDefaultAsync(c => c.MedicalOptionCategoryId == id);
+
+      if (existingCategory == null)
+      {
+        throw new KeyNotFoundException($"Medical option category with ID {id} not found");
+      }
+
+      // Check if new name conflicts with another category
+      if (!string.Equals(existingCategory.MedicalOptionCategoryName, updateCategoryPayload.MedicalOptionCategoryName, StringComparison.OrdinalIgnoreCase))
+      {
+        var nameConflict = await _context.MedicalOptionCategories
+          .AnyAsync(c => c.MedicalOptionCategoryId != id &&
+                         c.MedicalOptionCategoryName == updateCategoryPayload.MedicalOptionCategoryName);
+
+        if (nameConflict)
+        {
+          throw new InvalidOperationException($"Another category with name '{updateCategoryPayload.MedicalOptionCategoryName}' already exists");
+        }
+      }
+
+      // Update category properties
+      existingCategory.MedicalOptionCategoryName = updateCategoryPayload.MedicalOptionCategoryName;
+
+      _context.MedicalOptionCategories.Update(existingCategory);
+      await _context.SaveChangesAsync();
+
+      // Get updated options for the category
+      var options = await _context.MedicalOptions
+        .Where(o => o.MedicalOptionCategoryId == id)
+        .Select(o => o.ToMedicalOptionDto())
+        .ToListAsync();
+
+      // Map to DTO and return
+      return new MedicalOptionCategoryDto
+      {
+        MedicalOptionCategoryId = existingCategory.MedicalOptionCategoryId,
+        MedicalOptionCategoryName = existingCategory.MedicalOptionCategoryName,
+        MedicalOptions = options
+      };
+    }
   }
 }
+
+
+
+
+
+

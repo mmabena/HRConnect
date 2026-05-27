@@ -1,22 +1,21 @@
 namespace HRConnect.Tests
 {
   using System;
-  using Moq;
   using System.Collections.Generic;
   using System.Linq;
+  using System.Reflection.Metadata;
   using System.Threading.Tasks;
   using HRConnect.Api.Data;
-  using Microsoft.AspNetCore.Identity;
-  using HRConnect.Api.Models;
-  using HRConnect.Api.Services;
-  using Microsoft.EntityFrameworkCore;
-  using Xunit;
-  using HRConnect.Api.Interfaces;
-  using HRConnect.Api.Utils;
   using HRConnect.Api.DTOs.Employee;
+  using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Models;
   using HRConnect.Api.Repository;
+  using HRConnect.Api.Services;
+  using HRConnect.Api.Utils;
   using Microsoft.AspNetCore.Identity;
-  using System.Reflection.Metadata;
+  using Microsoft.EntityFrameworkCore;
+  using Moq;
+  using Xunit;
 
   public class LeaveBalanceServiceTests
   {
@@ -43,21 +42,40 @@ namespace HRConnect.Tests
         => new LeaveProcessingService(context, new FakeEmailService(), CreateLeaveBalanceService(context));
 
     private static EmployeeService CreateEmployeeService(ApplicationDBContext context)
-    {
-      var employeeRepo = new EmployeeRepository(context);
-      var positionRepo = new PositionRepository(context);
-      var passwordHasherMock = new Mock<IPasswordHasher<User>>();
+{
+    var employeeRepo = new EmployeeRepository(context);
+    var positionRepo = new PositionRepository(context);
 
-      return new EmployeeService(
-          context,
-          employeeRepo,
-          new FakeEmailService(),
-          positionRepo,
-          CreateLeaveBalanceService(context),
-          CreateLeaveProcessingService(context),
-          passwordHasherMock.Object
-      );
-    }
+    var passwordHasherMock = new Mock<IPasswordHasher<User>>();
+    var activeCompanyServiceMock = new Mock<IActiveCompanyService>();
+    var userCompanyServiceMock = new Mock<IUserCompanyService>();
+    var companyRepoMock = new Mock<ICompanyRepository>();
+
+    activeCompanyServiceMock
+        .Setup(x => x.GetActiveCompanyIdAsync(It.IsAny<int>()))
+        .ReturnsAsync("COMP001");
+
+    companyRepoMock
+        .Setup(x => x.GetCompanyByIdAsync(It.IsAny<string>()))
+        .ReturnsAsync(new Company
+        {
+            CompanyId = "COMP001",
+            CompanyName = "Test Company"
+        });
+
+    return new EmployeeService(
+        context,
+        activeCompanyServiceMock.Object,
+        userCompanyServiceMock.Object,
+        employeeRepo,
+        new FakeEmailService(),
+        companyRepoMock.Object,
+        positionRepo,
+        CreateLeaveBalanceService(context),
+        CreateLeaveProcessingService(context),
+        passwordHasherMock.Object
+    );
+}
 
     // ---------------- BASIC TEST ----------------
 
@@ -282,7 +300,7 @@ namespace HRConnect.Tests
       balance.TakenDays = 5;
       await context.SaveChangesAsync();
 
-      await employeeService.UpdateEmployeeAsync(employee.EmployeeId, new UpdateEmployeeRequestDto
+      await employeeService.UpdateEmployeeAsync(1, employee.EmployeeId, new UpdateEmployeeRequestDto
       {
         Title = Title.Mr,
         Gender = Gender.Male,

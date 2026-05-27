@@ -236,8 +236,8 @@
   /// - Network: Standard network access tier
   /// </para>
   /// </remarks>
-  #pragma warning disable CA1716 // Rename type Double so that it no longer conflicts with reserved keyword
-  #pragma warning disable CA1720 // Identifier contains type name
+#pragma warning disable CA1716 // Rename type Double so that it no longer conflicts with reserved keyword
+#pragma warning disable CA1720 // Identifier contains type name
   public enum @Double
   {
     /// <summary>
@@ -282,8 +282,8 @@
     /// </remarks>
     Network = 1
   }
-  #pragma warning restore CA1716
-  #pragma warning restore CA1720
+#pragma warning restore CA1716
+#pragma warning restore CA1720
 
   /// <summary>
   /// Defines the tier structure for Alliance medical option categories.

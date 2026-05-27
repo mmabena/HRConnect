@@ -1,26 +1,31 @@
 namespace HRConnect.Tests
 {
-  using Xunit;
-  using Moq;
-  using HRConnect.Api.Services;
+  using System;
+  using HRConnect.Api.DTOs.Company;
+  using HRConnect.Api.DTOs.UserCompany;
+  using System.Collections.Generic;
+  using System.ComponentModel.DataAnnotations;
+  using System.Linq;
+  using System.Reflection.Metadata;
+  using System.Runtime.Serialization;
+  using System.Threading;
+  using System.Threading.Tasks;
+  using HRConnect.Api.Data;
+  using HRConnect.Api.DTOs.Employee;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
-  using HRConnect.Api.DTOs.Employee;
-  using System;
-  using System.Collections.Generic;
-  using System.Threading.Tasks;
-  using Microsoft.EntityFrameworkCore;
-  using HRConnect.Api.Data;
-  using System.Threading;
-  using Microsoft.EntityFrameworkCore.Storage;
+  using HRConnect.Api.Services;
   using HRConnect.Api.Utils;
   using System.Linq;
   using Microsoft.AspNetCore.SignalR;
   using HRConnect.Api.Hubs;
+  using Microsoft.AspNetCore.SignalR;
+  using HRConnect.Api.Hubs;
   using Microsoft.AspNetCore.Identity;
-  using System.Reflection.Metadata;
-  using System.ComponentModel.DataAnnotations;
-  using System.Runtime.Serialization;
+  using Microsoft.EntityFrameworkCore;
+  using Microsoft.EntityFrameworkCore.Storage;
+  using Moq;
+  using Xunit;
 
   public class EmployeeServiceTests : IDisposable
   {
@@ -31,15 +36,23 @@ namespace HRConnect.Tests
     private readonly Mock<ILeaveProcessingService> _leaveProcessingServiceMock;
     private readonly Mock<IPasswordHasher<User>> _passwordHasherMock;
     private readonly ApplicationDBContext _context;
+    private readonly Mock<IActiveCompanyService> _activeCompanyServiceMock;
+    private readonly Mock<IUserCompanyService> _userCompanyServiceMock;
+    private readonly Mock<ICompanyRepository> _companyRepoMock;
     private readonly EmployeeService _employeeService;
 
  
+
+
 
     public EmployeeServiceTests()
     {
       _employeeRepoMock = new Mock<IEmployeeRepository>();
       _emailServiceMock = new Mock<IEmailService>();
       _positionRepoMock = new Mock<IPositionRepository>();
+      _activeCompanyServiceMock = new Mock<IActiveCompanyService>();
+      _userCompanyServiceMock = new Mock<IUserCompanyService>();
+      _companyRepoMock = new Mock<ICompanyRepository>();
       _leaveBalanceServiceMock = new Mock<ILeaveBalanceService>();
       _leaveProcessingServiceMock = new Mock<ILeaveProcessingService>();
      
@@ -56,6 +69,24 @@ namespace HRConnect.Tests
         OccupationalLevelId = 1,
         Description = "Level"
       });
+
+      _activeCompanyServiceMock
+    .Setup(x => x.GetActiveCompanyIdAsync(It.IsAny<int>()))
+    .ReturnsAsync("COMP001");
+
+      _companyRepoMock
+          .Setup(x => x.GetCompanyByIdAsync(It.IsAny<string>()))
+          .ReturnsAsync(new Company
+          {
+            CompanyId = "COMP001",
+            CompanyName = "Test Company"
+          });
+
+      _userCompanyServiceMock
+          .Setup(x => x.AssignCompanyToUserAsync(
+              It.IsAny<int>(),
+              It.IsAny<CreateUserCompanyDto>()))
+          .Returns(Task.CompletedTask);
 
       _context.JobGrades.Add(new JobGrade
       {
@@ -164,7 +195,7 @@ namespace HRConnect.Tests
       string managerId = "MNG001";
       var manager = new Employee { EmployeeId = managerId };
 
-      var dto = new CreateEmployeeRequestDto
+      var employeeRequestDto = new CreateEmployeeRequestDto
       {
         Name = "John",
         Surname = "Smith",
@@ -191,7 +222,7 @@ namespace HRConnect.Tests
       _employeeRepoMock.Setup(r => r.GetEmployeeByIdAsync(managerId))
           .ReturnsAsync(manager);
 
-      var result = await _employeeService.CreateEmployeeAsync(dto);
+      var result = await _employeeService.CreateEmployeeAsync(1, employeeRequestDto);
 
       Assert.NotNull(result);
       Assert.Equal("John", result.Name);
@@ -227,7 +258,7 @@ namespace HRConnect.Tests
           .ReturnsAsync(new Employee { Email = dto.Email });
 
       await Assert.ThrowsAsync<BusinessRuleException>(() =>
-          _employeeService.CreateEmployeeAsync(dto));
+          _employeeService.CreateEmployeeAsync(1, dto));
     }
 
     [Fact]
@@ -248,7 +279,7 @@ namespace HRConnect.Tests
       };
 
       await Assert.ThrowsAsync<HRConnect.Api.Services.ValidationException>(() =>
-          _employeeService.CreateEmployeeAsync(dto));
+          _employeeService.CreateEmployeeAsync(1, dto));
     }
 
     [Fact]
@@ -332,7 +363,7 @@ namespace HRConnect.Tests
         ProfileImage = "updated.jpg"
       };
 
-      var result = await _employeeService.UpdateEmployeeAsync(employeeId, dto);
+      var result = await _employeeService.UpdateEmployeeAsync(1, employeeId, dto);
 
       Assert.NotNull(result);
       Assert.Equal("Updated", result.Name);
@@ -345,7 +376,7 @@ namespace HRConnect.Tests
           .ReturnsAsync((Employee?)null);
 
       await Assert.ThrowsAsync<NotFoundException>(() =>
-          _employeeService.UpdateEmployeeAsync("X", new UpdateEmployeeRequestDto()));
+          _employeeService.UpdateEmployeeAsync(1, "X", new UpdateEmployeeRequestDto()));
     }
 
     [Fact]
@@ -360,7 +391,7 @@ namespace HRConnect.Tests
       _employeeRepoMock.Setup(r => r.GetEmployeeByIdAsync("EMP001"))
           .ReturnsAsync(employee);
 
-      var result = await _employeeService.DeleteEmployeeAsync("EMP001");
+      var result = await _employeeService.DeleteEmployeeAsync(1, "EMP001");
 
       Assert.True(result);
     }
@@ -372,7 +403,7 @@ namespace HRConnect.Tests
           .ReturnsAsync((Employee?)null);
 
       await Assert.ThrowsAsync<NotFoundException>(() =>
-          _employeeService.DeleteEmployeeAsync("X"));
+          _employeeService.DeleteEmployeeAsync(1, "X"));
     }
 
     public void Dispose()

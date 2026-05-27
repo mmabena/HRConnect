@@ -1,12 +1,12 @@
 ﻿namespace HRConnect.Api.Repository
 {
+  using System.Collections.Generic;
+  using System.Threading;
   using System.Threading.Tasks;
   using HRConnect.Api.Data;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
   using Microsoft.EntityFrameworkCore;
-  using System.Collections.Generic;
-  using System.Threading;
 
   public class PensionOptionRepository(ApplicationDBContext context) : IPensionOptionRepository
   {
@@ -38,17 +38,17 @@
       return ServiceResult.Success("Pension option updated successfully.");
     }
 
-    ///<summary>
-    ///Get pension option by id
-    ///</summary>
-    ///<param name="id">Pension Option Id</param>
-    ///<returns>
-    ///Pension option with the specified id
-    ///</returns>
-    public async Task<decimal> GetPensionOptionPercentageByIdAsync(int id)
-    {
-      return await _context.PensionOptions.Where(po => po.PensionOptionId == id)
-        .Select(po => po.ContributionPercentage).FirstOrDefaultAsync();
+        ///<summary>
+        ///Get pension option by ud
+        ///</summary>
+        ///<param name="id">Pension Option Id</param>
+        ///<returns>
+        ///Pension option with the specified id
+        ///</returns>
+        public async Task<decimal> GetPensionOptionPercentageByIdAsync(int id)
+        {
+            return await _context.PensionOptions.Where(po => po.PensionOptionId == id)
+              .Select(po => po.ContributionPercentage).FirstOrDefaultAsync();
+        }
     }
-  }
 }

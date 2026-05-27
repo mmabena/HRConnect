@@ -1,12 +1,12 @@
-﻿using HRConnect.Api.Interfaces;
-using HRConnect.Api.Models;
-using HRConnect.Api.Services;
-using Moq;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Xunit;
+using HRConnect.Api.Interfaces;
+using HRConnect.Api.Models;
 using HRConnect.Api.Repository;
+using HRConnect.Api.Services;
+using Moq;
+using Xunit;
 
 namespace HRConnect.Tests
 {

@@ -2,7 +2,6 @@
 {
   using System.Text.Json;
   using System.Threading.Tasks;
-  using Quartz;
   using HRConnect.Api.Data;
   using HRConnect.Api.DTOs.Employee.Pension;
   using HRConnect.Api.Interfaces;
@@ -11,6 +10,7 @@
   using HRConnect.Api.Models.Pension;
   using HRConnect.Api.Services;
   using Microsoft.EntityFrameworkCore;
+  using Quartz;
 
   [DisallowConcurrentExecution]
   public class EmployeePensionEnrollmentUpdateJob(IEmployeeRepository employeeRepository,

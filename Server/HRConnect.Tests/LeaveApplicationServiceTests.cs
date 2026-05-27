@@ -1,18 +1,18 @@
 namespace HRConnect.Tests
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using HRConnect.Api.Data;
     using HRConnect.Api.DTOs;
+    using HRConnect.Api.Interfaces;
     using HRConnect.Api.Models;
     using HRConnect.Api.Services;
-    using HRConnect.Api.Interfaces;
-    using Microsoft.EntityFrameworkCore;
     using HRConnect.Api.Utils;
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Xunit;
-    using System.Collections.Generic;
 
     public class LeaveApplicationServiceTests
     {

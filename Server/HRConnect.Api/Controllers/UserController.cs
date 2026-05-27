@@ -1,16 +1,20 @@
-
 namespace HRConnect.Api.Controllers
 {
   using HRConnect.Api.DTOs.User;
   using HRConnect.Api.Mappers;
   using Microsoft.AspNetCore.Mvc;
+  using HRConnect.Api.Data;
+  using System.Security.Claims;
+  using Microsoft.EntityFrameworkCore;
   using Microsoft.AspNetCore.Authorization;
+
 
   [Route("api/user")]
   [ApiController]
   public class UserController : ControllerBase
   {
     private readonly HRConnect.Api.Interfaces.IUserService _userService;
+
 
     public UserController(HRConnect.Api.Interfaces.IUserService userService)
     {
@@ -79,15 +83,14 @@ namespace HRConnect.Api.Controllers
       }
     }
 
-    [HttpPut("{userId}/role")]
+    [HttpPut("{UserId}/role")]
     [Authorize(Roles = "SuperUser")]
-    public async Task<IActionResult> UpdateUserRole(int userId, [FromBody] UpdateUserRoleRequestDto request)
+    public async Task<IActionResult> UpdateUserRole(int UserId, [FromBody] UpdateUserRoleRequestDto request)
     {
       try
       {
-        var result = await _userService.UpdateUserRoleAsync(userId, request);
-        if (result == null)
-          return NotFound();
+        var result = await _userService.UpdateUserRoleAsync(UserId, request);
+        if (result == null) return NotFound();
         return Ok(result.ToUserDto());
       }
       catch (ArgumentException ex)
@@ -104,8 +107,7 @@ namespace HRConnect.Api.Controllers
       try
       {
         var result = await _userService.UpdateEmployeeUserRoleAsync(employeeId, request);
-        if (result == null)
-          return NotFound();
+        if (result == null) return NotFound();
         return Ok(result.ToUserDto());
       }
       catch (ArgumentException ex)
@@ -114,6 +116,7 @@ namespace HRConnect.Api.Controllers
         return ValidationProblem(ModelState);
       }
     }
+
     [HttpDelete("{UserId}")]
     public async Task<IActionResult> DeleteUser(int UserId)
     {
@@ -135,6 +138,26 @@ namespace HRConnect.Api.Controllers
         ModelState.AddModelError("Validation", ex.Message);
         return ValidationProblem(ModelState);
       }
+    }
+
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<IActionResult> GetCurrentUser()
+    {
+      var email =
+        User.FindFirst(ClaimTypes.Email)?.Value ??
+        User.FindFirst("email")?.Value;
+
+      if (string.IsNullOrEmpty(email))
+        return Unauthorized();
+
+      var result = await _userService.GetCurrentUserAsync(email);
+
+      if (result == null)
+        return NotFound();
+
+      return Ok(result);
+
     }
   }
 }

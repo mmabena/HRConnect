@@ -1,44 +1,60 @@
 namespace HRConnect.Tests
 {
+    using System.Globalization;
     using System.Security.Claims;
+    using System.Threading.Tasks;
+    using HRConnect.Api.Controllers;
+    using HRConnect.Api.DTOs.Employee; 
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Moq;
     using Xunit;
-    using HRConnect.Api.Controllers;
-    using HRConnect.Api.Interfaces;
-    using HRConnect.Api.DTOs.Employee;
     using System.Collections.Generic;
-    using System.Threading.Tasks;
     using HRConnect.Api.Interfaces;
     using HRConnect.Api.Hubs;
     using Microsoft.AspNetCore.SignalR;
     public class EmployeeControllerAuthorizationTests
     {
-        private static EmployeeController CreateControllerWithRole(string role)
+        private static ClaimsPrincipal CreateUser(string role, int userId = 1)
         {
+<<<<<<< HEAD
             // Mock the service and controller dependencies
             var mockService = new Mock<IEmployeeService>();
             var mockLeaveBalance = new Mock<ILeaveBalanceService>();
             var mockHubContext = new Mock<IHubContext<UserPositionHub>>();
+=======
+            return new ClaimsPrincipal(new ClaimsIdentity(new[]
+            {
+                new Claim("userId", userId.ToString(CultureInfo.InvariantCulture)),
+                new Claim(ClaimTypes.NameIdentifier, userId.ToString(CultureInfo.InvariantCulture)),
+                new Claim(ClaimTypes.Name, "test@singular.co.za"),
+                new Claim(ClaimTypes.Role, role)
+            }, "mock"));
+        }
+>>>>>>> fa6a53bef625ffd9f8ff87369827de98ea0f3ce9
 
+        private static EmployeeController CreateController(string role, Mock<IEmployeeService> serviceMock)
+        {
             var controller = new EmployeeController(
+<<<<<<< HEAD
                 mockService.Object,
                 mockLeaveBalance.Object,
                 mockHubContext.Object
         
+=======
+                serviceMock.Object,
+                new Mock<ILeaveBalanceService>().Object
+>>>>>>> fa6a53bef625ffd9f8ff87369827de98ea0f3ce9
             );
 
-            // Mock the HttpContext with a ClaimsPrincipal having a role
-            var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
-            {
-                new Claim(ClaimTypes.Name, "testuser@singular.co.za"),
-                new Claim(ClaimTypes.Role, role) // assign role here
-            }, "mock"));
+            
 
             controller.ControllerContext = new ControllerContext
             {
-                HttpContext = new DefaultHttpContext { User = user }
+                HttpContext = new DefaultHttpContext
+                {
+                    User = CreateUser(role)
+                }
             };
 
             return controller;
@@ -47,11 +63,12 @@ namespace HRConnect.Tests
         [Fact]
         public async Task SuperUserCanAccessGetAllEmployees()
         {
-            // Arrange
-            var mockService = new Mock<IEmployeeService>();
-            mockService.Setup(s => s.GetAllEmployeesAsync())
+            var serviceMock = new Mock<IEmployeeService>();
+
+            serviceMock.Setup(s => s.GetAllEmployeesAsync(It.IsAny<int>()))
                        .ReturnsAsync(new List<EmployeeDto>());
 
+<<<<<<< HEAD
             var mockLeaveBalance = new Mock<ILeaveBalanceService>();
             var mockHubContext = new Mock<IHubContext<UserPositionHub>>();
 
@@ -74,15 +91,19 @@ namespace HRConnect.Tests
             };
 
             // Act
+=======
+            var controller = CreateController("SuperUser", serviceMock);
+
+>>>>>>> fa6a53bef625ffd9f8ff87369827de98ea0f3ce9
             var result = await controller.GetAllEmployees();
 
-            // Assert
             Assert.IsType<OkObjectResult>(result);
         }
 
         [Fact]
         public async Task NormalUserCannotAccessGetAllEmployees()
         {
+<<<<<<< HEAD
             // Arrange
             var mockService = new Mock<IEmployeeService>();
             var mockLeaveBalance = new Mock<ILeaveBalanceService>();
@@ -98,15 +119,16 @@ namespace HRConnect.Tests
                 new Claim(ClaimTypes.Name, "normaluser@singular.co.za"),
                 new Claim(ClaimTypes.Role, "NormalUser")
             }, "mock"));
+=======
+            var serviceMock = new Mock<IEmployeeService>();
 
-            controller.ControllerContext = new ControllerContext
-            {
-                HttpContext = new DefaultHttpContext { User = user }
-            };
+            var controller = CreateController("NormalUser", serviceMock);
+>>>>>>> fa6a53bef625ffd9f8ff87369827de98ea0f3ce9
 
-            // Simulate middleware authorization
             IActionResult result;
+
             var role = controller.ControllerContext.HttpContext.User.FindFirst(ClaimTypes.Role)?.Value;
+
             if (role != "SuperUser")
                 result = new ForbidResult();
             else
@@ -118,8 +140,6 @@ namespace HRConnect.Tests
         [Fact]
         public async Task SuperUserCanCreateEmployee()
         {
-            // Arrange
-            var mockService = new Mock<IEmployeeService>();
             var dto = new CreateEmployeeRequestDto
             {
                 Name = "Test",
@@ -127,7 +147,9 @@ namespace HRConnect.Tests
                 Email = "test@singular.co.za"
             };
 
-            mockService.Setup(s => s.CreateEmployeeAsync(dto))
+            var serviceMock = new Mock<IEmployeeService>();
+
+            serviceMock.Setup(s => s.CreateEmployeeAsync(It.IsAny<int>(), dto))
                        .ReturnsAsync(new EmployeeDto
                        {
                            EmployeeId = "123",
@@ -135,6 +157,7 @@ namespace HRConnect.Tests
                            Surname = dto.Surname
                        });
 
+<<<<<<< HEAD
             var mockLeaveBalance = new Mock<ILeaveBalanceService>();
             var mockHubContext = new Mock<IHubContext<UserPositionHub>>();  
 
@@ -157,19 +180,21 @@ namespace HRConnect.Tests
             };
 
             // Act
+=======
+            var controller = CreateController("SuperUser", serviceMock);
+
+>>>>>>> fa6a53bef625ffd9f8ff87369827de98ea0f3ce9
             var result = await controller.CreateEmployee(dto);
 
-            // Assert
-            var createdResult = Assert.IsType<CreatedAtActionResult>(result);
-            var employee = Assert.IsType<EmployeeDto>(createdResult.Value);
+            var created = Assert.IsType<CreatedAtActionResult>(result);
+            var employee = Assert.IsType<EmployeeDto>(created.Value);
+
             Assert.Equal("123", employee.EmployeeId);
         }
 
         [Fact]
         public async Task NormalUserCannotCreateEmployee()
         {
-            // Arrange
-            var mockService = new Mock<IEmployeeService>();
             var dto = new CreateEmployeeRequestDto
             {
                 Name = "Test",
@@ -177,6 +202,7 @@ namespace HRConnect.Tests
                 Email = "test@singular.co.za"
             };
 
+<<<<<<< HEAD
             var mockLeaveBalance = new Mock<ILeaveBalanceService>();
             var mockHubContext = new Mock<IHubContext<UserPositionHub>>();
 
@@ -199,16 +225,20 @@ namespace HRConnect.Tests
             };
 
             // Simulate middleware: check role manually
+=======
+            var controller = CreateController("NormalUser", new Mock<IEmployeeService>());
+
+>>>>>>> fa6a53bef625ffd9f8ff87369827de98ea0f3ce9
             IActionResult result;
+
             var role = controller.ControllerContext.HttpContext.User.FindFirst(ClaimTypes.Role)?.Value;
+
             if (role != "SuperUser")
                 result = new ForbidResult();
             else
                 result = await controller.CreateEmployee(dto);
 
-            // Assert
             Assert.IsType<ForbidResult>(result);
         }
-
     }
 }
