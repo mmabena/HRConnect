@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import { resolveRole } from "../../utils/roleUtils";
 import connection from "../../api/signalrService.js";
-import { ArrowLeftRight  } from 'lucide-react';
+import { ArrowLeftRight } from "lucide-react";
 import { fetchMyCompanies, switchCompany } from "../../api/UserCompany.js";
 
 const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
@@ -50,41 +50,41 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
     toggleFunction(); // keeps your existing toggle working
   };
 
+  const loadCompanies = async () => {
+    try {
+      const data = await fetchMyCompanies();
+
+      const list = data?.companies ?? data ?? [];
+
+      const mappedCompanies = Array.isArray(list)
+        ? list.map((uc) => ({
+            id: uc.companyId,
+            name: uc.companyName,
+            registrationNumber: uc.registrationNumber,
+            employeeCount: uc.employeeCount,
+            isDefault: uc.isDefault,
+          }))
+        : [];
+
+      setCompanies(mappedCompanies);
+
+      const current =
+        mappedCompanies.find((c) => c.isDefault) || mappedCompanies[0];
+
+      setActiveCompany(current);
+    } catch (error) {
+      console.error("Failed to load companies:", error);
+    }
+  };
+
   useEffect(() => {
-    const loadCompanies = async () => {
-      try {
-        const data = await fetchMyCompanies();
-
-        const list = data?.companies ?? data ?? [];
-
-        const mappedCompanies = Array.isArray(list)
-          ? list.map((uc) => ({
-              id: uc.companyId,
-              name: uc.companyName,
-              registrationNumber: uc.registrationNumber,
-              employeeCount: uc.employeeCount,
-              isDefault: uc.isDefault,
-            }))
-          : [];
-
-        setCompanies(mappedCompanies);
-
-        const current =
-          mappedCompanies.find((c) => c.isDefault) || mappedCompanies[0];
-
-        setActiveCompany(current);
-      } catch (error) {
-        console.error("Failed to load companies:", error);
-      }
-    };
-
     loadCompanies();
   }, []);
 
   const handleCompanySwitch = async (company) => {
     try {
       await switchCompany(company.id);
-      setActiveCompany(company);
+      await loadCompanies();
       setCompanySwitcherOpen(false);
       toast.success("Company switched successfully.");
     } catch (error) {
@@ -107,7 +107,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
 
   const isUserManagementPage = location.pathname.startsWith("/userManagement");
 
-  const baseUrl =api.defaults.baseURL;// process.env.REACT_APP_API_BASE_URL;
+  const baseUrl = api.defaults.baseURL; // process.env.REACT_APP_API_BASE_URL;
 
   useEffect(() => {
     console.log("MenuBar user role:", role);
@@ -116,7 +116,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
 
   useEffect(() => {
     console.log(`LOCATION`);
-    console.log(location)
+    console.log(location);
     if (!role) return;
 
     if (isEmployeeManagementPage && !manualReportToggle) {
@@ -196,26 +196,24 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   };
 
   useEffect(() => {
-    const startConnection = async () => {
-      try {
-        await connection.start();
-        console.log("SignalR Connected");
-      } catch (err) {
-        console.error("SignalR Connection Error:", err);
-      }
+    const handleCompanyCreated = (data) => {
+      console.log("Company created:", data);
+
+      loadCompanies();
+      window.location.reload();
     };
 
-    startConnection();
-
-    connection.on("CompanySwitched", (data) => {
-      console.log("Company switched:", data);
-
+    const handleCompanySwitched = () => {
+      loadCompanies();
       window.location.reload();
-      
-    });
+    };
+
+    connection.on("CompanyCreated", handleCompanyCreated);
+    connection.on("CompanySwitched", handleCompanySwitched);
 
     return () => {
-      connection.off("CompanySwitched");
+      connection.off("CompanyCreated", handleCompanyCreated);
+      connection.off("CompanySwitched", handleCompanySwitched);
     };
   }, []);
 
@@ -326,7 +324,6 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
             className="menu-company-active"
             onClick={() => setCompanySwitcherOpen((prev) => !prev)}
           >
-
             <div className="menu-company-info">
               <div className="menu-company-name">
                 {activeCompany?.name || "Select Company"}
@@ -338,7 +335,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
             </div>
 
             <div className="menu-company-arrow">
-              <ArrowLeftRight size={16}  className="company-arrow"/>
+              <ArrowLeftRight size={16} className="company-arrow" />
             </div>
           </div>
 
@@ -363,7 +360,6 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                       </div>
                     </div>
                   </div>
-
                 </div>
               ))}
             </div>
@@ -674,7 +670,9 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                 />
                 <span className="menu-heading">
                   Payroll Information
-                  <span className="menu-dropdown">{payInfoOpen ? "▲" : "▼"}</span>
+                  <span className="menu-dropdown">
+                    {payInfoOpen ? "▲" : "▼"}
+                  </span>
                 </span>
               </div>
               {payInfoOpen && (
@@ -813,11 +811,9 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
             )}
           </div>
           <div className="user-text-details">
-            <div className="user-full-name">
-              {displayName}
-            </div>
+            <div className="user-full-name">{displayName}</div>
             <div className="user-job-title">
-    {/*Create positions endpoint*/} 
+              {/*Create positions endpoint*/}
               {currentUser?.role}
             </div>
           </div>

@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import "./AddCompanyModal.css";
 import connection from "../../api/signalrService.js";
 import { Plus, Check } from "lucide-react";
+import useCompanyConnection from "../../hooks/useCompanyConnection.js";
 
 const AddCompanyModal = ({ closeModal }) => {
   const [formData, setFormData] = useState({
@@ -35,13 +36,6 @@ const AddCompanyModal = ({ closeModal }) => {
     }
   };
 
-  const handleToggle = () => {
-    setFormData((prev) => ({
-      ...prev,
-      isDefault: !prev.isDefault,
-    }));
-  };
-
   const handleSubmit = async () => {
     try {
       setLoading(true);
@@ -59,38 +53,20 @@ const AddCompanyModal = ({ closeModal }) => {
       closeModal();
       toast.success("Company created successfully");
     } catch (error) {
-      if (error.response && error.response.data?.errors) {
-        setFormErrors(error.response.data.errors);
+      if (error.error) {
+        setFormErrors(error.error);
       } else {
-        toast.error("Failed to create company.");
+        toast.error(error.message);
       }
 
-      console.error("Add company error response data:", error.response?.data);
-      console.error("Add company error status:", error.response?.status);
+      console.error("Add company error:", error);
+      console.error("Status:", error.status);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    const startConnection = async () => {
-      try {
-        await connection.start();
-        console.log("SignalR Connected");
-      } catch (err) {
-        console.error("SignalR Connection Error:", err)
-      }
-    };
-    startConnection();
-
-    connection.on("CompanyCreated", (data) => {
-      console.log("Company Switched:", data);
-
-      window.location.reload();
-    });
-
-    return () => {connection.off("CompanyCreated")};
-  }, []);
+  useCompanyConnection();
 
   return (
     <div className="ACM-overlay">

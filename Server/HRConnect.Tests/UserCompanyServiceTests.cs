@@ -16,6 +16,7 @@ namespace HRConnect.Tests
     using HRConnect.Api.DTOs.UserCompany;
     using System.Linq;
     using Moq;
+    
     public class UserCompanyServiceTests : IDisposable
     {
         private readonly Mock<IUserCompanyRepository> _userCompanyRepoMock;

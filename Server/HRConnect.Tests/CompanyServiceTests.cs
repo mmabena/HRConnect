@@ -15,6 +15,7 @@ namespace HRConnect.Tests
     using System.Threading.Tasks;
     using Microsoft.EntityFrameworkCore;
     using System.Linq;
+    
     public class CompanyServiceTests : IDisposable
     {
         private readonly Mock<ICompanyRepository> _companyRepoMock;

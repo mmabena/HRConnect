@@ -1,7 +1,7 @@
 import * as signalR from "@microsoft/signalr";
 
 const connection = new signalR.HubConnectionBuilder()
-  .withUrl("http://localhost:5147/companyHub")
+  .withUrl(process.env.REACT_APP_SIGNALR_URL)
   .withAutomaticReconnect()
   .build();
 
