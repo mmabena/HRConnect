@@ -63,6 +63,12 @@ namespace HRConnect.Api.Services
 
             if (leaveType == null)
                 throw new InvalidOperationException("Leave type not found.");
+            if (leaveType.Code != "AL" &&
+string.IsNullOrWhiteSpace(request.Description))
+            {
+                throw new ArgumentException(
+                    "Description is required.");
+            }
 
             if (leaveType.Code != "AL" &&
                 (request.Documents == null || request.Documents.Count == 0))
@@ -126,8 +132,30 @@ namespace HRConnect.Api.Services
             if (balance == null)
                 throw new InvalidOperationException("Leave balance not found.");
 
+            if (request.StartDate.DayOfWeek == DayOfWeek.Saturday ||
+     request.StartDate.DayOfWeek == DayOfWeek.Sunday)
+            {
+                throw new InvalidOperationException(
+                    "Leave cannot start on a weekend.");
+            }
+
+            if (request.EndDate.DayOfWeek == DayOfWeek.Saturday ||
+                request.EndDate.DayOfWeek == DayOfWeek.Sunday)
+            {
+                throw new InvalidOperationException(
+                    "Leave cannot end on a weekend.");
+            }
+
             var daysRequested =
-                WorkingDayCalculator.CountWorkingDays(request.StartDate, request.EndDate);
+                WorkingDayCalculator.CountWorkingDays(
+                    request.StartDate,
+                    request.EndDate);
+
+            if (daysRequested <= 0)
+            {
+                throw new InvalidOperationException(
+                    "Selected dates do not contain working days.");
+            }
 
             if (balance.AvailableDays <= 0 || balance.AvailableDays < daysRequested)
                 throw new InvalidOperationException("Insufficient leave balance.");

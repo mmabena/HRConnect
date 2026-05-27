@@ -865,31 +865,12 @@ namespace HRConnect.Api.Services
             if (currentSegment == null)
                 return;
 
-            var previousRule =
-    await _context.LeaveEntitlementRules
-        .Where(r =>
-            r.LeaveTypeId == annualLeave.Id &&
-            r.GroupKey == groupKey &&
-            r.DaysAllocated ==
-                currentSegment.AnnualEntitlement &&
-            r.IsActive)
-        .OrderByDescending(r => r.MinYearsService)
-        .FirstOrDefaultAsync();
+            var entitlementChanged = currentSegment.AnnualEntitlement != applicableRule.DaysAllocated;
 
-            if (previousRule == null)
+            if (!entitlementChanged)
             {
                 return;
             }
-
-            var crossedYearsBracket =
-                previousRule.MinYearsService !=
-                applicableRule.MinYearsService;
-
-            if (!crossedYearsBracket)
-            {
-                return;
-            }
-
             await CreateAccrualSegmentAsync(
                 employee,
                 applicableRule.DaysAllocated,
@@ -898,6 +879,7 @@ namespace HRConnect.Api.Services
 
             await RecalculateAnnualLeaveAsync(employeeId);
         }
+
         public async Task ApplyEntitlementRuleChangesAsync()
         {
             var employees = await _context.Employees

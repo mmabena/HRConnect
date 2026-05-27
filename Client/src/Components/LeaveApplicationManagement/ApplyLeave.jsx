@@ -27,11 +27,27 @@ const ApplyLeave = () => {
     const start = new Date(startDate);
     const end = new Date(endDate);
 
-    const diffTime = end - start;
+    if (start > end) return 0;
 
-    if (diffTime < 0) return 0;
+    let count = 0;
 
-    return Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    const current = new Date(start);
+
+    while (current <= end) {
+      const day = current.getDay();
+      if (day !== 0 && day !== 6) {
+        count++;
+      }
+
+      current.setDate(current.getDate() + 1);
+    }
+
+    return count;
+  };
+  const isWeekend = (dateString) => {
+    const date = new Date(dateString);
+    const day = date.getDay();
+    return day === 0 || day === 6;
   };
 
   const requestedDays = calculateDays();
@@ -63,6 +79,13 @@ const ApplyLeave = () => {
         newErrors.startDate = "Start date cannot be after end date";
         newErrors.endDate = "End date cannot be before start date";
       }
+    }
+    if (startDate && isWeekend(startDate)) {
+      newErrors.startDate = "Start date cannot be on a weekend";
+    }
+
+    if (endDate && isWeekend(endDate)) {
+      newErrors.endDate = "End date cannot be on a weekend";
     }
     if (selectedBalance && requestedDays > selectedBalance.availableDays) {
       newErrors.leaveBalance = "Requested leave days exceed available balance";
@@ -241,7 +264,23 @@ const ApplyLeave = () => {
                     className="input date-input"
                     value={startDate}
                     onChange={(e) => {
-                      setStartDate(e.target.value);
+                      const selected = e.target.value;
+
+                      if (isWeekend(selected)) {
+                        setErrors((prev) => ({
+                          ...prev,
+                          startDate: "Weekends cannot be selected",
+                        }));
+
+                        return;
+                      }
+
+                      setErrors((prev) => ({
+                        ...prev,
+                        startDate: "",
+                      }));
+
+                      setStartDate(selected);
                     }}
                   />
 
@@ -266,7 +305,23 @@ const ApplyLeave = () => {
                     className="input date-input"
                     value={endDate}
                     onChange={(e) => {
-                      setEndDate(e.target.value);
+                      const selected = e.target.value;
+
+                      if (isWeekend(selected)) {
+                        setErrors((prev) => ({
+                          ...prev,
+                          endDate: "Weekends cannot be selected",
+                        }));
+
+                        return;
+                      }
+
+                      setErrors((prev) => ({
+                        ...prev,
+                        endDate: "",
+                      }));
+
+                      setEndDate(selected);
                     }}
                   />
 

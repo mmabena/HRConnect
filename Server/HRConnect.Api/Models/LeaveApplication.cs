@@ -15,7 +15,7 @@ namespace HRConnect.Api.Models
         public int LeaveTypeId { get; set; }
         public LeaveType LeaveType { get; set; } = null!;
 
-        public string Description { get; set; } = null!;
+        public string? Description { get; set; }
 
         public DateOnly StartDate { get; set; }
 
