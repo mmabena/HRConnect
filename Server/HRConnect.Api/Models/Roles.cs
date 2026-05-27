@@ -2,7 +2,9 @@ namespace HRConnect.Api.Models
 {
   using System.ComponentModel.DataAnnotations;
   ///<summary>
-  ///Self-Referencing table
+  /// Self-Referencing table that holds all role data
+  /// Table describes role hierarchy and inheritance-roles
+  ///  CEO->HOD->SuperUser->NormalUser
   ///</summary>
   [Flags]
   public enum RoleName { NormalUser = 0, SuperUser, ExecutiveUser, CEO }
@@ -11,9 +13,9 @@ namespace HRConnect.Api.Models
     [Key]
     public int RoleId { get; set; }
     //This might need to be an Enum
-    public string Name { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;//IsUnique
     public RoleName _Name { get; set; }
-    public int ParenteRoleId { get; set; }//Roles follow a linear hierarchy 
+    public int? ParenteRoleId { get; set; }//Roles follow a linear hierarchy 
     public IList<Permissions> Permissions { get; set; } = [];
   }
 }
