@@ -1,7 +1,6 @@
 ﻿namespace HRConnect.Tests
 {
   using System.Collections.Generic;
-  using System.Threading.Tasks;
   using Api.Mappers;
   using Api.Utils.MedicalOption;
   using HRConnect.Api.DTOs.MedicalOption;

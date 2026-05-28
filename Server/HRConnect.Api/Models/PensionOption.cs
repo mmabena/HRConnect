@@ -1,10 +1,8 @@
-
 namespace HRConnect.Api.Models
 {
   using System.ComponentModel.DataAnnotations.Schema;
   using HRConnect.Api.Models.PayrollDeduction;
   using HRConnect.Api.Models.Pension;
-
   using System.ComponentModel.DataAnnotations;
 
   public class PensionOption

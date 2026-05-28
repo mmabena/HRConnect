@@ -1,4 +1,4 @@
-namespace HRConnect.Tests
+namespace HRConnect.Tests.Payroll
 {
   using Moq;
   using HRConnect.Api.Models.Payroll;
@@ -15,11 +15,9 @@ namespace HRConnect.Tests
   public class PayrollTests
   {
     private readonly Mock<IPayrollRunRepository> _payrollRunRepo;
-    private readonly Mock<IPayrollPeriodRepository> _payrollPeriodRepo;
     private readonly Mock<IPayrollPeriodService> _payrollPeriodService;
     private readonly Mock<IEmployeePensionEnrollmentService> _employeePensionEnrollmentService;
     private readonly Mock<IReportsService> _reportsService;
-    private readonly Mock<ICompanyContributionRepository> _contributionRepoMock;
     private readonly Mock<ICompanyContributionAllocationService> _contributionAllocService;
     private readonly Mock<IServiceProvider> _serviceProvider;
     private readonly Mock<IUserService> _userService;
@@ -40,7 +38,6 @@ namespace HRConnect.Tests
       _employeePayrollEarningService = new Mock<IEmployeePayrollEarningService>();
       _employeeDeductionService = new Mock<IEmployeeDeductionService>();
       _notificationsService = new Mock<INotificationService>();
-      _payrollPeriodRepo = new Mock<IPayrollPeriodRepository>();
 
       _now = () => DateTime.Now;
     }
@@ -169,8 +166,6 @@ namespace HRConnect.Tests
       );
 
       await job.Execute(null!);
-      // _payrollRunRepo.Setup(r => r.CreatePayrollRunAsync(It.IsAny<PayrollRun>()))
-      // .ReturnsAsync<PayrollRun>((PayrollRun)null!);
       var lockedRun = new PayrollRun { PayrollRunNumber = 1 };
       _payrollRunRepo.Setup(r => r.CreatePayrollRunAsync(It.IsAny<PayrollRun>()))
             .Callback<PayrollRun>(r => r = lockedRun);
@@ -210,8 +205,6 @@ namespace HRConnect.Tests
       );
       await job.Execute(null!);
       //Make sure that there's a new payroll run
-      // _payrollRunRepo.Setup(r => r.CreatePayrollRunAsync(It.IsAny<PayrollRun>()))
-      // .ReturnsAsync<PayrollRun>((PayrollRun)null!);
       var lockedRun = new PayrollRun { PayrollRunNumber = 1 };
       _payrollRunRepo.Setup(r => r.CreatePayrollRunAsync(It.IsAny<PayrollRun>()))
             .Callback<PayrollRun>(r => r = lockedRun);

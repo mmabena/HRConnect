@@ -1,9 +1,10 @@
 namespace HRConnect.Api.Utils
 {
   using HRConnect.Api.DTOs.Employee;
-  using HRConnect.Api.Models;
   using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Models;
   using HRConnect.Api.Services;
+
 
   public static class EmployeeValidationHelpers
   {
@@ -149,7 +150,7 @@ namespace HRConnect.Api.Utils
 
       if (hasId)
       {
-        var info = IdNumberValidator.ParseIdNumber(idNumber!);
+        var info = IdNumberValidator.ParseIdNumber(idNumber);
         if (info.IsSouthAfricanCitizen && !string.IsNullOrWhiteSpace(nationality) && nationality != "South African")
           throw new ValidationException("South African citizens cannot override nationality.");
         if (!info.IsSouthAfricanCitizen && string.IsNullOrWhiteSpace(nationality))

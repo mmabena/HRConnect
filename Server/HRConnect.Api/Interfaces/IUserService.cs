@@ -1,5 +1,7 @@
 namespace HRConnect.Api.Interfaces
 {
+  using System.Collections.Generic;
+  using System.Threading.Tasks;
   using HRConnect.Api.DTOs.User;
   using HRConnect.Api.Models;
   public interface IUserService
@@ -11,8 +13,9 @@ namespace HRConnect.Api.Interfaces
     Task<User?> UpdateUserAsync(int id, UpdateUserRequestDto dto);
     Task<User?> UpdateUserRoleAsync(int id, UpdateUserRoleRequestDto dto);
     Task<User?> UpdateEmployeeUserRoleAsync(string employeeId, UpdateUserRoleRequestDto dto);
-    Task<bool> DeleteUserAsync(int id);
     Task<List<UserRoleOptionDto>> GetRoleOptionsAsync();
+    Task<CurrentUserDto?> GetCurrentUserAsync(string email);
+    Task<bool> DeleteUserAsync(int id);
     Task SyncEmployeeUserAsync();
     Task<bool> ChangePasswordAsync(ChangePasswordRequestDto dto);
     Task<List<string>> OrganiseSuperUsersAsync(UserRole role = UserRole.SuperUser);

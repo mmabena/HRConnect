@@ -8,13 +8,13 @@ namespace HRConnect.Tests
   using HRConnect.Api.Models;
   using Microsoft.AspNetCore.DataProtection;
   using HRConnect.Api.Services;
+  using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Utils;
   using Microsoft.EntityFrameworkCore;
   using Xunit;
-  using HRConnect.Api.Utils;
   using HRConnect.Api.DTOs.Employee;
   using HRConnect.Api.Repository;
   using Moq;
-  using Xunit;
 
   public class LeaveBalanceServiceTests
   {
@@ -52,12 +52,31 @@ namespace HRConnect.Tests
     {
       var employeeRepo = new EmployeeRepository(context);
       var positionRepo = new PositionRepository(context);
+
       var passwordHasherMock = new Mock<IPasswordHasher<User>>();
+      var activeCompanyServiceMock = new Mock<IActiveCompanyService>();
+      var userCompanyServiceMock = new Mock<IUserCompanyService>();
+      var companyRepoMock = new Mock<ICompanyRepository>();
+
+      activeCompanyServiceMock
+          .Setup(x => x.GetActiveCompanyIdAsync(It.IsAny<int>()))
+          .ReturnsAsync("COMP001");
+
+      companyRepoMock
+          .Setup(x => x.GetCompanyByIdAsync(It.IsAny<string>()))
+          .ReturnsAsync(new Company
+          {
+            CompanyId = "COMP001",
+            CompanyName = "Test Company"
+          });
 
       return new EmployeeService(
           context,
+          activeCompanyServiceMock.Object,
+          userCompanyServiceMock.Object,
           employeeRepo,
           new FakeEmailService(),
+          companyRepoMock.Object,
           positionRepo,
           CreateLeaveBalanceService(context),
           CreateLeaveProcessingService(context),
@@ -241,7 +260,7 @@ new Position { PositionId = 2, JobGradeId = 1, OccupationalLevelId = 1 }
       balance.TakenDays = 5;
       await context.SaveChangesAsync();
 
-      await employeeService.UpdateEmployeeAsync(employee.EmployeeId, new UpdateEmployeeRequestDto
+      await employeeService.UpdateEmployeeAsync(1, employee.EmployeeId, new UpdateEmployeeRequestDto
       {
         Title = Title.Mr,
         Gender = Gender.Male,

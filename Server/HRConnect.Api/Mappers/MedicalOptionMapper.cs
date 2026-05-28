@@ -71,7 +71,7 @@
         MedicalOptions = group.Select(ToMedicalOptionDto).ToList()
       };
     }
-    
+
     /// <summary>
     /// Maps a single MedicalOption entity to a MedicalOptionDto.
     /// This method transforms the domain entity into a data transfer object suitable for
@@ -170,7 +170,7 @@
         TotalMonthlyContributionsChild2 = bulkUpdate.TotalMonthlyContributionsChild2
       };
     }
-    
+
     /// <summary>
     /// Updates a MedicalOption entity with values from an UpdateMedicalOptionVariantsDto.
     /// This method applies changes from the DTO to the existing entity, updating only

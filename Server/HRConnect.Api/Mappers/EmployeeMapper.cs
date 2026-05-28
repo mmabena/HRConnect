@@ -12,8 +12,8 @@ namespace HRConnect.Api.Mappers
         Title = employeeModel.Title,
         Name = employeeModel.Name,
         Surname = employeeModel.Surname,
-        IdNumber = employeeModel.IdNumber ?? "",
-        PassportNumber = employeeModel.PassportNumber ?? "",
+        IdNumber = employeeModel.IdNumber,
+        PassportNumber = employeeModel.PassportNumber,
         Nationality = employeeModel.Nationality,
         Gender = employeeModel.Gender,
         ContactNumber = employeeModel.ContactNumber,
@@ -29,8 +29,10 @@ namespace HRConnect.Api.Mappers
         Branch = employeeModel.Branch,
         MonthlySalary = employeeModel.MonthlySalary,
         PositionId = employeeModel.PositionId,
-        PositionTitle = employeeModel.Position?.PositionTitle,
+        PositionTitle = employeeModel.Position != null
+          ? employeeModel.Position.PositionTitle : null,
         EmploymentStatus = employeeModel.EmploymentStatus,
+        CompanyId = employeeModel.CompanyId,
         CareerManagerID = employeeModel.CareerManagerID,
         ProfileImage = employeeModel.ProfileImage,
         CreatedAt = employeeModel.CreatedAt,
@@ -66,6 +68,7 @@ namespace HRConnect.Api.Mappers
         EmploymentStatus = employeeRequestDto.EmploymentStatus,
         CareerManagerID = employeeRequestDto.CareerManagerID,
         ProfileImage = employeeRequestDto.ProfileImage,
+        CompanyId = employeeRequestDto.CompanyId,
         PensionOptionId = employeeRequestDto.PensionOptionId,
         IsActive = true
       };

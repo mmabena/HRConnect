@@ -1,0 +1,615 @@
+/* ================= OVERLAY ================= */
+.ACM-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  z-index: 999;
+}
+
+/* ================= MODAL ================= */
+.ACM-modal {
+  width: 841px;
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  font-family: "Anek Bangla", sans-serif;
+}
+
+/* ================= HEADER (Figma 46328) ================= */
+.ACM-header {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 76px;
+  padding: 21px 32px;
+  background: #355867;
+}
+
+/* left side group */
+.ACM-header-left {
+  display: flex;
+  align-items: center;
+  width: 623px;
+  height: 34px;
+}
+
+/* icon square */
+.ACM-icon-box {
+  width: 34px;
+  height: 34px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* simple icon placeholder for now */
+.ACM-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #FFFFFF;
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+/* title */
+.ACM-title {
+  margin: 0;
+  margin-left: 10px;
+  font-family: 'Anek Bangla', sans-serif;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 26px;
+  color: #FFFFFF;
+}
+
+/* close button */
+.ACM-close-btn {
+  width: 34px;
+  height: 34px;
+  border: none;
+  outline: none;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #FFFFFF;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s ease;
+}
+
+.ACM-close-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* ================= BODY ================= */
+.ACM-body {
+  padding: 24px 32px;
+}
+
+/* ================= BODY (Frame 50) ================= */
+.ACM-body {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 32px;
+  gap: 20px;
+  width: 100%;
+}
+
+/* ================= INPUTS ================= */
+.ACM-input {
+  width: 100%;
+  height: 42px;
+  padding: 10px 14px;
+  border: 1px solid rgba(154, 154, 154, 0.55);
+  border-radius: 6px;
+  font-family: "Anek Bangla", sans-serif;
+  font-size: 14px;
+  color: #002d40;
+  outline: none;
+  background: #fff;
+}
+
+/* focus state (clean UX improvement) */
+.ACM-input:focus {
+  border-color: #355867;
+  box-shadow: 0 0 0 2px rgba(53, 88, 103, 0.15);
+}
+
+/* ================= FIELD HEADER (Company Identity) ================= */
+.ACM-field-header {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0px 5px 5px;
+  width: 776px;
+  height: 26px;
+  border-bottom: 1px solid rgba(154, 154, 154, 0.55);
+}
+
+/* inner text wrapper */
+.ACM-field-text {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  padding: 0px 5px 0px 0px;
+  gap: 10px;
+  width: 429px;
+  height: 26px;
+  font-family: "League Spartan", sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 26px;
+
+  color: rgba(92, 92, 92, 0.61);
+}
+
+/* ================= FIELD GROUP (Frame 46401) ================= */
+.ACM-field-group {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.ACM-field-group-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0px 5px 5px 8px;
+  width: 776px;
+  min-height: 77px;
+  border-radius: 5px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+/* ================= LABEL ================= */
+.ACM-field-label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px;
+  gap: 10px;
+  width: 763px;
+  height: 33px;
+  margin: -4px 0px;
+  font-family: 'Anek Bangla', sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 26px;
+  color: #4F6E78;
+  flex: none;
+  align-self: stretch;
+  flex-grow: 0;
+}
+
+/* ================= INPUT WRAPPER ================= */
+.ACM-field-box {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px 5px 5px 10px;
+  gap: 5px;
+  width: 763px;
+  height: 37px;
+  border: 0.999902px solid rgba(154, 154, 154, 0.55);
+  border-radius: 5px;
+  flex: none;
+  align-self: stretch;
+  flex-grow: 0;
+}
+
+/* ================= INPUT ================= */
+.ACM-field-input {
+  width: 100%;
+  height: 26px;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: 'Anek Bangla', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 26px;
+  color: #355867;
+}
+
+/* placeholder styling */
+.ACM-field-input::placeholder {
+  color: #707070;
+}
+
+/**/
+
+/* ================= SECTION ================= */
+
+.ACM-section {
+  width: 776px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 6px;
+}
+
+/* Header */
+.ACM-section-header {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  padding: 0px 5px 5px;
+  width: 100%;
+  height: 26px;
+  border-bottom: 1px solid rgba(154, 154, 154, 0.55);
+  font-family: 'League Spartan', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 26px;
+  color: rgba(92, 92, 92, 0.61);
+}
+
+/* ================= ROW ================= */
+
+.ACM-row-3 {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 6px;
+  width: 776px;
+}
+
+/* ================= FIELD GROUP ================= */
+
+.ACM-field-group.small {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0px 5px 5px 8px;
+  width: 254px;
+  min-height: 77px;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+.ACM-field-group.small .ACM-field-label {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 33px;
+  margin: -4px 0px;
+  font-family: 'Anek Bangla', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 26px;
+  color: #4F6E78;
+}
+
+.ACM-field-group.small .ACM-field-box {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  width: 239px;
+  height: 37px;
+  padding: 0px 5px 5px 10px;
+  border: px solid rgba(154, 154, 154, 0.55);
+  border-radius: 5px;
+}
+
+.ACM-field-group.small .ACM-field-input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+
+  font-family: 'Anek Bangla', sans-serif;
+  font-size: 16px;
+  line-height: 26px;
+
+  color: #355867;
+}
+
+.ACM-field-group.small .ACM-field-input::placeholder {
+  color: #707070;
+}
+
+
+/* ================= INPUT BOX ================= */
+
+
+.ACM-field-input::placeholder {
+  color: #707070;
+}
+
+/**/
+
+/* ================= LARGE FIELD (Contact / Address) ================= */
+
+.ACM-field-group.large {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0px 5px 5px 8px;
+  width: 776px;
+  min-height: 77px;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+.ACM-field-group.large .ACM-field-label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 763px;
+  height: 33px;
+  margin: -4px 0px;
+  font-family: 'Anek Bangla', sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 26px;
+  color: #4F6E78;
+}
+
+
+.ACM-field-box.contact {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 763px;
+  height: 37px;
+  padding: 0px 5px 5px 10px;
+  border: 1px solid rgba(154, 154, 154, 0.55);
+  border-radius: 5px;
+}
+
+.ACM-field-box.address {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  width: 763px;
+  height: 84px;
+  padding: 8px 10px;
+  border: 1px solid rgba(154, 154, 154, 0.55);
+  border-radius: 5px;
+}
+
+.ACM-field-input::placeholder {
+  color: #707070;
+}
+
+/* textarea specific */
+.ACM-field-input.textarea {
+  resize: none;
+  height: 100%;
+}
+
+.ACM-setting-card {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 0px;
+  gap: 6px;
+  width: 785px;
+  height: 112px;
+  flex: none;
+  order: 7;
+  flex-grow: 0;
+}
+
+.ACM-setting-content {
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0px 5px 5px 10px;
+
+  width: 767px;
+  height: 75px;
+
+  background: rgba(255, 187, 0, 0.05);
+  border: 0.999902px solid #9A6F00;
+  border-radius: 5px;
+}
+
+.ACM-setting-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 698px;
+  height: 48px;
+}
+
+.ACM-setting-title {
+  margin: -4px 0px 0px;
+  font-family: 'Anek Bangla', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 26px;
+  color: #707070;
+}
+
+.ACM-setting-sub {
+  margin: 0;
+  font-family: 'Anek Bangla', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 26px;
+  color: #707070;
+}
+
+.ACM-toggle {
+  position: relative;
+  width: 38px;
+  height: 18px;
+  background: #ABC8D2;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: 0.2s ease;
+  flex-shrink: 0;
+  right: 5px;
+}
+
+.ACM-toggle-circle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  top: 3px;
+  left: 3px;
+  background: #FFFFFF;
+  border-radius: 50%;
+  transition: 0.2s ease;
+}
+
+.ACM-toggle.active {
+  background: #355867;
+}
+
+.ACM-field-box-error {
+  border: 1px solid #ff4d4f !important;
+}
+
+
+
+.ACM-toggle.active .ACM-toggle-circle {
+  left: 23px;
+}
+
+.ACM-footer {
+  box-sizing: border-box;
+  width: 100%;
+  height: 71px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  padding: 12px 0;
+  background: #ffffff;
+}
+
+.ACM-error {
+  display: block;
+  margin-top: 6px;
+  margin-left: 2px;
+  font-family: 'Anek Bangla', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: #ff4d4f;
+}
+
+.ACM-footer-buttons {
+  width: 100%;
+  max-width: 777px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid rgba(154, 154, 154, 0.55);
+}
+
+.ACM-btn {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  width: 187px;
+  height: 47px;
+  border-radius: 10px;
+  font-family: 'Anek Bangla', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 30px;
+  text-align: center;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.ACM-btn.cancel {
+  padding: 0px 10px 5px;
+  background: rgba(255, 255, 255, 0.7);
+  opacity: 0.9;
+  border: 1px solid rgba(112, 112, 112, 0.5);
+  color: #5C5C5C;
+}
+
+.ACM-btn.cancel:hover {
+  background: rgba(255, 255, 255, 1);
+}
+
+.ACM-btn.save {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 5px 10px;
+  background: #355867;
+  opacity: 0.9;
+  border: none;
+  color: #FFFFFF;
+}
+
+.ACM-btn.save:hover {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+.ACM-btn.save:active {
+  transform: scale(0.98);
+}
+
+.ACM-btn-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 20px;
+  height: 20px;
+  font-size: 14px;
+  line-height: 1;
+  color: #FFFFFF;
+  margin: 0px -1px;
+}
+
+.ACM-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+/**/
+
+
+

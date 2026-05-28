@@ -63,7 +63,7 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
       CreateMedicalAidDeductionRequestDto request)
   {
     // Get employee details
-    var employee = await _employeeService.GetEmployeeByIdAsync(employeeId);
+    var employee = await _employeeService.GetEmployeeByIdInternalAsync(employeeId);
     if (employee == null)
     {
       throw new KeyNotFoundException($"Employee with ID {employeeId} not found");
@@ -193,7 +193,7 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
       if (medicalOption.MedicalOptionName.Last() >= 1 && 
         medicalOption.MedicalOptionName.Last() <= 3)
       {
-        //apply the free child2+ condition
+    //apply the free child2+ condition
         if (request.ChildrenCount > 0)
         {
           totalChildPremium = childPremium;
@@ -320,7 +320,7 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
         medicalOptionCategoryScope.ServiceProvider.GetRequiredService<IMedicalOptionService>();   
       
       var payrollTask = payrollRunService.GetCurrentRunAsync();
-      var employeeTask = employeeService.GetEmployeeByIdAsync(employeeId);
+      var employeeTask = employeeService.GetEmployeeByIdInternalAsync(employeeId);
       var medicalAidDeductionTask =
         medicalAidDeductionsRepository.GetMedicalAidDeductionsByEmployeeIdAsync(employeeId);
       var medicalOptionTask = medicalOptionService.GetMedicalOptionByIdAsync(updatePayload.MedicalOptionId);

@@ -1,21 +1,21 @@
 namespace HRConnect.Api.Interfaces
 {
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-    using HRConnect.Api.DTOs.Employee;
+  using System.Collections.Generic;
+  using System.Threading.Tasks;
+  using HRConnect.Api.DTOs.Employee;
 
-    public interface IEmployeeService
-    {
-        Task<List<EmployeeDto>> GetAllEmployeesAsync();
+  public interface IEmployeeService
+  {
+    Task<List<EmployeeDto>> GetAllEmployeesAsync(int userId);
+    Task<EmployeeDto?> GetEmployeeByIdInternalAsync(string employeeId);
+    Task<EmployeeDto?> GetEmployeeByIdAsync(int userId, string employeeId);
+    Task<List<EmployeeDto>> GetAllEmployeesByCompanyAsync(string companyId);
+    Task<EmployeeDto> CreateEmployeeAsync(int userId, CreateEmployeeRequestDto employeeRequestDto);
 
-        Task<EmployeeDto?> GetEmployeeByIdAsync(string employeeId);
+    Task<EmployeeDto?> UpdateEmployeeAsync(int userId, string employeeId, UpdateEmployeeRequestDto employeeDto);
 
-        Task<EmployeeDto> CreateEmployeeAsync(CreateEmployeeRequestDto employeeRequestDto);
+    Task<bool> DeleteEmployeeAsync(int userId, string employeeId);
 
-        Task<EmployeeDto?> UpdateEmployeeAsync(string employeeId, UpdateEmployeeRequestDto employeeDto);
-
-        Task<bool> DeleteEmployeeAsync(string employeeId);
-
-        Task<EmployeeDto?> GetEmployeeByEmailAsync(string employeeEmail);
-    }
+    Task<EmployeeDto?> GetEmployeeByEmailAsync(string employeeEmail);
+  }
 }

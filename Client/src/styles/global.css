@@ -41,6 +41,7 @@
   --border-radius-small: 5px;
   --border-radius-medium: 10px;
   --transition-default: 0.2s ease;
+  --font: 'Anek Bangla', sans-serif
 }
 
 * {

@@ -28,6 +28,7 @@ namespace HRConnect.Api.Services
     /// while ensuring that leave requests cannot span multiple years and that all necessary validations are performed to maintain data integrity.
     /// </summary>
     /// <param name="request"></param>
+    /// <returns></returns>
     public async Task<LeaveApplicationResponse> ApplyForLeaveAsync(CreateApplicationRequest request)
     {
       var employee = await _context.Employees

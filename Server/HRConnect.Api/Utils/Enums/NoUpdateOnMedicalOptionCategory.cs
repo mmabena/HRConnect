@@ -30,7 +30,7 @@
     /// be modified as that is how the policy is structured.
     /// </summary>
     Alliance,
-    
+
     /// <summary>
     /// Double medical option category - protected from salary bracket updates.
     /// This category typically has no salary bracket pricing structure (entry-level), thus cannot

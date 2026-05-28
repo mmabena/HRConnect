@@ -42,7 +42,7 @@ namespace HRConnect.Api.Repository
     }
 
     ///<summary>
-    ///Get pension option by id
+    ///Get pension option by ud
     ///</summary>
     ///<param name="id">Pension Option Id</param>
     ///<returns>
