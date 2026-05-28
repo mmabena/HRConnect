@@ -81,7 +81,7 @@ namespace HRConnect.Api.Models
 
     [Required]
     public string ZipCode { get; set; } = string.Empty;
-    public string CompanyId { get; set; } = string.Empty;
+    public string? CompanyId { get; set; } = string.Empty;
     public Company Company { get; set; }
 
     public bool HasDisability { get; set; }

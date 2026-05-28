@@ -97,7 +97,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
     {
-      options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!);
+      options.UseSqlServer(builder.Configuration.GetConnectionString("DBeaverConnection")!);
       options.AddInterceptors(new AuditSaveChangesInterceptor());
     });
 
@@ -192,7 +192,7 @@ builder.Services.AddQuartz(q =>
   {
     store.UseSqlServer(options =>
         {
-          options.ConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
+          options.ConnectionString = builder.Configuration.GetConnectionString("DBeaverConnection")!;
           options.TablePrefix = "quartz.QRTZ_";
         });
     store.UseSerializer<Quartz.Simpl.SystemTextJsonObjectSerializer>();
