@@ -1,9 +1,9 @@
-import axios from 'axios';
+import axios from "axios";
 
 const api = axios.create({
-  baseURL: 'http://localhost:5147/api',
+  baseURL: process.env.REACT_APP_API_URL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
@@ -18,14 +18,23 @@ api.interceptors.request.use(
 
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 api.interceptors.response.use(
-  response => response,
-  error => {
+  (response) => response,
+  (error) => {
+    const formattedMessage = {
+
+     message: error.response?.data?.message || "An error occurred",
+
+    status: error.response?.status,
+
+    error: error.response?.data?.errors || null,
+    };
+    console.log("API URL:", process.env.REACT_APP_API_URL);
     console.log("Interceptor caught error:", error.response?.status);
-    return Promise.reject(error);
-  }
+    return Promise.reject(formattedMessage);
+  },
 );
 export default api;

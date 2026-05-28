@@ -66,7 +66,7 @@ namespace HRConnect.Tests
         })
       };
   
-      _mockEmployeeService.Setup(s => s.GetEmployeeByIdAsync(employeeId)).ReturnsAsync(employee);
+      _mockEmployeeService.Setup(s => s.GetEmployeeByIdInternalAsync(employeeId)).ReturnsAsync(employee);
       _mockMedicalOptionRepository.Setup(r => r.GetGroupedMedicalOptionsAsync()).ReturnsAsync(medicalOptions);
   
       var result = await _service.GetEligibleMedicalOptionsForEmployeeAsync(employeeId, request);
@@ -86,7 +86,7 @@ namespace HRConnect.Tests
       var employeeId = "EMP999";
       var request = new RequestEligibileOptionsDto { NumberOfPrincipals = 1 };
   
-      _mockEmployeeService.Setup(s => s.GetEmployeeByIdAsync(employeeId)).ReturnsAsync((EmployeeDto)null!);
+      _mockEmployeeService.Setup(s => s.GetEmployeeByIdInternalAsync(employeeId)).ReturnsAsync((EmployeeDto)null!);
   
       await Assert.ThrowsAsync<KeyNotFoundException>(
         () => _service.GetEligibleMedicalOptionsForEmployeeAsync(employeeId, request));
@@ -104,7 +104,7 @@ namespace HRConnect.Tests
         EmploymentStatus = EmploymentStatus.Contract
       };
   
-      _mockEmployeeService.Setup(s => s.GetEmployeeByIdAsync(employeeId)).ReturnsAsync(employee);
+      _mockEmployeeService.Setup(s => s.GetEmployeeByIdInternalAsync(employeeId)).ReturnsAsync(employee);
       _mockMedicalOptionRepository.Setup(r => r.GetGroupedMedicalOptionsAsync())
         .ReturnsAsync(new List<IGrouping<int, MedicalOption>>());
   
@@ -141,7 +141,7 @@ namespace HRConnect.Tests
         })
       };
   
-      _mockEmployeeService.Setup(s => s.GetEmployeeByIdAsync(employeeId)).ReturnsAsync(employee);
+      _mockEmployeeService.Setup(s => s.GetEmployeeByIdInternalAsync(employeeId)).ReturnsAsync(employee);
       _mockMedicalOptionRepository.Setup(r => r.GetGroupedMedicalOptionsAsync()).ReturnsAsync(medicalOptions);
   
       var result = await _service.GetEligibleMedicalOptionsForEmployeeAsync(employeeId, request);

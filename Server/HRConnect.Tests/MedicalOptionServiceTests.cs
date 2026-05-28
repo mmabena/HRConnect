@@ -37,7 +37,7 @@
     public void ConstructorWithNullRepositoryShouldThrowArgumentNullException()
     {
       // Act & Assert
-      Assert.Throws<ArgumentNullException>(() => new MedicalOptionService(null));
+      Assert.Throws<ArgumentNullException>(() => new MedicalOptionService(null!));
     }
 
     #endregion

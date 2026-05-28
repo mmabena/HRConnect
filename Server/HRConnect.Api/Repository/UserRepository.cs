@@ -43,6 +43,13 @@ namespace HRConnect.Api.Repository
       return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
     }
 
+    public async Task<Employee?> GetEmployeeByEmailAsync(string email)
+    {
+      return await _context.Employees
+        .Include(e => e.Position)
+        .FirstOrDefaultAsync(e => e.Email == email);
+    }
+
     public async Task<bool> IsEmailUniqueAsync(string email)
     {
       return !await _context.Users.AnyAsync(u => u.Email == email);

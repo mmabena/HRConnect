@@ -4,6 +4,7 @@ namespace HRConnect.Api.Controllers
   using HRConnect.Api.Interfaces;
   using Microsoft.AspNetCore.Authorization;
   using Microsoft.AspNetCore.Mvc;
+  
   /// <summary>
   /// API controller for managing medical options and their categories.
   /// Provides endpoints for retrieving grouped medical options and performing bulk updates.
@@ -23,6 +24,7 @@ namespace HRConnect.Api.Controllers
     {
       _medicalOptionService = medicalOptionService;
     }
+    
     /// <summary>
     /// Retrieves all medical options grouped by their categories.
     /// </summary>
@@ -266,7 +268,7 @@ namespace HRConnect.Api.Controllers
     [HttpPut("{optionId}/variants")]
     [Authorize(Roles = "SuperUser")]
     public async Task<ActionResult<IReadOnlyList<MedicalOptionDto>>> BulkUpdateMedicalOptionsByCategory(
-      int optionId, 
+      int optionId,
       [FromBody] IReadOnlyCollection<UpdateMedicalOptionVariantsDto> bulkUpdateDto)
     {
       var result =

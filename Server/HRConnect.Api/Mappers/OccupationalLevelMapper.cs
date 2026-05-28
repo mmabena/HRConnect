@@ -10,10 +10,10 @@ namespace HRConnect.Api.Mappers
     {
       return new OccupationalLevelDto
       {
-         Description = createoccupationalLevelDto.Description,
-         IsActive = true,
-         CreatedDate = DateTime.UtcNow
-      };        
+        Description = createoccupationalLevelDto.Description,
+        IsActive = true,
+        CreatedDate = DateTime.UtcNow
+      };
     }
 
     public static OccupationalLevelDto ToOccupationalLevelDto(this OccupationalLevel occupationalLevel)

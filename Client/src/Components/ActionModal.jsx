@@ -5,8 +5,7 @@ import { fetchRoles, updateUserRole } from "../api/UserManagement";
 
 const ActionsModal = ({ isOpen, onClose, user, onSuccess }) => {
   const [roles, setRoles] = useState([]);
-  const [selectedRole, setSelectedRole] = useState(0);
-  const [selectedStatus, setSelectedStatus] = useState(1); // Default active
+  const [selectedRole, setSelectedRole] = useState("");
   const [showDropdowns, setShowDropdowns] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -76,7 +75,7 @@ const ActionsModal = ({ isOpen, onClose, user, onSuccess }) => {
       <div className="actions-modal" onClick={(e) => e.stopPropagation()}>
         <div className="actions-modal-header">
           <h3>
-            Actions for {user.firstName} {user.lastName}
+            Actions for {user.name || user.email}
           </h3>
           <button className="close-btn" onClick={onClose}>
             <FaTimes />
@@ -101,7 +100,7 @@ const ActionsModal = ({ isOpen, onClose, user, onSuccess }) => {
                   value={selectedRole}
                   onChange={(e) => setSelectedRole(Number(e.target.value))}
                 >
-                  <option value={0} disabled>
+                  <option value="" disabled>
                     -- Select Role --
                   </option>
                   {roles.map(({ id, name }) => (

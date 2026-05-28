@@ -12,7 +12,7 @@
     public static string OptionNameFormatter(string optionName)
     {
       // Remove trailing digit only
-      return TrailingDigitRegex().Replace(optionName, ""); 
+      return TrailingDigitRegex().Replace(optionName, "");
     }
     // Repo helper Method for filtering through Salary Brackets according to the employees
     // Salary and handles nulls on max which present uncapped

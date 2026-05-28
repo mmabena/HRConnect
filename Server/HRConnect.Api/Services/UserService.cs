@@ -1,5 +1,7 @@
+
 namespace HRConnect.Api.Services
 {
+  using System;
   using System.Collections.Generic;
   using System.Linq;
   using System.Security.Cryptography;
@@ -17,17 +19,20 @@ namespace HRConnect.Api.Services
     private readonly ApplicationDBContext _context;
     private readonly IUserRepository _userRepo;
     private readonly Microsoft.AspNetCore.Identity.IPasswordHasher<User> _passwordHasher;
-    //These are valid characters for the a password hash
-    private static readonly char[] UpperCaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
-    private static readonly char[] LowerCaseChars = "abcdefghijklmnopqrstuvwxyz".ToCharArray();
-    private static readonly char[] DigitChars = "1234567890".ToCharArray();
+    private static readonly char[] UppercaseChars = "ABCDEFGHJKLMNPQRSTUVWXYZ".ToCharArray();
+    private static readonly char[] LowercaseChars = "abcdefghijkmnopqrstuvwxyz".ToCharArray();
+    private static readonly char[] DigitChars = "23456789".ToCharArray();
     private static readonly char[] SpecialChars = "!@#$%^&*".ToCharArray();
-    private static readonly char[] AllPossibleChars = UpperCaseChars
-      .Concat(LowerCaseChars)
+    private static readonly char[] AllPasswordChars = UppercaseChars
+      .Concat(LowercaseChars)
       .Concat(DigitChars)
       .Concat(SpecialChars)
       .ToArray();
-    public UserService(ApplicationDBContext context, IUserRepository userRepo, Microsoft.AspNetCore.Identity.IPasswordHasher<User> passwordHasher)
+
+    public UserService(
+      ApplicationDBContext context,
+      IUserRepository userRepo,
+      Microsoft.AspNetCore.Identity.IPasswordHasher<User> passwordHasher)
     {
       _context = context;
       _userRepo = userRepo;
@@ -110,7 +115,6 @@ namespace HRConnect.Api.Services
 
       return await _userRepo.UpdateUserAsync(id, existing);
     }
-
 
     public async Task<User?> UpdateUserRoleAsync(int id, UpdateUserRoleRequestDto dto)
     {
@@ -198,6 +202,30 @@ namespace HRConnect.Api.Services
       return _userRepo.DeleteUserAsync(id);
     }
 
+
+    public async Task<CurrentUserDto?> GetCurrentUserAsync(string email)
+    {
+      if (string.IsNullOrWhiteSpace(email))
+        return null;
+
+      var user = await _userRepo.GetUserByEmailAsync(email);
+
+      if (user == null)
+        return null;
+
+      var employee = await _userRepo.GetEmployeeByEmailAsync(email);
+
+      return new CurrentUserDto
+      {
+        UserId = user.UserId,
+        Email = user.Email,
+        Role = user.Role.ToString(),
+        FullName = employee != null
+          ? $"{employee.Name} {employee.Surname}"
+          : null,
+        JobTitle = employee?.Position?.PositionTitle
+      };
+    }
     public async Task<bool> ChangePasswordAsync(ChangePasswordRequestDto dto)
     {
       var user = await _userRepo.GetUserByEmailAsync(dto.Email);
@@ -246,24 +274,20 @@ namespace HRConnect.Api.Services
       await _context.SaveChangesAsync();
       return newUser;
     }
-    private static char GetRandomCharacter(char[] alphabet)
-    {
-      return alphabet[RandomNumberGenerator.GetInt32(alphabet.Length)];
-    }
 
     private static string GenerateTemporaryPassword()
     {
       var passwordChars = new List<char>
       {
-        GetRandomCharacter(UpperCaseChars),
-        GetRandomCharacter(LowerCaseChars),
+        GetRandomCharacter(UppercaseChars),
+        GetRandomCharacter(LowercaseChars),
         GetRandomCharacter(DigitChars),
         GetRandomCharacter(SpecialChars),
       };
 
       while (passwordChars.Count < 12)
       {
-        passwordChars.Add(GetRandomCharacter(AllPossibleChars));
+        passwordChars.Add(GetRandomCharacter(AllPasswordChars));
       }
 
       for (int i = passwordChars.Count - 1; i > 0; --i)
@@ -273,5 +297,10 @@ namespace HRConnect.Api.Services
       }
       return new string(passwordChars.ToArray());
     }
+    private static char GetRandomCharacter(char[] alphabet)
+    {
+      return alphabet[RandomNumberGenerator.GetInt32(alphabet.Length)];
+    }
   }
 }
+

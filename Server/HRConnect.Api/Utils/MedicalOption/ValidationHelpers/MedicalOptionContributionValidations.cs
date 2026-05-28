@@ -19,19 +19,19 @@
       var hasMsa = dbOption.MonthlyMsaContributionAdult.HasValue &&
                    dbOption.MonthlyMsaContributionAdult >= 0;
       var hasPrincipal = dbOption.MonthlyRiskContributionPrincipal.HasValue &&
-                         (dbOption.MonthlyRiskContributionPrincipal >= 0 && 
+                         (dbOption.MonthlyRiskContributionPrincipal >= 0 &&
                           dbOption.MonthlyRiskContributionPrincipal is not null);
 
       return MedicalOptionValidator.ValidateContributionValues(entity, hasMsa, hasPrincipal).IsValid;
     }
-    
+
     /// <summary>
     /// Validates salary bracket gaps and overlaps within a single variant
     /// </summary>
     public static BulkValidationResult ValidateSingleVariantSalaryBrackets(
       List<MedicalOption> variantOptions)
     {
-      var result = new BulkValidationResult() { IsValid = true}; 
+      var result = new BulkValidationResult() { IsValid = true };
 
       try
       {
@@ -88,7 +88,7 @@
       // Principal validation (if applicable)
       if (hasPrincipal &&
           (!entity.MonthlyRiskContributionPrincipal.HasValue ||
-           entity.MonthlyRiskContributionPrincipal < 0 || 
+           entity.MonthlyRiskContributionPrincipal < 0 ||
            entity.MonthlyRiskContributionPrincipal is null))
         return false;
 

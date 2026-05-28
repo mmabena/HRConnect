@@ -13,6 +13,7 @@ using HRConnect.Api.Middleware;
 using HRConnect.Api.Models;
 using HRConnect.Api.Repositories;
 using HRConnect.Api.Repository;
+using HRConnect.Api.Hubs;
 using HRConnect.Api.Services;
 using HRConnect.Api.Utils;
 using HRConnect.Api.Utils.Factories;
@@ -95,7 +96,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
     {
-      options.UseSqlServer(builder.Configuration.GetConnectionString("SomeeConnection")!);
+      options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!);
       options.AddInterceptors(new AuditSaveChangesInterceptor());
     });
 
@@ -183,7 +184,7 @@ builder.Services.AddQuartz(q =>
   {
     store.UseSqlServer(options =>
         {
-          options.ConnectionString = builder.Configuration.GetConnectionString("SomeeConnection")!;
+          options.ConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
           options.TablePrefix = "quartz.QRTZ_";
         });
     store.UseSerializer<Quartz.Simpl.SystemTextJsonObjectSerializer>();
@@ -221,6 +222,11 @@ builder.Services.AddScoped<ITaxDeductionRepository, TaxDeductionRepository>();
 builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
 builder.Services.AddScoped<IPositionRepository, PositionRepository>();
 builder.Services.AddScoped<IPositionService, PositionService>();
+builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
+builder.Services.AddScoped<ICompanyService, CompanyService>();
+builder.Services.AddScoped<IActiveCompanyService, ActiveCompanyService>();
+builder.Services.AddScoped<IUserCompanyService, UserCompanyService>();
+builder.Services.AddScoped<IUserCompanyRepository, UserCompanyRepository>();
 builder.Services.AddScoped<ICompanyContributionRepository, CompanyContributionRepository>();
 builder.Services.AddScoped<IEmployeeCompanyContributionRepository, EmployeeCompanyContributionRepository>();
 builder.Services.AddScoped<ICompanyContributionAllocationService, CompanyContributionAllocationService>();
@@ -259,7 +265,7 @@ builder.Services.AddScoped<IEmployeePensionEnrollmentRepository, EmployeePension
 builder.Services.AddTransient<IEmployeePensionEnrollmentService, EmployeePensionEnrollmentService>();
 builder.Services.AddScoped<IPensionDeductionRepository, PensionDeductionRepository>();
 builder.Services.AddTransient<IPensionDeductionService, PensionDeductionService>();
-
+builder.Services.AddSignalR();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<INotificationFactory, NotificationFactory>();
@@ -324,4 +330,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseMiddleware<ExceptionMiddleware>();
 app.MapControllers();
+app.MapHub<CompanyHub>("/companyHub");
 app.Run();

@@ -17,6 +17,8 @@ namespace HRConnect.Api.Data
     public DbSet<Employee> Employees { get; set; }
     public DbSet<Position> Positions { get; set; }
     public DbSet<JobGrade> JobGrades { get; set; }
+    public DbSet<UserCompany> UserCompanies { get; set; }
+    public DbSet<Company> Companies { get; set; }
     public DbSet<OccupationalLevel> OccupationalLevels { get; set; }
     public DbSet<PasswordResetPin> PasswordResetPins { get; set; }
     public DbSet<PasswordHistory> PasswordHistories { get; set; }
@@ -102,9 +104,28 @@ namespace HRConnect.Api.Data
           .HasIndex(p => p.PositionTitle)
           .IsUnique();
 
+      modelBuilder.Entity<UserCompany>()
+          .HasKey(uc => new { uc.UserId, uc.CompanyId });
+
+      modelBuilder.Entity<UserCompany>()
+          .HasOne(uc => uc.User)
+          .WithMany()
+          .HasForeignKey(uc => uc.UserId)
+          .OnDelete(DeleteBehavior.Cascade);
+
+      modelBuilder.Entity<UserCompany>()
+          .HasOne(uc => uc.Company)
+          .WithMany()
+          .HasForeignKey(uc => uc.CompanyId)
+          .OnDelete(DeleteBehavior.Cascade);
+
       modelBuilder.Entity<OccupationalLevel>()
           .HasIndex(o => o.Description)
           .IsUnique();
+
+      modelBuilder.Entity<PayrollRecord>()
+      .HasIndex(x => new { x.PayrollRunId, x.EmployeeId })
+      .IsUnique();
 
       modelBuilder.Entity<Employee>().Property(e => e.Title).HasConversion<string>();
       modelBuilder.Entity<Employee>().Property(e => e.Gender).HasConversion<string>();
@@ -122,6 +143,28 @@ namespace HRConnect.Api.Data
           .WithOne(l => l.Employee)
           .HasForeignKey(l => l.EmployeeId)
           .OnDelete(DeleteBehavior.Cascade);
+
+      modelBuilder.Entity<Employee>()
+          .HasOne(e => e.Company)
+          .WithMany(c => c.Employees)
+          .HasForeignKey(e => e.CompanyId)
+          .OnDelete(DeleteBehavior.Restrict);
+
+      modelBuilder.Entity<Company>()
+          .HasIndex(c => c.CompanyId)
+          .IsUnique();
+
+      modelBuilder.Entity<Company>()
+          .HasIndex(c => c.RegistrationNumber)
+          .IsUnique();
+
+      modelBuilder.Entity<Company>()
+          .HasIndex(c => c.UIFNumber)
+          .IsUnique();
+
+      modelBuilder.Entity<Company>()
+          .HasIndex(c => c.VATNumber)
+          .IsUnique();
 
       modelBuilder.Entity<EmployeeLeaveBalance>()
           .HasOne(lb => lb.LeaveType)

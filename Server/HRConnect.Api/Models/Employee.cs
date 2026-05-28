@@ -81,6 +81,8 @@ namespace HRConnect.Api.Models
 
     [Required]
     public string ZipCode { get; set; } = string.Empty;
+    public string CompanyId { get; set; } = string.Empty;
+    public Company Company { get; set; }
 
     public bool HasDisability { get; set; }
     public string? DisabilityDescription { get; set; }
@@ -120,7 +122,7 @@ namespace HRConnect.Api.Models
 
     public ICollection<Employee>? Subordinates { get; set; }
 
-    
+
     public ICollection<EmployeeLeaveBalance> LeaveBalances { get; set; }
         = new List<EmployeeLeaveBalance>();
 
@@ -132,7 +134,7 @@ namespace HRConnect.Api.Models
 
     public ICollection<AnnualLeaveAccrualHistory> AnnualLeaveAccrualHistories { get; set; }
         = new List<AnnualLeaveAccrualHistory>();
- 
+
     public ICollection<EmployeePensionEnrollment> EmployeePensionEnrollment { get; set; } = [];
     public PensionOption? PensionOption { get; set; }
     public ICollection<PensionFund>? PensionFunds { get; set; }             // navigation
