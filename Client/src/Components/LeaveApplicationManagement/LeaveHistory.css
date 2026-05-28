@@ -268,7 +268,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 0;
+  gap: 4px;
   min-width: 93px;  
   min-height: 30px;
   border-radius: 20px;
@@ -276,12 +276,13 @@
   font-weight: 500;
   font-size: 16px;
   letter-spacing: 0.02em;
-  margin-left: -20px;
+  margin-left: -5px;
+  padding-right: 16px;
 }
 .status.pending {
   background: #FEEFC0;
   color: #9A6F00;
-  width: 100px;
+  width: 120px;
 }
 .status-dot-icon {
   flex-shrink: 0;
@@ -291,13 +292,13 @@
 .status.rejected {
   background: #FADEDE;
   color: #A32D2D;
-  width: 100px;
+  width: 120px;
 }
 
 .status.approved {
   background: rgba(99, 133, 73, 0.31);
   color: #638549;
-  width: 100px;
+  width: 120px;
 }
 .status-dot {
   display: inline-block; 
