@@ -1,6 +1,7 @@
 using System.Text;
 using Audit.Core;
 using Audit.EntityFramework;
+using HRConnect.Api.Interfaces.AccessControl;
 using HRConnect.Api.Data;
 using HRConnect.Api.Interfaces;
 using HRConnect.Api.Interfaces.TOTP;
@@ -213,6 +214,7 @@ builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IUserService, HRConnect.Api.Services.UserService>();
+builder.Services.AddScoped<IRBACEnsurer, RBACEnsurer>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ITaxTableUploadService, TaxTableUploadService>();
 builder.Services.AddScoped<ITaxTableUploadRepository, TaxTableUploadRepository>();
@@ -230,8 +232,7 @@ builder.Services.AddScoped<IJobGradeRepository, JobGradeRepository>();
 builder.Services.AddScoped<IJobGradeService, JobGradeService>();
 builder.Services.AddScoped<IOccupationalLevelRepository, OccupationalLevelRepository>();
 builder.Services.AddScoped<IOccupationalLevelService, OccupationalLevelService>();
-builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.Services.AuthService>();
-
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<ILeaveBalanceService, LeaveBalanceService>();
 builder.Services.AddScoped<ILeaveProcessingService, LeaveProcessingService>();
@@ -239,7 +240,6 @@ builder.Services.AddScoped<ILeaveRuleService, LeaveRuleService>();
 builder.Services.AddScoped<IPensionFundService, PensionFundService>();
 builder.Services.AddScoped<IEmployeePensionRepository, EmployeePensionRepository>();
 builder.Services.AddScoped<IPensionFundService, PensionFundService>();
-
 builder.Services.AddScoped<IPensionFundRepository, PensionFundRepository>();
 builder.Services.AddScoped<ILeaveTypeManagementService, LeaveTypeManagementService>();
 builder.Services.AddScoped<ILeaveApplicationService, LeaveApplicationService>();
@@ -289,7 +289,7 @@ builder.Services.AddScoped<IMedicalOptionService,
 builder.Services.AddScoped<IMedicalAidEligibilityService, MedicalAidEligibilityService>();
 builder.Services.AddScoped<IMedicalAidDeductionRepository, MedicalAidDeductionRepository>();
 builder.Services.AddScoped<IMedicalAidDeductionService, MedicalAidDeductionService>();
-
+builder.Services.AddScoped<IRBACEnsurer, RBACEnsurer>();
 builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowReact",
@@ -324,10 +324,12 @@ using (var scope = app.Services.CreateScope())
 {
   var initialiser = scope.ServiceProvider.GetRequiredService<PayrollInit>();
   var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+  var RBACInitialiser = scope.ServiceProvider.GetRequiredService<IRBACEnsurer>();
 
   //initialise a payperiod and payrun on app start up
   await initialiser.InitialisePayrollPeriod();
   await userService.SyncEmployeeUserAsync();
+  await RBACInitialiser.EnsureRoleBasedAccessControlAsync();
 }
 
 if (app.Environment.IsDevelopment())
