@@ -2,21 +2,12 @@ namespace HRConnect.Api.Services
 {
   using System;
   using System.Collections.Generic;
-  using System.ComponentModel;
-  using System.Data.Common;
-  using System.IO;
   using System.Linq;
-  using System.Linq.Expressions;
   using System.Threading.Tasks;
-  using HRConnect.Api.Data;
   using HRConnect.Api.DTOs;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Mappers;
-  using HRConnect.Api.Models;
   using HRConnect.Api.Repositories;
-  using Microsoft.AspNetCore.Http;
-  using Microsoft.EntityFrameworkCore;
-  using OfficeOpenXml;
 
   /// <summary>
   /// This service is responsible for handling tax deduction operations which includes:

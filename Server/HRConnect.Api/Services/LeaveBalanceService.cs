@@ -1,12 +1,12 @@
 #pragma warning disable CS8634 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match 'class' constraint.
 namespace HRConnect.Api.Services
 {
-    using HRConnect.Api.Data;
-    using HRConnect.Api.DTOs;
-    using HRConnect.Api.Interfaces;
-    using HRConnect.Api.Models;
-    using HRConnect.Api.Utils;
-    using Microsoft.EntityFrameworkCore;
+  using HRConnect.Api.Data;
+  using HRConnect.Api.DTOs;
+  using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Models;
+  using HRConnect.Api.Utils;
+  using Microsoft.EntityFrameworkCore;
 
   public class LeaveBalanceService : ILeaveBalanceService
   {
@@ -52,17 +52,17 @@ namespace HRConnect.Api.Services
         if (employee.LeaveBalances.Any(b => b.LeaveTypeId == leaveType.Id))
           continue;
 
-                if (leaveType.Code == "AL")
-                {
-                    var rule = await _context.LeaveEntitlementRules
-                        .Where(r =>
-                            r.LeaveTypeId == leaveType.Id &&
-                            r.JobGradeId == employee.Position!.JobGradeId &&
-                            r.MinYearsService <= yearsOfService &&
-                            (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
-                            r.IsActive)
-                        .OrderByDescending(r => r.MinYearsService)
-                        .FirstOrDefaultAsync();
+        if (leaveType.Code == "AL")
+        {
+          var rule = await _context.LeaveEntitlementRules
+              .Where(r =>
+                  r.LeaveTypeId == leaveType.Id &&
+                  r.JobGradeId == employee.Position!.JobGradeId &&
+                  r.MinYearsService <= yearsOfService &&
+                  (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
+                  r.IsActive)
+              .OrderByDescending(r => r.MinYearsService)
+              .FirstOrDefaultAsync();
 
           if (rule == null)
             continue;
@@ -193,31 +193,31 @@ namespace HRConnect.Api.Services
             balance.AccruedDays - balance.TakenDays;
       }
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                throw new InvalidOperationException(
-                    "This leave balance was modified by another process. Please refresh and try again.");
-            }
-        }
-        /// <summary>
-        /// Recalculates the annual leave balance for an employee based on their accrual history and any changes to their position or job grade. 
-        /// This method is typically called after a position change or at the end of the year to ensure the annual leave balance is accurate. 
-        /// It calculates the total accrued days based on the employee's accrual segments, applies any carryover from the previous year, and updates the available days accordingly.
-        /// </summary>
-        /// <param name="employeeId"></param>
-        /// <returns></returns>
-        /// <exception cref="InvalidOperationException"></exception>
-        public async Task RecalculateAnnualLeaveAsync(string employeeId)
-        {
-            var employee = await _context.Employees
-                .Include(e => e.LeaveBalances)
-                .Include(e => e.Position)
-                    .ThenInclude(p => p!.JobGrade)
-                .FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
+      try
+      {
+        await _context.SaveChangesAsync();
+      }
+      catch (DbUpdateConcurrencyException)
+      {
+        throw new InvalidOperationException(
+            "This leave balance was modified by another process. Please refresh and try again.");
+      }
+    }
+    /// <summary>
+    /// Recalculates the annual leave balance for an employee based on their accrual history and any changes to their position or job grade. 
+    /// This method is typically called after a position change or at the end of the year to ensure the annual leave balance is accurate. 
+    /// It calculates the total accrued days based on the employee's accrual segments, applies any carryover from the previous year, and updates the available days accordingly.
+    /// </summary>
+    /// <param name="employeeId"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
+    public async Task RecalculateAnnualLeaveAsync(string employeeId)
+    {
+      var employee = await _context.Employees
+          .Include(e => e.LeaveBalances)
+          .Include(e => e.Position)
+              .ThenInclude(p => p!.JobGrade)
+          .FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
 
       if (employee == null)
         throw new InvalidOperationException("Employee not found.");
@@ -668,36 +668,36 @@ namespace HRConnect.Api.Services
 
       var yearsOfService = CalculateYearsOfService(employee.StartDate);
 
-            var rule = await _context.LeaveEntitlementRules
-                .Where(r =>
-                r.LeaveTypeId == annualLeave.Id &&
-                r.JobGradeId == employee.Position!.JobGradeId &&
-                r.MinYearsService <= yearsOfService &&
-                (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
-                r.IsActive)
-                .OrderByDescending(r => r.MinYearsService)
-                .FirstAsync();
+      var rule = await _context.LeaveEntitlementRules
+          .Where(r =>
+          r.LeaveTypeId == annualLeave.Id &&
+          r.JobGradeId == employee.Position!.JobGradeId &&
+          r.MinYearsService <= yearsOfService &&
+          (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
+          r.IsActive)
+          .OrderByDescending(r => r.MinYearsService)
+          .FirstAsync();
 
       await _context.Entry(employee)
           .Reference(e => e.Position)
           .LoadAsync();
 
-            await _context.Entry(employee.Position)
-                .Reference(p => p.JobGrade)
-                .LoadAsync();
+      await _context.Entry(employee.Position)
+          .Reference(p => p.JobGrade)
+          .LoadAsync();
 
-            await _context.EmployeeAccrualRateHistories.AddAsync(
-                new EmployeeAccrualRateHistory
-                {
-                    EmployeeId = employee.EmployeeId,
-                    PositionId = employee.PositionId,
-                    PositionName = employee.Position.PositionTitle,
-                    AnnualEntitlement = rule.DaysAllocated,
-                    DailyRate = (rule.DaysAllocated / 12m) / 21.67m,
-                    EffectiveFrom = employee.StartDate,
-                    EffectiveTo = null,
-                    CreatedDate = DateTime.UtcNow
-                });
+      await _context.EmployeeAccrualRateHistories.AddAsync(
+          new EmployeeAccrualRateHistory
+          {
+            EmployeeId = employee.EmployeeId,
+            PositionId = employee.PositionId,
+            PositionName = employee.Position.PositionTitle,
+            AnnualEntitlement = rule.DaysAllocated,
+            DailyRate = (rule.DaysAllocated / 12m) / 21.67m,
+            EffectiveFrom = employee.StartDate,
+            EffectiveTo = null,
+            CreatedDate = DateTime.UtcNow
+          });
 
       await _context.SaveChangesAsync();
     }

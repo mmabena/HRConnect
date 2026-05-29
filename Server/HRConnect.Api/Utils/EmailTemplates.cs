@@ -112,7 +112,7 @@ decimal availableDays)
       return $"""
                     Dear {employee.Name},
                     
-                    Your position has recently been updated to: {employee.Position.PositionTitle}.
+                    Your position has recently been updated to: {employee.Position!.PositionTitle}.
                     
                     As a result, your annual leave entitlement has been recalculated.
                     

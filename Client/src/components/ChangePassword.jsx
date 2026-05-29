@@ -73,7 +73,7 @@ const ChangePassword = ({ onClose }) => {
     }
   };
     return (
-        <div className="modal-overlay1">
+<div className="modal-overlay1">
     <div className="signin-container">
       <div className="logo-container">
         <span className="logo-bold">singular</span>

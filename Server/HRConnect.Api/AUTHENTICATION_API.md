@@ -265,8 +265,18 @@ When a SuperUser creates an employee through the employee API, HRConnect also cr
     "SmtpPort": 587,
     "SenderEmail": "your-email@gmail.com",
     "SenderPassword": "your-app-password"
+  },
+  "Totp": {
+    "StepMinutes": 10//lifetime of your time-based one-time-pin in minutes
+    //If nothing is provided, falls back to 10 minutes per one-time-pin
+  }, 
+  {
+    "Services":{
+        "Api":"http://<IP:port>/api/" //recommended: "http://localhost:5147/api/"
+    }
   }
 }
+
 ```
 
 ### Email Configuration

@@ -259,21 +259,21 @@ namespace HRConnect.Api.Services
       var createdCategory = await _medicalOptionRepository.CreateMedicalOptionCategory(createCategoryPayload);
       return createdCategory;
     }
-        /// <summary>
-        /// Bulk creates medical options in an existing category. Only allowed during update period (Nov-Dec).
-        /// </summary>
-        /// <param name="id">The category ID.</param>
-        /// <param name="createOptionsPayload">Collection of options to create.</param>
-        /// <param name="testDate">Optional date for testing; uses current date if null.</param>
-        /// <returns>List of created CreateMedicalOptionVariantsDto objects.</returns>
-        /// <exception cref="ArgumentException">Thrown when id is invalid (= 0), payload is null/empty, or category mismatch detected.</exception>
-        /// <exception cref="InvalidOperationException">Thrown when category not found or outside update period.</exception>
-        /// <exception cref="Middleware.ValidationException">Thrown when validation fails with detailed error information.</exception>
-        public async Task<IReadOnlyList<CreateMedicalOptionVariantsDto>> CreateBulkOptionsByExistingCategoryId(
-          int id,
-          IReadOnlyCollection<CreateMedicalOptionVariantsDto> createOptionsPayload,
-          DateTime? testDate = null)
-        {
+    /// <summary>
+    /// Bulk creates medical options in an existing category. Only allowed during update period (Nov-Dec).
+    /// </summary>
+    /// <param name="id">The category ID.</param>
+    /// <param name="createOptionsPayload">Collection of options to create.</param>
+    /// <param name="testDate">Optional date for testing; uses current date if null.</param>
+    /// <returns>List of created CreateMedicalOptionVariantsDto objects.</returns>
+    /// <exception cref="ArgumentException">Thrown when id is invalid (= 0), payload is null/empty, or category mismatch detected.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when category not found or outside update period.</exception>
+    /// <exception cref="Middleware.ValidationException">Thrown when validation fails with detailed error information.</exception>
+    public async Task<IReadOnlyList<CreateMedicalOptionVariantsDto>> CreateBulkOptionsByExistingCategoryId(
+      int id,
+      IReadOnlyCollection<CreateMedicalOptionVariantsDto> createOptionsPayload,
+      DateTime? testDate = null)
+    {
       if (id <= 0)
       {
         throw new ArgumentException("Category ID must be greater than 0", nameof(id));

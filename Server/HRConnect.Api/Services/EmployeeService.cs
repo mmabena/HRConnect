@@ -57,7 +57,7 @@ namespace HRConnect.Api.Services
       .Concat(DigitChars)
       .Concat(SpecialChars)
       .ToArray();
-    public EmployeeService(ApplicationDBContext context,IActiveCompanyService activeCompanyService, IUserCompanyService userCompanyService, IEmployeeRepository employeeRepo, IEmailService emailService,ICompanyRepository companyRepo, IPositionRepository positionRepo, ILeaveBalanceService leaveBalanceService, ILeaveProcessingService leaveProcessingService, IPasswordHasher<User> passwordHasher)
+    public EmployeeService(ApplicationDBContext context, IActiveCompanyService activeCompanyService, IUserCompanyService userCompanyService, IEmployeeRepository employeeRepo, IEmailService emailService, ICompanyRepository companyRepo, IPositionRepository positionRepo, ILeaveBalanceService leaveBalanceService, ILeaveProcessingService leaveProcessingService, IPasswordHasher<User> passwordHasher)
     {
       _context = context;
       _employeeRepo = employeeRepo;
@@ -91,7 +91,7 @@ namespace HRConnect.Api.Services
     /// <param name="EmployeeId">The employee identifier.</param>
     /// <returns>The employee if found; otherwise null.</returns>
     public async Task<EmployeeDto?> GetEmployeeByIdAsync(int userId, string employeeId)
-    { 
+    {
       var activeCompanyId = await _activeCompanyService.GetActiveCompanyIdAsync(userId);
 
       //Recalculate leave balances for the employee before returning the data
@@ -100,10 +100,10 @@ namespace HRConnect.Api.Services
       var employee = await _employeeRepo.GetEmployeeByIdAsync(employeeId);
 
       if (employee == null)
-          throw new ValidationException("Employee does not exist");
-        
+        throw new ValidationException("Employee does not exist");
+
       if (employee.CompanyId != activeCompanyId)
-          throw new UnauthorizedAccessException("Access denied to this employee.");
+        throw new UnauthorizedAccessException("Access denied to this employee.");
 
       return employee?.ToEmployeeDto();
     }
@@ -120,7 +120,7 @@ namespace HRConnect.Api.Services
       var employee = await _employeeRepo.GetEmployeeByIdAsync(employeeId);
 
       if (employee == null)
-          throw new ValidationException("Employee does not exist");
+        throw new ValidationException("Employee does not exist");
 
       return employee?.ToEmployeeDto();
     }
@@ -292,7 +292,7 @@ namespace HRConnect.Api.Services
         // LOAD FULL EMPLOYEE WITH POSITION + JOBGRADE
         var fullEmployee = await _context.Employees
             .Include(e => e.Position)
-                .ThenInclude(p => p.JobGrade)
+                .ThenInclude(p => p!.JobGrade)
             .FirstAsync(e => e.EmployeeId == employeeId);
 
         // GET ANNUAL LEAVE TYPE
@@ -306,7 +306,7 @@ namespace HRConnect.Api.Services
         var newRule = await _context.LeaveEntitlementRules
      .Where(r =>
          r.LeaveTypeId == annualLeave.Id &&
-         r.JobGradeId == fullEmployee.Position.JobGradeId &&
+         r.JobGradeId == fullEmployee.Position!.JobGradeId &&
          r.MinYearsService <= yearsOfService &&
          (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
          r.IsActive)
@@ -319,7 +319,7 @@ namespace HRConnect.Api.Services
             {
               EmployeeId = employeeId,
               PositionId = fullEmployee.PositionId,
-              PositionName = fullEmployee.Position.PositionTitle,
+              PositionName = fullEmployee.Position!.PositionTitle,
               AnnualEntitlement = newRule.DaysAllocated,
               DailyRate = (newRule.DaysAllocated / 12m) / 21.67m,
               EffectiveFrom = today,
@@ -380,7 +380,7 @@ namespace HRConnect.Api.Services
 
       if (existingEmployee.CompanyId != activeCompanyId)
         throw new UnauthorizedAccessException("You cannot delete employees from another company.");
-      
+
       var now = DateTime.UtcNow;
       // Business rule: Only allow deletion within the same start month
       if (existingEmployee.StartDate.Year != now.Year || existingEmployee.StartDate.Month != now.Month)

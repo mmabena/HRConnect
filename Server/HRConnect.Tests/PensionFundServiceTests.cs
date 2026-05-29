@@ -1,15 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using HRConnect.Api.Interfaces;
-using HRConnect.Api.Models;
-using HRConnect.Api.Repository;
-using HRConnect.Api.Services;
-using Moq;
-using Xunit;
-
 namespace HRConnect.Tests
 {
+  using System.Threading.Tasks;
+  using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Models;
+  using HRConnect.Api.Services;
+  using Moq;
+  using Xunit;
+
   public class PensionFundServiceTests
   {
     private readonly Mock<IPensionFundRepository> _fundRepoMock;
@@ -34,12 +31,12 @@ namespace HRConnect.Tests
     public async Task AddPensionFundReturnsSuccess()
     {
       PensionFund fund = new PensionFund { EmployeeId = "E001", EmployeeName = "John Doe" };
-      _fundRepoMock.Setup(r => r.AddPensionFundAsync(fund, CancellationToken.None))
+      _fundRepoMock.Setup(r => r.AddPensionFundAsync(fund))
                    .Returns(Task.CompletedTask);
-      _fundRepoMock.Setup(r => r.SaveChangesAsync(CancellationToken.None))
+      _fundRepoMock.Setup(r => r.SaveChangesAsync())
                    .Returns(Task.CompletedTask);
 
-      ServiceResult result = await _service.AddPensionFundAsync(fund, CancellationToken.None);
+      ServiceResult result = await _service.AddPensionFundAsync(fund);
 
       Assert.True(result.IsSuccess);
       Assert.Equal("Fund added successfully.", result.Message);
@@ -50,7 +47,7 @@ namespace HRConnect.Tests
     {
       PensionOption option = new PensionOption { ContributionPercentage = 20 };
 
-      ServiceResult result = await _service.AddPensionOptionAsync(option, CancellationToken.None);
+      ServiceResult result = await _service.AddPensionOptionAsync(option);
 
       Assert.False(result.IsSuccess);
       Assert.Equal("Percentage must be between 0 and 15.", result.Message);
@@ -78,12 +75,12 @@ namespace HRConnect.Tests
       };
       PensionOption option = new PensionOption { PensionOptionId = 1, ContributionPercentage = 5 };
 
-      _employeeRepoMock.Setup(r => r.GetEmployeeByIdAsync(employee.EmployeeId, CancellationToken.None))
+      _employeeRepoMock.Setup(r => r.GetEmployeeByIdAsync(employee.EmployeeId))
                        .ReturnsAsync(employee);
-      _optionRepoMock.Setup(r => r.GetPensionOptionByIdAsync(option.PensionOptionId, CancellationToken.None))
+      _optionRepoMock.Setup(r => r.GetPensionOptionByIdAsync(option.PensionOptionId))
                      .ReturnsAsync(option);
 
-      ServiceResult result = await _service.RecordEmployeePensionSelectionAsync(employee.EmployeeId, option.PensionOptionId, CancellationToken.None);
+      ServiceResult result = await _service.RecordEmployeePensionSelectionAsync(employee.EmployeeId, option.PensionOptionId);
 
       Assert.False(result.IsSuccess);
       Assert.Equal("Only permanent employees may select a pension option.", result.Message);
@@ -101,20 +98,19 @@ namespace HRConnect.Tests
       };
       PensionOption option = new PensionOption { PensionOptionId = 2, ContributionPercentage = 10 };
 
-      _employeeRepoMock.Setup(r => r.GetEmployeeByIdAsync(employee.EmployeeId, CancellationToken.None))
+      _employeeRepoMock.Setup(r => r.GetEmployeeByIdAsync(employee.EmployeeId))
                        .ReturnsAsync(employee);
-      _optionRepoMock.Setup(r => r.GetPensionOptionByIdAsync(option.PensionOptionId, CancellationToken.None))
+      _optionRepoMock.Setup(r => r.GetPensionOptionByIdAsync(option.PensionOptionId))
                      .ReturnsAsync(option);
-      _fundRepoMock.Setup(r => r.AddOrUpdatePensionFundAsync(It.IsAny<PensionFund>(), CancellationToken.None))
+      _fundRepoMock.Setup(r => r.AddOrUpdatePensionFundAsync(It.IsAny<PensionFund>()))
                    .Returns(Task.CompletedTask);
-      _fundRepoMock.Setup(r => r.SaveChangesAsync(CancellationToken.None))
+      _fundRepoMock.Setup(r => r.SaveChangesAsync())
                    .Returns(Task.CompletedTask);
 
-      ServiceResult result = await _service.RecordEmployeePensionSelectionAsync(employee.EmployeeId, option.PensionOptionId, CancellationToken.None);
+      ServiceResult result = await _service.RecordEmployeePensionSelectionAsync(employee.EmployeeId, option.PensionOptionId);
 
       Assert.True(result.IsSuccess);
       Assert.Equal("Pension option selected and pension fund created.", result.Message);
     }
   }
 }
-

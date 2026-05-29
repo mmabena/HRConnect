@@ -1,4 +1,4 @@
-﻿namespace HRConnect.Api.Utils.MedicalOption.ValidationHelpers
+namespace HRConnect.Api.Utils.MedicalOption.ValidationHelpers
 {
   using DTOs.MedicalOption;
   using Models;

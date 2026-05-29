@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import "../Components/AddEmployeeModal.css";
+import "../components/AddEmployeeModal.css";
 import axios from "axios";
 
 import {

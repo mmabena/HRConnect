@@ -2190,7 +2190,7 @@
       return result;
     }
 
-        #region Bulk Insert Validations
+    #region Bulk Insert Validations
 
     /// <summary>
     /// Comprehensive validation for bulk insert operations for new medical options
@@ -2872,7 +2872,7 @@
     }
 
     #endregion
-    
+
     /// <summary>
     /// Groups payload DTOs by variant using existing data for context
     /// </summary>

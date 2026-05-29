@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, {  useState } from "react";
 import { addCompany } from "../../api/Company";
 import { toast } from "react-toastify";
 import "./AddCompanyModal.css";
 import connection from "../../api/signalrService.js";
-import { Plus, Check } from "lucide-react";
+import { Plus } from "lucide-react";
 import useCompanyConnection from "../../hooks/useCompanyConnection.js";
 
 const AddCompanyModal = ({ closeModal }) => {

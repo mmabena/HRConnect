@@ -8,6 +8,8 @@ namespace HRConnect.Api.Mappers.Notification
     {
       return new NotificationDto
       {
+        NotificationId = notificationModel.NotificationId,
+        Subject = notificationModel.Subject,
         Message = notificationModel.Message,
         IsRead = notificationModel.IsRead,
         Type = notificationModel.Type,
@@ -17,10 +19,25 @@ namespace HRConnect.Api.Mappers.Notification
         CreatedAt = notificationModel.CreatedAt
       };
     }
-    public static Notification ToNotificationFromDto(this CreateNotificationDto dto)
+    public static Notification ToNotificationFromDto(this NotificationDto dto)
     {
       return new Notification
       {
+        Subject = dto.Subject,
+        Message = dto.Message,
+        Type = dto.Type,
+        Severity = dto.Severity,
+        DueDate = dto.DueDate,
+        IsRead = dto.IsRead,
+        DeliveryChannel = dto.DeliveryChannel,
+        IdempotencyKey = dto.IdempotencyKey
+      };
+    }
+    public static Notification ToNotificationFromCreateDto(this CreateNotificationDto dto)
+    {
+      return new Notification
+      {
+        Subject = dto.Subject,
         Message = dto.Message,
         Type = dto.Type,
         Severity = dto.Severity,
