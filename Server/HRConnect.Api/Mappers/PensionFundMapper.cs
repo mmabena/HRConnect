@@ -16,7 +16,15 @@
         ContributionPercentage = entity.ContributionPercentage,
         ContributionAmount = entity.ContributionAmount,
         TaxCode = entity.TaxCode,
-        PensionOptionId = entity.PensionOptionId
+        PensionOptionId = entity.PensionOptionId,
+        PensionOption = entity.PensionOptions != null
+              ? new PensionOptionDto
+              {
+                PensionOptionId = entity.PensionOptions.PensionOptionId,
+                ContributionPercentage = entity.PensionOptions.ContributionPercentage
+                // add other fields as needed
+              }
+              : null
       };
     }
 
@@ -30,9 +38,11 @@
         MonthlySalary = dto.MonthlySalary,
         ContributionPercentage = dto.ContributionPercentage,
         ContributionAmount = dto.ContributionAmount,
-        TaxCode = (int)dto.TaxCode, 
-        PensionOptionId = dto.PensionOptionId
+        TaxCode = (int)dto.TaxCode,
+        PensionOptionId = dto.PensionOptionId ?? 0   //default if null
       };
     }
   }
+
+
 }

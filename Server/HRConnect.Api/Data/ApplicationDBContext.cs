@@ -73,8 +73,17 @@ namespace HRConnect.Api.Data
                 .HasForeignKey(e => e.PensionOptionId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Employee -> Position
-            modelBuilder.Entity<Employee>()
+      // PensionFund -> PensionOption (missing piece)
+      modelBuilder.Entity<PensionFund>()
+   .HasOne(pf => pf.PensionOptions)  
+   .WithMany()
+   .HasForeignKey(pf => pf.PensionOptionId)
+   .OnDelete(DeleteBehavior.NoAction); 
+
+
+
+      // Employee -> Position
+      modelBuilder.Entity<Employee>()
           .HasOne(e => e.Position)
           .WithMany(p => p.Employees)
           .HasForeignKey(e => e.PositionId);
@@ -278,24 +287,15 @@ namespace HRConnect.Api.Data
     //Override 'SaveChangesAsync' for Payroll Records to enforce locked records on a payroll run 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-      //Intercept all instances of saving any changes to db
-      var modifiedRecords = ChangeTracker.Entries()
-            .Where(e => (e.State == EntityState.Modified || e.State == EntityState.Deleted) &&
-            (
-            e.Entity is PayrollPeriod ||
-            e.Entity is PayrollRun ||
-            e.Entity is PayrollRecord ||
-            e.Entity is EmployeePensionEnrollment
-            ));
+      var lockedRecords = ChangeTracker.Entries()
+          .Where(e =>
+              (e.State == EntityState.Modified || e.State == EntityState.Deleted) &&
+              e.Entity is PayrollRecord record &&
+              record.IsLocked);
 
-      foreach (var e in modifiedRecords)
+      if (lockedRecords.Any())
       {
-        //Any locked entity should be under a Hard Lock. Don't allow any changes
-        var prevLockState = (bool)e.OriginalValues["IsLocked"]!;
-        if (prevLockState)
-        {
-          throw new InvalidOperationException("Record/Run under Hard Lock. Cannot be modified");
-        }
+        throw new InvalidOperationException("One or more payroll records are locked and cannot be modified.");
       }
 
       return await base.SaveChangesAsync(cancellationToken);

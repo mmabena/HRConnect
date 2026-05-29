@@ -4,14 +4,13 @@
   using HRConnect.Api.Data;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
-  using HRConnect.Api.Data;
   using Microsoft.EntityFrameworkCore;
   using System.Collections.Generic;
   using System.Threading;
-  using System.Threading.Tasks;
 
   public class PensionOptionRepository(ApplicationDBContext context) : IPensionOptionRepository
   {
+    private readonly ApplicationDBContext _context = context;
     public async Task<IEnumerable<PensionOption>> GetPensionOptionsAsync(CancellationToken cancellationToken)
     {
       return await context.PensionOptions.ToListAsync(cancellationToken);
@@ -38,19 +37,34 @@
 
       return ServiceResult.Success("Pension option updated successfully.");
     }
-        private readonly ApplicationDBContext _context = context;
 
-        ///<summary>
-        ///Get pension option by ud
-        ///</summary>
-        ///<param name="id">Pension Option Id</param>
-        ///<returns>
-        ///Pension option with the specified id
-        ///</returns>
-        public async Task<decimal> GetPensionOptionPercentageByIdAsync(int id)
-        {
-            return await _context.PensionOptions.Where(po => po.PensionOptionId == id)
-              .Select(po => po.ContributionPercentage).FirstOrDefaultAsync();
-        }
+    ///<summary>
+    ///Get pension option by id
+    ///</summary>
+    ///<param name="id">Pension Option Id</param>
+    ///<returns>
+    ///Pension option with the specified id
+    ///</returns>
+    public async Task<decimal> GetPensionOptionPercentageByIdAsync(int id)
+    {
+      return await _context.PensionOptions.Where(po => po.PensionOptionId == id)
+        .Select(po => po.ContributionPercentage).FirstOrDefaultAsync();
     }
+
+
+    public async Task<ServiceResult> DeleteAllPensionOptionsAsync(CancellationToken cancellationToken)
+    {
+      _context.PensionOptions.RemoveRange(_context.PensionOptions);
+      await _context.SaveChangesAsync(cancellationToken);
+      return ServiceResult.Success("All options deleted.");
+    }
+
+    public async Task SaveChangesAsync(CancellationToken cancellationToken)
+    {
+      await _context.SaveChangesAsync(cancellationToken);
+    }
+
+
+
+  }
 }

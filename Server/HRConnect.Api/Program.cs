@@ -16,7 +16,7 @@ using HRConnect.Api.Utils.Jobs.Payroll;
 using HRConnect.Api.Utils.Jobs.Pension;
 using HRConnect.Api.Utils.Jobs.Notification;
 using HRConnect.Api.Utils.Payroll;
-using HRConnect.Api.Utils.Seed;
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -265,7 +265,7 @@ builder.Services.AddScoped<INotificationFactory, NotificationFactory>();
 builder.Services.AddScoped<INotificationDispatcher, NotificationDispatcher>();
 builder.Services.AddScoped<IJobScheduleService, JobScheduleService>();
 
-builder.Services.AddScoped<PositionAndLeaveSeed>();
+
 
 builder.Services.AddCors(options =>
 {
@@ -288,12 +288,6 @@ using (var scope = app.Services.CreateScope())
   await initialiser.InitialisePayrollPeriod();
 }
 
-using (var scope = app.Services.CreateScope())
-{
-  var seeder = scope.ServiceProvider.GetRequiredService<PositionAndLeaveSeed>();
-
-  await seeder.SeedAsync();
-}
 
 
 if (app.Environment.IsDevelopment())

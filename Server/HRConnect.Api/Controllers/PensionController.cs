@@ -13,6 +13,24 @@
   [Route("api/[controller]")]
   public class PensionController(IPensionFundService pensionFundService) : ControllerBase
   {
+    [Authorize(Roles = "SuperUser")]
+    [HttpPost("funds")]
+    public async Task<IActionResult> CreatePensionFund(
+    [FromBody] CreatePensionFundDto dto,
+    CancellationToken cancellationToken)
+    {
+      ServiceResult result = await pensionFundService.CreatePensionFundAsync(dto, cancellationToken);
+
+      return result.IsSuccess ? Ok(result.Message) : BadRequest(result.Message);
+    }
+
+
+    [HttpGet("funds")]
+    public async Task<ActionResult<IEnumerable<PensionFund>>> GetPensionFunds(CancellationToken cancellationToken)
+    {
+      IEnumerable<PensionFund> funds = await pensionFundService.GetPensionFundsAsync(cancellationToken);
+      return Ok(funds);
+    }
 
     [HttpGet("options")]
     public async Task<ActionResult<IEnumerable<PensionOption>>> GetPensionOptions(CancellationToken cancellationToken)
@@ -29,6 +47,15 @@
     }
 
     [Authorize(Roles = "SuperUser")]
+    [HttpDelete("options/delete-all")]
+    public async Task<IActionResult> DeleteAllOptions(CancellationToken cancellationToken)
+    {
+      var result = await pensionFundService.DeleteAllOptionsAsync(cancellationToken);
+      return result.IsSuccess ? Ok(result.Message) : BadRequest(result.Message);
+    }
+
+
+    [Authorize(Roles = "SuperUser")]
     [HttpPost("options")]
     public async Task<IActionResult> AddPensionOption([FromBody] PensionOptionDto dto, CancellationToken cancellationToken)
     {
@@ -41,6 +68,7 @@
 
       return result.IsSuccess ? Ok(result.Message) : BadRequest(result.Message);
     }
+
 
     [Authorize(Roles = "SuperUser")]
     [HttpPut("options")]
@@ -67,5 +95,6 @@
 
       return result.IsSuccess ? Ok(result.Message) : BadRequest(result.Message);
     }
+
   }
 }

@@ -14,8 +14,8 @@
     public decimal ContributionAmount { get; set; }
     public decimal TaxCode { get; set; } = 4001;
 
-    public int PensionOptionId { get; set; }
-    public PensionOptionDto PensionOption { get; set; }
+    public int? PensionOptionId { get; set; }
+    public PensionOptionDto? PensionOption { get; set; }
 
   }
 }

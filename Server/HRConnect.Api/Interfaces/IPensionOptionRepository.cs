@@ -15,7 +15,7 @@
     Task<ServiceResult> AddPensionOptionAsync(PensionOption pensionOption, CancellationToken cancellationToken);
 
     Task<ServiceResult> UpdatePensionOptionAsync(PensionOption pensionOption, CancellationToken cancellationToken);
+    Task<ServiceResult> DeleteAllPensionOptionsAsync(CancellationToken cancellationToken);
+    Task SaveChangesAsync(CancellationToken cancellationToken);
   }
 }
-
-
