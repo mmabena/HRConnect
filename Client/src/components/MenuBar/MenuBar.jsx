@@ -4,17 +4,16 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import api from "../../../src/api/api.js";
 import { toast } from "react-toastify";
+import axios from "axios";
+import { resolveRole } from "../../utils/roleUtils";
 import connection from "../../api/signalrService.js";
 import { ArrowLeftRight } from "lucide-react";
-import { fetchMyCompanies, switchCompany } from "../../../src/api/UserCompany.js.js";
-import { fetchNotifications } from "../../Pages/NotificationPage/notificationsApi.js";
+import { fetchMyCompanies, switchCompany } from "../../api/UserCompany.js";
 
 const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
-  const [showOptions, setShowOptions] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(null);
-  const [activeMenu, setActiveMenu] = useState(null);
-  const [notifications, setNotifications] = useState([]);
-  const [bellCount, setBellCount] = useState(0);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [companyOpen, setCompanyOpen] = useState(false);
+  const [adminOpen, setAdminOpen] = useState(false);
   const [deductionsOpen, setDeductionsOpen] = useState(false);
   const [payrollOpen, setPayrollOpen] = useState(false);
   const [companies, setCompanies] = useState([]);
@@ -32,7 +31,6 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   const displayName = currentUser?.username || currentUser?.email || "User";
   const [canProjectPension, setCanProjectPension] = useState(false);
 
-  //displaying user initials
   const initials = displayName
     .split(" ")
     .map((name) => name.charAt(0))
@@ -103,7 +101,6 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   };
 
   const isEmployeeManagementPage =
-    location.pathname.startsWith("/employeeList") ||
     location.pathname.startsWith("/addEmployee") ||
     location.pathname.startsWith("/employeeList") ||
     location.pathname.startsWith("/editEmployee");
@@ -114,15 +111,33 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
 
   useEffect(() => {
     console.log("MenuBar user role:", role);
-  }, [currentUser, role]);
+    console.log(`BASE_URL ${baseUrl}`);
+  }, [baseUrl, role]);
 
   useEffect(() => {
     console.log(`LOCATION`);
     console.log(location);
     if (!role) return;
-    if (isEmployeeManagementPage) setActiveMenu("report");
-    else if (isUserManagementPage) setActiveMenu("admin");
-  }, [role, location.pathname]);
+
+    if (isEmployeeManagementPage && !manualReportToggle) {
+      setReportOpen(true);
+    } else if (!manualReportToggle) {
+      setReportOpen(false);
+    }
+
+    if (isUserManagementPage && !manualAdminToggle) {
+      setAdminOpen(true);
+    } else if (!manualAdminToggle) {
+      setAdminOpen(false);
+    }
+  }, [
+    role,
+    location.pathname,
+    manualReportToggle,
+    manualAdminToggle,
+    isEmployeeManagementPage,
+    isUserManagementPage,
+  ]);
 
   useEffect(() => {
     if (
@@ -132,7 +147,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
       const token = localStorage.getItem("token");
       const email = JSON.parse(localStorage.getItem("currentUser")).email;
       const decodedTokenEmail = jwtDecode(token).sub;
-      if (decodedTokenEmail == email) {
+      if (decodedTokenEmail === email) {
         try {
           axios
             .get(`${baseUrl}/employee/email/${email}`, {
@@ -204,10 +219,10 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
 
   useEffect(() => {
     const handleClickOutside = () => {
-      setShowOptions(false);
+      setShowMenu(false);
     };
 
-    if (showOptions) {
+    if (showMenu) {
       document.removeEventListener("click", handleClickOutside);
     }
 
@@ -266,15 +281,6 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
     navigate(path);
     onAccessDenied && onAccessDenied("");
   };
-
-  const toggleOptions = (e) => {
-    e.stopPropagation();
-    setShowOptions((prev) => !prev);
-  };
-
-  function toggleMenu(menuName) {
-    setActiveMenu((prev) => (prev === menuName ? null : menuName));
-  }
 
   const menuPaths = {
     0: ["/personal"],
@@ -372,13 +378,11 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
               <span className="menu-heading">Persnal Information</span>
             </div>
           </li>
+
           {/* Employee Management */}
           {permissions.isAdmin && (
             <li>
-              <div
-                className="menu-item-wrapper"
-                onClick={() => toggleMenu("report")}
-              >
+              <div className="menu-item-wrapper" onClick={toggleReport}>
                 <img
                   src="/images/cases.png"
                   alt="Employee Management"
@@ -391,7 +395,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                   </span>
                 </span>
               </div>
-              {activeMenu === "report" && (
+              {reportOpen && (
                 <ul className="submenu show">
                   <li>
                     <span
@@ -433,10 +437,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
           {/* ✅ Company Management */}
           {permissions.isAdmin && (
             <li>
-              <div
-                className="menu-item-wrapper"
-                onClick={() => toggleMenu("company")}
-              >
+              <div className="menu-item-wrapper" onClick={toggleCompany}>
                 <img
                   src="/images/building-2.png"
                   alt="Company Management"
@@ -449,7 +450,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                   </span>
                 </span>
               </div>
-              {activeMenu === "company" && (
+              {companyOpen && (
                 <ul className="submenu show">
                   <li>
                     <span
@@ -510,7 +511,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
             <li>
               <div
                 className="menu-item-wrapper"
-                onClick={() => toggleMenu("pay")}
+                onClick={togglePay} // <-- Add this onClick handler
               >
                 <img
                   src="/images/hand-coins.png"
@@ -522,7 +523,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                   <span className="menu-dropdown">{payOpen ? "▲" : "▼"}</span>
                 </span>
               </div>
-              {activeMenu === "pay" && (
+              {payOpen && (
                 <ul className="submenu show">
                   <li>
                     <span
@@ -543,7 +544,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                         {deductionsOpen ? "▲" : "▼"}
                       </span>
                     </div>
-                    {openSubmenu === "deductions" && (
+                    {deductionsOpen && (
                       <ul className="submenu show">
                         <li>
                           <span
@@ -553,7 +554,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                             Pension Funds
                           </span>
                         </li>
-                        <li>
+                        {/* <li>
                           <span
                             className="menu-subitem"
                             onClick={() =>
@@ -562,7 +563,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                           >
                             Assign Pension
                           </span>
-                        </li>
+                        </li> */}
                         <li>
                           <span
                             className="menu-subitem"
@@ -632,10 +633,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
           {/* Admin tools (SuperUser only) */}
           {permissions.isAdmin && (
             <li>
-              <div
-                className="menu-item-wrapper"
-                onClick={() => toggleMenu("admin")}
-              >
+              <div className="menu-item-wrapper" onClick={toggleAdmin}>
                 <img
                   src="/images/user-star.png"
                   alt="Admin Tools icon"
@@ -643,12 +641,10 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                 />
                 <span className="menu-heading">
                   Admin Management tools
-                  <span className="menu-dropdown">
-                    {activeMenu === "admin" ? "▲" : "▼"}
-                  </span>
+                  <span className="menu-dropdown">{adminOpen ? "▲" : "▼"}</span>
                 </span>
               </div>
-              {activeMenu === "admin" && (
+              {adminOpen && (
                 <ul className="submenu show">
                   <li>
                     <span
@@ -666,10 +662,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
           {/* NormalUser tools (NormalUser only) */}
           {permissions.isNormalUser && (
             <li>
-              <div
-                className="menu-item-wrapper"
-                onClick={() => toggleMenu("payrollInfo")}
-              >
+              <div className="menu-item-wrapper" onClick={togglePayrollInfo}>
                 <img
                   src="/images/hand-coins.png"
                   alt="Leave"
@@ -682,12 +675,12 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                   </span>
                 </span>
               </div>
-              {activeMenu === "payrollInfo" && (
+              {payInfoOpen && (
                 <ul className="submenu show">
                   <li>
                     <span
                       className="menu-subitem"
-                      onClick={() => handleSubmenuClick("/payslips")}
+                      onClick={() => handleSubmenuClick("/payslip")}
                     >
                       Payslips
                     </span>
@@ -700,10 +693,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
           {/* NormalUser tools (NormalUser only) */}
           {permissions.isNormalUser && (
             <li>
-              <div
-                className="menu-item-wrapper"
-                onClick={() => toggleMenu("leave")}
-              >
+              <div className="menu-item-wrapper" onClick={toggleLeave}>
                 <img
                   src="/images/file-user.png"
                   alt="Leave"
@@ -711,12 +701,10 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                 />
                 <span className="menu-heading">
                   Leave
-                  <span className="menu-dropdown">
-                    {activeMenu === "leave" ? "▲" : "▼"}
-                  </span>
+                  <span className="menu-dropdown">{leaveOpen ? "▲" : "▼"}</span>
                 </span>
               </div>
-              {activeMenu === "leave" && (
+              {leaveOpen && (
                 <ul className="submenu show">
                   <li>
                     <span
@@ -750,10 +738,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
           {/* NormalUser tools (NormalUser only) */}
           {permissions.isNormalUser && (
             <li>
-              <div
-                className="menu-item-wrapper"
-                onClick={() => toggleMenu("payroll")}
-              >
+              <div className="menu-item-wrapper" onClick={togglePayroll}>
                 <img
                   src="/images/calculator.png"
                   alt="Payroll Tools"
@@ -766,7 +751,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                   </span>
                 </span>
               </div>
-              {canProjectPension && activeMenu === "payroll" && (
+              {canProjectPension && payrollOpen && (
                 <ul className="submenu show">
                   <li>
                     <span
@@ -786,6 +771,11 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
       </div>
 
       <div className="menu-footer">
+        <img
+          src="/images/setitngs_icon.png"
+          alt="Settings icon"
+          className="menu-icon"
+        />
         {/* Container for user details */}
         <div className="user-details-container">
           <div
@@ -826,12 +816,6 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
               {/*Create positions endpoint*/}
               {currentUser?.role}
             </div>
-
-            <img
-              src="/images/setitngs_icon.png"
-              alt="Settings icon"
-              className="menu-icon"
-            />
           </div>
         </div>
       </div>
