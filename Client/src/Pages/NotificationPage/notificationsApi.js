@@ -28,10 +28,7 @@ export const  NOTIFICATION_TYPE={
 //Notification DTO only to be used for InApp notifications
 export class NotificationDto{
     constructor(severity,type,rest){
-         //Type and Severity Have to be strictly maintained
-        //  if(!Object.values(NOTIFICATION_TYPE).includes(type))
-        //      throw new Error("Invalid type of notifications");
-     
+         
          if(!Object.values(SEVERITY).includes(severity))
              throw new Error("Invalid severity for notifications");
          this.severity=severity;
