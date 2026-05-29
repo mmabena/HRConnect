@@ -170,13 +170,13 @@ builder.Services.AddQuartz(q =>
   q.AddTrigger(opts => opts
   .ForJob(NotificationJobKey)
   .WithIdentity("NotificationJob-Trigger")
-  .WithCronSchedule("0 0 0 L-4,L-3,L-2,L-1,L * ?", x =>
+  .WithCronSchedule("0 0 0 23-31 * ?", x =>
   x.WithMisfireHandlingInstructionIgnoreMisfires()));
   //Cron Schedule for Payroll Notification Job
   // 0 -> 0 seconds
   // 0 -> 0 minutes
   // 0 -> 0 hours
-  // L-n -> last n days before end of the month 
+  // 23-31 is the widest range of days to include February and longer months
   // * -> for any/every month 
   // ? -> for all days of the week
 
