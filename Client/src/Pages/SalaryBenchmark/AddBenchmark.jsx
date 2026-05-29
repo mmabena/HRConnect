@@ -3,136 +3,39 @@ import React from "react";
 import api from "../../api/api";
 import "./AddBenchmark.css";
 
-function AddBenchmark({ onClose, onAddSuccess }) {
-  const [positions, setPositions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [errors, setErrors] = useState({});
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
-  const [formData, setFormData] = useState({
-    positionId: "",
-    location: "",
-    source: "",
+const LOCATIONS = ["Johannesburg", "Cape Town"];
+
+function emptyCard() {
+  return {
     salary25th: "",
     salary50th: "",
     salary75th: "",
-  });
+    source: "",
+    year: "",
+  };
+}
+
+function AddBenchmark({ onClose, onAddSuccess }) {
+  const [positions, setPositions] = useState([]);
   const [loadingPositions, setLoadingPositions] = useState(true);
+  const [positionId, setPositionId] = useState("");
   const [saving, setSaving] = useState(false);
-  const validate = () => {
-    const newErrors = {};
-    if (!formData.positionId) {
-      newErrors.positionId = "Position is required";
-    }
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
+  const [conflicts, setConflicts] = useState([]);
+  const [currentLocation, setCurrentLocation] = useState(0);
+  const currentLoc = LOCATIONS[currentLocation];
 
-    if (!formData.location.trim()) {
-      newErrors.location = "Location is required";
-    }
+  //one benchmark per location
+  const [cards, setCards] = useState({
+    Johannesburg: emptyCard(),
+    "Cape Town": emptyCard(),
+  });
 
-    if (!formData.source.trim()) {
-      newErrors.source = "Source is required";
-    }
-
-    if (!formData.salary25th) {
-      newErrors.salary25th = "25th percentile is required";
-    } else if (Number(formData.salary25th) <= 0) {
-      newErrors.salary25th = "Must be greater than 0";
-    }
-
-    if (!formData.salary50th) {
-      newErrors.salary50th = "50th percentile is required";
-    } else if (Number(formData.salary50th) <= 0) {
-      newErrors.salary50th = "Must be greater than 0";
-    }
-
-    if (!formData.salary75th) {
-      newErrors.salary75th = "75th percentile is required";
-    } else if (Number(formData.salary75th) <= 0) {
-      newErrors.salary75th = "Must be greater than 0";
-    }
-
-    if (Number(formData.salary25th) >= Number(formData.salary50th)) {
-      newErrors.salary50th =
-        "50th percentile must be greater than 25th percentile";
-    }
-
-    if (Number(formData.salary50th) >= Number(formData.salary75th)) {
-      newErrors.salary75th =
-        "75th percentile must be greater than 50th percentile";
-    }
-
-    setErrors(newErrors);
-
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const locations = ["Johannesburg", "Cape Town"];
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-    setErrors((prev) => ({
-    ...prev,
-    [e.target.name]: "",
-  }));
-  };
-
-  const handleReset = () => {
-    setFormData({
-      positionId: "",
-      location: "",
-      source: "",
-      salary25th: "",
-      salary50th: "",
-      salary75th: "",
-    });
-
-    setErrors({});
-    setError(null);
-  };
-
-  console.log("SENDING:", formData);
-
-  const handleAddBenchmark = async () => {
-    if (saving) return;
-    if (!validate()) return;
-
-    try {
-      setSaving(true);
-
-      const payload = {
-        PositionId: Number(formData.positionId),
-        Location: formData.location,
-        Source: formData.source,
-        Salary25th: Number(formData.salary25th),
-        Salary50th: Number(formData.salary50th),
-        Salary75th: Number(formData.salary75th),
-      };
-
-      console.log("FINAL PAYLOAD:", payload);
-
-      const res = await api.post("/salary-benchmarks", payload);
-
-      console.log("SUCCESS:", res.data);
-
-      onAddSuccess?.(res.data);
-      setSuccess("Benchmark saved successfully!");
-      handleReset();
-    } catch (err) {
-      console.log("ERROR:", err);
-      setError("Failed to save benchmark");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  useEffect(() => {
-    if (success) {
-      const timer = setTimeout(() => setSuccess(null), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [success]);
+  const [errors, setErrors] = useState({
+    Johannesburg: {},
+    "Cape Town": {},
+  });
 
   useEffect(() => {
     const fetchPositions = async () => {
@@ -150,6 +53,169 @@ function AddBenchmark({ onClose, onAddSuccess }) {
     fetchPositions();
   }, []);
 
+  //checking for exisiting benchmarks when position is selected
+  useEffect(() => {
+    if (!positionId) {
+      setConflicts([]);
+      return;
+    }
+
+    async function checkConflicts() {
+      try {
+        // fetch all benchmarks and filter client-side
+        // avoids needing a new endpoint
+        const res = await api.get("/salary-benchmarks");
+        const existing = res.data.filter(
+          (b) => b.positionId === Number(positionId),
+        );
+        setConflicts(existing.map((b) => b.location));
+      } catch {
+        // non-critical — just skip conflict check
+        setConflicts([]);
+      }
+    }
+
+    checkConflicts();
+  }, [positionId]);
+
+  function handleCardChange(location, field, value) {
+    setCards((prev) => ({
+      ...prev,
+      [location]: { ...prev[location], [field]: value },
+    }));
+    setErrors((prev) => ({
+      ...prev,
+      [location]: { ...prev[location], [field]: "" },
+    }));
+  }
+
+  function validate() {
+    if (!positionId) {
+      setError("Please select a position.");
+      return false;
+    }
+
+    let valid = true;
+    const newErrors = { Johannesburg: {}, "Cape Town": {} };
+
+    LOCATIONS.forEach((loc) => {
+      const c = cards[loc];
+
+      if (!c.year.trim()) newErrors[loc].year = "Select Date";
+      if (!c.source.trim()) newErrors[loc].source = "Required";
+
+      if (!c.salary25th) newErrors[loc].salary25th = "Required";
+      else if (Number(c.salary25th) <= 0)
+        newErrors[loc].salary25th = "Must be greater than 0";
+
+      if (!c.salary50th) newErrors[loc].salary50th = "Required";
+      else if (Number(c.salary50th) <= 0)
+        newErrors[loc].salary50th = "Must be greater than 0";
+
+      if (!c.salary75th) newErrors[loc].salary75th = "Required";
+      else if (Number(c.salary75th) <= 0)
+        newErrors[loc].salary75th = "Must be greater than 0";
+
+      // percentile order
+      if (Number(c.salary25th) >= Number(c.salary50th))
+        newErrors[loc].salary50th = "P50 must be greater than P25";
+      if (Number(c.salary50th) >= Number(c.salary75th))
+        newErrors[loc].salary75th = "P75 must be greater than P50";
+
+      if (Object.keys(newErrors[loc]).length > 0) valid = false;
+    });
+
+    setErrors(newErrors);
+    return valid;
+  }
+
+  function handleReset() {
+    setPositionId("");
+    setCurrentLocation(0);
+    setCards({ Johannesburg: emptyCard(), "Cape Town": emptyCard() });
+    setErrors({ Johannesburg: {}, "Cape Town": {} });
+    setError(null);
+    setConflicts([]);
+  }
+
+  // auto close after success
+  useEffect(() => {
+    if (success) {
+      const t = setTimeout(() => {
+        setSuccess(null);
+        onClose();
+      }, 4000);
+      return () => clearTimeout(t);
+    }
+  }, [success]);
+
+  async function handleSave() {
+    if (saving) return;
+    setError(null);
+
+    if (!validate()) return;
+
+    const blocked = LOCATIONS.filter((loc) => conflicts.includes(loc));
+    if (blocked.length > 0) {
+      setError(
+        `A benchmark already exists for ${blocked.join(" and ")} for this position. Please edit the existing one instead.`,
+      );
+      return;
+    }
+
+    setSaving(true);
+
+    const failed = [];
+    const succeeded = [];
+
+    for (const loc of LOCATIONS) {
+      try {
+        const payload = {
+          PositionId: Number(positionId),
+          Location: loc,
+          Salary25th: Number(cards[loc].salary25th),
+          Salary50th: Number(cards[loc].salary50th),
+          Salary75th: Number(cards[loc].salary75th),
+          Source: cards[loc].source.trim(),
+          Year: Number(cards[loc].year),
+        };
+
+        console.log(`Sending ${loc}:`, payload);
+
+        await api.post("/salary-benchmarks", payload);
+        succeeded.push(loc);
+      } catch (err) {
+        console.log(`Failed ${loc}:`, err.response?.status, err.response?.data);
+        failed.push(loc);
+      }
+    }
+
+    setSaving(false);
+
+    if (failed.length === 0) {
+      setSuccess("Both benchmarks saved successfully!");
+      onAddSuccess?.();
+    } else if (succeeded.length > 0) {
+      setError(
+        `${succeeded.join(" and ")} saved but ${failed.join(" and ")} failed. Please try again.`,
+      );
+      onAddSuccess?.();
+    } else {
+      setError("Failed to save benchmarks. Please try again.");
+    }
+  }
+
+  const currentYear = new Date().getFullYear();
+
+  const YEARS = Array.from(
+    { length: currentYear - 2019 + 1,},
+    (_, i) => currentYear - i
+  );
+  
+ const loc = currentLoc;
+          const card = cards[loc];
+          const cardErrors = errors[loc];
+          const hasConflict = conflicts.includes(loc);
   return (
     <div className="b-container">
       <div className="b-head-container">
@@ -193,10 +259,13 @@ function AddBenchmark({ onClose, onAddSuccess }) {
             <span className="b-label">POSITION TITLE</span>
             <div className="dropdown-wrapper">
               <select
-                className="b-form-input"
+                className="b-form-input-p"
                 name="positionId"
-                value={formData.positionId}
-                onChange={handleChange}
+                value={positionId}
+                onChange={(e) => {
+                  setPositionId(e.target.value);
+                  setError(null);
+                }}
               >
                 <option value="">Select Position</option>
 
@@ -206,110 +275,152 @@ function AddBenchmark({ onClose, onAddSuccess }) {
                   </option>
                 ))}
               </select>
-
               <svg className="dropdown-icon" viewBox="0 0 20 20">
                 <path d="M10 13L14 9H6L10 13Z" />
               </svg>
             </div>
-            {errors.positionId && (
-              <span className="error">{errors.positionId}</span>
-            )}
           </div>
-          <div className="b-location-wrapper">
-            <span className="b-label">LOCATION</span>
-            <div className="dropdown-wrapper">
+          <div className="b-date-wrapper">
+            <span className="b-label-date">Year</span>
+            <div className="dropdown-wrapper-date">
               <select
-                className="b-form-input"
-                name="location"
-                value={formData.location}
-                onChange={handleChange}
+                className="b-form-date-select"
+                name="year"
+                value={cards.year}
+                onChange={(e) => handleCardChange(loc, "year", e.target.value)}
               >
-                <option value="">Select location</option>
-                {locations.map((l, index) => (
-                  <option key={index} value={l}>
-                    {l}
+                <option value="">Select Year</option>
+
+                {YEARS.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
                   </option>
                 ))}
               </select>
-
-              <svg className="dropdown-icon" viewBox="0 0 20 20">
-                <path d="M10 13L14 9H6L10 13Z" />
-              </svg>
-            </div>
-            {errors.location && (
-  <span className="error">{errors.location}</span>
-)}
-          </div>
-        </div>
-        <div className="b-percentile-container">
-          <span className="b-salarypercentile">Base Salary Percentiles</span>
-        </div>
-        <div className="b-percentile-wrapper">
-          <div className="b-percentile">
-            <div className="b-percentile25">
-              <span className="bp-label">25th Percentile(Lowest)</span>
-              <input
-                className="bp-form-input"
-                type="number"
-                min="0"
-                name="salary25th"
-                value={formData.salary25th}
-                onChange={handleChange}
-              />
-              {errors.salary25th && (
-  <span className="error">{errors.salary25th}</span>
-)}
-            </div>
-            <div className="b-percentile50">
-              <span className="bp-label">50th Percentile(Median)</span>
-              <input
-                className="bp-form-input"
-                type="number"
-                min="0"
-                name="salary50th"
-                value={formData.salary50th}
-                onChange={handleChange}
-              />
-              {errors.salary50th && (
-  <span className="error">{errors.salary50th}</span>
-)}
+              {cardErrors.year && (
+                <span className="error">{cardErrors.year}</span>
+              )}
             </div>
 
-            <div className="b-percentile75">
-              <span className="bp-label">75th Percentile(Highest)</span>
+            <svg className="dropdown-icon" viewBox="0 0 20 20">
+              <path d="M10 13L14 9H6L10 13Z" />
+            </svg>
+          </div>
+        </div>
+        {/* location cards */}
+        {(() => {
+          const loc = currentLoc;
+          const card = cards[loc];
+          const cardErrors = errors[loc];
+          const hasConflict = conflicts.includes(loc);
 
-              <input
-                className="bp-form-input"
-                type="number"
-                min="0"
-                name="salary75th"
-                value={formData.salary75th}
-                onChange={handleChange}
-              />
-              {errors.salary75th && (
-  <span className="error">{errors.salary75th}</span>
-)}
+          return (
+            <div key={loc} className="b-location-card">
+              <div className="b-location-header">
+                <div>
+                  <span className="b-location-card-title">{loc}</span>
+                  <p className="b-location-card-sub">
+                    South Africa Market Benchmark
+                  </p>
+                </div>
+                {hasConflict && (
+                  <span className="b-conflict-badge">
+                    ⚠ Benchmark already exists — edit instead
+                  </span>
+                )}
+              </div>
+
+              <div className="b-step-indicator">
+                {LOCATIONS.map((l, i) => (
+                  <span
+                    key={l}
+                    className={`b-step-dot ${i === currentLocation ? "b-step-dot--active" : ""}`}
+                  />
+                ))}
+                <span className="b-step-label">
+                  {currentLocation + 1} of {LOCATIONS.length}
+                </span>
+              </div>
+
+              <div className="b-percentile-wrapper">
+                <div className="b-percentile">
+                  <div className="b-percentile25">
+                    <span className="bp-label">25th Percentile(Lowest)</span>
+                    <div className="bp-source-wrapper">
+                      <input
+                        className="bp-form-input"
+                        type="number"
+                        min="0"
+                        value={card.salary25th}
+                        onChange={(e) =>
+                          handleCardChange(loc, "salary25th", e.target.value)
+                        }
+                      />
+                      {cardErrors.salary25th && (
+                        <span className="error">{cardErrors.salary25th}</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="b-percentile50">
+                    <span className="bp-label">50th Percentile(Median)</span>
+                    <div className="bp-source-wrapper">
+                      <input
+                        className="bp-form-input"
+                        type="number"
+                        min="0"
+                        value={card.salary50th}
+                        onChange={(e) =>
+                          handleCardChange(loc, "salary50th", e.target.value)
+                        }
+                      />
+                      {cardErrors.salary50th && (
+                        <span className="error">{cardErrors.salary50th}</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="b-percentile75">
+                    <span className="bp-label">75th Percentile(Highest)</span>
+                    <div className="bp-source-wrapper">
+                      <input
+                        className="bp-form-input"
+                        type="number"
+                        min="0"
+                        value={card.salary75th}
+                        onChange={(e) =>
+                          handleCardChange(loc, "salary75th", e.target.value)
+                        }
+                      />
+                      {cardErrors.salary75th && (
+                        <span className="error">{cardErrors.salary75th}</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="b-source-container">
+                <div className="b-label-wrapper">
+                  <span className="bp-label-s">SOURCE</span>
+                </div>
+                <div className="bp-source-wrapper">
+                  <input
+                    className="bp-source-box"
+                    type="text"
+                    value={card.source}
+                    onChange={(e) =>
+                      handleCardChange(loc, "source", e.target.value)
+                    }
+                    placeholder="Payscale Only"
+                  />
+                  {cardErrors.source && (
+                    <span className="error">{cardErrors.source}</span>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-        <div className="b-source-container">
-          <div className="b-label-wrapper">
-            <span className="bp-label-s">SOURCE</span>
-          </div>
-          <div className="bp-source-wrapper">
-            <input
-              className="bp-source-box"
-              type="text"
-              name="source"
-              value={formData.source}
-              onChange={handleChange}
-              placeholder="Payscale Only"
-            />
-            {errors.source && (
-  <span className="error">{errors.source}</span>
-)}
-          </div>
-        </div>
+          );
+        })()}
       </div>
 
       <div className="b-buttons">
@@ -331,32 +442,52 @@ function AddBenchmark({ onClose, onAddSuccess }) {
           </svg>
           Reset
         </button>
-        <button
-          type="button"
-          className="b-complete"
-          onClick={handleAddBenchmark}
-          disabled={saving}
-        >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
+
+        {/* back — only show on second card */}
+        {currentLocation > 0 && (
+          <button
+            className="b-reset"
+            onClick={() => setCurrentLocation((p) => p - 1)}
           >
-            <path
-              d="M16.6654 5L7.4987 14.1667L3.33203 10"
-              stroke="white"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-          {loading ? "Save Benchmark" : "Saving ..."}
-        </button>
+            ← Back
+          </button>
+        )}
+        {currentLocation < LOCATIONS.length - 1 ? (
+          <button
+            className="b-complete"
+            onClick={() => setCurrentLocation((p) => p + 1)}
+          >
+            Next →
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="b-complete"
+            onClick={handleSave}
+            disabled={saving}
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M16.6654 5L7.4987 14.1667L3.33203 10"
+                stroke="white"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            {saving ? "Saving..." : "Save Benchmarks"}
+          </button>
+        )}
       </div>
     </div>
   );
 }
 
 export default AddBenchmark;
+

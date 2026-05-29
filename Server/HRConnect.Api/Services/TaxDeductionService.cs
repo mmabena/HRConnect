@@ -92,14 +92,13 @@ namespace HRConnect.Api.Services
       }
       else
       {
-
         decimal baseAmount = age switch
         {
           <= 64 => 54481m,
           <= 74 => 53694m,
           _ => 53432m
         };
-
+        // calculation based on people who earn more than what ia on the tax table 
         decimal excess = Math.Max(0, remuneration - 156_328m / 12);
         decimal tax = baseAmount + (0.45m * excess);
 
@@ -113,7 +112,7 @@ namespace HRConnect.Api.Services
     /// </summary>
     /// <param name="taxYear">The year to retrieve deductions for</param>
     /// <returns>List of tax deductions as DTOs</returns>
-    public async Task<List<TaxDeductionDto>> GetAllTaxDeductionsAsync(int taxYear)
+    public async Task<List<TaxDeductionDto>> GetAllTaxDeductionsAsync(int taxYear) 
     {
       var entities = await _repository.GetTaxDeductionsByYearAsync(taxYear);
       var ordered = entities.OrderBy(x => x.Remuneration).ToList();

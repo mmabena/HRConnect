@@ -15,5 +15,6 @@ namespace HRConnect.Api.DTOs.Benchmarking
     public decimal Salary75th { get; set; }
     public string Source { get; set; } = string.Empty;
     public string CreatedBy { get; set; } = string.Empty;
+   public int Year { get; set; }
   }
 }

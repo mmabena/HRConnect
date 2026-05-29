@@ -19,5 +19,6 @@ namespace HRConnect.Api.DTOs.Benchmarking
     public string Source { get; set; } = string.Empty;
     public string CreatedBy { get; set; } = string.Empty;
     public DateTime CreatedDate { get; set; }
+    public int Year { get; set; }
   }
 }

@@ -9,6 +9,7 @@ function EditBenchmark({ benchmark, onClose, onEditSuccess }) {
     salary50th: benchmark.salary50th,
     salary75th: benchmark.salary75th,
     source: benchmark.source,
+    year: benchmark.year,
   });
 
   const [errors, setErrors] = useState({});
@@ -19,6 +20,7 @@ function EditBenchmark({ benchmark, onClose, onEditSuccess }) {
   //- validations
   function validate() {
     const newErrors = {};
+    if(!formData.year) newErrors.year = "Select year";
     if (!formData.salary25th || Number(formData.salary25th) <= 0)
       newErrors.salary25th = "Must be greater than 0";
     if (!formData.salary50th || Number(formData.salary50th) <= 0)
@@ -26,6 +28,11 @@ function EditBenchmark({ benchmark, onClose, onEditSuccess }) {
     if (!formData.salary75th || Number(formData.salary75th) <= 0)
       newErrors.salary75th = "Must be greater than 0";
     if (!formData.source.trim()) newErrors.source = "Required";
+    if (Number(formData.salary25th) >= Number(formData.salary50th))
+      newErrors.salary50th = "P50 must be greater than P25";
+    if (Number(formData.salary50th) >= Number(formData.salary75th))
+      newErrors.salary75th = "P75 must be greater than P50";
+
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -59,6 +66,7 @@ function EditBenchmark({ benchmark, onClose, onEditSuccess }) {
         Salary50th: Number(formData.salary50th),
         Salary75th: Number(formData.salary75th),
         Source: formData.source.trim(),
+        year: Number(formData.year),
       };
 
       const res = await api.put(`/salary-benchmarks/${benchmark.id}`, payload);
@@ -81,6 +89,13 @@ function EditBenchmark({ benchmark, onClose, onEditSuccess }) {
       return () => clearTimeout(timer);
     }
   }, [success]);
+
+  const currentYear = new Date().getFullYear();
+
+  const YEARS = Array.from(
+    { length: currentYear - 2019 + 1,},
+    (_, i) => currentYear - i
+  );
 
   return (
     <div className="b-container">
@@ -124,92 +139,121 @@ function EditBenchmark({ benchmark, onClose, onEditSuccess }) {
         <div className="b-label-container">
           <div className="b-position-wrapper">
             <span className="b-label">POSITION TITLE</span>
-            <input
-              className="b-form-input"
-              type="text"
-              value={benchmark.positionTitle}
-              disabled
-            />
-          </div>
-          <div className="b-location-wrapper">
-            <span className="b-label">LOCATION</span>
-            <input
-              className="b-form-input"
-              type="text"
-              value={benchmark.location}
-              disabled
-            />
-          </div>
-        </div>
-
-        <div className="b-percentile-container">
-          <span className="b-salarypercentile">Base Salary Percentiles</span>
-        </div>
-
-        <div className="b-percentile-wrapper">
-          <div className="b-percentile">
-            <div className="b-percentile25">
-              <span className="bp-label">25th Percentile(Lowest)</span>
+            <div className="dropdown-wrapper">
               <input
-                className="bp-form-input"
-                type="number"
-                name="salary25th"
-                value={formData.salary25th}
-                onChange={handleChange}
+                className="b-form-input-p"
+                name="positionId"
+                value={benchmark.positionTitle}
+                disabled
               />
-              {errors.salary25th && (
-                <span className="error">{errors.salary25th}</span>
+              <svg className="dropdown-icon" viewBox="0 0 20 20">
+                <path d="M10 13L14 9H6L10 13Z" />
+              </svg>
+            </div>
+          </div>
+          <div className="b-date-wrapper">
+            <span className="b-label-date">DATE</span>
+            <div className="dropdown-wrapper-date">
+              <select
+                className="b-form-date-select"
+                name="year"
+                value={formData.year}
+                onChange={handleChange}
+              >
+                <option value="">Select Year</option>
+
+                {YEARS.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+              {errors.year &&(
+                <span className="error">{errors.year}</span>
               )}
             </div>
 
-            <div className="b-percentile50">
-              <span className="bp-label">50th Percentile(Median)</span>
-              <input
-                className="bp-form-input"
-                type="number"
-                name="salary50th"
-                value={formData.salary50th}
-                onChange={handleChange}
-              />
-              {errors.salary50th && (
-                <span className="error">{errors.salary50th}</span>
-              )}
-            </div>
-
-            <div className="b-percentile75">
-              <span className="bp-label">75th Percentile(Highest)</span>
-              <input
-                className="bp-form-input"
-                type="number"
-                name="salary75th"
-                value={formData.salary75th}
-                onChange={handleChange}
-              />
-              {errors.salary75th && (
-                <span className="error">{errors.salary75th}</span>
-              )}
-            </div>
+            <svg className="dropdown-icon" viewBox="0 0 20 20">
+              <path d="M10 13L14 9H6L10 13Z" />
+            </svg>
           </div>
         </div>
-
-        <div className="b-source-container">
-          <div className="b-label-wrapper">
-            <span className="bp-label-s">SOURCE</span>
+        <div className="b-location-card">
+          <div className="b-location-header">
+            <span className="b-location-card-title">{benchmark.location}</span>
+            <p className="b-location-card-sub">South Africa Market Benchmark</p>
           </div>
-          <div className="bp-source-wrapper">
-            <input
-              className="bp-source-box"
-              type="text"
-              name="source"
-              value={formData.source}
-              onChange={handleChange}
-              placeholder="e.g. Payscale 2026"
-            />
-            {errors.source && <span className="error">{errors.source}</span>}
+
+          <div className="b-percentile-wrapper">
+            <div className="b-percentile">
+              <div className="b-percentile25">
+                <span className="bp-label">25th Percentile(Lowest)</span>
+                <div className="bp-source-wrapper">
+                  <input
+                    className="bp-form-input"
+                    type="number"
+                    name="salary25th"
+                    value={formData.salary25th}
+                    onChange={handleChange}
+                  />
+                  {errors.salary25th && (
+                    <span className="error">{errors.salary25th}</span>
+                  )}
+                </div>
+              </div>
+
+              <div className="b-percentile50">
+                <span className="bp-label">50th Percentile(Median)</span>
+                <div className="bp-source-wrapper">
+                  <input
+                    className="bp-form-input"
+                    type="number"
+                    name="salary50th"
+                    value={formData.salary50th}
+                    onChange={handleChange}
+                  />
+                  {errors.salary50th && (
+                    <span className="error">{errors.salary50th}</span>
+                  )}
+                </div>
+              </div>
+
+              <div className="b-percentile75">
+                <span className="bp-label">75th Percentile(Highest)</span>
+                <div className="bp-source-wrapper">
+                  <input
+                    className="bp-form-input"
+                    type="number"
+                    name="salary75th"
+                    value={formData.salary75th}
+                    onChange={handleChange}
+                  />
+                  {errors.salary75th && (
+                    <span className="error">{errors.salary75th}</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="b-source-container">
+            <div className="b-label-wrapper">
+              <span className="bp-label-s">SOURCE</span>
+            </div>
+            <div className="bp-source-wrapper">
+              <input
+                className="bp-source-box"
+                type="text"
+                name="source"
+                value={formData.source}
+                onChange={handleChange}
+                placeholder="e.g. Payscale 2026"
+              />
+              {errors.source && <span className="error">{errors.source}</span>}
+            </div>
           </div>
         </div>
       </div>
-
       <div className="b-buttons">
         <button className="b-reset" onClick={handleReset}>
           <svg

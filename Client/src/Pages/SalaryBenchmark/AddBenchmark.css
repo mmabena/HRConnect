@@ -4,10 +4,10 @@
   align-items: center;
   padding: 0px;
 
-  width: 841px;
-  height: 545px;
-
-  background-color: #e0e0e0;
+  width: auto;
+  height: auto;
+  min-height: 545px;
+  background-color: #f6f7f8;
   border-radius: 10px;
 }
 
@@ -92,12 +92,148 @@
   gap: 10px;
 
   width: 782px;
-  height: 375px;
+  height: auto;
 
   border-bottom: 1px solid rgba(154, 154, 154, 0.55);
   flex: none;
   order: 1;
   flex-grow: 0;
+}
+
+.b-form-input-p {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px 5px 5px 10px;
+  gap: 5px;
+  width: 740px;
+  height: 37px;
+  border: none;
+  font-family: "Anek Bangla";
+  font-size: 16px;
+  color: #707070;
+  background-color: transparent;
+}
+
+.b-label-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px;
+  gap: 40px;
+
+  width: 782px;
+  height: 77px;
+
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.dropdown-wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 6px 12px;
+  gap: 10px;
+
+  width: 500px;
+  height: 42px;
+
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: rgba(92, 92, 92, 0.61) 0px 1px 2px 0px;
+
+  /* Inside auto layout */
+  flex: none;
+  order: 1;
+  flex-grow: 0;
+}
+
+.dropdown-wrapper-date {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 6px 12px;
+  gap: 10px;
+
+  width: 200px;
+  height: 42px;
+
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: rgba(92, 92, 92, 0.61) 0px 1px 2px 0px;
+
+  /* Inside auto layout */
+  flex: none;
+  order: 1;
+  flex-grow: 0;
+}
+
+.b-date-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 10px 5px 20px 8px;
+
+  width: 210px;
+  height: 77px;
+
+  border-radius: 5px;
+
+  /* Inside auto layout */
+  flex: none;
+  order: 2;
+  flex-grow: 0;
+}
+
+.b-label-date {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px 0px 12px;
+  gap: 10px;
+
+  width: 180px;
+  height: 33px;
+
+  /* Inside auto layout */
+  flex: none;
+  order: 0;
+  align-self: stretch;
+  flex-grow: 0;
+  margin: -4px 0px;
+
+  font-family: "Anek Bangla";
+  font-style: normal;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 26px;
+  /* identical to box height, or 186% */
+
+  color: #4f6e78;
+
+  /* Inside auto layout */
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.b-form-date-select {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px 5px 5px 10px;
+  gap: 5px;
+  width: 740px;
+  height: 37px;
+  border: none;
+  font-family: "Anek Bangla";
+  font-size: 16px;
+  color: #707070;
+  background-color: transparent;
 }
 
 .b-buttons {
@@ -107,7 +243,8 @@
   align-items: flex-end;
   padding: 12px 20px 12px 12px;
   gap: 12px;
-
+  margin-top: 8px;
+  margin-bottom: 12px;
   width: 800px;
   height: 71px;
 
@@ -183,20 +320,6 @@
   flex-grow: 0;
 }
 
-.b-label-container {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  padding: 12px 0px 0px 0px;
-  gap: 40px;
-
-  width: 782px;
-  height: 77px;
-  flex: none;
-  order: 0;
-  flex-grow: 0;
-}
-
 .b-label {
   display: flex;
   flex-direction: row;
@@ -269,9 +392,10 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  padding: 0px 5px 5px 8px;
-
-  width: 371px;
+  padding: 10px 5px 20px 8px;
+  position: relative;
+  left: 8px;
+  width: 515px;
   height: 77px;
 
   border-radius: 5px;
@@ -361,7 +485,7 @@
   flex-direction: row;
   align-items: flex-start;
   padding: 0px 5px 5px 0px;
-  gap: 14px;
+  gap: 1px;
 
   width: 785px;
   height: 77px;
@@ -416,7 +540,7 @@
   padding: 0px 5px 5px 10px;
   gap: 5px;
 
-  width: 239px;
+  width: 220px;
   height: 37px;
 
   border: 0.999902px solid rgba(154, 154, 154, 0.55);
@@ -476,7 +600,7 @@
   padding: 0px 5px 5px 8px;
 
   width: 785px;
-  height: 166px;
+  height: 130px;
 
   border-radius: 5px;
 
@@ -511,7 +635,7 @@
   padding: 10px 5px 5px 10px;
   gap: 20px;
 
-  width: 763px;
+  width: 712px;
   height: 61px;
 
   border: 0.999902px solid rgba(154, 154, 154, 0.55);
@@ -563,9 +687,131 @@
   margin: -4px 0px;
 }
 
-.success{
+.success {
   color: green;
   text-align: center;
   padding: 2px;
   font-size: 14px;
+}
+
+/* location card */
+.b-location-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #ffffff;
+  border: 0.5px solid rgba(154, 154, 154, 0.3);
+  border-radius: 10px;
+  padding: 18px 20px;
+  margin-top: 8px;
+  margin-bottom: 12px;
+  align-self: center;
+  box-shadow: rgba(92, 92, 92, 0.61) 0px 1px 2px 0px;
+}
+
+.b-location-card-header {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.b-step-indicator {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.b-step-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(154, 154, 154, 0.4);
+}
+
+.b-step-dot--active {
+  background: #355867;
+}
+
+.b-step-label {
+  font-family: "Anek Bangla";
+  font-size: 13px;
+  color: #9a9a9a;
+  margin-left: 4px;
+}
+
+.b-location-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #ffffff;
+  border: 0.5px solid rgba(154, 154, 154, 0.3);
+  border-radius: 10px;
+  padding: 14px 16px;
+  width: 750px;
+}
+
+.b-location-card-title {
+  font-family: "Anek Bangla";
+  font-weight: 600;
+  font-size: 18px;
+  color: #355867;
+}
+
+.b-location-card-sub {
+  font-family: "Anek Bangla";
+  font-size: 13px;
+  color: #9a9a9a;
+  margin: 0;
+}
+
+/* conflict warning badge */
+.b-conflict-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  background: rgba(244, 80, 82, 0.1);
+  border: 0.5px solid #f45052;
+  border-radius: 8px;
+  font-family: "Anek Bangla";
+  font-size: 13px;
+  color: #f45052;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* year badge current and old year ------ */
+.sb-year-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-family: "Anek Bangla";
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* green — data is from this year */
+.sb-year-badge--current {
+  background: rgba(175, 191, 116, 0.3);
+  color: #638549;
+  border: 0.5px solid #afbf74;
+}
+
+/* red — data is from a previous year, needs updating */
+.sb-year-badge--stale {
+  background: rgba(226, 33, 33, 0.13);
+  color: #f45052;
+  border: 0.5px solid #f45052;
+}
+
+.sb-table-muted {
+  font-size: 13px;
+  color: #9a9a9a;
+  font-family: "Anek Bangla";
 }

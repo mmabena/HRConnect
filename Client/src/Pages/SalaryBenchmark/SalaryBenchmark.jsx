@@ -349,6 +349,10 @@ function EmployeeCard({ employee, index, isOpen, onToggle }) {
                 Location: <strong>{employee.location || "—"}</strong>
               </span>
             </div>
+            <div className="sb-card-container">
+              <span className="sb-label">Data Year: <strong>{employee.year}</strong>
+              </span>
+            </div>
           </div>
           <RangeBar employee={employee} />
         </div>
@@ -408,11 +412,9 @@ function Pagination({
             <option value={15}>15</option>
             <option value={18}>18</option>
             <option value={20}>20</option>
-            
-
           </select>
           <svg
-          className="sb-perpage-icon"
+            className="sb-perpage-icon"
             width="20"
             height="20"
             viewBox="0 0 20 20"
@@ -549,6 +551,9 @@ function SalaryBenchmark() {
   const [viewMode, setViewMode] = useState("employees");
 
   const [editingBenchmark, setEditingBenchmark] = useState(null);
+  const [filterBenchmarkPosition, setFilterBenchmarkPosition] = useState("");
+  const [filterBenchmarkBranch, setFilterBenchmarkBranch] = useState("");
+  const [searchBenchmark, setSearchBenchmark] = useState("");
 
   const reloadBenchmarks = async () => {
     try {
@@ -577,20 +582,6 @@ function SalaryBenchmark() {
     load();
   }, []);
 
-  //  useEffect(() => {
-  //     async function load() {
-  //       try {
-  //         const res = await api.get("/salary-benchmarks");
-  //         setBenchmark(res.data);
-  //       } catch (err) {
-  //         setError(err.message);
-  //       } finally {
-  //         setLoading(false);
-  //       }
-  //     }
-  //     load();
-  //   }, []);
-
   const handleAddBenchmark = async () => {
     try {
       setLoading(true);
@@ -599,7 +590,6 @@ function SalaryBenchmark() {
       setBenchmark((prev) => [...prev, res.data]);
       setShowPopup(false); // close popup
       // reset form
-    
     } catch (err) {
       setError(err.message);
     } finally {
@@ -663,6 +653,43 @@ function SalaryBenchmark() {
     [benchmark],
   );
 
+  // dropdown options for dropdown
+  const benchmarkPositions = useMemo(
+    () => [...new Set(benchmark.map((b) => b.positionTitle))].sort(),
+    [benchmark],
+  );
+
+  const benchmarkBranches = useMemo(
+    () => [...new Set(benchmark.map((b) => b.location).filter(Boolean))].sort(),
+    [benchmark],
+  );
+
+  const filteredBenchmarks = useMemo(() => {
+    return benchmark.filter((b) => {
+      if (
+        filterBenchmarkPosition &&
+        b.positionTitle !== filterBenchmarkPosition
+      )
+        return false;
+      if (filterBenchmarkBranch && b.location !== filterBenchmarkBranch)
+        return false;
+      if (
+        searchBenchmark &&
+        !b.positionTitle
+          .toLowerCase()
+          .includes(searchBenchmark.toLowerCase()) &&
+        !b.source.toLowerCase().includes(searchBenchmark.toLowerCase())
+      )
+        return false;
+      return true;
+    });
+  }, [
+    benchmark,
+    filterBenchmarkPosition,
+    filterBenchmarkBranch,
+    searchBenchmark,
+  ]);
+
   const [empPage, setEmpPage] = useState(1);
   const [empPerPage, setEmpPerPage] = useState(5);
   const [benchmarkPage, setBenchmarkPage] = useState(1);
@@ -683,8 +710,12 @@ function SalaryBenchmark() {
   const totalBenchmarkPages = Math.ceil(benchmark.length / benchmarkPerPage);
   const paginatedBenchmarks = useMemo(() => {
     const start = (benchmarkPage - 1) * benchmarkPerPage;
-    return benchmark.slice(start, start + benchmarkPerPage);
-  }, [benchmark, benchmarkPage, benchmarkPerPage]);
+    return filteredBenchmarks.slice(start, start + benchmarkPerPage);
+  }, [filteredBenchmarks, benchmarkPage, benchmarkPerPage]);
+
+  useEffect(() => {
+    setBenchmarkPage(1);
+  }, [filterBenchmarkPosition, filterBenchmarkBranch, searchBenchmark]);
 
   function toggleCard(id) {
     setOpenId((prev) => (prev === id ? null : id));
@@ -752,57 +783,106 @@ function SalaryBenchmark() {
         </div>
         <div />
       </div>
-      <div className="navbar-with-button">
-        <PayrollNavbar />
+      <div className="sb-heading-sal">
+        <span>Salary Benchmark</span>
       </div>
 
       <div className="sb-filters">
         <div className="sb-filters-group">
-          <div className="sb-group-filters">
-            <span className="sb-filter-label">Position title</span>
-            <select                                                   
-              value={filterPosition}
-              onChange={(e) => setFilterPosition(e.target.value)}
-            >
-              <option value="">All positions</option>
-              {positions.map((p) => (
-                <option key={p} value={p}>
-                  {p}
-                </option>
-              ))}
-            </select>
-          </div>
+          {viewMode === "employees" ? (
+            <>
+              <div className="sb-group-filters">
+                <span className="sb-filter-label">Position title</span>
+                <select
+                  value={filterPosition}
+                  onChange={(e) => setFilterPosition(e.target.value)}
+                >
+                  <option value="">All positions</option>
+                  {positions.map((p) => (
+                    <option key={p} value={p}>
+                      {p}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-          <div className="sb-group-filters-s">
-            <span className="sb-filter-label-s">Salary benchmark</span>
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-            >
-              <option value="">All</option>
-              <option value="Below Market">Below market</option>
-              <option value="At Market">At market</option>
-              <option value="Above Market">Above market</option>
-              <option value="No Data">No data</option>
-            </select>
-          </div>
+              <div className="sb-group-filters-s">
+                <span className="sb-filter-label-s">Salary benchmark</span>
+                <select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                >
+                  <option value="">All</option>
+                  <option value="Below Market">Below market</option>
+                  <option value="At Market">At market</option>
+                  <option value="Above Market">Above market</option>
+                  <option value="No Data">No data</option>
+                </select>
+              </div>
 
-          <div className="sb-group-filter">
-            <div className="sb-filter-branch">
-              <span className="sb-filter-label-b">Branch</span>
-              <select
-                value={filterBranch}
-                onChange={(e) => setFilterBranch(e.target.value)}
-              >
-                <option value="">All branches</option>
-                {branches.map((b) => (
-                  <option key={b} value={b}>
-                    {b}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
+              <div className="sb-group-filter">
+                <div className="sb-filter-branch">
+                  <span className="sb-filter-label-b">Branch</span>
+                  <select
+                    value={filterBranch}
+                    onChange={(e) => setFilterBranch(e.target.value)}
+                  >
+                    <option value="">All branches</option>
+                    {branches.map((b) => (
+                      <option key={b} value={b}>
+                        {b}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              {/* ── benchmark filters ── */}
+              <div className="sb-group-filters-s">
+                <span className="sb-filter-label">Search</span>
+                <input
+                  className="sb-search-input"
+                  type="text"
+                  placeholder="Search position or source..."
+                  value={searchBenchmark}
+                  onChange={(e) => setSearchBenchmark(e.target.value)}
+                />
+              </div>
+              <div className="sb-group-filters">
+                <span className="sb-filter-label">Position title</span>
+                <select
+                  value={filterBenchmarkPosition}
+                  onChange={(e) => setFilterBenchmarkPosition(e.target.value)}
+                >
+                  <option value="">All positions</option>
+                  {benchmarkPositions.map((p) => (
+                    <option key={p} value={p}>
+                      {p}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="sb-group-filter">
+                <div className="sb-filter-branch">
+                  <span className="sb-filter-label-b">Branch</span>
+                  <select
+                    value={filterBenchmarkBranch}
+                    onChange={(e) => setFilterBenchmarkBranch(e.target.value)}
+                  >
+                    <option value="">All branches</option>
+                    {benchmarkBranches.map((b) => (
+                      <option key={b} value={b}>
+                        {b}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -931,34 +1011,54 @@ function SalaryBenchmark() {
               <table className="sb-table">
                 <thead>
                   <tr>
-                    <th>Position</th>
+                    <th>Position Title</th>
                     <th>Location</th>
-                    <th>P25</th>
-                    <th>P50</th>
-                    <th>P75</th>
+                    <th>P25(Lowest)</th>
+                    <th>P50(Median)</th>
+                    <th>P75(Highest)</th>
                     <th>Source</th>
+                    <th>Year</th>
                     <th></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {paginatedBenchmarks.map((b) => (
-                    <tr key={b.id}>
-                      <td>{b.positionTitle || b.positionId}</td>
-                      <td>{b.location}</td>
-                      <td>R {b.salary25th.toLocaleString("en-ZA")}</td>
-                      <td>R {b.salary50th.toLocaleString("en-ZA")}</td>
-                      <td>R {b.salary75th.toLocaleString("en-ZA")}</td>
-                      <td>{b.source}</td>
-                      <td className="sb-table-actions">
-                        <button
-                          className="sb-table-btn sb-table-btn--edit"
-                          onClick={() => setEditingBenchmark(b)}
-                        >
-                          Edit
-                        </button>
-                      </td>
+                  {filteredBenchmarks.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="sb-state-msg">No Benchmark found</td>
                     </tr>
-                  ))}
+                  ) : (
+                    paginatedBenchmarks.map((b) => {
+                      const lastActivity = b.updatedDate ?? b.createdDate;
+                      const year = new Date(lastActivity).getFullYear();
+                      const currentYear = new Date().getFullYear();
+                      const isStale = year < currentYear;
+
+                      return(
+                         <tr key={b.id}>
+                        <td>{b.positionTitle || b.positionId}</td>
+                        <td>{b.location}</td>
+                        <td>R {b.salary25th.toLocaleString("en-ZA")}</td>
+                        <td>R {b.salary50th.toLocaleString("en-ZA")}</td>
+                        <td>R {b.salary75th.toLocaleString("en-ZA")}</td>
+                        <td>{b.source}</td>
+                        <td>
+                          <span className={`sb-year-badge ${b.year < new Date().getFullYear() ? "sb-year-badge--stale" : "sb-year-badge--current"}`}>
+                            {b.year}
+                          </span>
+                          </td>
+                        <td className="sb-table-actions">
+                          <button
+                            className="sb-table-btn sb-table-btn--edit"
+                            onClick={() => setEditingBenchmark(b)}
+                          >
+                            Edit
+                          </button>
+                        </td>
+                      </tr>
+                      );
+                     
+                    })
+                  )}
                 </tbody>
               </table>
             </div>

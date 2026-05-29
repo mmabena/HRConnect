@@ -272,6 +272,16 @@ namespace HRConnect.Api.Data
               .IsRequired()
               .HasMaxLength(100);
 
+              entity.Property(e => e.Year)
+              .IsRequired()
+              .HasMaxLength(100);
+
+              entity.Property(e => e.IsArchived)
+              .IsRequired()
+              .HasDefaultValue(false);
+
+              entity.Property( e => e.ArchivedDate);
+
           entity.HasOne(e => e.Position)
               .WithMany()
               .HasForeignKey(e => e.PositionId)

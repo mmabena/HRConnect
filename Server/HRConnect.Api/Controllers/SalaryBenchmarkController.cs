@@ -45,6 +45,22 @@ namespace HRConnect.Api.Controllers
         return BadRequest("Salary values must be greater than 0.");
       }
 
+      //percentiles validation order one should be greater than the other 
+      if (request.Salary25th >= request.Salary50th)
+      {
+        return BadRequest("P50 must be greater than P25");
+      }
+
+      if (request.Salary50th >= request.Salary75th)
+      {
+        return BadRequest("P75 must be greater than P50");
+      }
+
+      if (request.Year < 2000 || request.Year > DateTime.UtcNow.Year + 1)
+      {
+        return BadRequest("Please provide a valid Year");
+      }
+      
       bool requiredFieldsMissing =
       string.IsNullOrWhiteSpace(request.Location) ||
       string.IsNullOrWhiteSpace(request.Source);
@@ -52,11 +68,17 @@ namespace HRConnect.Api.Controllers
       {
         return BadRequest("Location and Source are required fields.");
       }
+
       var email = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                ?? User.FindFirst("sub")?.Value;
+      var result = await _service.CreateAsync(request, email);
 
-      var createdBenchmark = await _service.CreateAsync(request, email);
-      return CreatedAtAction(nameof(GetAll), new { id = createdBenchmark.Id }, createdBenchmark);
+      //if the position and location already exists
+      if (result == null)
+      {
+        return BadRequest("A benchmark for this position has been already created");
+      }
+      return CreatedAtAction(nameof(GetAll), new { id = result.Id }, result);
     }
 
     /// <summary>
@@ -87,6 +109,16 @@ namespace HRConnect.Api.Controllers
       if (request.Salary25th <= 0 || request.Salary50th <= 0 || request.Salary75th <= 0)
       {
         return BadRequest("Salary percentile has to be greater than 0");
+      }
+
+      if (request.Salary25th >= request.Salary50th)
+      {
+        return BadRequest("P50 must be greater than P25");
+      }
+
+      if (request.Salary50th >= request.Salary75th)
+      {
+        return BadRequest("P75 must be greater than P50");
       }
 
       if (string.IsNullOrWhiteSpace(request.Source))

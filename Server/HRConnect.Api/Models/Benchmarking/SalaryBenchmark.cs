@@ -17,5 +17,9 @@ namespace HRConnect.Api.Models.Benchmarking
     public string Source { get; set; } = string.Empty;
     public string CreatedBy { get; set; } = string.Empty;
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+    public int Year { get; set; }
+
+    public bool IsArchived { get; set; }
+    public DateTime? ArchivedDate { get; set; }
   }
 }

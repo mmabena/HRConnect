@@ -23,6 +23,14 @@ namespace HRConnect.Api.Services
 
     public async Task<SalaryBenchmarkResponseDto> CreateAsync(SalaryBenchmarkRequestDto request, string createdBy)
     {
+      //check if a benchmark already exist for the position and location togeher
+      bool alreadyExists = await _repository.ExistAsync(request.PositionId, request.Location);
+      if (alreadyExists)
+      {
+        return null;
+      }
+
+
       var benchmark = new SalaryBenchmark
       {
         PositionId = request.PositionId,
@@ -31,6 +39,7 @@ namespace HRConnect.Api.Services
         Salary50th = request.Salary50th,
         Salary75th = request.Salary75th,
         Source = request.Source,
+        Year = request.Year,
         CreatedBy = createdBy,
         CreatedDate = DateTime.UtcNow
       };
@@ -56,6 +65,7 @@ namespace HRConnect.Api.Services
       Salary50th = benchmark.Salary50th,
       Salary75th = benchmark.Salary75th,
       Source = benchmark.Source,
+      Year = benchmark.Year,
       CreatedBy = benchmark.CreatedBy,
       CreatedDate = benchmark.CreatedDate
     };
@@ -73,6 +83,7 @@ namespace HRConnect.Api.Services
       exisiting.Salary50th = request.Salary50th;
       exisiting.Salary75th = request.Salary75th;
       exisiting.Source = request.Source;
+      exisiting.Year = request.Year;
 
       var updated = await _repository.UpdateAsync(exisiting);
       return MapToResponse(updated);

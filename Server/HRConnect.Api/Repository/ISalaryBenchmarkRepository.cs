@@ -15,6 +15,7 @@ namespace HRConnect.Api.Repository
     Task<SalaryBenchmark> UpdateAsync(SalaryBenchmark benchmark);
     Task<IEnumerable<EmployeeSalaryBenchmarkDto>> GetEmployeeSalaryBenchmarksAsync();
     Task<BenchmarkSummaryDto> GetSummaryAsync();
-
+    Task<bool> ExistAsync(int positionId, string location);
+    Task ArchiveOldBenchmarksAsync();
   }
 }
