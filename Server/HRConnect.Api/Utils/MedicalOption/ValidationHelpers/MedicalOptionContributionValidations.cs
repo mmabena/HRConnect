@@ -1,4 +1,4 @@
-﻿namespace HRConnect.Api.Utils.MedicalOption.ValidationHelpers
+namespace HRConnect.Api.Utils.MedicalOption.ValidationHelpers
 {
   using DTOs.MedicalOption;
   using Models;
@@ -19,19 +19,19 @@
       var hasMsa = dbOption.MonthlyMsaContributionAdult.HasValue &&
                    dbOption.MonthlyMsaContributionAdult >= 0;
       var hasPrincipal = dbOption.MonthlyRiskContributionPrincipal.HasValue &&
-                         (dbOption.MonthlyRiskContributionPrincipal >= 0 && 
+                         (dbOption.MonthlyRiskContributionPrincipal >= 0 &&
                           dbOption.MonthlyRiskContributionPrincipal is not null);
 
       return MedicalOptionValidator.ValidateContributionValues(entity, hasMsa, hasPrincipal).IsValid;
     }
-    
+
     /// <summary>
     /// Validates salary bracket gaps and overlaps within a single variant
     /// </summary>
     public static BulkValidationResult ValidateSingleVariantSalaryBrackets(
       List<MedicalOption> variantOptions)
     {
-      var result = new BulkValidationResult() { IsValid = true}; 
+      var result = new BulkValidationResult() { IsValid = true };
 
       try
       {
@@ -88,7 +88,7 @@
       // Principal validation (if applicable)
       if (hasPrincipal &&
           (!entity.MonthlyRiskContributionPrincipal.HasValue ||
-           entity.MonthlyRiskContributionPrincipal < 0 || 
+           entity.MonthlyRiskContributionPrincipal < 0 ||
            entity.MonthlyRiskContributionPrincipal is null))
         return false;
 
@@ -126,23 +126,23 @@
       {
         // Risk + MSA should equal Total
         var adultTotal = entity.MonthlyRiskContributionAdult +
-                         entity.MonthlyMsaContributionAdult.Value;
+                         entity.MonthlyMsaContributionAdult!.Value;
         var childTotal = entity.MonthlyRiskContributionChild +
-                         entity.MonthlyMsaContributionChild.Value;
+                         entity.MonthlyMsaContributionChild!.Value;
 
         if (Math.Abs((decimal)(adultTotal
-                               - entity.TotalMonthlyContributionsAdult)) > tolerance)
+                               - entity.TotalMonthlyContributionsAdult)!) > tolerance)
           return false;
 
         if (Math.Abs((decimal)(childTotal
-                               - entity.TotalMonthlyContributionsChild)) > tolerance)
+                               - entity.TotalMonthlyContributionsChild)!) > tolerance)
           return false;
 
         if (hasPrincipal)
         {
-          var principalTotal = entity.MonthlyRiskContributionPrincipal.Value +
-                               entity.MonthlyMsaContributionPrincipal.Value;
-          if (Math.Abs(principalTotal - entity.TotalMonthlyContributionsPrincipal.Value) >
+          var principalTotal = entity.MonthlyRiskContributionPrincipal!.Value +
+                               entity.MonthlyMsaContributionPrincipal!.Value;
+          if (Math.Abs(principalTotal - entity.TotalMonthlyContributionsPrincipal!.Value) >
               tolerance)
             return false;
         }
@@ -151,18 +151,18 @@
       {
         // Risk should equal Total when no MSA
         if (Math.Abs((decimal)(entity.MonthlyRiskContributionAdult
-                               - entity.TotalMonthlyContributionsAdult)) >
+                               - entity.TotalMonthlyContributionsAdult)!) >
             tolerance)
           return false;
 
         if (Math.Abs((decimal)(entity.MonthlyRiskContributionChild
-                               - entity.TotalMonthlyContributionsChild)) >
+                               - entity.TotalMonthlyContributionsChild)!) >
             tolerance)
           return false;
 
         if (hasPrincipal &&
-            Math.Abs(entity.MonthlyRiskContributionPrincipal.Value -
-                     entity.TotalMonthlyContributionsPrincipal.Value) > tolerance)
+            Math.Abs(entity.MonthlyRiskContributionPrincipal!.Value -
+                     entity.TotalMonthlyContributionsPrincipal!.Value) > tolerance)
           return false;
       }
 

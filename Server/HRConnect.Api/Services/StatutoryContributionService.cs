@@ -1,12 +1,12 @@
 
 namespace HRConnect.Api.Services
 {
+  using Audit.Core;
+  using HRConnect.Api.DTOs.StatutoryContribution;
   using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Mappers;
   using HRConnect.Api.Models;
   using HRConnect.Api.Utils;
-  using HRConnect.Api.Mappers;
-  using HRConnect.Api.DTOs.StatutoryContribution;
-  using Audit.Core;
 
   public class StatutoryContributionService : IStatutoryContributionService
   {

@@ -2,6 +2,7 @@ namespace HRConnect.Tests.Services
 {
   using System;
   using System.Collections.Generic;
+  using Microsoft.AspNetCore.DataProtection;
   using System.Threading;
   using System.Threading.Tasks;
   using HRConnect.Api.Data;
@@ -32,8 +33,17 @@ namespace HRConnect.Tests.Services
       var options = new DbContextOptionsBuilder<ApplicationDBContext>()
         .UseInMemoryDatabase(Guid.NewGuid().ToString())
         .Options;
+      var mockProvider = new Mock<IDataProtectionProvider>();
+      // Setup CreateProtector to return a dummy protector
+      var mockProtector = new Mock<IDataProtector>();
+      mockProtector.Setup(p => p.Protect(It.IsAny<byte[]>())).Returns<byte[]>(b => b);
+      mockProtector.Setup(p => p.Unprotect(It.IsAny<byte[]>())).Returns<byte[]>(b => b);
+      mockProvider.Setup(p => p.CreateProtector(It.IsAny<string>())).Returns(mockProtector.Object);
 
-      _context = new ApplicationDBContext(options);
+      _context = new ApplicationDBContext(options, mockProtector.Object);
+      var activeCompanyServiceMock = new Mock<IActiveCompanyService>();
+      var userCompanyServiceMock = new Mock<IUserCompanyService>();
+      var companyRepoMock = new Mock<ICompanyRepository>();
       _employeeRepositoryMock = new Mock<IEmployeeRepository>(MockBehavior.Strict);
       _positionRepositoryMock = new Mock<IPositionRepository>(MockBehavior.Strict);
       _emailServiceMock = new Mock<IEmailService>(MockBehavior.Strict);
@@ -50,6 +60,14 @@ namespace HRConnect.Tests.Services
         .Returns(Task.CompletedTask);
       _transactionMock
         .Setup(transaction => transaction.Dispose());
+
+      activeCompanyServiceMock
+        .Setup(x => x.GetActiveCompanyIdAsync(It.IsAny<int>()))
+        .ReturnsAsync("COMP001");
+
+      companyRepoMock
+          .Setup(x => x.GetCompanyByIdAsync("COMP001"))
+          .ReturnsAsync(new Company { CompanyId = "COMP001" });
 
       _employeeRepositoryMock
         .Setup(repository => repository.BeginTransactionAsync())
@@ -100,8 +118,11 @@ namespace HRConnect.Tests.Services
 
       _employeeService = new EmployeeService(
         _context,
+        activeCompanyServiceMock.Object,
+        userCompanyServiceMock.Object,
         _employeeRepositoryMock.Object,
         _emailServiceMock.Object,
+        companyRepoMock.Object,
         _positionRepositoryMock.Object,
         _leaveBalanceServiceMock.Object,
         _leaveProcessingServiceMock.Object,
@@ -124,6 +145,7 @@ namespace HRConnect.Tests.Services
         Email = "nomsa.dube@singular.co.za",
         PhysicalAddress = "1 Main Road",
         City = "Johannesburg",
+        CompanyId = "COMP001",
         ZipCode = "2000",
         DateOfBirth = new DateOnly(1990, 1, 1),
         StartDate = DateOnly.FromDateTime(DateTime.UtcNow.Date),
@@ -134,7 +156,7 @@ namespace HRConnect.Tests.Services
         ProfileImage = "profile.jpg",
       };
 
-      var result = await _employeeService.CreateEmployeeAsync(request);
+      var result = await _employeeService.CreateEmployeeAsync(1, request);
       var createdUser = await _context.Users.SingleAsync(user => user.Email == "nomsa.dube@singular.co.za");
 
       Assert.NotNull(result);

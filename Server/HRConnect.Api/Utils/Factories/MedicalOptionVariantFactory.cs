@@ -53,14 +53,14 @@
 
         var variant = GetVariantByName(enumType.Name, categoryName);
         var variantName = variant?.ToString() ?? string.Empty;
-        string altFilterName = null;
+        string altFilterName;
         if (categoryName.Contains("Choice"))
         {
           altFilterName = categoryName;
           return (categoryName, variantName, altFilterName);
         }
 
-        if (variantName == "" || variantName == null)
+        if (string.IsNullOrEmpty(variantName))
         {
           variantName = trimmedOptionName.Split(' ')[1].TrimEnd();
         }

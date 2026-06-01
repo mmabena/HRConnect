@@ -1,10 +1,10 @@
 namespace HRConnect.Api.Mappers
 {
-  using HRConnect.Api.DTOs;
-  using HRConnect.Api.Services;
-  using HRConnect.Api.Models;
-  using System.Xml;
   using System.Linq.Expressions;
+  using System.Xml;
+  using HRConnect.Api.DTOs;
+  using HRConnect.Api.Models;
+  using HRConnect.Api.Services;
 
   /// <summary>
   /// Provides mapping methods between TaxDeduction entities and DTOs.

@@ -1,21 +1,27 @@
+
 using System.Text;
 using Audit.Core;
 using Audit.EntityFramework;
 using HRConnect.Api.Data;
-// using Resend;
 using HRConnect.Api.Interfaces;
+using HRConnect.Api.Interfaces.TOTP;
+using HRConnect.Api.Interfaces.Notification;
+using HRConnect.Api.Interfaces.Payroll.Deduction;
+using HRConnect.Api.Interfaces.Payroll.Earning;
 using HRConnect.Api.Interfaces.Pension;
 using HRConnect.Api.Middleware;
 using HRConnect.Api.Models;
 using HRConnect.Api.Repositories;
 using HRConnect.Api.Repository;
+using HRConnect.Api.Hubs;
 using HRConnect.Api.Services;
 using HRConnect.Api.Utils;
-using HRConnect.Api.Utils.Jobs.Payroll;
-using HRConnect.Api.Utils.Jobs.Pension;
+using HRConnect.Api.Utils.Factories;
+using HRConnect.Api.Utils.Jobs;
 using HRConnect.Api.Utils.Jobs.Notification;
+using HRConnect.Api.Utils.Jobs.Payroll;
+using HRConnect.Api.Utils.Notification;
 using HRConnect.Api.Utils.Payroll;
-using HRConnect.Api.Utils.Seed;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -23,10 +29,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using OfficeOpenXml;
 using Quartz;
-using HRConnect.Api.Interfaces.Notification;
-using HRConnect.Api.Utils.Factories;
-using HRConnect.Api.Utils.Notification;
-using HRConnect.Api.Interfaces.Payroll.Earning;
+using System.Threading.RateLimiting;
+using HRConnect.Api.Utils.Notification.Channels;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -106,7 +110,7 @@ builder.Services.AddAuthentication(options =>
 .AddJwtBearer(options =>
 {
   var jwt = builder.Configuration.GetSection("JwtSettings");
-  var secretValue = jwt["Secret"] ?? string.Empty;
+  string secretValue = jwt["Secret"] ?? string.Empty;
   byte[] keyBytes;
   try
   {
@@ -149,22 +153,30 @@ builder.Services.AddQuartz(q =>
   q.AddJob<NotificationJob>(opts =>
   opts.WithIdentity(NotificationJobKey)
   .StoreDurably());
-  //Triggers that will need to be fired to run background job
-  // using Cron Schedule
-  q.AddTrigger(opts => opts
-  .ForJob(RolloverJobKey)
-  .WithIdentity("PayrollRollover-Trigger")
-  .WithCronSchedule("10 0/1 * * * ?", x =>
-  x.WithMisfireHandlingInstructionFireAndProceed()));
 
-  q.AddTrigger(opts => opts
-  .ForJob(NotificationJobKey)
-  .WithIdentity("NotificationJOb-Trigger")
-  .WithCronSchedule("10 0/1 * * * ?"));
+  //Cron Schedule for Payroll Rollover Job
   // 0 -> 0 seconds
   // 0 -> 0 minutes
   // 0 -> 0 hours
   // 1 -> first day of the month 
+  // * -> for any/every month 
+  // ? -> for all days of the week
+  q.AddTrigger(opts => opts
+  .ForJob(RolloverJobKey)
+  .WithIdentity("PayrollRollover-Trigger")
+  .WithCronSchedule("0 0 0 1 * ?", x =>
+  x.WithMisfireHandlingInstructionFireAndProceed()));
+
+  q.AddTrigger(opts => opts
+  .ForJob(NotificationJobKey)
+  .WithIdentity("NotificationJob-Trigger")
+  .WithCronSchedule("0 0 0 23-31 * ?", x =>
+  x.WithMisfireHandlingInstructionIgnoreMisfires()));
+  //Cron Schedule for Payroll Notification Job
+  // 0 -> 0 seconds
+  // 0 -> 0 minutes
+  // 0 -> 0 hours
+  // 23-31 is the widest range of days to include February and longer months
   // * -> for any/every month 
   // ? -> for all days of the week
 
@@ -177,7 +189,6 @@ builder.Services.AddQuartz(q =>
        .ForJob(employeePensionEnrollmentJob)
        .StartNow());
 
-  //Adding persistence to quartz to be able to be run in the back
   q.UsePersistentStore(store =>
   {
     store.UseSqlServer(options =>
@@ -199,7 +210,6 @@ builder.Configuration.AddUserSecrets<Program>();
 builder.Services.AddSingleton(provider =>
   provider.GetRequiredService<ISchedulerFactory>().GetScheduler().GetAwaiter().GetResult());
 
-//Register payroll stuff
 builder.Services.AddScoped<IPayrollPeriodRepository, PayrollPeriodRepository>();
 builder.Services.AddScoped<IPayrollRunRepository, PayrollRunRepository>();
 builder.Services.AddScoped<IPayrollRunService, PayrollRunService>();
@@ -220,17 +230,21 @@ builder.Services.AddScoped<ITaxDeductionRepository, TaxDeductionRepository>();
 builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
 builder.Services.AddScoped<IPositionRepository, PositionRepository>();
 builder.Services.AddScoped<IPositionService, PositionService>();
+builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
+builder.Services.AddScoped<ICompanyService, CompanyService>();
+builder.Services.AddScoped<IActiveCompanyService, ActiveCompanyService>();
+builder.Services.AddScoped<IUserCompanyService, UserCompanyService>();
+builder.Services.AddScoped<IUserCompanyRepository, UserCompanyRepository>();
 builder.Services.AddScoped<ICompanyContributionRepository, CompanyContributionRepository>();
 builder.Services.AddScoped<IEmployeeCompanyContributionRepository, EmployeeCompanyContributionRepository>();
 builder.Services.AddScoped<ICompanyContributionAllocationService, CompanyContributionAllocationService>();
 builder.Services.AddScoped<ICompanyContributionRepository, CompanyContributionRepository>();
 builder.Services.AddScoped<ICompanyContributionService, CompanyContributionService>();
 builder.Services.AddScoped<IJobGradeRepository, JobGradeRepository>();
+builder.Services.AddScoped<IJobGradeService, JobGradeService>();
 builder.Services.AddScoped<IOccupationalLevelRepository, OccupationalLevelRepository>();
 builder.Services.AddScoped<IOccupationalLevelService, OccupationalLevelService>();
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.Services.AuthService>();
-
-// Mpho Mosia - Leave Services 
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<ILeaveBalanceService, LeaveBalanceService>();
 builder.Services.AddScoped<ILeaveProcessingService, LeaveProcessingService>();
@@ -238,36 +252,55 @@ builder.Services.AddScoped<ILeaveRuleService, LeaveRuleService>();
 builder.Services.AddScoped<IPensionFundService, PensionFundService>();
 builder.Services.AddScoped<IEmployeePensionRepository, EmployeePensionRepository>();
 builder.Services.AddScoped<IPensionFundService, PensionFundService>();
-
 builder.Services.AddScoped<IPensionFundRepository, PensionFundRepository>();
 builder.Services.AddScoped<ILeaveTypeManagementService, LeaveTypeManagementService>();
 builder.Services.AddScoped<ILeaveApplicationService, LeaveApplicationService>();
-
 builder.Services.AddHostedService<LeaveAutomationBackgroundService>();
-
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IEmployeeCompanyContributionService, EmployeeCompanyContributionService>();
 builder.Services.AddScoped<IStatutoryContributionRepository, StatutoryContributionRepository>();
 builder.Services.AddScoped<IStatutoryContributionService, StatutoryContributionService>();
 builder.Services.AddTransient<IPensionProjectionService, PensionProjectionService>();
 builder.Services.AddScoped<IMedicalOptionRepository, MedicalOptionRepository>();
-builder.Services.AddScoped<HRConnect.Api.Interfaces.IMedicalOptionService,
-  HRConnect.Api.Services.MedicalOptionService>();
+builder.Services.AddScoped<IMedicalOptionService, MedicalOptionService>();
 builder.Services.AddScoped<IPensionOptionRepository, PensionOptionRepository>();
 builder.Services.AddScoped<IEmployeePensionEnrollmentRepository, EmployeePensionEnrollmentRepository>();
 builder.Services.AddTransient<IEmployeePensionEnrollmentService, EmployeePensionEnrollmentService>();
 builder.Services.AddScoped<IPensionDeductionRepository, PensionDeductionRepository>();
 builder.Services.AddTransient<IPensionDeductionService, PensionDeductionService>();
-
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<INotificationFactory, NotificationFactory>();
 builder.Services.AddScoped<INotificationDispatcher, NotificationDispatcher>();
+builder.Services.AddScoped<INotificationDeliveryChannel, InAppDeliveryChannel>();
+builder.Services.AddScoped<INotificationDeliveryChannel, EmailDeliveryChannel>();
 builder.Services.AddScoped<IJobScheduleService, JobScheduleService>();
-
-builder.Services.AddScoped<PositionAndLeaveSeed>();
 builder.Services.AddScoped<IPayrollEarningRepository, PayrollEarningRepository>();
 builder.Services.AddScoped<IPayrollEarningService, PayrollEarningService>();
+builder.Services.AddScoped<IEmployeePayrollEarningRepository, EmployeePayrollEarningRepository>();
+builder.Services.AddScoped<IEmployeePayrollEarningService, EmployeePayrollEarningService>();
+builder.Services.AddScoped<IDeductionRepository, DeductionRepository>();
+builder.Services.AddScoped<IDeductionService, DeductionService>();
+builder.Services.AddScoped<IEmployeeDeductionRepository, EmployeeDeductionRepository>();
+builder.Services.AddScoped<IEmployeeDeductionService, EmployeeDeductionService>();
+builder.Services.AddScoped<ITOTPService, TOTPService>();
+builder.Services.AddScoped<ITOTPRepository, TOTPRepository>();
+builder.Services.AddScoped<IMFAUserSecretsService, MFAUserSecretsService>();
+builder.Services.AddScoped<IMFAUserSecretsRepository, MFAUserSecretsRepository>();
+builder.Services.AddScoped<IMedicalOptionService,
+  MedicalOptionService>();
+builder.Services.AddScoped<IMedicalAidEligibilityService, MedicalAidEligibilityService>();
+builder.Services.AddScoped<IMedicalAidDeductionRepository, MedicalAidDeductionRepository>();
+builder.Services.AddScoped<IMedicalAidDeductionService, MedicalAidDeductionService>();
+
+
+builder.Services.AddHttpClient<IUserHttpClient, UserHttpClient>((provider, client) =>
+{
+  IConfiguration config = provider.GetRequiredService<IConfiguration>();
+  client.BaseAddress = new Uri(config["Services:Api"]!);
+});
+
+builder.Services.AddSignalR();
 
 builder.Services.AddCors(options =>
 {
@@ -279,28 +312,34 @@ builder.Services.AddCors(options =>
           .AllowCredentials());
 });
 
+builder.Services.AddRateLimiter(options =>
+{
+  options.AddPolicy("totp-policy", ctx =>
+  {
+    var ip = ctx.Connection.RemoteIpAddress?.ToString() ?? "Unknown IP";
+
+    return RateLimitPartition.GetFixedWindowLimiter(
+     partitionKey: ip,
+      factory: _ => new FixedWindowRateLimiterOptions
+      {
+        PermitLimit = 3,//3 attempts per time frame
+        Window = TimeSpan.FromMinutes(1),
+        QueueLimit = 0
+      });
+  });
+});
+
 var app = builder.Build();
 
 //Automatically create payroll run on app start up
 using (var scope = app.Services.CreateScope())
 {
   var initialiser = scope.ServiceProvider.GetRequiredService<PayrollInit>();
+  var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
 
   //initialise a payperiod and payrun on app start up
   await initialiser.InitialisePayrollPeriod();
-}
-
-using (var scope = app.Services.CreateScope())
-{
-  var seeder = scope.ServiceProvider.GetRequiredService<PositionAndLeaveSeed>();
-
-  await seeder.SeedAsync();
-}
-
-using (var scope = app.Services.CreateScope())
-{
-  var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
-  await userService.SyncEmployeeUsersAsync();
+  await userService.SyncEmployeeUserAsync();
 }
 
 if (app.Environment.IsDevelopment())
@@ -319,5 +358,7 @@ app.UseGlobalExceptionHandler();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseMiddleware<ExceptionMiddleware>();
+app.UseRateLimiter();
 app.MapControllers();
+app.MapHub<CompanyHub>("/companyHub");
 app.Run();

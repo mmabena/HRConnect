@@ -2,7 +2,9 @@ namespace HRConnect.Tests.Services
 {
   using System;
   using System.Threading.Tasks;
+  using HRConnect.Api.Interfaces.TOTP;
   using HRConnect.Api.Data;
+  using Microsoft.AspNetCore.DataProtection;
   using HRConnect.Api.DTOs.User;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
@@ -16,6 +18,9 @@ namespace HRConnect.Tests.Services
     private readonly ApplicationDBContext _context;
     private readonly Mock<IUserRepository> _userRepositoryMock;
     private readonly Mock<IPasswordHasher<User>> _passwordHasherMock;
+
+    private readonly Mock<ITOTPService> _otpServiceMock;
+    private readonly Mock<IEmployeeRepository> _employeeRepoMock;
     private readonly UserService _userService;
 
     public UserServiceEmployeeSyncTests()
@@ -23,18 +28,31 @@ namespace HRConnect.Tests.Services
       var options = new DbContextOptionsBuilder<ApplicationDBContext>()
         .UseInMemoryDatabase(Guid.NewGuid().ToString())
         .Options;
+      var mockProvider = new Mock<IDataProtectionProvider>();
+      var mockProtector = new Mock<IDataProtector>();
+      mockProtector.Setup(p => p.Protect(It.IsAny<byte[]>())).Returns<byte[]>(b => b);
+      mockProtector.Setup(p => p.Unprotect(It.IsAny<byte[]>())).Returns<byte[]>(b => b);
+      mockProvider.Setup(p => p.CreateProtector(It.IsAny<string>())).Returns(mockProtector.Object);
 
-      _context = new ApplicationDBContext(options);
+      _context = new ApplicationDBContext(options, mockProtector.Object);
+
       _userRepositoryMock = new Mock<IUserRepository>(MockBehavior.Strict);
+      _otpServiceMock = new Mock<ITOTPService>();
+      _employeeRepoMock = new Mock<IEmployeeRepository>();
       _passwordHasherMock = new Mock<IPasswordHasher<User>>();
+
       _passwordHasherMock
         .Setup(hasher => hasher.HashPassword(It.IsAny<User>(), It.IsAny<string>()))
         .Returns((User user, string _) => $"hashed::{user.Email}");
 
       _userService = new UserService(
         _context,
+        _otpServiceMock.Object,
         _userRepositoryMock.Object,
-        _passwordHasherMock.Object);
+        _passwordHasherMock.Object,
+        _employeeRepoMock.Object
+        );
+
     }
 
     [Fact]
@@ -54,7 +72,7 @@ namespace HRConnect.Tests.Services
 
       await _context.SaveChangesAsync();
 
-      await _userService.SyncEmployeeUsersAsync();
+      await _userService.SyncEmployeeUserAsync();
 
       var users = await _context.Users.ToListAsync();
 

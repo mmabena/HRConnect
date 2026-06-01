@@ -62,7 +62,7 @@ namespace HRConnect.Api.Middleware
 
       await context.Response.WriteAsync(JsonSerializer.Serialize(response));
     }
-  ///<summary>
+    ///<summary>
     ///Maps an exception message to the corresponding API field name so that the frontend
     ///can associate the error message with the correct form input field.
     ///</summary>
@@ -96,19 +96,31 @@ namespace HRConnect.Api.Middleware
         errors["reportsTo"] = message;
       else if (message.Contains("surname", StringComparison.OrdinalIgnoreCase))
         errors["lastName"] = message;
-      else if (message.Contains("name", StringComparison.OrdinalIgnoreCase))
+      else if (message.Contains("first name", StringComparison.OrdinalIgnoreCase))
         errors["firstName"] = message;
-        else if (message.Contains("zipCode", StringComparison.OrdinalIgnoreCase))
+      else if (message.Contains("zipCode", StringComparison.OrdinalIgnoreCase))
         errors["zipCode"] = message;
       else if (message.Contains("title", StringComparison.OrdinalIgnoreCase))
         errors["title"] = message;
-        else if (message.Contains("city", StringComparison.OrdinalIgnoreCase))
+      else if (message.Contains("city", StringComparison.OrdinalIgnoreCase))
         errors["city"] = message;
-        else if (message.Contains("disabilityType", StringComparison.OrdinalIgnoreCase))
+      else if (message.Contains("disabilityType", StringComparison.OrdinalIgnoreCase))
         errors["disabilityType"] = message;
+      //Company Validation
+      else if (message.Contains("Company name", StringComparison.OrdinalIgnoreCase))
+        errors["companyName"] = message;
+      else if (message.Contains("Registration number", StringComparison.OrdinalIgnoreCase))
+        errors["registrationNumber"] = message;
+      else if (message.Contains("UIF number", StringComparison.OrdinalIgnoreCase))
+        errors["uifNumber"] = message;
+      else if (message.Contains("VAT number", StringComparison.OrdinalIgnoreCase))
+        errors["vatNumber"] = message;
+      else if (message.Contains("Contact number", StringComparison.OrdinalIgnoreCase))
+        errors["contactNumber"] = message;
+      else if (message.Contains("Company address", StringComparison.OrdinalIgnoreCase))
+        errors["companyAddress"] = message;
       else
         errors["general"] = message;
-
       return errors;
     }
   }

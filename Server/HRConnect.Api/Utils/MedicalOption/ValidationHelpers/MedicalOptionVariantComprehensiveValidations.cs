@@ -39,14 +39,14 @@
 
         // Group by variant using your existing factory
         var variantGroups = MedicalOptionValidator.GroupOptionsByVariant(bulkUpdateDto, dbData);
-        
+
         // Validate each variant individually with ALL validations
         foreach (var variantGroup in variantGroups)
         {
           var variantValidation = await MedicalOptionSingleVariantValidations.ValidateSingleVariantWithAllRulesAsync(
-            variantGroup.Key, 
-            variantGroup.Value, 
-            bulkUpdateDto, 
+            variantGroup.Key,
+            variantGroup.Value,
+            bulkUpdateDto,
             repository,
             categoryId, dbData);
 

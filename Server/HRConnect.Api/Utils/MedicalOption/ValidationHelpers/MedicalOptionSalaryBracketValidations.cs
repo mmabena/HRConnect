@@ -31,7 +31,7 @@
       List<SalaryBracketValidatorRecord> records)
     {
       var sortedRecords = records
-        .Where(r => r.salaryBracketMin.HasValue && 
+        .Where(r => r.salaryBracketMin.HasValue &&
                     (r.salaryBracketMax.HasValue || r.salaryBracketMax is null))
         .OrderBy(r => r.salaryBracketMin)
         .ToList();
@@ -46,7 +46,7 @@
         {
           var expectedNextMin = current.salaryBracketMax.Value + 0.01m;
           if (next.salaryBracketMin > expectedNextMin + 0.99m) // Allow up to 1.00 gap
-            return false;  
+            return false;
         }
         else
         {
@@ -63,7 +63,7 @@
       List<SalaryBracketValidatorRecord> records)
     {
       var sortedRecords = records
-        .Where(r => (r.salaryBracketMin.HasValue || r.salaryBracketMin >= 0 ) 
+        .Where(r => (r.salaryBracketMin.HasValue || r.salaryBracketMin >= 0)
                     && (r.salaryBracketMax.HasValue || r.salaryBracketMax is null))
         .OrderBy(r => r.salaryBracketMin)
         .ToList();
@@ -76,10 +76,10 @@
         // Check for overlap (next.min should be > current.max)
         if (current.salaryBracketMax.HasValue && next.salaryBracketMin.HasValue || 
             !(next is null)) {
-          if (next.salaryBracketMin <= current.salaryBracketMax.Value)
+          if (next.salaryBracketMin <= current.salaryBracketMax!.Value)
             return false;
         }
-        
+
         // When current.max is null (uncapped), it can't overlap with anything -
         // what if there is a next value that has a less value ? [Resolved]
       }

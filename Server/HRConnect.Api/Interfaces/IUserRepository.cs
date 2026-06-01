@@ -9,6 +9,8 @@ namespace HRConnect.Api.Interfaces
     Task<User?> UpdateUserAsync(int id, User user);
     Task<bool> DeleteUserAsync(int id);
     Task<User?> GetUserByEmailAsync(string email);
+    Task<Employee?> GetEmployeeByEmailAsync(string email);
     Task<bool> IsEmailUniqueAsync(string email);
+    Task SaveChangesAsync();
   }
 }

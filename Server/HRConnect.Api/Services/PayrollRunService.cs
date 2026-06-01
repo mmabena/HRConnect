@@ -1,9 +1,9 @@
 namespace HRConnect.Api.Services
 {
-  using HRConnect.Api.Interfaces;
-  using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.DTOs.Payroll;
+  using HRConnect.Api.Interfaces;
   using HRConnect.Api.Mappers.Payroll;
+  using HRConnect.Api.Models.Payroll;
 
   public class PayrollRunService : IPayrollRunService
   {
@@ -101,6 +101,14 @@ namespace HRConnect.Api.Services
         ? employeeId
         : record.EmployeeId;
 
+
+      //   var exists = currentPayRun.Records
+      //   .Any(r => r.PayrollRunId == currentPayRun.PayrollRunId
+      //  && r.EmployeeId == empId);
+
+      //   if (exists)
+      //     continue;
+          
         record.PayrollRun = currentPayRun;
         record.EmployeeId = empId;
         currentPayRun.Records.Add(record);

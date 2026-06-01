@@ -3,28 +3,32 @@ namespace HRConnect.Api.Models
   using System.ComponentModel.DataAnnotations;
   public enum NotificationSeverity
   {
-    Critical,
-    Warning,
-    Infomation
+    Critical = 0, Warning, Information
   }
   public enum NotificationType
   {
-    Payroll, TaxUpload, LeaveRequest, LeaveRequestResponse, General
+    Payroll = 0, TaxUpload, RoleUpdate, LeaveRequest, LeaveRequestResponse, General
   }
+
+  [Flags]
+  public enum DeliveryChannel
+  {
+    InApp = 0, Email
+  };
 
   public class Notification
   {
     [Key]
     public int NotificationId { get; set; }
+    public string IdempotencyKey { get; set; } = null!;
     public string Message { get; set; } = string.Empty;
+    public string Subject { get; set; } = string.Empty;
     public bool IsRead { get; set; }
-    public NotificationType Type { get; set; } // Leave, Tax, Payroll
+    public NotificationType Type { get; set; } 
     public NotificationSeverity Severity { get; set; }
-    //This will also determine if a user is a superuer
     public string EmployeeId { get; set; } = string.Empty;
     public DateTime? DueDate { get; set; }
-
     public DateTime CreatedAt { get; set; }
-    public string DeliveryChannel { get; set; } = string.Empty;//"Email", "InApp" etc
+    public DeliveryChannel DeliveryChannel { get; set; } 
   }
 }

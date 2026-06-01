@@ -1,19 +1,19 @@
 namespace HRConnect.Tests
 {
-  using HRConnect.Api.Data;
-  using HRConnect.Api.DTOs;
-  using HRConnect.Api.Interfaces;
-  using HRConnect.Api.Models;
-  using HRConnect.Api.Services;
-  using Microsoft.AspNetCore.Http;
-  using HRConnect.Api.Repositories;
-  using OfficeOpenXml;
-  using Moq;
   using System;
   using System.Collections.Generic;
   using System.IO;
   using System.Text;
   using System.Threading.Tasks;
+  using HRConnect.Api.Data;
+  using HRConnect.Api.DTOs;
+  using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Models;
+  using HRConnect.Api.Repositories;
+  using HRConnect.Api.Services;
+  using Microsoft.AspNetCore.Http;
+  using Moq;
+  using OfficeOpenXml;
   using Xunit;
 
 

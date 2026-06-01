@@ -1,30 +1,43 @@
 namespace HRConnect.Api.Repository
 {
+  using System.Linq;
   using HRConnect.Api.Interfaces.Notification;
   using HRConnect.Api.Models;
   using HRConnect.Api.Data;
-  using HRConnect.Api.Mappers.Notification;
-  using HRConnect.Api.DTOs.Notification;
   using Microsoft.EntityFrameworkCore;
 
   public class NotificationRepository : INotificationRepository
   {
-    // Task <NotificationDto> CreateNotification
     private readonly ApplicationDBContext _context;
     public NotificationRepository(ApplicationDBContext context)
     {
       _context = context;
     }
-    public async Task AddNotificationAsync(Notification notification)
+    public async Task<Notification> AddNotificationAsync(Notification notification)
     {
-      await _context.Notifications.AddAsync(notification);
-      await _context.SaveChangesAsync();
+      _ = await _context.Notifications.AddAsync(notification);
+      _ = await Save();
+      return notification;
     }
-    // public async Task AddNotificationBatchAsync(Notification notification)
-    // {
-    //   await _context.Notifications.AddAsync(notification);
-    // }
 
+    public async Task<bool> Save()
+    {
+      if (await _context.SaveChangesAsync() > 0)
+        return true;
+      return false;
+    }
+
+    public async Task<IEnumerable<Notification>> GetEmployeeNotificationsAsync(string employeeId)
+    {
+      List<Notification> notifications = await _context.Notifications.AsNoTracking().Where(n =>
+        (n.EmployeeId == employeeId) &&
+        (n.DeliveryChannel == DeliveryChannel.InApp))
+        .OrderBy(n => n.Severity)
+        .ToListAsync();
+      if (notifications == null)
+        return [];
+      return notifications;
+    }
     /// <summary>
     /// This metod acts as a deduplication safe guard when creating and dispatching 
     /// notifications. It is used as boolean check before notification storing
@@ -35,45 +48,123 @@ namespace HRConnect.Api.Repository
     /// <returns>Notification Object</returns>
     public async Task<Notification?> ExistsAsync(NotificationType type, string employeeId, string? message, NotificationSeverity severity)
     {
-      // return await _context.Notifications.FindAsync(type, message, employeeId, severity);
       return await _context.Notifications.Where(n =>
       (n.Type == type) &&
       (n.Message == message) &&
       (n.EmployeeId == employeeId) &&
       (n.Severity == severity) &&
-      n.IsRead == false)//Avoid to duplicate unread messages
+      !n.IsRead)//Avoids duplicating unread messages
       .FirstOrDefaultAsync();
     }
-    public async Task<bool> MarkAsReadAsync(Notification notification)
+
+    public async Task<Notification?> TryAndAquireAsync(string idempotencyKey)
     {
-      _context.Notifications.Update(notification);
-      if (await _context.SaveChangesAsync() > 0)
-        return true;
-      return false;
+      return await _context.Notifications.AsNoTracking()
+        .FirstOrDefaultAsync(n =>
+          (n.IdempotencyKey == idempotencyKey) &&
+          !n.IsRead);
     }
-    public async Task<IEnumerable<NotificationDto>> GetAllUnreadAsync(string? employeeId)
+    public async Task MarkBatchAsReadAsync(List<string> employeeIds, NotificationType type)
+    {
+      //Prefer batching updating as SQL has a parameter limit of ~2100
+      foreach (string[] idBatch in employeeIds.Chunk(500))
+      {
+        await _context.Notifications.Where(n =>
+        idBatch.Contains(n.EmployeeId) &&
+        (n.Type == type) &&
+        !n.IsRead)
+        .ExecuteUpdateAsync(s =>
+        s.SetProperty(n => n.IsRead, true));
+      }
+      await DeleteAllReadByTypeAsync(type);
+      await _context.SaveChangesAsync();
+    }
+    public async Task MarkAsReadAsync(Notification notification)
+    {
+      //attatching entity into the entity tracker 
+      _ = _context.Attach(notification);
+
+      notification.IsRead = true;
+
+      _context.Entry(notification).Property(n => n.IsRead)
+      .IsModified = true;
+
+      _ = await Save();
+    }
+    public async Task MarkAllAsReadByEmployeeId(string employeeId)
+    {
+      await _context.Notifications.Where(n =>
+      (n.EmployeeId == employeeId) &&
+      !new[] { NotificationType.Payroll, NotificationType.TaxUpload }.Contains(n.Type)
+      ).ExecuteUpdateAsync(s => s.SetProperty(n => n.IsRead,
+      n => true));
+
+      await _context.SaveChangesAsync();
+    }
+    public async Task<IEnumerable<Notification>> GetAllUnreadAsync(string? employeeId)
     {
       var notifications = await _context.Notifications.
             Where(n => !n.IsRead &&
             (n.EmployeeId == null || n.EmployeeId == employeeId))
       .OrderByDescending(n => n.CreatedAt).ToListAsync();
-      // throw new NotImplementedException();
-      return notifications.Select(n => n.ToNotificationDto()).ToList();
+      return notifications;
     }
-    public async Task<IEnumerable<NotificationDto>> GetAllEmployeeNotificationsByTypeAsync(NotificationType type, string employeeId)
+    public async Task<IEnumerable<Notification>> GetAllEmployeeNotificationsByTypeAsync(NotificationType type, string employeeId)
     {
       var notifications = await _context.Notifications.Where(n =>
                   (n.EmployeeId == employeeId) &&
                   (n.Type == type)).ToListAsync();
-      return notifications.Select(n => n.ToNotificationDto());
+      return notifications;
     }
-    //Critical,Warning,Information
-    public async Task<IEnumerable<NotificationDto>> GetAllEmployeeNotificationsBySeverityAsync(string employeeId, NotificationSeverity severity)
+    public async Task<IEnumerable<Notification>> GetAllEmployeeNotificationsBySeverityAsync(string employeeId, NotificationSeverity severity)
     {
       var notifications = await _context.Notifications.Where(n =>
                   (n.EmployeeId == employeeId) &&
                   (n.Severity == severity)).ToListAsync();
-      return notifications.Select(n => n.ToNotificationDto());
+      return notifications;
+    }
+    public async Task<Notification?> TryCreateUnreadAsync(Notification notification)
+    {
+      using var tsx = await _context.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+
+      var existsUnread = await TryAndAquireAsync(notification.IdempotencyKey);
+      if (existsUnread != null)
+        return existsUnread;
+
+      _ = await _context.Notifications.AddAsync(notification);
+      _ = await _context.SaveChangesAsync();
+
+      await tsx.CommitAsync();
+      return notification;
+    }
+    public async Task<bool> DeleteAllReadAsync()
+    {
+      return await _context.Notifications.Where(n => n.IsRead)
+          .ExecuteDeleteAsync() > 0;
+    }
+    public async Task<bool> DeleteAllReadByTypeAsync(NotificationType type)
+    {
+      return await _context.Notifications.Where(n => n.IsRead &&
+          n.Type == type)
+          .ExecuteDeleteAsync() > 0;
+    }
+
+    public async Task<bool> DeleteAllByEmployeeId(string employeeId)
+    {
+      return await _context.Notifications.Where(n => n.EmployeeId == employeeId)
+        .ExecuteDeleteAsync() > 0;
+    }
+    public async Task<bool> DeleteNotificationByIdAsync(string employeeId, int id)
+    {
+      Notification? notification = await _context.Notifications.Where(n => n.EmployeeId == employeeId)
+      .FirstOrDefaultAsync(n => n.NotificationId == id);
+
+      if (notification == null)
+        return false;
+
+      _ = _context.Notifications.Remove(notification);
+      _ = await _context.SaveChangesAsync();
+      return true;
     }
   }
 }

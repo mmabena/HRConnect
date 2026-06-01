@@ -1,15 +1,15 @@
 namespace HRConnect.Tests
 {
-  using HRConnect.Api.DTOs;
-  using HRConnect.Api.Models;
-  using HRConnect.Api.Services;
-  using HRConnect.Api.Interfaces;
-  using HRConnect.Api.Repositories;
-  using Moq;
   using System;
   using System.Collections.Generic;
   using System.Linq;
   using System.Threading.Tasks;
+  using HRConnect.Api.DTOs;
+  using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Models;
+  using HRConnect.Api.Repositories;
+  using HRConnect.Api.Services;
+  using Moq;
   using Xunit;
 
   public class TaxDeductionServiceTests
