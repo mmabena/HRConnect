@@ -1,15 +1,11 @@
 namespace HRConnect.Api.Models
 {
-  using System;
   using System.Collections.Generic;
-  using System.Linq;
-  using System.Threading.Tasks;
   using System.ComponentModel.DataAnnotations;
-  using System.ComponentModel.DataAnnotations.Schema;
 
   public class Company
   {
-    [Required]
+    [Key]
     public string CompanyId { get; set; } = string.Empty;
     [Required]
     public string CompanyName { get; set; } = string.Empty;

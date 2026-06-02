@@ -1,4 +1,3 @@
-#pragma warning disable CS0219 // Variable is assigned but its value is never used
 namespace HRConnect.Api.Services
 {
   using System.Collections.Concurrent;
@@ -7,7 +6,6 @@ namespace HRConnect.Api.Services
   using System.Text;
   using HRConnect.Api.Interfaces;
   using System.Globalization;
-  using System.Collections.Concurrent;
   using HRConnect.Api.Models;
   using Microsoft.AspNetCore.Identity;
   using Microsoft.IdentityModel.Tokens;
@@ -113,8 +111,7 @@ namespace HRConnect.Api.Services
 
       var emailSubject = "Password Reset PIN";
       var emailBody = $"Your password reset PIN is: {pin}\n\nThis PIN is valid for 3 minute only.";
-      //      await _emailService.SendEmailAsync(email, emailSubject, emailBody);
-      Console.WriteLine($"????????? 3 MIN PIN ==>{pin}");
+      await _emailService.SendEmailAsync(email, emailSubject, emailBody);
 
       return (pin, resetPin.ExpiresAt);
     }

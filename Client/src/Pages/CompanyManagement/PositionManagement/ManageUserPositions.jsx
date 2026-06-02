@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import CompanyManagementNavBar from "../../../Components/companyManagement/companyManagementNavBar";
+import CompanyManagementNavBar from "../../../components/companyManagement/companyManagementNavBar";
 import { useNavigate, useLocation } from "react-router-dom";
 import { editEmployee, showConfirmationToast } from "../../../api/Employee";
 import api from "../../../api/api";
 import {jwtDecode} from "jwt-decode";
 import { toast } from "react-toastify";
 import * as signalR from "@microsoft/signalr";
-import { getConnection } from "../../../Components/Services/signalRService";
+import { getConnection } from "../../../components/Services/signalRService";
 
 const ManageUserPositions = ({ title }) => {
   const [employees, setEmployees] = useState([]);
@@ -20,7 +20,7 @@ const ManageUserPositions = ({ title }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [activeTab, setActiveTab] = useState("Position Management");
-  const [connection, setConnection] = useState(null);
+  const [userManagementHubConnection, setuserManagementHubConnection] = useState(null);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -138,18 +138,18 @@ const ManageUserPositions = ({ title }) => {
       .withUrl("http://localhost:3000/userPositionHub")
       .withAutomaticReconnect()
       .build();
-    setConnection(newConnection);
+    setuserManagementHubConnection(newConnection);
   }, []);
 
   useEffect(() => {
-    if (!connection) return;
+    if (!userManagementHubConnection) return;
 
-    connection
+   userManagementHubConnection
       .start()
       .then(() => {
         console.log("SignalR Connected");
 
-        connection.on("UserPositionUpdated", (updatedEmployee) => {
+        userManagementHubConnection.on("UserPositionUpdated", (updatedEmployee) => {
           // Remove employee if they were moved
           setEmployees((prev) =>
             prev.filter((emp) => emp.employeeId !== updatedEmployee.employeeId)
@@ -158,9 +158,9 @@ const ManageUserPositions = ({ title }) => {
       })
       .catch((err) => {
         console.error("SignalR Connection Error:", err);
-        setTimeout(() => connection.start(), 5000);
+        setTimeout(() => userManagementHubConnection.start(), 5000);
       });
-  }, [connection]);
+  }, [userManagementHubConnection]);
 
   // ----------------------------
   // Checkbox Handlers

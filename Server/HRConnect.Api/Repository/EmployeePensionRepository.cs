@@ -7,16 +7,16 @@
 
   public class EmployeePensionRepository(ApplicationDBContext context) : IEmployeePensionRepository
   {
-    public async Task<Employee?> GetEmployeeByIdAsync(string employeeId, CancellationToken cancellationToken)
+    public async Task<Employee?> GetEmployeeByIdAsync(string employeeId)
     {
       return await context.Employees
-          .FirstOrDefaultAsync(e => e.EmployeeId == employeeId, cancellationToken);
+          .FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
     }
 
-    public async Task UpdateEmployeeAsync(Employee employee, CancellationToken cancellationToken)
+    public async Task UpdateEmployeeAsync(Employee employee)
     {
       _ = context.Employees.Update(employee);
-      _ = await context.SaveChangesAsync(cancellationToken);
+      _ = await context.SaveChangesAsync();
     }
   }
 }

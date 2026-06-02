@@ -2,6 +2,7 @@ namespace HRConnect.Tests.Services
 {
   using System;
   using System.Collections.Generic;
+  using Microsoft.AspNetCore.DataProtection;
   using System.Threading;
   using System.Threading.Tasks;
   using HRConnect.Api.Data;
@@ -32,8 +33,14 @@ namespace HRConnect.Tests.Services
       var options = new DbContextOptionsBuilder<ApplicationDBContext>()
         .UseInMemoryDatabase(Guid.NewGuid().ToString())
         .Options;
+      var mockProvider = new Mock<IDataProtectionProvider>();
+      // Setup CreateProtector to return a dummy protector
+      var mockProtector = new Mock<IDataProtector>();
+      mockProtector.Setup(p => p.Protect(It.IsAny<byte[]>())).Returns<byte[]>(b => b);
+      mockProtector.Setup(p => p.Unprotect(It.IsAny<byte[]>())).Returns<byte[]>(b => b);
+      mockProvider.Setup(p => p.CreateProtector(It.IsAny<string>())).Returns(mockProtector.Object);
 
-      _context = new ApplicationDBContext(options);
+      _context = new ApplicationDBContext(options, mockProtector.Object);
       var activeCompanyServiceMock = new Mock<IActiveCompanyService>();
       var userCompanyServiceMock = new Mock<IUserCompanyService>();
       var companyRepoMock = new Mock<ICompanyRepository>();

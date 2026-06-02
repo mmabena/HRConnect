@@ -1,11 +1,11 @@
 namespace HRConnect.Api.Services
 {
-    using HRConnect.Api.Data;
-    using HRConnect.Api.Interfaces;
-    using HRConnect.Api.Models;
-    using HRConnect.Api.Models.CompanyContributions;
-    using HRConnect.Api.Models.Payroll;
-    using Microsoft.EntityFrameworkCore;
+  using HRConnect.Api.Data;
+  using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Models;
+  using HRConnect.Api.Models.CompanyContributions;
+  using HRConnect.Api.Models.Payroll;
+  using Microsoft.EntityFrameworkCore;
 
   public class CompanyContributionAllocationService : ICompanyContributionAllocationService
   {
@@ -75,12 +75,12 @@ namespace HRConnect.Api.Services
           EmployeeId = emp.EmployeeId,
           IsLocked = false,
 
-                    Name = emp.Name,
-                    Surname = emp.Surname,
-                    IdNumber = emp.IdNumber!,
-                    PassportNumber = emp.PassportNumber!,
-                    Age = age,
-                    Salary = salary,
+          Name = emp.Name,
+          Surname = emp.Surname,
+          IdNumber = emp.IdNumber!,
+          PassportNumber = emp.PassportNumber!,
+          Age = age,
+          Salary = salary,
 
           DeathPercentage = deathPercentage,
           DeathAmount = salary * deathPercentage,

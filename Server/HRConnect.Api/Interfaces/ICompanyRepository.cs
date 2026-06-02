@@ -17,8 +17,5 @@ namespace HRConnect.Api.Interfaces
     Task<Company?> GetCompanyByVATAsync(string vatNumber);
     Task<Company?> GetCompanyByContactNumberAsync(string contactNumber);
     Task<Company?> GetCompanyByNameAsync(string companyName);
-
-
-
   }
 }

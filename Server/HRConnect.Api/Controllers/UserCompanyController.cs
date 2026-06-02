@@ -10,6 +10,7 @@ namespace HRConnect.Api.Controllers
     using Microsoft.AspNetCore.Authorization;
     using System.Threading.Tasks;
     using HRConnect.Api.Interfaces;
+    
     [Route("api/userCompany")]
     [ApiController]
     public class UserCompanyController : ControllerBase

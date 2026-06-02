@@ -22,7 +22,6 @@ namespace HRConnect.Api.Repository
         return null;
       return period.ToPayrollPeriodDto();
     }
-    /*Active period depends on the financial year. April-March*/
 
     public async Task<PayrollPeriod?> GetPeriodByDate(DateTime dateTime)
     {
@@ -30,13 +29,6 @@ namespace HRConnect.Api.Repository
          p => p.StartDate <= dateTime &&
          p.EndDate >= dateTime);
     }
-
-    // public async Task<PayrollPeriod?> GetActivePeriod(DateTime dateTime)
-    // {
-    //   return await _context.PayrollPeriods.FirstOrDefaultAsync(
-    //      p => p.StartDate <= dateTime &&
-    //      p.EndDate >= dateTime);
-    // }
 
     public async Task<PayrollPeriodDto> CreatePeriodAsync(PayrollPeriod payrollPeriod)
     {
@@ -59,10 +51,10 @@ namespace HRConnect.Api.Repository
         await transaction.CommitAsync();
         return periods;
       }
-      catch (DbException ex)
+      catch (DbException exception)
       {
         await transaction.RollbackAsync();
-        Console.WriteLine($"Failed Database Transaction With :{ex}");
+        Console.WriteLine($"Failed PayrollPeriod Database Transaction:{exception.InnerException?.Message}");
         throw;
       }
     }
@@ -82,8 +74,9 @@ namespace HRConnect.Api.Repository
               .Where(p => !p.IsLocked)//filter out early to prevent hogging up memory usage
               .OrderByDescending(p => p.PayrollPeriodId)
               .Include(p => p.Runs)
-              .ThenInclude(r => r.Records)
-                          .AsSplitQuery() //prevent what is called 'Cartesian Explosion' (we have 3 record types so far to query)
+              .ThenInclude(r =>
+                  r.Records)
+              .AsSplitQuery() //prevent what is called 'Cartesian Explosion' (we have 3 record types so far to query)
             .FirstOrDefaultAsync();
 
         await transaction.CommitAsync();

@@ -1,22 +1,23 @@
 namespace HRConnect.Api.Interfaces.Notification
 {
-  using HRConnect.Api.DTOs.Notification;
   using HRConnect.Api.Models;
   public interface INotificationRepository
   {
-    Task AddNotificationAsync(Notification notification);
-    // Task AddNotificationBatchAsync(Notification notification);
+    Task<Notification> AddNotificationAsync(Notification notification);
+    Task<IEnumerable<Notification>> GetEmployeeNotificationsAsync(string employeeId);
     Task<Notification?> ExistsAsync(NotificationType type, string employeeId, string? message, NotificationSeverity severity);
     Task MarkBatchAsReadAsync(List<string> employeeIds, NotificationType type);
-    Task<bool> MarkAsReadAsync(Notification notification);
-    //May not be necessary for production
-
-    /// <summary>
-    ///  For now treat employeeId as an employeeId
-    /// </summary>
-    /// <param name="employeeId">Psuedo-UserId</param>
-    Task<IEnumerable<NotificationDto>> GetAllUnreadAsync(string? employeeId);
-    Task<IEnumerable<NotificationDto>> GetAllEmployeeNotificationsBySeverityAsync(string employeeId, NotificationSeverity severity);
-    Task<IEnumerable<NotificationDto>> GetAllEmployeeNotificationsByTypeAsync(NotificationType type, string employeeId);
+    Task MarkAsReadAsync(Notification notification);
+    Task<bool> Save();
+    Task<Notification?> TryAndAquireAsync(string idempotencyKey);
+    Task<IEnumerable<Notification>> GetAllUnreadAsync(string? employeeId);
+    Task<IEnumerable<Notification>> GetAllEmployeeNotificationsBySeverityAsync(string employeeId, NotificationSeverity severity);
+    Task<IEnumerable<Notification>> GetAllEmployeeNotificationsByTypeAsync(NotificationType type, string employeeId);
+    Task<Notification?> TryCreateUnreadAsync(Notification notification);
+    Task<bool> DeleteAllReadAsync();
+    Task<bool> DeleteAllReadByTypeAsync(NotificationType type);
+    Task<bool> DeleteAllByEmployeeId(string employeeId);
+    Task<bool> DeleteNotificationByIdAsync(string employeeId, int id);
+    Task MarkAllAsReadByEmployeeId(string employeeId);
   }
 }

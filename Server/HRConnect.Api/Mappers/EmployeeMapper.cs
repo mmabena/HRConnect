@@ -1,9 +1,5 @@
 namespace HRConnect.Api.Mappers
 {
-  using System;
-  using System.Collections.Generic;
-  using System.Linq;
-  using System.Threading.Tasks;
   using HRConnect.Api.Models;
   using HRConnect.Api.DTOs.Employee;
   public static class EmployeeMapper

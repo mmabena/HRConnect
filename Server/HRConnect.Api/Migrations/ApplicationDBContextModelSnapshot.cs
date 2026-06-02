@@ -886,7 +886,6 @@ namespace HRConnect.Api.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CompanyId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ContactNumber")
@@ -1291,6 +1290,26 @@ namespace HRConnect.Api.Migrations
                     b.ToTable("LeaveTypes");
                 });
 
+            modelBuilder.Entity("HRConnect.Api.Models.MFAUserSecret", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<byte[]>("EncryptedUserSecret")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<int>("KeyVersion")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("UserSecrets");
+                });
+
             modelBuilder.Entity("HRConnect.Api.Models.MedicalOption", b =>
                 {
                     b.Property<int>("MedicalOptionId")
@@ -1393,6 +1412,10 @@ namespace HRConnect.Api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("IdempotencyKey")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsRead")
                         .HasColumnType("bit");
 
@@ -1400,7 +1423,10 @@ namespace HRConnect.Api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Severity")
+                    b.Property<int>("Severity")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Subject")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -1957,6 +1983,21 @@ namespace HRConnect.Api.Migrations
                     b.ToTable("StatutoryContributionTypes");
                 });
 
+            modelBuilder.Entity("HRConnect.Api.Models.TOTPState", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<long>("LastUsedTimeStamp")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("TOTPStates");
+                });
+
             modelBuilder.Entity("HRConnect.Api.Models.TaxDeduction", b =>
                 {
                     b.Property<int>("Id")
@@ -2046,6 +2087,9 @@ namespace HRConnect.Api.Migrations
 
                     b.Property<int>("Role")
                         .HasColumnType("int");
+
+                    b.Property<string>("TempRole")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("UserId");
 
@@ -2402,8 +2446,7 @@ namespace HRConnect.Api.Migrations
                     b.HasOne("HRConnect.Api.Models.Company", "Company")
                         .WithMany("Employees")
                         .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("HRConnect.Api.Models.PensionOption", "PensionOption")
                         .WithMany("Employees")
@@ -2502,6 +2545,17 @@ namespace HRConnect.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("LeaveType");
+                });
+
+            modelBuilder.Entity("HRConnect.Api.Models.MFAUserSecret", b =>
+                {
+                    b.HasOne("HRConnect.Api.Models.User", "User")
+                        .WithOne()
+                        .HasForeignKey("HRConnect.Api.Models.MFAUserSecret", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.MedicalOption", b =>
@@ -2673,6 +2727,17 @@ namespace HRConnect.Api.Migrations
                     b.Navigation("JobGrade");
 
                     b.Navigation("OccupationalLevels");
+                });
+
+            modelBuilder.Entity("HRConnect.Api.Models.TOTPState", b =>
+                {
+                    b.HasOne("HRConnect.Api.Models.User", "User")
+                        .WithOne()
+                        .HasForeignKey("HRConnect.Api.Models.TOTPState", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.UserCompany", b =>

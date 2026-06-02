@@ -9,8 +9,6 @@ namespace HRConnect.Api.DTOs.User
         public int UserId { get; set; }
         public string Email { get; set; }
         public string Role { get; set; }
-
-        // 👇 From Employee
         public string? FullName { get; set; }
         public string? JobTitle { get; set; }
 

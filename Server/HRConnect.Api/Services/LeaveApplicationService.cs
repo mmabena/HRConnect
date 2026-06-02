@@ -67,17 +67,17 @@ namespace HRConnect.Api.Services
       if (balance.AvailableDays <= 0 || balance.AvailableDays < daysRequested)
         throw new InvalidOperationException("Insufficient leave balance.");
 
-            var application = new LeaveApplication
-            {
-                EmployeeId = request.EmployeeId,
-                LeaveTypeId = request.LeaveTypeId,
-                Description = request.Description!,
-                StartDate = request.StartDate,
-                EndDate = request.EndDate,
-                DaysRequested = daysRequested,
-                Status = LeaveApplication.LeaveApplicationStatus.Pending,
-                AppliedDate = DateTime.UtcNow
-            };
+      var application = new LeaveApplication
+      {
+        EmployeeId = request.EmployeeId,
+        LeaveTypeId = request.LeaveTypeId,
+        Description = request.Description!,
+        StartDate = request.StartDate,
+        EndDate = request.EndDate,
+        DaysRequested = daysRequested,
+        Status = LeaveApplication.LeaveApplicationStatus.Pending,
+        AppliedDate = DateTime.UtcNow
+      };
 
       await _context.LeaveApplications.AddAsync(application);
       await _context.SaveChangesAsync();

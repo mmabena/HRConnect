@@ -205,31 +205,31 @@ namespace HRConnect.Api.Services
             balance.AccruedDays - balance.TakenDays;
       }
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                throw new InvalidOperationException(
-                    "This leave balance was modified by another process. Please refresh and try again.");
-            }
-        }
-        /// <summary>
-        /// Recalculates the annual leave balance for an employee based on their accrual history and any changes to their position or job grade. 
-        /// This method is typically called after a position change or at the end of the year to ensure the annual leave balance is accurate. 
-        /// It calculates the total accrued days based on the employee's accrual segments, applies any carryover from the previous year, and updates the available days accordingly.
-        /// </summary>
-        /// <param name="employeeId"></param>
-        /// <returns></returns>
-        /// <exception cref="InvalidOperationException"></exception>
-        public async Task RecalculateAnnualLeaveAsync(string employeeId)
-        {
-            var employee = await _context.Employees
-                .Include(e => e.LeaveBalances)
-                .Include(e => e.Position)
-                    .ThenInclude(p => p!.JobGrade)
-                .FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
+      try
+      {
+        await _context.SaveChangesAsync();
+      }
+      catch (DbUpdateConcurrencyException)
+      {
+        throw new InvalidOperationException(
+            "This leave balance was modified by another process. Please refresh and try again.");
+      }
+    }
+    /// <summary>
+    /// Recalculates the annual leave balance for an employee based on their accrual history and any changes to their position or job grade. 
+    /// This method is typically called after a position change or at the end of the year to ensure the annual leave balance is accurate. 
+    /// It calculates the total accrued days based on the employee's accrual segments, applies any carryover from the previous year, and updates the available days accordingly.
+    /// </summary>
+    /// <param name="employeeId"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
+    public async Task RecalculateAnnualLeaveAsync(string employeeId)
+    {
+      var employee = await _context.Employees
+          .Include(e => e.LeaveBalances)
+          .Include(e => e.Position)
+              .ThenInclude(p => p!.JobGrade)
+          .FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
 
       if (employee == null)
         throw new InvalidOperationException("Employee not found.");

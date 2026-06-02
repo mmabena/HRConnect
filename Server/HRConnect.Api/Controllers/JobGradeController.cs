@@ -1,13 +1,13 @@
 namespace HRConnect.Api.Controllers
 {
-    using HRConnect.Api.DTOs.JobGrade;
-    using HRConnect.Api.Interfaces;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Authorization;
+  using HRConnect.Api.DTOs.JobGrade;
+  using HRConnect.Api.Interfaces;
+  using Microsoft.AspNetCore.Authorization;
+  using Microsoft.AspNetCore.Mvc;
 
   [ApiController]
   [Route("api/jobgrades")]
-  // [Authorize(Roles = "SuperUser")] // Require authentication and SuperAdmin role
+  [Authorize(Roles = "SuperUser")]
 
   public class JobGradeController : ControllerBase
   {
@@ -18,7 +18,6 @@ namespace HRConnect.Api.Controllers
       _jobGradeService = jobGradeService;
     }
 
-    // GET /api/jobgrade
     [HttpGet]
     public async Task<List<JobGradeDto>> GetAllJobGrades()
     {
@@ -37,7 +36,6 @@ namespace HRConnect.Api.Controllers
       return Ok(jobGrade);
     }
 
-    // POST /api/jobgrade
     [HttpPost]
     public async Task<ActionResult<JobGradeDto>> CreateJobGrade([FromBody] CreateJobGradeDto createJobGradeDto)
     {
@@ -49,7 +47,6 @@ namespace HRConnect.Api.Controllers
           createdJobGrade);
     }
 
-    // PUT /api/jobgrade/{id}
     [HttpPut("{id}")]
     public async Task<ActionResult<JobGradeDto>> UpdateJobGrade(int id, [FromBody] UpdateJobGradeDto updateJobGradeDto)
     {

@@ -1,21 +1,20 @@
 namespace HRConnect.Tests
 {
   using System;
-  using System.Collections.Generic;
   using System.Linq;
-  using System.Reflection.Metadata;
   using System.Threading.Tasks;
   using HRConnect.Api.Data;
-  using HRConnect.Api.DTOs.Employee;
-  using HRConnect.Api.Interfaces;
-  using HRConnect.Api.Models;
-  using HRConnect.Api.Repository;
-  using HRConnect.Api.Services;
-  using HRConnect.Api.Utils;
   using Microsoft.AspNetCore.Identity;
+  using HRConnect.Api.Models;
+  using Microsoft.AspNetCore.DataProtection;
+  using HRConnect.Api.Services;
+  using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Utils;
   using Microsoft.EntityFrameworkCore;
-  using Moq;
   using Xunit;
+  using HRConnect.Api.DTOs.Employee;
+  using HRConnect.Api.Repository;
+  using Moq;
 
   public class LeaveBalanceServiceTests
   {
@@ -32,50 +31,58 @@ namespace HRConnect.Tests
           .ConfigureWarnings(w =>
               w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.InMemoryEventId.TransactionIgnoredWarning))
           .Options;
+      // Create a mock IDataProtectionProvider
+      var mockProvider = new Mock<IDataProtectionProvider>();
+      // Setup CreateProtector to return a dummy protector
+      var mockProtector = new Mock<IDataProtector>();
+      mockProtector.Setup(p => p.Protect(It.IsAny<byte[]>())).Returns<byte[]>(b => b);
+      mockProtector.Setup(p => p.Unprotect(It.IsAny<byte[]>())).Returns<byte[]>(b => b);
+      mockProvider.Setup(p => p.CreateProtector(It.IsAny<string>())).Returns(mockProtector.Object);
+      return new ApplicationDBContext(options, mockProtector.Object);
+    }
 
-            return new ApplicationDBContext(options);
-        }
-        private static LeaveBalanceService CreateLeaveBalanceService(ApplicationDBContext context)
-            => new LeaveBalanceService(context);
+    // 🔥 IMPORTANT: return CONCRETE types (fixes CA1859)
+    private static LeaveBalanceService CreateLeaveBalanceService(ApplicationDBContext context)
+        => new LeaveBalanceService(context);
 
     private static LeaveProcessingService CreateLeaveProcessingService(ApplicationDBContext context)
         => new LeaveProcessingService(context, new FakeEmailService(), CreateLeaveBalanceService(context));
 
     private static EmployeeService CreateEmployeeService(ApplicationDBContext context)
-{
-    var employeeRepo = new EmployeeRepository(context);
-    var positionRepo = new PositionRepository(context);
+    {
+      var employeeRepo = new EmployeeRepository(context);
+      var positionRepo = new PositionRepository(context);
 
-    var passwordHasherMock = new Mock<IPasswordHasher<User>>();
-    var activeCompanyServiceMock = new Mock<IActiveCompanyService>();
-    var userCompanyServiceMock = new Mock<IUserCompanyService>();
-    var companyRepoMock = new Mock<ICompanyRepository>();
+      var passwordHasherMock = new Mock<IPasswordHasher<User>>();
+      var activeCompanyServiceMock = new Mock<IActiveCompanyService>();
+      var userCompanyServiceMock = new Mock<IUserCompanyService>();
+      var companyRepoMock = new Mock<ICompanyRepository>();
 
-    activeCompanyServiceMock
-        .Setup(x => x.GetActiveCompanyIdAsync(It.IsAny<int>()))
-        .ReturnsAsync("COMP001");
+      activeCompanyServiceMock
+          .Setup(x => x.GetActiveCompanyIdAsync(It.IsAny<int>()))
+          .ReturnsAsync("COMP001");
 
-    companyRepoMock
-        .Setup(x => x.GetCompanyByIdAsync(It.IsAny<string>()))
-        .ReturnsAsync(new Company
-        {
+      companyRepoMock
+          .Setup(x => x.GetCompanyByIdAsync(It.IsAny<string>()))
+          .ReturnsAsync(new Company
+          {
             CompanyId = "COMP001",
             CompanyName = "Test Company"
-        });
+          });
 
-    return new EmployeeService(
-        context,
-        activeCompanyServiceMock.Object,
-        userCompanyServiceMock.Object,
-        employeeRepo,
-        new FakeEmailService(),
-        companyRepoMock.Object,
-        positionRepo,
-        CreateLeaveBalanceService(context),
-        CreateLeaveProcessingService(context),
-        passwordHasherMock.Object
-    );
-}
+      return new EmployeeService(
+          context,
+          activeCompanyServiceMock.Object,
+          userCompanyServiceMock.Object,
+          employeeRepo,
+          new FakeEmailService(),
+          companyRepoMock.Object,
+          positionRepo,
+          CreateLeaveBalanceService(context),
+          CreateLeaveProcessingService(context),
+          passwordHasherMock.Object
+      );
+    }
 
     // ---------------- BASIC TEST ----------------
 

@@ -23,6 +23,8 @@ Successfully implemented a complete authentication system for HRConnect with log
 - Email validation (@singular.co.za domain)
 - Password complexity requirements
 - Password history tracking (prevent reuse)
+- Time-Based One-Time-Pin (with replay attack prevention, RFC6238)
+
 
  **Database Schema**:
 - Users table with email, password hash, role

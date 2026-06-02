@@ -27,11 +27,11 @@ namespace HRConnect.Api.DTOs.Employee
     public string? PositionTitle { get; set; }
     public EmploymentStatus EmploymentStatus { get; set; }
     public string CareerManagerID { get; set; } = string.Empty;
-    public string CompanyId { get; set; }
+    public string CompanyId { get; set; } = string.Empty;
     public string ProfileImage { get; set; } = string.Empty;
     public int? PensionOptionId { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime UpdatedAt { get; set; } = DateTime.Now;
     public bool IsActive { get; set; }
   }
 }
