@@ -86,12 +86,11 @@ namespace HRConnect.Api.Data
         x => x == null ? string.Empty : SecretsProtector.UnWrap<string>(x)
         );
 
-#pragma warning disable CS8603
       var byteEncryptor = new ValueConverter<byte[], byte[]>(
         x => x == null ? null : SecretsProtector.WrapBytes(x),
         x => x == null ? null : SecretsProtector.UnWrapBytes(x)
         );
-#pragma warning restore CS8603
+
 
       // Using data protect to encrypt notification messages
       modelBuilder.Entity<Notification>()
@@ -102,29 +101,7 @@ namespace HRConnect.Api.Data
       .Property(m => m.EncryptedUserSecret)
       .HasConversion(byteEncryptor);
 
-      // Use this to protector to convert data of your choosing (of type string) in the database
-      SecretsProtector.Init(provider.CreateProtector("DbEncryptor"));
-      var stringEncryptor = new ValueConverter<string, string>(
-        x => x == null ? string.Empty : SecretsProtector.Wrap(x),
-        x => x == null ? string.Empty : SecretsProtector.UnWrap<string>(x)
-        );
-
-#pragma warning disable CS8603
-      var byteEncryptor = new ValueConverter<byte[], byte[]>(
-        x => x == null ? null : SecretsProtector.WrapBytes(x),
-        x => x == null ? null : SecretsProtector.UnWrapBytes(x)
-        );
-#pragma warning restore CS8603
-
-      // Using data protect to encrypt notification messages
-      modelBuilder.Entity<Notification>()
-      .Property(n => n.Message)
-      .HasConversion(stringEncryptor);
-
-      modelBuilder.Entity<MFAUserSecret>()
-      .Property(m => m.EncryptedUserSecret)
-      .HasConversion(byteEncryptor);
-
+     
       // Employee Relationships
       modelBuilder.Entity<Employee>()
           .HasOne(e => e.Position)
@@ -255,8 +232,6 @@ namespace HRConnect.Api.Data
 
       // Company Contributions
       modelBuilder.Entity<CompanyContribution>()
-          .Property(c => c.Percentage)
-          .HasColumnType("decimal(10,6)");
           .Property(c => c.Percentage)
           .HasColumnType("decimal(10,6)");
 
