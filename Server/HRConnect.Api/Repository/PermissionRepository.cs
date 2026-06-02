@@ -5,12 +5,12 @@ namespace HRConnect.Api.Repositories
   using HRConnect.Api.Models;
   using Microsoft.EntityFrameworkCore;
 
-  public class PermissionsRepository : IPermissionsRepository
+  public class PermissionRepository : IPermissionsRepository
   {
     private readonly ApplicationDBContext _context;
     private readonly IRolesRepository _rolesRepo;
 
-    public PermissionsRepository(ApplicationDBContext context, IRolesRepository rolesRepo)
+    public PermissionRepository(ApplicationDBContext context, IRolesRepository rolesRepo)
     {
       _context = context;
       _rolesRepo = rolesRepo;
@@ -24,9 +24,36 @@ namespace HRConnect.Api.Repositories
       return permission;
     }
 
-    public async Task AssignPermissionsToRoleAsync(int roleId, string[] permissionsList)
+    public async Task AssignPermissionsToRoleAsync(int roleId, params string[] permissionsList)
     {
-      throw new NotImplementedException();
+      //Get the roles
+      Roles? role = await _context.Roles
+        .Include(r => r.RolePermissions)
+        .FirstOrDefaultAsync(r => r.RoleId == roleId);
+      //Get the permisions
+      var permissions = await _context.Permissions
+        .Where(p => permissionsList.Contains(p.Key)).ToListAsync();
+
+      foreach (var p in permissions)
+      {
+        bool alreadyAssigned = role!.RolePermissions.Any(rp => rp.PermissionsId == p.PermissionsId);
+
+        //Avoid duplicatte assignment
+        if (alreadyAssigned)
+          continue;
+
+        await _context.RolePermissions.AddAsync(new RolePermissions
+        {
+          RoleId = role.RoleId,
+          PermissionsId = p.PermissionsId,
+          Role = role,
+          Permissions = p,
+          IsGranted = true
+        });
+      }
+
+      //write to db
+      await _context.SaveChangesAsync();
     }
     public async Task RemovePermissionsFromRoleAsync(int roleId, params string[] permissionsList)
     {
@@ -47,6 +74,9 @@ namespace HRConnect.Api.Repositories
     {
       return await _context.Permissions.ToListAsync();
     }
+    public async Task Save()
+    {
+      await _context.SaveChangesAsync();
+    }
   }
 }
-

@@ -22,6 +22,14 @@ namespace HRConnect.Api.Repositories
       return role;
     }
 
+    public async Task<Roles?> GetRoleByIdAsync(int roleId)
+    {
+      Roles? role = await _context.Roles.FirstOrDefaultAsync(r => r.RoleId == roleId);
+      if (role == null)
+        return null;
+      return role;
+    }
+
     public async Task<IEnumerable<Roles>> GetAllRolesAsync()
     {
       return await _context.Roles.ToListAsync();

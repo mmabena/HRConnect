@@ -16,5 +16,6 @@ namespace HRConnect.Api.Interfaces.AccessControl
     Task AssignPermissionsToRoleAsync(int roleId, params string[] permissionsList);
     //I'll Challenge myself of implementing this completely alone under pressure
     Task RemovePermissionsFromRoleAsync(int roleId, params string[] permissionsList);
+    Task Save();
   }
 }

@@ -6,7 +6,7 @@ namespace HRConnect.Api.Interfaces.AccessControl
   {
     Task<Roles?> GetRoleByNameAsync(string roleName);
     Task<IEnumerable<Roles>> GetAllRolesAsync();
-
+    Task<Roles?> GetRoleByIdAsync(int roleId);
     // Task RemovePermissionsFromRoleAsync(int roleId, int permissionId);
     // Task AssignPermissionsToRoleAsync(int roleId, params string[] permissionsList);
   }

@@ -34,7 +34,6 @@ namespace HRConnect.Api.Utils.AccessControl
     public const string BudgetView = "budget.view";
     public const string PayrollBenchmarkCapture = "payroll.benchmarking-capture";
     public const string PayrollBenchmarkView = "payroll.benchmarking-view";
-    //
     //Additionally for the CEO 
     public const string BudgetViewOnly = "budget.view-only";
     public const string BudgetApprove = "budget.approve";
