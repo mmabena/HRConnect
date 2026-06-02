@@ -56,6 +56,7 @@ namespace HRConnect.Api.Data
     /// Salary Budgets
     /// </summary>
     public DbSet<SalaryBudget> SalaryBudgets { get; set; }
+    public DbSet<SalaryBudgetEmployee> SalaryBudgetEmployees { get; set; }
 
     /// <param name="modelBuilder"></param>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -350,7 +351,31 @@ namespace HRConnect.Api.Data
         .HasForeignKey(ed => ed.EmployeeId)
         .OnDelete(DeleteBehavior.NoAction);
 
+      /// <summary>
+      /// Salary Budget Configurations
+      /// </summary>
+      modelBuilder.Entity<SalaryBudgetEmployee>()
+          .HasOne(e => e.Employee)
+          .WithMany()
+          .HasForeignKey(e => e.EmployeeId)
+          .OnDelete(DeleteBehavior.NoAction);
+
+      modelBuilder.Entity<SalaryBudgetEmployee>()
+          .HasOne(jg => jg.JobGrade)
+          .WithMany()
+          .HasForeignKey(jg => jg.JobGradeId)
+          .OnDelete(DeleteBehavior.NoAction);
+
+      modelBuilder.Entity<SalaryBudgetEmployee>()
+          .HasOne(p => p.Position)
+          .WithMany()
+          .HasForeignKey(p => p.PositionId)
+          .OnDelete(DeleteBehavior.NoAction);
+        
+
     }
+
+    
 
     //Override 'SaveChangesAsync' for Payroll Records to enforce locked records on a payroll run 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

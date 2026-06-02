@@ -1718,6 +1718,138 @@ namespace HRConnect.Api.Migrations
                     b.ToTable("Positions");
                 });
 
+            modelBuilder.Entity("HRConnect.Api.Models.SalaryBudget.SalaryBudget", b =>
+                {
+                    b.Property<int>("SalaryBudgetId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SalaryBudgetId"));
+
+                    b.Property<DateTime?>("ApprovedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("BudgetYear")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("RejectionReason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SalaryBudgetName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("SalaryBudgetId");
+
+                    b.ToTable("SalaryBudgets");
+                });
+
+            modelBuilder.Entity("HRConnect.Api.Models.SalaryBudget.SalaryBudgetEmployee", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal?>("BonusApril")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("BonusOctober")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Branch")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("CarAllowance")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("CurrentSalary")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("DeathBenefit")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("DisabilityBenefit")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("EmployeeId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("EmployeeName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("GrossSalary")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("JobGradeId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("JobGradeName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("NewAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PositionId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PositionTitle")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("ProposedPercentage")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<int>("SalaryBudgetId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("TotalCostToCompany")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.HasIndex("JobGradeId");
+
+                    b.HasIndex("PositionId");
+
+                    b.HasIndex("SalaryBudgetId");
+
+                    b.ToTable("SalaryBudgetEmployees");
+                });
+
             modelBuilder.Entity("HRConnect.Api.Models.StatutoryContributionType", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2429,6 +2561,41 @@ namespace HRConnect.Api.Migrations
                     b.Navigation("OccupationalLevels");
                 });
 
+            modelBuilder.Entity("HRConnect.Api.Models.SalaryBudget.SalaryBudgetEmployee", b =>
+                {
+                    b.HasOne("HRConnect.Api.Models.Employee", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("HRConnect.Api.Models.JobGrade", "JobGrade")
+                        .WithMany()
+                        .HasForeignKey("JobGradeId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("HRConnect.Api.Models.Position", "Position")
+                        .WithMany()
+                        .HasForeignKey("PositionId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("HRConnect.Api.Models.SalaryBudget.SalaryBudget", "SalaryBudget")
+                        .WithMany("Employees")
+                        .HasForeignKey("SalaryBudgetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Employee");
+
+                    b.Navigation("JobGrade");
+
+                    b.Navigation("Position");
+
+                    b.Navigation("SalaryBudget");
+                });
+
             modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction.MedicalAidDeduction", b =>
                 {
                     b.HasOne("HRConnect.Api.Models.MedicalOptionCategory", "MedicalOptionCategory")
@@ -2546,6 +2713,11 @@ namespace HRConnect.Api.Migrations
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.Position", b =>
+                {
+                    b.Navigation("Employees");
+                });
+
+            modelBuilder.Entity("HRConnect.Api.Models.SalaryBudget.SalaryBudget", b =>
                 {
                     b.Navigation("Employees");
                 });

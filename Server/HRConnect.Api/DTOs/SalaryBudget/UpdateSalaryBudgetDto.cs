@@ -1,12 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace HRConnect.Api.DTOs.SalaryBudget
 {
-    public class UpdateSalaryBudgetDto
-    {
-        
-    }
+  using System;
+  using HRConnect.Api.Models.SalaryBudget;
+  public class UpdateSalaryBudgetDto
+  {
+    public string SalaryBudgetName { get; set; } = string.Empty;
+    public int BudgetYear { get; set; }
+    public SalaryBudgetStatus Status { get; set; }
+    public string? RejectionReason { get; set; } = string.Empty;
+    public DateTime? ApprovedDate { get; set; }
+  }
 }
