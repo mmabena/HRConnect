@@ -32,9 +32,9 @@ const MedicalAidModal = ({
   const [newDependent, setNewDependent] = useState({
     fullName: "",
     lastName: "",
-    gender: "Male",
+    gender: "",
     idNumber: "",
-    relationship: "Child",
+    relationship: "",
   });
 
   const relationshipOptions = [
@@ -72,23 +72,21 @@ const MedicalAidModal = ({
   // =========================
   // FILTER BY SALARY
   // =========================
-  const filteredPlans = useMemo(() => {
-    return plans
-      .map((category) => {
-        const options = (category.medicalOptions || []).filter((opt) => {
-          const min = opt.salaryBracketMin ?? 0;
-          const max = opt.salaryBracketMax ?? Infinity;
+const filteredPlans = useMemo(() => {
+  const safeSalary = Number(salary) || 0;
 
-          return salary >= min && salary <= max;
-        });
+  return plans
+    .map((category) => ({
+      ...category,
+      medicalOptions: (category.medicalOptions || []).filter((opt) => {
+        const min = Number(opt.salaryBracketMin ?? 0);
+        const max = Number(opt.salaryBracketMax ?? Infinity);
 
-        return {
-          ...category,
-          medicalOptions: options,
-        };
-      })
-      .filter((cat) => cat.medicalOptions.length > 0);
-  }, [plans, salary]);
+        return safeSalary >= min && safeSalary <= max;
+      }),
+    }))
+    .filter((category) => category.medicalOptions.length > 0);
+}, [plans, salary]);
 
   // =========================
   // SELECT PLAN
@@ -118,9 +116,10 @@ const MedicalAidModal = ({
     setNewDependent({
       fullName: "",
       lastName: "",
-      gender: "Male",
+      gender: "",
       idNumber: "",
-      relationship: "Child",
+      relationship: "",
+      dateOfBirth: "",
     });
 
     setShowDependentModal(false);
@@ -256,46 +255,107 @@ const MedicalAidModal = ({
                             <span>Available</span>
                           </div>
 
-                          <div className="medical-salary-bracket">
-                            R{plan.salaryBracketMin} -{" "}
-                            {plan.salaryBracketMax
-                              ? `R${plan.salaryBracketMax}`
-                              : "Above"}
-                          </div>
+                          
 
-                          <div className="medical-plan-pricing">
+                       <div className="medical-plan-pricing">
 
-                            <div className="medical-price-box">
-                              <span>Principal</span>
-                              <h5>
-                                R{" "}
-                                {Number(
-                                  plan.totalMonthlyContributionsPrincipal || 0
-                                ).toFixed(2)}
-                              </h5>
-                            </div>
+  {/* PRINCIPAL */}
+  <div className="medical-price-card">
 
-                            <div className="medical-price-box">
-                              <span>Adult</span>
-                              <h5>
-                                R{" "}
-                                {Number(
-                                  plan.totalMonthlyContributionsAdult || 0
-                                ).toFixed(2)}
-                              </h5>
-                            </div>
+    <div className="medical-price-content">
 
-                            <div className="medical-price-box">
-                              <span>Child</span>
-                              <h5>
-                                R{" "}
-                                {Number(
-                                  plan.totalMonthlyContributionsChild || 0
-                                ).toFixed(2)}
-                              </h5>
-                            </div>
+      <span className="medical-price-title">
+        PRINCIPLE
+      </span>
 
-                          </div>
+      <div className="medical-price-amount-box">
+
+        <span className="medical-price-amount">
+          R{" "}
+          {Number(
+            plan.totalMonthlyContributionsPrincipal || 0
+          ).toFixed(2)}
+        </span>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  {/* ADULT */}
+  <div className="medical-price-card">
+
+    <div className="medical-price-content">
+
+      <span className="medical-price-title">
+        ADULT
+      </span>
+
+      <div className="medical-price-amount-box">
+
+        <span className="medical-price-amount">
+          R{" "}
+          {Number(
+            plan.totalMonthlyContributionsAdult || 0
+          ).toFixed(2)}
+        </span>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  {/* CHILD */}
+  <div className="medical-price-card">
+
+    <div className="medical-price-content">
+
+      <span className="medical-price-title">
+        CHILD
+      </span>
+
+      <div className="medical-price-amount-box">
+
+        <span className="medical-price-amount">
+          R{" "}
+          {Number(
+            plan.totalMonthlyContributionsChild || 0
+          ).toFixed(2)}
+        </span>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  {/* 2ND CHILD */}
+  <div className="medical-price-card">
+
+    <div className="medical-price-content">
+
+      <span className="medical-price-title">
+        2ND CHILD +
+      </span>
+
+      <div className="medical-price-amount-box">
+
+        <span className="medical-price-amount">
+          R{" "}
+          {Number(
+            plan.totalMonthlyContributionsSecondChild || 0
+          ).toFixed(2)}
+        </span>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
 
                         </div>
                       );
@@ -386,7 +446,7 @@ const MedicalAidModal = ({
 
                 <div className="medical-input-group">
                   <label>GENDER</label>
-
+               
                   <select
                     value={newDependent.gender}
                     onChange={(e) =>
@@ -396,12 +456,20 @@ const MedicalAidModal = ({
                       }))
                     }
                   >
+                    <option value =" disabled">
+                      Gender
+                    </option>
                     {genderOptions.map((g) => (
                       <option key={g} value={g}>
                         {g}
                       </option>
                     ))}
                   </select>
+                  <img
+                      src="/images/arrow_drop_down_circle.png"
+                      alt="Dropdown icon"
+                      className="icon-dropdown-icon"
+                    />
                 </div>
 
                 <div className="medical-input-group">
@@ -421,23 +489,60 @@ const MedicalAidModal = ({
                 </div>
 
                 <div className="medical-input-group">
-                  <label>RELATIONSHIP</label>
+  <label>RELATIONSHIP</label>
 
-                  <select
-                    value={newDependent.relationship}
+  <div
+    className={`medical-select-wrapper ${
+      newDependent.relationship ? "has-value" : ""
+    }`}
+  >
+    <select
+      value={newDependent.relationship || ""}
+      onChange={(e) =>
+        setNewDependent((prev) => ({
+          ...prev,
+          relationship: e.target.value,
+        }))
+      }
+      className="medical-relationship-input"
+    >
+      {/* PLACEHOLDER */}
+      <option value="" disabled hidden>
+        Select Relationship
+      </option>
+
+      {relationshipOptions.map((r) => (
+        <option key={r} value={r}>
+          {r}
+        </option>
+      ))}
+    </select>
+
+    <img
+      src="/images/arrow_drop_down_circle.png"
+      alt="Dropdown icon"
+      className="icon-dropdown-icon"
+    />
+  </div>
+</div>
+
+                <div className="medical-input-group">
+                  <label>DATE OF BIRTH</label>
+                  <input
+                    type="date"
+                    value={newDependent.dateOfBirth}
                     onChange={(e) =>
                       setNewDependent((prev) => ({
                         ...prev,
-                        relationship: e.target.value,
+                        dateOfBirth: e.target.value,
                       }))
                     }
-                  >
-                    {relationshipOptions.map((r) => (
-                      <option key={r} value={r}>
-                        {r}
-                      </option>
-                    ))}
-                  </select>
+                  />
+                  <img
+                        src="/images/calendar-range.svg"
+                        alt="Calendar icon"
+                        className="dropdown-icon"
+                      />
                 </div>
 
               </div>
