@@ -72,21 +72,21 @@ const MedicalAidModal = ({
   // =========================
   // FILTER BY SALARY
   // =========================
-const filteredPlans = useMemo(() => {
-  const safeSalary = Number(salary) || 0;
+  const filteredPlans = useMemo(() => {
+    const safeSalary = Number(salary) || 0;
 
-  return plans
-    .map((category) => ({
-      ...category,
-      medicalOptions: (category.medicalOptions || []).filter((opt) => {
-        const min = Number(opt.salaryBracketMin ?? 0);
-        const max = Number(opt.salaryBracketMax ?? Infinity);
+    return plans
+      .map((category) => ({
+        ...category,
+        medicalOptions: (category.medicalOptions || []).filter((opt) => {
+          const min = Number(opt.salaryBracketMin ?? 0);
+          const max = Number(opt.salaryBracketMax ?? Infinity);
 
-        return safeSalary >= min && safeSalary <= max;
-      }),
-    }))
-    .filter((category) => category.medicalOptions.length > 0);
-}, [plans, salary]);
+          return safeSalary >= min && safeSalary <= max;
+        }),
+      }))
+      .filter((category) => category.medicalOptions.length > 0);
+  }, [plans, salary]);
 
   // =========================
   // SELECT PLAN
@@ -220,150 +220,116 @@ const filteredPlans = useMemo(() => {
           ) : (
             <div className="medical-category-container">
 
-              {filteredPlans.map((category) => (
-                <div
-                  key={category.medicalOptionCategoryId}
-                  className="medical-category-section"
-                >
+              {/* FLATTENED GRID — all plans share one grid so they
+                  always fill 2 columns regardless of category grouping */}
+              <div className="medical-plan-grid">
 
-                  <div className="medical-plan-grid">
+                {filteredPlans.flatMap((category) =>
+                  category.medicalOptions.map((plan) => {
+                    const selected =
+                      String(medicalAidInfo?.planId) ===
+                      String(plan.medicalOptionId);
 
-                    {category.medicalOptions.map((plan) => {
-                      const selected =
-                        String(medicalAidInfo?.planId) ===
-                        String(plan.medicalOptionId);
+                    return (
+                      <div
+                        key={plan.medicalOptionId}
+                        className={`medical-plan-card ${
+                          selected ? "selected" : ""
+                        }`}
+                        onClick={() => selectPlan(plan)}
+                      >
 
-                      return (
-                        <div
-                          key={plan.medicalOptionId}
-                          className={`medical-plan-card ${
-                            selected ? "selected" : ""
-                          }`}
-                          onClick={() => selectPlan(plan)}
-                        >
+                        {selected && (
+                          <div className="medical-selected-badge">
+                            Selected
+                          </div>
+                        )}
 
-                          {selected && (
-                            <div className="medical-selected-badge">
-                              Selected
+                        <h4>{plan.medicalOptionName}</h4>
+
+                        <div className="medical-plan-status">
+                          <Check size={14} />
+                          <span>Available</span>
+                        </div>
+
+                        <div className="medical-plan-pricing">
+
+                          {/* PRINCIPAL */}
+                          <div className="medical-price-card">
+                            <div className="medical-price-content">
+                              <span className="medical-price-title">
+                                PRINCIPLE
+                              </span>
+                              <div className="medical-price-amount-box">
+                                <span className="medical-price-amount">
+                                  R{" "}
+                                  {Number(
+                                    plan.totalMonthlyContributionsPrincipal || 0
+                                  ).toFixed(2)}
+                                </span>
+                              </div>
                             </div>
-                          )}
-
-                          <h4>{plan.medicalOptionName}</h4>
-
-                          <div className="medical-plan-status">
-                            <Check size={14} />
-                            <span>Available</span>
                           </div>
 
-                          
+                          {/* ADULT */}
+                          <div className="medical-price-card">
+                            <div className="medical-price-content">
+                              <span className="medical-price-title">
+                                ADULT
+                              </span>
+                              <div className="medical-price-amount-box">
+                                <span className="medical-price-amount">
+                                  R{" "}
+                                  {Number(
+                                    plan.totalMonthlyContributionsAdult || 0
+                                  ).toFixed(2)}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
 
-                       <div className="medical-plan-pricing">
+                          {/* CHILD */}
+                          <div className="medical-price-card">
+                            <div className="medical-price-content">
+                              <span className="medical-price-title">
+                                CHILD
+                              </span>
+                              <div className="medical-price-amount-box">
+                                <span className="medical-price-amount">
+                                  R{" "}
+                                  {Number(
+                                    plan.totalMonthlyContributionsChild || 0
+                                  ).toFixed(2)}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
 
-  {/* PRINCIPAL */}
-  <div className="medical-price-card">
-
-    <div className="medical-price-content">
-
-      <span className="medical-price-title">
-        PRINCIPLE
-      </span>
-
-      <div className="medical-price-amount-box">
-
-        <span className="medical-price-amount">
-          R{" "}
-          {Number(
-            plan.totalMonthlyContributionsPrincipal || 0
-          ).toFixed(2)}
-        </span>
-
-      </div>
-
-    </div>
-
-  </div>
-
-  {/* ADULT */}
-  <div className="medical-price-card">
-
-    <div className="medical-price-content">
-
-      <span className="medical-price-title">
-        ADULT
-      </span>
-
-      <div className="medical-price-amount-box">
-
-        <span className="medical-price-amount">
-          R{" "}
-          {Number(
-            plan.totalMonthlyContributionsAdult || 0
-          ).toFixed(2)}
-        </span>
-
-      </div>
-
-    </div>
-
-  </div>
-
-  {/* CHILD */}
-  <div className="medical-price-card">
-
-    <div className="medical-price-content">
-
-      <span className="medical-price-title">
-        CHILD
-      </span>
-
-      <div className="medical-price-amount-box">
-
-        <span className="medical-price-amount">
-          R{" "}
-          {Number(
-            plan.totalMonthlyContributionsChild || 0
-          ).toFixed(2)}
-        </span>
-
-      </div>
-
-    </div>
-
-  </div>
-
-  {/* 2ND CHILD */}
-  <div className="medical-price-card">
-
-    <div className="medical-price-content">
-
-      <span className="medical-price-title">
-        2ND CHILD +
-      </span>
-
-      <div className="medical-price-amount-box">
-
-        <span className="medical-price-amount">
-          R{" "}
-          {Number(
-            plan.totalMonthlyContributionsSecondChild || 0
-          ).toFixed(2)}
-        </span>
-
-      </div>
-
-    </div>
-
-  </div>
-
-</div>
+                          {/* 2ND CHILD */}
+                          <div className="medical-price-card">
+                            <div className="medical-price-content">
+                              <span className="medical-price-title">
+                                2ND CHILD +
+                              </span>
+                              <div className="medical-price-amount-box">
+                                <span className="medical-price-amount">
+                                  R{" "}
+                                  {Number(
+                                    plan.totalMonthlyContributionsSecondChild || 0
+                                  ).toFixed(2)}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
 
                         </div>
-                      );
-                    })}
 
-                  </div>
-                </div>
-              ))}
+                      </div>
+                    );
+                  })
+                )}
+
+              </div>
 
             </div>
           )}
@@ -446,7 +412,7 @@ const filteredPlans = useMemo(() => {
 
                 <div className="medical-input-group">
                   <label>GENDER</label>
-               
+
                   <select
                     value={newDependent.gender}
                     onChange={(e) =>
@@ -456,7 +422,7 @@ const filteredPlans = useMemo(() => {
                       }))
                     }
                   >
-                    <option value =" disabled">
+                    <option value=" " disabled>
                       Gender
                     </option>
                     {genderOptions.map((g) => (
@@ -466,10 +432,10 @@ const filteredPlans = useMemo(() => {
                     ))}
                   </select>
                   <img
-                      src="/images/arrow_drop_down_circle.png"
-                      alt="Dropdown icon"
-                      className="icon-dropdown-icon"
-                    />
+                    src="/images/arrow_drop_down_circle.png"
+                    alt="Dropdown icon"
+                    className="icon-dropdown-icon"
+                  />
                 </div>
 
                 <div className="medical-input-group">
@@ -489,42 +455,41 @@ const filteredPlans = useMemo(() => {
                 </div>
 
                 <div className="medical-input-group">
-  <label>RELATIONSHIP</label>
+                  <label>RELATIONSHIP</label>
 
-  <div
-    className={`medical-select-wrapper ${
-      newDependent.relationship ? "has-value" : ""
-    }`}
-  >
-    <select
-      value={newDependent.relationship || ""}
-      onChange={(e) =>
-        setNewDependent((prev) => ({
-          ...prev,
-          relationship: e.target.value,
-        }))
-      }
-      className="medical-relationship-input"
-    >
-      {/* PLACEHOLDER */}
-      <option value="" disabled hidden>
-        Select Relationship
-      </option>
+                  <div
+                    className={`medical-select-wrapper ${
+                      newDependent.relationship ? "has-value" : ""
+                    }`}
+                  >
+                    <select
+                      value={newDependent.relationship || ""}
+                      onChange={(e) =>
+                        setNewDependent((prev) => ({
+                          ...prev,
+                          relationship: e.target.value,
+                        }))
+                      }
+                      className="medical-relationship-input"
+                    >
+                      <option value="" disabled hidden>
+                        Select Relationship
+                      </option>
 
-      {relationshipOptions.map((r) => (
-        <option key={r} value={r}>
-          {r}
-        </option>
-      ))}
-    </select>
+                      {relationshipOptions.map((r) => (
+                        <option key={r} value={r}>
+                          {r}
+                        </option>
+                      ))}
+                    </select>
 
-    <img
-      src="/images/arrow_drop_down_circle.png"
-      alt="Dropdown icon"
-      className="icon-dropdown-icon"
-    />
-  </div>
-</div>
+                    <img
+                      src="/images/arrow_drop_down_circle.png"
+                      alt="Dropdown icon"
+                      className="icon-dropdown-icon"
+                    />
+                  </div>
+                </div>
 
                 <div className="medical-input-group">
                   <label>DATE OF BIRTH</label>
@@ -539,10 +504,10 @@ const filteredPlans = useMemo(() => {
                     }
                   />
                   <img
-                        src="/images/calendar-range.svg"
-                        alt="Calendar icon"
-                        className="dropdown-icon"
-                      />
+                    src="/images/calendar-range.svg"
+                    alt="Calendar icon"
+                    className="dropdown-icon"
+                  />
                 </div>
 
               </div>
