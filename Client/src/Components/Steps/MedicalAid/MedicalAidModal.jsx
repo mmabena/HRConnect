@@ -7,24 +7,26 @@ import {
   Info,
   Check,
   X,
+  ShieldCheck,
 } from "lucide-react";
 
 import { getMedicalAidPlans } from "../../../api/MedicalAidPlan";
 
 const MedicalAidModal = ({
+  closeModal,
   onClose,
-  onNext,
-  onPrevious,
-  medicalAidInfo,
-  setMedicalAidInfo,
+ employee,
+ setEmployee,
+ onNext,
+ onBack,
 }) => {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const salary = medicalAidInfo?.salary || 0;
+  const salary = employee?.salary || 0;
 
   const [dependents, setDependents] = useState(
-    medicalAidInfo?.dependents || []
+    employee?.dependents || []
   );
 
   const [showDependentModal, setShowDependentModal] = useState(false);
@@ -35,6 +37,7 @@ const MedicalAidModal = ({
     gender: "",
     idNumber: "",
     relationship: "",
+    dateOfBirth: "",
   });
 
   const relationshipOptions = [
@@ -92,14 +95,18 @@ const MedicalAidModal = ({
   // SELECT PLAN
   // =========================
   const selectPlan = (plan) => {
-    setMedicalAidInfo((prev) => ({
+    setEmployee((prev) => ({
       ...prev,
-      planId: plan.medicalOptionId,
-      medicalAidPlan: plan.medicalOptionName,
-      selectedPlan: plan,
+      medicalAidInfo: {
+        ...prev.medicalAidInfo,
+        planId: plan.medicalOptionId,
+        medicalAidPlan: plan.medicalOptionName,
+        selectedPlan: plan,
+      },
     }));
   };
 
+  
   // =========================
   // ADD DEPENDENT
   // =========================
@@ -108,9 +115,12 @@ const MedicalAidModal = ({
 
     setDependents(updatedDependents);
 
-    setMedicalAidInfo((prev) => ({
+    setEmployee((prev) => ({
       ...prev,
-      dependents: updatedDependents,
+      medicalAidInfo: {
+        ...prev.medicalAidInfo,
+        dependents: updatedDependents,
+      },
     }));
 
     setNewDependent({
@@ -124,6 +134,24 @@ const MedicalAidModal = ({
 
     setShowDependentModal(false);
   };
+
+   // =========================
+  // REMOVE DEPENDENT
+  // =========================
+ const removeDependent = (indexToRemove) => {
+  const updatedDependents = dependents.filter((dependent, index) => {
+    return index !== indexToRemove;
+  });
+
+  setDependents(updatedDependents);
+
+  setEmployee((prev) => {
+    return {
+      ...prev,
+      dependents: updatedDependents,
+    };
+  });
+};
 
   return (
     <div className="emp-medical-aid-container">
@@ -165,32 +193,35 @@ const MedicalAidModal = ({
             </div>
           )}
 
-          {/* DEPENDENTS LIST */}
+            {/* DEPENDENTS LIST */}
           <div className="medical-dependent-list">
-
             {dependents.map((dep, index) => (
-              <div
-                className="medical-dependent-card"
-                key={index}
-              >
-                <div className="medical-dependent-grid">
+              <div className="medical-dependent-card" key={index}>
+                <div className="medical-dependent-card-inner">
 
-                  <div>
-                    <strong>
+                  {/* LEFT — name + detail line */}
+                  <div className="medical-dependent-info">
+                    <span className="medical-dependent-name">
                       {dep.fullName} {dep.lastName}
-                    </strong>
+                    </span>
+                    <span className="medical-dependent-meta">
+                      {[dep.relationship, dep.dateOfBirth, dep.gender]
+                        .filter(Boolean)
+                        .join(" . ")}
+                    </span>
                   </div>
 
-                  <div>{dep.relationship}</div>
-
-                  <div>{dep.gender}</div>
-
-                  <div>{dep.idNumber}</div>
+                  {/* RIGHT — remove button */}
+                  <button
+                    className="medical-dependent-remove-btn"
+                    onClick={() => removeDependent(index)}
+                  >
+                    Remove
+                  </button>
 
                 </div>
               </div>
             ))}
-
           </div>
 
           {/* ADD BUTTON */}
@@ -227,7 +258,7 @@ const MedicalAidModal = ({
                 {filteredPlans.flatMap((category) =>
                   category.medicalOptions.map((plan) => {
                     const selected =
-                      String(medicalAidInfo?.planId) ===
+                      String(employee?.planId) ===
                       String(plan.medicalOptionId);
 
                     return (
@@ -337,7 +368,7 @@ const MedicalAidModal = ({
           {/* BUTTONS */}
           <div className="emp-button-row">
 
-            <button onClick={onPrevious}>
+            <button onClick={onBack}>
               <ArrowLeft size={20} />
               Back
             </button>
@@ -356,20 +387,22 @@ const MedicalAidModal = ({
           DEPENDENT MODAL
       ========================= */}
       {showDependentModal && (
-        <div className="medical-dependent-modal-overlay">
+        <div className="medical-dependent-modal-overlay"
+        onClick={() => setShowDependentModal(false)}>
 
-          <div className="medical-dependent-modal">
+          <div className="medical-dependent-modal"
+          onClick={(e) => e.stopPropagation()} >
 
             {/* HEADER */}
             <div className="medical-dependent-modal-header">
-
+              <div className="emp-left-icon-wrapper">
+              <ShieldCheck size={24} />
+              </div>
               <span>Add Dependent</span>
 
-              <X
-                size={18}
-                cursor="pointer"
-                onClick={() => setShowDependentModal(false)}
-              />
+              <div className="emp-right-icon-wrapper">
+                       <X size={24} onClick={() => setShowDependentModal(false)} style={{ cursor: "pointer" }} />
+                     </div>
 
             </div>
 
@@ -422,9 +455,9 @@ const MedicalAidModal = ({
                       }))
                     }
                   >
-                    <option value=" " disabled>
-                      Gender
-                    </option>
+                   <option value="" disabled hidden>
+                        Gender
+                      </option>
                     {genderOptions.map((g) => (
                       <option key={g} value={g}>
                         {g}
@@ -443,7 +476,7 @@ const MedicalAidModal = ({
 
                   <input
                     type="text"
-                    placeholder="ID Number"
+                    placeholder="Id Number"
                     value={newDependent.idNumber}
                     onChange={(e) =>
                       setNewDependent((prev) => ({
@@ -483,11 +516,11 @@ const MedicalAidModal = ({
                       ))}
                     </select>
 
-                    <img
-                      src="/images/arrow_drop_down_circle.png"
-                      alt="Dropdown icon"
-                      className="icon-dropdown-icon"
-                    />
+                  <img
+                    src="/images/arrow_drop_down_circle.png"
+                    alt="Dropdown icon"
+                    className="icon-dropdown-icon"
+                  />
                   </div>
                 </div>
 
@@ -506,7 +539,7 @@ const MedicalAidModal = ({
                   <img
                     src="/images/calendar-range.svg"
                     alt="Calendar icon"
-                    className="dropdown-icon"
+                    className="date-picker-dropdown-icon"
                   />
                 </div>
 
@@ -528,6 +561,7 @@ const MedicalAidModal = ({
                 className="medical-btn-primary"
                 onClick={addDependent}
               >
+                 <Plus size={18} />
                 Add Dependent
               </button>
 
