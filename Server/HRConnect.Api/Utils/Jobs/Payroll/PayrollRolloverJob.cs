@@ -1,6 +1,7 @@
 namespace HRConnect.Api.Utils.Jobs.Payroll
 {
   using global::Quartz;
+  using HRConnect.Api.Data;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Interfaces.Notification;
   using HRConnect.Api.Interfaces.Payroll.Deduction;
@@ -9,7 +10,12 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
   using HRConnect.Api.Models;
   using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Models.PayrollDeduction;
+  using HRConnect.Api.Utils;
+  using Microsoft.EntityFrameworkCore;
   using Microsoft.Extensions.DependencyInjection;
+  using HRConnect.Api.Services;
+    
+  
 
   /// <summary>
   /// Payroll Rollover Job class to handle the locking, rolling over and 
@@ -33,6 +39,8 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
     private readonly IEmployeePensionEnrollmentService _employeePensionEnrollmentService;
     private readonly IServiceProvider _serviceProvider;
     private readonly IReportsService _reportsService;
+    private readonly IBankingDetailService _bankingDetailService;
+    // private readonly ICompanyContributionService contributionService;
     private readonly IUserService _userService;
     private readonly IEmployeeService _employeeService;
     private readonly INotificationService _notificationsService;
@@ -44,7 +52,7 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
 
     public PayrollRolloverJob(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService, IServiceProvider serviceProvider,
       IEmployeePensionEnrollmentService employeePensionEnrollmentService,
-      IReportsService reportsService, IUserService userService,
+      IReportsService reportsService, IBankingDetailService bankingDetailService, IUserService userService,
       IEmployeeService employeeService,
       IEmployeePayrollEarningService employeePayrollEarningService,
       IEmployeeDeductionService employeeDeductionService,
@@ -55,6 +63,7 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
       _reportsService = reportsService;
       _serviceProvider = serviceProvider;
       _employeePensionEnrollmentService = employeePensionEnrollmentService;
+      _bankingDetailService = bankingDetailService;
       _userService = userService;
       _employeeService = employeeService;
       _employeeDeductionService = employeeDeductionService;
@@ -204,6 +213,11 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
         {
           await RolloverPayrollRun(payperiod, nextRun);
         }
+        
+        // Lock all banking details on payroll rollover to prevent changes to banking details while payroll runs are active
+        await _bankingDetailService.LockAllBankingDetailsAsync();
+
+
         // await ClearPayrollNotifications();
 
       }

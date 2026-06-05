@@ -25,7 +25,7 @@ import CompanyContribution from "./components/CompanyContribution/CompanyContrib
 import Profile from "./components/MyProfile";
 import CompensationPlanning from "./components/CompensationPlanning";
 import CompanyList from "./Pages/CompanyList.jsx"
-import TaxTableManagement from "./components/companyManagement/TaxTableManagement/TaxTableManagement.jsx";
+import TaxTableManagement from "./components/companyManagement/TaxTableManagement/TaxTableManagement";
 import ChangePassword from "./components/ChangePassword";
 import MenuBar from "./components/MenuBar/MenuBar";
 import ManageUserPositions from "./Pages/CompanyManagement/PositionManagement/ManageUserPositions.jsx";
@@ -33,7 +33,9 @@ import ProjectionCalculator from "./Pages/PayrollTools/ProjectionCalculator";
 import PersonalInformation from "./components/PersonalInformation.jsx";
 import NotificationPage from "./Pages/NotificationPage/NotificationPage.jsx";
 import api from "../src/api/api.js";
+import LeaveTables from "./components/LeaveTypeManagement/LeaveTables";
 import { resolveRole } from "./utils/roleUtils.js";
+import BankingDetailsModal from "./components/Steps/BankingManagement/BankingDetailsModal.jsx";
 import HomePage from "./Pages/HomePage/HomePage.jsx";
 
 function App() {
@@ -197,6 +199,7 @@ function App() {
           <Route path="/dashboard" element={<div>Welcome to Dashboard</div>} />
           <Route path="/addEmployee" element={<AddEmployee />} />
           <Route path="/addEmployeeModal" element={<AddEmployeeModal />} />
+          <Route path="/bankingDetailsModal" element={<BankingDetailsModal />} />
           <Route path="/editEmployee" element={<EditEmployee />} />
           <Route
             path="/editEmployee/:employeeNumber"
@@ -206,12 +209,14 @@ function App() {
           <Route path="/companyManagement" element={<CompanyManagement />} />
           <Route path="/editCompany/:id" element={<EditCompany />} />
           <Route path="/employeeList" element={<EmployeeList />} />
+          
           <Route
             path="/company-contribution"
             element={<CompanyContribution />}
           />
           <Route path="/userManagement" element={<UserManagement />} />
           <Route path="/taxTableManagement" element={<TaxTableManagement />} />
+          <Route path="/leaveManagement" element={<LeaveTables />} />
           <Route path="/companyManagement" element={<CompanyManagement />} />
           <Route path="/taxTableUpload" element={<TaxTableUpload />} />
           <Route path="/positionManagement" element={<PositionManagement />} />

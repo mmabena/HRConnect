@@ -1,70 +1,114 @@
 namespace HRConnect.Api.Controllers
 {
+    using System;
+    using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.EntityFrameworkCore;
     using HRConnect.Api.DTOs;
     using HRConnect.Api.Interfaces;
+    using HRConnect.Api.Data;
 
-  [ApiController]
-  [Route("api/leave-types")]
-  [Authorize(Roles = "SuperUser")]
-  public class LeaveTypesController : ControllerBase
-  {
-    private readonly ILeaveTypeManagementService _service;
+    [ApiController]
+    [Route("api/leave-types")]
+    public class LeaveTypesController : ControllerBase
+    {
+        private readonly ILeaveTypeManagementService _service;
+        private readonly ApplicationDBContext _context;
 
-    public LeaveTypesController(ILeaveTypeManagementService service)
-    {
-      _service = service;
-    }
-    /// <summary>
-    /// Handles the HTTP GET request to retrieve all leave types,
-    /// by calling the GetLeaveTypesAsync method of the ILeaveTypeManagementService to fetch the list of leave types from the database,
-    /// and then returns the list of leave types in the response body, allowing clients to view all available leave types through the API.
-    /// </summary>
-    /// <returns></returns>
-    [HttpGet]
-    public async Task<IActionResult> GetAll()
-        => Ok(await _service.GetLeaveTypesAsync());
-    /// <summary>
-    /// Handles the HTTP GET request to retrieve a specific leave type by its ID,
-    /// by accepting the leave type ID as a route parameter,
-    /// and then returns the leave type in the response body, allowing clients to view specific leave type details through the API.
-    /// </summary>
-    /// <param name="id"></param>
-    /// <returns></returns>
-    [HttpGet("{id}")]
-    public async Task<IActionResult> Get(int id)
-        => Ok(await _service.GetLeaveTypeByIdAsync(id));
-    /// <summary>        
-    /// /// Handles the HTTP POST request to create a new leave type,
-    /// by accepting a CreateLeaveTypeRequest DTO in the request body, which contains the necessary information for creating a new leave type,
-    /// and then calls the CreateLeaveTypeAsync method of the ILeaveTypeManagementService to create the new leave type in the database,
-    /// returning the created leave type in the response body, 
-    /// allowing clients to add new leave types through the API and receive feedback on the created leave type details.
-    /// </summary>
-    /// <param name="request"></param>
-    /// <returns></returns>
-    [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateLeaveTypeRequest request)
-    {
-      var result = await _service.CreateLeaveTypeAsync(request);
-      return CreatedAtAction(nameof(Get), new { id = result.Id }, result);
-    }
-    /// <summary>
-    /// Handles the HTTP PUT request to update an existing leave type,
-    /// by accepting the leave type ID as a route parameter and an UpdateLeaveTypeRequest DTO in the request body, 
-    /// which contains the updated information for the leave type,
-    /// and then calls the UpdateLeaveTypeAsync method of the ILeaveTypeManagementService to update the leave type in the database,
-    /// returning the updated leave type in the response body, 
-    /// allowing clients to modify existing leave types through the API and receive feedback on the updated leave type details.
-    /// </summary>
-    /// <param name="id"></param>
-    /// <param name="request"></param>
-    /// <returns></returns>
-    [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, [FromBody] UpdateLeaveTypeRequest request)
-        => Ok(await _service.UpdateLeaveTypeAsync(id, request));
+        public LeaveTypesController(
+            ILeaveTypeManagementService service,
+            ApplicationDBContext context)
+        {
+            _service = service;
+            _context = context;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+            => Ok(await _service.GetLeaveTypesAsync());
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(int id)
+        {
+            try
+            {
+                return Ok(await _service.GetLeaveTypeByIdAsync(id));
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound("Leave type not found");
+            }
+        }
+
+        [HttpGet("group-keys")]
+        public async Task<IActionResult> GetGroupKeys()
+        {
+            var keys = await _context.JobGradeGroupMaps
+                .Select(x => x.GroupKey)
+                .Distinct()
+                .ToListAsync();
+
+            return Ok(keys);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateLeaveTypeRequest request)
+        {
+            if (request == null || request.Rules == null || request.Rules.Count == 0)
+                return BadRequest("At least one rule is required.");
+
+            var validGroupKeys = await _context.JobGradeGroupMaps
+                .Select(x => x.GroupKey)
+                .Distinct()
+                .ToListAsync();
+
+            var invalidKeys = request.Rules
+                .Where(r => r.GroupKey != "ALL" && !validGroupKeys.Contains(r.GroupKey))
+                .Select(r => r.GroupKey)
+                .Distinct()
+                .ToList();
+
+            if (invalidKeys.Count > 0)
+                return BadRequest($"Invalid GroupKeys: {string.Join(", ", invalidKeys)}");
+
+            try
+            {
+                var result = await _service.CreateLeaveTypeAsync(request);
+                return CreatedAtAction(nameof(Get), new { id = result.Id }, result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateLeaveTypeRequest request)
+        {
+            var validGroupKeys = await _context.JobGradeGroupMaps
+                .Select(x => x.GroupKey)
+                .Distinct()
+                .ToListAsync();
+
+            var invalidKeys = request.Rules
+                .Where(r => r.GroupKey != "ALL" && !validGroupKeys.Contains(r.GroupKey))
+                .Select(r => r.GroupKey)
+                .Distinct()
+                .ToList();
+
+            if (invalidKeys.Count > 0)
+                return BadRequest($"Invalid GroupKeys: {string.Join(", ", invalidKeys)}");
+
+            try
+            {
+                return Ok(await _service.UpdateLeaveTypeAsync(id, request));
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
     [HttpGet("employees")]
     public async Task<IActionResult> GetEmployeesWithLeave()
@@ -80,8 +124,21 @@ namespace HRConnect.Api.Controllers
       if (result == null)
         return NotFound("Employee not found");
 
-      return Ok(result);
-    }
+            return Ok(result);
+        }
+        [HttpPatch("{id}/status")]
+        public async Task<IActionResult> ToggleStatus(int id)
+        {
+            var leaveType = await _context.LeaveTypes.FindAsync(id);
 
-  }
+            if (leaveType == null)
+                return NotFound();
+
+            leaveType.IsActive = !leaveType.IsActive;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { leaveType.Id, leaveType.IsActive });
+        }
+    }
 }

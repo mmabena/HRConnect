@@ -152,18 +152,24 @@ namespace HRConnect.Tests.Payroll
         .ReturnsAsync(period); ;
 
       var job = new PayrollRolloverJob(
-      _payrollRunRepo.Object,
-      _payrollPeriodService.Object,
-      serviceProvider,
-      _employeePensionEnrollmentService.Object,
-      _reportsService.Object,
-      _userService.Object,
+    _payrollRunRepo.Object,
+    _payrollPeriodService.Object,
+    serviceProvider,
+    _employeePensionEnrollmentService.Object,
+    _reportsService.Object,
+    _earningServiceMock.Object,
+    _deductionServiceMock.Object,
+    _context,
+     _userService.Object,
       _employeeService.Object,
       _employeePayrollEarningService.Object,
       _employeeDeductionService.Object,
       _notificationsService.Object,
-        _now
-      );
+      
+        _contributionRepoMock.Object,
+        _bankingDetailService.Object,
+    _now
+);
 
       await job.Execute(null!);
       var lockedRun = new PayrollRun { PayrollRunNumber = 1 };
@@ -191,17 +197,20 @@ namespace HRConnect.Tests.Payroll
       };
 
       var job = new PayrollRolloverJob(
-      _payrollRunRepo.Object,
-      _payrollPeriodService.Object,
-      serviceProvider,
-      _employeePensionEnrollmentService.Object,
-      _reportsService.Object,
-      _userService.Object,
+          _payrollRunRepo.Object,
+          _payrollPeriodService.Object,
+          serviceProvider,
+          _employeePensionEnrollmentService.Object,
+          _reportsService.Object,
+          _earningServiceMock.Object,
+          _deductionServiceMock.Object,
+          _context,
+            _userService.Object,
       _employeeService.Object,
       _employeePayrollEarningService.Object,
       _employeeDeductionService.Object,
       _notificationsService.Object,
-        _now
+          _now
       );
       await job.Execute(null!);
       //Make sure that there's a new payroll run
@@ -235,18 +244,17 @@ namespace HRConnect.Tests.Payroll
                                                           //Act
 
       var job = new PayrollRolloverJob(
-      _payrollRunRepo.Object,
-      _payrollPeriodService.Object,
-      serviceProvider,
-      _employeePensionEnrollmentService.Object,
-      _reportsService.Object,
-      _userService.Object,
-      _employeeService.Object,
-      _employeePayrollEarningService.Object,
-      _employeeDeductionService.Object,
-      _notificationsService.Object,
-        _now
-      );
+    _payrollRunRepo.Object,
+    _payrollPeriodService.Object,
+    serviceProvider,
+    _employeePensionEnrollmentService.Object,
+    _reportsService.Object,
+    _earningServiceMock.Object,
+    _deductionServiceMock.Object,
+    _context,
+     _contributionRepoMock.Object,
+    _now
+);
       if (IsLastMomentOfTheMonth(_now()))
       {
         await job.Execute(null!);
@@ -268,18 +276,29 @@ namespace HRConnect.Tests.Payroll
       var serviceProvider = services.BuildServiceProvider();
 
       var job = new PayrollRolloverJob(
-      _payrollRunRepo.Object,
-      _payrollPeriodService.Object,
-      serviceProvider,
-      _employeePensionEnrollmentService.Object,
-      _reportsService.Object,
-      _userService.Object,
+    _payrollRunRepo.Object,
+    _payrollPeriodService.Object,
+    serviceProvider,
+    _employeePensionEnrollmentService.Object,
+    _reportsService.Object,
+    _earningServiceMock.Object,
+    _deductionServiceMock.Object,
+    _context,
+       _userService.Object,
       _employeeService.Object,
       _employeePayrollEarningService.Object,
       _employeeDeductionService.Object,
       _notificationsService.Object,
-        _now
-      );
+      _contributionRepoMock.Object,
+    _now
+);
+
+    }
+
+    public void Dispose()
+    {
+      _context.Dispose();
+      GC.SuppressFinalize(this);
     }
   }
 }

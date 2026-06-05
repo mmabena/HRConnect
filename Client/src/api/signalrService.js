@@ -1,8 +1,12 @@
 import * as signalR from "@microsoft/signalr";
 
-const connection = new signalR.HubConnectionBuilder()
-  .withUrl(process.env.REACT_APP_SIGNALR_URL)
+export const companyHubConnection = new signalR.HubConnectionBuilder()
+  .withUrl(process.env.REACT_APP_COMPANY_HUB_URL)
   .withAutomaticReconnect()
   .build();
 
-export default connection;
+export const userManagementHubConnection = new signalR.HubConnectionBuilder()
+  .withUrl(process.env.REACT_APP_USER_MANAGEMENT_HUB_URL)
+  .withAutomaticReconnect()
+  .build();
+

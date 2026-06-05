@@ -226,7 +226,10 @@ namespace HRConnect.Api.Services
 
       var positionChanged = existingEmployee.PositionId != employeeDto.PositionId;
 
-      var position = await _positionRepo.GetPositionByIdAsync(employeeDto.PositionId);
+     var position = await _context.Positions
+    .Include(p => p.JobGrade)
+    .FirstOrDefaultAsync(p => p.PositionId == employeeDto.PositionId);
+
       if (position == null)
         throw new ValidationException($"Position with ID {employeeDto.PositionId} does not exist.");
 
@@ -255,7 +258,6 @@ namespace HRConnect.Api.Services
       existingEmployee.City = employeeDto.City;
       existingEmployee.ZipCode = employeeDto.ZipCode;
       existingEmployee.Branch = employeeDto.Branch;
-      existingEmployee.PositionId = employeeDto.PositionId;
       existingEmployee.MonthlySalary = employeeDto.MonthlySalary;
       existingEmployee.CareerManagerID = employeeDto.CareerManagerID;
       existingEmployee.EmploymentStatus = employeeDto.EmploymentStatus;
@@ -268,11 +270,11 @@ namespace HRConnect.Api.Services
       var updatedEmployee = await _employeeRepo.UpdateEmployeeAsync(existingEmployee);
 
       // Position change requires recalculation of leave balances and notification email
+
       if (positionChanged)
       {
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
-        // GET CURRENT ACTIVE SEGMENT
         var currentSegment = await _context.EmployeeAccrualRateHistories
             .Where(x => x.EmployeeId == employeeId && x.EffectiveTo == null)
             .FirstOrDefaultAsync();
@@ -280,40 +282,41 @@ namespace HRConnect.Api.Services
         if (currentSegment != null)
         {
           if (currentSegment.EffectiveFrom == today)
-          {
             _context.EmployeeAccrualRateHistories.Remove(currentSegment);
-          }
           else
-          {
             currentSegment.EffectiveTo = today.AddDays(-1);
-          }
         }
 
-        // LOAD FULL EMPLOYEE WITH POSITION + JOBGRADE
         var fullEmployee = await _context.Employees
             .Include(e => e.Position)
-                .ThenInclude(p => p!.JobGrade)
-            .FirstAsync(e => e.EmployeeId == employeeId);
+                .ThenInclude(p => p.JobGrade)
+            .FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
 
-        // GET ANNUAL LEAVE TYPE
+        // GET GROUP KEY 
+        var groupKey = await _context.JobGradeGroupMaps
+            .Where(x => x.JobGradeId == fullEmployee.Position.JobGradeId)
+            .Select(x => x.GroupKey)
+            .FirstOrDefaultAsync();
+
+        if (groupKey == null)
+          throw new InvalidOperationException("JobGrade not mapped to any group.");
+
         var annualLeave = await _context.LeaveTypes
             .FirstAsync(l => l.Code == "AL" && l.IsActive);
 
-        // CALCULATE YEARS OF SERVICE
         var yearsOfService = CalculateYearsOfService(fullEmployee.StartDate);
 
-        //GET ENTITLEMENT RULE
+        
         var newRule = await _context.LeaveEntitlementRules
-     .Where(r =>
-         r.LeaveTypeId == annualLeave.Id &&
-         r.JobGradeId == fullEmployee.Position!.JobGradeId &&
-         r.MinYearsService <= yearsOfService &&
-         (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
-         r.IsActive)
-     .OrderByDescending(r => r.MinYearsService)
-     .FirstAsync();
+            .Where(r =>
+                r.LeaveTypeId == annualLeave.Id &&
+                r.GroupKey == groupKey &&
+                r.MinYearsService <= yearsOfService &&
+                (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
+                r.IsActive)
+            .OrderByDescending(r => r.MinYearsService)
+            .FirstAsync();
 
-        // INSERT NEW ACCRUAL HISTORY RECORD
         await _context.EmployeeAccrualRateHistories.AddAsync(
             new EmployeeAccrualRateHistory
             {
@@ -323,13 +326,11 @@ namespace HRConnect.Api.Services
               AnnualEntitlement = newRule.DaysAllocated,
               DailyRate = (newRule.DaysAllocated / 12m) / 21.67m,
               EffectiveFrom = today,
-              EffectiveTo = null,
               CreatedDate = DateTime.UtcNow
             });
 
-        await _context.SaveChangesAsync(); // IMPORTANT
+        await _context.SaveChangesAsync();
 
-        // KEEP YOUR EXISTING LOGIC
         await _leaveBalanceService.RecalculateAnnualLeaveAsync(employeeId);
         await _leaveProcessingService.RecalculateAllSickLeaveAsync();
         await _leaveProcessingService.RecalculateAllFamilyResponsibilityLeaveAsync();
@@ -338,20 +339,21 @@ namespace HRConnect.Api.Services
             .Include(e => e.LeaveBalances)
             .ThenInclude(lb => lb.LeaveType)
             .FirstAsync(e => e.EmployeeId == employeeId);
+
         var annualBalance = employeeWithBalances?.LeaveBalances
         ?.FirstOrDefault(lb => lb.LeaveType.Code == "AL");
 
         try
         {
           var emailBody = EmailTemplates.GeneratePositionUpdateEmail(
-              employeeWithBalances!,
+              employeeWithBalances,
               annualBalance?.AccruedDays ?? 0,
               annualBalance?.TakenDays ?? 0,
               annualBalance?.AvailableDays ?? 0
           );
 
           await _emailService.SendEmailAsync(
-              employeeWithBalances!.Email,
+              employeeWithBalances.Email,
               "Annual Leave Recalculated Due to Position Change",
               emailBody
           );

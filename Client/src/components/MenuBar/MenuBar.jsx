@@ -6,7 +6,7 @@ import api from "../../../src/api/api.js";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { resolveRole } from "../../utils/roleUtils";
-import connection from "../../api/signalrService.js";
+import {companyHubConnection} from "../../api/signalrService.js";
 import { ArrowLeftRight } from "lucide-react";
 import { fetchMyCompanies, switchCompany } from "../../api/UserCompany.js";
 
@@ -208,12 +208,12 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
       window.location.reload();
     };
 
-    connection.on("CompanyCreated", handleCompanyCreated);
-    connection.on("CompanySwitched", handleCompanySwitched);
+    companyHubConnection.on("CompanyCreated", handleCompanyCreated);
+    companyHubConnection.on("CompanySwitched", handleCompanySwitched);
 
     return () => {
-      connection.off("CompanyCreated", handleCompanyCreated);
-      connection.off("CompanySwitched", handleCompanySwitched);
+      companyHubConnection.off("CompanyCreated", handleCompanyCreated);
+      companyHubConnection.off("CompanySwitched", handleCompanySwitched);
     };
   }, []);
 

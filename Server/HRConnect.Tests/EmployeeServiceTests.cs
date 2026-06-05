@@ -19,6 +19,8 @@ namespace HRConnect.Tests
   using System.Linq;
   using Microsoft.AspNetCore.SignalR;
   using HRConnect.Api.Hubs;
+  using Microsoft.AspNetCore.SignalR;
+  using HRConnect.Api.Hubs;
   using Microsoft.AspNetCore.Identity;
   using Microsoft.EntityFrameworkCore;
   using Microsoft.EntityFrameworkCore.Storage;
@@ -37,6 +39,8 @@ namespace HRConnect.Tests
     private readonly Mock<ICompanyRepository> _companyRepoMock;
     private readonly EmployeeService _employeeService;
 
+ 
+
 
 
     public EmployeeServiceTests()
@@ -49,7 +53,7 @@ namespace HRConnect.Tests
       _companyRepoMock = new Mock<ICompanyRepository>();
       _leaveBalanceServiceMock = new Mock<ILeaveBalanceService>();
       _leaveProcessingServiceMock = new Mock<ILeaveProcessingService>();
-
+     
       _passwordHasherMock = new Mock<IPasswordHasher<User>>();
 
       var options = new DbContextOptionsBuilder<ApplicationDBContext>()
@@ -93,11 +97,11 @@ namespace HRConnect.Tests
         JobGradeId = 1,
         Name = "Grade"
       });
-      // _context.JobGradeGroupMaps.Add(new JobGradeGroupMap
-      // {
-      //   JobGradeId = 1,
-      //   GroupKey = "G1"
-      // });
+      _context.JobGradeGroupMaps.Add(new JobGradeGroupMap
+      {
+        JobGradeId = 1,
+        GroupKey = "G1"
+      });
 
       _context.Positions.AddRange(
           new Position { PositionId = 1, JobGradeId = 1, OccupationalLevelId = 1 },
@@ -169,15 +173,15 @@ namespace HRConnect.Tests
 
       _employeeService = new EmployeeService(
           _context,
-    _activeCompanyServiceMock.Object,
-    _userCompanyServiceMock.Object,
-    _employeeRepoMock.Object,
-    _emailServiceMock.Object,
-    _companyRepoMock.Object,
-    _positionRepoMock.Object,
-    _leaveBalanceServiceMock.Object,
-    _leaveProcessingServiceMock.Object,
-    _passwordHasherMock.Object
+          _employeeRepoMock.Object,
+          _emailServiceMock.Object,
+          _positionRepoMock.Object,
+          _leaveBalanceServiceMock.Object,
+          _leaveProcessingServiceMock.Object,
+       
+
+          _leaveProcessingServiceMock.Object,
+          _passwordHasherMock.Object
       );
     }
 
@@ -305,15 +309,15 @@ namespace HRConnect.Tests
         Name = "Annual Leave",
         Description = "Annual Leave"
       });
-      // _context.JobGradeGroupMaps.Add(new JobGradeGroupMap
-      // {
-      //   JobGradeId = 1,
-      //   GroupKey = "G1"
-      // });
+      _context.JobGradeGroupMaps.Add(new JobGradeGroupMap
+      {
+        JobGradeId = 1,
+        GroupKey = "G1"
+      });
       _context.LeaveEntitlementRules.Add(new LeaveEntitlementRule
       {
         LeaveTypeId = 1,
-        // GroupKey = "G1",
+        GroupKey = "G1",
         MinYearsService = 0,
         MaxYearsService = null,
         DaysAllocated = 15,

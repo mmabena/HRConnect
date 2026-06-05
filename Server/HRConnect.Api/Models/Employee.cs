@@ -104,6 +104,11 @@ namespace HRConnect.Api.Models
 
     public Position? Position { get; set; }
 
+    public int BankingDetailsId { get; set; }
+
+    [ForeignKey(nameof(BankingDetailsId))]
+    public BankingDetail? BankingDetail { get; set; }
+
     [Required]
     public EmploymentStatus EmploymentStatus { get; set; }
 
