@@ -24,6 +24,7 @@ import CompanyManagement from "./companyManagement";
 import CompanyContribution from "./components/CompanyContribution/CompanyContribution";
 import Profile from "./components/MyProfile";
 import CompensationPlanning from "./components/CompensationPlanning";
+import CompanyList from "./Pages/CompanyList.jsx"
 import TaxTableManagement from "./components/companyManagement/TaxTableManagement/TaxTableManagement.jsx";
 import ChangePassword from "./components/ChangePassword";
 import MenuBar from "./components/MenuBar/MenuBar";
@@ -46,6 +47,12 @@ function App() {
     return storedUser ? JSON.parse(storedUser) : null;
   });
   const navigate = useNavigate();
+
+  const hideMenuBarRoutes = ["/companyManagement"];
+
+  const shouldHideMenuBar = hideMenuBarRoutes.includes(
+    window.location.pathname,
+  );
 
   //Load user from localStorage on refresh
   useEffect(() => {
@@ -122,12 +129,8 @@ function App() {
         console.warn("Employee endpoint not accessible for this role");
       }
 
-      const resolvedRole=resolveRole(backendUserData);
-
       const mergedUser = {
         ...backendUserData,
-        role:resolvedRole.roleName||backendUserData.role,
-        roleId:resolvedRole.roleId,
         username: employee
           ? `${employee.name} ${employee.surname}`
           : backendUserData.email,
@@ -140,7 +143,13 @@ function App() {
       localStorage.setItem("currentUser", JSON.stringify(mergedUser));
       setIsLoggedIn(true);
 
-      navigate("/dashboard");
+      const role = resolveRole?.key ?? backendUserData?.role?.toLowerCase();
+
+      if (role === "superuser") {
+        navigate("/companyManagement");
+      } else {
+        navigate("/dashboard");
+      }
     } catch (error) {
       console.error("Login error:", error);
     }
@@ -178,7 +187,9 @@ function App() {
 
   return (
     <div className="App">
-      <MenuBar currentUser={currentUser} onLogout={handleLogout} />
+      {!shouldHideMenuBar && (
+        <MenuBar currentUser={currentUser} onLogout={handleLogout} />
+      )}
       <div>
         <ToastContainer position="top-right" autoClose={3000} />
         <Routes>
@@ -201,8 +212,10 @@ function App() {
           />
           <Route path="/userManagement" element={<UserManagement />} />
           <Route path="/taxTableManagement" element={<TaxTableManagement />} />
+          <Route path="/companyManagement" element={<CompanyManagement />} />
           <Route path="/taxTableUpload" element={<TaxTableUpload />} />
           <Route path="/positionManagement" element={<PositionManagement />} />
+          <Route path="/companyList" element={<CompanyList />} />
           <Route
             path="/addPositionManagement"
             element={<AddPositionManagement />}
@@ -251,3 +264,4 @@ function App() {
 }
 
 export default App;
+

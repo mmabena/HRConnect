@@ -1,4 +1,4 @@
-﻿namespace HRConnect.Api.Interfaces
+namespace HRConnect.Api.Interfaces
 {
   using System.Collections.Generic;
   using System.Threading.Tasks;
@@ -8,11 +8,8 @@
   {
     Task<decimal> GetPensionOptionPercentageByIdAsync(int id);
     Task<IEnumerable<PensionOption>> GetPensionOptionsAsync();
-
     Task<PensionOption?> GetPensionOptionByIdAsync(int id);
-
     Task<ServiceResult> AddPensionOptionAsync(PensionOption pensionOption);
-
     Task<ServiceResult> UpdatePensionOptionAsync(PensionOption pensionOption);
   }
 }

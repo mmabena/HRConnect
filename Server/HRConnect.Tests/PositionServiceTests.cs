@@ -72,7 +72,7 @@ namespace HRConnect.Tests.Services
     {
       // Arrange
       _positionRepoMock.Setup(r => r.GetPositionByIdAsync(999))
-                       .ReturnsAsync((Position)null);
+                       .ReturnsAsync((Position?)null);
 
       // Act
       var result = await _positionService.GetPositionByIdAsync(999);

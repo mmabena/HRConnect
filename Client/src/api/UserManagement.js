@@ -2,12 +2,12 @@ import api from "./api";
 
 const BASE_URL = api.defaults.baseURL;//"http://localhost:5147/api";
 
-export const getAuthHeaders = () => {
+const getAuthHeaders = () => {
   const token = localStorage.getItem("token");
 
   if (!token) {
-    throw new Error("No authentication token found")
-  };
+    throw new Error("No authentication token found");
+  }
 
   return {
     Authorization: `Bearer ${token}`,
@@ -21,7 +21,7 @@ export const fetchRoles = async () => {
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch roles: ${response.status}`)
+    throw new Error(`Failed to fetch roles: ${response.status}`);
   }
 
   return await response.json();
@@ -67,17 +67,12 @@ export const updateUserRole = async (userId, roleId) => {
 
   return await response.json();
 };
-export const updateUser = async (userId, userData) => {
-  const token = localStorage.getItem("token");
-  if (!token) throw new Error("No authentication token found");
 
+export const updateUser = async (userId, userData) => {
   try {
     const response = await fetch(`${BASE_URL}/user/${userId}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      },
+      headers: getAuthHeaders(),
       body: JSON.stringify(userData)
     });
 

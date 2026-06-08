@@ -46,7 +46,7 @@ public class MedicalAidEligibilityService : IMedicalAidEligibilityService
         }
 
         // Get employee details
-        var employee = await _employeeService.GetEmployeeByIdAsync(employeeId);
+        var employee = await _employeeService.GetEmployeeByIdInternalAsync(employeeId);
         if (employee == null)
         {
             throw new KeyNotFoundException($"Employee with ID {employeeId} not found");
@@ -92,7 +92,7 @@ public class MedicalAidEligibilityService : IMedicalAidEligibilityService
     public async Task<bool> isEligibleAsync(string employeeId,
       int medicalOptionId, int principalCount, int adultCount, int childCount){
       //get emp info
-      var empData = await _employeeService.GetEmployeeByIdAsync(employeeId);
+      var empData = await _employeeService.GetEmployeeByIdInternalAsync(employeeId);
       
       if (empData == null) throw new ArgumentException("Employee not found");
       

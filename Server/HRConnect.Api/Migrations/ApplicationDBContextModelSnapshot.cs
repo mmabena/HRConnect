@@ -10,2807 +10,2699 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace HRConnect.Api.Migrations
 {
-    [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+  [DbContext(typeof(ApplicationDBContext))]
+  partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+  {
+    protected override void BuildModel(ModelBuilder modelBuilder)
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
-        {
 #pragma warning disable 612, 618
-            modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.11")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
-
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.HasSequence("PayrollRecordSequence");
-
-            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzBlobTrigger", b =>
-                {
-                    b.Property<string>("SchedulerName")
-                        .HasMaxLength(120)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(120)")
-                        .HasColumnName("SCHED_NAME");
-
-                    b.Property<string>("TriggerName")
-                        .HasMaxLength(150)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(150)")
-                        .HasColumnName("TRIGGER_NAME");
-
-                    b.Property<string>("TriggerGroup")
-                        .HasMaxLength(150)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(150)")
-                        .HasColumnName("TRIGGER_GROUP");
-
-                    b.Property<byte[]>("BlobData")
-                        .HasColumnType("varbinary(max)")
-                        .HasColumnName("BLOB_DATA");
-
-                    b.HasKey("SchedulerName", "TriggerName", "TriggerGroup");
-
-                    b.ToTable("QRTZ_BLOB_TRIGGERS", "quartz");
-                });
-
-            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzCalendar", b =>
-                {
-                    b.Property<string>("SchedulerName")
-                        .HasMaxLength(120)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(120)")
-                        .HasColumnName("SCHED_NAME");
-
-                    b.Property<string>("CalendarName")
-                        .HasMaxLength(200)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("CALENDAR_NAME");
-
-                    b.Property<byte[]>("Calendar")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)")
-                        .HasColumnName("CALENDAR");
-
-                    b.HasKey("SchedulerName", "CalendarName");
-
-                    b.ToTable("QRTZ_CALENDARS", "quartz");
-                });
-
-            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzCronTrigger", b =>
-                {
-                    b.Property<string>("SchedulerName")
-                        .HasMaxLength(120)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(120)")
-                        .HasColumnName("SCHED_NAME");
-
-                    b.Property<string>("TriggerName")
-                        .HasMaxLength(150)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(150)")
-                        .HasColumnName("TRIGGER_NAME");
-
-                    b.Property<string>("TriggerGroup")
-                        .HasMaxLength(150)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(150)")
-                        .HasColumnName("TRIGGER_GROUP");
-
-                    b.Property<string>("CronExpression")
-                        .IsRequired()
-                        .HasMaxLength(120)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(120)")
-                        .HasColumnName("CRON_EXPRESSION");
-
-                    b.Property<string>("TimeZoneId")
-                        .HasMaxLength(120)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(120)")
-                        .HasColumnName("TIME_ZONE_ID");
-
-                    b.HasKey("SchedulerName", "TriggerName", "TriggerGroup");
-
-                    b.ToTable("QRTZ_CRON_TRIGGERS", "quartz");
-                });
-
-            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzFiredTrigger", b =>
-                {
-                    b.Property<string>("SchedulerName")
-                        .HasMaxLength(120)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(120)")
-                        .HasColumnName("SCHED_NAME");
-
-                    b.Property<string>("EntryId")
-                        .HasMaxLength(140)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(140)")
-                        .HasColumnName("ENTRY_ID");
-
-                    b.Property<long>("FiredTime")
-                        .HasColumnType("bigint")
-                        .HasColumnName("FIRED_TIME");
-
-                    b.Property<string>("InstanceName")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(150)")
-                        .HasColumnName("INSTANCE_NAME");
-
-                    b.Property<bool>("IsNonConcurrent")
-                        .HasColumnType("bit")
-                        .HasColumnName("IS_NONCONCURRENT");
-
-                    b.Property<string>("JobGroup")
-                        .HasMaxLength(150)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(150)")
-                        .HasColumnName("JOB_GROUP");
-
-                    b.Property<string>("JobName")
-                        .HasMaxLength(150)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(150)")
-                        .HasColumnName("JOB_NAME");
-
-                    b.Property<int>("Priority")
-                        .HasColumnType("int")
-                        .HasColumnName("PRIORITY");
-
-                    b.Property<bool?>("RequestsRecovery")
-                        .HasColumnType("bit")
-                        .HasColumnName("REQUESTS_RECOVERY");
-
-                    b.Property<long>("ScheduledTime")
-                        .HasColumnType("bigint")
-                        .HasColumnName("SCHED_TIME");
-
-                    b.Property<string>("State")
-                        .IsRequired()
-                        .HasMaxLength(16)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(16)")
-                        .HasColumnName("STATE");
-
-                    b.Property<string>("TriggerGroup")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(150)")
-                        .HasColumnName("TRIGGER_GROUP");
-
-                    b.Property<string>("TriggerName")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(150)")
-                        .HasColumnName("TRIGGER_NAME");
-
-                    b.HasKey("SchedulerName", "EntryId");
-
-                    b.HasIndex("InstanceName")
-                        .HasDatabaseName("IDX_QRTZ_FT_TRIG_INST_NAME");
-
-                    b.HasIndex("JobGroup")
-                        .HasDatabaseName("IDX_QRTZ_FT_JOB_GROUP");
-
-                    b.HasIndex("JobName")
-                        .HasDatabaseName("IDX_QRTZ_FT_JOB_NAME");
-
-                    b.HasIndex("RequestsRecovery")
-                        .HasDatabaseName("IDX_QRTZ_FT_JOB_REQ_RECOVERY");
-
-                    b.HasIndex("TriggerGroup")
-                        .HasDatabaseName("IDX_QRTZ_FT_TRIG_GROUP");
-
-                    b.HasIndex("TriggerName")
-                        .HasDatabaseName("IDX_QRTZ_FT_TRIG_NAME");
-
-                    b.HasIndex("SchedulerName", "TriggerName", "TriggerGroup")
-                        .HasDatabaseName("IDX_QRTZ_FT_TRIG_NM_GP");
-
-                    b.ToTable("QRTZ_FIRED_TRIGGERS", "quartz");
-                });
-
-            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzJobDetail", b =>
-                {
-                    b.Property<string>("SchedulerName")
-                        .HasMaxLength(120)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(120)")
-                        .HasColumnName("SCHED_NAME");
-
-                    b.Property<string>("JobName")
-                        .HasMaxLength(150)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(150)")
-                        .HasColumnName("JOB_NAME");
-
-                    b.Property<string>("JobGroup")
-                        .HasMaxLength(150)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(150)")
-                        .HasColumnName("JOB_GROUP");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(250)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(250)")
-                        .HasColumnName("DESCRIPTION");
-
-                    b.Property<bool>("IsDurable")
-                        .HasColumnType("bit")
-                        .HasColumnName("IS_DURABLE");
-
-                    b.Property<bool>("IsNonConcurrent")
-                        .HasColumnType("bit")
-                        .HasColumnName("IS_NONCONCURRENT");
-
-                    b.Property<bool>("IsUpdateData")
-                        .HasColumnType("bit")
-                        .HasColumnName("IS_UPDATE_DATA");
-
-                    b.Property<string>("JobClassName")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(250)")
-                        .HasColumnName("JOB_CLASS_NAME");
-
-                    b.Property<byte[]>("JobData")
-                        .HasColumnType("varbinary(max)")
-                        .HasColumnName("JOB_DATA");
-
-                    b.Property<bool>("RequestsRecovery")
-                        .HasColumnType("bit")
-                        .HasColumnName("REQUESTS_RECOVERY");
-
-                    b.HasKey("SchedulerName", "JobName", "JobGroup");
-
-                    b.HasIndex("RequestsRecovery")
-                        .HasDatabaseName("IDX_QRTZ_J_REQ_RECOVERY");
-
-                    b.ToTable("QRTZ_JOB_DETAILS", "quartz");
-                });
-
-            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzLock", b =>
-                {
-                    b.Property<string>("SchedulerName")
-                        .HasMaxLength(120)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(120)")
-                        .HasColumnName("SCHED_NAME");
-
-                    b.Property<string>("LockName")
-                        .HasMaxLength(40)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(40)")
-                        .HasColumnName("LOCK_NAME");
-
-                    b.HasKey("SchedulerName", "LockName");
-
-                    b.ToTable("QRTZ_LOCKS", "quartz");
-                });
-
-            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzPausedTriggerGroup", b =>
-                {
-                    b.Property<string>("SchedulerName")
-                        .HasMaxLength(120)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(120)")
-                        .HasColumnName("SCHED_NAME");
-
-                    b.Property<string>("TriggerGroup")
-                        .HasMaxLength(150)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(150)")
-                        .HasColumnName("TRIGGER_GROUP");
-
-                    b.HasKey("SchedulerName", "TriggerGroup");
-
-                    b.ToTable("QRTZ_PAUSED_TRIGGER_GRPS", "quartz");
-                });
-
-            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzSchedulerState", b =>
-                {
-                    b.Property<string>("SchedulerName")
-                        .HasMaxLength(120)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(120)")
-                        .HasColumnName("SCHED_NAME");
-
-                    b.Property<string>("InstanceName")
-                        .HasMaxLength(200)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("INSTANCE_NAME");
-
-                    b.Property<long>("CheckInInterval")
-                        .HasColumnType("bigint")
-                        .HasColumnName("CHECKIN_INTERVAL");
-
-                    b.Property<long>("LastCheckInTime")
-                        .HasColumnType("bigint")
-                        .HasColumnName("LAST_CHECKIN_TIME");
-
-                    b.HasKey("SchedulerName", "InstanceName");
-
-                    b.ToTable("QRTZ_SCHEDULER_STATE", "quartz");
-                });
-
-            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzSimplePropertyTrigger", b =>
-                {
-                    b.Property<string>("SchedulerName")
-                        .HasMaxLength(120)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(120)")
-                        .HasColumnName("SCHED_NAME");
-
-                    b.Property<string>("TriggerName")
-                        .HasMaxLength(150)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(150)")
-                        .HasColumnName("TRIGGER_NAME");
-
-                    b.Property<string>("TriggerGroup")
-                        .HasMaxLength(150)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(150)")
-                        .HasColumnName("TRIGGER_GROUP");
-
-                    b.Property<bool?>("BooleanProperty1")
-                        .HasColumnType("bit")
-                        .HasColumnName("BOOL_PROP_1");
-
-                    b.Property<bool?>("BooleanProperty2")
-                        .HasColumnType("bit")
-                        .HasColumnName("BOOL_PROP_2");
-
-                    b.Property<decimal?>("DecimalProperty1")
-                        .HasColumnType("numeric(13,4)")
-                        .HasColumnName("DEC_PROP_1");
-
-                    b.Property<decimal?>("DecimalProperty2")
-                        .HasColumnType("numeric(13,4)")
-                        .HasColumnName("DEC_PROP_2");
-
-                    b.Property<int?>("IntegerProperty1")
-                        .HasColumnType("int")
-                        .HasColumnName("INT_PROP_1");
-
-                    b.Property<int?>("IntegerProperty2")
-                        .HasColumnType("int")
-                        .HasColumnName("INT_PROP_2");
-
-                    b.Property<long?>("LongProperty1")
-                        .HasColumnType("bigint")
-                        .HasColumnName("LONG_PROP_1");
-
-                    b.Property<long?>("LongProperty2")
-                        .HasColumnType("bigint")
-                        .HasColumnName("LONG_PROP_2");
-
-                    b.Property<string>("StringProperty1")
-                        .IsRequired()
-                        .HasMaxLength(512)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(512)")
-                        .HasColumnName("STR_PROP_1");
-
-                    b.Property<string>("StringProperty2")
-                        .IsRequired()
-                        .HasMaxLength(512)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(512)")
-                        .HasColumnName("STR_PROP_2");
-
-                    b.Property<string>("StringProperty3")
-                        .IsRequired()
-                        .HasMaxLength(512)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(512)")
-                        .HasColumnName("STR_PROP_3");
-
-                    b.Property<string>("TimeZoneId")
-                        .HasMaxLength(80)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(80)")
-                        .HasColumnName("TIME_ZONE_ID");
-
-                    b.HasKey("SchedulerName", "TriggerName", "TriggerGroup");
-
-                    b.ToTable("QRTZ_SIMPROP_TRIGGERS", "quartz");
-                });
-
-            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzSimpleTrigger", b =>
-                {
-                    b.Property<string>("SchedulerName")
-                        .HasMaxLength(120)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(120)")
-                        .HasColumnName("SCHED_NAME");
-
-                    b.Property<string>("TriggerName")
-                        .HasMaxLength(150)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(150)")
-                        .HasColumnName("TRIGGER_NAME");
-
-                    b.Property<string>("TriggerGroup")
-                        .HasMaxLength(150)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(150)")
-                        .HasColumnName("TRIGGER_GROUP");
-
-                    b.Property<long>("RepeatCount")
-                        .HasColumnType("bigint")
-                        .HasColumnName("REPEAT_COUNT");
-
-                    b.Property<long>("RepeatInterval")
-                        .HasColumnType("bigint")
-                        .HasColumnName("REPEAT_INTERVAL");
-
-                    b.Property<long>("TimesTriggered")
-                        .HasColumnType("bigint")
-                        .HasColumnName("TIMES_TRIGGERED");
-
-                    b.HasKey("SchedulerName", "TriggerName", "TriggerGroup");
-
-                    b.ToTable("QRTZ_SIMPLE_TRIGGERS", "quartz");
-                });
-
-            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzTrigger", b =>
-                {
-                    b.Property<string>("SchedulerName")
-                        .HasMaxLength(120)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(120)")
-                        .HasColumnName("SCHED_NAME");
-
-                    b.Property<string>("TriggerName")
-                        .HasMaxLength(150)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(150)")
-                        .HasColumnName("TRIGGER_NAME");
-
-                    b.Property<string>("TriggerGroup")
-                        .HasMaxLength(150)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(150)")
-                        .HasColumnName("TRIGGER_GROUP");
-
-                    b.Property<string>("CalendarName")
-                        .HasMaxLength(200)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("CALENDAR_NAME");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(250)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(250)")
-                        .HasColumnName("DESCRIPTION");
-
-                    b.Property<long?>("EndTime")
-                        .HasColumnType("bigint")
-                        .HasColumnName("END_TIME");
-
-                    b.Property<byte[]>("JobData")
-                        .HasColumnType("varbinary(max)")
-                        .HasColumnName("JOB_DATA");
-
-                    b.Property<string>("JobGroup")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(150)")
-                        .HasColumnName("JOB_GROUP");
-
-                    b.Property<string>("JobName")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(150)")
-                        .HasColumnName("JOB_NAME");
-
-                    b.Property<short?>("MisfireInstruction")
-                        .HasColumnType("smallint")
-                        .HasColumnName("MISFIRE_INSTR");
-
-                    b.Property<long?>("NextFireTime")
-                        .HasColumnType("bigint")
-                        .HasColumnName("NEXT_FIRE_TIME");
-
-                    b.Property<long?>("PreviousFireTime")
-                        .HasColumnType("bigint")
-                        .HasColumnName("PREV_FIRE_TIME");
-
-                    b.Property<int?>("Priority")
-                        .HasColumnType("int")
-                        .HasColumnName("PRIORITY");
-
-                    b.Property<long>("StartTime")
-                        .HasColumnType("bigint")
-                        .HasColumnName("START_TIME");
-
-                    b.Property<string>("TriggerState")
-                        .IsRequired()
-                        .HasMaxLength(16)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(16)")
-                        .HasColumnName("TRIGGER_STATE");
-
-                    b.Property<string>("TriggerType")
-                        .IsRequired()
-                        .HasMaxLength(8)
-                        .IsUnicode(true)
-                        .HasColumnType("nvarchar(8)")
-                        .HasColumnName("TRIGGER_TYPE");
-
-                    b.HasKey("SchedulerName", "TriggerName", "TriggerGroup");
-
-                    b.HasIndex("NextFireTime")
-                        .HasDatabaseName("IDX_QRTZ_T_NEXT_FIRE_TIME");
-
-                    b.HasIndex("TriggerState")
-                        .HasDatabaseName("IDX_QRTZ_T_STATE");
-
-                    b.HasIndex("NextFireTime", "TriggerState")
-                        .HasDatabaseName("IDX_QRTZ_T_NFT_ST");
-
-                    b.HasIndex("SchedulerName", "JobName", "JobGroup");
-
-                    b.ToTable("QRTZ_TRIGGERS", "quartz");
-                });
-
-            modelBuilder.Entity("HRConnect.Api.Models.AnnualLeaveAccrualHistory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("Accrued")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("ClosingBalance")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("EmployeeId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<decimal>("Forfeited")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("OpeningBalance")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("Used")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("Year")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EmployeeId");
-
-                    b.ToTable("AnnualLeaveAccrualHistories");
-                });
-
-            modelBuilder.Entity("HRConnect.Api.Models.AuditLogs", b =>
-                {
-                    b.Property<int>("AuditId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AuditId"));
-
-                    b.Property<string>("AuditAction")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("AuditedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("EmployeeId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("EmployerSdlContribution")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("IdNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("MonthlySalary")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("PassportNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("ProjectedSalary")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("TabelName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("UifEmployeeAmount")
-                        .HasPrecision(5, 2)
-                        .HasColumnType("decimal(5,2)");
-
-                    b.Property<decimal>("UifEmployerAmount")
-                        .HasPrecision(5, 2)
-                        .HasColumnType("decimal(5,2)");
-
-                    b.HasKey("AuditId");
-
-                    b.ToTable("AuditLogs");
-                });
-
-            modelBuilder.Entity("HRConnect.Api.Models.CompanyContributions.CompanyContribution", b =>
-                {
-                    b.Property<int>("CompanyContributionId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CompanyContributionId"));
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("LongDescription")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("Percentage")
-                        .HasColumnType("decimal(10,6)");
-
-                    b.Property<string>("ShortDescription")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TaxCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("CompanyContributionId");
-
-                    b.ToTable("CompanyContributions");
-                });
-
-            modelBuilder.Entity("HRConnect.Api.Models.Employee", b =>
-                {
-                    b.Property<string>("EmployeeId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Branch")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CareerManagerID")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("City")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ContactNumber")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateOnly>("DateOfBirth")
-                        .HasColumnType("date");
-
-                    b.Property<string>("DisabilityDescription")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("EmploymentStatus")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Gender")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("HasDisability")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("IdNumber")
-                        .HasMaxLength(13)
-                        .HasColumnType("nvarchar(13)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<decimal>("MonthlySalary")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Nationality")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PassportNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("PensionOptionId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("PhysicalAddress")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("PositionId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ProfileImage")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateOnly>("StartDate")
-                        .HasColumnType("date");
-
-                    b.Property<string>("Surname")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TaxNumber")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ZipCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("EmployeeId");
-
-                    b.HasIndex("CareerManagerID");
-
-                    b.HasIndex("PensionOptionId");
-
-                    b.HasIndex("PositionId");
-
-                    b.ToTable("Employees");
-                });
-
-            modelBuilder.Entity("HRConnect.Api.Models.EmployeeAccrualRateHistory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+      modelBuilder
+          .HasAnnotation("ProductVersion", "9.0.11")
+          .HasAnnotation("Relational:MaxIdentifierLength", 128);
+
+      SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+      modelBuilder.HasSequence("PayrollRecordSequence");
+
+      modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzBlobTrigger", b =>
+          {
+            b.Property<string>("SchedulerName")
+                      .HasMaxLength(120)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(120)")
+                      .HasColumnName("SCHED_NAME");
+
+            b.Property<string>("TriggerName")
+                      .HasMaxLength(150)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(150)")
+                      .HasColumnName("TRIGGER_NAME");
+
+            b.Property<string>("TriggerGroup")
+                      .HasMaxLength(150)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(150)")
+                      .HasColumnName("TRIGGER_GROUP");
+
+            b.Property<byte[]>("BlobData")
+                      .HasColumnType("varbinary(max)")
+                      .HasColumnName("BLOB_DATA");
+
+            b.HasKey("SchedulerName", "TriggerName", "TriggerGroup");
+
+            b.ToTable("QRTZ_BLOB_TRIGGERS", "quartz");
+          });
+
+      modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzCalendar", b =>
+          {
+            b.Property<string>("SchedulerName")
+                      .HasMaxLength(120)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(120)")
+                      .HasColumnName("SCHED_NAME");
+
+            b.Property<string>("CalendarName")
+                      .HasMaxLength(200)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(200)")
+                      .HasColumnName("CALENDAR_NAME");
+
+            b.Property<byte[]>("Calendar")
+                      .IsRequired()
+                      .HasColumnType("varbinary(max)")
+                      .HasColumnName("CALENDAR");
+
+            b.HasKey("SchedulerName", "CalendarName");
+
+            b.ToTable("QRTZ_CALENDARS", "quartz");
+          });
+
+      modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzCronTrigger", b =>
+          {
+            b.Property<string>("SchedulerName")
+                      .HasMaxLength(120)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(120)")
+                      .HasColumnName("SCHED_NAME");
+
+            b.Property<string>("TriggerName")
+                      .HasMaxLength(150)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(150)")
+                      .HasColumnName("TRIGGER_NAME");
+
+            b.Property<string>("TriggerGroup")
+                      .HasMaxLength(150)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(150)")
+                      .HasColumnName("TRIGGER_GROUP");
+
+            b.Property<string>("CronExpression")
+                      .IsRequired()
+                      .HasMaxLength(120)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(120)")
+                      .HasColumnName("CRON_EXPRESSION");
+
+            b.Property<string>("TimeZoneId")
+                      .HasMaxLength(120)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(120)")
+                      .HasColumnName("TIME_ZONE_ID");
+
+            b.HasKey("SchedulerName", "TriggerName", "TriggerGroup");
+
+            b.ToTable("QRTZ_CRON_TRIGGERS", "quartz");
+          });
+
+      modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzFiredTrigger", b =>
+          {
+            b.Property<string>("SchedulerName")
+                      .HasMaxLength(120)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(120)")
+                      .HasColumnName("SCHED_NAME");
+
+            b.Property<string>("EntryId")
+                      .HasMaxLength(140)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(140)")
+                      .HasColumnName("ENTRY_ID");
+
+            b.Property<long>("FiredTime")
+                      .HasColumnType("bigint")
+                      .HasColumnName("FIRED_TIME");
+
+            b.Property<string>("InstanceName")
+                      .IsRequired()
+                      .HasMaxLength(150)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(150)")
+                      .HasColumnName("INSTANCE_NAME");
+
+            b.Property<bool>("IsNonConcurrent")
+                      .HasColumnType("bit")
+                      .HasColumnName("IS_NONCONCURRENT");
+
+            b.Property<string>("JobGroup")
+                      .HasMaxLength(150)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(150)")
+                      .HasColumnName("JOB_GROUP");
+
+            b.Property<string>("JobName")
+                      .HasMaxLength(150)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(150)")
+                      .HasColumnName("JOB_NAME");
+
+            b.Property<int>("Priority")
+                      .HasColumnType("int")
+                      .HasColumnName("PRIORITY");
+
+            b.Property<bool?>("RequestsRecovery")
+                      .HasColumnType("bit")
+                      .HasColumnName("REQUESTS_RECOVERY");
+
+            b.Property<long>("ScheduledTime")
+                      .HasColumnType("bigint")
+                      .HasColumnName("SCHED_TIME");
+
+            b.Property<string>("State")
+                      .IsRequired()
+                      .HasMaxLength(16)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(16)")
+                      .HasColumnName("STATE");
+
+            b.Property<string>("TriggerGroup")
+                      .IsRequired()
+                      .HasMaxLength(150)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(150)")
+                      .HasColumnName("TRIGGER_GROUP");
+
+            b.Property<string>("TriggerName")
+                      .IsRequired()
+                      .HasMaxLength(150)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(150)")
+                      .HasColumnName("TRIGGER_NAME");
+
+            b.HasKey("SchedulerName", "EntryId");
+
+            b.HasIndex("InstanceName")
+                      .HasDatabaseName("IDX_QRTZ_FT_TRIG_INST_NAME");
+
+            b.HasIndex("JobGroup")
+                      .HasDatabaseName("IDX_QRTZ_FT_JOB_GROUP");
+
+            b.HasIndex("JobName")
+                      .HasDatabaseName("IDX_QRTZ_FT_JOB_NAME");
+
+            b.HasIndex("RequestsRecovery")
+                      .HasDatabaseName("IDX_QRTZ_FT_JOB_REQ_RECOVERY");
+
+            b.HasIndex("TriggerGroup")
+                      .HasDatabaseName("IDX_QRTZ_FT_TRIG_GROUP");
+
+            b.HasIndex("TriggerName")
+                      .HasDatabaseName("IDX_QRTZ_FT_TRIG_NAME");
+
+            b.HasIndex("SchedulerName", "TriggerName", "TriggerGroup")
+                      .HasDatabaseName("IDX_QRTZ_FT_TRIG_NM_GP");
+
+            b.ToTable("QRTZ_FIRED_TRIGGERS", "quartz");
+          });
+
+      modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzJobDetail", b =>
+          {
+            b.Property<string>("SchedulerName")
+                      .HasMaxLength(120)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(120)")
+                      .HasColumnName("SCHED_NAME");
+
+            b.Property<string>("JobName")
+                      .HasMaxLength(150)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(150)")
+                      .HasColumnName("JOB_NAME");
+
+            b.Property<string>("JobGroup")
+                      .HasMaxLength(150)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(150)")
+                      .HasColumnName("JOB_GROUP");
+
+            b.Property<string>("Description")
+                      .HasMaxLength(250)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(250)")
+                      .HasColumnName("DESCRIPTION");
+
+            b.Property<bool>("IsDurable")
+                      .HasColumnType("bit")
+                      .HasColumnName("IS_DURABLE");
+
+            b.Property<bool>("IsNonConcurrent")
+                      .HasColumnType("bit")
+                      .HasColumnName("IS_NONCONCURRENT");
+
+            b.Property<bool>("IsUpdateData")
+                      .HasColumnType("bit")
+                      .HasColumnName("IS_UPDATE_DATA");
+
+            b.Property<string>("JobClassName")
+                      .IsRequired()
+                      .HasMaxLength(250)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(250)")
+                      .HasColumnName("JOB_CLASS_NAME");
+
+            b.Property<byte[]>("JobData")
+                      .HasColumnType("varbinary(max)")
+                      .HasColumnName("JOB_DATA");
+
+            b.Property<bool>("RequestsRecovery")
+                      .HasColumnType("bit")
+                      .HasColumnName("REQUESTS_RECOVERY");
+
+            b.HasKey("SchedulerName", "JobName", "JobGroup");
+
+            b.HasIndex("RequestsRecovery")
+                      .HasDatabaseName("IDX_QRTZ_J_REQ_RECOVERY");
+
+            b.ToTable("QRTZ_JOB_DETAILS", "quartz");
+          });
+
+      modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzLock", b =>
+          {
+            b.Property<string>("SchedulerName")
+                      .HasMaxLength(120)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(120)")
+                      .HasColumnName("SCHED_NAME");
+
+            b.Property<string>("LockName")
+                      .HasMaxLength(40)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(40)")
+                      .HasColumnName("LOCK_NAME");
+
+            b.HasKey("SchedulerName", "LockName");
+
+            b.ToTable("QRTZ_LOCKS", "quartz");
+          });
+
+      modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzPausedTriggerGroup", b =>
+          {
+            b.Property<string>("SchedulerName")
+                      .HasMaxLength(120)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(120)")
+                      .HasColumnName("SCHED_NAME");
+
+            b.Property<string>("TriggerGroup")
+                      .HasMaxLength(150)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(150)")
+                      .HasColumnName("TRIGGER_GROUP");
+
+            b.HasKey("SchedulerName", "TriggerGroup");
+
+            b.ToTable("QRTZ_PAUSED_TRIGGER_GRPS", "quartz");
+          });
+
+      modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzSchedulerState", b =>
+          {
+            b.Property<string>("SchedulerName")
+                      .HasMaxLength(120)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(120)")
+                      .HasColumnName("SCHED_NAME");
+
+            b.Property<string>("InstanceName")
+                      .HasMaxLength(200)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(200)")
+                      .HasColumnName("INSTANCE_NAME");
+
+            b.Property<long>("CheckInInterval")
+                      .HasColumnType("bigint")
+                      .HasColumnName("CHECKIN_INTERVAL");
+
+            b.Property<long>("LastCheckInTime")
+                      .HasColumnType("bigint")
+                      .HasColumnName("LAST_CHECKIN_TIME");
+
+            b.HasKey("SchedulerName", "InstanceName");
+
+            b.ToTable("QRTZ_SCHEDULER_STATE", "quartz");
+          });
+
+      modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzSimplePropertyTrigger", b =>
+          {
+            b.Property<string>("SchedulerName")
+                      .HasMaxLength(120)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(120)")
+                      .HasColumnName("SCHED_NAME");
+
+            b.Property<string>("TriggerName")
+                      .HasMaxLength(150)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(150)")
+                      .HasColumnName("TRIGGER_NAME");
+
+            b.Property<string>("TriggerGroup")
+                      .HasMaxLength(150)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(150)")
+                      .HasColumnName("TRIGGER_GROUP");
+
+            b.Property<bool?>("BooleanProperty1")
+                      .HasColumnType("bit")
+                      .HasColumnName("BOOL_PROP_1");
+
+            b.Property<bool?>("BooleanProperty2")
+                      .HasColumnType("bit")
+                      .HasColumnName("BOOL_PROP_2");
+
+            b.Property<decimal?>("DecimalProperty1")
+                      .HasColumnType("numeric(13,4)")
+                      .HasColumnName("DEC_PROP_1");
+
+            b.Property<decimal?>("DecimalProperty2")
+                      .HasColumnType("numeric(13,4)")
+                      .HasColumnName("DEC_PROP_2");
+
+            b.Property<int?>("IntegerProperty1")
+                      .HasColumnType("int")
+                      .HasColumnName("INT_PROP_1");
+
+            b.Property<int?>("IntegerProperty2")
+                      .HasColumnType("int")
+                      .HasColumnName("INT_PROP_2");
+
+            b.Property<long?>("LongProperty1")
+                      .HasColumnType("bigint")
+                      .HasColumnName("LONG_PROP_1");
+
+            b.Property<long?>("LongProperty2")
+                      .HasColumnType("bigint")
+                      .HasColumnName("LONG_PROP_2");
+
+            b.Property<string>("StringProperty1")
+                      .IsRequired()
+                      .HasMaxLength(512)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(512)")
+                      .HasColumnName("STR_PROP_1");
+
+            b.Property<string>("StringProperty2")
+                      .IsRequired()
+                      .HasMaxLength(512)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(512)")
+                      .HasColumnName("STR_PROP_2");
+
+            b.Property<string>("StringProperty3")
+                      .IsRequired()
+                      .HasMaxLength(512)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(512)")
+                      .HasColumnName("STR_PROP_3");
+
+            b.Property<string>("TimeZoneId")
+                      .HasMaxLength(80)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(80)")
+                      .HasColumnName("TIME_ZONE_ID");
+
+            b.HasKey("SchedulerName", "TriggerName", "TriggerGroup");
+
+            b.ToTable("QRTZ_SIMPROP_TRIGGERS", "quartz");
+          });
+
+      modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzSimpleTrigger", b =>
+          {
+            b.Property<string>("SchedulerName")
+                      .HasMaxLength(120)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(120)")
+                      .HasColumnName("SCHED_NAME");
+
+            b.Property<string>("TriggerName")
+                      .HasMaxLength(150)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(150)")
+                      .HasColumnName("TRIGGER_NAME");
+
+            b.Property<string>("TriggerGroup")
+                      .HasMaxLength(150)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(150)")
+                      .HasColumnName("TRIGGER_GROUP");
+
+            b.Property<long>("RepeatCount")
+                      .HasColumnType("bigint")
+                      .HasColumnName("REPEAT_COUNT");
+
+            b.Property<long>("RepeatInterval")
+                      .HasColumnType("bigint")
+                      .HasColumnName("REPEAT_INTERVAL");
+
+            b.Property<long>("TimesTriggered")
+                      .HasColumnType("bigint")
+                      .HasColumnName("TIMES_TRIGGERED");
+
+            b.HasKey("SchedulerName", "TriggerName", "TriggerGroup");
+
+            b.ToTable("QRTZ_SIMPLE_TRIGGERS", "quartz");
+          });
+
+      modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzTrigger", b =>
+          {
+            b.Property<string>("SchedulerName")
+                      .HasMaxLength(120)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(120)")
+                      .HasColumnName("SCHED_NAME");
+
+            b.Property<string>("TriggerName")
+                      .HasMaxLength(150)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(150)")
+                      .HasColumnName("TRIGGER_NAME");
+
+            b.Property<string>("TriggerGroup")
+                      .HasMaxLength(150)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(150)")
+                      .HasColumnName("TRIGGER_GROUP");
+
+            b.Property<string>("CalendarName")
+                      .HasMaxLength(200)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(200)")
+                      .HasColumnName("CALENDAR_NAME");
+
+            b.Property<string>("Description")
+                      .HasMaxLength(250)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(250)")
+                      .HasColumnName("DESCRIPTION");
+
+            b.Property<long?>("EndTime")
+                      .HasColumnType("bigint")
+                      .HasColumnName("END_TIME");
+
+            b.Property<byte[]>("JobData")
+                      .HasColumnType("varbinary(max)")
+                      .HasColumnName("JOB_DATA");
+
+            b.Property<string>("JobGroup")
+                      .IsRequired()
+                      .HasMaxLength(150)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(150)")
+                      .HasColumnName("JOB_GROUP");
+
+            b.Property<string>("JobName")
+                      .IsRequired()
+                      .HasMaxLength(150)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(150)")
+                      .HasColumnName("JOB_NAME");
+
+            b.Property<short?>("MisfireInstruction")
+                      .HasColumnType("smallint")
+                      .HasColumnName("MISFIRE_INSTR");
+
+            b.Property<long?>("NextFireTime")
+                      .HasColumnType("bigint")
+                      .HasColumnName("NEXT_FIRE_TIME");
+
+            b.Property<long?>("PreviousFireTime")
+                      .HasColumnType("bigint")
+                      .HasColumnName("PREV_FIRE_TIME");
+
+            b.Property<int?>("Priority")
+                      .HasColumnType("int")
+                      .HasColumnName("PRIORITY");
+
+            b.Property<long>("StartTime")
+                      .HasColumnType("bigint")
+                      .HasColumnName("START_TIME");
+
+            b.Property<string>("TriggerState")
+                      .IsRequired()
+                      .HasMaxLength(16)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(16)")
+                      .HasColumnName("TRIGGER_STATE");
+
+            b.Property<string>("TriggerType")
+                      .IsRequired()
+                      .HasMaxLength(8)
+                      .IsUnicode(true)
+                      .HasColumnType("nvarchar(8)")
+                      .HasColumnName("TRIGGER_TYPE");
+
+            b.HasKey("SchedulerName", "TriggerName", "TriggerGroup");
+
+            b.HasIndex("NextFireTime")
+                      .HasDatabaseName("IDX_QRTZ_T_NEXT_FIRE_TIME");
+
+            b.HasIndex("TriggerState")
+                      .HasDatabaseName("IDX_QRTZ_T_STATE");
+
+            b.HasIndex("NextFireTime", "TriggerState")
+                      .HasDatabaseName("IDX_QRTZ_T_NFT_ST");
+
+            b.HasIndex("SchedulerName", "JobName", "JobGroup");
+
+            b.ToTable("QRTZ_TRIGGERS", "quartz");
+          });
+
+      modelBuilder.Entity("HRConnect.Api.Models.AnnualLeaveAccrualHistory", b =>
+          {
+            b.Property<int>("Id")
+                      .ValueGeneratedOnAdd()
+                      .HasColumnType("int");
+
+            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+            b.Property<decimal>("Accrued")
+                      .HasColumnType("decimal(18,2)");
+
+            b.Property<decimal>("ClosingBalance")
+                      .HasColumnType("decimal(18,2)");
+
+            b.Property<DateTime>("CreatedDate")
+                      .HasColumnType("datetime2");
+
+            b.Property<string>("EmployeeId")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(450)");
+
+            b.Property<decimal>("Forfeited")
+                      .HasColumnType("decimal(18,2)");
+
+            b.Property<decimal>("OpeningBalance")
+                      .HasColumnType("decimal(18,2)");
+
+            b.Property<decimal>("Used")
+                      .HasColumnType("decimal(18,2)");
+
+            b.Property<int>("Year")
+                      .HasColumnType("int");
+
+            b.HasKey("Id");
+
+            b.HasIndex("EmployeeId");
+
+            b.ToTable("AnnualLeaveAccrualHistories");
+          });
+
+      modelBuilder.Entity("HRConnect.Api.Models.AuditLogs", b =>
+          {
+            b.Property<int>("AuditId")
+                      .ValueGeneratedOnAdd()
+                      .HasColumnType("int");
+
+            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AuditId"));
+
+            b.Property<string>("AuditAction")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
+
+            b.Property<DateTime>("AuditedAt")
+                      .HasColumnType("datetime2");
+
+            b.Property<string>("EmployeeId")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
+
+            b.Property<decimal>("EmployerSdlContribution")
+                      .HasPrecision(18, 2)
+                      .HasColumnType("decimal(18,2)");
+
+            b.Property<string>("IdNumber")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
+
+            b.Property<decimal>("MonthlySalary")
+                      .HasPrecision(18, 2)
+                      .HasColumnType("decimal(18,2)");
+
+            b.Property<string>("PassportNumber")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
+
+            b.Property<decimal>("ProjectedSalary")
+                      .HasPrecision(18, 2)
+                      .HasColumnType("decimal(18,2)");
+
+            b.Property<string>("TabelName")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
+
+            b.Property<decimal>("UifEmployeeAmount")
+                      .HasPrecision(5, 2)
+                      .HasColumnType("decimal(5,2)");
+
+            b.Property<decimal>("UifEmployerAmount")
+                      .HasPrecision(5, 2)
+                      .HasColumnType("decimal(5,2)");
+
+            b.HasKey("AuditId");
+
+            b.ToTable("AuditLogs");
+          });
+
+      modelBuilder.Entity("HRConnect.Api.Models.Company", b =>
+          {
+            b.Property<string>("CompanyId")
+                      .HasColumnType("nvarchar(450)");
+
+            b.Property<string>("CompanyAddress")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
+
+            b.Property<string>("CompanyName")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
+
+            b.Property<string>("ContactNumber")
+                      .IsRequired()
+                      .HasMaxLength(10)
+                      .HasColumnType("nvarchar(10)");
+
+            b.Property<string>("RegistrationNumber")
+                      .IsRequired()
+                      .HasMaxLength(14)
+                      .HasColumnType("nvarchar(14)");
+
+            b.Property<string>("UIFNumber")
+                      .IsRequired()
+                      .HasMaxLength(10)
+                      .HasColumnType("nvarchar(10)");
+
+            b.Property<string>("VATNumber")
+                      .HasColumnType("nvarchar(450)");
+
+            b.HasKey("CompanyId");
+
+            b.HasIndex("CompanyId")
+                      .IsUnique();
+
+            b.HasIndex("RegistrationNumber")
+                      .IsUnique();
+
+            b.HasIndex("UIFNumber")
+                      .IsUnique();
+
+            b.HasIndex("VATNumber")
+                      .IsUnique()
+                      .HasFilter("[VATNumber] IS NOT NULL");
+
+            b.ToTable("Companies");
+          });
+
+      modelBuilder.Entity("HRConnect.Api.Models.CompanyContributions.CompanyContribution", b =>
+          {
+            b.Property<int>("CompanyContributionId")
+                      .ValueGeneratedOnAdd()
+                      .HasColumnType("int");
+
+            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CompanyContributionId"));
+
+            b.Property<string>("Code")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
+
+            b.Property<bool>("IsActive")
+                      .HasColumnType("bit");
+
+            b.Property<string>("LongDescription")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
+
+            b.Property<decimal>("Percentage")
+                      .HasColumnType("decimal(10,6)");
+
+            b.Property<string>("ShortDescription")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
+
+            b.Property<string>("TaxCode")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
+
+            b.HasKey("CompanyContributionId");
+
+            b.ToTable("CompanyContributions");
+          });
+
+      modelBuilder.Entity("HRConnect.Api.Models.Employee", b =>
+          {
+            b.Property<string>("EmployeeId")
+                      .HasColumnType("nvarchar(450)");
+
+            b.Property<string>("Branch")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
+
+            b.Property<string>("CareerManagerID")
+                      .HasColumnType("nvarchar(450)");
+
+            b.Property<string>("City")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
+
+            b.Property<string>("CompanyId")
+                      .HasColumnType("nvarchar(450)");
+
+            b.Property<string>("ContactNumber")
+                      .IsRequired()
+                      .HasMaxLength(10)
+                      .HasColumnType("nvarchar(10)");
+
+            b.Property<DateTime>("CreatedAt")
+                      .HasColumnType("datetime2");
+
+            b.Property<DateOnly>("DateOfBirth")
+                      .HasColumnType("date");
+
+            b.Property<string>("DisabilityDescription")
+                      .HasColumnType("nvarchar(max)");
+
+            b.Property<string>("Email")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
+
+            b.Property<string>("EmploymentStatus")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
+
+            b.Property<string>("Gender")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
+
+            b.Property<bool>("HasDisability")
+                      .HasColumnType("bit");
+
+            b.Property<string>("IdNumber")
+                      .HasMaxLength(13)
+                      .HasColumnType("nvarchar(13)");
+
+            b.Property<bool>("IsActive")
+                      .HasColumnType("bit");
+
+            b.Property<decimal>("MonthlySalary")
+                      .HasColumnType("decimal(18,2)");
+
+            b.Property<string>("Name")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
+
+            b.Property<string>("Nationality")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
+
+            b.Property<string>("PassportNumber")
+                      .HasColumnType("nvarchar(max)");
+
+            b.Property<int?>("PensionOptionId")
+                      .HasColumnType("int");
+
+            b.Property<string>("PhysicalAddress")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
+
+            b.Property<int>("PositionId")
+                      .HasColumnType("int");
+
+            b.Property<string>("ProfileImage")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
+
+            b.Property<DateOnly>("StartDate")
+                      .HasColumnType("date");
+
+            b.Property<string>("Surname")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
+
+            b.Property<string>("TaxNumber")
+                      .IsRequired()
+                      .HasMaxLength(10)
+                      .HasColumnType("nvarchar(10)");
+
+            b.Property<string>("Title")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("AnnualEntitlement")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+            b.Property<DateTime>("UpdatedAt")
+                      .HasColumnType("datetime2");
+
+            b.Property<string>("ZipCode")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
+
+            b.HasKey("EmployeeId");
+
+            b.HasIndex("CareerManagerID");
 
-                    b.Property<decimal>("DailyRate")
-                        .HasColumnType("decimal(18,6)");
+            b.HasIndex("CompanyId");
 
-                    b.Property<DateOnly>("EffectiveFrom")
-                        .HasColumnType("date");
+            b.HasIndex("PensionOptionId");
 
-                    b.Property<DateOnly?>("EffectiveTo")
-                        .HasColumnType("date");
+            b.HasIndex("PositionId");
 
-                    b.Property<string>("EmployeeId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+            b.ToTable("Employees");
+          });
 
-                    b.Property<int>("PositionId")
-                        .HasColumnType("int");
+      modelBuilder.Entity("HRConnect.Api.Models.EmployeeAccrualRateHistory", b =>
+          {
+            b.Property<int>("Id")
+                      .ValueGeneratedOnAdd()
+                      .HasColumnType("int");
 
-                    b.Property<string>("PositionName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.HasKey("Id");
+            b.Property<decimal>("AnnualEntitlement")
+                      .HasColumnType("decimal(18,2)");
 
-                    b.HasIndex("EmployeeId");
+            b.Property<DateTime>("CreatedDate")
+                      .HasColumnType("datetime2");
 
-                    b.HasIndex("PositionId");
+            b.Property<decimal>("DailyRate")
+                      .HasColumnType("decimal(18,6)");
 
-                    b.ToTable("EmployeeAccrualRateHistories");
-                });
+            b.Property<DateOnly>("EffectiveFrom")
+                      .HasColumnType("date");
 
-            modelBuilder.Entity("HRConnect.Api.Models.EmployeeLeaveBalance", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            b.Property<DateOnly?>("EffectiveTo")
+                      .HasColumnType("date");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+            b.Property<string>("EmployeeId")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(450)");
 
-                    b.Property<decimal>("AccruedDays")
-                        .HasColumnType("decimal(18,2)");
+            b.Property<int>("PositionId")
+                      .HasColumnType("int");
 
-                    b.Property<decimal>("AvailableDays")
-                        .HasColumnType("decimal(18,2)");
+            b.Property<string>("PositionName")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("CarryoverDays")
-                        .HasColumnType("decimal(18,2)");
+            b.HasKey("Id");
 
-                    b.Property<string>("EmployeeId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+            b.HasIndex("EmployeeId");
 
-                    b.Property<decimal>("ForfeitedDays")
-                        .HasColumnType("decimal(18,2)");
+            b.HasIndex("PositionId");
 
-                    b.Property<DateOnly?>("LastAccrualDate")
-                        .HasColumnType("date");
+            b.ToTable("EmployeeAccrualRateHistories");
+          });
 
-                    b.Property<DateOnly?>("LastCalculatedDate")
-                        .HasColumnType("date");
+      modelBuilder.Entity("HRConnect.Api.Models.EmployeeLeaveBalance", b =>
+          {
+            b.Property<int>("Id")
+                      .ValueGeneratedOnAdd()
+                      .HasColumnType("int");
 
-                    b.Property<int?>("LastResetYear")
-                        .HasColumnType("int");
+            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("LeaveTypeId")
-                        .HasColumnType("int");
+            b.Property<decimal>("AccruedDays")
+                      .HasColumnType("decimal(18,2)");
 
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
+            b.Property<decimal>("AvailableDays")
+                      .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("TakenDays")
-                        .HasColumnType("decimal(18,2)");
+            b.Property<decimal>("CarryoverDays")
+                      .HasColumnType("decimal(18,2)");
 
-                    b.HasKey("Id");
+            b.Property<string>("EmployeeId")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(450)");
 
-                    b.HasIndex("EmployeeId");
+            b.Property<decimal>("ForfeitedDays")
+                      .HasColumnType("decimal(18,2)");
 
-                    b.HasIndex("LeaveTypeId");
+            b.Property<DateOnly?>("LastAccrualDate")
+                      .HasColumnType("date");
 
-                    b.ToTable("EmployeeLeaveBalances");
-                });
+            b.Property<DateOnly?>("LastCalculatedDate")
+                      .HasColumnType("date");
 
-            modelBuilder.Entity("HRConnect.Api.Models.JobGrade", b =>
-                {
-                    b.Property<int>("JobGradeId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            b.Property<int?>("LastResetYear")
+                      .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("JobGradeId"));
+            b.Property<int>("LeaveTypeId")
+                      .HasColumnType("int");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+            b.Property<byte[]>("RowVersion")
+                      .IsConcurrencyToken()
+                      .IsRequired()
+                      .ValueGeneratedOnAddOrUpdate()
+                      .HasColumnType("rowversion");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+            b.Property<decimal>("TakenDays")
+                      .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.HasKey("Id");
 
-                    b.Property<DateTime>("UpdatedDate")
-                        .HasColumnType("datetime2");
+            b.HasIndex("EmployeeId");
 
-                    b.HasKey("JobGradeId");
+            b.HasIndex("LeaveTypeId");
 
-                    b.ToTable("JobGrades");
-                });
+            b.ToTable("EmployeeLeaveBalances");
+          });
 
-            modelBuilder.Entity("HRConnect.Api.Models.LeaveApplication", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+      modelBuilder.Entity("HRConnect.Api.Models.JobGrade", b =>
+          {
+            b.Property<int>("JobGradeId")
+                      .ValueGeneratedOnAdd()
+                      .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("JobGradeId"));
 
-                    b.Property<DateTime>("AppliedDate")
-                        .HasColumnType("datetime2");
+            b.Property<DateTime>("CreatedDate")
+                      .HasColumnType("datetime2");
 
-                    b.Property<Guid>("ApprovalToken")
-                        .HasColumnType("uniqueidentifier");
+            b.Property<bool>("IsActive")
+                      .HasColumnType("bit");
 
-                    b.Property<decimal>("DaysRequested")
-                        .HasColumnType("decimal(18,2)");
+            b.Property<string>("Name")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("DecisionBy")
-                        .HasColumnType("nvarchar(max)");
+            b.Property<DateTime>("UpdatedDate")
+                      .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("DecisionDate")
-                        .HasColumnType("datetime2");
+            b.HasKey("JobGradeId");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.ToTable("JobGrades");
+          });
 
-                    b.Property<string>("EmployeeId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+      modelBuilder.Entity("HRConnect.Api.Models.LeaveApplication", b =>
+          {
+            b.Property<int>("Id")
+                      .ValueGeneratedOnAdd()
+                      .HasColumnType("int");
 
-                    b.Property<DateOnly>("EndDate")
-                        .HasColumnType("date");
+            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("LeaveTypeId")
-                        .HasColumnType("int");
+            b.Property<DateTime>("AppliedDate")
+                      .HasColumnType("datetime2");
 
-                    b.Property<string>("RejectionReason")
-                        .HasColumnType("nvarchar(max)");
+            b.Property<Guid>("ApprovalToken")
+                      .HasColumnType("uniqueidentifier");
 
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
+            b.Property<decimal>("DaysRequested")
+                      .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateOnly>("StartDate")
-                        .HasColumnType("date");
+            b.Property<string>("DecisionBy")
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+            b.Property<DateTime?>("DecisionDate")
+                      .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("TokenExpiry")
-                        .HasColumnType("datetime2");
+            b.Property<string>("Description")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+            b.Property<string>("EmployeeId")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(450)");
 
-                    b.HasIndex("EmployeeId");
+            b.Property<DateOnly>("EndDate")
+                      .HasColumnType("date");
 
-                    b.HasIndex("LeaveTypeId");
+            b.Property<int>("LeaveTypeId")
+                      .HasColumnType("int");
 
-                    b.ToTable("LeaveApplications");
-                });
+            b.Property<string>("RejectionReason")
+                      .HasColumnType("nvarchar(max)");
 
-            modelBuilder.Entity("HRConnect.Api.Models.LeaveEntitlementRule", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            b.Property<byte[]>("RowVersion")
+                      .IsConcurrencyToken()
+                      .IsRequired()
+                      .ValueGeneratedOnAddOrUpdate()
+                      .HasColumnType("rowversion");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+            b.Property<DateOnly>("StartDate")
+                      .HasColumnType("date");
 
-                    b.Property<decimal>("DaysAllocated")
-                        .HasColumnType("decimal(18,2)");
+            b.Property<int>("Status")
+                      .HasColumnType("int");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+            b.Property<DateTime>("TokenExpiry")
+                      .HasColumnType("datetime2");
 
-                    b.Property<int>("JobGradeId")
-                        .HasColumnType("int");
+            b.HasKey("Id");
 
-                    b.Property<int>("LeaveTypeId")
-                        .HasColumnType("int");
+            b.HasIndex("EmployeeId");
 
-                    b.Property<decimal?>("MaxYearsService")
-                        .HasColumnType("decimal(18,2)");
+            b.HasIndex("LeaveTypeId");
 
-                    b.Property<decimal>("MinYearsService")
-                        .HasColumnType("decimal(18,2)");
+            b.ToTable("LeaveApplications");
+          });
 
-                    b.HasKey("Id");
+      modelBuilder.Entity("HRConnect.Api.Models.LeaveEntitlementRule", b =>
+          {
+            b.Property<int>("Id")
+                      .ValueGeneratedOnAdd()
+                      .HasColumnType("int");
 
-                    b.HasIndex("JobGradeId");
+            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.HasIndex("LeaveTypeId");
+            b.Property<decimal>("DaysAllocated")
+                      .HasColumnType("decimal(18,2)");
 
-                    b.ToTable("LeaveEntitlementRules");
-                });
+            b.Property<bool>("IsActive")
+                      .HasColumnType("bit");
 
-            modelBuilder.Entity("HRConnect.Api.Models.LeaveType", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            b.Property<int>("JobGradeId")
+                      .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+            b.Property<int>("LeaveTypeId")
+                      .HasColumnType("int");
 
-                    b.Property<int?>("CarryoverExpiryDay")
-                        .HasColumnType("int");
+            b.Property<decimal?>("MaxYearsService")
+                      .HasColumnType("decimal(18,2)");
 
-                    b.Property<int?>("CarryoverExpiryMonth")
-                        .HasColumnType("int");
+            b.Property<decimal>("MinYearsService")
+                      .HasColumnType("decimal(18,2)");
 
-                    b.Property<int?>("CarryoverNotificationDay")
-                        .HasColumnType("int");
+            b.HasKey("Id");
 
-                    b.Property<int?>("CarryoverNotificationMonth")
-                        .HasColumnType("int");
+            b.HasIndex("JobGradeId");
 
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.HasIndex("LeaveTypeId");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.ToTable("LeaveEntitlementRules");
+          });
 
-                    b.Property<bool>("FemaleOnly")
-                        .HasColumnType("bit");
+      modelBuilder.Entity("HRConnect.Api.Models.LeaveType", b =>
+          {
+            b.Property<int>("Id")
+                      .ValueGeneratedOnAdd()
+                      .HasColumnType("int");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("IsRollingWindow")
-                        .HasColumnType("bit");
+            b.Property<int?>("CarryoverExpiryDay")
+                      .HasColumnType("int");
 
-                    b.Property<int?>("MaxCarryoverDays")
-                        .HasColumnType("int");
+            b.Property<int?>("CarryoverExpiryMonth")
+                      .HasColumnType("int");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<int?>("CarryoverNotificationDay")
+                      .HasColumnType("int");
 
-                    b.Property<int?>("ResetDay")
-                        .HasColumnType("int");
+            b.Property<int?>("CarryoverNotificationMonth")
+                      .HasColumnType("int");
 
-                    b.Property<int?>("ResetMonth")
-                        .HasColumnType("int");
+            b.Property<string>("Code")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("RollingMonths")
-                        .HasColumnType("int");
+            b.Property<string>("Description")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+            b.Property<bool>("FemaleOnly")
+                      .HasColumnType("bit");
 
-                    b.ToTable("LeaveTypes");
-                });
+            b.Property<bool>("IsActive")
+                      .HasColumnType("bit");
 
-            modelBuilder.Entity("HRConnect.Api.Models.MFAUserSecret", b =>
-                {
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+            b.Property<bool>("IsRollingWindow")
+                      .HasColumnType("bit");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+            b.Property<int?>("MaxCarryoverDays")
+                      .HasColumnType("int");
 
-                    b.Property<byte[]>("EncryptedUserSecret")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)");
+            b.Property<string>("Name")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("KeyVersion")
-                        .HasColumnType("int");
+            b.Property<int?>("ResetDay")
+                      .HasColumnType("int");
 
-                    b.HasKey("UserId");
+            b.Property<int?>("ResetMonth")
+                      .HasColumnType("int");
 
-                    b.ToTable("UserSecrets");
-                });
+            b.Property<int?>("RollingMonths")
+                      .HasColumnType("int");
 
-            modelBuilder.Entity("HRConnect.Api.Models.MedicalOption", b =>
-                {
-                    b.Property<int>("MedicalOptionId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("MedicalOptionId");
+            b.HasKey("Id");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MedicalOptionId"));
+            b.ToTable("LeaveTypes");
+          });
 
-                    b.Property<int>("MedicalOptionCategoryId")
-                        .HasColumnType("int");
+      modelBuilder.Entity("HRConnect.Api.Models.MFAUserSecret", b =>
+          {
+            b.Property<int>("UserId")
+                      .HasColumnType("int");
 
-                    b.Property<string>("MedicalOptionName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<DateTime>("CreatedAt")
+                      .HasColumnType("datetime2");
 
-                    b.Property<decimal?>("MonthlyMsaContributionAdult")
-                        .HasColumnType("decimal(15, 2)");
+            b.Property<byte[]>("EncryptedUserSecret")
+                      .IsRequired()
+                      .HasColumnType("varbinary(max)");
 
-                    b.Property<decimal?>("MonthlyMsaContributionChild")
-                        .HasColumnType("decimal(15, 2)");
+            b.Property<int>("KeyVersion")
+                      .HasColumnType("int");
 
-                    b.Property<decimal?>("MonthlyMsaContributionPrincipal")
-                        .HasColumnType("decimal(15, 2)");
+            b.HasKey("UserId");
 
-                    b.Property<decimal>("MonthlyRiskContributionAdult")
-                        .HasColumnType("decimal(15, 2)");
+            b.ToTable("UserSecrets");
+          });
 
-                    b.Property<decimal>("MonthlyRiskContributionChild")
-                        .HasColumnType("decimal(15, 2)");
+      modelBuilder.Entity("HRConnect.Api.Models.MedicalOption", b =>
+          {
+            b.Property<int>("MedicalOptionId")
+                      .ValueGeneratedOnAdd()
+                      .HasColumnType("int")
+                      .HasColumnName("MedicalOptionId");
 
-                    b.Property<decimal?>("MonthlyRiskContributionChild2")
-                        .HasColumnType("decimal(15, 2)");
+            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MedicalOptionId"));
 
-                    b.Property<decimal?>("MonthlyRiskContributionPrincipal")
-                        .HasColumnType("decimal(15, 2)");
+            b.Property<int>("MedicalOptionCategoryId")
+                      .HasColumnType("int");
 
-                    b.Property<decimal?>("SalaryBracketMax")
-                        .HasColumnType("decimal(15, 2)");
+            b.Property<string>("MedicalOptionName")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal?>("SalaryBracketMin")
-                        .HasColumnType("decimal(15, 2)");
+            b.Property<decimal?>("MonthlyMsaContributionAdult")
+                      .HasColumnType("decimal(15, 2)");
 
-                    b.Property<decimal>("TotalMonthlyContributionsAdult")
-                        .HasColumnType("decimal(15, 2)");
+            b.Property<decimal?>("MonthlyMsaContributionChild")
+                      .HasColumnType("decimal(15, 2)");
 
-                    b.Property<decimal>("TotalMonthlyContributionsChild")
-                        .HasColumnType("decimal(15, 2)");
+            b.Property<decimal?>("MonthlyMsaContributionPrincipal")
+                      .HasColumnType("decimal(15, 2)");
 
-                    b.Property<decimal?>("TotalMonthlyContributionsChild2")
-                        .HasColumnType("decimal(15, 2)");
+            b.Property<decimal>("MonthlyRiskContributionAdult")
+                      .HasColumnType("decimal(15, 2)");
 
-                    b.Property<decimal?>("TotalMonthlyContributionsPrincipal")
-                        .HasColumnType("decimal(15, 2)");
+            b.Property<decimal>("MonthlyRiskContributionChild")
+                      .HasColumnType("decimal(15, 2)");
 
-                    b.HasKey("MedicalOptionId");
+            b.Property<decimal?>("MonthlyRiskContributionChild2")
+                      .HasColumnType("decimal(15, 2)");
 
-                    b.HasIndex("MedicalOptionCategoryId");
+            b.Property<decimal?>("MonthlyRiskContributionPrincipal")
+                      .HasColumnType("decimal(15, 2)");
 
-                    b.ToTable("MedicalOptions");
-                });
+            b.Property<decimal?>("SalaryBracketMax")
+                      .HasColumnType("decimal(15, 2)");
 
-            modelBuilder.Entity("HRConnect.Api.Models.MedicalOptionCategory", b =>
-                {
-                    b.Property<int>("MedicalOptionCategoryId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("MedicalOptionCategoryId");
+            b.Property<decimal?>("SalaryBracketMin")
+                      .HasColumnType("decimal(15, 2)");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MedicalOptionCategoryId"));
+            b.Property<decimal>("TotalMonthlyContributionsAdult")
+                      .HasColumnType("decimal(15, 2)");
 
-                    b.Property<string>("MedicalOptionCategoryName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<decimal>("TotalMonthlyContributionsChild")
+                      .HasColumnType("decimal(15, 2)");
 
-                    b.HasKey("MedicalOptionCategoryId");
+            b.Property<decimal?>("TotalMonthlyContributionsChild2")
+                      .HasColumnType("decimal(15, 2)");
 
-                    b.ToTable("MedicalOptionCategories");
-                });
+            b.Property<decimal?>("TotalMonthlyContributionsPrincipal")
+                      .HasColumnType("decimal(15, 2)");
 
-            modelBuilder.Entity("HRConnect.Api.Models.Notification", b =>
-                {
-                    b.Property<int>("NotificationId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            b.HasKey("MedicalOptionId");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("NotificationId"));
+            b.HasIndex("MedicalOptionCategoryId");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+            b.ToTable("MedicalOptions");
+          });
 
-                    b.Property<string>("DeliveryChannel")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+      modelBuilder.Entity("HRConnect.Api.Models.MedicalOptionCategory", b =>
+          {
+            b.Property<int>("MedicalOptionCategoryId")
+                      .ValueGeneratedOnAdd()
+                      .HasColumnType("int")
+                      .HasColumnName("MedicalOptionCategoryId");
 
-                    b.Property<DateTime?>("DueDate")
-                        .HasColumnType("datetime2");
+            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MedicalOptionCategoryId"));
 
-                    b.Property<string>("EmployeeId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<string>("MedicalOptionCategoryName")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("IdempotencyKey")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.HasKey("MedicalOptionCategoryId");
 
-                    b.Property<bool>("IsRead")
-                        .HasColumnType("bit");
+            b.ToTable("MedicalOptionCategories");
+          });
 
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+      modelBuilder.Entity("HRConnect.Api.Models.Notification", b =>
+          {
+            b.Property<int>("NotificationId")
+                      .ValueGeneratedOnAdd()
+                      .HasColumnType("int");
 
-                    b.Property<int>("Severity")
-                        .HasColumnType("int");
+            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("NotificationId"));
 
-                    b.Property<string>("Subject")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<DateTime>("CreatedAt")
+                      .HasColumnType("datetime2");
 
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<string>("DeliveryChannel")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("NotificationId");
+            b.Property<DateTime?>("DueDate")
+                      .HasColumnType("datetime2");
 
-                    b.ToTable("Notifications");
-                });
+            b.Property<string>("EmployeeId")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-            modelBuilder.Entity("HRConnect.Api.Models.OccupationalLevel", b =>
-                {
-                    b.Property<int>("OccupationalLevelId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            b.Property<string>("IdempotencyKey")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OccupationalLevelId"));
+            b.Property<bool>("IsRead")
+                      .HasColumnType("bit");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+            b.Property<string>("Message")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+            b.Property<int>("Severity")
+                      .HasColumnType("int");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+            b.Property<string>("Subject")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("UpdatedDate")
-                        .HasColumnType("datetime2");
+            b.Property<string>("Type")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("OccupationalLevelId");
+            b.HasKey("NotificationId");
 
-                    b.HasIndex("Description")
-                        .IsUnique();
+            b.ToTable("Notifications");
+          });
 
-                    b.ToTable("OccupationalLevels");
-                });
+      modelBuilder.Entity("HRConnect.Api.Models.OccupationalLevel", b =>
+          {
+            b.Property<int>("OccupationalLevelId")
+                      .ValueGeneratedOnAdd()
+                      .HasColumnType("int");
 
-            modelBuilder.Entity("HRConnect.Api.Models.PasswordHistory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OccupationalLevelId"));
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+            b.Property<DateTime>("CreatedDate")
+                      .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("ChangedAt")
-                        .HasColumnType("datetime2");
+            b.Property<string>("Description")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<bool>("IsActive")
+                      .HasColumnType("bit");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+            b.Property<DateTime>("UpdatedDate")
+                      .HasColumnType("datetime2");
 
-                    b.HasKey("Id");
+            b.HasKey("OccupationalLevelId");
 
-                    b.ToTable("PasswordHistories");
-                });
+            b.HasIndex("Description")
+                      .IsUnique();
 
-            modelBuilder.Entity("HRConnect.Api.Models.PasswordResetPin", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            b.ToTable("OccupationalLevels");
+          });
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+      modelBuilder.Entity("HRConnect.Api.Models.PasswordHistory", b =>
+          {
+            b.Property<int>("Id")
+                      .ValueGeneratedOnAdd()
+                      .HasColumnType("int");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<DateTime>("ChangedAt")
+                      .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("datetime2");
+            b.Property<string>("PasswordHash")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsUsed")
-                        .HasColumnType("bit");
+            b.Property<int>("UserId")
+                      .HasColumnType("int");
 
-                    b.Property<string>("Pin")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.HasKey("Id");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+            b.ToTable("PasswordHistories");
+          });
 
-                    b.HasKey("Id");
+      modelBuilder.Entity("HRConnect.Api.Models.PasswordResetPin", b =>
+          {
+            b.Property<int>("Id")
+                      .ValueGeneratedOnAdd()
+                      .HasColumnType("int");
 
-                    b.ToTable("PasswordResetPins");
-                });
+            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-            modelBuilder.Entity("HRConnect.Api.Models.Payroll.Earning.EmployeePayrollEarning", b =>
-                {
-                    b.Property<int>("EmployeePayrollEarningId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            b.Property<DateTime>("CreatedAt")
+                      .HasColumnType("datetime2");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EmployeePayrollEarningId"));
+            b.Property<string>("Email")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
+            b.Property<DateTime>("ExpiresAt")
+                      .HasColumnType("datetime2");
 
-                    b.Property<decimal>("CalculatedAmountAfterTax")
-                        .HasColumnType("decimal(18,2)");
+            b.Property<bool>("IsUsed")
+                      .HasColumnType("bit");
 
-                    b.Property<string>("EmployeeId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+            b.Property<string>("Pin")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsLocked")
-                        .HasColumnType("bit");
+            b.Property<int>("UserId")
+                      .HasColumnType("int");
 
-                    b.Property<int?>("OverTimeHoursWorked")
-                        .HasColumnType("int");
+            b.HasKey("Id");
 
-                    b.Property<string>("PayrollEarningId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+            b.ToTable("PasswordResetPins");
+          });
 
-                    b.Property<int>("PayrollRunId")
-                        .HasColumnType("int");
+      modelBuilder.Entity("HRConnect.Api.Models.Payroll.Earning.EmployeePayrollEarning", b =>
+          {
+            b.Property<int>("EmployeePayrollEarningId")
+                      .ValueGeneratedOnAdd()
+                      .HasColumnType("int");
 
-                    b.Property<int>("TaxCode")
-                        .HasColumnType("int");
+            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EmployeePayrollEarningId"));
 
-                    b.HasKey("EmployeePayrollEarningId");
+            b.Property<decimal>("Amount")
+                      .HasColumnType("decimal(18,2)");
 
-                    b.HasIndex("EmployeeId");
+            b.Property<decimal>("CalculatedAmountAfterTax")
+                      .HasColumnType("decimal(18,2)");
 
-                    b.HasIndex("PayrollEarningId");
+            b.Property<string>("EmployeeId")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(450)");
 
-                    b.HasIndex("PayrollRunId");
+            b.Property<bool>("IsLocked")
+                      .HasColumnType("bit");
 
-                    b.ToTable("EmployeePayrollEarnings");
-                });
+            b.Property<int?>("OverTimeHoursWorked")
+                      .HasColumnType("int");
 
-            modelBuilder.Entity("HRConnect.Api.Models.Payroll.Earning.PayrollEarning", b =>
-                {
-                    b.Property<string>("PayrollEarningId")
-                        .HasColumnType("nvarchar(450)");
+            b.Property<string>("PayrollEarningId")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(450)");
 
-                    b.Property<bool>("CanProRata")
-                        .HasColumnType("bit");
+            b.Property<int>("PayrollRunId")
+                      .HasColumnType("int");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+            b.Property<int>("TaxCode")
+                      .HasColumnType("int");
 
-                    b.Property<bool>("IsOnGoing")
-                        .HasColumnType("bit");
+            b.HasKey("EmployeePayrollEarningId");
 
-                    b.Property<string>("LongDescription")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.HasIndex("EmployeeId");
 
-                    b.Property<decimal?>("OvertimeHourMultiplier")
-                        .HasColumnType("decimal(18,2)");
+            b.HasIndex("PayrollEarningId");
 
-                    b.Property<string>("ShortDescription")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.HasIndex("PayrollRunId");
 
-                    b.Property<int>("TaxCode")
-                        .HasColumnType("int");
+            b.ToTable("EmployeePayrollEarnings");
+          });
 
-                    b.Property<decimal?>("TaxPercentage")
-                        .HasColumnType("decimal(18,2)");
+      modelBuilder.Entity("HRConnect.Api.Models.Payroll.Earning.PayrollEarning", b =>
+          {
+            b.Property<string>("PayrollEarningId")
+                      .HasColumnType("nvarchar(450)");
 
-                    b.Property<bool>("Taxable")
-                        .HasColumnType("bit");
+            b.Property<bool>("CanProRata")
+                      .HasColumnType("bit");
 
-                    b.HasKey("PayrollEarningId");
+            b.Property<bool>("IsActive")
+                      .HasColumnType("bit");
 
-                    b.ToTable("PayrollEarnings");
+            b.Property<bool>("IsOnGoing")
+                      .HasColumnType("bit");
 
-                    b.HasData(
-                        new
-                        {
-                            PayrollEarningId = "PRE001",
-                            CanProRata = true,
-                            IsActive = true,
-                            IsOnGoing = true,
-                            LongDescription = "Employee monthly salary",
-                            ShortDescription = "Basic salary",
-                            TaxCode = 3601,
-                            TaxPercentage = 100m,
-                            Taxable = true
-                        });
-                });
+            b.Property<string>("LongDescription")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-            modelBuilder.Entity("HRConnect.Api.Models.Payroll.PayrollPeriod", b =>
-                {
-                    b.Property<int>("PayrollPeriodId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            b.Property<decimal?>("OvertimeHourMultiplier")
+                      .HasColumnType("decimal(18,2)");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PayrollPeriodId"));
+            b.Property<string>("ShortDescription")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime2");
+            b.Property<int>("TaxCode")
+                      .HasColumnType("int");
 
-                    b.Property<bool>("IsClosed")
-                        .HasColumnType("bit");
+            b.Property<decimal?>("TaxPercentage")
+                      .HasColumnType("decimal(18,2)");
 
-                    b.Property<bool>("IsLocked")
-                        .IsConcurrencyToken()
-                        .HasColumnType("bit");
+            b.Property<bool>("Taxable")
+                      .HasColumnType("bit");
 
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
+            b.HasKey("PayrollEarningId");
 
-                    b.HasKey("PayrollPeriodId");
+            b.ToTable("PayrollEarnings");
 
-                    b.ToTable("PayrollPeriods");
-                });
+            b.HasData(
+                      new
+                  {
+                    PayrollEarningId = "PRE001",
+                    CanProRata = true,
+                    IsActive = true,
+                    IsOnGoing = true,
+                    LongDescription = "Employee monthly salary",
+                    ShortDescription = "Basic salary",
+                    TaxCode = 3601,
+                    TaxPercentage = 100m,
+                    Taxable = true
+                  });
+          });
 
-            modelBuilder.Entity("HRConnect.Api.Models.Payroll.PayrollRecord", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValueSql("NEXT VALUE FOR [PayrollRecordSequence]");
+      modelBuilder.Entity("HRConnect.Api.Models.Payroll.PayrollPeriod", b =>
+          {
+            b.Property<int>("PayrollPeriodId")
+                      .ValueGeneratedOnAdd()
+                      .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseSequence(b.Property<int>("Id"));
+            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PayrollPeriodId"));
 
-                    b.Property<string>("EmployeeId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<DateTime>("EndDate")
+                      .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsLocked")
-                        .IsConcurrencyToken()
-                        .HasColumnType("bit");
+            b.Property<bool>("IsClosed")
+                      .HasColumnType("bit");
 
-                    b.Property<int>("PayrollRunId")
-                        .HasColumnType("int");
+            b.Property<bool>("IsLocked")
+                      .IsConcurrencyToken()
+                      .HasColumnType("bit");
 
-                    b.HasKey("Id");
+            b.Property<DateTime>("StartDate")
+                      .HasColumnType("datetime2");
 
-                    b.HasIndex("PayrollRunId");
+            b.HasKey("PayrollPeriodId");
 
-                    b.ToTable((string)null);
+            b.ToTable("PayrollPeriods");
+          });
 
-                    b.UseTpcMappingStrategy();
-                });
+      modelBuilder.Entity("HRConnect.Api.Models.Payroll.PayrollRecord", b =>
+          {
+            b.Property<int>("Id")
+                      .ValueGeneratedOnAdd()
+                      .HasColumnType("int")
+                      .HasDefaultValueSql("NEXT VALUE FOR [PayrollRecordSequence]");
 
-            modelBuilder.Entity("HRConnect.Api.Models.Payroll.PayrollRun", b =>
-                {
-                    b.Property<int>("PayrollRunId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            SqlServerPropertyBuilderExtensions.UseSequence(b.Property<int>("Id"));
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PayrollRunId"));
+            b.Property<string>("EmployeeId")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(450)");
 
-                    b.Property<DateTime?>("FinalisedDate")
-                        .HasColumnType("datetime2");
+            b.Property<bool>("IsLocked")
+                      .IsConcurrencyToken()
+                      .HasColumnType("bit");
 
-                    b.Property<bool>("IsFinalised")
-                        .HasColumnType("bit");
+            b.Property<int>("PayrollRunId")
+                      .HasColumnType("int");
 
-                    b.Property<bool>("IsLocked")
-                        .IsConcurrencyToken()
-                        .HasColumnType("bit");
+            b.HasKey("Id");
 
-                    b.Property<int>("PayrollRunNumber")
-                        .HasColumnType("int");
+            b.HasIndex("PayrollRunId", "EmployeeId")
+                      .IsUnique();
 
-                    b.Property<DateTime>("PeriodDate")
-                        .HasColumnType("datetime2");
+            b.ToTable((string)null);
 
-                    b.Property<int>("PeriodId")
-                        .HasColumnType("int");
+            b.UseTpcMappingStrategy();
+          });
 
-                    b.HasKey("PayrollRunId");
+      modelBuilder.Entity("HRConnect.Api.Models.Payroll.PayrollRun", b =>
+          {
+            b.Property<int>("PayrollRunId")
+                      .ValueGeneratedOnAdd()
+                      .HasColumnType("int");
 
-                    b.HasIndex("PeriodId");
+            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PayrollRunId"));
 
-                    b.ToTable("PayrollRuns");
-                });
+            b.Property<DateTime?>("FinalisedDate")
+                      .HasColumnType("datetime2");
 
-            modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction.Deduction", b =>
-                {
-                    b.Property<string>("DeductionId")
-                        .HasColumnType("nvarchar(450)");
+            b.Property<bool>("IsFinalised")
+                      .HasColumnType("bit");
 
-                    b.Property<string>("CompanyId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<bool>("IsLocked")
+                      .IsConcurrencyToken()
+                      .HasColumnType("bit");
 
-                    b.Property<string>("DeductionType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<int>("PayrollRunNumber")
+                      .HasColumnType("int");
 
-                    b.Property<bool>("EmployerContributed")
-                        .HasColumnType("bit");
+            b.Property<DateTime>("PeriodDate")
+                      .HasColumnType("datetime2");
 
-                    b.Property<string>("InputType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<int>("PeriodId")
+                      .HasColumnType("int");
 
-                    b.Property<string>("LongDescription")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.HasKey("PayrollRunId");
 
-                    b.Property<decimal?>("MaximumValue")
-                        .HasColumnType("decimal(18,2)");
+            b.HasIndex("PeriodId");
 
-                    b.Property<decimal?>("MinimumValue")
-                        .HasColumnType("decimal(18,2)");
+            b.ToTable("PayrollRuns");
+          });
 
-                    b.Property<DateTime>("ModifiedDate")
-                        .HasColumnType("datetime2");
+      modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction.Deduction", b =>
+          {
+            b.Property<string>("DeductionId")
+                      .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("ShortDescription")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<string>("CompanyId")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("Status")
-                        .HasColumnType("bit");
+            b.Property<string>("DeductionType")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("TaxCode")
-                        .HasColumnType("int");
+            b.Property<bool>("EmployerContributed")
+                      .HasColumnType("bit");
 
-                    b.HasKey("DeductionId");
+            b.Property<string>("InputType")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.ToTable("Deductions");
-                });
+            b.Property<string>("LongDescription")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-            modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction.EmployeeDeduction", b =>
-                {
-                    b.Property<int>("EmployeeDeductionId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            b.Property<decimal?>("MaximumValue")
+                      .HasColumnType("decimal(18,2)");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EmployeeDeductionId"));
+            b.Property<decimal?>("MinimumValue")
+                      .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("AmountOrPercentage")
-                        .HasColumnType("decimal(18,2)");
+            b.Property<DateTime>("ModifiedDate")
+                      .HasColumnType("datetime2");
 
-                    b.Property<decimal>("CalculatedDeductionAmount")
-                        .HasColumnType("decimal(18,2)");
+            b.Property<string>("ShortDescription")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("DeductionId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+            b.Property<bool>("Status")
+                      .HasColumnType("bit");
 
-                    b.Property<int>("DeductionInputType")
-                        .HasColumnType("int");
+            b.Property<int?>("TaxCode")
+                      .HasColumnType("int");
 
-                    b.Property<string>("DeductionType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.HasKey("DeductionId");
 
-                    b.Property<string>("EmployeeId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+            b.ToTable("Deductions");
+          });
 
-                    b.Property<bool>("IsLocked")
-                        .HasColumnType("bit");
+      modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction.EmployeeDeduction", b =>
+          {
+            b.Property<int>("EmployeeDeductionId")
+                      .ValueGeneratedOnAdd()
+                      .HasColumnType("int");
 
-                    b.Property<int>("PayrollRunId")
-                        .HasColumnType("int");
+            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EmployeeDeductionId"));
 
-                    b.HasKey("EmployeeDeductionId");
+            b.Property<decimal>("AmountOrPercentage")
+                      .HasColumnType("decimal(18,2)");
 
-                    b.HasIndex("DeductionId");
+            b.Property<decimal>("CalculatedDeductionAmount")
+                      .HasColumnType("decimal(18,2)");
 
-                    b.HasIndex("EmployeeId");
+            b.Property<string>("DeductionId")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(450)");
 
-                    b.HasIndex("PayrollRunId");
+            b.Property<int>("DeductionInputType")
+                      .HasColumnType("int");
 
-                    b.ToTable("EmployeeDeductions");
-                });
+            b.Property<string>("DeductionType")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-            modelBuilder.Entity("HRConnect.Api.Models.Pension.EmployeePensionEnrollment", b =>
-                {
-                    b.Property<int>("EmployeePensionEnrollmentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            b.Property<string>("EmployeeId")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(450)");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EmployeePensionEnrollmentId"));
+            b.Property<bool>("IsLocked")
+                      .HasColumnType("bit");
 
-                    b.Property<DateOnly>("EffectiveDate")
-                        .HasColumnType("date");
+            b.Property<int>("PayrollRunId")
+                      .HasColumnType("int");
 
-                    b.Property<string>("EmployeeId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+            b.HasKey("EmployeeDeductionId");
 
-                    b.Property<bool>("IsLocked")
-                        .HasColumnType("bit");
+            b.HasIndex("DeductionId");
 
-                    b.Property<bool?>("IsVoluntaryContributionPermament")
-                        .HasColumnType("bit");
+            b.HasIndex("EmployeeId");
 
-                    b.Property<int>("PayrollRunId")
-                        .HasColumnType("int");
+            b.HasIndex("PayrollRunId");
 
-                    b.Property<int>("PensionOptionId")
-                        .HasColumnType("int");
+            b.ToTable("EmployeeDeductions");
+          });
 
-                    b.Property<DateOnly>("StartDate")
-                        .HasColumnType("date");
+      modelBuilder.Entity("HRConnect.Api.Models.Pension.EmployeePensionEnrollment", b =>
+          {
+            b.Property<int>("EmployeePensionEnrollmentId")
+                      .ValueGeneratedOnAdd()
+                      .HasColumnType("int");
 
-                    b.Property<decimal>("VoluntaryContribution")
-                        .HasColumnType("decimal(18,2)");
+            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EmployeePensionEnrollmentId"));
 
-                    b.HasKey("EmployeePensionEnrollmentId");
+            b.Property<DateOnly>("EffectiveDate")
+                      .HasColumnType("date");
 
-                    b.HasIndex("EmployeeId");
+            b.Property<string>("EmployeeId")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(450)");
 
-                    b.HasIndex("PayrollRunId");
+            b.Property<bool>("IsLocked")
+                      .HasColumnType("bit");
 
-                    b.HasIndex("PensionOptionId");
+            b.Property<bool?>("IsVoluntaryContributionPermament")
+                      .HasColumnType("bit");
 
-                    b.ToTable("EmployeePensionEnrollments");
-                });
+            b.Property<int>("PayrollRunId")
+                      .HasColumnType("int");
 
-            modelBuilder.Entity("HRConnect.Api.Models.PensionFund", b =>
-                {
-                    b.Property<int>("PensionFundId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            b.Property<int>("PensionOptionId")
+                      .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PensionFundId"));
+            b.Property<DateOnly>("StartDate")
+                      .HasColumnType("date");
 
-                    b.Property<decimal>("ContributionAmount")
-                        .HasColumnType("decimal(18,2)");
+            b.Property<decimal>("VoluntaryContribution")
+                      .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("ContributionPercentage")
-                        .HasColumnType("decimal(18,2)");
+            b.HasKey("EmployeePensionEnrollmentId");
 
-                    b.Property<string>("EmployeeId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+            b.HasIndex("EmployeeId");
 
-                    b.Property<string>("EmployeeName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.HasIndex("PayrollRunId");
 
-                    b.Property<decimal>("MonthlySalary")
-                        .HasColumnType("decimal(18,2)");
+            b.HasIndex("PensionOptionId");
 
-                    b.Property<int>("PensionOptionId")
-                        .HasColumnType("int");
+            b.ToTable("EmployeePensionEnrollments");
+          });
 
-                    b.Property<int>("TaxCode")
-                        .HasColumnType("int");
+      modelBuilder.Entity("HRConnect.Api.Models.PensionFund", b =>
+          {
+            b.Property<int>("PensionFundId")
+                      .ValueGeneratedOnAdd()
+                      .HasColumnType("int");
 
-                    b.HasKey("PensionFundId");
+            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PensionFundId"));
 
-                    b.HasIndex("EmployeeId");
+            b.Property<decimal>("ContributionAmount")
+                      .HasColumnType("decimal(18,2)");
 
-                    b.HasIndex("PensionOptionId");
+            b.Property<decimal>("ContributionPercentage")
+                      .HasColumnType("decimal(18,2)");
 
-                    b.ToTable("PensionFunds");
-                });
+            b.Property<string>("EmployeeId")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(450)");
 
-            modelBuilder.Entity("HRConnect.Api.Models.PensionOption", b =>
-                {
-                    b.Property<int>("PensionOptionId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            b.Property<string>("EmployeeName")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PensionOptionId"));
+            b.Property<decimal>("MonthlySalary")
+                      .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("ContributionPercentage")
-                        .HasColumnType("decimal(18,2)");
+            b.Property<int>("PensionOptionId")
+                      .HasColumnType("int");
 
-                    b.HasKey("PensionOptionId");
+            b.Property<int>("TaxCode")
+                      .HasColumnType("int");
 
-                    b.ToTable("PensionOptions");
-                });
+            b.HasKey("PensionFundId");
 
-            modelBuilder.Entity("HRConnect.Api.Models.PermissionAuditLog", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            b.HasIndex("EmployeeId");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+            b.HasIndex("PensionOptionId");
 
-                    b.Property<string>("Action")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.ToTable("PensionFunds");
+          });
 
-                    b.Property<DateTime>("ChangedAt")
-                        .HasColumnType("datetime2");
+      modelBuilder.Entity("HRConnect.Api.Models.PensionOption", b =>
+          {
+            b.Property<int>("PensionOptionId")
+                      .ValueGeneratedOnAdd()
+                      .HasColumnType("int");
 
-                    b.Property<string>("ChangedBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PensionOptionId"));
 
-                    b.Property<int>("PermissionId")
-                        .HasColumnType("int");
+            b.Property<decimal>("ContributionPercentage")
+                      .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("RoleId")
-                        .HasColumnType("int");
+            b.HasKey("PensionOptionId");
 
-                    b.HasKey("Id");
+            b.ToTable("PensionOptions");
+          });
 
-                    b.HasIndex("Id");
+      modelBuilder.Entity("HRConnect.Api.Models.Position", b =>
+          {
+            b.Property<int>("PositionId")
+                      .ValueGeneratedOnAdd()
+                      .HasColumnType("int");
 
-                    b.HasIndex("PermissionId");
+            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PositionId"));
 
-                    b.HasIndex("RoleId");
+            b.Property<DateTime>("CreatedDate")
+                      .HasColumnType("datetime2");
 
-                    b.ToTable("PermissionAuditLogs");
-                });
+            b.Property<bool>("IsActive")
+                      .HasColumnType("bit");
 
-            modelBuilder.Entity("HRConnect.Api.Models.Permissions", b =>
-                {
-                    b.Property<int>("PermissionsId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            b.Property<int>("JobGradeId")
+                      .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PermissionsId"));
+            b.Property<int>("OccupationalLevelId")
+                      .HasColumnType("int");
 
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<string>("PositionTitle")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<DateTime>("UpdatedDate")
+                      .HasColumnType("datetime2");
 
-                    b.Property<string>("Key")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+            b.HasKey("PositionId");
 
-                    b.HasKey("PermissionsId");
+            b.HasIndex("JobGradeId");
 
-                    b.HasIndex("Key")
-                        .IsUnique();
+            b.HasIndex("OccupationalLevelId");
 
-                    b.ToTable("Permissions");
-                });
+            b.HasIndex("PositionTitle")
+                      .IsUnique();
 
-            modelBuilder.Entity("HRConnect.Api.Models.Position", b =>
-                {
-                    b.Property<int>("PositionId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            b.ToTable("Positions");
+          });
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PositionId"));
+      modelBuilder.Entity("HRConnect.Api.Models.StatutoryContributionType", b =>
+          {
+            b.Property<Guid>("Id")
+                      .ValueGeneratedOnAdd()
+                      .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+            b.Property<decimal?>("CapAmount")
+                      .HasPrecision(18, 4)
+                      .HasColumnType("decimal(18,4)");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+            b.Property<string>("Code")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("JobGradeId")
-                        .HasColumnType("int");
+            b.Property<DateTime>("EffectiveFrom")
+                      .HasColumnType("datetime2");
 
-                    b.Property<int>("OccupationalLevelId")
-                        .HasColumnType("int");
+            b.Property<DateTime?>("EffectiveTo")
+                      .HasColumnType("datetime2");
 
-                    b.Property<string>("PositionTitle")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+            b.Property<decimal>("EmployeeRate")
+                      .ValueGeneratedOnAdd()
+                      .HasPrecision(18, 4)
+                      .HasColumnType("decimal(18,4)")
+                      .HasDefaultValue(0.01m);
 
-                    b.Property<DateTime>("UpdatedDate")
-                        .HasColumnType("datetime2");
+            b.Property<decimal>("EmployerRate")
+                      .ValueGeneratedOnAdd()
+                      .HasPrecision(18, 4)
+                      .HasColumnType("decimal(18,4)")
+                      .HasDefaultValue(0.01m);
 
-                    b.HasKey("PositionId");
+            b.Property<bool>("IsActive")
+                      .HasColumnType("bit");
 
-                    b.HasIndex("JobGradeId");
+            b.Property<string>("Name")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.HasIndex("OccupationalLevelId");
+            b.HasKey("Id");
 
-                    b.HasIndex("PositionTitle")
-                        .IsUnique();
+            b.ToTable("StatutoryContributionTypes");
+          });
 
-                    b.ToTable("Positions");
-                });
+      modelBuilder.Entity("HRConnect.Api.Models.TOTPState", b =>
+          {
+            b.Property<int>("UserId")
+                      .HasColumnType("int");
 
-            modelBuilder.Entity("HRConnect.Api.Models.RolePermissions", b =>
-                {
-                    b.Property<int>("RoleId")
-                        .HasColumnType("int");
+            b.Property<long>("LastUsedTimeStamp")
+                      .HasColumnType("bigint");
 
-                    b.Property<int>("PermissionsId")
-                        .HasColumnType("int");
+            b.HasKey("UserId");
 
-                    b.Property<bool>("IsGranted")
-                        .HasColumnType("bit");
+            b.HasIndex("UserId");
 
-                    b.HasKey("RoleId", "PermissionsId");
+            b.ToTable("TOTPStates");
+          });
 
-                    b.HasIndex("PermissionsId");
+      modelBuilder.Entity("HRConnect.Api.Models.TaxDeduction", b =>
+          {
+            b.Property<int>("Id")
+                      .ValueGeneratedOnAdd()
+                      .HasColumnType("int");
 
-                    b.ToTable("RolePermissions", (string)null);
-                });
+            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-            modelBuilder.Entity("HRConnect.Api.Models.Roles", b =>
-                {
-                    b.Property<int>("RoleId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            b.Property<decimal>("AnnualEquivalent")
+                      .HasPrecision(12, 2)
+                      .HasColumnType("decimal(12,2)");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RoleId"));
+            b.Property<DateTime>("CreatedAt")
+                      .HasColumnType("datetime2");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<decimal>("Remuneration")
+                      .HasPrecision(12, 2)
+                      .HasColumnType("decimal(12,2)");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+            b.Property<decimal>("Tax65To74")
+                      .HasPrecision(12, 2)
+                      .HasColumnType("decimal(12,2)");
 
-                    b.Property<int?>("ParentRoleId")
-                        .HasColumnType("int");
+            b.Property<decimal>("TaxOver75")
+                      .HasPrecision(12, 2)
+                      .HasColumnType("decimal(12,2)");
 
-                    b.Property<int>("RoleName")
-                        .HasColumnType("int");
+            b.Property<decimal>("TaxUnder65")
+                      .HasPrecision(12, 2)
+                      .HasColumnType("decimal(12,2)");
 
-                    b.HasKey("RoleId");
+            b.Property<int>("TaxYear")
+                      .HasColumnType("int");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
+            b.HasKey("Id");
 
-                    b.HasIndex("ParentRoleId");
+            b.HasIndex("TaxYear", "Remuneration")
+                      .IsUnique();
 
-                    b.ToTable("Roles");
-                });
+            b.ToTable("TaxDeduction", (string)null);
+          });
 
-            modelBuilder.Entity("HRConnect.Api.Models.StatutoryContributionType", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+      modelBuilder.Entity("HRConnect.Api.Models.TaxTableUpload", b =>
+          {
+            b.Property<int>("Id")
+                      .ValueGeneratedOnAdd()
+                      .HasColumnType("int");
 
-                    b.Property<decimal?>("CapAmount")
-                        .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)");
+            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<DateTime>("EffectiveFrom")
+                      .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("EffectiveFrom")
-                        .HasColumnType("datetime2");
+            b.Property<DateTime?>("EffectiveTo")
+                      .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("EffectiveTo")
-                        .HasColumnType("datetime2");
+            b.Property<string>("FileName")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("EmployeeRate")
-                        .ValueGeneratedOnAdd()
-                        .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)")
-                        .HasDefaultValue(0.01m);
+            b.Property<string>("FileUrl")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("EmployerRate")
-                        .ValueGeneratedOnAdd()
-                        .HasPrecision(18, 4)
-                        .HasColumnType("decimal(18,4)")
-                        .HasDefaultValue(0.01m);
+            b.Property<int>("TaxYear")
+                      .HasColumnType("int");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+            b.Property<DateTime>("UploadedAt")
+                      .HasColumnType("datetime2");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.HasKey("Id");
 
-                    b.HasKey("Id");
+            b.ToTable("TaxTableUpload", (string)null);
+          });
 
-                    b.ToTable("StatutoryContributionTypes");
-                });
+      modelBuilder.Entity("HRConnect.Api.Models.User", b =>
+          {
+            b.Property<int>("UserId")
+                      .ValueGeneratedOnAdd()
+                      .HasColumnType("int");
 
-            modelBuilder.Entity("HRConnect.Api.Models.TOTPState", b =>
-                {
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
 
-                    b.Property<long>("LastUsedTimeStamp")
-                        .HasColumnType("bigint");
+            b.Property<DateTime>("CreatedAt")
+                      .HasColumnType("datetime2");
 
-                    b.HasKey("UserId");
+            b.Property<string>("Email")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.HasIndex("UserId");
+            b.Property<string>("PasswordHash")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.ToTable("TOTPStates");
-                });
+            b.Property<int>("Role")
+                      .HasColumnType("int");
 
-            modelBuilder.Entity("HRConnect.Api.Models.TaxDeduction", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            b.Property<string>("TempRole")
+                      .HasColumnType("nvarchar(max)");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+            b.HasKey("UserId");
 
-                    b.Property<decimal>("AnnualEquivalent")
-                        .HasPrecision(12, 2)
-                        .HasColumnType("decimal(12,2)");
+            b.ToTable("Users");
+          });
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+      modelBuilder.Entity("HRConnect.Api.Models.UserCompany", b =>
+          {
+            b.Property<int>("UserId")
+                      .HasColumnType("int");
 
-                    b.Property<decimal>("Remuneration")
-                        .HasPrecision(12, 2)
-                        .HasColumnType("decimal(12,2)");
+            b.Property<string>("CompanyId")
+                      .HasColumnType("nvarchar(450)");
 
-                    b.Property<decimal>("Tax65To74")
-                        .HasPrecision(12, 2)
-                        .HasColumnType("decimal(12,2)");
+            b.Property<DateTime>("CreatedAt")
+                      .HasColumnType("datetime2");
 
-                    b.Property<decimal>("TaxOver75")
-                        .HasPrecision(12, 2)
-                        .HasColumnType("decimal(12,2)");
+            b.Property<bool>("IsDefault")
+                      .HasColumnType("bit");
 
-                    b.Property<decimal>("TaxUnder65")
-                        .HasPrecision(12, 2)
-                        .HasColumnType("decimal(12,2)");
+            b.HasKey("UserId", "CompanyId");
 
-                    b.Property<int>("TaxYear")
-                        .HasColumnType("int");
+            b.HasIndex("CompanyId");
 
-                    b.HasKey("Id");
+            b.ToTable("UserCompanies");
+          });
 
-                    b.HasIndex("TaxYear", "Remuneration")
-                        .IsUnique();
+      modelBuilder.Entity("HRConnect.Api.Models.CompanyContributions.EmployeeCompanyContribution", b =>
+          {
+            b.HasBaseType("HRConnect.Api.Models.Payroll.PayrollRecord");
 
-                    b.ToTable("TaxDeduction", (string)null);
-                });
+            b.Property<int>("Age")
+                      .HasColumnType("int");
 
-            modelBuilder.Entity("HRConnect.Api.Models.TaxTableUpload", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+            b.Property<decimal>("DeathAmount")
+                      .HasColumnType("decimal(18,2)");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+            b.Property<decimal>("DeathPercentage")
+                      .HasColumnType("decimal(10,6)");
 
-                    b.Property<DateTime>("EffectiveFrom")
-                        .HasColumnType("datetime2");
+            b.Property<decimal>("DisabilityAmount")
+                      .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTime?>("EffectiveTo")
-                        .HasColumnType("datetime2");
+            b.Property<decimal>("DisabilityPercentage")
+                      .HasColumnType("decimal(10,6)");
 
-                    b.Property<string>("FileName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<string>("IdNumber")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("FileUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<string>("Name")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("TaxYear")
-                        .HasColumnType("int");
+            b.Property<string>("PassportNumber")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("UploadedAt")
-                        .HasColumnType("datetime2");
+            b.Property<decimal>("Salary")
+                      .HasColumnType("decimal(18,2)");
 
-                    b.HasKey("Id");
+            b.Property<string>("Surname")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.ToTable("TaxTableUpload", (string)null);
-                });
+            b.ToTable("EmployeeCompanyContributions", (string)null);
+          });
 
-            modelBuilder.Entity("HRConnect.Api.Models.User", b =>
-                {
-                    b.Property<int>("UserId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+      modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction.MedicalAidDeduction", b =>
+          {
+            b.HasBaseType("HRConnect.Api.Models.Payroll.PayrollRecord");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
+            b.Property<int>("AdultCount")
+                      .HasColumnType("int");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+            b.Property<string>("Branch")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<decimal?>("ChildPremium")
+                      .HasColumnType("decimal(15, 2)");
 
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<int>("ChildrenCount")
+                      .HasColumnType("int");
 
-                    b.Property<int>("Role")
-                        .HasColumnType("int");
+            b.Property<DateTime>("CreatedDate")
+                      .HasColumnType("datetime2");
 
-                    b.Property<string>("TempRole")
-                        .HasColumnType("nvarchar(max)");
+            b.Property<DateTime>("EffectiveDate")
+                      .HasColumnType("datetime2");
 
-                    b.HasKey("UserId");
+            b.Property<DateTime>("EmployeeStartDate")
+                      .HasColumnType("datetime2");
 
-                    b.ToTable("Users");
-                });
+            b.Property<bool>("IsActive")
+                      .HasColumnType("bit");
 
-            modelBuilder.Entity("HRConnect.Api.Models.UserRoles", b =>
-                {
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+            b.Property<int>("MedicalCategoryId")
+                      .HasColumnType("int");
 
-                    b.Property<int>("RolesId")
-                        .HasColumnType("int");
+            b.Property<int>("MedicalOptionId")
+                      .HasColumnType("int");
 
-                    b.HasKey("UserId", "RolesId");
+            b.Property<string>("Name")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.HasIndex("RolesId");
+            b.Property<string>("OptionCategoryName")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.ToTable("UserRoles", (string)null);
-                });
+            b.Property<string>("OptionName")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-            modelBuilder.Entity("HRConnect.Api.Models.CompanyContributions.EmployeeCompanyContribution", b =>
-                {
-                    b.HasBaseType("HRConnect.Api.Models.Payroll.PayrollRecord");
+            b.Property<int>("PrincipalCount")
+                      .HasColumnType("int");
 
-                    b.Property<int>("Age")
-                        .HasColumnType("int");
+            b.Property<decimal>("PrincipalPremium")
+                      .HasColumnType("decimal(15, 2)");
 
-                    b.Property<decimal>("DeathAmount")
-                        .HasColumnType("decimal(18,2)");
+            b.Property<decimal>("Salary")
+                      .HasColumnType("decimal(15, 2)");
 
-                    b.Property<decimal>("DeathPercentage")
-                        .HasColumnType("decimal(10,6)");
+            b.Property<decimal?>("SpousePremium")
+                      .HasColumnType("decimal(15, 2)");
 
-                    b.Property<decimal>("DisabilityAmount")
-                        .HasColumnType("decimal(18,2)");
+            b.Property<string>("Surname")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("DisabilityPercentage")
-                        .HasColumnType("decimal(10,6)");
+            b.Property<DateTime?>("TerminationDate")
+                      .HasColumnType("datetime2");
 
-                    b.Property<string>("IdNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<string>("TerminationReason")
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<decimal>("TotalDeductionAmount")
+                      .HasColumnType("decimal(15, 2)");
 
-                    b.Property<string>("PassportNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<DateTime>("UpdatedDate")
+                      .HasColumnType("datetime2");
 
-                    b.Property<decimal>("Salary")
-                        .HasColumnType("decimal(18,2)");
+            b.HasIndex("MedicalCategoryId");
 
-                    b.Property<string>("Surname")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.HasIndex("MedicalOptionId");
 
-                    b.ToTable("EmployeeCompanyContributions", (string)null);
-                });
+            b.ToTable("MedicalAidDeductions", (string)null);
+          });
 
-            modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction.MedicalAidDeduction", b =>
-                {
-                    b.HasBaseType("HRConnect.Api.Models.Payroll.PayrollRecord");
+      modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction.PensionDeduction", b =>
+          {
+            b.HasBaseType("HRConnect.Api.Models.Payroll.PayrollRecord");
 
-                    b.Property<int>("AdultCount")
-                        .HasColumnType("int");
+            b.Property<DateOnly>("CreatedDate")
+                      .HasColumnType("date");
 
-                    b.Property<string>("Branch")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<DateOnly>("DateJoinedCompany")
+                      .HasColumnType("date");
 
-                    b.Property<decimal?>("ChildPremium")
-                        .HasColumnType("decimal(15, 2)");
+            b.Property<string>("EmailAddress")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ChildrenCount")
-                        .HasColumnType("int");
+            b.Property<int>("EmployeePensionDeductionId")
+                      .HasColumnType("int")
+                      .HasColumnName("EmployeePensionDeductionId");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+            b.Property<string>("FirstName")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("EffectiveDate")
-                        .HasColumnType("datetime2");
+            b.Property<string>("IdNumber")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("EmployeeStartDate")
-                        .HasColumnType("datetime2");
+            b.Property<bool>("IsActive")
+                      .HasColumnType("bit");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+            b.Property<string>("LastName")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("MedicalCategoryId")
-                        .HasColumnType("int");
+            b.Property<string>("Passport")
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("MedicalOptionId")
-                        .HasColumnType("int");
+            b.Property<decimal>("PendsionCategoryPercentage")
+                      .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<decimal>("PensionContribution")
+                      .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("OptionCategoryName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<int>("PensionOptionId")
+                      .HasColumnType("int");
 
-                    b.Property<string>("OptionName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<decimal>("PensionableSalary")
+                      .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("PrincipalCount")
-                        .HasColumnType("int");
+            b.Property<int>("PeriodId")
+                      .HasColumnType("int");
 
-                    b.Property<decimal>("PrincipalPremium")
-                        .HasColumnType("decimal(15, 2)");
+            b.Property<string>("PhysicalAddress")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("Salary")
-                        .HasColumnType("decimal(15, 2)");
+            b.Property<string>("TaxNumber")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal?>("SpousePremium")
-                        .HasColumnType("decimal(15, 2)");
+            b.Property<decimal>("TotalPensionContribution")
+                      .HasPrecision(18, 2)
+                      .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("Surname")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<decimal>("VoluntaryContribution")
+                      .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateTime?>("TerminationDate")
-                        .HasColumnType("datetime2");
+            b.HasIndex("PensionOptionId");
 
-                    b.Property<string>("TerminationReason")
-                        .HasColumnType("nvarchar(max)");
+            b.ToTable("PensionDeductions", (string)null);
+          });
 
-                    b.Property<decimal>("TotalDeductionAmount")
-                        .HasColumnType("decimal(15, 2)");
+      modelBuilder.Entity("HRConnect.Api.Models.StatutoryContribution", b =>
+          {
+            b.HasBaseType("HRConnect.Api.Models.Payroll.PayrollRecord");
 
-                    b.Property<DateTime>("UpdatedDate")
-                        .HasColumnType("datetime2");
+            b.Property<DateOnly>("CurrentMonth")
+                      .HasColumnType("date");
 
-                    b.HasIndex("MedicalCategoryId");
+            b.Property<DateTime>("DeductedAt")
+                      .HasColumnType("datetime2");
 
-                    b.HasIndex("MedicalOptionId");
+            b.Property<decimal>("EmployerSdlContribution")
+                      .HasPrecision(18, 2)
+                      .HasColumnType("decimal(18,2)");
 
-                    b.ToTable("MedicalAidDeductions", (string)null);
-                });
+            b.Property<string>("IdNumber")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-            modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction.PensionDeduction", b =>
-                {
-                    b.HasBaseType("HRConnect.Api.Models.Payroll.PayrollRecord");
+            b.Property<decimal>("MonthlySalary")
+                      .HasPrecision(18, 2)
+                      .HasColumnType("decimal(18,2)");
 
-                    b.Property<DateOnly>("CreatedDate")
-                        .HasColumnType("date");
+            b.Property<string>("PassportNumber")
+                      .IsRequired()
+                      .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateOnly>("DateJoinedCompany")
-                        .HasColumnType("date");
+            b.Property<decimal>("UifEmployeeAmount")
+                      .HasPrecision(18, 2)
+                      .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("EmailAddress")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Property<decimal>("UifEmployerAmount")
+                      .HasPrecision(18, 2)
+                      .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("EmployeePensionDeductionId")
-                        .HasColumnType("int")
-                        .HasColumnName("EmployeePensionDeductionId");
+            b.ToTable("StatutoryContributions", (string)null);
+          });
 
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+      modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzBlobTrigger", b =>
+          {
+            b.HasOne("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzTrigger", "Trigger")
+                      .WithMany("BlobTriggers")
+                      .HasForeignKey("SchedulerName", "TriggerName", "TriggerGroup")
+                      .OnDelete(DeleteBehavior.Cascade)
+                      .IsRequired();
 
-                    b.Property<string>("IdNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Navigation("Trigger");
+          });
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+      modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzCronTrigger", b =>
+          {
+            b.HasOne("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzTrigger", "Trigger")
+                      .WithMany("CronTriggers")
+                      .HasForeignKey("SchedulerName", "TriggerName", "TriggerGroup")
+                      .OnDelete(DeleteBehavior.Cascade)
+                      .IsRequired();
 
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Navigation("Trigger");
+          });
 
-                    b.Property<string>("Passport")
-                        .HasColumnType("nvarchar(max)");
+      modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzSimplePropertyTrigger", b =>
+          {
+            b.HasOne("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzTrigger", "Trigger")
+                      .WithMany("SimplePropertyTriggers")
+                      .HasForeignKey("SchedulerName", "TriggerName", "TriggerGroup")
+                      .OnDelete(DeleteBehavior.Cascade)
+                      .IsRequired();
 
-                    b.Property<decimal>("PendsionCategoryPercentage")
-                        .HasColumnType("decimal(18,2)");
+            b.Navigation("Trigger");
+          });
 
-                    b.Property<decimal>("PensionContribution")
-                        .HasColumnType("decimal(18,2)");
+      modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzSimpleTrigger", b =>
+          {
+            b.HasOne("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzTrigger", "Trigger")
+                      .WithMany("SimpleTriggers")
+                      .HasForeignKey("SchedulerName", "TriggerName", "TriggerGroup")
+                      .OnDelete(DeleteBehavior.Cascade)
+                      .IsRequired();
 
-                    b.Property<int>("PensionOptionId")
-                        .HasColumnType("int");
+            b.Navigation("Trigger");
+          });
 
-                    b.Property<decimal>("PensionableSalary")
-                        .HasColumnType("decimal(18,2)");
+      modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzTrigger", b =>
+          {
+            b.HasOne("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzJobDetail", "JobDetail")
+                      .WithMany("Triggers")
+                      .HasForeignKey("SchedulerName", "JobName", "JobGroup")
+                      .OnDelete(DeleteBehavior.Cascade)
+                      .IsRequired();
 
-                    b.Property<int>("PeriodId")
-                        .HasColumnType("int");
+            b.Navigation("JobDetail");
+          });
 
-                    b.Property<string>("PhysicalAddress")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+      modelBuilder.Entity("HRConnect.Api.Models.AnnualLeaveAccrualHistory", b =>
+          {
+            b.HasOne("HRConnect.Api.Models.Employee", "Employee")
+                      .WithMany("AnnualLeaveAccrualHistories")
+                      .HasForeignKey("EmployeeId")
+                      .OnDelete(DeleteBehavior.Cascade)
+                      .IsRequired();
 
-                    b.Property<string>("TaxNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Navigation("Employee");
+          });
 
-                    b.Property<decimal>("TotalPensionContribution")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+      modelBuilder.Entity("HRConnect.Api.Models.Employee", b =>
+          {
+            b.HasOne("HRConnect.Api.Models.Employee", "CareerManager")
+                      .WithMany("Subordinates")
+                      .HasForeignKey("CareerManagerID")
+                      .OnDelete(DeleteBehavior.Restrict);
 
-                    b.Property<decimal>("VoluntaryContribution")
-                        .HasColumnType("decimal(18,2)");
+            b.HasOne("HRConnect.Api.Models.Company", "Company")
+                      .WithMany("Employees")
+                      .HasForeignKey("CompanyId")
+                      .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasIndex("PensionOptionId");
+            b.HasOne("HRConnect.Api.Models.PensionOption", "PensionOption")
+                      .WithMany("Employees")
+                      .HasForeignKey("PensionOptionId")
+                      .OnDelete(DeleteBehavior.SetNull);
 
-                    b.ToTable("PensionDeductions", (string)null);
-                });
+            b.HasOne("HRConnect.Api.Models.Position", "Position")
+                      .WithMany("Employees")
+                      .HasForeignKey("PositionId")
+                      .OnDelete(DeleteBehavior.Cascade)
+                      .IsRequired();
 
-            modelBuilder.Entity("HRConnect.Api.Models.StatutoryContribution", b =>
-                {
-                    b.HasBaseType("HRConnect.Api.Models.Payroll.PayrollRecord");
+            b.Navigation("CareerManager");
 
-                    b.Property<DateOnly>("CurrentMonth")
-                        .HasColumnType("date");
+            b.Navigation("Company");
 
-                    b.Property<DateTime>("DeductedAt")
-                        .HasColumnType("datetime2");
+            b.Navigation("PensionOption");
 
-                    b.Property<decimal>("EmployerSdlContribution")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+            b.Navigation("Position");
+          });
 
-                    b.Property<string>("IdNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+      modelBuilder.Entity("HRConnect.Api.Models.EmployeeAccrualRateHistory", b =>
+          {
+            b.HasOne("HRConnect.Api.Models.Employee", "Employee")
+                      .WithMany("AccrualRateHistory")
+                      .HasForeignKey("EmployeeId")
+                      .OnDelete(DeleteBehavior.Cascade)
+                      .IsRequired();
 
-                    b.Property<decimal>("MonthlySalary")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+            b.HasOne("HRConnect.Api.Models.Position", "Position")
+                      .WithMany()
+                      .HasForeignKey("PositionId")
+                      .OnDelete(DeleteBehavior.Restrict)
+                      .IsRequired();
 
-                    b.Property<string>("PassportNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            b.Navigation("Employee");
 
-                    b.Property<decimal>("UifEmployeeAmount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+            b.Navigation("Position");
+          });
 
-                    b.Property<decimal>("UifEmployerAmount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+      modelBuilder.Entity("HRConnect.Api.Models.EmployeeLeaveBalance", b =>
+          {
+            b.HasOne("HRConnect.Api.Models.Employee", "Employee")
+                      .WithMany("LeaveBalances")
+                      .HasForeignKey("EmployeeId")
+                      .OnDelete(DeleteBehavior.Cascade)
+                      .IsRequired();
 
-                    b.ToTable("StatutoryContributions", (string)null);
-                });
+            b.HasOne("HRConnect.Api.Models.LeaveType", "LeaveType")
+                      .WithMany()
+                      .HasForeignKey("LeaveTypeId")
+                      .OnDelete(DeleteBehavior.Restrict)
+                      .IsRequired();
 
-            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzBlobTrigger", b =>
-                {
-                    b.HasOne("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzTrigger", "Trigger")
-                        .WithMany("BlobTriggers")
-                        .HasForeignKey("SchedulerName", "TriggerName", "TriggerGroup")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            b.Navigation("Employee");
 
-                    b.Navigation("Trigger");
-                });
+            b.Navigation("LeaveType");
+          });
 
-            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzCronTrigger", b =>
-                {
-                    b.HasOne("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzTrigger", "Trigger")
-                        .WithMany("CronTriggers")
-                        .HasForeignKey("SchedulerName", "TriggerName", "TriggerGroup")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+      modelBuilder.Entity("HRConnect.Api.Models.LeaveApplication", b =>
+          {
+            b.HasOne("HRConnect.Api.Models.Employee", "Employee")
+                      .WithMany("LeaveApplications")
+                      .HasForeignKey("EmployeeId")
+                      .OnDelete(DeleteBehavior.Cascade)
+                      .IsRequired();
 
-                    b.Navigation("Trigger");
-                });
+            b.HasOne("HRConnect.Api.Models.LeaveType", "LeaveType")
+                      .WithMany()
+                      .HasForeignKey("LeaveTypeId")
+                      .OnDelete(DeleteBehavior.Cascade)
+                      .IsRequired();
 
-            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzSimplePropertyTrigger", b =>
-                {
-                    b.HasOne("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzTrigger", "Trigger")
-                        .WithMany("SimplePropertyTriggers")
-                        .HasForeignKey("SchedulerName", "TriggerName", "TriggerGroup")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            b.Navigation("Employee");
 
-                    b.Navigation("Trigger");
-                });
+            b.Navigation("LeaveType");
+          });
 
-            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzSimpleTrigger", b =>
-                {
-                    b.HasOne("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzTrigger", "Trigger")
-                        .WithMany("SimpleTriggers")
-                        .HasForeignKey("SchedulerName", "TriggerName", "TriggerGroup")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+      modelBuilder.Entity("HRConnect.Api.Models.LeaveEntitlementRule", b =>
+          {
+            b.HasOne("HRConnect.Api.Models.JobGrade", "JobGrade")
+                      .WithMany("LeaveEntitlementRules")
+                      .HasForeignKey("JobGradeId")
+                      .OnDelete(DeleteBehavior.Restrict)
+                      .IsRequired();
 
-                    b.Navigation("Trigger");
-                });
+            b.HasOne("HRConnect.Api.Models.LeaveType", "LeaveType")
+                      .WithMany("EntitlementRules")
+                      .HasForeignKey("LeaveTypeId")
+                      .OnDelete(DeleteBehavior.Cascade)
+                      .IsRequired();
 
-            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzTrigger", b =>
-                {
-                    b.HasOne("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzJobDetail", "JobDetail")
-                        .WithMany("Triggers")
-                        .HasForeignKey("SchedulerName", "JobName", "JobGroup")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            b.Navigation("JobGrade");
 
-                    b.Navigation("JobDetail");
-                });
+            b.Navigation("LeaveType");
+          });
 
-            modelBuilder.Entity("HRConnect.Api.Models.AnnualLeaveAccrualHistory", b =>
-                {
-                    b.HasOne("HRConnect.Api.Models.Employee", "Employee")
-                        .WithMany("AnnualLeaveAccrualHistories")
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+      modelBuilder.Entity("HRConnect.Api.Models.MFAUserSecret", b =>
+          {
+            b.HasOne("HRConnect.Api.Models.User", "User")
+                      .WithOne()
+                      .HasForeignKey("HRConnect.Api.Models.MFAUserSecret", "UserId")
+                      .OnDelete(DeleteBehavior.Cascade)
+                      .IsRequired();
 
-                    b.Navigation("Employee");
-                });
+            b.Navigation("User");
+          });
 
-            modelBuilder.Entity("HRConnect.Api.Models.Employee", b =>
-                {
-                    b.HasOne("HRConnect.Api.Models.Employee", "CareerManager")
-                        .WithMany("Subordinates")
-                        .HasForeignKey("CareerManagerID")
-                        .OnDelete(DeleteBehavior.Restrict);
+      modelBuilder.Entity("HRConnect.Api.Models.MedicalOption", b =>
+          {
+            b.HasOne("HRConnect.Api.Models.MedicalOptionCategory", "MedicalOptionCategory")
+                      .WithMany("MedicalOptions")
+                      .HasForeignKey("MedicalOptionCategoryId")
+                      .OnDelete(DeleteBehavior.Cascade)
+                      .IsRequired();
 
-                    b.HasOne("HRConnect.Api.Models.PensionOption", "PensionOption")
-                        .WithMany("Employees")
-                        .HasForeignKey("PensionOptionId")
-                        .OnDelete(DeleteBehavior.SetNull);
+            b.Navigation("MedicalOptionCategory");
+          });
 
-                    b.HasOne("HRConnect.Api.Models.Position", "Position")
-                        .WithMany("Employees")
-                        .HasForeignKey("PositionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+      modelBuilder.Entity("HRConnect.Api.Models.Payroll.Earning.EmployeePayrollEarning", b =>
+          {
+            b.HasOne("HRConnect.Api.Models.Employee", "Employee")
+                      .WithMany("EmployeePayrollEarning")
+                      .HasForeignKey("EmployeeId")
+                      .OnDelete(DeleteBehavior.NoAction)
+                      .IsRequired();
 
-                    b.Navigation("CareerManager");
+            b.HasOne("HRConnect.Api.Models.Payroll.Earning.PayrollEarning", "PayrollEarning")
+                      .WithMany("EmployeePayrollEarning")
+                      .HasForeignKey("PayrollEarningId")
+                      .OnDelete(DeleteBehavior.NoAction)
+                      .IsRequired();
 
-                    b.Navigation("PensionOption");
+            b.HasOne("HRConnect.Api.Models.Payroll.PayrollRun", null)
+                      .WithMany()
+                      .HasForeignKey("PayrollRunId")
+                      .OnDelete(DeleteBehavior.Cascade)
+                      .IsRequired();
 
-                    b.Navigation("Position");
-                });
+            b.Navigation("Employee");
 
-            modelBuilder.Entity("HRConnect.Api.Models.EmployeeAccrualRateHistory", b =>
-                {
-                    b.HasOne("HRConnect.Api.Models.Employee", "Employee")
-                        .WithMany("AccrualRateHistory")
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            b.Navigation("PayrollEarning");
+          });
 
-                    b.HasOne("HRConnect.Api.Models.Position", "Position")
-                        .WithMany()
-                        .HasForeignKey("PositionId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+      modelBuilder.Entity("HRConnect.Api.Models.Payroll.PayrollRecord", b =>
+          {
+            b.HasOne("HRConnect.Api.Models.Payroll.PayrollRun", "PayrollRun")
+                      .WithMany("Records")
+                      .HasForeignKey("PayrollRunId")
+                      .OnDelete(DeleteBehavior.Cascade)
+                      .IsRequired();
 
-                    b.Navigation("Employee");
+            b.Navigation("PayrollRun");
+          });
 
-                    b.Navigation("Position");
-                });
+      modelBuilder.Entity("HRConnect.Api.Models.Payroll.PayrollRun", b =>
+          {
+            b.HasOne("HRConnect.Api.Models.Payroll.PayrollPeriod", "Period")
+                      .WithMany("Runs")
+                      .HasForeignKey("PeriodId")
+                      .OnDelete(DeleteBehavior.Cascade)
+                      .IsRequired();
 
-            modelBuilder.Entity("HRConnect.Api.Models.EmployeeLeaveBalance", b =>
-                {
-                    b.HasOne("HRConnect.Api.Models.Employee", "Employee")
-                        .WithMany("LeaveBalances")
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            b.Navigation("Period");
+          });
 
-                    b.HasOne("HRConnect.Api.Models.LeaveType", "LeaveType")
-                        .WithMany()
-                        .HasForeignKey("LeaveTypeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+      modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction.EmployeeDeduction", b =>
+          {
+            b.HasOne("HRConnect.Api.Models.PayrollDeduction.Deduction", "Deduction")
+                      .WithMany("EmployeeDeduction")
+                      .HasForeignKey("DeductionId")
+                      .OnDelete(DeleteBehavior.NoAction)
+                      .IsRequired();
 
-                    b.Navigation("Employee");
+            b.HasOne("HRConnect.Api.Models.Employee", "Employee")
+                      .WithMany("EmployeeDeduction")
+                      .HasForeignKey("EmployeeId")
+                      .OnDelete(DeleteBehavior.NoAction)
+                      .IsRequired();
 
-                    b.Navigation("LeaveType");
-                });
+            b.HasOne("HRConnect.Api.Models.Payroll.PayrollRun", null)
+                      .WithMany()
+                      .HasForeignKey("PayrollRunId")
+                      .OnDelete(DeleteBehavior.Cascade)
+                      .IsRequired();
 
-            modelBuilder.Entity("HRConnect.Api.Models.LeaveApplication", b =>
-                {
-                    b.HasOne("HRConnect.Api.Models.Employee", "Employee")
-                        .WithMany("LeaveApplications")
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            b.Navigation("Deduction");
 
-                    b.HasOne("HRConnect.Api.Models.LeaveType", "LeaveType")
-                        .WithMany()
-                        .HasForeignKey("LeaveTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            b.Navigation("Employee");
+          });
 
-                    b.Navigation("Employee");
+      modelBuilder.Entity("HRConnect.Api.Models.Pension.EmployeePensionEnrollment", b =>
+          {
+            b.HasOne("HRConnect.Api.Models.Employee", "Employee")
+                      .WithMany("EmployeePensionEnrollment")
+                      .HasForeignKey("EmployeeId")
+                      .OnDelete(DeleteBehavior.Cascade)
+                      .IsRequired();
 
-                    b.Navigation("LeaveType");
-                });
+            b.HasOne("HRConnect.Api.Models.Payroll.PayrollRun", null)
+                      .WithMany()
+                      .HasForeignKey("PayrollRunId")
+                      .OnDelete(DeleteBehavior.Cascade)
+                      .IsRequired();
 
-            modelBuilder.Entity("HRConnect.Api.Models.LeaveEntitlementRule", b =>
-                {
-                    b.HasOne("HRConnect.Api.Models.JobGrade", "JobGrade")
-                        .WithMany("LeaveEntitlementRules")
-                        .HasForeignKey("JobGradeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+            b.HasOne("HRConnect.Api.Models.PensionOption", "PensionOption")
+                      .WithMany("EmployeePensionEnrollment")
+                      .HasForeignKey("PensionOptionId")
+                      .OnDelete(DeleteBehavior.Cascade)
+                      .IsRequired();
 
-                    b.HasOne("HRConnect.Api.Models.LeaveType", "LeaveType")
-                        .WithMany("EntitlementRules")
-                        .HasForeignKey("LeaveTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            b.Navigation("Employee");
 
-                    b.Navigation("JobGrade");
+            b.Navigation("PensionOption");
+          });
 
-                    b.Navigation("LeaveType");
-                });
+      modelBuilder.Entity("HRConnect.Api.Models.PensionFund", b =>
+          {
+            b.HasOne("HRConnect.Api.Models.Employee", "Employee")
+                      .WithMany("PensionFunds")
+                      .HasForeignKey("EmployeeId")
+                      .OnDelete(DeleteBehavior.Restrict)
+                      .IsRequired();
 
-            modelBuilder.Entity("HRConnect.Api.Models.MFAUserSecret", b =>
-                {
-                    b.HasOne("HRConnect.Api.Models.User", "User")
-                        .WithOne()
-                        .HasForeignKey("HRConnect.Api.Models.MFAUserSecret", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            b.HasOne("HRConnect.Api.Models.PensionOption", "PensionOptions")
+                      .WithMany()
+                      .HasForeignKey("PensionOptionId")
+                      .OnDelete(DeleteBehavior.Cascade)
+                      .IsRequired();
 
-                    b.Navigation("User");
-                });
+            b.Navigation("Employee");
 
-            modelBuilder.Entity("HRConnect.Api.Models.MedicalOption", b =>
-                {
-                    b.HasOne("HRConnect.Api.Models.MedicalOptionCategory", "MedicalOptionCategory")
-                        .WithMany("MedicalOptions")
-                        .HasForeignKey("MedicalOptionCategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            b.Navigation("PensionOptions");
+          });
 
-                    b.Navigation("MedicalOptionCategory");
-                });
+      modelBuilder.Entity("HRConnect.Api.Models.Position", b =>
+          {
+            b.HasOne("HRConnect.Api.Models.JobGrade", "JobGrade")
+                      .WithMany("Positions")
+                      .HasForeignKey("JobGradeId")
+                      .OnDelete(DeleteBehavior.Cascade)
+                      .IsRequired();
 
-            modelBuilder.Entity("HRConnect.Api.Models.Payroll.Earning.EmployeePayrollEarning", b =>
-                {
-                    b.HasOne("HRConnect.Api.Models.Employee", "Employee")
-                        .WithMany("EmployeePayrollEarning")
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+            b.HasOne("HRConnect.Api.Models.OccupationalLevel", "OccupationalLevels")
+                      .WithMany("Positions")
+                      .HasForeignKey("OccupationalLevelId")
+                      .OnDelete(DeleteBehavior.Restrict)
+                      .IsRequired();
 
-                    b.HasOne("HRConnect.Api.Models.Payroll.Earning.PayrollEarning", "PayrollEarning")
-                        .WithMany("EmployeePayrollEarning")
-                        .HasForeignKey("PayrollEarningId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+            b.Navigation("JobGrade");
 
-                    b.HasOne("HRConnect.Api.Models.Payroll.PayrollRun", null)
-                        .WithMany()
-                        .HasForeignKey("PayrollRunId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            b.Navigation("OccupationalLevels");
+          });
 
-                    b.Navigation("Employee");
+      modelBuilder.Entity("HRConnect.Api.Models.TOTPState", b =>
+          {
+            b.HasOne("HRConnect.Api.Models.User", "User")
+                      .WithOne()
+                      .HasForeignKey("HRConnect.Api.Models.TOTPState", "UserId")
+                      .OnDelete(DeleteBehavior.Cascade)
+                      .IsRequired();
 
-                    b.Navigation("PayrollEarning");
-                });
+            b.Navigation("User");
+          });
 
-            modelBuilder.Entity("HRConnect.Api.Models.Payroll.PayrollRecord", b =>
-                {
-                    b.HasOne("HRConnect.Api.Models.Payroll.PayrollRun", "PayrollRun")
-                        .WithMany("Records")
-                        .HasForeignKey("PayrollRunId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+      modelBuilder.Entity("HRConnect.Api.Models.UserCompany", b =>
+          {
+            b.HasOne("HRConnect.Api.Models.Company", "Company")
+                      .WithMany()
+                      .HasForeignKey("CompanyId")
+                      .OnDelete(DeleteBehavior.Cascade)
+                      .IsRequired();
 
-                    b.Navigation("PayrollRun");
-                });
+            b.HasOne("HRConnect.Api.Models.User", "User")
+                      .WithMany()
+                      .HasForeignKey("UserId")
+                      .OnDelete(DeleteBehavior.Cascade)
+                      .IsRequired();
 
-            modelBuilder.Entity("HRConnect.Api.Models.Payroll.PayrollRun", b =>
-                {
-                    b.HasOne("HRConnect.Api.Models.Payroll.PayrollPeriod", "Period")
-                        .WithMany("Runs")
-                        .HasForeignKey("PeriodId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            b.Navigation("Company");
 
-                    b.Navigation("Period");
-                });
+            b.Navigation("User");
+          });
 
-            modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction.EmployeeDeduction", b =>
-                {
-                    b.HasOne("HRConnect.Api.Models.PayrollDeduction.Deduction", "Deduction")
-                        .WithMany("EmployeeDeduction")
-                        .HasForeignKey("DeductionId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+      modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction.MedicalAidDeduction", b =>
+          {
+            b.HasOne("HRConnect.Api.Models.MedicalOptionCategory", "MedicalOptionCategory")
+                      .WithMany()
+                      .HasForeignKey("MedicalCategoryId")
+                      .OnDelete(DeleteBehavior.NoAction)
+                      .IsRequired();
 
-                    b.HasOne("HRConnect.Api.Models.Employee", "Employee")
-                        .WithMany("EmployeeDeduction")
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+            b.HasOne("HRConnect.Api.Models.MedicalOption", "MedicalOption")
+                      .WithMany()
+                      .HasForeignKey("MedicalOptionId")
+                      .OnDelete(DeleteBehavior.NoAction)
+                      .IsRequired();
 
-                    b.HasOne("HRConnect.Api.Models.Payroll.PayrollRun", null)
-                        .WithMany()
-                        .HasForeignKey("PayrollRunId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            b.Navigation("MedicalOption");
 
-                    b.Navigation("Deduction");
+            b.Navigation("MedicalOptionCategory");
+          });
 
-                    b.Navigation("Employee");
-                });
+      modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction.PensionDeduction", b =>
+          {
+            b.HasOne("HRConnect.Api.Models.PensionOption", null)
+                      .WithMany("PensionDeduction")
+                      .HasForeignKey("PensionOptionId")
+                      .OnDelete(DeleteBehavior.Cascade)
+                      .IsRequired();
+          });
 
-            modelBuilder.Entity("HRConnect.Api.Models.Pension.EmployeePensionEnrollment", b =>
-                {
-                    b.HasOne("HRConnect.Api.Models.Employee", "Employee")
-                        .WithMany("EmployeePensionEnrollment")
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+      modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzJobDetail", b =>
+          {
+            b.Navigation("Triggers");
+          });
 
-                    b.HasOne("HRConnect.Api.Models.Payroll.PayrollRun", null)
-                        .WithMany()
-                        .HasForeignKey("PayrollRunId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+      modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzTrigger", b =>
+          {
+            b.Navigation("BlobTriggers");
 
-                    b.HasOne("HRConnect.Api.Models.PensionOption", "PensionOption")
-                        .WithMany("EmployeePensionEnrollment")
-                        .HasForeignKey("PensionOptionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            b.Navigation("CronTriggers");
 
-                    b.Navigation("Employee");
+            b.Navigation("SimplePropertyTriggers");
 
-                    b.Navigation("PensionOption");
-                });
+            b.Navigation("SimpleTriggers");
+          });
 
-            modelBuilder.Entity("HRConnect.Api.Models.PensionFund", b =>
-                {
-                    b.HasOne("HRConnect.Api.Models.Employee", "Employee")
-                        .WithMany("PensionFunds")
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+      modelBuilder.Entity("HRConnect.Api.Models.Company", b =>
+          {
+            b.Navigation("Employees");
+          });
 
-                    b.HasOne("HRConnect.Api.Models.PensionOption", "PensionOptions")
-                        .WithMany()
-                        .HasForeignKey("PensionOptionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+      modelBuilder.Entity("HRConnect.Api.Models.Employee", b =>
+          {
+            b.Navigation("AccrualRateHistory");
 
-                    b.Navigation("Employee");
+            b.Navigation("AnnualLeaveAccrualHistories");
 
-                    b.Navigation("PensionOptions");
-                });
+            b.Navigation("EmployeeDeduction");
 
-            modelBuilder.Entity("HRConnect.Api.Models.PermissionAuditLog", b =>
-                {
-                    b.HasOne("HRConnect.Api.Models.Permissions", "Permissions")
-                        .WithMany()
-                        .HasForeignKey("PermissionId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+            b.Navigation("EmployeePayrollEarning");
 
-                    b.HasOne("HRConnect.Api.Models.Roles", "Role")
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+            b.Navigation("EmployeePensionEnrollment");
 
-                    b.Navigation("Permissions");
+            b.Navigation("LeaveApplications");
 
-                    b.Navigation("Role");
-                });
+            b.Navigation("LeaveBalances");
 
-            modelBuilder.Entity("HRConnect.Api.Models.Position", b =>
-                {
-                    b.HasOne("HRConnect.Api.Models.JobGrade", "JobGrade")
-                        .WithMany("Positions")
-                        .HasForeignKey("JobGradeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            b.Navigation("PensionFunds");
 
-                    b.HasOne("HRConnect.Api.Models.OccupationalLevel", "OccupationalLevels")
-                        .WithMany("Positions")
-                        .HasForeignKey("OccupationalLevelId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+            b.Navigation("Subordinates");
+          });
 
-                    b.Navigation("JobGrade");
+      modelBuilder.Entity("HRConnect.Api.Models.JobGrade", b =>
+          {
+            b.Navigation("LeaveEntitlementRules");
 
-                    b.Navigation("OccupationalLevels");
-                });
+            b.Navigation("Positions");
+          });
 
-            modelBuilder.Entity("HRConnect.Api.Models.RolePermissions", b =>
-                {
-                    b.HasOne("HRConnect.Api.Models.Permissions", "Permissions")
-                        .WithMany("RolePermissions")
-                        .HasForeignKey("PermissionsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+      modelBuilder.Entity("HRConnect.Api.Models.LeaveType", b =>
+          {
+            b.Navigation("EntitlementRules");
+          });
 
-                    b.HasOne("HRConnect.Api.Models.Roles", "Role")
-                        .WithMany("RolePermissions")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+      modelBuilder.Entity("HRConnect.Api.Models.MedicalOptionCategory", b =>
+          {
+            b.Navigation("MedicalOptions");
+          });
 
-                    b.Navigation("Permissions");
+      modelBuilder.Entity("HRConnect.Api.Models.OccupationalLevel", b =>
+          {
+            b.Navigation("Positions");
+          });
 
-                    b.Navigation("Role");
-                });
+      modelBuilder.Entity("HRConnect.Api.Models.Payroll.Earning.PayrollEarning", b =>
+          {
+            b.Navigation("EmployeePayrollEarning");
+          });
 
-            modelBuilder.Entity("HRConnect.Api.Models.Roles", b =>
-                {
-                    b.HasOne("HRConnect.Api.Models.Roles", "ParentRole")
-                        .WithMany("ChildRoles")
-                        .HasForeignKey("ParentRoleId")
-                        .OnDelete(DeleteBehavior.Restrict);
+      modelBuilder.Entity("HRConnect.Api.Models.Payroll.PayrollPeriod", b =>
+          {
+            b.Navigation("Runs");
+          });
 
-                    b.Navigation("ParentRole");
-                });
+      modelBuilder.Entity("HRConnect.Api.Models.Payroll.PayrollRun", b =>
+          {
+            b.Navigation("Records");
+          });
 
-            modelBuilder.Entity("HRConnect.Api.Models.TOTPState", b =>
-                {
-                    b.HasOne("HRConnect.Api.Models.User", "User")
-                        .WithOne()
-                        .HasForeignKey("HRConnect.Api.Models.TOTPState", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+      modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction.Deduction", b =>
+          {
+            b.Navigation("EmployeeDeduction");
+          });
 
-                    b.Navigation("User");
-                });
+      modelBuilder.Entity("HRConnect.Api.Models.PensionOption", b =>
+          {
+            b.Navigation("EmployeePensionEnrollment");
 
-            modelBuilder.Entity("HRConnect.Api.Models.UserRoles", b =>
-                {
-                    b.HasOne("HRConnect.Api.Models.Roles", "Role")
-                        .WithMany("UserRoles")
-                        .HasForeignKey("RolesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            b.Navigation("Employees");
 
-                    b.HasOne("HRConnect.Api.Models.User", "User")
-                        .WithMany("UserRoles")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+            b.Navigation("PensionDeduction");
+          });
 
-                    b.Navigation("Role");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction.MedicalAidDeduction", b =>
-                {
-                    b.HasOne("HRConnect.Api.Models.MedicalOptionCategory", "MedicalOptionCategory")
-                        .WithMany()
-                        .HasForeignKey("MedicalCategoryId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("HRConnect.Api.Models.MedicalOption", "MedicalOption")
-                        .WithMany()
-                        .HasForeignKey("MedicalOptionId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("MedicalOption");
-
-                    b.Navigation("MedicalOptionCategory");
-                });
-
-            modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction.PensionDeduction", b =>
-                {
-                    b.HasOne("HRConnect.Api.Models.PensionOption", null)
-                        .WithMany("PensionDeduction")
-                        .HasForeignKey("PensionOptionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzJobDetail", b =>
-                {
-                    b.Navigation("Triggers");
-                });
-
-            modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzTrigger", b =>
-                {
-                    b.Navigation("BlobTriggers");
-
-                    b.Navigation("CronTriggers");
-
-                    b.Navigation("SimplePropertyTriggers");
-
-                    b.Navigation("SimpleTriggers");
-                });
-
-            modelBuilder.Entity("HRConnect.Api.Models.Employee", b =>
-                {
-                    b.Navigation("AccrualRateHistory");
-
-                    b.Navigation("AnnualLeaveAccrualHistories");
-
-                    b.Navigation("EmployeeDeduction");
-
-                    b.Navigation("EmployeePayrollEarning");
-
-                    b.Navigation("EmployeePensionEnrollment");
-
-                    b.Navigation("LeaveApplications");
-
-                    b.Navigation("LeaveBalances");
-
-                    b.Navigation("PensionFunds");
-
-                    b.Navigation("Subordinates");
-                });
-
-            modelBuilder.Entity("HRConnect.Api.Models.JobGrade", b =>
-                {
-                    b.Navigation("LeaveEntitlementRules");
-
-                    b.Navigation("Positions");
-                });
-
-            modelBuilder.Entity("HRConnect.Api.Models.LeaveType", b =>
-                {
-                    b.Navigation("EntitlementRules");
-                });
-
-            modelBuilder.Entity("HRConnect.Api.Models.MedicalOptionCategory", b =>
-                {
-                    b.Navigation("MedicalOptions");
-                });
-
-            modelBuilder.Entity("HRConnect.Api.Models.OccupationalLevel", b =>
-                {
-                    b.Navigation("Positions");
-                });
-
-            modelBuilder.Entity("HRConnect.Api.Models.Payroll.Earning.PayrollEarning", b =>
-                {
-                    b.Navigation("EmployeePayrollEarning");
-                });
-
-            modelBuilder.Entity("HRConnect.Api.Models.Payroll.PayrollPeriod", b =>
-                {
-                    b.Navigation("Runs");
-                });
-
-            modelBuilder.Entity("HRConnect.Api.Models.Payroll.PayrollRun", b =>
-                {
-                    b.Navigation("Records");
-                });
-
-            modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction.Deduction", b =>
-                {
-                    b.Navigation("EmployeeDeduction");
-                });
-
-            modelBuilder.Entity("HRConnect.Api.Models.PensionOption", b =>
-                {
-                    b.Navigation("EmployeePensionEnrollment");
-
-                    b.Navigation("Employees");
-
-                    b.Navigation("PensionDeduction");
-                });
-
-            modelBuilder.Entity("HRConnect.Api.Models.Permissions", b =>
-                {
-                    b.Navigation("RolePermissions");
-                });
-
-            modelBuilder.Entity("HRConnect.Api.Models.Position", b =>
-                {
-                    b.Navigation("Employees");
-                });
-
-            modelBuilder.Entity("HRConnect.Api.Models.Roles", b =>
-                {
-                    b.Navigation("ChildRoles");
-
-                    b.Navigation("RolePermissions");
-
-                    b.Navigation("UserRoles");
-                });
-
-            modelBuilder.Entity("HRConnect.Api.Models.User", b =>
-                {
-                    b.Navigation("UserRoles");
-                });
+      modelBuilder.Entity("HRConnect.Api.Models.Position", b =>
+          {
+            b.Navigation("Employees");
+          });
 #pragma warning restore 612, 618
-        }
     }
+  }
 }

@@ -18,7 +18,7 @@ namespace HRConnect.Api.Utils.Notification.Channels
     }
     public async Task SendNotificationAsync(Notification notification)
     {
-      EmployeeDto? employeeDto = await _employeeService.GetEmployeeByIdAsync(notification.EmployeeId);
+      EmployeeDto? employeeDto = await _employeeService.GetEmployeeByIdInternalAsync(notification.EmployeeId);
       if (employeeDto == null)
         throw new InvalidDataException($"Employee {notification.EmployeeId} Cannot Be Found");
       try

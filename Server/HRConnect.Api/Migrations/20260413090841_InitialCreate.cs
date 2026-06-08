@@ -4,18 +4,18 @@
 
 namespace HRConnect.Api.Migrations
 {
+  /// <inheritdoc />
+  public partial class InitialCreate : Migration
+  {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    protected override void Up(MigrationBuilder migrationBuilder)
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {   
       /*This is to bring migrations back in line with one another*/
-        }
-
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-        }
     }
+
+    /// <inheritdoc />
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
+    }
+  }
 }

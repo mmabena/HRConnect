@@ -102,6 +102,13 @@ namespace HRConnect.Api.Services
         : record.EmployeeId;
 
 
+      //   var exists = currentPayRun.Records
+      //   .Any(r => r.PayrollRunId == currentPayRun.PayrollRunId
+      //  && r.EmployeeId == empId);
+
+      //   if (exists)
+      //     continue;
+          
         record.PayrollRun = currentPayRun;
         record.EmployeeId = empId;
         currentPayRun.Records.Add(record);

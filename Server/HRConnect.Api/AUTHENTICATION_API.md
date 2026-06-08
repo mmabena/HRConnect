@@ -150,6 +150,102 @@ http://localhost:5147/api
 
 ---
 
+## User Provisioning And Role Management
+
+### Employee provisioning behavior
+
+When a SuperUser creates an employee through the employee API, HRConnect also creates a matching row in the `Users` table for that employee email address if one does not already exist.
+
+- Default role: `NormalUser`
+- Password: a temporary hashed password is generated server-side
+- First sign-in: employee should use the forgot-password flow to set a real password
+
+### 5. Get Role Options
+
+**Endpoint:** `GET /user/roles`
+
+**Description:** Returns the available user roles and their numeric IDs.
+
+**Response (200 OK):**
+```json
+[
+  {
+    "roleId": 0,
+    "name": "NormalUser"
+  },
+  {
+    "roleId": 1,
+    "name": "SuperUser"
+  }
+]
+```
+
+### 6. Change User Role By User ID
+
+**Endpoint:** `PUT /user/{userId}/role`
+
+**Authorization:** `SuperUser`
+
+**Description:** Updates an existing user record to a different role.
+
+**Request Body:**
+```json
+{
+  "roleId": 1
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "userId": 12,
+  "email": "user@singular.co.za",
+  "role": "SuperUser",
+  "roleId": 1,
+  "createdAt": "2026-03-31T08:00:00Z"
+}
+```
+
+**Error Responses:**
+- **400 Bad Request:** Invalid role id
+- **401 Unauthorized:** Missing or invalid token
+- **403 Forbidden:** Caller is not a SuperUser
+- **404 Not Found:** User not found
+
+### 7. Change User Role By Employee ID
+
+**Endpoint:** `PUT /user/employee/{employeeId}/role`
+
+**Authorization:** `SuperUser`
+
+**Description:** Looks up the employee by employee ID, ensures that employee has a `Users` record, and then updates that user role.
+
+**Request Body:**
+```json
+{
+  "roleId": 1
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "userId": 15,
+  "email": "employee@singular.co.za",
+  "role": "SuperUser",
+  "roleId": 1,
+  "createdAt": "2026-03-31T08:00:00Z"
+}
+```
+
+**Error Responses:**
+- **400 Bad Request:** Invalid role id or employee email missing
+- **401 Unauthorized:** Missing or invalid token
+- **403 Forbidden:** Caller is not a SuperUser
+- **404 Not Found:** Employee not found
+
+---
+
 ## Configuration
 
 ### appsettings.json
@@ -171,8 +267,13 @@ http://localhost:5147/api
     "SenderPassword": "your-app-password"
   },
   "Totp": {
-    "StepMinutes": "lifetime of your time-based one-time-pin in minutes"
-    "If nothing is provided, falls back to 10 minutes per one-time-pin"
+    "StepMinutes": 10//lifetime of your time-based one-time-pin in minutes
+    //If nothing is provided, falls back to 10 minutes per one-time-pin
+  }, 
+  {
+    "Services":{
+        "Api":"http://<IP:port>/api/" //recommended: "http://localhost:5147/api/"
+    }
   }
 }
 

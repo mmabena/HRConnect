@@ -142,7 +142,7 @@ public class MedicalAidDeductionServiceTests
             MedicalOptionCategoryName = "Essential"
         };
 
-        _mockEmployeeService.Setup(s => s.GetEmployeeByIdAsync(employeeId)).ReturnsAsync(employee);
+        _mockEmployeeService.Setup(s => s.GetEmployeeByIdInternalAsync(employeeId)).ReturnsAsync(employee);
         _mockDeductionRepository.Setup(r => r.GetMedicalAidDeductionsByEmployeeIdAsync(employeeId))
             .ReturnsAsync(new List<MedicalAidDeduction>());
         _mockMedicalOptionRepository.Setup(r => r.GetMedicalOptionByIdAsync(medicalOptionId))
@@ -211,7 +211,7 @@ public class MedicalAidDeductionServiceTests
             MedicalOptionCategoryName = "Vital"
         };
 
-        _mockEmployeeService.Setup(s => s.GetEmployeeByIdAsync(employeeId)).ReturnsAsync(employee);
+        _mockEmployeeService.Setup(s => s.GetEmployeeByIdInternalAsync(employeeId)).ReturnsAsync(employee);
         _mockDeductionRepository.Setup(r => r.GetMedicalAidDeductionsByEmployeeIdAsync(employeeId))
             .ReturnsAsync(new List<MedicalAidDeduction>());
         _mockMedicalOptionRepository.Setup(r => r.GetMedicalOptionByIdAsync(medicalOptionId))
@@ -243,7 +243,7 @@ public class MedicalAidDeductionServiceTests
         var medicalOptionId = 1;
         var request = new CreateMedicalAidDeductionRequestDto { PrincipalCount = 1 };
 
-        _mockEmployeeService.Setup(s => s.GetEmployeeByIdAsync(employeeId))
+        _mockEmployeeService.Setup(s => s.GetEmployeeByIdInternalAsync(employeeId))
             .ReturnsAsync((EmployeeDto)null!);
 
         var exception = await Assert.ThrowsAsync<KeyNotFoundException>(() =>
@@ -265,7 +265,7 @@ public class MedicalAidDeductionServiceTests
             EmploymentStatus = EmploymentStatus.Contract
         };
 
-        _mockEmployeeService.Setup(s => s.GetEmployeeByIdAsync(employeeId)).ReturnsAsync(employee);
+        _mockEmployeeService.Setup(s => s.GetEmployeeByIdInternalAsync(employeeId)).ReturnsAsync(employee);
 
         var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
             _service.AddNewMedicalAidDeductions(employeeId, medicalOptionId, request));
@@ -358,7 +358,7 @@ public class MedicalAidDeductionServiceTests
 
         // Setup method calls
         _mockPayrollRunService.Setup(s => s.GetCurrentRunAsync()).ReturnsAsync(currentRun);
-        _mockEmployeeService.Setup(s => s.GetEmployeeByIdAsync(employeeId)).ReturnsAsync(employee);
+        _mockEmployeeService.Setup(s => s.GetEmployeeByIdInternalAsync(employeeId)).ReturnsAsync(employee);
         _mockDeductionRepository.Setup(r => r.GetMedicalAidDeductionsByEmployeeIdAsync(employeeId))
             .ReturnsAsync(new List<MedicalAidDeduction> { existingDeduction });
         _mockMedicalOptionService.Setup(r => r.GetMedicalOptionByIdAsync(1))

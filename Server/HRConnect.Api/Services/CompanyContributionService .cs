@@ -15,14 +15,14 @@ namespace HRConnect.Api.Services
     {
       _companyContributionRepo = companyContributionRepo;
     }
-
     /// <summary>
     /// Retrieves all company contribution definitions.
     /// </summary>
     /// <returns>List of company contribution definitions.</returns>
+
     public async Task<List<CompanyContributionDto>> GetAllCompanyContributionAsync()
     {
-      var list = await _companyContributionRepo.GetAllAsync();
+      var list = await _companyContributionRepo.GetAllCompanyContributionAsync();
 
       var companyContributions = new List<CompanyContributionDto>();
 
@@ -33,33 +33,26 @@ namespace HRConnect.Api.Services
 
       return companyContributions;
     }
-
     /// <summary>
     /// Retrieves a single company contribution by ID.
     /// </summary>
     /// <returns>A company contribution definition or null if not found.</returns>
-    public async Task<CompanyContributionDto?> GetCompanyContributionByIdAsync(int id)
+    public async Task<CompanyContributionDto?> GetCompanyContributionByIdAsync(int companyContributionId)
     {
-      var contributions = await _companyContributionRepo.GetByIdAsync(id);
-      if (contributions == null)
-        return null;
+      var contributions = await _companyContributionRepo.GetCompanyContributionByIdAsync(companyContributionId);
+      if (contributions == null) return null;
 
       return contributions.ToCompanyContributionDto();
     }
-
     /// <summary>
     /// Creates a new company contribution rule.
     /// </summary>
     /// <param name="companyContributionModel">The company contribution model to create.</param>
     /// <returns>The created company contribution definition.</returns>
-    public async Task<CompanyContributionDto> CreateCompanyContributionAsync(
-      CompanyContribution companyContributionModel
-    )
+    public async Task<CompanyContributionDto> CreateCompanyContributionAsync(CompanyContribution companyContributionModel)
     {
-      var createdContribution = await _companyContributionRepo.CreateCompanyContributionAsync(
-        companyContributionModel
-      );
-      return createdContribution?.ToCompanyContributionDto()!;
+      var createdContribution = await _companyContributionRepo.CreateCompanyContributionAsync(companyContributionModel);
+      return createdContribution.ToCompanyContributionDto();
     }
 
     /// <summary>
@@ -67,26 +60,22 @@ namespace HRConnect.Api.Services
     /// </summary>
     /// <param name="companyContributionModel">The company contribution model to update.</param>
     /// <returns>The updated company contribution definition.</returns>
-    public async Task<CompanyContributionDto> UpdateCompanyContributionAsync(
-      CompanyContribution companyContributionModel
-    )
+    public async Task<CompanyContributionDto> UpdateCompanyContributionAsync(CompanyContribution companyContributionModel)
     {
-      var updatedContribution = await _companyContributionRepo.UpdateCompanyContributionAsync(
-        companyContributionModel
-      );
-      return updatedContribution!.ToCompanyContributionDto();
+      var updatedContribution = await _companyContributionRepo.UpdateCompanyContributionAsync(companyContributionModel);
+      return updatedContribution.ToCompanyContributionDto();
     }
 
     /// <summary>
     /// Deletes a company contribution rule.
     /// </summary>
-    /// <param name="id">The ID of the company contribution to delete.</param>
-    public async Task DeleteAsync(int id)
+    /// <param name="companyContributionId">The ID of the company contribution to delete.</param>
+    public async Task DeleteCompanyContributionAsync(int companyContributionId)
     {
-      await _companyContributionRepo.DeleteAsync(id);
+      await _companyContributionRepo.DeleteCompanyContributionAsync(companyContributionId);
     }
 
-    /// <summary>
+     /// <summary>
     /// Find any allocated company contribution for the given payroll run
     /// </summary>
     /// <param name="payrollRunId">Id for given payroll run</param>
@@ -95,5 +84,6 @@ namespace HRConnect.Api.Services
     {
       return await _companyContributionRepo.FindAllocatedContribution(payrollRunId);
     }
+
   }
 }

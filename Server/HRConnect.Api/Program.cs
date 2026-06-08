@@ -1,3 +1,4 @@
+
 using System.Text;
 using Audit.Core;
 using Audit.EntityFramework;
@@ -13,6 +14,7 @@ using HRConnect.Api.Middleware;
 using HRConnect.Api.Models;
 using HRConnect.Api.Repositories;
 using HRConnect.Api.Repository;
+using HRConnect.Api.Hubs;
 using HRConnect.Api.Services;
 using HRConnect.Api.Utils;
 using HRConnect.Api.Utils.Factories;
@@ -153,22 +155,29 @@ builder.Services.AddQuartz(q =>
   opts.WithIdentity(NotificationJobKey)
   .StoreDurably());
 
-  q.AddTrigger(opts => opts
-  .ForJob(RolloverJobKey)
-  .WithIdentity("PayrollRollover-Trigger")
-  .WithCronSchedule("10 0/2 * * * ?", x =>
-  x.WithMisfireHandlingInstructionFireAndProceed()));
-
-  q.AddTrigger(opts => opts
-  .ForJob(NotificationJobKey)
-  .WithIdentity("NotificationJob-Trigger")
-  .WithCronSchedule("5,10,15,20,25 0/1 * * * ?", x =>
-  x.WithMisfireHandlingInstructionIgnoreMisfires()));
   //Cron Schedule for Payroll Rollover Job
   // 0 -> 0 seconds
   // 0 -> 0 minutes
   // 0 -> 0 hours
   // 1 -> first day of the month 
+  // * -> for any/every month 
+  // ? -> for all days of the week
+  q.AddTrigger(opts => opts
+  .ForJob(RolloverJobKey)
+  .WithIdentity("PayrollRollover-Trigger")
+  .WithCronSchedule("0 0 0 1 * ?", x =>
+  x.WithMisfireHandlingInstructionFireAndProceed()));
+
+  q.AddTrigger(opts => opts
+  .ForJob(NotificationJobKey)
+  .WithIdentity("NotificationJob-Trigger")
+  .WithCronSchedule("0 0 0 23-31 * ?", x =>
+  x.WithMisfireHandlingInstructionIgnoreMisfires()));
+  //Cron Schedule for Payroll Notification Job
+  // 0 -> 0 seconds
+  // 0 -> 0 minutes
+  // 0 -> 0 hours
+  // 23-31 is the widest range of days to include February and longer months
   // * -> for any/every month 
   // ? -> for all days of the week
 
@@ -223,6 +232,11 @@ builder.Services.AddScoped<ITaxDeductionRepository, TaxDeductionRepository>();
 builder.Services.AddScoped<IPasswordResetRepository, PasswordResetRepository>();
 builder.Services.AddScoped<IPositionRepository, PositionRepository>();
 builder.Services.AddScoped<IPositionService, PositionService>();
+builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
+builder.Services.AddScoped<ICompanyService, CompanyService>();
+builder.Services.AddScoped<IActiveCompanyService, ActiveCompanyService>();
+builder.Services.AddScoped<IUserCompanyService, UserCompanyService>();
+builder.Services.AddScoped<IUserCompanyRepository, UserCompanyRepository>();
 builder.Services.AddScoped<ICompanyContributionRepository, CompanyContributionRepository>();
 builder.Services.AddScoped<IEmployeeCompanyContributionRepository, EmployeeCompanyContributionRepository>();
 builder.Services.AddScoped<ICompanyContributionAllocationService, CompanyContributionAllocationService>();
@@ -232,7 +246,11 @@ builder.Services.AddScoped<IJobGradeRepository, JobGradeRepository>();
 builder.Services.AddScoped<IJobGradeService, JobGradeService>();
 builder.Services.AddScoped<IOccupationalLevelRepository, OccupationalLevelRepository>();
 builder.Services.AddScoped<IOccupationalLevelService, OccupationalLevelService>();
+<<<<<<< HEAD
 builder.Services.AddScoped<IAuthService, AuthService>();
+=======
+builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.Services.AuthService>();
+>>>>>>> 64bac85f9e35e161e3a66d1a85620a8200783968
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<ILeaveBalanceService, LeaveBalanceService>();
 builder.Services.AddScoped<ILeaveProcessingService, LeaveProcessingService>();
@@ -275,6 +293,12 @@ builder.Services.AddScoped<ITOTPService, TOTPService>();
 builder.Services.AddScoped<ITOTPRepository, TOTPRepository>();
 builder.Services.AddScoped<IMFAUserSecretsService, MFAUserSecretsService>();
 builder.Services.AddScoped<IMFAUserSecretsRepository, MFAUserSecretsRepository>();
+builder.Services.AddScoped<IMedicalOptionService,
+  MedicalOptionService>();
+builder.Services.AddScoped<IMedicalAidEligibilityService, MedicalAidEligibilityService>();
+builder.Services.AddScoped<IMedicalAidDeductionRepository, MedicalAidDeductionRepository>();
+builder.Services.AddScoped<IMedicalAidDeductionService, MedicalAidDeductionService>();
+
 
 builder.Services.AddHttpClient<IUserHttpClient, UserHttpClient>((provider, client) =>
 {
@@ -282,12 +306,17 @@ builder.Services.AddHttpClient<IUserHttpClient, UserHttpClient>((provider, clien
   client.BaseAddress = new Uri(config["Services:Api"]!);
 });
 
+<<<<<<< HEAD
 builder.Services.AddScoped<IMedicalOptionService,
   MedicalOptionService>();
 builder.Services.AddScoped<IMedicalAidEligibilityService, MedicalAidEligibilityService>();
 builder.Services.AddScoped<IMedicalAidDeductionRepository, MedicalAidDeductionRepository>();
 builder.Services.AddScoped<IMedicalAidDeductionService, MedicalAidDeductionService>();
 builder.Services.AddScoped<IRBACEnsurer, RBACEnsurer>();
+=======
+builder.Services.AddSignalR();
+
+>>>>>>> 64bac85f9e35e161e3a66d1a85620a8200783968
 builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowReact",
@@ -348,4 +377,5 @@ app.UseAuthorization();
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseRateLimiter();
 app.MapControllers();
+app.MapHub<CompanyHub>("/companyHub");
 app.Run();
