@@ -97,7 +97,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
     {
-      options.UseSqlServer(builder.Configuration.GetConnectionString("DBeaverConnection")!);
+      options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!);
       options.AddInterceptors(new AuditSaveChangesInterceptor());
     });
 
@@ -185,7 +185,7 @@ builder.Services.AddQuartz(q =>
   {
     store.UseSqlServer(options =>
         {
-          options.ConnectionString = builder.Configuration.GetConnectionString("DBeaverConnection")!;
+          options.ConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
           options.TablePrefix = "quartz.QRTZ_";
         });
     store.UseSerializer<Quartz.Simpl.SystemTextJsonObjectSerializer>();
@@ -243,9 +243,7 @@ builder.Services.AddScoped<IPensionFundService, PensionFundService>();
 builder.Services.AddScoped<IPensionFundRepository, PensionFundRepository>();
 builder.Services.AddScoped<ILeaveTypeManagementService, LeaveTypeManagementService>();
 builder.Services.AddScoped<ILeaveApplicationService, LeaveApplicationService>();
-
 builder.Services.AddHostedService<LeaveAutomationBackgroundService>();
-
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IEmployeeCompanyContributionService, EmployeeCompanyContributionService>();
 builder.Services.AddScoped<IStatutoryContributionRepository, StatutoryContributionRepository>();
