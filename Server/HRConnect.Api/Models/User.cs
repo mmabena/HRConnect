@@ -4,7 +4,7 @@ namespace HRConnect.Api.Models
   {
     NormalUser,
     SuperUser,
-    HOD,
+    ExecutiveUser,
     CEO
   }
 
@@ -14,7 +14,6 @@ namespace HRConnect.Api.Models
     public string Email { get; set; } = string.Empty;
     public string PasswordHash { get; set; } = string.Empty;
     // TODO 
-    // MOVE THIS TO A LIST FOR A 1-MANY
     public Userrole Role { get; set; }
     public Userrole? TempRole { get; set; }
     public ICollection<UserRoles> UserRoles { get; set; } = [];

@@ -1,4 +1,4 @@
-namespace HRConnect.Api.Repositories
+namespace HRConnect.Api.Repository
 {
   using HRConnect.Api.Interfaces.AccessControl;
   using HRConnect.Api.Data;
@@ -15,50 +15,58 @@ namespace HRConnect.Api.Repositories
       _context = context;
       _rolesRepo = rolesRepo;
     }
-
-    public async Task<Permissions?> GetPermissionByKeyAsync(string key)
+    public async Task<Permissions?> GetPermissionsByIdAsync(int id)
     {
-      Permissions? permission = await _context.Permissions.FirstAsync(p => p.Key == key);
+      Permissions? permission = await _context.Permissions.FirstOrDefaultAsync(p =>
+      p.PermissionsId == id);
       if (permission == null)
         return null;
       return permission;
     }
 
-    public async Task AssignPermissionsToRoleAsync(int roleId, params string[] permissionsList)
+    public async Task<Permissions?> GetPermissionByKeyAsync(string key)
     {
-      //Get the roles
-      Roles? role = await _context.Roles
-        .Include(r => r.RolePermissions)
-        .FirstOrDefaultAsync(r => r.RoleId == roleId);
-      //Get the permisions
-      var permissions = await _context.Permissions
-        .Where(p => permissionsList.Contains(p.Key)).ToListAsync();
-
-      foreach (var p in permissions)
-      {
-        bool alreadyAssigned = role!.RolePermissions.Any(rp => rp.PermissionsId == p.PermissionsId);
-
-        //Avoid duplicatte assignment
-        if (alreadyAssigned)
-          continue;
-
-        await _context.RolePermissions.AddAsync(new RolePermissions
-        {
-          RoleId = role.RoleId,
-          PermissionsId = p.PermissionsId,
-          Role = role,
-          Permissions = p,
-          IsGranted = true
-        });
-      }
-
-      //write to db
-      await _context.SaveChangesAsync();
+      Permissions? permission = await _context.Permissions.FirstOrDefaultAsync(p => p.Key == key);
+      if (permission == null)
+        return null;
+      return permission;
     }
-    public async Task RemovePermissionsFromRoleAsync(int roleId, params string[] permissionsList)
-    {
-      throw new NotImplementedException();
-    }
+
+    // public async Task AssignPermissionsToRoleByIdAsync(int roleId, params string[] permissionsList)
+    // {
+    //   //Get the roles
+    //   Roles? role = await _context.Roles
+    //     .Include(r => r.RolePermissions)
+    //     .FirstOrDefaultAsync(r => r.RoleId == roleId);
+    //   //Get the permisions
+    //   var permissions = await _context.Permissions
+    //     .Where(p => permissionsList.Contains(p.Key)).ToListAsync();
+
+    //   foreach (var p in permissions)
+    //   {
+    //     bool alreadyAssigned = role!.RolePermissions.Any(rp => rp.PermissionsId == p.PermissionsId);
+
+    //     //Avoid duplicatte assignment
+    //     if (alreadyAssigned)
+    //       continue;
+
+    //     await _context.RolePermissions.AddAsync(new RolePermissions
+    //     {
+    //       RoleId = role.RoleId,
+    //       PermissionsId = p.PermissionsId,
+    //       Role = role,
+    //       Permissions = p,
+    //       IsGranted = true
+    //     });
+    //   }
+
+    //   //write to db
+    //   await _context.SaveChangesAsync();
+    // }
+    // public async Task RemovePermissionsFromRoleAsync(int roleId, params string[] permissionsList)
+    // {
+    //   throw new NotImplementedException();
+    // }
 
     public async Task<IEnumerable<Permissions>> GetPermissionsForRoleAsync(int roleId)
     {

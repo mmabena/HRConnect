@@ -9,7 +9,7 @@ namespace HRConnect.Api.Models
   {
     [Key]
     public int PermissionsId { get; }
-    public string Key { get; set; } = string.Empty;//This should be unique to prevent 
+    public string Key { get; set; } = string.Empty;
     // permissions duplication
     public string Description { get; set; } = string.Empty;
     public string Category { get; set; } = string.Empty;

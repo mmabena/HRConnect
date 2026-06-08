@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRConnect.Api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20260529081033_CompanyIdIsNull")]
+    [Migration("20260608082959_CompanyIdIsNull")]
     partial class CompanyIdIsNull
     {
         /// <inheritdoc />
@@ -1517,7 +1517,7 @@ namespace HRConnect.Api.Migrations
 
                     b.Property<string>("EmployeeId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsLocked")
                         .IsConcurrencyToken()
@@ -1528,8 +1528,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PayrollRunId", "EmployeeId")
-                        .IsUnique();
+                    b.HasIndex("PayrollRunId");
 
                     b.ToTable((string)null);
 
@@ -1764,6 +1763,70 @@ namespace HRConnect.Api.Migrations
                     b.ToTable("PensionOptions");
                 });
 
+            modelBuilder.Entity("HRConnect.Api.Models.PermissionAuditLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ChangedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ChangedBy")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PermissionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Id");
+
+                    b.HasIndex("PermissionId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("PermissionAuditLogs");
+                });
+
+            modelBuilder.Entity("HRConnect.Api.Models.Permissions", b =>
+                {
+                    b.Property<int>("PermissionsId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PermissionsId"));
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("PermissionsId");
+
+                    b.HasIndex("Key")
+                        .IsUnique();
+
+                    b.ToTable("Permissions");
+                });
+
             modelBuilder.Entity("HRConnect.Api.Models.Position", b =>
                 {
                     b.Property<int>("PositionId")
@@ -1801,6 +1864,56 @@ namespace HRConnect.Api.Migrations
                         .IsUnique();
 
                     b.ToTable("Positions");
+                });
+
+            modelBuilder.Entity("HRConnect.Api.Models.RolePermissions", b =>
+                {
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PermissionsId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsGranted")
+                        .HasColumnType("bit");
+
+                    b.HasKey("RoleId", "PermissionsId");
+
+                    b.HasIndex("PermissionsId");
+
+                    b.ToTable("RolePermissions", (string)null);
+                });
+
+            modelBuilder.Entity("HRConnect.Api.Models.Roles", b =>
+                {
+                    b.Property<int>("RoleId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RoleId"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int?>("ParentRoleId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RoleName")
+                        .HasColumnType("int");
+
+                    b.HasKey("RoleId");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.HasIndex("ParentRoleId");
+
+                    b.ToTable("Roles");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.StatutoryContributionType", b =>
@@ -1986,6 +2099,21 @@ namespace HRConnect.Api.Migrations
                     b.HasIndex("CompanyId");
 
                     b.ToTable("UserCompanies");
+                });
+
+            modelBuilder.Entity("HRConnect.Api.Models.UserRoles", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RolesId")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserId", "RolesId");
+
+                    b.HasIndex("RolesId");
+
+                    b.ToTable("UserRoles", (string)null);
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.CompanyContributions.EmployeeCompanyContribution", b =>
@@ -2531,6 +2659,25 @@ namespace HRConnect.Api.Migrations
                     b.Navigation("PensionOptions");
                 });
 
+            modelBuilder.Entity("HRConnect.Api.Models.PermissionAuditLog", b =>
+                {
+                    b.HasOne("HRConnect.Api.Models.Permissions", "Permissions")
+                        .WithMany()
+                        .HasForeignKey("PermissionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("HRConnect.Api.Models.Roles", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Permissions");
+
+                    b.Navigation("Role");
+                });
+
             modelBuilder.Entity("HRConnect.Api.Models.Position", b =>
                 {
                     b.HasOne("HRConnect.Api.Models.JobGrade", "JobGrade")
@@ -2548,6 +2695,35 @@ namespace HRConnect.Api.Migrations
                     b.Navigation("JobGrade");
 
                     b.Navigation("OccupationalLevels");
+                });
+
+            modelBuilder.Entity("HRConnect.Api.Models.RolePermissions", b =>
+                {
+                    b.HasOne("HRConnect.Api.Models.Permissions", "Permissions")
+                        .WithMany("RolePermissions")
+                        .HasForeignKey("PermissionsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HRConnect.Api.Models.Roles", "Role")
+                        .WithMany("RolePermissions")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Permissions");
+
+                    b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("HRConnect.Api.Models.Roles", b =>
+                {
+                    b.HasOne("HRConnect.Api.Models.Roles", "ParentRole")
+                        .WithMany("ChildRoles")
+                        .HasForeignKey("ParentRoleId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("ParentRole");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.TOTPState", b =>
@@ -2576,6 +2752,25 @@ namespace HRConnect.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("Company");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("HRConnect.Api.Models.UserRoles", b =>
+                {
+                    b.HasOne("HRConnect.Api.Models.Roles", "Role")
+                        .WithMany("UserRoles")
+                        .HasForeignKey("RolesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HRConnect.Api.Models.User", "User")
+                        .WithMany("UserRoles")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
 
                     b.Navigation("User");
                 });
@@ -2701,9 +2896,28 @@ namespace HRConnect.Api.Migrations
                     b.Navigation("PensionDeduction");
                 });
 
+            modelBuilder.Entity("HRConnect.Api.Models.Permissions", b =>
+                {
+                    b.Navigation("RolePermissions");
+                });
+
             modelBuilder.Entity("HRConnect.Api.Models.Position", b =>
                 {
                     b.Navigation("Employees");
+                });
+
+            modelBuilder.Entity("HRConnect.Api.Models.Roles", b =>
+                {
+                    b.Navigation("ChildRoles");
+
+                    b.Navigation("RolePermissions");
+
+                    b.Navigation("UserRoles");
+                });
+
+            modelBuilder.Entity("HRConnect.Api.Models.User", b =>
+                {
+                    b.Navigation("UserRoles");
                 });
 #pragma warning restore 612, 618
         }

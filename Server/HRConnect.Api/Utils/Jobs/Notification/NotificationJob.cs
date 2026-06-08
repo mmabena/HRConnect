@@ -55,14 +55,11 @@ namespace HRConnect.Api.Utils.Jobs.Notification
 
       DateTimeOffset now = DateTimeOffset.Now;
       double daysUntilRollover = (payrollExecutionDate.Value.Date - now.Date).Days;
-      double secondsUntilRollover = (payrollExecutionDate.Value - DateTime.Now).TotalSeconds;
+
+      Console.WriteLine($"----===... => DAYS TO ROLL OVER {daysUntilRollover}");
 
       if (daysUntilRollover >= 1 &&
        daysUntilRollover <= DAYS_TO_ROLLOVER_NOTIFICATION)
-      {
-        //Use this if check for testing notification job if neccessary 
-      }
-      if (secondsUntilRollover > 0)
       {
         var superUserIds = await _userService.OrganiseSuperUsersAsync();
         foreach (var su in superUserIds)

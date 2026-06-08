@@ -1,4 +1,3 @@
-
 using System.Text;
 using Audit.Core;
 using Audit.EntityFramework;
@@ -246,11 +245,7 @@ builder.Services.AddScoped<IJobGradeRepository, JobGradeRepository>();
 builder.Services.AddScoped<IJobGradeService, JobGradeService>();
 builder.Services.AddScoped<IOccupationalLevelRepository, OccupationalLevelRepository>();
 builder.Services.AddScoped<IOccupationalLevelService, OccupationalLevelService>();
-<<<<<<< HEAD
 builder.Services.AddScoped<IAuthService, AuthService>();
-=======
-builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.Services.AuthService>();
->>>>>>> 64bac85f9e35e161e3a66d1a85620a8200783968
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<ILeaveBalanceService, LeaveBalanceService>();
 builder.Services.AddScoped<ILeaveProcessingService, LeaveProcessingService>();
@@ -293,12 +288,18 @@ builder.Services.AddScoped<ITOTPService, TOTPService>();
 builder.Services.AddScoped<ITOTPRepository, TOTPRepository>();
 builder.Services.AddScoped<IMFAUserSecretsService, MFAUserSecretsService>();
 builder.Services.AddScoped<IMFAUserSecretsRepository, MFAUserSecretsRepository>();
-builder.Services.AddScoped<IMedicalOptionService,
-  MedicalOptionService>();
+builder.Services.AddScoped<IMedicalOptionService, MedicalOptionService>();
 builder.Services.AddScoped<IMedicalAidEligibilityService, MedicalAidEligibilityService>();
 builder.Services.AddScoped<IMedicalAidDeductionRepository, MedicalAidDeductionRepository>();
 builder.Services.AddScoped<IMedicalAidDeductionService, MedicalAidDeductionService>();
-
+builder.Services.AddScoped<IMedicalOptionService, MedicalOptionService>();
+builder.Services.AddScoped<IMedicalAidEligibilityService, MedicalAidEligibilityService>();
+builder.Services.AddScoped<IMedicalAidDeductionRepository, MedicalAidDeductionRepository>();
+builder.Services.AddScoped<IMedicalAidDeductionService, MedicalAidDeductionService>();
+builder.Services.AddScoped<IRBACEnsurer, RBACEnsurer>();
+builder.Services.AddScoped<IRolesRepository, RolesRepository>();
+builder.Services.AddScoped<IPermissionsRepository, PermissionRepository>();
+builder.Services.AddScoped<IPermissionService, PermissionService>();
 
 builder.Services.AddHttpClient<IUserHttpClient, UserHttpClient>((provider, client) =>
 {
@@ -306,17 +307,8 @@ builder.Services.AddHttpClient<IUserHttpClient, UserHttpClient>((provider, clien
   client.BaseAddress = new Uri(config["Services:Api"]!);
 });
 
-<<<<<<< HEAD
-builder.Services.AddScoped<IMedicalOptionService,
-  MedicalOptionService>();
-builder.Services.AddScoped<IMedicalAidEligibilityService, MedicalAidEligibilityService>();
-builder.Services.AddScoped<IMedicalAidDeductionRepository, MedicalAidDeductionRepository>();
-builder.Services.AddScoped<IMedicalAidDeductionService, MedicalAidDeductionService>();
-builder.Services.AddScoped<IRBACEnsurer, RBACEnsurer>();
-=======
 builder.Services.AddSignalR();
 
->>>>>>> 64bac85f9e35e161e3a66d1a85620a8200783968
 builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowReact",
@@ -357,6 +349,7 @@ using (var scope = app.Services.CreateScope())
   await initialiser.InitialisePayrollPeriod();
   await userService.SyncEmployeeUserAsync();
   await RBACInitialiser.EnsureRoleBasedAccessControlAsync();
+  // await RBACInitialiser.ConfigureHierarchyAsync();
 }
 
 if (app.Environment.IsDevelopment())

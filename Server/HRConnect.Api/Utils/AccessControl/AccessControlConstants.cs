@@ -6,7 +6,7 @@ namespace HRConnect.Api.Utils.AccessControl
   {
     public const string NormalUser = "NormalUser";
     public const string SuperUser = "SuperUser";
-    public const string Executive = "Executive";
+    public const string Executive = "ExecutiveUser";
     public const string CEO = "CEO";
   }
 
@@ -17,7 +17,6 @@ namespace HRConnect.Api.Utils.AccessControl
     public const string PayrollViewOwn = "payroll.view-own-payslips";
     public const string LeaveApply = "leave.apply";
     public const string PayrollToolsCalculator = "payroll-tools.pension-calculator";
-
     //For Super User including the above
     public const string EmployeeViewAll = "employee.view-all";
     public const string EmployeeCreate = "employee.create";
@@ -28,8 +27,7 @@ namespace HRConnect.Api.Utils.AccessControl
     public const string LeaveManagePartial = "leave.manage-partial";
     public const string PositionManagePartial = "position.manage-partial";
     public const string CompanyViewDetails = "company.view-details";
-
-    //Additionally for the HOD (Executives)
+    //Additionally for the Executives (HOD)
     public const string BudgetSet = "budget.set";
     public const string BudgetView = "budget.view";
     public const string PayrollBenchmarkCapture = "payroll.benchmarking-capture";

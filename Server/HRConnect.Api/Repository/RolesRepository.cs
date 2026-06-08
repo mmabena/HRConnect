@@ -1,4 +1,4 @@
-namespace HRConnect.Api.Repositories
+namespace HRConnect.Api.Repository
 {
   using HRConnect.Api.Interfaces.AccessControl;
   using HRConnect.Api.Data;
@@ -35,7 +35,7 @@ namespace HRConnect.Api.Repositories
       return await _context.Roles.ToListAsync();
     }
 
-    public async Task AssignPermissionsToRoleAsync(int roleId, params string[] permissionsList)
+    public async Task AssignPermissionsToRoleByIdAsync(int roleId, params string[] permissionsList)
     {
       throw new NotImplementedException();
     }

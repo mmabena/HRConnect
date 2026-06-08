@@ -4,6 +4,7 @@ namespace HRConnect.Api.Interfaces.AccessControl
   public interface IPermissionsRepository
   {
     Task<IEnumerable<Permissions>> GetAllPermissionsAsync();
+    Task<Permissions?> GetPermissionsByIdAsync(int id);
     Task<Permissions?> GetPermissionByKeyAsync(string key);
     Task<IEnumerable<Permissions>> GetPermissionsForRoleAsync(int roleId);
     ///<summary>
@@ -13,9 +14,9 @@ namespace HRConnect.Api.Interfaces.AccessControl
     ///<paramref name="roleName">Name of the role to assign permissions to</paramref>
     ///<paramref name="permissionsList">Parameter collection of Permissions to be assigned</paramref>
     ///</summary>
-    Task AssignPermissionsToRoleAsync(int roleId, params string[] permissionsList);
+    // Task AssignPermissionsToRoleByIdAsync(int roleId, params string[] permissionsList);
     //I'll Challenge myself of implementing this completely alone under pressure
-    Task RemovePermissionsFromRoleAsync(int roleId, params string[] permissionsList);
+    // Task RemovePermissionsFromRoleAsync(int roleId, params string[] permissionsList);
     Task Save();
   }
 }
