@@ -10,8 +10,9 @@ namespace HRConnect.Api.Services
   public interface IRBACEnsurer
   {
     Task EnsureRoleBasedAccessControlAsync();
-    Task ConfigureHierarchyAsync();
+    // Task SetDefaultAccessControl();
   }
+
   ///<summary>
   ///This is used to ensure that all the roles and permissions exist in the 
   ///system. This is later used to be able to migrate to new Role Based
@@ -20,7 +21,7 @@ namespace HRConnect.Api.Services
   ///</summary>
   public sealed partial class RBACEnsurer : IRBACEnsurer
   {
-    [GeneratedRegex("(?<=[A-Z])(?=[A-Z]|[a-z])|(?<!^)(A-Z)")]
+    [GeneratedRegex("(?<=[A-Z])(?=[A-Z][a-z])|(?<!^)([A-Z][a-z])")]
     private static partial Regex AddSpacesRegex();
     private readonly ApplicationDBContext _context;
     private readonly IRolesRepository _roleRepo;
@@ -35,7 +36,7 @@ namespace HRConnect.Api.Services
     }
     private static string AddSpaces(string s)
     {
-      return AddSpacesRegex().Replace(s, "$1");
+      return AddSpacesRegex().Replace(s, " $1");
     }
     public async Task EnsureRoleBasedAccessControlAsync()
     {
@@ -43,18 +44,42 @@ namespace HRConnect.Api.Services
       await EnsurePermissionsExistsAsync();
 
       //Create Roles and Configure hierarchy 
-      await EnsureRoleExistsAsync();
+      if (await EnsureRoleExistsAsync())
+        await ConfigureHierarchyAsync();
 
-      //Configure roles hierarchy 
-      // await ConfigureHierarchyAsync();
     }
+
+    private async Task SetDefaultAccessControl(Roles? role, params string[] permissionsList)
+    {
+      List<Permissions> permissions = await _context.Permissions
+        .Where(p => permissionsList.Contains(p.Key)).ToListAsync();
+
+      foreach (Permissions p in permissions)
+      {
+        bool alreadyAssigned = role!.RolePermissions.Any(rp => rp.PermissionsId == p.PermissionsId);
+
+        if (alreadyAssigned)
+          continue;
+
+        _ = await _context.RolePermissions.AddAsync(new RolePermissions
+        {
+          RoleId = role.RoleId,
+          PermissionsId = p.PermissionsId,
+          Role = role,
+          Permissions = p,
+          IsGranted = true
+        });
+      }
+      // await _context.SaveChangesAsync();
+    }
+
     public async Task ConfigureHierarchyAsync()
     {
       //CEO -> Executive -> SuperUser -> User
       Roles? ceo = await _roleRepo.GetRoleByNameAsync("CEO");
-      Roles? executive = await _roleRepo.GetRoleByNameAsync("Executive");
-      Roles? superUser = await _roleRepo.GetRoleByNameAsync("SuperUser");
-      Roles? normalUser = await _roleRepo.GetRoleByNameAsync("NormalUser");
+      Roles? executive = await _roleRepo.GetRoleByNameAsync("Executive User");
+      Roles? superUser = await _roleRepo.GetRoleByNameAsync("Super User");
+      Roles? normalUser = await _roleRepo.GetRoleByNameAsync("Normal User");
 
       //Walk up the hierarchy and link the roles correctly
       normalUser!.ParentRole = superUser;
@@ -62,14 +87,46 @@ namespace HRConnect.Api.Services
 
       superUser!.ParentRole = executive;
       superUser!.ParentRoleId = executive!.RoleId;
-      superUser.ChildRoles.Add(normalUser!);
 
       executive!.ParentRole = ceo!;
       executive!.ParentRoleId = ceo!.RoleId;
-      executive!.ChildRoles.Add(superUser);
 
       ceo!.ParentRoleId = null;
       ceo!.ParentRole = null;
+
+      await SetDefaultAccessControl(normalUser,
+          PermissionSet.PayrollViewOwn,
+          PermissionSet.PayrollViewOwn,
+          PermissionSet.LeaveApply,
+          PermissionSet.LeaveViewOwn,
+          PermissionSet.PayrollToolsCalculator);
+
+      await SetDefaultAccessControl(superUser,
+          PermissionSet.EmployeeViewAll,
+          PermissionSet.EmployeeCreate,
+          PermissionSet.EmployeeEdit,
+          PermissionSet.EmployeeViewPayslip,
+          PermissionSet.CompanySwitch,
+          PermissionSet.TaxManagePartial,
+          PermissionSet.LeaveManagePartial,
+          PermissionSet.PositionManagePartial,
+          PermissionSet.CompanyViewDetails
+        );
+      await SetDefaultAccessControl(executive,
+          PermissionSet.BudgetSet,
+          PermissionSet.BudgetView,
+          PermissionSet.PayrollBenchmarkCapture,
+          PermissionSet.PayrollBenchmarkView
+      );
+      await SetDefaultAccessControl(ceo,
+          PermissionSet.BudgetViewOnly,
+          PermissionSet.BudgetApprove,
+          PermissionSet.BudgetComment,
+          PermissionSet.PayrollBenchmarkViewOnly
+      );
+
+      superUser!.ChildRoles.Add(normalUser!);
+      executive!.ChildRoles.Add(superUser);
       ceo!.ChildRoles.Add(executive!);
 
       _ = await _context.SaveChangesAsync();
@@ -82,6 +139,7 @@ namespace HRConnect.Api.Services
           PermissionSet.EmployeeViewOwn,
           PermissionSet.PayrollViewOwn,
           PermissionSet.LeaveApply,
+          PermissionSet.LeaveViewOwn,
           PermissionSet.PayrollToolsCalculator,
           PermissionSet.EmployeeViewAll,
           PermissionSet.EmployeeCreate,
@@ -117,8 +175,9 @@ namespace HRConnect.Api.Services
       _ = await _context.SaveChangesAsync();
     }
 
-    private async Task EnsureRoleExistsAsync()
+    private async Task<bool> EnsureRoleExistsAsync()
     {
+      bool shouldConfigure = false;
       string[] roles =
      [
         RoleSet.SuperUser,
@@ -126,28 +185,24 @@ namespace HRConnect.Api.Services
         RoleSet.Executive,
         RoleSet.CEO,
      ];
-      // string addSpaces(string s)
-      // {
-      //   return Regex.Replace(
-      //      s, "(?<=[A-Z])(?=[A-Z]|[a-z])|(?<!^)(A-Z)");
-      // }
 
       foreach (string role in roles)
       {
-        bool exists = await _context.Roles.AnyAsync(r => r.Name == role);
+        Enum.TryParse<RoleName>(role, true, out RoleName roleName);
+        bool exists = await _context.Roles.AnyAsync(r => r.RoleName == roleName);
         if (!exists)
         {
           //Parse string to RoleName and ignore casing 
-          Enum.TryParse<RoleName>(role, true, out RoleName roleName);
           _ = await _context.Roles.AddAsync(new Roles
           {
             Name = AddSpaces(role),
             RoleName = roleName
           });
-          Console.WriteLine($"REGEX {role} -> {AddSpaces(role)}");
+          shouldConfigure = true;
         }
       }
-      // _ = await _context.SaveChangesAsync();
+      _ = await _context.SaveChangesAsync();
+      return shouldConfigure;
     }
   }
 }

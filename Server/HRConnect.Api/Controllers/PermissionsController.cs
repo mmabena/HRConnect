@@ -1,26 +1,36 @@
 namespace HRConnect.Api.Controllers
 {
+  using HRConnect.Api.Interfaces.AccessControl;
+  using HRConnect.Api.DTOs.AccessControl;
   using Microsoft.AspNetCore.Mvc;
-  using Microsoft.AspNetCore.Authorization;
+
   [Route("api/permissions")]
-  [Authorize(Roles = "SuperUser")]
   [ApiController]
   public class PermissionsController : ControllerBase
   {
-    public PermissionsController()
+    private readonly IRolePermissionService _rolePermissionService;
+    private readonly IRoleService _roleService;
+    private readonly IPermissionService _permissionService;
+    public PermissionsController(IRolePermissionService rolePermissionService,
+    IRoleService roleService, IPermissionService permissionService)
     {
+      _rolePermissionService = rolePermissionService;
+      _roleService = roleService;
+      _permissionService = permissionService;
     }
 
     [HttpGet("roles")] //Get All Permissions
     public async Task<IActionResult> GetAllRoles()
     {
-      throw new NotImplementedException();
+      var roles = await _roleService.GetAllRolesAsync();
+      return Ok(roles);
     }
 
     [HttpGet("all")]
     public async Task<IActionResult> GetAllPermissions()
     {
-      throw new NotImplementedException();
+      var permissions = await _permissionService.GetAllPermissionsAsync();
+      return Ok(permissions);
     }
 
     //Get all permissions for a roles
@@ -32,9 +42,18 @@ namespace HRConnect.Api.Controllers
 
     //Assign a permissions to a role
     [HttpPost("/roles/{roleId}/permissions")]
-    public async Task<IActionResult> AssignPermissionToRole(int roleId)
+    public async Task<IActionResult> AssignPermissionToRole(int roleId, [FromBody] AssignPermissionToRoleDTO dto)
     {
-      throw new NotImplementedException();
+      try
+      {
+        await _rolePermissionService.AssignPermissionsToRoleByIdAsync(roleId, dto.PermissionsArray);
+
+        return Ok($"Successfully Assigned Permissions To Role");
+      }
+      catch
+      {
+        return BadRequest($"Failed To Assign Permissions To Role");
+      }
     }
 
     [HttpDelete("roles/{roleid}/permissions/{permissionId}")]

@@ -16,6 +16,7 @@ namespace HRConnect.Api.Utils.AccessControl
     public const string EmployeeViewOwn = "employee.view-own";
     public const string PayrollViewOwn = "payroll.view-own-payslips";
     public const string LeaveApply = "leave.apply";
+    public const string LeaveViewOwn = "leave.view-own";
     public const string PayrollToolsCalculator = "payroll-tools.pension-calculator";
     //For Super User including the above
     public const string EmployeeViewAll = "employee.view-all";

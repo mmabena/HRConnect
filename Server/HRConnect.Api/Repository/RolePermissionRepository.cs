@@ -2,7 +2,7 @@ namespace HRConnect.Api.Repository
 {
   using HRConnect.Api.Data;
   using HRConnect.Api.Models;
-  using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Interfaces.AccessControl;
   using System.Linq;
   using Microsoft.EntityFrameworkCore;
   using System.Collections.Generic;
@@ -16,11 +16,10 @@ namespace HRConnect.Api.Repository
     }
     public async Task AssignPermissionsToRoleByIdAsync(int roleId, params string[] permissionsList)
     {
-      //Get the roles
       Roles? role = await _context.Roles
         .Include(r => r.RolePermissions)
         .FirstOrDefaultAsync(r => r.RoleId == roleId);
-      //Get the permisions
+
       List<Permissions> permissions = await _context.Permissions
         .Where(p => permissionsList.Contains(p.Key)).ToListAsync();
 
@@ -28,11 +27,10 @@ namespace HRConnect.Api.Repository
       {
         bool alreadyAssigned = role!.RolePermissions.Any(rp => rp.PermissionsId == p.PermissionsId);
 
-        //Avoid duplicatte assignment
         if (alreadyAssigned)
           continue;
 
-        await _context.RolePermissions.AddAsync(new RolePermissions
+        _ = await _context.RolePermissions.AddAsync(new RolePermissions
         {
           RoleId = role.RoleId,
           PermissionsId = p.PermissionsId,
@@ -42,13 +40,23 @@ namespace HRConnect.Api.Repository
         });
       }
 
-      //write to db
       await _context.SaveChangesAsync();
     }
 
-    public Task RemovePermissionsFromRoleAsync(int roleId, params string[] permissionsList)
+    public async Task RemovePermissionsFromRoleAsync(int roleId, params string[] permissionsList)
     {
-      throw new NotImplementedException();
+      List<int> permissionIds = await _context.Permissions
+      .Where(p => permissionsList.Contains(p.Key))
+      .Select(s => s.PermissionsId)
+      .ToListAsync();
+
+      List<RolePermissions> rolePermissions = await _context.RolePermissions
+      .Where(rp => rp.RoleId == roleId &&
+      permissionIds.Contains(rp.PermissionsId))
+      .ToListAsync();
+
+      _context.RolePermissions.RemoveRange(rolePermissions);
+      await _context.SaveChangesAsync();
     }
   }
 }

@@ -1,4 +1,4 @@
-namespace HRConnect.Api.Interfaces
+namespace HRConnect.Api.Interfaces.AccessControl
 {
   public interface IRolePermissionRepository
   {
