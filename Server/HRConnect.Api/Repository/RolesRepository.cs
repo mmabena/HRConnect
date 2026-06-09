@@ -16,12 +16,12 @@ namespace HRConnect.Api.Repository
       _context = context;
     }
 
-    public async Task<RolesDto?> GetRoleByNameAsync(string roleName)
+    public async Task<Roles?> GetRoleByNameAsync(string roleName)
     {
       Roles? role = await _context.Roles.FirstOrDefaultAsync(r => r.Name == roleName);
       if (role == null)
         return null;
-      return role.ToRolesDtoFromRole();
+      return role;
     }
 
     public async Task<RolesDto?> GetRoleByIdAsync(int roleId)

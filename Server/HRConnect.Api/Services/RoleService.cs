@@ -16,10 +16,10 @@ namespace HRConnect.Api.Services
 
     public async Task<RolesDto?> GetRoleByNameAsync(string roleName)
     {
-      RolesDto role = await _roleRepo.GetRoleByNameAsync(roleName);
+      Roles? role = await _roleRepo.GetRoleByNameAsync(roleName);
       if (role == null)
         throw new KeyNotFoundException($"Role Named {roleName} Not Found");
-      return role;
+      return role.ToRolesDtoFromRole();
     }
     public async Task<IEnumerable<RolesDto>> GetAllRolesAsync()
     {
