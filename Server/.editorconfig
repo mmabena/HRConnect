@@ -72,5 +72,9 @@ dotnet_analyzer_diagnostic.severity = error
 #############################################
 # Suppress CA1720 for NoUpdateOnMedicalOptionCategory
 #############################################
+
+# IDE0290: Use primary constructor
+dotnet_diagnostic.IDE0290.severity = none
+
 [**/NoUpdateOnMedicalOptionCategory.cs]
 dotnet_diagnostic.CA1720.severity = none

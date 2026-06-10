@@ -1,22 +1,20 @@
 namespace HRConnect.Tests
 {
   using System;
-  using Moq;
-  using System.Collections.Generic;
   using System.Linq;
   using System.Threading.Tasks;
   using HRConnect.Api.Data;
   using Microsoft.AspNetCore.Identity;
   using HRConnect.Api.Models;
+  using Microsoft.AspNetCore.DataProtection;
   using HRConnect.Api.Services;
-  using Microsoft.EntityFrameworkCore;
-  using Xunit;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Utils;
+  using Microsoft.EntityFrameworkCore;
+  using Xunit;
   using HRConnect.Api.DTOs.Employee;
   using HRConnect.Api.Repository;
-  using Microsoft.AspNetCore.Identity;
-  using System.Reflection.Metadata;
+  using Moq;
 
   public class LeaveBalanceServiceTests
   {
@@ -33,8 +31,14 @@ namespace HRConnect.Tests
           .ConfigureWarnings(w =>
               w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.InMemoryEventId.TransactionIgnoredWarning))
           .Options;
-
-      return new ApplicationDBContext(options);
+      // Create a mock IDataProtectionProvider
+      var mockProvider = new Mock<IDataProtectionProvider>();
+      // Setup CreateProtector to return a dummy protector
+      var mockProtector = new Mock<IDataProtector>();
+      mockProtector.Setup(p => p.Protect(It.IsAny<byte[]>())).Returns<byte[]>(b => b);
+      mockProtector.Setup(p => p.Unprotect(It.IsAny<byte[]>())).Returns<byte[]>(b => b);
+      mockProvider.Setup(p => p.CreateProtector(It.IsAny<string>())).Returns(mockProtector.Object);
+      return new ApplicationDBContext(options, mockProtector.Object);
     }
 
     private static LeaveBalanceService CreateLeaveBalanceService(ApplicationDBContext context)
@@ -47,12 +51,31 @@ namespace HRConnect.Tests
     {
       var employeeRepo = new EmployeeRepository(context);
       var positionRepo = new PositionRepository(context);
+
       var passwordHasherMock = new Mock<IPasswordHasher<User>>();
+      var activeCompanyServiceMock = new Mock<IActiveCompanyService>();
+      var userCompanyServiceMock = new Mock<IUserCompanyService>();
+      var companyRepoMock = new Mock<ICompanyRepository>();
+
+      activeCompanyServiceMock
+          .Setup(x => x.GetActiveCompanyIdAsync(It.IsAny<int>()))
+          .ReturnsAsync("COMP001");
+
+      companyRepoMock
+          .Setup(x => x.GetCompanyByIdAsync(It.IsAny<string>()))
+          .ReturnsAsync(new Company
+          {
+            CompanyId = "COMP001",
+            CompanyName = "Test Company"
+          });
 
       return new EmployeeService(
           context,
+          activeCompanyServiceMock.Object,
+          userCompanyServiceMock.Object,
           employeeRepo,
           new FakeEmailService(),
+          companyRepoMock.Object,
           positionRepo,
           CreateLeaveBalanceService(context),
           CreateLeaveProcessingService(context),
@@ -254,7 +277,7 @@ namespace HRConnect.Tests
       balance.TakenDays = 5;
       await context.SaveChangesAsync();
 
-      await employeeService.UpdateEmployeeAsync(employee.EmployeeId, new UpdateEmployeeRequestDto
+      await employeeService.UpdateEmployeeAsync(1, employee.EmployeeId, new UpdateEmployeeRequestDto
       {
         Title = Title.Mr,
         Gender = Gender.Male,

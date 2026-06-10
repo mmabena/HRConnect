@@ -8,9 +8,12 @@ namespace HRConnect.Api.Controllers
     using HRConnect.Api.DTOs;
     using HRConnect.Api.Interfaces;
     using HRConnect.Api.Data;
+    using HRConnect.Api.Models;
+    using Microsoft.AspNetCore.Authorization;
 
     [ApiController]
     [Route("api/leave-types")]
+    [Authorize(Roles = "SuperUser")]
     public class LeaveTypesController : ControllerBase
     {
         private readonly ILeaveTypeManagementService _service;
@@ -137,8 +140,8 @@ namespace HRConnect.Api.Controllers
         {
             var result = await _service.GetEmployeeWithLeaveByIdAsync(employeeId);
 
-            if (result == null)
-                return NotFound("Employee not found");
+      if (result == null)
+        return NotFound("Employee not found");
 
             return Ok(result);
         }

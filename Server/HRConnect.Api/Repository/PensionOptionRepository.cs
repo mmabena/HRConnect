@@ -1,4 +1,4 @@
-﻿namespace HRConnect.Api.Repository
+namespace HRConnect.Api.Repository
 {
   using System.Threading.Tasks;
   using HRConnect.Api.Data;
@@ -6,40 +6,43 @@
   using HRConnect.Api.Models;
   using Microsoft.EntityFrameworkCore;
   using System.Collections.Generic;
-  using System.Threading;
 
-  public class PensionOptionRepository(ApplicationDBContext context) : IPensionOptionRepository
+  public class PensionOptionRepository : IPensionOptionRepository
   {
-    private readonly ApplicationDBContext _context = context;
-    public async Task<IEnumerable<PensionOption>> GetPensionOptionsAsync(CancellationToken cancellationToken)
+    private readonly ApplicationDBContext _context;
+    public PensionOptionRepository(ApplicationDBContext context)
     {
-      return await context.PensionOptions.ToListAsync(cancellationToken);
+      _context = context;
+    }
+    public async Task<IEnumerable<PensionOption>> GetPensionOptionsAsync()
+    {
+      return await _context.PensionOptions.ToListAsync();
     }
 
-    public async Task<PensionOption?> GetPensionOptionByIdAsync(int id, CancellationToken cancellationToken)
+    public async Task<PensionOption?> GetPensionOptionByIdAsync(int id)
     {
-      return await context.PensionOptions
-          .FirstOrDefaultAsync(o => o.PensionOptionId == id, cancellationToken);
+      return await _context.PensionOptions
+          .FirstOrDefaultAsync(o => o.PensionOptionId == id);
     }
 
-    public async Task<ServiceResult> AddPensionOptionAsync(PensionOption pensionOption, CancellationToken cancellationToken)
+    public async Task<ServiceResult> AddPensionOptionAsync(PensionOption pensionOption)
     {
-      _ = await context.PensionOptions.AddAsync(pensionOption, cancellationToken);
-      _ = await context.SaveChangesAsync(cancellationToken);
+      _ = await _context.PensionOptions.AddAsync(pensionOption);
+      _ = await _context.SaveChangesAsync();
 
       return ServiceResult.Success("Pension option added successfully.");
     }
 
-    public async Task<ServiceResult> UpdatePensionOptionAsync(PensionOption pensionOption, CancellationToken cancellationToken)
+    public async Task<ServiceResult> UpdatePensionOptionAsync(PensionOption pensionOption)
     {
-      _ = context.PensionOptions.Update(pensionOption);
-      _ = await context.SaveChangesAsync(cancellationToken);
+      _ = _context.PensionOptions.Update(pensionOption);
+      _ = await _context.SaveChangesAsync();
 
       return ServiceResult.Success("Pension option updated successfully.");
     }
 
     ///<summary>
-    ///Get pension option by id
+    ///Get pension option by ud
     ///</summary>
     ///<param name="id">Pension Option Id</param>
     ///<returns>

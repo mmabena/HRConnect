@@ -50,6 +50,10 @@ namespace HRConnect.Api.Utils
       msg.AddTo(new EmailAddress(recipientEmail));
 
       var response = await _client.SendEmailAsync(msg);
+      var responseBody = await response.Body.ReadAsStringAsync();
+
+      Console.WriteLine($"Status: {response.StatusCode}");
+      Console.WriteLine($"Body: {responseBody}");
 
       if (!response.IsSuccessStatusCode)
       {

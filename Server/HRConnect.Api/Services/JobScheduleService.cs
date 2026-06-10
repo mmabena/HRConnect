@@ -1,7 +1,7 @@
 namespace HRConnect.Api.Services
 {
-  using HRConnect.Api.Interfaces;
   using System.Linq;
+  using HRConnect.Api.Interfaces;
   using Quartz;
   public class JobScheduleService : IJobScheduleService
   {
@@ -10,7 +10,7 @@ namespace HRConnect.Api.Services
     {
       _schedulerFactory = schedulerFactory;
     }
-    public async Task<DateTime?> GetNextJobScheduleAsync(string jobName)
+    public async Task<DateTimeOffset?> GetNextJobScheduleAsync(string jobName)
     {
       var scheduler = await _schedulerFactory.GetScheduler();
 
@@ -21,7 +21,7 @@ namespace HRConnect.Api.Services
 
       if (trigger != null)
       {
-        return trigger.GetNextFireTimeUtc()?.DateTime;
+        return trigger.GetNextFireTimeUtc();
       }
       return null;
     }

@@ -1,18 +1,20 @@
-
 namespace HRConnect.Api.Controllers
 {
   using HRConnect.Api.DTOs.User;
+  using HRConnect.Api.Interfaces;
   using HRConnect.Api.Mappers;
   using Microsoft.AspNetCore.Mvc;
+  using System.Security.Claims;
   using Microsoft.AspNetCore.Authorization;
+
 
   [Route("api/user")]
   [ApiController]
   public class UserController : ControllerBase
   {
-    private readonly HRConnect.Api.Interfaces.IUserService _userService;
+    private readonly IUserService _userService;
 
-    public UserController(HRConnect.Api.Interfaces.IUserService userService)
+    public UserController(IUserService userService)
     {
       _userService = userService;
     }
@@ -40,10 +42,10 @@ namespace HRConnect.Api.Controllers
       return Ok(users.Select(s => s.ToUserDto()));
     }
 
-    [HttpGet("{UserId}")]
-    public async Task<IActionResult> GetUserById(int UserId)
+    [HttpGet("{userId}")]
+    public async Task<IActionResult> GetUserById(int userId)
     {
-      var user = await _userService.GetUserByIdAsync(UserId);
+      var user = await _userService.GetUserByIdAsync(userId);
       if (user == null) return NotFound();
       return Ok(user.ToUserDto());
     }
@@ -63,7 +65,7 @@ namespace HRConnect.Api.Controllers
       return Ok(roles);
     }
 
-    [HttpPut("{UserId}")]
+    [HttpPut("{userId}")]
     public async Task<IActionResult> UpdateUser(int UserId, [FromBody] UpdateUserRequestDto updatedUser)
     {
       try
@@ -79,15 +81,14 @@ namespace HRConnect.Api.Controllers
       }
     }
 
-    [HttpPut("{userId}/role")]
+    [HttpPut("{UserId}/role")]
     [Authorize(Roles = "SuperUser")]
-    public async Task<IActionResult> UpdateUserRole(int userId, [FromBody] UpdateUserRoleRequestDto request)
+    public async Task<IActionResult> UpdateUserRole(int UserId, [FromBody] UpdateUserRoleRequestDto request)
     {
       try
       {
-        var result = await _userService.UpdateUserRoleAsync(userId, request);
-        if (result == null)
-          return NotFound();
+        var result = await _userService.UpdateUserRoleAsync(UserId, request);
+        if (result == null) return NotFound();
         return Ok(result.ToUserDto());
       }
       catch (ArgumentException ex)
@@ -104,8 +105,7 @@ namespace HRConnect.Api.Controllers
       try
       {
         var result = await _userService.UpdateEmployeeUserRoleAsync(employeeId, request);
-        if (result == null)
-          return NotFound();
+        if (result == null) return NotFound();
         return Ok(result.ToUserDto());
       }
       catch (ArgumentException ex)
@@ -114,7 +114,7 @@ namespace HRConnect.Api.Controllers
         return ValidationProblem(ModelState);
       }
     }
-    [HttpDelete("{UserId}")]
+    [HttpDelete("{userId}")]
     public async Task<IActionResult> DeleteUser(int UserId)
     {
       var deleted = await _userService.DeleteUserAsync(UserId);
@@ -135,6 +135,26 @@ namespace HRConnect.Api.Controllers
         ModelState.AddModelError("Validation", ex.Message);
         return ValidationProblem(ModelState);
       }
+    }
+
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<IActionResult> GetCurrentUser()
+    {
+      var email =
+        User.FindFirst(ClaimTypes.Email)?.Value ??
+        User.FindFirst("email")?.Value;
+
+      if (string.IsNullOrEmpty(email))
+        return Unauthorized();
+
+      var result = await _userService.GetCurrentUserAsync(email);
+
+      if (result == null)
+        return NotFound();
+
+      return Ok(result);
+
     }
   }
 }

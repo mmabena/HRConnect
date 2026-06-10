@@ -6,11 +6,12 @@ namespace HRConnect.Api.Interfaces
     using HRConnect.Api.DTOs.CompanyContribution;
     public interface ICompanyContributionRepository
     {
-        Task<List<CompanyContribution>> GetAllAsync();
-        Task<CompanyContribution?> GetByIdAsync(int id);
+        Task<List<CompanyContribution>> GetAllCompanyContributionAsync();
+        Task<bool> FindAllocatedContribution(int payrollRunId);
+        Task<CompanyContribution?> GetCompanyContributionByIdAsync(int companyContributionId);
         Task<CompanyContribution?> CreateCompanyContributionAsync(CompanyContribution companyContributionModel);
         Task<CompanyContribution?> UpdateCompanyContributionAsync(CompanyContribution companyContributionModel);
-        Task DeleteAsync(int id);
+        Task DeleteCompanyContributionAsync(int companyContributionId);
         
     }
 }

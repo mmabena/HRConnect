@@ -13,8 +13,8 @@ namespace HRConnect.Api.Services
     private static readonly decimal MAX_MONTHLYCONTRIBUTION = 29166.66M;
     private readonly float SALARYINCREASE_PERCENTAGE = 0.05f;
     private readonly float PENSIONGROWTH_PRECENTAGE = 0.06f;
-    private decimal[][]? _monthlyContributions;
-    private decimal[][]? _voluntaryContributions;
+    private decimal[][] _monthlyContributions = null!;
+    private decimal[][] _voluntaryContributions = null!;
     private decimal _totalProjectedSavings = 0.00M;
     private int _yearWhenMonthlyContributionWasCapped;
     private int _monthWhenMonthlyContributionWasCapped;
@@ -96,7 +96,7 @@ namespace HRConnect.Api.Services
 
       if (currentAge >= PENSION_PROJECTION_AGE_LIMIT)
       {
-        warningMessage += "You have reached retirement age — projections not available.";
+        warningMessage += "You have reached retirement age ï¿½ projections not available.";
       }
       if (EmploymentStatus != EmploymentStatus.Permanent)
       {

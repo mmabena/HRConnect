@@ -1,10 +1,21 @@
+<<<<<<< HEAD
 namespace HRConnect.Tests
+=======
+namespace HRConnect.Tests.Payroll
+>>>>>>> main-v0.2
 {
   using Moq;
   using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Utils.Jobs.Payroll;
+<<<<<<< HEAD
   using HRConnect.Api.Interfaces.Pension;
+=======
+  using HRConnect.Api.Interfaces.Payroll.Earning;
+  using HRConnect.Api.Interfaces.Pension;
+  using HRConnect.Api.Interfaces.Payroll.Deduction;
+  using HRConnect.Api.Interfaces.Notification;
+>>>>>>> main-v0.2
   using System;
   using Microsoft.Extensions.DependencyInjection;
   using HRConnect.Api.Models.PayrollDeduction;
@@ -12,6 +23,7 @@ namespace HRConnect.Tests
   public class PayrollTests
   {
     private readonly Mock<IPayrollRunRepository> _payrollRunRepo;
+<<<<<<< HEAD
     private readonly Mock<IPayrollPeriodRepository> _payrollPeriodRepo;
     private readonly Mock<IPayrollPeriodService> _payrollPeriodService;
     private readonly Mock<IEmployeePensionEnrollmentService> _employeePensionEnrollmentService;
@@ -25,10 +37,25 @@ namespace HRConnect.Tests
     // private readonly Mock<IServiceScope> _scopeMock;
     // private readonly Mock<IServiceProvider> _serviceProviderMock;
     // private readonly Mock<IServiceScopeFactory> _serviceScopeFactoryMock;
+=======
+    private readonly Mock<IPayrollPeriodService> _payrollPeriodService;
+    private readonly Mock<IEmployeePensionEnrollmentService> _employeePensionEnrollmentService;
+    private readonly Mock<IReportsService> _reportsService;
+    private readonly Mock<ICompanyContributionAllocationService> _contributionAllocService;
+    private readonly Mock<IServiceProvider> _serviceProvider;
+    private readonly Mock<IUserService> _userService;
+    private readonly Mock<IEmployeeService> _employeeService;
+    private readonly Mock<IEmployeeDeductionService> _employeeDeductionService;
+    private readonly Mock<IEmployeePayrollEarningService> _employeePayrollEarningService;
+    private readonly Mock<INotificationService> _notificationsService;
+    private Func<DateTime> _now;
+
+>>>>>>> main-v0.2
     public PayrollTests()
     {
       _payrollRunRepo = new Mock<IPayrollRunRepository>();
       _payrollPeriodService = new Mock<IPayrollPeriodService>();
+<<<<<<< HEAD
       _payrollPeriodRepo = new Mock<IPayrollPeriodRepository>();
       _reportsService = new Mock<IReportsService>();
       _employeePensionEnrollmentService = new Mock<IEmployeePensionEnrollmentService>();
@@ -51,6 +78,17 @@ namespace HRConnect.Tests
       // _serviceScopeFactoryMock=new Mock<IServiceScopeFactory>();
 
 
+=======
+      _employeePensionEnrollmentService = new Mock<IEmployeePensionEnrollmentService>();
+      _reportsService = new Mock<IReportsService>();
+      _userService = new Mock<IUserService>();
+      _employeeService = new Mock<IEmployeeService>();
+      _employeePayrollEarningService = new Mock<IEmployeePayrollEarningService>();
+      _employeeDeductionService = new Mock<IEmployeeDeductionService>();
+      _notificationsService = new Mock<INotificationService>();
+
+      _now = () => DateTime.Now;
+>>>>>>> main-v0.2
     }
 
     //Will be used to mock the time of roll over
@@ -71,12 +109,16 @@ namespace HRConnect.Tests
     {
       var services = new ServiceCollection();
       // register other dependencies if needed
+<<<<<<< HEAD
       services.AddScoped<ICompanyContributionAllocationService>(
           _ => _contributionAllocService.Object
           );
       services.AddScoped<ICompanyContributionAllocationService>(
           _ => _contributionAllocService.Object
           );
+=======
+      services.AddScoped(_ => _contributionAllocService.Object);
+>>>>>>> main-v0.2
       var serviceProvider = services.BuildServiceProvider();
 
       var runNumber = ((DateTime.Now.Month + 8) % 12) + 1;
@@ -100,13 +142,20 @@ namespace HRConnect.Tests
         Runs = new List<PayrollRun> { currentRun }
       };
       _payrollPeriodService.Setup(p => p.GetLastPeriodAsync()).ReturnsAsync(period);
+<<<<<<< HEAD
       // _payrollRunRepo.Setup(r => r.GetCurrentRunAsync()).ReturnsAsync(currentRun);
+=======
+>>>>>>> main-v0.2
 
       PayrollRun lockedRun = new PayrollRun
       {
         PayrollRunNumber = runNumber + 1,
         IsFinalised = false,
+<<<<<<< HEAD
         IsLocked = false,
+=======
+        IsLocked = true,
+>>>>>>> main-v0.2
         Records = new List<PayrollRecord>
         {
           new MedicalAidDeduction
@@ -121,12 +170,25 @@ namespace HRConnect.Tests
       var fakeTime = new DateTime(2026, 3, 31, 23, 59, 59);//23:59 March 31st
       _now = () => fakeTime;
       var job = new PayrollRolloverJob(
+<<<<<<< HEAD
         _payrollRunRepo.Object,
         _payrollPeriodService.Object,
         serviceProvider,
         _employeePensionEnrollmentService.Object,
         _reportsService.Object,
         _contributionRepoMock.Object,
+=======
+      _payrollRunRepo.Object,
+      _payrollPeriodService.Object,
+      serviceProvider,
+      _employeePensionEnrollmentService.Object,
+      _reportsService.Object,
+      _userService.Object,
+      _employeeService.Object,
+      _employeePayrollEarningService.Object,
+      _employeeDeductionService.Object,
+      _notificationsService.Object,
+>>>>>>> main-v0.2
         _now
       );
       //Act now
@@ -141,8 +203,11 @@ namespace HRConnect.Tests
       //Assert we got the results we wanted
       Assert.True(lockedRun.IsLocked);
       Assert.True(lockedRun.IsFinalised);
+<<<<<<< HEAD
       // Assert.All(lockedRun.Records, r => Assert.True(r.IsLocked));
       //Make sure we check if the updates have applied
+=======
+>>>>>>> main-v0.2
     }
 
     /// <summary>
@@ -154,11 +219,17 @@ namespace HRConnect.Tests
       //Arrange 
       var services = new ServiceCollection();
       // register other dependencies if needed
+<<<<<<< HEAD
       services.AddScoped<ICompanyContributionAllocationService>(
           _ => _contributionAllocService.Object
           );
       var serviceProvider = services.BuildServiceProvider();
 
+=======
+      services.AddScoped(_ => _contributionAllocService.Object);
+
+      var serviceProvider = services.BuildServiceProvider();
+>>>>>>> main-v0.2
 
       var period = new PayrollPeriod
       {
@@ -169,19 +240,35 @@ namespace HRConnect.Tests
         .ReturnsAsync(period); ;
 
       var job = new PayrollRolloverJob(
+<<<<<<< HEAD
         _payrollRunRepo.Object,
         _payrollPeriodService.Object,
         serviceProvider,
         _employeePensionEnrollmentService.Object,
         _reportsService.Object,
         _contributionRepoMock.Object,
+=======
+      _payrollRunRepo.Object,
+      _payrollPeriodService.Object,
+      serviceProvider,
+      _employeePensionEnrollmentService.Object,
+      _reportsService.Object,
+      _userService.Object,
+      _employeeService.Object,
+      _employeePayrollEarningService.Object,
+      _employeeDeductionService.Object,
+      _notificationsService.Object,
+>>>>>>> main-v0.2
         _now
       );
 
       await job.Execute(null!);
+<<<<<<< HEAD
       //Make sure that there's a new payroll run
       // _payrollRunRepo.Setup(r => r.CreatePayrollRunAsync(It.IsAny<PayrollRun>()))
       // .ReturnsAsync<PayrollRun>((PayrollRun)null!);
+=======
+>>>>>>> main-v0.2
       var lockedRun = new PayrollRun { PayrollRunNumber = 1 };
       _payrollRunRepo.Setup(r => r.CreatePayrollRunAsync(It.IsAny<PayrollRun>()))
             .Callback<PayrollRun>(r => r = lockedRun);
@@ -196,12 +283,18 @@ namespace HRConnect.Tests
       //Arrange 
       var services = new ServiceCollection();
       // register other dependencies if needed
+<<<<<<< HEAD
       services.AddScoped<ICompanyContributionAllocationService>(
     _ => _contributionAllocService.Object
     );
       var serviceProvider = services.BuildServiceProvider();
 
 
+=======
+      services.AddScoped(_ => _contributionAllocService.Object);
+      var serviceProvider = services.BuildServiceProvider();
+
+>>>>>>> main-v0.2
       var currentRun = new PayrollRun
       {
         PayrollRunNumber = 1,
@@ -209,6 +302,7 @@ namespace HRConnect.Tests
         IsLocked = true
       };
 
+<<<<<<< HEAD
       var period = new PayrollPeriod
       {
         Runs = new List<PayrollRun> { currentRun }
@@ -236,13 +330,38 @@ namespace HRConnect.Tests
       // throw new InvalidOperationException("Record/Run under Hard Lock. Cannot be modified"));
     }
 
+=======
+      var job = new PayrollRolloverJob(
+      _payrollRunRepo.Object,
+      _payrollPeriodService.Object,
+      serviceProvider,
+      _employeePensionEnrollmentService.Object,
+      _reportsService.Object,
+      _userService.Object,
+      _employeeService.Object,
+      _employeePayrollEarningService.Object,
+      _employeeDeductionService.Object,
+      _notificationsService.Object,
+        _now
+      );
+      await job.Execute(null!);
+      //Make sure that there's a new payroll run
+      var lockedRun = new PayrollRun { PayrollRunNumber = 1 };
+      _payrollRunRepo.Setup(r => r.CreatePayrollRunAsync(It.IsAny<PayrollRun>()))
+            .Callback<PayrollRun>(r => r = lockedRun);
+    }
+>>>>>>> main-v0.2
     [Fact]
     public async Task ShouldNotRunRolloverBeforeMonthEnd()
     {
       //Arrange 
       var services = new ServiceCollection();
       // register other dependencies if needed
+<<<<<<< HEAD
       services.AddScoped<ICompanyContributionAllocationService>(
+=======
+      services.AddScoped(
+>>>>>>> main-v0.2
           _ => _contributionAllocService.Object
           );
       var serviceProvider = services.BuildServiceProvider();
@@ -262,12 +381,25 @@ namespace HRConnect.Tests
                                                           //Act
 
       var job = new PayrollRolloverJob(
+<<<<<<< HEAD
         _payrollRunRepo.Object,
         _payrollPeriodService.Object,
         serviceProvider,
         _employeePensionEnrollmentService.Object,
         _reportsService.Object,
         _contributionRepoMock.Object,
+=======
+      _payrollRunRepo.Object,
+      _payrollPeriodService.Object,
+      serviceProvider,
+      _employeePensionEnrollmentService.Object,
+      _reportsService.Object,
+      _userService.Object,
+      _employeeService.Object,
+      _employeePayrollEarningService.Object,
+      _employeeDeductionService.Object,
+      _notificationsService.Object,
+>>>>>>> main-v0.2
         _now
       );
       if (IsLastMomentOfTheMonth(_now()))
@@ -281,13 +413,17 @@ namespace HRConnect.Tests
       Assert.False(currentRun.IsLocked);
     }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> main-v0.2
     [Fact]
     public async Task RolloverJobCallsRolloverPayrollDeductions()
     {
       //Arrange 
       var services = new ServiceCollection();
       // register other dependencies if needed
+<<<<<<< HEAD
       services.AddScoped<ICompanyContributionAllocationService>(
           _ => _contributionAllocService.Object
           );
@@ -306,3 +442,24 @@ namespace HRConnect.Tests
     }
   }
 }
+=======
+      services.AddScoped(_ => _contributionAllocService.Object);
+      var serviceProvider = services.BuildServiceProvider();
+
+      var job = new PayrollRolloverJob(
+      _payrollRunRepo.Object,
+      _payrollPeriodService.Object,
+      serviceProvider,
+      _employeePensionEnrollmentService.Object,
+      _reportsService.Object,
+      _userService.Object,
+      _employeeService.Object,
+      _employeePayrollEarningService.Object,
+      _employeeDeductionService.Object,
+      _notificationsService.Object,
+        _now
+      );
+    }
+  }
+}
+>>>>>>> main-v0.2

@@ -1,22 +1,21 @@
 namespace HRConnect.Tests
 {
   using System;
-  using System.Linq;
-  using System.Threading.Tasks;
   using System.Collections.Generic;
-  using Microsoft.AspNetCore.Identity;
+  using System.Linq;
+  using System.Threading;
+  using System.Threading.Tasks;
   using HRConnect.Api.Data;
+  using HRConnect.Api.DTOs.Employee;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
   using HRConnect.Api.Services;
-  using Microsoft.EntityFrameworkCore;
-  using Xunit;
-  using HRConnect.Api.DTOs.Employee;
-  using Moq;
   using HRConnect.Api.Utils;
-  using System.Threading;
-  using Microsoft.EntityFrameworkCore.Storage;
-  using System.Reflection.Metadata;
+  using Microsoft.AspNetCore.Identity;
+  using Microsoft.EntityFrameworkCore;
+  using Microsoft.AspNetCore.DataProtection;
+  using Moq;
+  using Xunit;
 
   public class EmployeeServiceBusinessTests
   {
@@ -33,10 +32,17 @@ namespace HRConnect.Tests
 
     private static ApplicationDBContext GetDb()
     {
-      return new ApplicationDBContext(
-          new DbContextOptionsBuilder<ApplicationDBContext>()
-              .UseInMemoryDatabase(Guid.NewGuid().ToString())
-              .Options);
+      var options = new DbContextOptionsBuilder<ApplicationDBContext>()
+          .UseInMemoryDatabase(Guid.NewGuid().ToString())
+          .Options;
+      // Create a mock IDataProtectionProvider
+      var mockProvider = new Mock<IDataProtectionProvider>();
+      // Setup CreateProtector to return a dummy protector
+      var mockProtector = new Mock<IDataProtector>();
+      mockProtector.Setup(p => p.Protect(It.IsAny<byte[]>())).Returns<byte[]>(b => b);
+      mockProtector.Setup(p => p.Unprotect(It.IsAny<byte[]>())).Returns<byte[]>(b => b);
+      mockProvider.Setup(p => p.CreateProtector(It.IsAny<string>())).Returns(mockProtector.Object);
+      return new ApplicationDBContext(options, mockProtector.Object); ;
     }
 
     private static LeaveBalanceService GetBalanceService(ApplicationDBContext db)
@@ -45,12 +51,15 @@ namespace HRConnect.Tests
     private static LeaveProcessingService GetProcessingService(ApplicationDBContext db)
         => new LeaveProcessingService(db, new FakeEmailService(), GetBalanceService(db));
 
-    private static EmployeeService GetService(ApplicationDBContext db, FakeEmailService email)
-    {
-      var employeeRepoMock = new Mock<IEmployeeRepository>();
-      var passwordHasherMock = new Mock<IPasswordHasher<User>>();
-      var positionRepoMock = new Mock<IPositionRepository>();
-      var transactionMock = new Mock<Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction>();
+        private static EmployeeService GetService(ApplicationDBContext db, FakeEmailService email)
+        {
+            var employeeRepoMock = new Mock<IEmployeeRepository>();
+            var positionRepoMock = new Mock<IPositionRepository>();
+            var companyRepoMock = new Mock<ICompanyRepository>();
+            var transactionMock = new Mock<Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction>();
+
+            var activeCompanyService = new Mock<IActiveCompanyService>();
+            var userCompanyService = new Mock<IUserCompanyService>();
 
       transactionMock.Setup(t => t.CommitAsync(It.IsAny<CancellationToken>()))
           .Returns(Task.CompletedTask);
@@ -67,13 +76,13 @@ namespace HRConnect.Tests
       employeeRepoMock.Setup(x => x.UpdateEmployeeAsync(It.IsAny<Employee>()))
           .ReturnsAsync((Employee e) => e);
 
-      employeeRepoMock.Setup(x => x.CreateEmployeeAsync(It.IsAny<Employee>()))
-      .ReturnsAsync((Employee e) =>
-      {
-        db.Employees.Add(e);
-        db.SaveChanges();
-        return e;
-      });
+            employeeRepoMock.Setup(x => x.CreateEmployeeAsync(It.IsAny<Employee>()))
+            .ReturnsAsync((Employee e) =>
+            {
+                db.Employees.Add(e);
+                db.SaveChanges();
+                return e;
+            });
 
       employeeRepoMock.Setup(x => x.GetAllEmployeeIdsWithPrefix(It.IsAny<string>()))
           .ReturnsAsync(new List<string>());
@@ -143,27 +152,27 @@ namespace HRConnect.Tests
         new User { UserId = 1, Email = "test@singular.co.za" });
       await db.SaveChangesAsync();
 
-      var result = await service.CreateEmployeeAsync(new CreateEmployeeRequestDto
-      {
-        Name = "Test",
-        Surname = "User",
-        Email = "test@singular.co.za",
-        Title = Title.Mr,
-        Gender = Gender.Male,
-        ContactNumber = "0123456789",
-        PhysicalAddress = "Address",
-        TaxNumber = "1234567890",
-        IdNumber = "0309195036087",
-        Nationality = "South African",
-        Branch = Branch.Johannesburg,
-        City = "Johannesburg",
-        ZipCode = "2000",
-        PositionId = 1,
-        MonthlySalary = 10000,
-        EmploymentStatus = EmploymentStatus.Permanent,
-        StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
-        ProfileImage = "img.jpg"
-      });
+            var result = await service.CreateEmployeeAsync(1, new CreateEmployeeRequestDto
+            {
+                Name = "Test",
+                Surname = "User",
+                Email = "test@singular.co.za",
+                Title = Title.Mr,
+                Gender = Gender.Male,
+                ContactNumber = "0123456789",
+                PhysicalAddress = "Address",
+                TaxNumber = "1234567890",
+                IdNumber = "0309195036087",
+                Nationality = "South African",
+                Branch = Branch.Johannesburg,
+                City = "Johannesburg",
+                ZipCode = "2000",
+                PositionId = 1,
+                MonthlySalary = 10000,
+                EmploymentStatus = EmploymentStatus.Permanent,
+                StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
+                ProfileImage = "img.jpg"
+            });
 
       Assert.Single(db.EmployeeLeaveBalances);
     }
@@ -230,24 +239,24 @@ namespace HRConnect.Tests
 
       await GetBalanceService(db).InitializeEmployeeLeaveBalancesAsync(employee.EmployeeId);
 
-      await service.UpdateEmployeeAsync(employee.EmployeeId, new UpdateEmployeeRequestDto
-      {
-        Title = Title.Mr,
-        Gender = Gender.Male,
-        Name = "Test",
-        Surname = "User",
-        IdNumber = "0305054589589",
-        Nationality = "South African",
-        Email = "test@singular.co.za",
-        ContactNumber = "0123456789",
-        City = "Johannesburg",
-        ZipCode = "2000",
-        Branch = Branch.Johannesburg,
-        MonthlySalary = 10000,
-        PositionId = 2,
-        EmploymentStatus = EmploymentStatus.Permanent,
-        ProfileImage = "img.jpg"
-      });
+            await service.UpdateEmployeeAsync(1, employee.EmployeeId, new UpdateEmployeeRequestDto
+            {
+                Title = Title.Mr,
+                Gender = Gender.Male,
+                Name = "Test",
+                Surname = "User",
+                IdNumber = "0305054589589",
+                Nationality = "South African",
+                Email = "test@singular.co.za",
+                ContactNumber = "0123456789",
+                City = "Johannesburg",
+                ZipCode = "2000",
+                Branch = Branch.Johannesburg,
+                MonthlySalary = 10000,
+                PositionId = 2,
+                EmploymentStatus = EmploymentStatus.Permanent,
+                ProfileImage = "img.jpg"
+            });
 
       Assert.Equal(2, db.EmployeeAccrualRateHistories.Count());
     }
@@ -258,25 +267,25 @@ namespace HRConnect.Tests
       var db = GetDb();
       var service = GetService(db, new FakeEmailService());
 
-      await Assert.ThrowsAsync<NotFoundException>(() =>
-          service.UpdateEmployeeAsync("invalid", new UpdateEmployeeRequestDto
-          {
-            Title = Title.Mr,
-            Gender = Gender.Male,
-            Name = "Test",
-            Surname = "User",
-            IdNumber = "0305054589589",
-            Nationality = "South African",
-            Email = "test@singular.co.za",
-            ContactNumber = "0123456789",
-            City = "Johannesburg",
-            ZipCode = "2000",
-            Branch = Branch.Johannesburg,
-            MonthlySalary = 10000,
-            PositionId = 1,
-            EmploymentStatus = EmploymentStatus.Permanent,
-            ProfileImage = "img.jpg"
-          }));
+            await Assert.ThrowsAsync<NotFoundException>(() =>
+                service.UpdateEmployeeAsync(1, "invalid", new UpdateEmployeeRequestDto
+                {
+                    Title = Title.Mr,
+                    Gender = Gender.Male,
+                    Name = "Test",
+                    Surname = "User",
+                    IdNumber = "0305054589589",
+                    Nationality = "South African",
+                    Email = "test@singular.co.za",
+                    ContactNumber = "0123456789",
+                    City = "Johannesburg",
+                    ZipCode = "2000",
+                    Branch = Branch.Johannesburg,
+                    MonthlySalary = 10000,
+                    PositionId = 1,
+                    EmploymentStatus = EmploymentStatus.Permanent,
+                    ProfileImage = "img.jpg"
+                }));
+        }
     }
-  }
 }

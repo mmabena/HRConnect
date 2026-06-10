@@ -1,10 +1,10 @@
 namespace HRConnect.Tests
 {
-  using Moq;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
-  using HRConnect.Api.Utils;
   using HRConnect.Api.Services;
+  using HRConnect.Api.Utils;
+  using Moq;
 
   public class StatutoryContributionServiceTests
   {

@@ -3,22 +3,25 @@ namespace HRConnect.Tests
   using Xunit;
   using Moq;
   using HRConnect.Api.Services;
+  using Microsoft.AspNetCore.DataProtection;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
   using HRConnect.Api.DTOs.Employee;
   using System;
+  using HRConnect.Api.DTOs.Company;
+  using HRConnect.Api.DTOs.UserCompany;
   using System.Collections.Generic;
-  using System.Threading.Tasks;
-  using Microsoft.EntityFrameworkCore;
-  using HRConnect.Api.Data;
+  using System.Linq;
   using System.Threading;
-  using Microsoft.EntityFrameworkCore.Storage;
+  using System.Threading.Tasks;
+  using HRConnect.Api.Data;
   using HRConnect.Api.Utils;
   using System.Linq;
+  using Microsoft.AspNetCore.SignalR;
+  using HRConnect.Api.Hubs;
   using Microsoft.AspNetCore.Identity;
-  using System.Reflection.Metadata;
-  using System.ComponentModel.DataAnnotations;
-  using System.Runtime.Serialization;
+  using Microsoft.EntityFrameworkCore;
+  using Microsoft.EntityFrameworkCore.Storage;
 
   public class EmployeeServiceTests : IDisposable
   {
@@ -29,28 +32,61 @@ namespace HRConnect.Tests
     private readonly Mock<ILeaveProcessingService> _leaveProcessingServiceMock;
     private readonly Mock<IPasswordHasher<User>> _passwordHasherMock;
     private readonly ApplicationDBContext _context;
+    private readonly Mock<IActiveCompanyService> _activeCompanyServiceMock;
+    private readonly Mock<IUserCompanyService> _userCompanyServiceMock;
+    private readonly Mock<ICompanyRepository> _companyRepoMock;
     private readonly EmployeeService _employeeService;
+
+
 
     public EmployeeServiceTests()
     {
       _employeeRepoMock = new Mock<IEmployeeRepository>();
       _emailServiceMock = new Mock<IEmailService>();
       _positionRepoMock = new Mock<IPositionRepository>();
+      _activeCompanyServiceMock = new Mock<IActiveCompanyService>();
+      _userCompanyServiceMock = new Mock<IUserCompanyService>();
+      _companyRepoMock = new Mock<ICompanyRepository>();
       _leaveBalanceServiceMock = new Mock<ILeaveBalanceService>();
       _leaveProcessingServiceMock = new Mock<ILeaveProcessingService>();
+
       _passwordHasherMock = new Mock<IPasswordHasher<User>>();
 
       var options = new DbContextOptionsBuilder<ApplicationDBContext>()
           .UseInMemoryDatabase(Guid.NewGuid().ToString())
           .Options;
-
-      _context = new ApplicationDBContext(options);
+      // Create a mock IDataProtectionProvider
+      var mockProvider = new Mock<IDataProtectionProvider>();
+      // Setup CreateProtector to return a dummy protector
+      var mockProtector = new Mock<IDataProtector>();
+      mockProtector.Setup(p => p.Protect(It.IsAny<byte[]>())).Returns<byte[]>(b => b);
+      mockProtector.Setup(p => p.Unprotect(It.IsAny<byte[]>())).Returns<byte[]>(b => b);
+      mockProvider.Setup(p => p.CreateProtector(It.IsAny<string>())).Returns(mockProtector.Object);
+      _context = new ApplicationDBContext(options, mockProtector.Object);
 
       _context.OccupationalLevels.Add(new OccupationalLevel
       {
         OccupationalLevelId = 1,
         Description = "Level"
       });
+
+      _activeCompanyServiceMock
+    .Setup(x => x.GetActiveCompanyIdAsync(It.IsAny<int>()))
+    .ReturnsAsync("COMP001");
+
+      _companyRepoMock
+          .Setup(x => x.GetCompanyByIdAsync(It.IsAny<string>()))
+          .ReturnsAsync(new Company
+          {
+            CompanyId = "COMP001",
+            CompanyName = "Test Company"
+          });
+
+      _userCompanyServiceMock
+          .Setup(x => x.AssignCompanyToUserAsync(
+              It.IsAny<int>(),
+              It.IsAny<CreateUserCompanyDto>()))
+          .Returns(Task.CompletedTask);
 
       _context.JobGrades.Add(new JobGrade
       {
@@ -76,7 +112,6 @@ namespace HRConnect.Tests
 
       _context.SaveChanges();
 
-
       var transactionMock = new Mock<IDbContextTransaction>();
       transactionMock.Setup(t => t.CommitAsync(It.IsAny<CancellationToken>()))
           .Returns(Task.CompletedTask);
@@ -85,7 +120,6 @@ namespace HRConnect.Tests
 
       _employeeRepoMock.Setup(r => r.BeginTransactionAsync())
           .ReturnsAsync(transactionMock.Object);
-
 
       _employeeRepoMock.Setup(x => x.CreateEmployeeAsync(It.IsAny<Employee>()))
           .ReturnsAsync((Employee e) =>
@@ -119,7 +153,6 @@ namespace HRConnect.Tests
       _employeeRepoMock.Setup(x => x.GetEmployeeByContactNumberAsync(It.IsAny<string>()))
           .ReturnsAsync((Employee?)null);
 
-      // Position repo setup (dynamic)
       _positionRepoMock.Setup(p => p.GetPositionByIdAsync(It.IsAny<int>()))
           .ReturnsAsync((int id) =>
               _context.Positions.FirstOrDefault(p => p.PositionId == id));
@@ -132,12 +165,15 @@ namespace HRConnect.Tests
 
       _employeeService = new EmployeeService(
           _context,
-          _employeeRepoMock.Object,
-          _emailServiceMock.Object,
-          _positionRepoMock.Object,
-          _leaveBalanceServiceMock.Object,
-          _leaveProcessingServiceMock.Object,
-          _passwordHasherMock.Object
+    _activeCompanyServiceMock.Object,
+    _userCompanyServiceMock.Object,
+    _employeeRepoMock.Object,
+    _emailServiceMock.Object,
+    _companyRepoMock.Object,
+    _positionRepoMock.Object,
+    _leaveBalanceServiceMock.Object,
+    _leaveProcessingServiceMock.Object,
+    _passwordHasherMock.Object
       );
     }
 
@@ -155,7 +191,7 @@ namespace HRConnect.Tests
       string managerId = "MNG001";
       var manager = new Employee { EmployeeId = managerId };
 
-      var dto = new CreateEmployeeRequestDto
+      var employeeRequestDto = new CreateEmployeeRequestDto
       {
         Name = "John",
         Surname = "Smith",
@@ -182,7 +218,7 @@ namespace HRConnect.Tests
       _employeeRepoMock.Setup(r => r.GetEmployeeByIdAsync(managerId))
           .ReturnsAsync(manager);
 
-      var result = await _employeeService.CreateEmployeeAsync(dto);
+      var result = await _employeeService.CreateEmployeeAsync(1, employeeRequestDto);
 
       Assert.NotNull(result);
       Assert.Equal("John", result.Name);
@@ -218,7 +254,7 @@ namespace HRConnect.Tests
           .ReturnsAsync(new Employee { Email = dto.Email });
 
       await Assert.ThrowsAsync<BusinessRuleException>(() =>
-          _employeeService.CreateEmployeeAsync(dto));
+          _employeeService.CreateEmployeeAsync(1, dto));
     }
 
     [Fact]
@@ -239,7 +275,7 @@ namespace HRConnect.Tests
       };
 
       await Assert.ThrowsAsync<HRConnect.Api.Services.ValidationException>(() =>
-          _employeeService.CreateEmployeeAsync(dto));
+          _employeeService.CreateEmployeeAsync(1, dto));
     }
 
     [Fact]
@@ -265,6 +301,11 @@ namespace HRConnect.Tests
         Name = "Annual Leave",
         Description = "Annual Leave"
       });
+      // _context.JobGradeGroupMaps.Add(new JobGradeGroupMap
+      // {
+      //   JobGradeId = 1,
+      //   GroupKey = "G1"
+      // });
       _context.LeaveEntitlementRules.Add(new LeaveEntitlementRule
       {
         LeaveTypeId = 1,
@@ -324,7 +365,7 @@ namespace HRConnect.Tests
         ProfileImage = "updated.jpg"
       };
 
-      var result = await _employeeService.UpdateEmployeeAsync(employeeId, dto);
+      var result = await _employeeService.UpdateEmployeeAsync(1, employeeId, dto);
 
       Assert.NotNull(result);
       Assert.Equal("Updated", result.Name);
@@ -337,7 +378,7 @@ namespace HRConnect.Tests
           .ReturnsAsync((Employee?)null);
 
       await Assert.ThrowsAsync<NotFoundException>(() =>
-          _employeeService.UpdateEmployeeAsync("X", new UpdateEmployeeRequestDto()));
+          _employeeService.UpdateEmployeeAsync(1, "X", new UpdateEmployeeRequestDto()));
     }
 
     [Fact]
@@ -352,7 +393,7 @@ namespace HRConnect.Tests
       _employeeRepoMock.Setup(r => r.GetEmployeeByIdAsync("EMP001"))
           .ReturnsAsync(employee);
 
-      var result = await _employeeService.DeleteEmployeeAsync("EMP001");
+      var result = await _employeeService.DeleteEmployeeAsync(1, "EMP001");
 
       Assert.True(result);
     }
@@ -364,7 +405,7 @@ namespace HRConnect.Tests
           .ReturnsAsync((Employee?)null);
 
       await Assert.ThrowsAsync<NotFoundException>(() =>
-          _employeeService.DeleteEmployeeAsync("X"));
+          _employeeService.DeleteEmployeeAsync(1, "X"));
     }
 
     public void Dispose()

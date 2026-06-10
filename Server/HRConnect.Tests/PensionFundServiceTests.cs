@@ -1,10 +1,11 @@
-﻿namespace HRConnect.Tests
+namespace HRConnect.Tests
 {
+  using System.Threading.Tasks;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
   using HRConnect.Api.Services;
   using Moq;
-
+  using Xunit;
 
   public class PensionFundServiceTests
   {
@@ -31,12 +32,12 @@
     {
       var cancellationToken = new CancellationToken();
       PensionFund fund = new PensionFund { EmployeeId = "E001", EmployeeName = "John Doe" };
-      _fundRepoMock.Setup(r => r.AddPensionFundAsync(fund, cancellationToken))
+      _fundRepoMock.Setup(r => r.AddPensionFundAsync(fund))
                    .Returns(Task.CompletedTask);
-      _fundRepoMock.Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()))
+      _fundRepoMock.Setup(r => r.SaveChangesAsync())
                    .Returns(Task.CompletedTask);
 
-      ServiceResult result = await _service.AddPensionFundAsync(fund, cancellationToken);
+      ServiceResult result = await _service.AddPensionFundAsync(fund);
 
       Assert.True(result.IsSuccess);
       Assert.Equal("Fund added successfully.", result.Message);
@@ -47,9 +48,7 @@
     {
       PensionOption option = new PensionOption { ContributionPercentage = 20 };
 
-      var cancellationToken = new CancellationToken();
-
-      ServiceResult result = await _service.AddPensionOptionAsync(option, cancellationToken);
+      ServiceResult result = await _service.AddPensionOptionAsync(option);
 
       Assert.False(result.IsSuccess);
       Assert.Equal("Percentage must be between 0 and 15.", result.Message);
@@ -78,15 +77,12 @@
       PensionOption option = new PensionOption { PensionOptionId = 1, ContributionPercentage = 5 };
       var cancellationToken = new CancellationToken();
 
-      _employeeRepoMock.Setup(r =>
-    r.GetEmployeeByIdAsync(
-        employee.EmployeeId,
-        It.IsAny<CancellationToken>()))
-    .ReturnsAsync(employee);
-      _optionRepoMock.Setup(r => r.GetPensionOptionByIdAsync(option.PensionOptionId, It.IsAny<CancellationToken>()))
+      _employeeRepoMock.Setup(r => r.GetEmployeeByIdAsync(employee.EmployeeId))
+                       .ReturnsAsync(employee);
+      _optionRepoMock.Setup(r => r.GetPensionOptionByIdAsync(option.PensionOptionId))
                      .ReturnsAsync(option);
 
-      ServiceResult result = await _service.RecordEmployeePensionSelectionAsync(employee.EmployeeId, option.PensionOptionId, cancellationToken);
+      ServiceResult result = await _service.RecordEmployeePensionSelectionAsync(employee.EmployeeId, option.PensionOptionId);
 
       Assert.False(result.IsSuccess);
       Assert.Equal("Only permanent employees may select a pension option.", result.Message);
@@ -104,23 +100,16 @@
       };
       PensionOption option = new PensionOption { PensionOptionId = 2, ContributionPercentage = 10 };
 
-      _employeeRepoMock.Setup(r =>
-    r.GetEmployeeByIdAsync(
-        employee.EmployeeId,
-        It.IsAny<CancellationToken>()))
-    .ReturnsAsync(employee);
-      _optionRepoMock.Setup(r => r.GetPensionOptionByIdAsync(option.PensionOptionId, It.IsAny<CancellationToken>()))
+      _employeeRepoMock.Setup(r => r.GetEmployeeByIdAsync(employee.EmployeeId))
+                       .ReturnsAsync(employee);
+      _optionRepoMock.Setup(r => r.GetPensionOptionByIdAsync(option.PensionOptionId))
                      .ReturnsAsync(option);
-      _fundRepoMock.Setup(r =>
-    r.AddOrUpdatePensionFundAsync(
-        It.IsAny<PensionFund>(),
-        It.IsAny<CancellationToken>()))
-    .Returns(Task.CompletedTask);
-      _fundRepoMock.Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()))
+      _fundRepoMock.Setup(r => r.AddOrUpdatePensionFundAsync(It.IsAny<PensionFund>()))
+                   .Returns(Task.CompletedTask);
+      _fundRepoMock.Setup(r => r.SaveChangesAsync())
                    .Returns(Task.CompletedTask);
 
-      var cancellationToken = new CancellationToken();
-      ServiceResult result = await _service.RecordEmployeePensionSelectionAsync(employee.EmployeeId, option.PensionOptionId, cancellationToken);
+      ServiceResult result = await _service.RecordEmployeePensionSelectionAsync(employee.EmployeeId, option.PensionOptionId);
 
       Assert.True(result.IsSuccess);
       Assert.Equal("Pension option selected and pension fund created.", result.Message);

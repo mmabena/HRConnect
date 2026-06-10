@@ -1,36 +1,36 @@
 namespace HRConnect.Api.DTOs
 {
-    using System;
-    using System.Collections.Generic;
-    using HRConnect.Api.Models;
-    public class CreateEmployeeRequest
-    {
-        public int PositionId { get; set; }
-        public string? CareerManagerID { get; set; }
-        public string Name { get; set; } = null!;
-        public string Surname { get; set; } = null!;
-        public string Email { get; set; } = null!;
-        public Gender Gender { get; set; }
-        public DateOnly StartDate { get; set; }
-    }
-    public class UpdatePositionRequest
-    {
-        public int NewPositionId { get; set; }
-    }
-    public class EmployeeResponse
-    {
-        public string Id { get; set; } = string.Empty;
+  using System;
+  using System.Collections.Generic;
+  using HRConnect.Api.Models;
+  public class CreateEmployeeRequest
+  {
+    public int PositionId { get; set; }
+    public string? CareerManagerID { get; set; }
+    public string Name { get; set; } = null!;
+    public string Surname { get; set; } = null!;
+    public string Email { get; set; } = null!;
+    public Gender Gender { get; set; }
+    public DateOnly StartDate { get; set; }
+  }
+  public class UpdatePositionRequest
+  {
+    public int NewPositionId { get; set; }
+  }
+  public class EmployeeResponse
+  {
+    public string Id { get; set; } = string.Empty;
 
-        public string FullName { get; set; } = null!;
-        public string Gender { get; set; } = null!;
+    public string FullName { get; set; } = null!;
+    public string Gender { get; set; } = null!;
 
-        public string Position { get; set; } = null!;
-        public string JobGrade { get; set; } = null!;
+    public string Position { get; set; } = null!;
+    public string JobGrade { get; set; } = null!;
 
-        public DateOnly StartDate { get; set; }
+    public DateOnly StartDate { get; set; }
 
-        // Keep this high-level summary
-        public decimal AnnualLeaveRemaining { get; set; }
+    // Keep this high-level summary
+    public decimal AnnualLeaveRemaining { get; set; }
 
         // Optional detailed balances (used in GET by ID)
         public List<LeaveBalanceSummary> LeaveBalances { get; set; } = new();
@@ -75,7 +75,7 @@ namespace HRConnect.Api.DTOs
         public string Email { get; set; } = string.Empty;
         public string Position { get; set; } = string.Empty;
 
-        public List<LeaveBalanceSummary> LeaveBalances { get; set; } = new();
-    }
+    public List<LeaveBalanceSummary> LeaveBalances { get; set; } = new();
+  }
 
 }

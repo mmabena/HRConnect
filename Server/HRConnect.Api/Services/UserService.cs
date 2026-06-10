@@ -1,5 +1,8 @@
+
 namespace HRConnect.Api.Services
 {
+  using System;
+  using Microsoft.AspNetCore.Identity;
   using System.Collections.Generic;
   using System.Linq;
   using System.Security.Cryptography;
@@ -7,31 +10,36 @@ namespace HRConnect.Api.Services
   using HRConnect.Api.Data;
   using HRConnect.Api.DTOs.User;
   using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Mappers;
   using HRConnect.Api.Models;
   using HRConnect.Api.Utils;
-  using HRConnect.Api.Mappers;
   using Microsoft.EntityFrameworkCore;
+  using HRConnect.Api.Interfaces.TOTP;
 
   public class UserService : IUserService
   {
     private readonly ApplicationDBContext _context;
+    private readonly ITOTPService _otpService;
     private readonly IUserRepository _userRepo;
-    private readonly Microsoft.AspNetCore.Identity.IPasswordHasher<User> _passwordHasher;
+    private readonly IEmployeeRepository _employeeRepo;
+    private readonly IPasswordHasher<User> _passwordHasher;
     //These are valid characters for the a password hash
     private static readonly char[] UpperCaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
     private static readonly char[] LowerCaseChars = "abcdefghijklmnopqrstuvwxyz".ToCharArray();
     private static readonly char[] DigitChars = "1234567890".ToCharArray();
     private static readonly char[] SpecialChars = "!@#$%^&*".ToCharArray();
-    private static readonly char[] AllPossibleChars = UpperCaseChars
+    private static readonly char[] AllPasswordChars = UpperCaseChars
       .Concat(LowerCaseChars)
       .Concat(DigitChars)
       .Concat(SpecialChars)
       .ToArray();
-    public UserService(ApplicationDBContext context, IUserRepository userRepo, Microsoft.AspNetCore.Identity.IPasswordHasher<User> passwordHasher)
+    public UserService(ApplicationDBContext context, ITOTPService otpService, IUserRepository userRepo, IPasswordHasher<User> passwordHasher, IEmployeeRepository employeeRepo)
     {
       _context = context;
       _userRepo = userRepo;
       _passwordHasher = passwordHasher;
+      _otpService = otpService;
+      _employeeRepo = employeeRepo;
     }
 
     public async Task<List<User>> GetAllUsersAsync()
@@ -52,7 +60,7 @@ namespace HRConnect.Api.Services
 
     public async Task<User> CreateUserAsync(CreateUserRequestDto dto)
     {
-      if (string.IsNullOrWhiteSpace(dto.Email) || !dto.Email.EndsWith("@singular.co.za", System.StringComparison.OrdinalIgnoreCase))
+      if (string.IsNullOrWhiteSpace(dto.Email) || !dto.Email.EndsWith("@singular.co.za", StringComparison.OrdinalIgnoreCase))
       {
         throw new ArgumentException("Email must be a @singular.co.za address.");
       }
@@ -111,7 +119,6 @@ namespace HRConnect.Api.Services
       return await _userRepo.UpdateUserAsync(id, existing);
     }
 
-
     public async Task<User?> UpdateUserRoleAsync(int id, UpdateUserRoleRequestDto dto)
     {
       if (!Enum.IsDefined(typeof(UserRole), dto.RoleId))
@@ -124,8 +131,11 @@ namespace HRConnect.Api.Services
       {
         return null;
       }
-      existing.Role = (UserRole)dto.RoleId;
-      return await _userRepo.UpdateUserAsync(id, existing);
+      existing.TempRole = (UserRole)dto.RoleId;
+      var updatedUser = await _userRepo.UpdateUserAsync(id, existing);
+      await _otpService.SendTotpAndNotify(id);
+
+      return updatedUser;
     }
 
     public async Task<User?> UpdateEmployeeUserRoleAsync(string employeeId, UpdateUserRoleRequestDto dto)
@@ -147,7 +157,7 @@ namespace HRConnect.Api.Services
         return null;
       }
 
-      if (string.IsNullOrWhiteSpace(employee.Email))
+      if (string.IsNullOrWhiteSpace(employee!.Email))
       {
         throw new ArgumentException("Employee does not have an email address.");
       }
@@ -198,6 +208,30 @@ namespace HRConnect.Api.Services
       return _userRepo.DeleteUserAsync(id);
     }
 
+
+    public async Task<CurrentUserDto?> GetCurrentUserAsync(string email)
+    {
+      if (string.IsNullOrWhiteSpace(email))
+        return null;
+
+      var user = await _userRepo.GetUserByEmailAsync(email);
+
+      if (user == null)
+        return null;
+
+      var employee = await _userRepo.GetEmployeeByEmailAsync(email);
+
+      return new CurrentUserDto
+      {
+        UserId = user.UserId,
+        Email = user.Email,
+        Role = user.Role.ToString(),
+        FullName = employee != null
+          ? $"{employee.Name} {employee.Surname}"
+          : null,
+        JobTitle = employee?.Position?.PositionTitle
+      };
+    }
     public async Task<bool> ChangePasswordAsync(ChangePasswordRequestDto dto)
     {
       var user = await _userRepo.GetUserByEmailAsync(dto.Email);
@@ -246,10 +280,6 @@ namespace HRConnect.Api.Services
       await _context.SaveChangesAsync();
       return newUser;
     }
-    private static char GetRandomCharacter(char[] alphabet)
-    {
-      return alphabet[RandomNumberGenerator.GetInt32(alphabet.Length)];
-    }
 
     private static string GenerateTemporaryPassword()
     {
@@ -263,7 +293,7 @@ namespace HRConnect.Api.Services
 
       while (passwordChars.Count < 12)
       {
-        passwordChars.Add(GetRandomCharacter(AllPossibleChars));
+        passwordChars.Add(GetRandomCharacter(AllPasswordChars));
       }
 
       for (int i = passwordChars.Count - 1; i > 0; --i)
@@ -273,5 +303,28 @@ namespace HRConnect.Api.Services
       }
       return new string(passwordChars.ToArray());
     }
+
+    ///<summary>
+    ///Utitlity function used to get the EmployeeId for all SuperUsers 
+    public async Task<List<string>> OrganiseSuperUsersAsync(UserRole role = UserRole.SuperUser)
+    {
+      var users = await GetAllUsersAsync();
+
+      users = users.FindAll(u => u.Role == role);
+      List<string> employeeIds = new();
+
+      foreach (var u in users)
+      {
+        var e = await _employeeRepo.GetEmployeeByEmailAsync(u.Email);
+        if (e is not null)
+          employeeIds.Add(e.EmployeeId);
+      }
+      return employeeIds;
+    }
+    private static char GetRandomCharacter(char[] alphabet)
+    {
+      return alphabet[RandomNumberGenerator.GetInt32(alphabet.Length)];
+    }
   }
 }
+

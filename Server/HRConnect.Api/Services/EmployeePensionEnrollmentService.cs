@@ -1,4 +1,4 @@
-﻿namespace HRConnect.Api.Services
+namespace HRConnect.Api.Services
 {
   using System.Collections.Generic;
   using System.Text.Json;
@@ -12,9 +12,8 @@
   using HRConnect.Api.Models.PayrollDeduction;
   using HRConnect.Api.Models.Pension;
   using HRConnect.Api.Utils;
-  //using HRConnect.Api.Utils.Pension.ValidationHelpers;
-  using HRConnect.Api.Utils.ValidationHelpers.Pension;
   using HRConnect.Api.Utils.Jobs.Pension;
+  using HRConnect.Api.Utils.ValidationHelpers.Pension;
   using Quartz;
 
   public class EmployeePensionEnrollmentService(IEmployeePensionEnrollmentRepository employeePensionEnrollmentRepository,
@@ -154,7 +153,7 @@
       Employee? existingEmployee = await _employeeRepository.GetEmployeeByIdAsync(employeePensionEnrollmentUpdateDto.EmployeeId);
       if (existingEmployee != null && existingEmployee.PensionOptionId != null && employeePensionEnrollmentUpdateDto.VoluntaryContribution != null)
       {
-        decimal pensionOptionPercentage = await GetEmployeePensionOptionPercentageAsync((int)existingEmployee.PensionOptionId);
+        decimal pensionOptionPercentage = await GetEmployeePensionOptionPercentageAsync((int)existingEmployee.PensionOptionId!);
         ValidateEmployeePensionEnrollmentDtos.ValidateVoluntaryContribution(
         (decimal)employeePensionEnrollmentUpdateDto.VoluntaryContribution, existingEmployee.MonthlySalary, pensionOptionPercentage);
       }
@@ -167,7 +166,7 @@
         GetByEmployeeIdAndLastRunIdAsync(employeePensionEnrollmentUpdateDto.EmployeeId)
         ?? throw new NotFoundException("Employee pension enrollment not found");
 
-      int oldPensionOptionId = employeePensionEnrollment.PensionOptionId;
+      int oldPensionOptionId = (int)(employeePensionEnrollment!.PensionOptionId);
       if (employeePensionEnrollment != null)
       {
         employeePensionEnrollment.PensionOptionId = employeePensionEnrollmentUpdateDto.PensionOptionId
@@ -255,8 +254,8 @@
         ?? throw new NotFoundException("Employee not found");
       if (existingEmployee != null && existingEmployee.PensionOptionId != null)
       {
-        decimal pensionOptionPercentage = await GetEmployeePensionOptionPercentageAsync((int)existingEmployee.PensionOptionId);
-        PayrollRun? currentPayrollRunId = await _payrollRunRepository.GetCurrentRunAsync() ?? throw new NotFoundException("Current payroll run not found");
+        decimal pensionOptionPercentage = await GetEmployeePensionOptionPercentageAsync((int)existingEmployee.PensionOptionId!);
+        PayrollRun? currentPayrollRunId = await _payrollRunRepository.GetCurrentRunAsync();
         PensionDeduction? existingPensionDeduction = await _pensionDeductionRepository.GetByEmployeeIdAndIsNotLockedAsync(employeePensionEnrollment.EmployeeId);
         if (existingPensionDeduction == null)
         {
@@ -278,7 +277,7 @@
             ValidPensionContribution(Math.Round(existingEmployee.MonthlySalary * (pensionOptionPercentage / 100)) + employeePensionEnrollment.VoluntaryContribution),
             EmailAddress = existingEmployee.Email,
             PhysicalAddress = existingEmployee.PhysicalAddress,
-            PayrollRunId = currentPayrollRunId.PayrollRunId,
+            PayrollRunId = currentPayrollRunId!.PayrollRunId,
             CreatedDate = employeePensionEnrollment.EffectiveDate,
             IsActive = true
           };
@@ -398,7 +397,7 @@
           {
             EmployeeId = employee.EmployeeId,
             PayrollRunId = currentPayRollRun.PayrollRunId,
-            PensionOptionId = (int)employee.PensionOptionId,
+            PensionOptionId = (int)employee.PensionOptionId!,
             StartDate = employee.StartDate,
             EffectiveDate = firstDayNextMonth,
             VoluntaryContribution = (bool)employeeExisitingPensionEnrollment.IsVoluntaryContributionPermament ?
@@ -425,7 +424,7 @@
           {
             EmployeeId = employee.EmployeeId,
             PayrollRunId = currentPayRollRun.PayrollRunId,
-            PensionOptionId = (int)employee.PensionOptionId,
+            PensionOptionId = (int)employee.PensionOptionId!,
             StartDate = employee.StartDate,
             EffectiveDate = firstDayNextMonth,
             IsLocked = false,
@@ -478,7 +477,7 @@
           {
             EmployeeId = employee.EmployeeId,
             PayrollRunId = currentPayRollRun.PayrollRunId,
-            PensionOptionId = (int)employee.PensionOptionId,
+            PensionOptionId = (int)employee.PensionOptionId!,
             StartDate = employee.StartDate,
             EffectiveDate = firstDayNextMonth,
             IsLocked = false,

@@ -1,6 +1,6 @@
 namespace HRConnect.Api.Utils
 {
-    using HRConnect.Api.Models;
+  using HRConnect.Api.Models;
 
     public static class EmailTemplates
     {
@@ -154,7 +154,7 @@ namespace HRConnect.Api.Utils
             return $"""
                     Dear {employee.Name},
                     
-                    Your position has recently been updated to: {employee.Position.PositionTitle}.
+                    Your position has recently been updated to: {employee.Position!.PositionTitle}.
                     
                     As a result, your annual leave entitlement has been recalculated.
                     
@@ -169,22 +169,22 @@ namespace HRConnect.Api.Utils
                     Regards,
                     HRConnect
                     """;
-        }
-        /// <summary>
-        /// Generates the HTML content for the carryover warning email, 
-        /// informing the employee about their remaining annual leave balance, 
-        /// the carryover policy, and any days that will be forfeited if not used before the end of the year.
-        /// </summary>
-        /// <param name="employee"></param>
-        /// <param name="availableDays"></param>
-        /// <param name="forfeitedDays"></param>
-        /// <returns></returns>
-        public static string GenerateCarryOverWarningEmail(
-    Employee employee,
-    decimal availableDays,
-    decimal forfeitedDays)
-        {
-            return $"""
+    }
+    /// <summary>
+    /// Generates the HTML content for the carryover warning email, 
+    /// informing the employee about their remaining annual leave balance, 
+    /// the carryover policy, and any days that will be forfeited if not used before the end of the year.
+    /// </summary>
+    /// <param name="employee"></param>
+    /// <param name="availableDays"></param>
+    /// <param name="forfeitedDays"></param>
+    /// <returns></returns>
+    public static string GenerateCarryOverWarningEmail(
+Employee employee,
+decimal availableDays,
+decimal forfeitedDays)
+    {
+      return $"""
                     Dear {employee.Name},
 
                     You currently have {availableDays} days of Annual Leave remaining.
@@ -195,22 +195,22 @@ namespace HRConnect.Api.Utils
                     Regards,
                     HRConnect
                     """;
-        }
-        /// <summary>
-        /// Generates the HTML content for the leave rule change email, 
-        /// notifying the employee about a change in the leave entitlement rule that affects them, 
-        /// including the new entitlement and available days.
-        /// </summary>
-        /// <param name="employee"></param>
-        /// <param name="newEntitlement"></param>
-        /// <param name="availableDays"></param>
-        /// <returns></returns>
-        public static string GenerateRuleChangeEmail(
-    Employee employee,
-    decimal newEntitlement,
-    decimal availableDays)
-        {
-            return $"""
+    }
+    /// <summary>
+    /// Generates the HTML content for the leave rule change email, 
+    /// notifying the employee about a change in the leave entitlement rule that affects them, 
+    /// including the new entitlement and available days.
+    /// </summary>
+    /// <param name="employee"></param>
+    /// <param name="newEntitlement"></param>
+    /// <param name="availableDays"></param>
+    /// <returns></returns>
+    public static string GenerateRuleChangeEmail(
+Employee employee,
+decimal newEntitlement,
+decimal availableDays)
+    {
+      return $"""
                     Dear {employee.Name},
                     
                     The company has updated the leave policy.
@@ -221,6 +221,6 @@ namespace HRConnect.Api.Utils
                     Regards,
                     HRConnect
                     """;
-        }
     }
+  }
 }

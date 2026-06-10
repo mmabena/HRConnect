@@ -14,33 +14,40 @@ namespace HRConnect.Tests
     using Xunit;
     using System.Collections.Generic;
     using Moq;
+    using Microsoft.AspNetCore.DataProtection;
     using Microsoft.AspNetCore.SignalR;
     using HRConnect.Api.Hubs;
 
-    public class LeaveApplicationServiceTests
+  public class LeaveApplicationServiceTests
+  {
+    private sealed class TrackingEmailService : IEmailService
     {
-        private sealed class TrackingEmailService : IEmailService
-        {
-            public int EmailsSent { get; private set; }
+      public int EmailsSent { get; private set; }
 
-            public Task SendEmailAsync(string recipientEmail, string subject, string body)
-            {
-                EmailsSent++;
-                return Task.CompletedTask;
-            }
-        }
+      public Task SendEmailAsync(string recipientEmail, string subject, string body)
+      {
+        EmailsSent++;
+        return Task.CompletedTask;
+      }
+    }
 
-        private static ApplicationDBContext GetInMemoryDb()
-        {
-            var options = new DbContextOptionsBuilder<ApplicationDBContext>()
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .Options;
-
-            return new ApplicationDBContext(options);
-        }
-        private static IConfiguration GetFakeConfiguration()
-        {
-            var settings = new Dictionary<string, string?>
+    private static ApplicationDBContext GetInMemoryDb()
+    {
+      var options = new DbContextOptionsBuilder<ApplicationDBContext>()
+          .UseInMemoryDatabase(Guid.NewGuid().ToString())
+          .Options;
+      // Create a mock IDataProtectionProvider
+      var mockProvider = new Mock<IDataProtectionProvider>();
+      // Setup CreateProtector to return a dummy protector
+      var mockProtector = new Mock<IDataProtector>();
+      mockProtector.Setup(p => p.Protect(It.IsAny<byte[]>())).Returns<byte[]>(b => b);
+      mockProtector.Setup(p => p.Unprotect(It.IsAny<byte[]>())).Returns<byte[]>(b => b);
+      mockProvider.Setup(p => p.CreateProtector(It.IsAny<string>())).Returns(mockProtector.Object);
+      return new ApplicationDBContext(options, mockProtector.Object);
+    }
+    private static IConfiguration GetFakeConfiguration()
+    {
+      var settings = new Dictionary<string, string?>
                 {
                     { "AppSettings:BaseUrl", "http://localhost:5147" }
                 };
@@ -99,7 +106,7 @@ namespace HRConnect.Tests
                 StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-5))
             };
 
-            context.Employees.Add(manager);
+      context.Employees.Add(manager);
 
             var employee = new Employee
             {
@@ -113,52 +120,52 @@ namespace HRConnect.Tests
                 StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1))
             };
 
-            context.Employees.Add(employee);
+      context.Employees.Add(employee);
 
-            context.LeaveTypes.Add(new LeaveType
-            {
-                Id = 1,
-                Name = "Annual",
-                Code = "AL",
-                Description = "Annual Leave",
-                IsActive = true
-            });
+      context.LeaveTypes.Add(new LeaveType
+      {
+        Id = 1,
+        Name = "Annual",
+        Code = "AL",
+        Description = "Annual Leave",
+        IsActive = true
+      });
 
-            context.EmployeeLeaveBalances.Add(new EmployeeLeaveBalance
-            {
-                EmployeeId = employee.EmployeeId,
-                LeaveTypeId = 1,
-                AccruedDays = 10,
-                AvailableDays = 10,
-                TakenDays = 0
-            });
+      context.EmployeeLeaveBalances.Add(new EmployeeLeaveBalance
+      {
+        EmployeeId = employee.EmployeeId,
+        LeaveTypeId = 1,
+        AccruedDays = 10,
+        AvailableDays = 10,
+        TakenDays = 0
+      });
 
-            await context.SaveChangesAsync();
+      await context.SaveChangesAsync();
 
-            return (context, employee);
-        }
-        [Fact]
-        public async Task ApplyForLeaveShouldCreateApplication()
-        {
-            var (context, employee) = await SetupEmployee();
-            var email = new TrackingEmailService();
+      return (context, employee);
+    }
+    [Fact]
+    public async Task ApplyForLeaveShouldCreateApplication()
+    {
+      var (context, employee) = await SetupEmployee();
+      var email = new TrackingEmailService();
 
             var service = CreateService(context, email);
 
-            var request = new CreateApplicationRequest
-            {
-                EmployeeId = employee.EmployeeId,
-                LeaveTypeId = 1,
-                StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)),
-                EndDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(6)),
-                Description = "Vacation"
-            };
+      var request = new CreateApplicationRequest
+      {
+        EmployeeId = employee.EmployeeId,
+        LeaveTypeId = 1,
+        StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)),
+        EndDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(6)),
+        Description = "Vacation"
+      };
 
-            var result = await service.ApplyForLeaveAsync(request);
+      var result = await service.ApplyForLeaveAsync(request);
 
-            Assert.Equal("Pending", result.Status);
-            Assert.Equal(1, context.LeaveApplications.Count());
-        }
+      Assert.Equal("Pending", result.Status);
+      Assert.Equal(1, context.LeaveApplications.Count());
+    }
 
         [Fact]
         public async Task ApplyForLeaveShouldFailIfEmployeeNotFound()
@@ -167,17 +174,17 @@ namespace HRConnect.Tests
             var email = new TrackingEmailService();
             var service = CreateService(context, email);
 
-            var request = new CreateApplicationRequest
-            {
-                EmployeeId = Guid.NewGuid().ToString(),
-                LeaveTypeId = 1,
-                StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
-                EndDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1))
-            };
+      var request = new CreateApplicationRequest
+      {
+        EmployeeId = Guid.NewGuid().ToString(),
+        LeaveTypeId = 1,
+        StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
+        EndDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1))
+      };
 
-            await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                service.ApplyForLeaveAsync(request));
-        }
+      await Assert.ThrowsAsync<InvalidOperationException>(() =>
+          service.ApplyForLeaveAsync(request));
+    }
 
         [Fact]
         public async Task ApplyForLeaveShouldRejectInvalidDateRange()
@@ -185,17 +192,17 @@ namespace HRConnect.Tests
             var (context, employee) = await SetupEmployee();
             var service = CreateService(context, new TrackingEmailService());
 
-            var request = new CreateApplicationRequest
-            {
-                EmployeeId = employee.EmployeeId,
-                LeaveTypeId = 1,
-                StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)),
-                EndDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1))
-            };
+      var request = new CreateApplicationRequest
+      {
+        EmployeeId = employee.EmployeeId,
+        LeaveTypeId = 1,
+        StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)),
+        EndDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(1))
+      };
 
-            await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                service.ApplyForLeaveAsync(request));
-        }
+      await Assert.ThrowsAsync<InvalidOperationException>(() =>
+          service.ApplyForLeaveAsync(request));
+    }
 
         [Fact]
         public async Task ApplyForLeaveShouldRejectCrossYearRequests()
@@ -203,17 +210,17 @@ namespace HRConnect.Tests
             var (context, employee) = await SetupEmployee();
             var service = CreateService(context, new TrackingEmailService());
 
-            var request = new CreateApplicationRequest
-            {
-                EmployeeId = employee.EmployeeId,
-                LeaveTypeId = 1,
-                StartDate = new DateOnly(DateTime.UtcNow.Year, 12, 31),
-                EndDate = new DateOnly(DateTime.UtcNow.Year + 1, 1, 2)
-            };
+      var request = new CreateApplicationRequest
+      {
+        EmployeeId = employee.EmployeeId,
+        LeaveTypeId = 1,
+        StartDate = new DateOnly(DateTime.UtcNow.Year, 12, 31),
+        EndDate = new DateOnly(DateTime.UtcNow.Year + 1, 1, 2)
+      };
 
-            await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                service.ApplyForLeaveAsync(request));
-        }
+      await Assert.ThrowsAsync<InvalidOperationException>(() =>
+          service.ApplyForLeaveAsync(request));
+    }
 
         [Fact]
         public async Task ApplyForLeaveShouldRejectInsufficientBalance()
@@ -221,21 +228,21 @@ namespace HRConnect.Tests
             var (context, employee) = await SetupEmployee();
             var service = CreateService(context, new TrackingEmailService());
 
-            var balance = context.EmployeeLeaveBalances.First();
-            balance.AvailableDays = 0;
-            await context.SaveChangesAsync();
+      var balance = context.EmployeeLeaveBalances.First();
+      balance.AvailableDays = 0;
+      await context.SaveChangesAsync();
 
-            var request = new CreateApplicationRequest
-            {
-                EmployeeId = employee.EmployeeId,
-                LeaveTypeId = 1,
-                StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)),
-                EndDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(10))
-            };
+      var request = new CreateApplicationRequest
+      {
+        EmployeeId = employee.EmployeeId,
+        LeaveTypeId = 1,
+        StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)),
+        EndDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(10))
+      };
 
-            await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                service.ApplyForLeaveAsync(request));
-        }
+      await Assert.ThrowsAsync<InvalidOperationException>(() =>
+          service.ApplyForLeaveAsync(request));
+    }
 
         [Fact]
         public async Task ApproveLeaveShouldUpdateBalance()
@@ -243,29 +250,29 @@ namespace HRConnect.Tests
             var (context, employee) = await SetupEmployee();
             var service = CreateService(context, new TrackingEmailService());
 
-            var application = new LeaveApplication
-            {
-                EmployeeId = employee.EmployeeId,
-                LeaveTypeId = 1,
-                StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)),
-                EndDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(6)),
-                DaysRequested = 2,
-                Description = "Vacation",
-                Status = LeaveApplication.LeaveApplicationStatus.Pending,
-                ApprovalToken = Guid.NewGuid(),
-                TokenExpiry = DateTime.UtcNow.AddHours(2)
-            };
+      var application = new LeaveApplication
+      {
+        EmployeeId = employee.EmployeeId,
+        LeaveTypeId = 1,
+        StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)),
+        EndDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(6)),
+        DaysRequested = 2,
+        Description = "Vacation",
+        Status = LeaveApplication.LeaveApplicationStatus.Pending,
+        ApprovalToken = Guid.NewGuid(),
+        TokenExpiry = DateTime.UtcNow.AddHours(2)
+      };
 
-            context.LeaveApplications.Add(application);
-            await context.SaveChangesAsync();
+      context.LeaveApplications.Add(application);
+      await context.SaveChangesAsync();
 
-            await service.ApproveLeaveAsync(application.Id, application.ApprovalToken);
+      await service.ApproveLeaveAsync(application.Id, application.ApprovalToken);
 
-            var balance = context.EmployeeLeaveBalances.First();
+      var balance = context.EmployeeLeaveBalances.First();
 
-            Assert.Equal(2, balance.TakenDays);
-            Assert.Equal(8, balance.AvailableDays);
-        }
+      Assert.Equal(2, balance.TakenDays);
+      Assert.Equal(8, balance.AvailableDays);
+    }
 
         [Fact]
         public async Task RejectLeaveShouldUpdateStatus()
@@ -273,29 +280,29 @@ namespace HRConnect.Tests
             var (context, employee) = await SetupEmployee();
             var service = CreateService(context, new TrackingEmailService());
 
-            var application = new LeaveApplication
-            {
-                EmployeeId = employee.EmployeeId,
-                LeaveTypeId = 1,
-                StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)),
-                EndDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(6)),
-                DaysRequested = 2,
-                Description = "Vacation",
-                Status = LeaveApplication.LeaveApplicationStatus.Pending,
-                ApprovalToken = Guid.NewGuid(),
-                TokenExpiry = DateTime.UtcNow.AddHours(2)
-            };
+      var application = new LeaveApplication
+      {
+        EmployeeId = employee.EmployeeId,
+        LeaveTypeId = 1,
+        StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)),
+        EndDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(6)),
+        DaysRequested = 2,
+        Description = "Vacation",
+        Status = LeaveApplication.LeaveApplicationStatus.Pending,
+        ApprovalToken = Guid.NewGuid(),
+        TokenExpiry = DateTime.UtcNow.AddHours(2)
+      };
 
-            context.LeaveApplications.Add(application);
-            await context.SaveChangesAsync();
+      context.LeaveApplications.Add(application);
+      await context.SaveChangesAsync();
 
-            await service.RejectLeaveAsync(application.Id, application.ApprovalToken, "Not approved");
+      await service.RejectLeaveAsync(application.Id, application.ApprovalToken, "Not approved");
 
-            var updated = context.LeaveApplications.First();
+      var updated = context.LeaveApplications.First();
 
-            Assert.Equal("Rejected", updated.Status.ToString());
-            Assert.Equal("Not approved", updated.RejectionReason);
-        }
+      Assert.Equal("Rejected", updated.Status.ToString());
+      Assert.Equal("Not approved", updated.RejectionReason);
+    }
 
         [Fact]
         public async Task ApproveShouldFailWithInvalidToken()
@@ -303,21 +310,21 @@ namespace HRConnect.Tests
             var (context, employee) = await SetupEmployee();
             var service = CreateService(context, new TrackingEmailService());
 
-            var application = new LeaveApplication
-            {
-                EmployeeId = employee.EmployeeId,
-                LeaveTypeId = 1,
-                StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)),
-                EndDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(6)),
-                DaysRequested = 2,
-                Description = "Vacation",
-                Status = LeaveApplication.LeaveApplicationStatus.Pending,
-                ApprovalToken = Guid.NewGuid(),
-                TokenExpiry = DateTime.UtcNow.AddHours(2)
-            };
+      var application = new LeaveApplication
+      {
+        EmployeeId = employee.EmployeeId,
+        LeaveTypeId = 1,
+        StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)),
+        EndDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(6)),
+        DaysRequested = 2,
+        Description = "Vacation",
+        Status = LeaveApplication.LeaveApplicationStatus.Pending,
+        ApprovalToken = Guid.NewGuid(),
+        TokenExpiry = DateTime.UtcNow.AddHours(2)
+      };
 
-            context.LeaveApplications.Add(application);
-            await context.SaveChangesAsync();
+      context.LeaveApplications.Add(application);
+      await context.SaveChangesAsync();
 
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 service.ApproveLeaveAsync(application.Id, Guid.NewGuid()));
@@ -328,26 +335,26 @@ namespace HRConnect.Tests
             var (context, employee) = await SetupEmployee();
             var service = CreateService(context, new TrackingEmailService());
 
-            var token = Guid.NewGuid();
+      var token = Guid.NewGuid();
 
-            var application = new LeaveApplication
-            {
-                EmployeeId = employee.EmployeeId,
-                LeaveTypeId = 1,
-                StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)),
-                EndDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(6)),
-                DaysRequested = 2,
-                Description = "Vacation",
-                Status = LeaveApplication.LeaveApplicationStatus.Pending,
-                ApprovalToken = token,
-                TokenExpiry = DateTime.UtcNow.AddMinutes(-5)
-            };
+      var application = new LeaveApplication
+      {
+        EmployeeId = employee.EmployeeId,
+        LeaveTypeId = 1,
+        StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(5)),
+        EndDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(6)),
+        DaysRequested = 2,
+        Description = "Vacation",
+        Status = LeaveApplication.LeaveApplicationStatus.Pending,
+        ApprovalToken = token,
+        TokenExpiry = DateTime.UtcNow.AddMinutes(-5)
+      };
 
-            context.LeaveApplications.Add(application);
-            await context.SaveChangesAsync();
+      context.LeaveApplications.Add(application);
+      await context.SaveChangesAsync();
 
-            await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                service.ApproveLeaveAsync(application.Id, token));
-        }
+      await Assert.ThrowsAsync<InvalidOperationException>(() =>
+          service.ApproveLeaveAsync(application.Id, token));
     }
+  }
 }

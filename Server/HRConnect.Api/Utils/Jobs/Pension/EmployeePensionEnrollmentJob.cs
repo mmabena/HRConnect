@@ -1,16 +1,14 @@
 ﻿namespace HRConnect.Api.Utils.Jobs.Pension
 {
+  using global::Quartz;
   using System.Text.Json;
   using System.Threading.Tasks;
-  using Quartz;
-  using HRConnect.Api.Data;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
   using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Models.PayrollDeduction;
   using HRConnect.Api.Models.Pension;
   using HRConnect.Api.Services;
-  using Microsoft.EntityFrameworkCore;
 
   [DisallowConcurrentExecution]
   public class EmployeePensionEnrollmentJob(IEmployeePensionEnrollmentRepository employeePensionEnrollmentRepository,
@@ -43,7 +41,7 @@
 
           PayrollRun? currentPayRollRun = await _payrollRunRepository.GetCurrentRunAsync() ?? throw new NotFoundException("Current payroll run not found");
 
-          EmployeePensionEnrollment employeePensionEnroll = new EmployeePensionEnrollment
+          EmployeePensionEnrollment employeePensionEnroll = new()
           {
             EmployeeId = employeeToPensionEnrollment.EmployeeId,
             PensionOptionId = (int)employeeToPensionEnrollment.PensionOptionId,
@@ -108,7 +106,7 @@
               employeePensionEnrollment.VoluntaryContribution),
             EmailAddress = existingEmployee.Email,
             PhysicalAddress = existingEmployee.PhysicalAddress,
-            PayrollRunId = currentPayrollRunId.PayrollRunId,
+            PayrollRunId = currentPayrollRunId!.PayrollRunId,
             CreatedDate = employeePensionEnrollment.EffectiveDate,
             IsActive = true
           };

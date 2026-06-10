@@ -30,7 +30,7 @@
         MonthlySalary = dto.MonthlySalary,
         ContributionPercentage = dto.ContributionPercentage,
         ContributionAmount = dto.ContributionAmount,
-        TaxCode = (int)dto.TaxCode, 
+        TaxCode = (int)dto.TaxCode,
         PensionOptionId = dto.PensionOptionId
       };
     }

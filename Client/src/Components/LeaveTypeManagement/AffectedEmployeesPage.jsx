@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import "../../Components/MenuBar/MenuBar.css";
+import "../MenuBar/MenuBar.css";
 import NavBar from "../NavBar";
 import "./affected-employees-page.css";
 import { updateLeaveType } from "../../api/leaveTypeApi";

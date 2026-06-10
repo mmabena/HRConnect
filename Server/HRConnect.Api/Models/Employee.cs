@@ -81,6 +81,8 @@ namespace HRConnect.Api.Models
 
     [Required]
     public string ZipCode { get; set; } = string.Empty;
+    public string? CompanyId { get; set; } 
+    public Company? Company { get; set; }
 
     public bool HasDisability { get; set; }
     public string? DisabilityDescription { get; set; }
@@ -108,10 +110,10 @@ namespace HRConnect.Api.Models
     public string? CareerManagerID { get; set; }
 
     [ForeignKey(nameof(CareerManagerID))]
-    public Employee? CareerManager { get; set; }
+    public Employee? CareerManager { get; set; } = null;
 
     [Required]
-    public string? ProfileImage { get; set; } = string.Empty;
+    public string? ProfileImage { get; set; } = null;
 
     public int? PensionOptionId { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
@@ -120,7 +122,7 @@ namespace HRConnect.Api.Models
 
     public ICollection<Employee>? Subordinates { get; set; }
 
-    
+
     public ICollection<EmployeeLeaveBalance> LeaveBalances { get; set; }
         = new List<EmployeeLeaveBalance>();
 
@@ -132,7 +134,7 @@ namespace HRConnect.Api.Models
 
     public ICollection<AnnualLeaveAccrualHistory> AnnualLeaveAccrualHistories { get; set; }
         = new List<AnnualLeaveAccrualHistory>();
- 
+
     public ICollection<EmployeePensionEnrollment> EmployeePensionEnrollment { get; set; } = [];
     public PensionOption? PensionOption { get; set; }
     public ICollection<PensionFund>? PensionFunds { get; set; }             // navigation
