@@ -28,10 +28,10 @@ namespace HRConnect.Api.Services
     }
     public async Task<RolesDto?> GetRoleByIdAsync(int roleId)
     {
-      RolesDto? role = await _roleRepo.GetRoleByIdAsync(roleId);
+      Roles? role = await _roleRepo.GetRoleByIdAsync(roleId);
       if (role == null)
         throw new KeyNotFoundException($"Role With ID {roleId} Not Found");
-      return role;
+      return role.ToRolesDtoFromRole();
     }
   }
 }

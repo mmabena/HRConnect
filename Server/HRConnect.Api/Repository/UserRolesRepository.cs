@@ -9,9 +9,12 @@ namespace HRConnect.Api.Interfaces
   {
 
     private readonly ApplicationDBContext _context;
-    public UserRolesRepository(ApplicationDBContext context)
+    private readonly IRolesRepository _roleRepo;
+    public UserRolesRepository(ApplicationDBContext context,
+    IRolesRepository rolesRepository)
     {
       _context = context;
+      _roleRepo = rolesRepository;
     }
     public async Task MigrateUserEnumRoles()
     {
@@ -21,8 +24,46 @@ namespace HRConnect.Api.Interfaces
       if (users.Count <= 0)
         return;
 
-      throw new NotImplementedException();
+      foreach (User u in users)
+      {
+        Userrole legacyRole = u.Role;
+        Roles? newRole = await _roleRepo
+        .GetRoleByEnumAsync(LegacyRoleToNewRole(legacyRole));
+        if (newRole == null)
+          continue;
+
+        bool exists = await _context.UserRoles.AnyAsync(ur =>
+        ur.RolesId == newRole.RoleId &&
+        ur.UserId == u.UserId);
+
+        if (!exists)
+        {
+          _ = _context.UserRoles.Add(new UserRoles
+          {
+            Role = newRole,
+            RolesId = newRole.RoleId,
+            User = u,
+            UserId = u.UserId
+          });
+        }
+      }
+      _ = await _context.SaveChangesAsync();
+    }
+    private static RoleName LegacyRoleToNewRole(Userrole legacyRole)
+    {
+      return legacyRole switch
+      {
+        Userrole.NormalUser => RoleName.NormalUser,
+        Userrole.SuperUser => RoleName.SuperUser,
+        _ => RoleName.NormalUser
+      };
     }
 
+    public async Task<Roles> GetRoleByFromUserIdAsync(int userId)
+    {
+      Roles? role = await _context.UserRoles.Where(ur => ur.UserId == userId)
+      .Select(r => r.Role).FirstOrDefaultAsync();
+      return role!;
+    }
   }
 }

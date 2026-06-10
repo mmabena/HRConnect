@@ -10,7 +10,7 @@ namespace HRConnect.Api.Services
   public interface IRBACEnsurer
   {
     Task EnsureRoleBasedAccessControlAsync();
-    // Task SetDefaultAccessControl();
+    Task MigrateAndBackfillUsersToRole();
   }
 
   ///<summary>
@@ -25,18 +25,22 @@ namespace HRConnect.Api.Services
     private static partial Regex AddSpacesRegex();
     private readonly ApplicationDBContext _context;
     private readonly IRolesRepository _roleRepo;
-    private readonly IPermissionsRepository _permissionsRepo;
+    private readonly IUserRolesRepository _userRoleRepo;
 
     public RBACEnsurer(ApplicationDBContext context, IRolesRepository roleRepo,
-        IPermissionsRepository permissionsRepo)
+        IUserRolesRepository userRoleRepo)
     {
       _context = context;
       _roleRepo = roleRepo;
-      _permissionsRepo = permissionsRepo;
+      _userRoleRepo = userRoleRepo;
     }
     private static string AddSpaces(string s)
     {
       return AddSpacesRegex().Replace(s, " $1");
+    }
+    public async Task MigrateAndBackfillUsersToRole()
+    {
+      await _userRoleRepo.MigrateUserEnumRoles();
     }
     public async Task EnsureRoleBasedAccessControlAsync()
     {
@@ -70,7 +74,7 @@ namespace HRConnect.Api.Services
           IsGranted = true
         });
       }
-      // await _context.SaveChangesAsync();
+      await _context.SaveChangesAsync();
     }
 
     public async Task ConfigureHierarchyAsync()
@@ -169,6 +173,7 @@ namespace HRConnect.Api.Services
           _ = await _context.Permissions.AddAsync(new Permissions
           {
             Key = permission,
+            Description = PermissionSet.PermissionDescription[permission]
           });
         }
       }

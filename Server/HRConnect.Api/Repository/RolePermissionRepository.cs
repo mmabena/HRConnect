@@ -10,9 +10,12 @@ namespace HRConnect.Api.Repository
   public class RolePermissionRepository : IRolePermissionRepository
   {
     private readonly ApplicationDBContext _context;
-    public RolePermissionRepository(ApplicationDBContext context)
+    private readonly IRolesRepository _roleRepo;
+    public RolePermissionRepository(ApplicationDBContext context,
+     IRolesRepository roleRepository)
     {
       _context = context;
+      _roleRepo = roleRepository;
     }
     public async Task AssignPermissionsToRoleByIdAsync(int roleId, params string[] permissionsList)
     {
@@ -43,10 +46,10 @@ namespace HRConnect.Api.Repository
       await _context.SaveChangesAsync();
     }
 
-    public async Task RemovePermissionsFromRoleAsync(int roleId, params string[] permissionsList)
+    public async Task RemovePermissionsFromRoleAsync(int roleId, params int[] permissionsIds)
     {
       List<int> permissionIds = await _context.Permissions
-      .Where(p => permissionsList.Contains(p.Key))
+      .Where(p => permissionsIds.Contains(p.PermissionsId))
       .Select(s => s.PermissionsId)
       .ToListAsync();
 
@@ -57,6 +60,17 @@ namespace HRConnect.Api.Repository
 
       _context.RolePermissions.RemoveRange(rolePermissions);
       await _context.SaveChangesAsync();
+    }
+    public async Task<IEnumerable<Permissions>> GetPermissionsForRoleAsync(int roleId)
+    {
+      Roles? role = await _roleRepo.GetRoleByIdAsync(roleId);
+      if (role == null)
+        throw new KeyNotFoundException($"This Role Does Not Exist");
+      //Get all pairs of (roleId,<permission>)
+      var rolePermissions = await _context.RolePermissions
+      .Where(rp => rp.RoleId == role.RoleId)
+      .Select(rp => rp.Permissions).ToListAsync();
+      return rolePermissions;
     }
   }
 }

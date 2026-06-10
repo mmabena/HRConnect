@@ -38,5 +38,30 @@ namespace HRConnect.Api.Utils.AccessControl
     public const string BudgetApprove = "budget.approve";
     public const string BudgetComment = "budget.comment";
     public const string PayrollBenchmarkViewOnly = "payroll.benchmarking-view-only";
+    public static readonly Dictionary<string, string> PermissionDescription = new()
+    {
+     {EmployeeViewOwn , "Employee can view own profile"},
+     {PayrollViewOwn , "Can only view own payslip"},
+     {LeaveApply , "Can apply for leave"},
+     {LeaveViewOwn , "Can view own leave applications"},
+     {PayrollToolsCalculator , "Can access payroll calculator tools"},
+     {EmployeeViewAll , "Can view all employees"},
+     {EmployeeCreate , "Can create an employee"},
+     {EmployeeEdit , "Can edit an employee's details"},
+     {EmployeeViewPayslip , "Can view (only) employee's payslip"},
+     {CompanySwitch , "Can switch to view other companies"},
+     {TaxManagePartial , "Has partial access to manage tax tables"},
+     {LeaveManagePartial , "Can partially manage employee leave"},
+     {PositionManagePartial , "Can partially manage positions"},
+     {CompanyViewDetails , "Can view company details"},
+     {BudgetSet , "Can access and set budget"},
+     {BudgetView , "Can access and view budget"},
+     {PayrollBenchmarkCapture , "Can capture employee payroll benchmarks"},
+     {PayrollBenchmarkView , "Can access and view employee payroll benchmarks"},
+     {BudgetViewOnly , "Can view budget only"},
+     {BudgetApprove , "Can approve budget"},
+     {BudgetComment , "Can access and comment on budget"},
+     {PayrollBenchmarkViewOnly , "Can only view payroll benchmarks"},
+    };
   }
 }

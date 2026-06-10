@@ -303,6 +303,7 @@ builder.Services.AddScoped<IPermissionsRepository, PermissionRepository>();
 builder.Services.AddScoped<IPermissionService, PermissionService>();
 builder.Services.AddScoped<IRolePermissionRepository, RolePermissionRepository>();
 builder.Services.AddScoped<IRolePermissionService, RolePermissionService>();
+builder.Services.AddScoped<IUserRolesRepository, UserRolesRepository>();
 
 builder.Services.AddHttpClient<IUserHttpClient, UserHttpClient>((provider, client) =>
 {
@@ -352,6 +353,7 @@ using (var scope = app.Services.CreateScope())
   await initialiser.InitialisePayrollPeriod();
   await userService.SyncEmployeeUserAsync();
   await RBACInitialiser.EnsureRoleBasedAccessControlAsync();
+  await RBACInitialiser.MigrateAndBackfillUsersToRole();
 }
 
 if (app.Environment.IsDevelopment())

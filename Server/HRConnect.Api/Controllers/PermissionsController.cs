@@ -1,5 +1,6 @@
 namespace HRConnect.Api.Controllers
 {
+  using HRConnect.Api.Models;
   using HRConnect.Api.Interfaces.AccessControl;
   using HRConnect.Api.DTOs.AccessControl;
   using Microsoft.AspNetCore.Mvc;
@@ -37,7 +38,9 @@ namespace HRConnect.Api.Controllers
     [HttpGet("roles/{roleId}/permissions")]
     public async Task<IActionResult> GetPermissionsForRole(int roleId)
     {
-      throw new NotImplementedException();
+      IEnumerable<Permissions> permissions = await _rolePermissionService
+      .GetPermissionsForRoleAsync(roleId);
+      return Ok(permissions);
     }
 
     //Assign a permissions to a role
@@ -56,10 +59,18 @@ namespace HRConnect.Api.Controllers
       }
     }
 
-    [HttpDelete("roles/{roleid}/permissions/{permissionId}")]
+    [HttpDelete("roles/{roleId}/permissions/{permissionId}")]
     public async Task<IActionResult> DeletePermissionFromRole(int roleId, int permissionId)
     {
-      throw new NotImplementedException();
+      try
+      {
+        await _rolePermissionService.RemovePermissionsFromRoleAsync(roleId, permissionId);
+        return Ok($"Successfully Remove Permission From Role");
+      }
+      catch
+      {
+        return BadRequest($"Failed To Remove Permission");
+      }
     }
 
   }

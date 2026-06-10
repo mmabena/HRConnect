@@ -9,6 +9,8 @@ namespace HRConnect.Api.Services
   using HRConnect.Api.Models;
   using Microsoft.AspNetCore.Identity;
   using Microsoft.IdentityModel.Tokens;
+  using HRConnect.Api.Interfaces.AccessControl;
+
   public class AuthService : IAuthService
   {
     private sealed class LoginAttemptInfo
@@ -25,23 +27,28 @@ namespace HRConnect.Api.Services
     private readonly IConfiguration _config;
     private readonly IPasswordResetRepository _passwordResetRepo;
     private readonly HRConnect.Api.Utils.IEmailService _emailService;
+    private readonly IUserRolesRepository _userRoleRepo;
 
-    public AuthService(IUserRepository userRepository, IPasswordHasher<User> passwordHasher, IConfiguration config, IPasswordResetRepository passwordResetRepo, HRConnect.Api.Utils.IEmailService emailService)
+    public AuthService(IUserRepository userRepository, IPasswordHasher<User> passwordHasher, IConfiguration config, IPasswordResetRepository passwordResetRepo, HRConnect.Api.Utils.IEmailService emailService,
+    IUserRolesRepository userRoleRepo)
     {
       _userRepository = userRepository;
       _passwordHasher = passwordHasher;
       _config = config;
       _passwordResetRepo = passwordResetRepo;
       _emailService = emailService;
+      _userRoleRepo = userRoleRepo;
     }
-
+    private async Task<Roles> ResolveRoleForJwt(int userId)
+    {
+      return await _userRoleRepo.GetRoleByFromUserIdAsync(userId);
+    }
     public async Task<string?> LoginAsync(string email, string password)
     {
       if (string.IsNullOrWhiteSpace(email) || !email.EndsWith("@singular.co.za", StringComparison.OrdinalIgnoreCase))
       {
         return null;
       }
-
 
       var user = await _userRepository.GetUserByEmailAsync(email);
       if (user == null)
@@ -162,12 +169,13 @@ namespace HRConnect.Api.Services
 
     private string GenerateJwtToken(User user)
     {
+      var role = ResolveRoleForJwt(user.UserId).GetAwaiter().GetResult();
       var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Email),
             new Claim(ClaimTypes.Email, user.Email),
             new Claim("UserId", user.UserId.ToString(CultureInfo.InvariantCulture)),
-            new Claim(ClaimTypes.Role, user.Role.ToString())
+            new Claim(ClaimTypes.Role, role.Name.ToString())
         };
 
       /// <summary>

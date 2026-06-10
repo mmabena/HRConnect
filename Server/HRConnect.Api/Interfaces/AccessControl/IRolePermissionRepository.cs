@@ -1,5 +1,6 @@
 namespace HRConnect.Api.Interfaces.AccessControl
 {
+  using HRConnect.Api.Models;
   public interface IRolePermissionRepository
   {
     /// <summary>
@@ -10,6 +11,7 @@ namespace HRConnect.Api.Interfaces.AccessControl
     /// <resource>.<action> </param>
     Task AssignPermissionsToRoleByIdAsync(int roleId, params string[] permissionsList);
 
-    Task RemovePermissionsFromRoleAsync(int roleId, params string[] permissionsList);
+    Task RemovePermissionsFromRoleAsync(int roleId, params int[] permissionsIds);
+    Task<IEnumerable<Permissions>> GetPermissionsForRoleAsync(int roleId);
   }
 }
