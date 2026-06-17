@@ -1,6 +1,7 @@
 namespace HRConnect.Api.Utils.Jobs.Payroll
 {
   using global::Quartz;
+  using HRConnect.Api.Data;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Interfaces.Notification;
   using HRConnect.Api.Interfaces.Payroll.Deduction;
@@ -9,7 +10,12 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
   using HRConnect.Api.Models;
   using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Models.PayrollDeduction;
+  using HRConnect.Api.Utils;
+  using Microsoft.EntityFrameworkCore;
   using Microsoft.Extensions.DependencyInjection;
+  using HRConnect.Api.Services;
+    
+  
 
   /// <summary>
   /// Payroll Rollover Job class to handle the locking, rolling over and 
@@ -33,6 +39,7 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
     private readonly IEmployeePensionEnrollmentService _employeePensionEnrollmentService;
     private readonly IServiceProvider _serviceProvider;
     private readonly IReportsService _reportsService;
+    private readonly IBankingDetailService _bankingDetailService;
     // private readonly ICompanyContributionService contributionService;
     private readonly IUserService _userService;
     private readonly IEmployeeService _employeeService;
@@ -45,7 +52,7 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
 
     public PayrollRolloverJob(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService, IServiceProvider serviceProvider,
       IEmployeePensionEnrollmentService employeePensionEnrollmentService,
-      IReportsService reportsService, IUserService userService,
+      IReportsService reportsService, IBankingDetailService bankingDetailService, IUserService userService,
       IEmployeeService employeeService,
       IEmployeePayrollEarningService employeePayrollEarningService,
       IEmployeeDeductionService employeeDeductionService,
@@ -56,6 +63,7 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
       _reportsService = reportsService;
       _serviceProvider = serviceProvider;
       _employeePensionEnrollmentService = employeePensionEnrollmentService;
+      _bankingDetailService = bankingDetailService;
       _userService = userService;
       _employeeService = employeeService;
       _employeeDeductionService = employeeDeductionService;
@@ -87,7 +95,7 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
 
       var newPayrun = new PayrollRun
       {
-        PayrollRunNumber = 1,//PayrollUtil.SetPayrunNumber(),
+        PayrollRunNumber = 1,
         PeriodId = newPeriod.PayrollPeriodId,
         PeriodDate = DateTime.Now,
         IsFinalised = false
@@ -102,8 +110,8 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
     {
       var users = await _userService.GetAllUsersAsync();
 
-      //Only returns users with SuperUser role
-      users = users.FindAll(u => u.Role == UserRole.SuperUser);
+      users = users.FindAll(u => u.Role == UserRole.SuperUser ||
+      u.TempRole == UserRole.SuperUser);
       List<string> employeeIds = new();
 
       foreach (var u in users)
@@ -141,13 +149,12 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
       DateTime currentDate = DateTime.Now;
       int runId = ((currentDate.Month + 8) % 12) + 1;
 
-      //   if (currentDate.Date !=
-      // new DateTime(currentDate.Year, currentDate.Month,
-      // DateTime.DaysInMonth(currentDate.Year, currentDate.Month)))
-      //   {
-      //     Console.WriteLine("Safe Guard: Today Is Not The Last Day Of The Month.");
-      //     return;
-      //   }
+      if (currentDate.Date !=
+        new DateTime(currentDate.Year, currentDate.Month,
+        DateTime.DaysInMonth(currentDate.Year, currentDate.Month)))
+      {
+        return;
+      }
 
       try
       {
@@ -167,7 +174,6 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
           return;
         }
 
-        //Finalise and lock a run if it isn't finalised and is still running
         if (!currentPayRun.IsFinalised && !currentPayRun.IsLocked)
         {
           currentPayRun.IsFinalised = true;
@@ -207,12 +213,16 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
         {
           await RolloverPayrollRun(payperiod, nextRun);
         }
+        
+        // Lock all banking details on payroll rollover to prevent changes to banking details while payroll runs are active
+        await _bankingDetailService.LockAllBankingDetailsAsync();
+
+
         // await ClearPayrollNotifications();
 
       }
       catch (InvalidOperationException ex)
       {
-        Console.WriteLine($"Invalid Operation on locked entity \n{ex}");
         var jobException = new JobExecutionException(ex);
         throw jobException;
       }
@@ -230,7 +240,6 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
     private async Task AllocateCompanyContributionsIfNeeded(int payrollRunId)
     {
       using var scope = _serviceProvider.CreateScope();
-      // bool alreadyAllocated = await _contributionRepo.FindAllocatedContribution(payrollRunId);
       var companyContributionService = scope.ServiceProvider.GetRequiredService<ICompanyContributionService>();
 
       bool alreadyAllocated = await companyContributionService.FindAllocatedContribution(payrollRunId);

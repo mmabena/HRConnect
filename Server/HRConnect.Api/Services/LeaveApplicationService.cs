@@ -67,17 +67,17 @@ namespace HRConnect.Api.Services
       if (balance.AvailableDays <= 0 || balance.AvailableDays < daysRequested)
         throw new InvalidOperationException("Insufficient leave balance.");
 
-            var application = new LeaveApplication
-            {
-                EmployeeId = request.EmployeeId,
-                LeaveTypeId = request.LeaveTypeId,
-                Description = request.Description!,
-                StartDate = request.StartDate,
-                EndDate = request.EndDate,
-                DaysRequested = daysRequested,
-                Status = LeaveApplication.LeaveApplicationStatus.Pending,
-                AppliedDate = DateTime.UtcNow
-            };
+      var application = new LeaveApplication
+      {
+        EmployeeId = request.EmployeeId,
+        LeaveTypeId = request.LeaveTypeId,
+        Description = request.Description!,
+        StartDate = request.StartDate,
+        EndDate = request.EndDate,
+        DaysRequested = daysRequested,
+        Status = LeaveApplication.LeaveApplicationStatus.Pending,
+        AppliedDate = DateTime.UtcNow
+      };
 
       await _context.LeaveApplications.AddAsync(application);
       await _context.SaveChangesAsync();
@@ -239,43 +239,41 @@ namespace HRConnect.Api.Services
 
       application.RejectionReason = reason;
 
-      await _context.SaveChangesAsync();
-
-      // 🔥 ALWAYS SEND EMAIL
-      await SendEmployeeDecisionEmail(application, false);
-    }
-    /// <summary>
-    /// Maps a LeaveApplication entity to a LeaveApplicationResponse DTO, 
-    /// extracting relevant information such as employee ID, leave type ID, start and end dates, days requested, and application status,
-    /// to provide a structured response object that can be returned to API clients while abstracting away internal entity details and ensuring that only necessary information is exposed.
-    /// </summary>
-    /// <param name="application"></param>
-    private static LeaveApplicationResponse MapToResponse(LeaveApplication application)
-    {
-      return new LeaveApplicationResponse
-      {
-        Id = application.Id,
-        EmployeeId = application.EmployeeId,
-        LeaveTypeId = application.LeaveTypeId,
-        StartDate = application.StartDate,
-        EndDate = application.EndDate,
-        DaysRequested = application.DaysRequested,
-        Status = application.Status.ToString()
-      };
-    }
-    /// <summary>
-    /// Sends an email notification to the employee regarding the decision on their leave application,
-    /// including details about the leave type, dates, and the decision (approved or rejected),
-    /// </summary>
-    /// <param name="application"></param>
-    /// <param name="approved"></param>
-    /// <returns></returns>
-    private async Task SendEmployeeDecisionEmail(
-LeaveApplication application,
-bool approved)
-    {
-      var employee = await _context.Employees
-          .FirstAsync(e => e.EmployeeId == application.EmployeeId);
+            await _context.SaveChangesAsync();
+            await SendEmployeeDecisionEmail(application, false);
+        }
+        /// <summary>
+        /// Maps a LeaveApplication entity to a LeaveApplicationResponse DTO, 
+        /// extracting relevant information such as employee ID, leave type ID, start and end dates, days requested, and application status,
+        /// to provide a structured response object that can be returned to API clients while abstracting away internal entity details and ensuring that only necessary information is exposed.
+        /// </summary>
+        /// <param name="application"></param>
+        private static LeaveApplicationResponse MapToResponse(LeaveApplication application)
+        {
+            return new LeaveApplicationResponse
+            {
+                Id = application.Id,
+                EmployeeId = application.EmployeeId,
+                LeaveTypeId = application.LeaveTypeId,
+                StartDate = application.StartDate,
+                EndDate = application.EndDate,
+                DaysRequested = application.DaysRequested,
+                Status = application.Status.ToString()
+            };
+        }
+        /// <summary>
+        /// Sends an email notification to the employee regarding the decision on their leave application,
+        /// including details about the leave type, dates, and the decision (approved or rejected),
+        /// </summary>
+        /// <param name="application"></param>
+        /// <param name="approved"></param>
+        /// <returns></returns>
+        private async Task SendEmployeeDecisionEmail(
+    LeaveApplication application,
+    bool approved)
+        {
+            var employee = await _context.Employees
+                .FirstAsync(e => e.EmployeeId == application.EmployeeId);
 
       var leaveType = await _context.LeaveTypes
           .FirstAsync(l => l.Id == application.LeaveTypeId);
@@ -308,15 +306,14 @@ bool approved)
       var employee = await _context.Employees
           .FirstAsync(e => e.EmployeeId == application.EmployeeId);
 
-      var leaveType = await _context.LeaveTypes
-          .FirstAsync(l => l.Id == application.LeaveTypeId);
-      if (application.ApprovalToken == Guid.Empty)
-      {
-        application.ApprovalToken = Guid.NewGuid();
-        application.TokenExpiry = DateTime.UtcNow.AddHours(48);
-        await _context.SaveChangesAsync();
-      }
-      var baseUrl = _configuration["AppSettings:BaseUrl"];
+            var leaveType = await _context.LeaveTypes
+                .FirstAsync(l => l.Id == application.LeaveTypeId);
+            if (application.ApprovalToken == Guid.Empty)
+            {
+                application.ApprovalToken = Guid.NewGuid();
+                application.TokenExpiry = DateTime.UtcNow.AddHours(48);
+            }
+            var baseUrl = _configuration["AppSettings:BaseUrl"];
 
       var approveLink =
           $"{baseUrl}/api/LeaveApplication/{application.Id}/approve?token={application.ApprovalToken}";

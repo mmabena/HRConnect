@@ -1,5 +1,7 @@
 namespace HRConnect.Api.Models
 {
+  using System.Collections.Generic;
+
   public class JobGrade
   {
     public int JobGradeId { get; set; }
@@ -9,8 +11,5 @@ namespace HRConnect.Api.Models
     public DateTime UpdatedDate { get; set; } = DateTime.Now;
 
     public ICollection<Position> Positions { get; set; } = new List<Position>();
-
-    public ICollection<LeaveEntitlementRule> LeaveEntitlementRules { get; set; }
-        = new List<LeaveEntitlementRule>();
   }
 }

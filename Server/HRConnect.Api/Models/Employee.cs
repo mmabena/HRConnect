@@ -81,8 +81,8 @@ namespace HRConnect.Api.Models
 
     [Required]
     public string ZipCode { get; set; } = string.Empty;
-    public string CompanyId { get; set; } = string.Empty;
-    public Company Company { get; set; }
+    public string? CompanyId { get; set; } 
+    public Company? Company { get; set; }
 
     public bool HasDisability { get; set; }
     public string? DisabilityDescription { get; set; }
@@ -104,16 +104,21 @@ namespace HRConnect.Api.Models
 
     public Position? Position { get; set; }
 
+    public int BankingDetailsId { get; set; }
+
+    [ForeignKey(nameof(BankingDetailsId))]
+    public BankingDetail? BankingDetail { get; set; }
+
     [Required]
     public EmploymentStatus EmploymentStatus { get; set; }
 
     public string? CareerManagerID { get; set; }
 
     [ForeignKey(nameof(CareerManagerID))]
-    public Employee? CareerManager { get; set; }
+    public Employee? CareerManager { get; set; } = null;
 
     [Required]
-    public string? ProfileImage { get; set; } = string.Empty;
+    public string? ProfileImage { get; set; } = null;
 
     public int? PensionOptionId { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

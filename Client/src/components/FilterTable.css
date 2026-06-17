@@ -1,0 +1,25 @@
+.filter-container{
+position:absolute;
+top: 110%;/*makes this component float on top*/
+left:0;/*make this component render on the bottom left of the button*/
+z-index:100;
+    
+width: 357px;
+height: 184px;
+gap: 11px;
+/* angle: 0 deg; */
+opacity: 1;
+background-color: white;
+border-radius: 5px;
+padding-top: 20px;
+padding-bottom: 20px;
+}
+
+.filter-popup{
+width: 326px;
+height: 30px;
+gap: 10px;
+/* angle: 0 deg; */
+opacity: 1;
+
+}

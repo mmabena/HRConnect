@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from "react";
-import CompanyManagementNavBar from "../../../Components/companyManagement/companyManagementNavBar";
+import CompanyManagementNavBar from "../../../components/companyManagement/companyManagementNavBar";
 import { useNavigate, useLocation } from "react-router-dom";
-import { editEmployee, fetchAllEmployees,showConfirmationToast } from "../../../api/Employee";
+import { editEmployee, showConfirmationToast } from "../../../api/Employee";
 import api from "../../../api/api";
-import { jwtDecode } from "jwt-decode";
+import {jwtDecode} from "jwt-decode";
 import { toast } from "react-toastify";
-
-import usePositions from "../../../hooks/usePositions";
-import usePagination from "../../../hooks/usePagination";
-import useDateTime from "../../../hooks/useDateTime";
+import * as signalR from "@microsoft/signalr";
+import { getConnection } from "../../../components/Services/signalRService";
 
 const ManageUserPositions = ({ title }) => {
   const [employees, setEmployees] = useState([]);
@@ -21,13 +19,12 @@ const ManageUserPositions = ({ title }) => {
   const [selectedPosition, setSelectedPosition] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [showPageOptions, setShowPageOptions] = useState(false);
   const [activeTab, setActiveTab] = useState("Position Management");
+  const [userManagementHubConnection, setuserManagementHubConnection] = useState(null);
 
   const navigate = useNavigate();
   const location = useLocation();
   const { currentPositionTitle, newPositionTitle } = location.state || {};
-  const pageOptions = [10, 15, 20, 25];
 
   const navTabs = [
     "Tax Table Management",
@@ -69,7 +66,6 @@ const ManageUserPositions = ({ title }) => {
     const initialize = async () => {
       setLoading(true);
       const token = localStorage.getItem("token");
-
       if (!token) {
         toast.error("You are not logged in.");
         setLoading(false);
@@ -80,10 +76,7 @@ const ManageUserPositions = ({ title }) => {
         const decoded = jwtDecode(token);
         const role =
           decoded?.role ||
-          decoded?.[
-            "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-          ];
-
+          decoded?.["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
         if (role !== "SuperUser") {
           toast.error("Access Denied. SuperUser only.");
           setHasAccess(false);
@@ -93,7 +86,6 @@ const ManageUserPositions = ({ title }) => {
 
         setHasAccess(true);
 
-        // Fetch employees and positions
         const [employeesRes, positionsRes] = await Promise.all([
           api.get("/employee"),
           api.get("/positions"),
@@ -104,31 +96,26 @@ const ManageUserPositions = ({ title }) => {
 
         setPositions(allPositions);
 
-        // Find current position
         const matchedCurrent = allPositions.find(
-          (pos) => pos.positionTitle === currentPositionTitle,
+          (pos) => pos.positionTitle === currentPositionTitle
         );
 
-        // Filter employees by CURRENT position
         const filteredEmployees = matchedCurrent
           ? allEmployees.filter(
-              (emp) =>
-                Number(emp.positionId) === Number(matchedCurrent.positionId),
+              (emp) => Number(emp.positionId) === Number(matchedCurrent.positionId)
             )
           : [];
 
         setEmployees(filteredEmployees);
 
-        // Find new position after positions are loaded
         const matchedNew = allPositions.find(
-          (pos) => pos.positionTitle === newPositionTitle,
+          (pos) => pos.positionTitle === newPositionTitle
         );
 
-        if (matchedNew) {
-          setSelectedPosition(String(matchedNew.positionId));
-        } else {
+        if (matchedNew) setSelectedPosition(String(matchedNew.positionId));
+        else {
           const firstOther = allPositions.find(
-            (pos) => pos.positionId !== matchedCurrent?.positionId,
+            (pos) => pos.positionId !== matchedCurrent?.positionId
           );
           setSelectedPosition(firstOther ? String(firstOther.positionId) : "");
         }
@@ -144,6 +131,38 @@ const ManageUserPositions = ({ title }) => {
   }, [currentPositionTitle, newPositionTitle]);
 
   // ----------------------------
+  // SignalR Setup
+  // ----------------------------
+  useEffect(() => {
+    const newConnection = new signalR.HubConnectionBuilder()
+      .withUrl("http://localhost:3000/userPositionHub")
+      .withAutomaticReconnect()
+      .build();
+    setuserManagementHubConnection(newConnection);
+  }, []);
+
+  useEffect(() => {
+    if (!userManagementHubConnection) return;
+
+   userManagementHubConnection
+      .start()
+      .then(() => {
+        console.log("SignalR Connected");
+
+        userManagementHubConnection.on("UserPositionUpdated", (updatedEmployee) => {
+          // Remove employee if they were moved
+          setEmployees((prev) =>
+            prev.filter((emp) => emp.employeeId !== updatedEmployee.employeeId)
+          );
+        });
+      })
+      .catch((err) => {
+        console.error("SignalR Connection Error:", err);
+        setTimeout(() => userManagementHubConnection.start(), 5000);
+      });
+  }, [userManagementHubConnection]);
+
+  // ----------------------------
   // Checkbox Handlers
   // ----------------------------
   const handleCheckboxChange = (employeeId) => {
@@ -155,7 +174,7 @@ const ManageUserPositions = ({ title }) => {
 
   const handleSelectAll = () => {
     const allSelected = currentEmployees.every(
-      (emp) => selectedEmployees[emp.employeeId],
+      (emp) => selectedEmployees[emp.employeeId]
     );
     const newSelection = { ...selectedEmployees };
     currentEmployees.forEach((emp) => {
@@ -168,12 +187,10 @@ const ManageUserPositions = ({ title }) => {
   // Position Mapping
   // ----------------------------
   const positionMap = Object.fromEntries(
-    positions.map((pos) => [pos.positionId, pos.positionTitle]),
+    positions.map((pos) => [pos.positionId, pos.positionTitle])
   );
 
-  const handlePositionChange = (e) => {
-    setSelectedPosition(e.target.value);
-  };
+  const handlePositionChange = (e) => setSelectedPosition(e.target.value);
 
   // ----------------------------
   // Pagination
@@ -190,38 +207,25 @@ const ManageUserPositions = ({ title }) => {
   const handlePageClick = (num) => setCurrentPage(num);
 
   // ----------------------------
-  // Save Changes (Update Position)
+  // Save Changes
   // ----------------------------
   const handleSave = async () => {
     const selectedIds = Object.keys(selectedEmployees).filter(
-      (id) => selectedEmployees[id],
+      (id) => selectedEmployees[id]
     );
+    if (!selectedIds.length) return toast.error("Select at least one employee");
+    if (!selectedPosition) return toast.error("Select a position");
 
-    if (!selectedIds.length) {
-      toast.error("Please select at least one employee.");
-      return;
-    }
-
-    if (!selectedPosition) {
-      toast.error("Please select a position.");
-      return;
-    }
-     const confirmed = await showConfirmationToast(
-    "Are you sure you want to save changes?",
-  );
-
-  if (!confirmed) return;
+    const confirmed = await showConfirmationToast(
+      "Are you sure you want to save changes?"
+    );
+    if (!confirmed) return;
 
     try {
-      const updatePromises = selectedIds
-        .map((employeeId) => {
-          const emp = employees.find(
-            (e) => e.employeeId.toString() === employeeId,
-          );
-
-          if (!emp) return null;
-
-          const updatedEmp = {
+      const updatePromises = selectedIds.map((id) => {
+        const emp = employees.find((e) => e.employeeId.toString() === id);
+        if (!emp) return null;
+ const updatedEmp = {
             employeeId: emp.employeeId,
             positionId: Number(selectedPosition),
             title: emp.title,
@@ -247,40 +251,20 @@ const ManageUserPositions = ({ title }) => {
             nationality: emp.nationality,
           };
 
-          return editEmployee(emp.employeeId, updatedEmp);
-        })
-        .filter(Boolean);
+        return editEmployee(emp.employeeId, updatedEmp);
+      }).filter(Boolean);
 
       await Promise.all(updatePromises);
+        toast.success("Positions updated successfully.");
 
-      toast.success("Positions updated successfully.");
-
-      //KEY FIX: Update UI immediately WITHOUT refetch
+      // Remove updated employees immediately from current table
       setEmployees((prev) =>
-        prev.map((emp) => {
-          if (selectedIds.includes(emp.employeeId.toString())) {
-            const newPosition = positions.find(
-              (p) => p.positionId === Number(selectedPosition),
-            );
-
-            return {
-              ...emp,
-              positionId: Number(selectedPosition),
-
-              //THIS is what makes UI update instantly
-              position: newPosition
-                ? {
-                    ...newPosition,
-                  }
-                : emp.position,
-            };
-          }
-          return emp;
-        }),
+        prev.filter((emp) => !selectedIds.includes(emp.employeeId.toString()))
       );
 
       setSelectedEmployees({});
       setSelectedPosition("");
+    
     } catch (error) {
       console.error(
         "Failed to update positions:",
@@ -352,7 +336,6 @@ const ManageUserPositions = ({ title }) => {
         </div>
 
         {/* Employee Table */}
-        <div className="manage-positions"></div>
         <table className="positions-table">
           <thead>
             <tr>
@@ -363,7 +346,7 @@ const ManageUserPositions = ({ title }) => {
                     checked={
                       currentEmployees.length > 0 &&
                       currentEmployees.every(
-                        (emp) => selectedEmployees[emp.employeeId],
+                        (emp) => selectedEmployees[emp.employeeId]
                       )
                     }
                     onChange={handleSelectAll}
@@ -371,17 +354,15 @@ const ManageUserPositions = ({ title }) => {
                   <span>Name</span>
                 </div>
               </th>
-
               <th>Branch</th>
               <th>Current Position</th>
               <th>Position Title</th>
             </tr>
           </thead>
-
           <tbody>
             {currentEmployees.length === 0 ? (
               <tr>
-                <td>No users found.</td>
+                <td colSpan={4}>No users found.</td>
               </tr>
             ) : (
               currentEmployees.map((employee) => (
@@ -400,10 +381,8 @@ const ManageUserPositions = ({ title }) => {
                       </span>
                     </div>
                   </td>
-
                   <td>{employee.branch || "N/A"}</td>
                   <td>{positionMap[employee.positionId] || "N/A"}</td>
-
                   <td>
                     {selectedEmployees[employee.employeeId]
                       ? positionMap[selectedPosition] || "-"
@@ -415,7 +394,6 @@ const ManageUserPositions = ({ title }) => {
           </tbody>
         </table>
 
-        {/* Pagination */}
         {/* Pagination */}
         {employees.length > itemsPerPage && (
           <div className="pagination-placeholder">
@@ -432,7 +410,6 @@ const ManageUserPositions = ({ title }) => {
                     opacity: currentPage > 1 ? 1 : 0.4,
                   }}
                 />
-
                 <div className="page-numbers">
                   {Array.from({ length: totalPages }, (_, i) => (
                     <button
@@ -446,7 +423,6 @@ const ManageUserPositions = ({ title }) => {
                     </button>
                   ))}
                 </div>
-
                 <img
                   src="/images/arrow_drop_down_circle.png"
                   alt="Next"
@@ -454,8 +430,7 @@ const ManageUserPositions = ({ title }) => {
                   onClick={handleNext}
                   style={{
                     transform: "rotate(-90deg)",
-                    cursor:
-                      currentPage < totalPages ? "pointer" : "not-allowed",
+                    cursor: currentPage < totalPages ? "pointer" : "not-allowed",
                     opacity: currentPage < totalPages ? 1 : 0.4,
                   }}
                 />

@@ -11,90 +11,60 @@ namespace HRConnect.Api.Services
         private readonly IEmailService _emailService;
         private readonly ILeaveBalanceService _leaveBalanceService;
 
-    public LeaveProcessingService(
-        ApplicationDBContext context,
-        IEmailService emailService,
-        ILeaveBalanceService leaveBalanceService)
-    {
-      _context = context;
-      _emailService = emailService;
-      _leaveBalanceService = leaveBalanceService;
-    }
-    /// <summary>
-    /// Recalculates the sick leave balance for all employees based on their tenure and the sick leave policy.
-    /// </summary>
-    /// <returns></returns>
-    public async Task RecalculateAllSickLeaveAsync()
-    {
-      var employees = await _context.EmployeeLeaveBalances
-          .Include(b => b.Employee)
-          .Include(b => b.LeaveType)
-          .Where(b => b.LeaveType.Code == "SL")
-          .Select(b => b.Employee)
-          .Distinct()
-          .ToListAsync();
+        public LeaveProcessingService(
+            ApplicationDBContext context,
+            IEmailService emailService,
+            ILeaveBalanceService leaveBalanceService)
+        {
+            _context = context;
+            _emailService = emailService;
+            _leaveBalanceService = leaveBalanceService;
+        }
+        /// <summary>
+        /// Recalculates the sick leave balance for all employees based on their tenure and the sick leave policy.
+        /// </summary>
+        /// <returns></returns>
+        public async Task RecalculateAllSickLeaveAsync()
+        {
+            var employees = await _context.Employees
+            .Include(e => e.LeaveBalances)
+            .ThenInclude(lb => lb.LeaveType)
+            .Where(e => e.LeaveBalances.Any(lb => lb.LeaveType.Code == "SL"))
+            .ToListAsync();
 
       var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
-      foreach (var employee in employees)
-      {
-        var sickBalance = employee.LeaveBalances
-            .FirstOrDefault(b => b.LeaveType.Code == "SL");
-
-        if (sickBalance == null)
-          continue;
-
-        var monthsWorked =
-            (today.Year - employee.StartDate.Year) * 12 +
-            (today.Month - employee.StartDate.Month) + 1;
-
-        if (monthsWorked < 0)
-          monthsWorked = 0;
-
-        decimal entitled =
-            monthsWorked < 6 ? monthsWorked : 30;
-
-        var cycleNumber = monthsWorked / 36;
-
-        if (sickBalance.LastResetYear == null || sickBalance.LastResetYear != cycleNumber)
-        {
-          sickBalance.TakenDays = 0;
-          sickBalance.LastResetYear = cycleNumber;
+            foreach (var employee in employees)
+            {
+                await _leaveBalanceService.RecalculateSickLeaveAsync(employee.EmployeeId);
+            }
         }
+        /// <summary>
+        /// Recalculates the family responsibility leave balance for all employees based on their work anniversary and the applicable policy.
+        /// </summary>
+        /// <returns></returns>
+        public async Task RecalculateAllFamilyResponsibilityLeaveAsync()
+        {
+            var employees = await _context.Employees
+                .Include(e => e.LeaveBalances)
+                .ThenInclude(lb => lb.LeaveType)
+                .Where(e => e.LeaveBalances.Any(lb => lb.LeaveType.Code == "FRL"))
+                .ToListAsync();
 
-        sickBalance.AccruedDays = entitled;
-        sickBalance.AvailableDays =
-            Math.Max(0, entitled - sickBalance.TakenDays);
-      }
-
-      await _context.SaveChangesAsync();
-    }
-    /// <summary>
-    /// Recalculates the family responsibility leave balance for all employees based on their work anniversary and the applicable policy.
-    /// </summary>
-    /// <returns></returns>
-    public async Task RecalculateAllFamilyResponsibilityLeaveAsync()
-    {
-      var employees = await _context.Employees
-          .Include(e => e.LeaveBalances)
-              .ThenInclude(lb => lb.LeaveType)
-          .ToListAsync();
-
-      foreach (var employee in employees)
-      {
-        await _leaveBalanceService
-            .RecalculateFamilyResponsibilityLeaveAsync(employee.EmployeeId);
-      }
-    }
-    /// <summary>
-    /// Resets the maternity leave balance for all eligible employees when they have a new pregnancy, based on the applicable policy.
-    /// </summary>
-    /// </summary>
-    /// <returns></returns>
-    /// <exception cref="InvalidOperationException"></exception>
-    public async Task ProcessCarryOverNotificationAsync()
-    {
-      var today = DateTime.UtcNow.Date;
+            await _leaveBalanceService
+                .RecalculateFamilyResponsibilityLeaveBulkAsync(
+                employees.Select(e => e.EmployeeId).ToList()
+            );
+        }
+        /// <summary>
+        /// Resets the maternity leave balance for all eligible employees when they have a new pregnancy, based on the applicable policy.
+        /// </summary>
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        public async Task ProcessCarryOverNotificationAsync()
+        {
+            var today = DateTime.UtcNow.Date;
 
       if (today.Month != 12 || today.Day != 1)
       {
@@ -155,12 +125,10 @@ namespace HRConnect.Api.Services
         if (annualLeave == null)
           throw new InvalidOperationException("Annual Leave not configured.");
 
-        var balances = await _context.EmployeeLeaveBalances
-            .Include(b => b.Employee)
-                .ThenInclude(e => e.Position)
-                .ThenInclude(p => p.JobGrade)
-            .Where(b => b.LeaveTypeId == annualLeave.Id)
-            .ToListAsync();
+                var balances = await _context.EmployeeLeaveBalances
+                    .Include(b => b.Employee)
+                    .Where(b => b.LeaveTypeId == annualLeave.Id)
+                    .ToListAsync();
 
         foreach (var balance in balances)
         {
@@ -208,24 +176,24 @@ namespace HRConnect.Api.Services
           balance.LastResetYear = currentYear;
         }
 
-        await _context.SaveChangesAsync();
-        await transaction.CommitAsync();
-      }
-      catch (Exception ex)
-      {
-        await transaction.RollbackAsync();
-        Console.WriteLine($"Error during annual reset: {ex.Message}");
-      }
-    }
-    /// <summary>
-    /// Calculates the carryover amount for annual leave based on the remaining balance at the end of the year, applying the policy of capping carryover at 5 days.
-    /// </summary>
-    /// <param name="remaining"></param>
-    /// <returns></returns>
-    private decimal CalculateCarryover(decimal remaining)
-    {
-      if (remaining <= 0)
-        return 0;
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                throw new InvalidOperationException("Annual reset failed", ex);
+            }
+        }
+        /// <summary>
+        /// Calculates the carryover amount for annual leave based on the remaining balance at the end of the year, applying the policy of capping carryover at 5 days.
+        /// </summary>
+        /// <param name="remaining"></param>
+        /// <returns></returns>
+        private decimal CalculateCarryover(decimal remaining)
+        {
+            if (remaining <= 0)
+                return 0;
 
       return remaining <= 5 ? remaining : 5;
     }

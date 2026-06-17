@@ -9,8 +9,8 @@ namespace HRConnect.Api.Utils
     {
       if (ex.InnerException is SqlException sqlException)
       {
-        return sqlException.Number == 2601
-            || sqlException.Number == 2627;
+        return sqlException.Number is 2601
+            or 2627;
       }
 
       return false;

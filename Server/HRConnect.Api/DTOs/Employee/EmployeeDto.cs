@@ -7,8 +7,8 @@ namespace HRConnect.Api.DTOs.Employee
     public Title Title { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Surname { get; set; } = string.Empty;
-    public string IdNumber { get; set; } = string.Empty;
-    public string PassportNumber { get; set; } = string.Empty;
+    public string? IdNumber { get; set; } = string.Empty;
+    public string? PassportNumber { get; set; } = string.Empty;
     public string Nationality { get; set; } = string.Empty;
     public Gender? Gender { get; set; }
     public string ContactNumber { get; set; } = string.Empty;
@@ -27,11 +27,11 @@ namespace HRConnect.Api.DTOs.Employee
     public string? PositionTitle { get; set; }
     public EmploymentStatus EmploymentStatus { get; set; }
     public string CareerManagerID { get; set; } = string.Empty;
-    public string CompanyId { get; set; }
+    public string CompanyId { get; set; } = string.Empty;
     public string ProfileImage { get; set; } = string.Empty;
     public int? PensionOptionId { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime UpdatedAt { get; set; } = DateTime.Now;
     public bool IsActive { get; set; }
   }
 }

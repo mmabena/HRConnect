@@ -7,6 +7,8 @@ namespace HRConnect.Api.Services
     using HRConnect.Api.Models;
     using HRConnect.Api.Utils;
     using Microsoft.EntityFrameworkCore;
+    using HRConnect.Api.Utils;
+    using System.Globalization;
 
   public class LeaveBalanceService : ILeaveBalanceService
   {
@@ -36,30 +38,38 @@ namespace HRConnect.Api.Services
       if (employee == null)
         throw new InvalidOperationException("Employee not found.");
 
-      var yearsOfService = CalculateYearsOfService(employee.StartDate);
+            var groupKey = await _context.JobGradeGroupMaps
+                .Where(x => x.JobGradeId == employee.Position.JobGradeId)
+                .Select(x => x.GroupKey)
+                .FirstOrDefaultAsync();
+
+            if (groupKey == null)
+                throw new InvalidOperationException("JobGrade not mapped to any group.");
+
+            var yearsOfService = CalculateYearsOfService(employee.StartDate);
 
       var leaveTypes = await _context.LeaveTypes
           .Where(l => l.IsActive)
           .ToListAsync();
 
-      foreach (var leaveType in leaveTypes)
-      {
-        // Skip gender-restricted leave
-        if (leaveType.FemaleOnly && employee.Gender != Gender.Female)
-          continue;
+            var balancesToAdd = new List<EmployeeLeaveBalance>();
 
-        // Skip if already exists
-        if (employee.LeaveBalances.Any(b => b.LeaveTypeId == leaveType.Id))
-          continue;
+            foreach (var leaveType in leaveTypes)
+            {
+                if (leaveType.FemaleOnly && employee.Gender != Gender.Female)
+                    continue;
+
+                if (employee.LeaveBalances.Any(b => b.LeaveTypeId == leaveType.Id))
+                    continue;
 
                 if (leaveType.Code == "AL")
                 {
                     var rule = await _context.LeaveEntitlementRules
                         .Where(r =>
                             r.LeaveTypeId == leaveType.Id &&
-                            r.JobGradeId == employee.Position!.JobGradeId &&
+                            r.GroupKey == groupKey &&
                             r.MinYearsService <= yearsOfService &&
-                            (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
+                            (r.MaxYearsService == null || yearsOfService < r.MaxYearsService) &&
                             r.IsActive)
                         .OrderByDescending(r => r.MinYearsService)
                         .FirstOrDefaultAsync();
@@ -94,36 +104,38 @@ namespace HRConnect.Api.Services
             await CreateInitialAccrualSegmentAsync(employee);
           }
 
-          continue;
-        }
-        if (leaveType.Code == "SL")
-        {
-          var sickBalance = new EmployeeLeaveBalance
-          {
-            EmployeeId = employee.EmployeeId,
-            LeaveTypeId = leaveType.Id,
-            AccruedDays = 30,
-            TakenDays = 0,
-            AvailableDays = 30
-          };
+                    continue;
+                }
+
+                if (leaveType.Code == "SL")
+                {
+                    var sickBalance = new EmployeeLeaveBalance
+                    {
+                        EmployeeId = employee.EmployeeId,
+                        LeaveTypeId = leaveType.Id,
+                        AccruedDays = 30,
+                        TakenDays = 0,
+                        AvailableDays = 30
+                    };
 
           await _context.EmployeeLeaveBalances.AddAsync(sickBalance);
           await _context.SaveChangesAsync();
 
-          await RecalculateSickLeaveAsync(employee.EmployeeId);
-          continue;
-        }
-        if (leaveType.Code == "FRL")
-        {
-          var frlBalance = new EmployeeLeaveBalance
-          {
-            EmployeeId = employee.EmployeeId,
-            LeaveTypeId = leaveType.Id,
-            AccruedDays = 3,
-            TakenDays = 0,
-            AvailableDays = 3,
-            LastResetYear = DateTime.UtcNow.Year
-          };
+                    await RecalculateSickLeaveAsync(employee.EmployeeId);
+                    continue;
+                }
+
+                if (leaveType.Code == "FRL")
+                {
+                    var frlBalance = new EmployeeLeaveBalance
+                    {
+                        EmployeeId = employee.EmployeeId,
+                        LeaveTypeId = leaveType.Id,
+                        AccruedDays = 3,
+                        TakenDays = 0,
+                        AvailableDays = 3,
+                        LastResetYear = DateTime.UtcNow.Year
+                    };
 
           await _context.EmployeeLeaveBalances.AddAsync(frlBalance);
           await _context.SaveChangesAsync();
@@ -193,31 +205,31 @@ namespace HRConnect.Api.Services
             balance.AccruedDays - balance.TakenDays;
       }
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                throw new InvalidOperationException(
-                    "This leave balance was modified by another process. Please refresh and try again.");
-            }
-        }
-        /// <summary>
-        /// Recalculates the annual leave balance for an employee based on their accrual history and any changes to their position or job grade. 
-        /// This method is typically called after a position change or at the end of the year to ensure the annual leave balance is accurate. 
-        /// It calculates the total accrued days based on the employee's accrual segments, applies any carryover from the previous year, and updates the available days accordingly.
-        /// </summary>
-        /// <param name="employeeId"></param>
-        /// <returns></returns>
-        /// <exception cref="InvalidOperationException"></exception>
-        public async Task RecalculateAnnualLeaveAsync(string employeeId)
-        {
-            var employee = await _context.Employees
-                .Include(e => e.LeaveBalances)
-                .Include(e => e.Position)
-                    .ThenInclude(p => p!.JobGrade)
-                .FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
+      try
+      {
+        await _context.SaveChangesAsync();
+      }
+      catch (DbUpdateConcurrencyException)
+      {
+        throw new InvalidOperationException(
+            "This leave balance was modified by another process. Please refresh and try again.");
+      }
+    }
+    /// <summary>
+    /// Recalculates the annual leave balance for an employee based on their accrual history and any changes to their position or job grade. 
+    /// This method is typically called after a position change or at the end of the year to ensure the annual leave balance is accurate. 
+    /// It calculates the total accrued days based on the employee's accrual segments, applies any carryover from the previous year, and updates the available days accordingly.
+    /// </summary>
+    /// <param name="employeeId"></param>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
+    public async Task RecalculateAnnualLeaveAsync(string employeeId)
+    {
+      var employee = await _context.Employees
+          .Include(e => e.LeaveBalances)
+          .Include(e => e.Position)
+              .ThenInclude(p => p!.JobGrade)
+          .FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
 
       if (employee == null)
         throw new InvalidOperationException("Employee not found.");
@@ -461,26 +473,33 @@ namespace HRConnect.Api.Services
             projectionDate);
       }
 
-      if (projectionDate <= today)
-      {
-        return new LeaveProjectionResponse
-        {
-          EmployeeName = $"{employee.Name} {employee.Surname}",
-          ProjectionDate = projectionDate,
-          ProjectedAccruedDays = balance.AccruedDays,
-          TakenDays = balance.TakenDays,
-          ProjectedAvailableDays = balance.AvailableDays,
-          DaysWorked = totalDaysWorked
-        };
-      }
+            if (projectionDate <= today)
+            {
+                return new LeaveProjectionResponse
+                {
+                    EmployeeName = $"{employee.Name} {employee.Surname}",
+                    ProjectionDate = projectionDate,
+                    ProjectedAccruedDays = balance.AccruedDays,
+                    TakenDays = balance.TakenDays,
+                    ProjectedAvailableDays = balance.AvailableDays,
+                    DaysWorked = totalDaysWorked
+                };
+            }
+            var groupKey = await _context.JobGradeGroupMaps
+                .Where(x => x.JobGradeId == employee.Position.JobGradeId)
+                .Select(x => x.GroupKey)
+                .FirstOrDefaultAsync();
 
-      var rules = await _context.LeaveEntitlementRules
-          .Where(r =>
-              r.LeaveTypeId == annualLeave.Id &&
-              r.JobGradeId == employee.Position.JobGradeId &&
-              r.IsActive)
-          .OrderBy(r => r.MinYearsService)
-          .ToListAsync();
+            if (groupKey == null)
+                throw new InvalidOperationException("JobGrade not mapped.");
+
+            var rules = await _context.LeaveEntitlementRules
+                .Where(r =>
+                    r.LeaveTypeId == annualLeave.Id &&
+                    r.GroupKey == groupKey &&
+                    r.IsActive)
+                .OrderBy(r => r.MinYearsService)
+                .ToListAsync();
 
       decimal projectedAvailable = balance.AvailableDays;
       decimal projectedEntitled = balance.AccruedDays;
@@ -498,9 +517,9 @@ namespace HRConnect.Api.Services
         decimal yearsOfService =
             (periodStart.DayNumber - employee.StartDate.DayNumber) / 365.25m;
 
-        var rule = rules.First(r =>
-            r.MinYearsService <= yearsOfService &&
-            (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService));
+                var rule = rules.First(r =>
+                r.MinYearsService <= yearsOfService &&
+                (r.MaxYearsService == null || yearsOfService < r.MaxYearsService));
 
         int workingDays = WorkingDayCalculator.CountWorkingDays(
             periodStart,
@@ -590,8 +609,16 @@ namespace HRConnect.Api.Services
       if (employee.StartDate.Year >= currentYear)
         return;
 
-      var annualLeave = await _context.LeaveTypes
-          .FirstAsync(l => l.Code == "AL" && l.IsActive);
+            var groupKey = await _context.JobGradeGroupMaps
+                .Where(x => x.JobGradeId == employee.Position.JobGradeId)
+                .Select(x => x.GroupKey)
+                .FirstOrDefaultAsync();
+
+            if (groupKey == null)
+                throw new InvalidOperationException("JobGrade not mapped.");
+
+            var annualLeave = await _context.LeaveTypes
+                .FirstAsync(l => l.Code == "AL" && l.IsActive);
 
       var balance = await _context.EmployeeLeaveBalances
           .FirstAsync(b =>
@@ -606,19 +633,16 @@ namespace HRConnect.Api.Services
 
       var yearsOfService = (decimal)((endOfPreviousYearDate - employee.StartDate.ToDateTime(TimeOnly.MinValue)).TotalDays / 365.25);
 
-      var rule = await _context.LeaveEntitlementRules
-          .Where(r =>
-              r.LeaveTypeId == annualLeave.Id &&
-              r.JobGradeId == employee.Position.JobGradeId &&
-              r.MinYearsService <= yearsOfService &&
-              (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
-              r.IsActive)
-          .OrderByDescending(r => r.MinYearsService)
-          .FirstAsync();
+            var rule = await _context.LeaveEntitlementRules
+                .Where(r =>
+                    r.LeaveTypeId == annualLeave.Id &&
+                    r.GroupKey == groupKey &&
+                    (r.MaxYearsService == null || yearsOfService < r.MaxYearsService) &&
+                    r.IsActive)
+                .OrderByDescending(r => r.MinYearsService)
+                .FirstAsync();
 
-      var endOfPreviousYear = new DateOnly(currentYear - 1, 12, 31);
-
-      decimal accrued = rule.DaysAllocated;
+            decimal accrued = rule.DaysAllocated;
 
       var carryover = accrued <= 5 ? accrued : 5;
       var forfeited = accrued > 5 ? accrued - 5 : 0;
@@ -630,61 +654,59 @@ namespace HRConnect.Api.Services
               x.EmployeeId == employee.EmployeeId &&
               x.Year == yearToClose);
 
-      if (!alreadyExists)
-      {
-        await _context.AnnualLeaveAccrualHistories.AddAsync(
-            new AnnualLeaveAccrualHistory
+            if (!alreadyExists)
             {
-              EmployeeId = employee.EmployeeId,
-              Year = yearToClose,
-              OpeningBalance = 0,
-              Accrued = accrued,
-              Used = 0,
-              Forfeited = forfeited,
-              ClosingBalance = carryover,
-              CreatedDate = DateTime.UtcNow
-            });
-      }
+                await _context.AnnualLeaveAccrualHistories.AddAsync(
+                    new AnnualLeaveAccrualHistory
+                    {
+                        EmployeeId = employee.EmployeeId,
+                        Year = yearToClose,
+                        Accrued = accrued,
+                        Forfeited = forfeited,
+                        ClosingBalance = carryover,
+                        CreatedDate = DateTime.UtcNow
+                    });
+            }
 
-      balance.CarryoverDays = carryover;
-      balance.TakenDays = 0;
-      balance.LastResetYear = currentYear;
-    }
-    /// <summary>
-    /// Creates an initial accrual segment for an employee if none exist, based on their start date and the applicable entitlement rules.
-    /// </summary>
-    /// <param name="employee"></param>
-    /// <returns></returns>
-    private async Task CreateInitialAccrualSegmentAsync(Employee employee)
-    {
-      bool exists = await _context.EmployeeAccrualRateHistories
-          .AnyAsync(s => s.EmployeeId == employee.EmployeeId);
+            balance.CarryoverDays = carryover;
+            balance.TakenDays = 0;
+            balance.LastResetYear = currentYear;
+        }
+        /// <summary>
+        /// Creates an initial accrual segment for an employee if none exist, based on their start date and the applicable entitlement rules.
+        /// </summary>
+        /// <param name="employee"></param>
+        /// <returns></returns>
+        private async Task CreateInitialAccrualSegmentAsync(Employee employee)
+        {
+            var exists = await _context.EmployeeAccrualRateHistories
+                .AnyAsync(s => s.EmployeeId == employee.EmployeeId);
 
       if (exists)
         return;
 
-      var annualLeave = await _context.LeaveTypes
-          .FirstAsync(l => l.Code == "AL" && l.IsActive);
+            var groupKey = await _context.JobGradeGroupMaps
+                .Where(x => x.JobGradeId == employee.Position.JobGradeId)
+                .Select(x => x.GroupKey)
+                .FirstOrDefaultAsync();
+
+            if (groupKey == null)
+                throw new InvalidOperationException("JobGrade not mapped.");
+
+            var annualLeave = await _context.LeaveTypes
+                .FirstAsync(l => l.Code == "AL" && l.IsActive);
 
       var yearsOfService = CalculateYearsOfService(employee.StartDate);
 
             var rule = await _context.LeaveEntitlementRules
                 .Where(r =>
-                r.LeaveTypeId == annualLeave.Id &&
-                r.JobGradeId == employee.Position!.JobGradeId &&
-                r.MinYearsService <= yearsOfService &&
-                (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
-                r.IsActive)
+                    r.LeaveTypeId == annualLeave.Id &&
+                    r.GroupKey == groupKey &&
+                    r.MinYearsService <= yearsOfService &&
+                    (r.MaxYearsService == null || yearsOfService < r.MaxYearsService) &&
+                    r.IsActive)
                 .OrderByDescending(r => r.MinYearsService)
                 .FirstAsync();
-
-      await _context.Entry(employee)
-          .Reference(e => e.Position)
-          .LoadAsync();
-
-            await _context.Entry(employee.Position)
-                .Reference(p => p.JobGrade)
-                .LoadAsync();
 
             await _context.EmployeeAccrualRateHistories.AddAsync(
                 new EmployeeAccrualRateHistory
@@ -695,11 +717,24 @@ namespace HRConnect.Api.Services
                     AnnualEntitlement = rule.DaysAllocated,
                     DailyRate = (rule.DaysAllocated / 12m) / 21.67m,
                     EffectiveFrom = employee.StartDate,
-                    EffectiveTo = null,
                     CreatedDate = DateTime.UtcNow
                 });
 
-      await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
+        }
+        public async Task RecalculateFamilyResponsibilityLeaveBulkAsync(List<string> employeeIds)
+        {
+            foreach (var id in employeeIds)
+            {
+                await RecalculateFamilyResponsibilityLeaveAsync(id);
+            }
+        }
+        public async Task RecalculateAnnualLeaveBulkAsync(List<string> employeeIds)
+        {
+            foreach (var id in employeeIds)
+            {
+                await RecalculateAnnualLeaveAsync(id);
+            }
+        }
     }
-  }
 }

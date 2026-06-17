@@ -2,7 +2,7 @@ namespace HRConnect.Api.Utils.Notification
 {
   using HRConnect.Api.Models;
 
-  public static class NotificationTypeRules
+  public static class NotificationsRules
   {
     public static bool ShouldPersist(NotificationSeverity severity)
     {

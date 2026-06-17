@@ -24,7 +24,7 @@
   --teal: #01A19A;
   --baby-blue: #C7D9E5;
   --success-color: #AFBF74;
-  --add-buttton: #638549;
+  --add-button: #638549;
   --BG: linear-gradient(180deg, #EEEEF1 0%, #EFF1F3 16.19%, #E7EAEB 50.25%, #D6D6D9 79.77%, #C4C4C5 100% );
   --background-light: #EEEEF1;
   --background-light-alt: #EFF1F3;
@@ -75,7 +75,7 @@ body {
 }
 
 .add-button {
-  background-color: var(--add-buttton);
+  background-color: var(--add-button);
   color: white;
   border: none;
   padding: 10px 50px;
@@ -955,4 +955,15 @@ body {
     padding: 8px;
     font-size: 12px;
   }
+}
+.superuser{
+background: #0060881A;
+border:1px solid #00608887;
+color: var(--COLOUR-Calm-Blue, #006088);
+}
+.normaluser{
+border:1px solid #AFBF74;
+background: #AFBF744D;
+color: var(--COLOUR-Olive-Green, #638549);
+border:1px solid #AFBF74;
 }

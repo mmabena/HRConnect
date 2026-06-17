@@ -1,28 +1,29 @@
 namespace HRConnect.Api.Services
 {
-  using System;
-  using System.Collections.Generic;
-  using System.Linq;
-  using System.Threading.Tasks;
-  using HRConnect.Api.DTOs.JobGrade;
-  using HRConnect.Api.DTOs.OccupationalLevel;
-  using HRConnect.Api.DTOs.Position;
-  using HRConnect.Api.Interfaces;
-  using HRConnect.Api.Mappers;
-  using HRConnect.Api.Models;
-  using HRConnect.Api.Utils;
-  using Microsoft.EntityFrameworkCore;
-
-  public class PositionService : IPositionService
-  {
-    /// <summary>
-    /// Handles business logic related to position operations
-    /// This service acts as a bridge between the controller and Repository layers.
-    /// This is responsible for validation, mapping, and enforcing business rules.
-    /// </summary>
-    private readonly IPositionRepository _positionRepo;
-    private readonly IJobGradeRepository _jobGradeRepo;
-    private readonly IOccupationalLevelRepository _occupationalLevelRepo;
+    using HRConnect.Api.DTOs.JobGrade;
+    using HRConnect.Api.DTOs.OccupationalLevel;
+    using HRConnect.Api.DTOs.Position;
+    using HRConnect.Api.Interfaces;
+    using HRConnect.Api.Mappers;
+    using HRConnect.Api.Models;
+    using HRConnect.Api.Utils;
+    using Microsoft.EntityFrameworkCore;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using System.Security.Cryptography.X509Certificates;
+   
+    public class PositionService : IPositionService
+    {
+        /// <summary>
+        /// Handles business logic related to position operations
+        /// This service acts as a bridge between the controller and Repository layers.
+        /// This is responsible for validation, mapping, and enforcing business rules.
+        /// </summary>
+        private readonly IPositionRepository _positionRepo;
+        private readonly IJobGradeRepository _jobGradeRepo;
+        private readonly IOccupationalLevelRepository _occupationalLevelRepo;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PositionService"/> class.

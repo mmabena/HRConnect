@@ -11,5 +11,6 @@ namespace HRConnect.Api.Interfaces
     Task<User?> GetUserByEmailAsync(string email);
     Task<Employee?> GetEmployeeByEmailAsync(string email);
     Task<bool> IsEmailUniqueAsync(string email);
+    Task SaveChangesAsync();
   }
 }

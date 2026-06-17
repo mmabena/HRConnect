@@ -2,6 +2,6 @@
 {
   public class PensionDeductionAddDto
   {
-    public required string EmployeeId { get; set; }
+    public string EmployeeId { get; set; } = string.Empty;
   }
 }

@@ -3,7 +3,7 @@ import "./CompanyList.css";
 import { Link } from "react-router-dom";
 import { Plus } from "lucide-react";
 import { fetchAllCompanies } from "../api/Company";
-import AddCompanyModal from "../Components/companyManagement/AddCompanyModal.jsx";
+import AddCompanyModal from "../components/companyManagement/AddCompanyModal.jsx";
 
 const CompanyList = () => {
   const [searchQuery, setSearchQuery] = useState("");
