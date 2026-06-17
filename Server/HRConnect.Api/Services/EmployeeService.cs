@@ -238,7 +238,6 @@ namespace HRConnect.Api.Services
 
       existingEmployee.PositionId = position.PositionId;
       existingEmployee.Position = position;
-
       existingEmployee.CompanyId = company.CompanyId;
       existingEmployee.Company = company;
 

@@ -25,12 +25,11 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     const formattedMessage = {
+      message: error.response?.data?.message || "An error occurred",
 
-     message: error.response?.data?.message || "An error occurred",
+      status: error.response?.status,
 
-    status: error.response?.status,
-
-    error: error.response?.data?.errors || null,
+      error: error.response?.data?.errors || null,
     };
     console.log("API URL:", process.env.REACT_APP_API_URL);
     console.log("Interceptor caught error:", error.response?.status);

@@ -86,7 +86,6 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
       await switchCompany(company.id);
       await loadCompanies();
       setCompanySwitcherOpen(false);
-      toast.success("Company switched successfully.");
     } catch (error) {
       console.error("Failed to switch company:", error);
     }
@@ -205,7 +204,10 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
 
     const handleCompanySwitched = () => {
       loadCompanies();
+      toast.success("Company switched successfully.");
+      setTimeout(() => {
       window.location.reload();
+      }, 2000);
     };
 
     connection.on("CompanyCreated", handleCompanyCreated);
