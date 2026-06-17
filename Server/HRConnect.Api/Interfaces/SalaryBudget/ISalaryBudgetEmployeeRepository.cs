@@ -7,8 +7,9 @@ namespace HRConnect.Api.Interfaces.SalaryBudget
   {
     Task<List<SalaryBudgetEmployee>> GetAllBudgetEmployeesAsync();
     Task<SalaryBudgetEmployee?> GetBudgetEmployeeByIdAsync(int budgetEmployeeId);
-    Task<SalaryBudgetEmployee> CreateBudgetEmployeeAsync(SalaryBudgetEmployee salaryBudget);
-    Task<SalaryBudgetEmployee> UpdateBudgetEmployeeAsync(SalaryBudgetEmployee salaryBudget);
+    Task<SalaryBudgetEmployee> CreateBudgetEmployeeAsync(SalaryBudgetEmployee SalaryBudgetEmployee);
+    Task<SalaryBudgetEmployee> UpdateBudgetEmployeeAsync(SalaryBudgetEmployee SalaryBudgetEmployee);
     Task<bool> DeleteBudgetEmployeeAsync(int budgetEmployeeId);
   }
 }
+

@@ -12,5 +12,6 @@ namespace HRConnect.Api.DTOs.SalaryBudget
     public string? RejectionReason { get; set; } = string.Empty;
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
     public DateTime? ApprovedDate { get; set; }
+    public DateTime? ArchivedDate { get; set; }
   }
 }

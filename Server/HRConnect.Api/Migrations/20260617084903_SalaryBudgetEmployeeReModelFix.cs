@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace HRConnect.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class SalaryBudgetEmployeeReModel : Migration
+    public partial class SalaryBudgetEmployeeReModelFix : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -28,11 +28,17 @@ namespace HRConnect.Api.Migrations
                 nullable: true);
 
             migrationBuilder.AddColumn<DateTime>(
-                name: "BudgetYear",
+                name: "ArchivedDate",
                 table: "SalaryBudgets",
                 type: "datetime2",
+                nullable: true);
+
+            migrationBuilder.AddColumn<int>(
+                name: "BudgetYear",
+                table: "SalaryBudgets",
+                type: "int",
                 nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+                defaultValue: 0);
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "CreatedDate",
@@ -69,6 +75,10 @@ namespace HRConnect.Api.Migrations
         {
             migrationBuilder.DropColumn(
                 name: "ApprovedDate",
+                table: "SalaryBudgets");
+
+            migrationBuilder.DropColumn(
+                name: "ArchivedDate",
                 table: "SalaryBudgets");
 
             migrationBuilder.DropColumn(

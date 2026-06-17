@@ -7,8 +7,8 @@ namespace HRConnect.Api.Interfaces.SalaryBudget
   {
     Task<List<SalaryBudgetDto>> GetAllBudgetsAsync();
     Task<SalaryBudgetDto?> GetBudgetByIdAsync(int salaryBudgetId);
-    Task<SalaryBudgetDto> CreateBudgetAsync(CreateSalaryBudgetDto salaryBudgetDto);
-    Task<SalaryBudgetDto> UpdateBudgetAsync(UpdateSalaryBudgetDto updateSalaryBudgetDto);
-    Task<bool> DeleteBudgetAsync(int salaryBudgetId);
+    Task<SalaryBudgetDto> CreateBudgetAsync(CreateSalaryBudgetDto createBudgetDto);
+    Task<SalaryBudgetDto> UpdateBudgetAsync(UpdateSalaryBudgetDto updateBudgetDto);
+    Task<bool> ArchiveBudgetAsync(int salaryBudgetId);
   }
-}
+} 

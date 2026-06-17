@@ -58,7 +58,6 @@ namespace HRConnect.Api.Models.SalaryBudget
       /// <summary>
       /// Cost to Company
       /// </summary>
-      
       [Column(TypeName = "decimal(18,2)")]
       public decimal GrossSalary { get; set; }
 

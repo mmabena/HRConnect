@@ -4,11 +4,15 @@ namespace HRConnect.Api.Repository
   using System.Collections.Generic;
   using System.Linq;
   using System.Threading.Tasks;
+  using HRConnect.Api.Models;
   using HRConnect.Api.Models.SalaryBudget;
   using HRConnect.Api.Interfaces.SalaryBudget;
   using Microsoft.EntityFrameworkCore;
   using HRConnect.Api.Data;
 
+   /// <summary>
+   /// Database access/communicates to the database 
+   /// </summary>
     public class SalaryBudgetRepository : ISalaryBudgetRepository
     {
       private readonly ApplicationDBContext _context;
@@ -18,23 +22,18 @@ namespace HRConnect.Api.Repository
         _context = context;
     }
 
-     public async Task<List<SalaryBudget>> GetAllSalaryBudgetsAsync()
+     public async Task<List<SalaryBudget>> GetAllBudgetsAsync()
     {
        return await _context.SalaryBudgets
               .Include(sb => sb.Employees)
-              .Include(sb => sb.Position)
-              .Include(sb => sb.JobGrade)
               .ToListAsync();
-
     }
-
      public async Task<SalaryBudget?> GetBudgetByIdAsync(int salaryBudgetId)
     {
       return await _context.SalaryBudgets
               .Include(sb => sb.Employees)
-              .Include(sb => sb.Position)
-              .Include(sb => sb.JobGrade)
-              .FirstOrDefaultAsync(sb => sb.SalaryBudgetId ==salaryBudgetId);
+              .FirstOrDefaultAsync(
+                sb => sb.SalaryBudgetId ==salaryBudgetId);
     }
 
     public async Task<SalaryBudget> CreateBudgetAsync(SalaryBudget salaryBudgetModel)
@@ -50,12 +49,23 @@ namespace HRConnect.Api.Repository
        await _context.SaveChangesAsync();
        return salaryBudgetModel;
     }
-
-    public async Task<bool> DeleteBudgetAsync (int salaryBudgetId)
+    
+    public async Task<bool> ArchiveBudgetAsync (int salaryBudgetId)
     {
-       _context.SalaryBudgets.Remove(salaryBudgetId);
+      var budget = await _context.SalaryBudgets
+          .FindAsync(salaryBudgetId);
+
+        if(budget == null)
+      {
+        return false;
+      }
+
+       budget.Status = SalaryBudgetStatus.Archived;
+       budget.ArchivedDate = DateTime.UtcNow;
+
        await _context.SaveChangesAsync();
-       return salaryBudgetId;
+
+       return true;
     }
         
     }

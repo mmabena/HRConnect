@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRConnect.Api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    [Migration("20260528122708_SalaryBudgetEmployeeReModel")]
-    partial class SalaryBudgetEmployeeReModel
+    [Migration("20260617084903_SalaryBudgetEmployeeReModelFix")]
+    partial class SalaryBudgetEmployeeReModelFix
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1732,8 +1732,11 @@ namespace HRConnect.Api.Migrations
                     b.Property<DateTime?>("ApprovedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("BudgetYear")
+                    b.Property<DateTime?>("ArchivedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("BudgetYear")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
