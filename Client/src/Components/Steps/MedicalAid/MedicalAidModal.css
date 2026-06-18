@@ -198,7 +198,7 @@
   border: 1px solid #e8e8e8;
   border-radius: 10px;
   padding: 12px;
- background: rgba(79, 110, 120, 0.1);
+  background: rgba(79, 110, 120, 0.1);
   width: 525px;
 }
 
@@ -217,23 +217,21 @@
 }
 
 .medical-dependent-name {
-
-font-family: 'Anek Bangla';
-font-style: normal;
-font-weight: 500;
-font-size: 14px;
-color: #4F6E78;
-margin-left:-45px;
-margin-top:-10px;
+  font-family: "Anek Bangla";
+  font-style: normal;
+  font-weight: 500;
+  font-size: 14px;
+  color: #4f6e78;
+  margin-left: -45px;
+  margin-top: -10px;
 }
-
 
 .medical-dependent-meta {
   font-family: "Anek Bangla", sans-serif;
   font-size: 12px;
   font-weight: 400;
   color: #6b7280;
-  margin-top:-10px;
+  margin-top: -10px;
 }
 
 .medical-dependent-remove-btn {
@@ -242,27 +240,22 @@ margin-top:-10px;
   justify-content: center;
   padding: 5px 14px;
   height: 25px;
-   background: rgba(226, 33, 33, 0.33);
-  color: #D31212;
+  background: rgba(226, 33, 33, 0.33);
+  color: #d31212;
   font-family: "Anek Bangla", sans-serif;
   font-size: 12px;
   font-weight: 400;
-  border: 0.5px solid #EB1F1F;
+  border: 0.5px solid #eb1f1f;
   border-radius: 5px;
   cursor: pointer;
   transition: background 0.2s ease;
   white-space: nowrap;
 }
 
-
-
-
-
-
 .medical-dependent-remove-btn:hover {
   background: #a93226;
-   border: 0.5px solid #a93226;
-  color:#fff;
+  border: 0.5px solid #a93226;
+  color: #fff;
 }
 .medical-dependent-grid {
   display: grid;
@@ -271,10 +264,9 @@ margin-top:-10px;
   width: 100%;
   padding: 0px 0 20px 0;
   border-bottom: 1px solid rgba(154, 154, 154, 0.55);
-  
+
   box-sizing: border-box;
 }
-
 
 /* ===== SELECT WRAPPER ===== */
 .medical-select-wrapper {
@@ -284,9 +276,9 @@ margin-top:-10px;
 
 .medical-select-wrapper .icon-dropdown-icon {
   position: absolute;
-  right: 8px;           /* sits at the right edge of the select */
+  right: 8px; /* sits at the right edge of the select */
   top: 50%;
-  left: unset;          /* override the hardcoded left: 230px */
+  left: unset; /* override the hardcoded left: 230px */
   transform: translateY(-50%);
   width: 18px;
   height: 18px;
@@ -300,7 +292,6 @@ margin-top:-10px;
 .medical-input-group {
   display: flex;
   flex-direction: column;
-  
 }
 
 .medical-input-group label {
@@ -331,16 +322,15 @@ margin-top:-10px;
   height: 18px;
   pointer-events: none;
 }
-.date-picker-dropdown-icon{
-      position: absolute;
-    right: 34px;
-   bottom: 73px;
-    transform: translateY(-50%);
-    width: 20px;
-    height: 20px;
-    pointer-events: none;
+.date-picker-dropdown-icon {
+  position: absolute;
+  right: 34px;
+  bottom: 73px;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
 }
-
 
 .medical-input-group input,
 .medical-input-group select {
@@ -665,7 +655,14 @@ margin-top:-10px;
   border-radius: 13px;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(135deg, #eeeef1, #eff1f3, #e7eaeb, #d6d6d9, #c4c4c5);
+  background: linear-gradient(
+    135deg,
+    #eeeef1,
+    #eff1f3,
+    #e7eaeb,
+    #d6d6d9,
+    #c4c4c5
+  );
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
   animation: modalFadeIn 0.25s ease;
   overflow: hidden;
@@ -692,7 +689,7 @@ margin-top:-10px;
   align-items: center;
   justify-content: space-between;
   padding: 0px 26px;
-  left:0px;
+  left: 0px;
   font: Anek Bangla;
   font-size: 18px;
   font-weight: 600;
@@ -703,7 +700,6 @@ margin-top:-10px;
   border-radius: 13px 13px 0px 0px;
   box-sizing: border-box;
   flex-shrink: 0;
-  
 }
 
 .medical-dependent-modal-header span {
@@ -726,10 +722,8 @@ margin-top:-10px;
 ========================= */
 
 .medical-dependent-modal-footer {
-
-width: 289px;
-height: 28px;
-
+  width: 289px;
+  height: 28px;
 }
 
 /* =========================
@@ -742,8 +736,8 @@ height: 28px;
   justify-content: center;
   align-items: center;
   padding: 5px;
-  margin-top:-20px;
- margin-left: 190px;
+  margin-top: -20px;
+  margin-left: 190px;
   color: #5c5c5c;
   font-size: 14px;
   font-family: "Anek Bangla", sans-serif;
@@ -766,8 +760,8 @@ height: 28px;
   justify-content: center;
   align-items: center;
   gap: 6px;
-  margin-top:-36px;
-  margin-left:358px;
+  margin-top: -36px;
+  margin-left: 358px;
   width: 140px;
   height: 35px;
   padding: 0px;
@@ -786,4 +780,52 @@ height: 28px;
 
 .medical-btn-primary:hover {
   opacity: 0.9;
+}
+
+.medical-back-btn {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 10px 5px;
+  color: #5c5c5c;
+  position: absolute;
+  width: 187px;
+  height: 47px;
+  bottom: -55px;
+  right: 580px;
+  background: rgba(255, 255, 255, 0.7);
+  opacity: 0.9;
+  border: 1px solid rgba(66, 66, 66, 0.5);
+  border-radius: 10px;
+}
+
+.medical-next-btn {
+  position: relative;
+  display: flex;
+  width: 187px;
+  height: 47px;
+  padding: 0 10px 0px 10px;
+  justify-content: center;
+  align-items: center;
+  left: 340px;
+  color: var(--white);
+  text-align: center;
+  font-family: "Anek Bangla", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: 0.32px;
+  border: 1px solid var(--light-grey);
+  opacity: 0.9;
+  background: var(--primary-color);
+  background-color: var(--primary-color);
+  border-radius: 10px;
+  display: flex;
+  gap: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  bottom: -85px;
 }

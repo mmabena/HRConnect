@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getLeaveTypes } from "../../api/leaveTypeApi";
 import "./leave-tables.css";
-import "../../components/MenuBar/MenuBar.css";
+import "../../Components/MenuBar/MenuBar.css";
 import NavBar from "../NavBar";
 import AddLeaveTypeModal from "./AddLeaveTypeModal";
 import EditLeaveTypeModal from "./EditLeaveTypeModal";

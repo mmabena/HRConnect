@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import CompanyManagementNavBar from "../../../components/companyManagement/companyManagementNavBar";
+import CompanyManagementNavBar from "../../../Components/companyManagement/companyManagementNavBar";
 import { useNavigate, useLocation } from "react-router-dom";
 import { editEmployee, showConfirmationToast } from "../../../api/Employee";
 import api from "../../../api/api";
 import {jwtDecode} from "jwt-decode";
 import { toast } from "react-toastify";
 import * as signalR from "@microsoft/signalr";
-import { getConnection } from "../../../components/Services/signalRService";
+import { getConnection } from "../../../Components/Services/signalRService";
 
 const ManageUserPositions = ({ title }) => {
   const [employees, setEmployees] = useState([]);

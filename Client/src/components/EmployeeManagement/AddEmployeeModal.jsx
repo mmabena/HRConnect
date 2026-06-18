@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import "./AddEmployeeModal.css";
-import BankingDetailsModal from "../../components/Steps/BankingManagement/BankingDetailsModal.jsx";
+import BankingDetailsModal from "../../Components/Steps/BankingManagement/BankingDetailsModal.jsx";
 import LeaveTypesModal from "../Steps/LeaveType/LeaveTypesModal.jsx";
 import PreviewModal from "../Steps/Preview/PreviewModal.jsx";
 import PensionFundOptionsModal from "../Steps/PensionFundOptions/PensionFundOptionsModal.jsx";

@@ -50,7 +50,7 @@ namespace HRConnect.Api.Utils.BankingDetailsValidation
         public static bool IsValidBranchCode(string branchCode)
         {
             return !string.IsNullOrWhiteSpace(branchCode)
-                   && SixDigits().IsMatch(branchCode);
+                   && DigitsOnly().IsMatch(branchCode);
         }
 
         // -----------------------------

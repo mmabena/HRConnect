@@ -11,113 +11,113 @@ namespace HRConnect.Api.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // migrationBuilder.DropForeignKey(
-            //     name: "FK_EmployeePensionEnrollments_PayrollRuns_PayrollRunId",
-            //     table: "EmployeePensionEnrollments");
+            migrationBuilder.DropForeignKey(
+                name: "FK_EmployeePensionEnrollments_PayrollRuns_PayrollRunId",
+                table: "EmployeePensionEnrollments");
 
-            // migrationBuilder.DropForeignKey(
-            //     name: "FK_Employees_PensionOptions_PensionOptionId",
-            //     table: "Employees");
+            migrationBuilder.DropForeignKey(
+                name: "FK_Employees_PensionOptions_PensionOptionId",
+                table: "Employees");
 
-            // migrationBuilder.DropForeignKey(
-            //     name: "FK_LeaveEntitlementRules_JobGrades_JobGradeId",
-            //     table: "LeaveEntitlementRules");
+            migrationBuilder.DropForeignKey(
+                name: "FK_LeaveEntitlementRules_JobGrades_JobGradeId",
+                table: "LeaveEntitlementRules");
 
-            // migrationBuilder.DropIndex(
-            //     name: "IX_LeaveEntitlementRules_JobGradeId",
-            //     table: "LeaveEntitlementRules");
+            migrationBuilder.DropIndex(
+                name: "IX_LeaveEntitlementRules_JobGradeId",
+                table: "LeaveEntitlementRules");
 
-            // migrationBuilder.DropIndex(
-            //     name: "IX_EmployeePensionEnrollments_PayrollRunId",
-            //     table: "EmployeePensionEnrollments");
+            migrationBuilder.DropIndex(
+                name: "IX_EmployeePensionEnrollments_PayrollRunId",
+                table: "EmployeePensionEnrollments");
 
-            // migrationBuilder.DropPrimaryKey(
-            //     name: "PK_TaxTableUpload",
-            //     table: "TaxTableUpload");
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_TaxTableUpload",
+                table: "TaxTableUpload");
 
-            // migrationBuilder.DropPrimaryKey(
-            //     name: "PK_TaxDeduction",
-            //     table: "TaxDeduction");
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_TaxDeduction",
+                table: "TaxDeduction");
 
-            // migrationBuilder.DropIndex(
-            //     name: "IX_TaxDeduction_TaxYear_Remuneration",
-            //     table: "TaxDeduction");
+            migrationBuilder.DropIndex(
+                name: "IX_TaxDeduction_TaxYear_Remuneration",
+                table: "TaxDeduction");
 
-            // migrationBuilder.DropColumn(
-            //     name: "JobGradeId",
-            //     table: "LeaveEntitlementRules");
+            migrationBuilder.DropColumn(
+                name: "JobGradeId",
+                table: "LeaveEntitlementRules");
 
-            // migrationBuilder.RenameTable(
-            //     name: "TaxTableUpload",
-            //     newName: "TaxTableUploads");
+            migrationBuilder.RenameTable(
+                name: "TaxTableUpload",
+                newName: "TaxTableUploads");
 
-            // migrationBuilder.RenameTable(
-            //     name: "TaxDeduction",
-            //     newName: "TaxDeductions");
+            migrationBuilder.RenameTable(
+                name: "TaxDeduction",
+                newName: "TaxDeductions");
 
-            // migrationBuilder.AddColumn<string>(
-            //     name: "GroupKey",
-            //     table: "LeaveEntitlementRules",
-            //     type: "nvarchar(max)",
-            //     nullable: false,
-            //     defaultValue: "");
+            migrationBuilder.AddColumn<string>(
+                name: "GroupKey",
+                table: "LeaveEntitlementRules",
+                type: "nvarchar(max)",
+                nullable: false,
+                defaultValue: "");
 
-            // migrationBuilder.AddColumn<int>(
-            //     name: "BankingDetailsId",
-            //     table: "Employees",
-            //     type: "int",
-            //     nullable: false,
-            //     defaultValue: 0);
+            migrationBuilder.AddColumn<int>(
+                name: "BankingDetailsId",
+                table: "Employees",
+                type: "int",
+                nullable: false,
+                defaultValue: 0);
 
-            // migrationBuilder.AlterColumn<decimal>(
-            //     name: "TaxUnder65",
-            //     table: "TaxDeductions",
-            //     type: "decimal(18,2)",
-            //     nullable: false,
-            //     oldClrType: typeof(decimal),
-            //     oldType: "decimal(12,2)",
-            //     oldPrecision: 12,
-            //     oldScale: 2);
+            migrationBuilder.AlterColumn<decimal>(
+                name: "TaxUnder65",
+                table: "TaxDeductions",
+                type: "decimal(18,2)",
+                nullable: false,
+                oldClrType: typeof(decimal),
+                oldType: "decimal(12,2)",
+                oldPrecision: 12,
+                oldScale: 2);
 
-            // migrationBuilder.AlterColumn<decimal>(
-            //     name: "TaxOver75",
-            //     table: "TaxDeductions",
-            //     type: "decimal(18,2)",
-            //     nullable: false,
-            //     oldClrType: typeof(decimal),
-            //     oldType: "decimal(12,2)",
-            //     oldPrecision: 12,
-            //     oldScale: 2);
+            migrationBuilder.AlterColumn<decimal>(
+                name: "TaxOver75",
+                table: "TaxDeductions",
+                type: "decimal(18,2)",
+                nullable: false,
+                oldClrType: typeof(decimal),
+                oldType: "decimal(12,2)",
+                oldPrecision: 12,
+                oldScale: 2);
 
-            // migrationBuilder.AlterColumn<decimal>(
-            //     name: "Tax65To74",
-            //     table: "TaxDeductions",
-            //     type: "decimal(18,2)",
-            //     nullable: false,
-            //     oldClrType: typeof(decimal),
-            //     oldType: "decimal(12,2)",
-            //     oldPrecision: 12,
-            //     oldScale: 2);
+            migrationBuilder.AlterColumn<decimal>(
+                name: "Tax65To74",
+                table: "TaxDeductions",
+                type: "decimal(18,2)",
+                nullable: false,
+                oldClrType: typeof(decimal),
+                oldType: "decimal(12,2)",
+                oldPrecision: 12,
+                oldScale: 2);
 
-            // migrationBuilder.AlterColumn<decimal>(
-            //     name: "AnnualEquivalent",
-            //     table: "TaxDeductions",
-            //     type: "decimal(18,2)",
-            //     nullable: false,
-            //     oldClrType: typeof(decimal),
-            //     oldType: "decimal(12,2)",
-            //     oldPrecision: 12,
-            //     oldScale: 2);
+            migrationBuilder.AlterColumn<decimal>(
+                name: "AnnualEquivalent",
+                table: "TaxDeductions",
+                type: "decimal(18,2)",
+                nullable: false,
+                oldClrType: typeof(decimal),
+                oldType: "decimal(12,2)",
+                oldPrecision: 12,
+                oldScale: 2);
 
-            // migrationBuilder.AddPrimaryKey(
-            //     name: "PK_TaxTableUploads",
-            //     table: "TaxTableUploads",
-            //     column: "Id");
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_TaxTableUploads",
+                table: "TaxTableUploads",
+                column: "Id");
 
-            // migrationBuilder.AddPrimaryKey(
-            //     name: "PK_TaxDeductions",
-            //     table: "TaxDeductions",
-            //     column: "Id");
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_TaxDeductions",
+                table: "TaxDeductions",
+                column: "Id");
 
             migrationBuilder.CreateTable(
                 name: "BankBranchCodes",
@@ -136,25 +136,25 @@ namespace HRConnect.Api.Migrations
                     table.PrimaryKey("PK_BankBranchCodes", x => x.BankBranchCodeId);
                 });
 
-            // migrationBuilder.CreateTable(
-            //     name: "JobGradeGroupMaps",
-            //     columns: table => new
-            //     {
-            //         Id = table.Column<int>(type: "int", nullable: false)
-            //             .Annotation("SqlServer:Identity", "1, 1"),
-            //         JobGradeId = table.Column<int>(type: "int", nullable: false),
-            //         GroupKey = table.Column<string>(type: "nvarchar(450)", nullable: false)
-            //     },
-            //     constraints: table =>
-            //     {
-            //         table.PrimaryKey("PK_JobGradeGroupMaps", x => x.Id);
-            //         table.ForeignKey(
-            //             name: "FK_JobGradeGroupMaps_JobGrades_JobGradeId",
-            //             column: x => x.JobGradeId,
-            //             principalTable: "JobGrades",
-            //             principalColumn: "JobGradeId",
-            //             onDelete: ReferentialAction.Cascade);
-            //     });
+            migrationBuilder.CreateTable(
+                name: "JobGradeGroupMaps",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    JobGradeId = table.Column<int>(type: "int", nullable: false),
+                    GroupKey = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_JobGradeGroupMaps", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_JobGradeGroupMaps_JobGrades_JobGradeId",
+                        column: x => x.JobGradeId,
+                        principalTable: "JobGrades",
+                        principalColumn: "JobGradeId",
+                        onDelete: ReferentialAction.Cascade);
+                });
 
             migrationBuilder.CreateTable(
                 name: "BankingDetails",
@@ -217,157 +217,157 @@ namespace HRConnect.Api.Migrations
                 column: "EmployeeId",
                 unique: true);
 
-            // migrationBuilder.CreateIndex(
-            //     name: "IX_JobGradeGroupMaps_JobGradeId_GroupKey",
-            //     table: "JobGradeGroupMaps",
-            //     columns: new[] { "JobGradeId", "GroupKey" },
-            //     unique: true);
+            migrationBuilder.CreateIndex(
+                name: "IX_JobGradeGroupMaps_JobGradeId_GroupKey",
+                table: "JobGradeGroupMaps",
+                columns: new[] { "JobGradeId", "GroupKey" },
+                unique: true);
 
-            // migrationBuilder.AddForeignKey(
-            //     name: "FK_Employees_PensionOptions_PensionOptionId",
-            //     table: "Employees",
-            //     column: "PensionOptionId",
-            //     principalTable: "PensionOptions",
-            //     principalColumn: "PensionOptionId",
-            //     onDelete: ReferentialAction.Restrict);
+            migrationBuilder.AddForeignKey(
+                name: "FK_Employees_PensionOptions_PensionOptionId",
+                table: "Employees",
+                column: "PensionOptionId",
+                principalTable: "PensionOptions",
+                principalColumn: "PensionOptionId",
+                onDelete: ReferentialAction.Restrict);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            // migrationBuilder.DropForeignKey(
-            //     name: "FK_Employees_PensionOptions_PensionOptionId",
-            //     table: "Employees");
+            migrationBuilder.DropForeignKey(
+                name: "FK_Employees_PensionOptions_PensionOptionId",
+                table: "Employees");
 
             migrationBuilder.DropTable(
                 name: "BankingDetails");
 
-            // migrationBuilder.DropTable(
-            //     name: "JobGradeGroupMaps");
+            migrationBuilder.DropTable(
+                name: "JobGradeGroupMaps");
 
             migrationBuilder.DropTable(
                 name: "BankBranchCodes");
 
-            // migrationBuilder.DropPrimaryKey(
-            //     name: "PK_TaxTableUploads",
-            //     table: "TaxTableUploads");
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_TaxTableUploads",
+                table: "TaxTableUploads");
 
-            // migrationBuilder.DropPrimaryKey(
-            //     name: "PK_TaxDeductions",
-            //     table: "TaxDeductions");
+            migrationBuilder.DropPrimaryKey(
+                name: "PK_TaxDeductions",
+                table: "TaxDeductions");
 
-            // migrationBuilder.DropColumn(
-            //     name: "GroupKey",
-            //     table: "LeaveEntitlementRules");
+            migrationBuilder.DropColumn(
+                name: "GroupKey",
+                table: "LeaveEntitlementRules");
 
-            // migrationBuilder.DropColumn(
-            //     name: "BankingDetailsId",
-            //     table: "Employees");
+            migrationBuilder.DropColumn(
+                name: "BankingDetailsId",
+                table: "Employees");
 
-            // migrationBuilder.RenameTable(
-            //     name: "TaxTableUploads",
-            //     newName: "TaxTableUpload");
+            migrationBuilder.RenameTable(
+                name: "TaxTableUploads",
+                newName: "TaxTableUpload");
 
-            // migrationBuilder.RenameTable(
-            //     name: "TaxDeductions",
-            //     newName: "TaxDeduction");
+            migrationBuilder.RenameTable(
+                name: "TaxDeductions",
+                newName: "TaxDeduction");
 
-            // migrationBuilder.AddColumn<int>(
-            //     name: "JobGradeId",
-            //     table: "LeaveEntitlementRules",
-            //     type: "int",
-            //     nullable: false,
-            //     defaultValue: 0);
+            migrationBuilder.AddColumn<int>(
+                name: "JobGradeId",
+                table: "LeaveEntitlementRules",
+                type: "int",
+                nullable: false,
+                defaultValue: 0);
 
-            // migrationBuilder.AlterColumn<decimal>(
-            //     name: "TaxUnder65",
-            //     table: "TaxDeduction",
-            //     type: "decimal(12,2)",
-            //     precision: 12,
-            //     scale: 2,
-            //     nullable: false,
-            //     oldClrType: typeof(decimal),
-            //     oldType: "decimal(18,2)");
+            migrationBuilder.AlterColumn<decimal>(
+                name: "TaxUnder65",
+                table: "TaxDeduction",
+                type: "decimal(12,2)",
+                precision: 12,
+                scale: 2,
+                nullable: false,
+                oldClrType: typeof(decimal),
+                oldType: "decimal(18,2)");
 
-            // migrationBuilder.AlterColumn<decimal>(
-            //     name: "TaxOver75",
-            //     table: "TaxDeduction",
-            //     type: "decimal(12,2)",
-            //     precision: 12,
-            //     scale: 2,
-            //     nullable: false,
-            //     oldClrType: typeof(decimal),
-            //     oldType: "decimal(18,2)");
+            migrationBuilder.AlterColumn<decimal>(
+                name: "TaxOver75",
+                table: "TaxDeduction",
+                type: "decimal(12,2)",
+                precision: 12,
+                scale: 2,
+                nullable: false,
+                oldClrType: typeof(decimal),
+                oldType: "decimal(18,2)");
 
-            // migrationBuilder.AlterColumn<decimal>(
-            //     name: "Tax65To74",
-            //     table: "TaxDeduction",
-            //     type: "decimal(12,2)",
-            //     precision: 12,
-            //     scale: 2,
-            //     nullable: false,
-            //     oldClrType: typeof(decimal),
-            //     oldType: "decimal(18,2)");
+            migrationBuilder.AlterColumn<decimal>(
+                name: "Tax65To74",
+                table: "TaxDeduction",
+                type: "decimal(12,2)",
+                precision: 12,
+                scale: 2,
+                nullable: false,
+                oldClrType: typeof(decimal),
+                oldType: "decimal(18,2)");
 
-            // migrationBuilder.AlterColumn<decimal>(
-            //     name: "AnnualEquivalent",
-            //     table: "TaxDeduction",
-            //     type: "decimal(12,2)",
-            //     precision: 12,
-            //     scale: 2,
-            //     nullable: false,
-            //     oldClrType: typeof(decimal),
-            //     oldType: "decimal(18,2)");
+            migrationBuilder.AlterColumn<decimal>(
+                name: "AnnualEquivalent",
+                table: "TaxDeduction",
+                type: "decimal(12,2)",
+                precision: 12,
+                scale: 2,
+                nullable: false,
+                oldClrType: typeof(decimal),
+                oldType: "decimal(18,2)");
 
-            // migrationBuilder.AddPrimaryKey(
-            //     name: "PK_TaxTableUpload",
-            //     table: "TaxTableUpload",
-            //     column: "Id");
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_TaxTableUpload",
+                table: "TaxTableUpload",
+                column: "Id");
 
-            // migrationBuilder.AddPrimaryKey(
-            //     name: "PK_TaxDeduction",
-            //     table: "TaxDeduction",
-            //     column: "Id");
+            migrationBuilder.AddPrimaryKey(
+                name: "PK_TaxDeduction",
+                table: "TaxDeduction",
+                column: "Id");
 
-            // migrationBuilder.CreateIndex(
-            //     name: "IX_LeaveEntitlementRules_JobGradeId",
-            //     table: "LeaveEntitlementRules",
-            //     column: "JobGradeId");
+            migrationBuilder.CreateIndex(
+                name: "IX_LeaveEntitlementRules_JobGradeId",
+                table: "LeaveEntitlementRules",
+                column: "JobGradeId");
 
-            // migrationBuilder.CreateIndex(
-            //     name: "IX_EmployeePensionEnrollments_PayrollRunId",
-            //     table: "EmployeePensionEnrollments",
-            //     column: "PayrollRunId");
+            migrationBuilder.CreateIndex(
+                name: "IX_EmployeePensionEnrollments_PayrollRunId",
+                table: "EmployeePensionEnrollments",
+                column: "PayrollRunId");
 
-            // migrationBuilder.CreateIndex(
-            //     name: "IX_TaxDeduction_TaxYear_Remuneration",
-            //     table: "TaxDeduction",
-            //     columns: new[] { "TaxYear", "Remuneration" },
-            //     unique: true);
+            migrationBuilder.CreateIndex(
+                name: "IX_TaxDeduction_TaxYear_Remuneration",
+                table: "TaxDeduction",
+                columns: new[] { "TaxYear", "Remuneration" },
+                unique: true);
 
-            // migrationBuilder.AddForeignKey(
-            //     name: "FK_EmployeePensionEnrollments_PayrollRuns_PayrollRunId",
-            //     table: "EmployeePensionEnrollments",
-            //     column: "PayrollRunId",
-            //     principalTable: "PayrollRuns",
-            //     principalColumn: "PayrollRunId",
-            //     onDelete: ReferentialAction.Cascade);
+            migrationBuilder.AddForeignKey(
+                name: "FK_EmployeePensionEnrollments_PayrollRuns_PayrollRunId",
+                table: "EmployeePensionEnrollments",
+                column: "PayrollRunId",
+                principalTable: "PayrollRuns",
+                principalColumn: "PayrollRunId",
+                onDelete: ReferentialAction.Cascade);
 
-            // migrationBuilder.AddForeignKey(
-            //     name: "FK_Employees_PensionOptions_PensionOptionId",
-            //     table: "Employees",
-            //     column: "PensionOptionId",
-            //     principalTable: "PensionOptions",
-            //     principalColumn: "PensionOptionId",
-            //     onDelete: ReferentialAction.SetNull);
+            migrationBuilder.AddForeignKey(
+                name: "FK_Employees_PensionOptions_PensionOptionId",
+                table: "Employees",
+                column: "PensionOptionId",
+                principalTable: "PensionOptions",
+                principalColumn: "PensionOptionId",
+                onDelete: ReferentialAction.SetNull);
 
-            // migrationBuilder.AddForeignKey(
-            //     name: "FK_LeaveEntitlementRules_JobGrades_JobGradeId",
-            //     table: "LeaveEntitlementRules",
-            //     column: "JobGradeId",
-            //     principalTable: "JobGrades",
-            //     principalColumn: "JobGradeId",
-            //     onDelete: ReferentialAction.Restrict);
+            migrationBuilder.AddForeignKey(
+                name: "FK_LeaveEntitlementRules_JobGrades_JobGradeId",
+                table: "LeaveEntitlementRules",
+                column: "JobGradeId",
+                principalTable: "JobGrades",
+                principalColumn: "JobGradeId",
+                onDelete: ReferentialAction.Restrict);
         }
     }
 }

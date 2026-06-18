@@ -4,6 +4,7 @@ using HRConnect.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HRConnect.Api.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20260618074739_MissingMigrations")]
+    partial class MissingMigrations
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -603,7 +606,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("EmployeeId");
 
-                    b.ToTable("AnnualLeaveAccrualHistories", (string)null);
+                    b.ToTable("AnnualLeaveAccrualHistories");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.AuditLogs", b =>
@@ -659,7 +662,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("AuditId");
 
-                    b.ToTable("AuditLogs", (string)null);
+                    b.ToTable("AuditLogs");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.BankBranchCode", b =>
@@ -689,7 +692,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("BankBranchCodeId");
 
-                    b.ToTable("BankBranchCodes", (string)null);
+                    b.ToTable("BankBranchCodes");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.BankingDetail", b =>
@@ -779,7 +782,7 @@ namespace HRConnect.Api.Migrations
                     b.HasIndex("EmployeeId")
                         .IsUnique();
 
-                    b.ToTable("BankingDetails", (string)null);
+                    b.ToTable("BankingDetails");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.Company", b =>
@@ -828,7 +831,7 @@ namespace HRConnect.Api.Migrations
                         .IsUnique()
                         .HasFilter("[VATNumber] IS NOT NULL");
 
-                    b.ToTable("Companies", (string)null);
+                    b.ToTable("Companies");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.CompanyContributions.CompanyContribution", b =>
@@ -863,7 +866,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("CompanyContributionId");
 
-                    b.ToTable("CompanyContributions", (string)null);
+                    b.ToTable("CompanyContributions");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.Employee", b =>
@@ -985,7 +988,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("PositionId");
 
-                    b.ToTable("Employees", (string)null);
+                    b.ToTable("Employees");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.EmployeeAccrualRateHistory", b =>
@@ -1028,7 +1031,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("PositionId");
 
-                    b.ToTable("EmployeeAccrualRateHistories", (string)null);
+                    b.ToTable("EmployeeAccrualRateHistories");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.EmployeeLeaveBalance", b =>
@@ -1082,7 +1085,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("LeaveTypeId");
 
-                    b.ToTable("EmployeeLeaveBalances", (string)null);
+                    b.ToTable("EmployeeLeaveBalances");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.JobGrade", b =>
@@ -1108,7 +1111,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("JobGradeId");
 
-                    b.ToTable("JobGrades", (string)null);
+                    b.ToTable("JobGrades");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.JobGradeGroupMap", b =>
@@ -1131,7 +1134,7 @@ namespace HRConnect.Api.Migrations
                     b.HasIndex("JobGradeId", "GroupKey")
                         .IsUnique();
 
-                    b.ToTable("JobGradeGroupMaps", (string)null);
+                    b.ToTable("JobGradeGroupMaps");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.LeaveApplication", b =>
@@ -1195,7 +1198,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("LeaveTypeId");
 
-                    b.ToTable("LeaveApplications", (string)null);
+                    b.ToTable("LeaveApplications");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.LeaveEntitlementRule", b =>
@@ -1229,7 +1232,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("LeaveTypeId");
 
-                    b.ToTable("LeaveEntitlementRules", (string)null);
+                    b.ToTable("LeaveEntitlementRules");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.LeaveType", b =>
@@ -1287,7 +1290,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("LeaveTypes", (string)null);
+                    b.ToTable("LeaveTypes");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.MFAUserSecret", b =>
@@ -1307,7 +1310,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("UserSecrets", (string)null);
+                    b.ToTable("UserSecrets");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.MedicalOption", b =>
@@ -1369,7 +1372,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("MedicalOptionCategoryId");
 
-                    b.ToTable("MedicalOptions", (string)null);
+                    b.ToTable("MedicalOptions");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.MedicalOptionCategory", b =>
@@ -1387,7 +1390,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("MedicalOptionCategoryId");
 
-                    b.ToTable("MedicalOptionCategories", (string)null);
+                    b.ToTable("MedicalOptionCategories");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.Notification", b =>
@@ -1436,7 +1439,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("NotificationId");
 
-                    b.ToTable("Notifications", (string)null);
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.OccupationalLevel", b =>
@@ -1465,7 +1468,7 @@ namespace HRConnect.Api.Migrations
                     b.HasIndex("Description")
                         .IsUnique();
 
-                    b.ToTable("OccupationalLevels", (string)null);
+                    b.ToTable("OccupationalLevels");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.PasswordHistory", b =>
@@ -1488,7 +1491,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("PasswordHistories", (string)null);
+                    b.ToTable("PasswordHistories");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.PasswordResetPin", b =>
@@ -1521,7 +1524,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("PasswordResetPins", (string)null);
+                    b.ToTable("PasswordResetPins");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.Payroll.Earning.EmployeePayrollEarning", b =>
@@ -1566,7 +1569,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("PayrollRunId");
 
-                    b.ToTable("EmployeePayrollEarnings", (string)null);
+                    b.ToTable("EmployeePayrollEarnings");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.Payroll.Earning.PayrollEarning", b =>
@@ -1605,7 +1608,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("PayrollEarningId");
 
-                    b.ToTable("PayrollEarnings", (string)null);
+                    b.ToTable("PayrollEarnings");
 
                     b.HasData(
                         new
@@ -1645,7 +1648,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("PayrollPeriodId");
 
-                    b.ToTable("PayrollPeriods", (string)null);
+                    b.ToTable("PayrollPeriods");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.Payroll.PayrollRecord", b =>
@@ -1709,7 +1712,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("PeriodId");
 
-                    b.ToTable("PayrollRuns", (string)null);
+                    b.ToTable("PayrollRuns");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction.Deduction", b =>
@@ -1757,7 +1760,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("DeductionId");
 
-                    b.ToTable("Deductions", (string)null);
+                    b.ToTable("Deductions");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction.EmployeeDeduction", b =>
@@ -1803,7 +1806,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("PayrollRunId");
 
-                    b.ToTable("EmployeeDeductions", (string)null);
+                    b.ToTable("EmployeeDeductions");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.Pension.EmployeePensionEnrollment", b =>
@@ -1845,7 +1848,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("PensionOptionId");
 
-                    b.ToTable("EmployeePensionEnrollments", (string)null);
+                    b.ToTable("EmployeePensionEnrollments");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.PensionFund", b =>
@@ -1885,7 +1888,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("PensionOptionId");
 
-                    b.ToTable("PensionFunds", (string)null);
+                    b.ToTable("PensionFunds");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.PensionOption", b =>
@@ -1901,7 +1904,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("PensionOptionId");
 
-                    b.ToTable("PensionOptions", (string)null);
+                    b.ToTable("PensionOptions");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.Position", b =>
@@ -1940,7 +1943,7 @@ namespace HRConnect.Api.Migrations
                     b.HasIndex("PositionTitle")
                         .IsUnique();
 
-                    b.ToTable("Positions", (string)null);
+                    b.ToTable("Positions");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.StatutoryContributionType", b =>
@@ -1984,7 +1987,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("StatutoryContributionTypes", (string)null);
+                    b.ToTable("StatutoryContributionTypes");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.TOTPState", b =>
@@ -1999,7 +2002,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("TOTPStates", (string)null);
+                    b.ToTable("TOTPStates");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.TaxDeduction", b =>
@@ -2034,7 +2037,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TaxDeductions", (string)null);
+                    b.ToTable("TaxDeductions");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.TaxTableUpload", b =>
@@ -2067,7 +2070,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TaxTableUploads", (string)null);
+                    b.ToTable("TaxTableUploads");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.User", b =>
@@ -2097,7 +2100,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.UserCompany", b =>
@@ -2118,7 +2121,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("CompanyId");
 
-                    b.ToTable("UserCompanies", (string)null);
+                    b.ToTable("UserCompanies");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.CompanyContributions.EmployeeCompanyContribution", b =>
@@ -2159,7 +2162,7 @@ namespace HRConnect.Api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.ToTable("EmployeeCompanyContributions", (string)null);
+                    b.ToTable("EmployeeCompanyContributions");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction.MedicalAidDeduction", b =>
@@ -2241,7 +2244,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("MedicalOptionId");
 
-                    b.ToTable("MedicalAidDeductions", (string)null);
+                    b.ToTable("MedicalAidDeductions");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction.PensionDeduction", b =>
@@ -2312,7 +2315,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("PensionOptionId");
 
-                    b.ToTable("PensionDeductions", (string)null);
+                    b.ToTable("PensionDeductions");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.StatutoryContribution", b =>
@@ -2349,7 +2352,7 @@ namespace HRConnect.Api.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.ToTable("StatutoryContributions", (string)null);
+                    b.ToTable("StatutoryContributions");
                 });
 
             modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzBlobTrigger", b =>

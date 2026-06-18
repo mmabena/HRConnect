@@ -368,12 +368,12 @@ const MedicalAidModal = ({
           {/* BUTTONS */}
           <div className="emp-button-row">
 
-            <button onClick={onBack}>
+            <button className="medical-back-btn" onClick={onBack}>
               <ArrowLeft size={20} />
               Back
             </button>
 
-            <button onClick={onNext}>
+            <button className="medical-next-btn"onClick={onNext}>
               Next
               <ArrowRight size={20} />
             </button>
