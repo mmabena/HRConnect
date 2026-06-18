@@ -231,30 +231,6 @@
 
 
 
-.logo-container {
-  display: flex;
-  justify-content: center;   
-  align-items: baseline;
-  gap: 6px;
-  margin-bottom: 20px;
-  width: 100%;               
-}
-
-.apm-logo-bold {
-  font-family: 'Inter', sans-serif;
-  font-weight: 700;
-  font-size: 24px;
-  color: #002D40;
-}
-
-.apm-logo-light {
-  font-family: 'Instrument Sans', sans-serif;
-  font-weight: 300;
-  font-size: 24px;
-  color: #006088;
-}
-
-
 .pension-options-table {
   width: 100%;
   border-collapse: separate;
@@ -441,8 +417,6 @@
   margin-top: -20px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
-
-
 
 .section-title {
   font-family: 'Anek Bangla', sans-serif; 
@@ -642,17 +616,14 @@
 }
 
 
-
 .delete-tab {
   color: #a30000;        
   margin-left: 0.5rem;    
   
 }
 
-
 .pension-title {
   font-family: 'Anek Bangla', sans-serif; 
-
   font-size: 24px;                        
   font-weight: 400;                    
   color: #355867;                        
@@ -677,6 +648,7 @@
   margin-bottom: 20px;
 }
 
+
 /* GENERAL CELL STYLE */
 .inactive-funds-table th,
 .inactive-funds-table td {
@@ -685,6 +657,7 @@
   font-family: 'Anek Bangla', sans-serif;
   font-size: 14px;
 }
+
 
 /* HEADER */
 .inactive-funds-table th {
