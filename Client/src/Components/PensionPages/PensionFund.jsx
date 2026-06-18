@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-
 import {
   getPensionFunds,
   getPensionOptions,
@@ -11,12 +10,9 @@ import {
 } from "../../api/PensionFund";
 
 import "./PensionFund.css";
-
 import PayrollNavbar from "../PayrollNavbar";
 
-
 export default function PensionFundsList({isOpen, onClose}) {
-
   // STATE 
   const [funds, setFunds] = useState([]);
   const [options, setOptions] = useState([]);
