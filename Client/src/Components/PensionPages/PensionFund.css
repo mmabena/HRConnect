@@ -33,16 +33,6 @@
   gap: 30px;
   top: 10px;                 
 }
-/* LOGO */
-.logo-container {
-  display: flex;
-  justify-content: flex-start;   
-  gap: 2px;
-
-  margin-top: -130px;
-     justify-content: center;   
-  margin-bottom: 12px;           
-}
 
 .logo-singular {
   font-family: 'Inter', sans-serif;
@@ -63,9 +53,13 @@
 }
 
 /* Header wrapper directly below logo */
-.add-fund-wrapper {
-  text-align: center;
-  margin-bottom: 20px;
+.add-button-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-top: 0px;
+  margin-bottom: -10px;
 }
 
 .add-fund-wrapper span {
@@ -138,35 +132,6 @@
   margin-top: 20px;
 }
 
-.btn-save {
-  background-color: #007bff;
-  color: white;
-  padding: 10px 25px;
-  border: none;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.btn-save:hover {
-  background-color: #0056b3;
-}
-
-.btn-cancel {
-  background-color: #ccc;
-  color: #333;
-  padding: 10px 25px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.btn-cancel:hover {
-  background-color: #aaa;
-}
-
 /* Pension Funds Page Styles */
 .menu-background {
   padding: 20px;
@@ -204,12 +169,8 @@
   font-weight: 400;
   line-height: normal;
   letter-spacing: 0.4px;
-  float: right;
   
-}
-
-.add-button:hover {
-  background-color:#668c4d;
+  
 }
 
 /* Pension Funds table */
@@ -226,7 +187,7 @@
 .styled-table th {
   background-color: #355867;
   color: var(--white);
-  padding: 12px;
+  padding: 10px 10px;
   font-family: 'Anek Bangla', sans-serif;
   font-weight: 700;
   font-size: 16px;
@@ -239,7 +200,11 @@
   font-size: 14px;
   color: #1f3a44;
   text-align: left;
-  margin-left: -50px ;
+
+}.styled-table th:first-child, .styled-table td:first-child {
+    width: 20%;
+    text-align: center;
+    line-height: 3;
 }
 
 /* Row colors */
@@ -254,7 +219,7 @@
 /* Column alignment */
 .styled-table th:first-child,
 .styled-table td:first-child {
-  width: 30%;   /* Option Name */
+  width: 20%;   /* Option Name */
   text-align: left;
 }
 
@@ -264,10 +229,7 @@
   text-align: center;
 }
 
-.styled-table th:first-child, .styled-table td:first-child {
-    width: 20%;
-    text-align: left;
-}
+
 
 .logo-container {
   display: flex;
@@ -277,7 +239,6 @@
   margin-bottom: 20px;
   width: 100%;               
 }
-
 
 .apm-logo-bold {
   font-family: 'Inter', sans-serif;
@@ -296,8 +257,10 @@
 
 .pension-options-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  overflow: hidden;
   background-color: #fff;
+  border-spacing: 0;
   border-radius: 10px;
   box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
   margin-top: 20px;
@@ -347,7 +310,7 @@
   text-align: right;
 }
 
-/* Add Option button styled per Figma */
+/* Add Option */
 .btn-add-option {
   box-sizing: border-box;
   display: flex;
@@ -393,7 +356,6 @@
   justify-content: left;
   margin-top: 25px;  
 }
-
 
 /* Save button styled per Figma */
 .btn-save {
@@ -494,26 +456,7 @@
 }
 
 
-/* EDIT OPTION SAVE BUTTON */
-
-.edit-option-save-btn {
-  background: #355867;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 8px 18px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  transition: 0.2s ease;
-}
-
-.edit-option-save-btn:hover {
-  background: #284653;
-}
-
 /* MAIN EDIT FORM SAVE BUTTON*/
-
 .edit-form-actions {
   display: flex;
   justify-content: flex-end;
@@ -563,11 +506,6 @@
   margin-bottom: 20px;
 }
 
-.divider {
-  border: none;
-  border-top: 1px solid #e5e5e5;
-  margin: 20px 0;
-}
 
 .edit-option-input {
   width: 80px;              
@@ -689,11 +627,28 @@
   cursor: pointer;
   color: #002D40;
   font-weight: 500;
+  display: flex;
+  gap: 0.5rem;
+  transition: color 0.3s ease;
+  margin-left: auto;  
 }
 
-.delete-tab {
-  color: #c0392b;        
+.clickable-tab {
+  cursor: pointer;
+  color: #002D40;
+  font-weight: 500;
+  display: block;
+  text-align: right;  
 }
+
+
+
+.delete-tab {
+  color: #a30000;        
+  margin-left: 0.5rem;    
+  
+}
+
 
 .pension-title {
   font-family: 'Anek Bangla', sans-serif; 
@@ -715,17 +670,55 @@
   text-align: left;
 }
 
+
 .inactive-funds-table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 20px;
 }
 
+/* GENERAL CELL STYLE */
 .inactive-funds-table th,
 .inactive-funds-table td {
   padding: 12px 16px;
   border-bottom: 1px solid #ddd;
+  font-family: 'Anek Bangla', sans-serif;
+  font-size: 14px;
+}
+
+/* HEADER */
+.inactive-funds-table th {
+  background: #355867;
+  color: white;
+  font-weight: 700;
+}
+
+/* NAME */
+.inactive-funds-table th:nth-child(1),
+.inactive-funds-table td:nth-child(1) {
+  width: 25%;
   text-align: left;
+}
+
+/*  DESCRIPTION */
+.inactive-funds-table th:nth-child(2),
+.inactive-funds-table td:nth-child(2) {
+  width: 35%;
+  text-align: center;
+}
+
+/* TAX CODE */
+.inactive-funds-table th:nth-child(3),
+.inactive-funds-table td:nth-child(3) {
+  width: 20%;
+  text-align: center;
+}
+
+/* STATUS */
+.inactive-funds-table th:nth-child(4),
+.inactive-funds-table td:nth-child(4) {
+  width: 20%;
+  text-align: center;
 }
 
 .inactive-status {
@@ -733,3 +726,120 @@
   font-style: italic;   
 }
 
+.form-error {
+  width: 100%;
+  background: #ffe5e5;
+  color: #c40000;
+  border: 1px solid #ffb3b3;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.table-action-tab {
+  cursor: pointer;
+  color: #002D40;
+  font-weight: 500;
+  margin-left: auto;   
+  transition: color 0.3s ease;
+}
+
+/* INACTIVE STATUS PILL */
+
+.inactive-status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  width: 110px;
+  height: 32px;
+
+  background: rgba(232, 49, 49, 0.15);
+  border-radius: 20px;
+
+  font-family: 'Anek Bangla', sans-serif;
+  font-weight: 500;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  color: #FE3944;
+}
+
+/* RED DOT */
+
+.status-dot {
+  width: 5px;
+  height: 5px;
+  background: #FE3944;
+  border-radius: 50%;
+}
+.pension-funds-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #FFFFFF;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  margin-top: 20px;
+}
+
+/* HEADERS */
+.pension-funds-table th {
+  background-color: #355867;
+  color: #FFFFFF;
+  padding: 12px 16px;
+
+  font-family: 'Anek Bangla', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+
+  text-align: left;
+}
+
+/* CELLS */
+.pension-funds-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #E5E5E5;
+
+  font-family: 'Anek Bangla', sans-serif;
+  font-size: 14px;
+  color: #1F3A44;
+}
+
+/* ROW STRIPES */
+.pension-funds-table tr:nth-child(even) {
+  background-color: #F8FAFB;
+}
+
+/* HOVER */
+.pension-funds-table tr:hover {
+  background-color: #EEF6F9;
+}
+
+/* COLUMN WIDTHS */
+.pension-funds-table th:first-child,
+.pension-funds-table td:first-child {
+  width: 20%;
+  text-align: left;
+}
+
+.pension-funds-table th:nth-child(2),
+.pension-funds-table td:nth-child(2) {
+  width: 30%;
+  text-align: left;
+}
+
+.pension-funds-table th:nth-child(3),
+.pension-funds-table td:nth-child(3) {
+  width: 20%;
+  text-align: left;
+}
+
+.pension-funds-table th:nth-child(4),
+.pension-funds-table td:nth-child(4) {
+  width: 25%;
+  text-align: center;
+}
