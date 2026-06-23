@@ -634,7 +634,7 @@
 
 .inactive-title {
   font-family: 'Anek Bangla', sans-serif;
-  font-size: 22px;
+  font-size: 25px;
   font-weight: 400;
   color: #355867;
   margin: 30px 0 15px 0;   
@@ -815,4 +815,4 @@
 .pension-funds-table td:nth-child(4) {
   width: 25%;
   text-align: center;
-}
+} 

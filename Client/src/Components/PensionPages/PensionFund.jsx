@@ -147,15 +147,13 @@ export default function PensionFundsList({isOpen, onClose}) {
   }
 };
 
-
 return (
   <div className="menu-background custom-scrollbar" >
   <div className="wrap-container">
   <div className="heading-container2">Payroll Management</div>
   <h2 className="sub-heading">Pension Fund Management</h2>
   </div>
-
-
+   <PayrollNavbar />
 
   <div className="add-button-wrapper">
     <h2 className="inactive-title">Active Pension Funds</h2>
@@ -229,7 +227,6 @@ return (
     De-activate
   </span>
 </td>
-
 
   </tr>
   ))
@@ -305,7 +302,6 @@ Inactive
 </tbody>
 </table>
 </div>
-
 
 {showForm && (
 <div className="modal-overlay" onClick={handleCloseForm}>
@@ -405,9 +401,7 @@ Inactive
         placeholder="Description"
       />
 
-     
       <h3 className="section-title">Pension Options</h3>
-
       <table className="pension-options-table">
       <thead>
       <tr>
@@ -486,7 +480,6 @@ Inactive
   Add Option
 </button>
 
-
       {/* SAVE FUND */}
   <div className="edit-form-actions">
   <button
@@ -511,7 +504,6 @@ Inactive
   </div>
 
     </div>
-
   </form>
 )}
 
