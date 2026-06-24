@@ -59,6 +59,7 @@
 
   position: absolute;
 
+  
   width: 471px;
   height: 502px;
 
@@ -430,6 +431,10 @@
   grid-template-columns: repeat(2, 1fr);
   gap: 24px;
   width: 525px;
+    max-height: 225px;
+  overflow-y: auto;
+  overflow-x: hidden;
+
 }
 
 /* =========================
@@ -446,7 +451,7 @@
   gap: 2px;
 
   width: 100%;
-  min-height: 130px;
+  min-height: 150px;
   height: auto;
 
   background: rgba(255, 255, 255, 0.41);
@@ -474,7 +479,6 @@
 
 .medical-plan-card h4 {
   margin: 0;
-
   font-family: "Anek Bangla";
   font-style: normal;
   font-weight: 400;
@@ -489,19 +493,13 @@
 ========================= */
 
 .medical-selected-badge {
-  position: absolute;
-
-  top: 10px;
-  right: 10px;
-
+  position: relative;
+  top: -3px;
+  left: 163px;
   font-size: 11px;
-
   background: #2c5f6d;
-
   color: white;
-
   padding: 3px 10px;
-
   border-radius: 20px;
 }
 
@@ -754,6 +752,16 @@
   background: rgba(255, 255, 255, 0.9);
 }
 
+.medical-button-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  margin-top: 32px;
+}
+
 .medical-btn-primary {
   display: flex;
   flex-direction: row;
@@ -827,5 +835,5 @@
   font-size: 16px;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  bottom: -85px;
+  bottom: 78px;
 }

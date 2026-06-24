@@ -19,7 +19,7 @@ const CompanyList = () => {
         const data = await fetchAllCompanies();
         setCompanies(data);
       } catch (err) {
-        setError("Failed to load companies");
+        setError("Failed to load companies:", err);
       } finally {
         setLoading(false);
       }

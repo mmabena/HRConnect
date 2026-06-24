@@ -24,6 +24,8 @@ export const getMedicalAidPlans = async () => {
         ? category.medicalOptions.map((opt) => ({
             medicalOptionId: opt.medicalOptionId,
             medicalOptionName: opt.medicalOptionName,
+            medicalOptionCategoryId: opt.medicalOptionCategoryId,
+            medicalOptionCategoryName: opt.medicalOptionCategoryName,
             salaryBracketMin: opt.salaryBracketMin,
             salaryBracketMax: opt.salaryBracketMax,
 

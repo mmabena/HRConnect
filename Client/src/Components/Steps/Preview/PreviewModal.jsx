@@ -44,15 +44,12 @@ const PreviewModal = ({
   const isPermanent = !isContract && !isFixedTerm;
 
   return (
-    <div className="emp-preview-container">
-
-
-        
+    <div className="preview-container">
 
         {/* =========================
             BODY
         ========================= */}
-        <div className="preview-body">
+        
 
           {/* =========================
               REVIEW TEXT
@@ -64,6 +61,8 @@ const PreviewModal = ({
               Check all details before saving
             </span>
           </div>
+
+          <div className="preview-body">
 
           {/* =========================
               PERSONAL DETAILS
@@ -257,6 +256,7 @@ const PreviewModal = ({
               </div>
             </div>
           )}
+          
 
           {/* =========================
               MEDICAL AID
@@ -274,7 +274,7 @@ const PreviewModal = ({
                   <span>MEDICAL AID</span>
 
                   <h4>
-                    {employee?.medicalAid || "N/A"}
+                    {employee?.medicalAidInfo?.medicalAidCategory || "N/A"}
                   </h4>
                 </div>
 
@@ -282,14 +282,14 @@ const PreviewModal = ({
                   <span>MEDICAL PLAN</span>
 
                   <h4>
-                    {employee?.medicalPlan || "N/A"}
+                    {employee?.medicalAidInfo?.medicalAidPlan || "N/A"}
                   </h4>
                 </div>
 
               </div>
             </div>
           )}
-        </div>
+          </div>
 
         {/* =========================
             FOOTER
@@ -312,7 +312,7 @@ const PreviewModal = ({
           </button>
         </div>
       </div>
-    
+  
   );
 };
 

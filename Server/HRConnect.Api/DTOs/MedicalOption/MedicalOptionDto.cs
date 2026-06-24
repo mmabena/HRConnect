@@ -11,6 +11,7 @@
     public int MedicalOptionId { get; set; }
     public string MedicalOptionName { get; set; } = string.Empty;
     public int MedicalOptionCategoryId { get; set; }
+    public string? MedicalOptionCategoryName { get; set; }
     public decimal? SalaryBracketMin { get; set; }
     public decimal? SalaryBracketMax { get; set; }
     public decimal? MonthlyRiskContributionPrincipal { get; set; }

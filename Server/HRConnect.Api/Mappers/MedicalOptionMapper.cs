@@ -108,6 +108,8 @@
         MedicalOptionId = option.MedicalOptionId,
         MedicalOptionName = option.MedicalOptionName,
         MedicalOptionCategoryId = option.MedicalOptionCategoryId,
+        MedicalOptionCategoryName = option.MedicalOptionCategory != null
+          ? option.MedicalOptionCategory.MedicalOptionCategoryName : null,
         SalaryBracketMin = option.SalaryBracketMin,
         SalaryBracketMax = option.SalaryBracketMax,
         MonthlyRiskContributionPrincipal = option.MonthlyRiskContributionPrincipal,
@@ -238,6 +240,7 @@
         MedicalOptionId = dto.MedicalOptionId,
         MedicalOptionName = dto.MedicalOptionName,
         MedicalOptionCategoryId = dto.MedicalOptionCategoryId,
+      
         SalaryBracketMin = dto.SalaryBracketMin,
         SalaryBracketMax = dto.SalaryBracketMax,
         MonthlyRiskContributionPrincipal = dto.MonthlyRiskContributionPrincipal,

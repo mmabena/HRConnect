@@ -61,6 +61,7 @@ const MedicalAidModal = ({
         const result = await getMedicalAidPlans();
 
         setPlans(Array.isArray(result) ? result : []);
+        console.log("Loaded medical aid plans:", result);
       } catch (error) {
         console.log("Failed to load medical aid plans", error);
         setPlans([]);
@@ -100,6 +101,7 @@ const MedicalAidModal = ({
       medicalAidInfo: {
         ...prev.medicalAidInfo,
         planId: plan.medicalOptionId,
+        medicalAidCategory: plan.medicalOptionCategoryName,
         medicalAidPlan: plan.medicalOptionName,
         selectedPlan: plan,
       },
@@ -258,7 +260,7 @@ const MedicalAidModal = ({
                 {filteredPlans.flatMap((category) =>
                   category.medicalOptions.map((plan) => {
                     const selected =
-                      String(employee?.planId) ===
+                      String(employee?.medicalAidInfo?.planId) ===
                       String(plan.medicalOptionId);
 
                     return (
@@ -366,7 +368,7 @@ const MedicalAidModal = ({
           )}
 
           {/* BUTTONS */}
-          <div className="emp-button-row">
+          <div className="medical-button-row">
 
             <button className="medical-back-btn" onClick={onBack}>
               <ArrowLeft size={20} />
