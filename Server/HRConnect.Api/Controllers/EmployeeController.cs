@@ -69,6 +69,11 @@ namespace HRConnect.Api.Controllers
     [Authorize(Roles = "SuperUser")]
     public async Task<IActionResult> CreateEmployee([FromBody] CreateEmployeeRequestDto employeeDto)
     {
+      if (!ModelState.IsValid)
+    {
+        return BadRequest(ModelState);
+    }
+    
       var userId = User.GetUserId();
 
       var employee = await _employeeService.CreateEmployeeAsync(userId, employeeDto);

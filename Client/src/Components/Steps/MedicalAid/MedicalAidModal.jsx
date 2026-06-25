@@ -15,19 +15,17 @@ import { getMedicalAidPlans } from "../../../api/MedicalAidPlan";
 const MedicalAidModal = ({
   closeModal,
   onClose,
- employee,
- setEmployee,
- onNext,
- onBack,
+  employee,
+  setEmployee,
+  onNext,
+  onBack,
 }) => {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const salary = employee?.salary || 0;
 
-  const [dependents, setDependents] = useState(
-    employee?.dependents || []
-  );
+  const [dependents, setDependents] = useState(employee?.dependents || []);
 
   const [showDependentModal, setShowDependentModal] = useState(false);
 
@@ -40,13 +38,7 @@ const MedicalAidModal = ({
     dateOfBirth: "",
   });
 
-  const relationshipOptions = [
-    "Spouse",
-    "Child",
-    "Parent",
-    "Sibling",
-    "Other",
-  ];
+  const relationshipOptions = ["Spouse", "Child", "Parent", "Sibling", "Other"];
 
   const genderOptions = ["Male", "Female"];
 
@@ -108,7 +100,31 @@ const MedicalAidModal = ({
     }));
   };
 
-  
+  //Helper to convert dependents to counts
+  const getDependentCounts = (deps = []) => {
+    let principalCount = 1; // employee always counts as principal
+    let adultCount = 0;
+    let childrenCount = 0;
+
+    deps.forEach((d) => {
+      const rel = (d.relationship || "").toLowerCase();
+
+      if (rel === "spouse" || rel === "parent" || rel === "sibling") {
+        adultCount++;
+      } else if (rel === "child") {
+        childrenCount++;
+      } else {
+        adultCount++;
+      }
+    });
+
+    return {
+      principalCount,
+      adultCount,
+      childrenCount,
+    };
+  };
+
   // =========================
   // ADD DEPENDENT
   // =========================
@@ -137,30 +153,29 @@ const MedicalAidModal = ({
     setShowDependentModal(false);
   };
 
-   // =========================
+  // =========================
   // REMOVE DEPENDENT
   // =========================
- const removeDependent = (indexToRemove) => {
-  const updatedDependents = dependents.filter((dependent, index) => {
-    return index !== indexToRemove;
-  });
+  const removeDependent = (indexToRemove) => {
+    const updatedDependents = dependents.filter((dependent, index) => {
+      return index !== indexToRemove;
+    });
 
-  setDependents(updatedDependents);
+    setDependents(updatedDependents);
 
-  setEmployee((prev) => {
-    return {
+    setEmployee((prev) => ({
       ...prev,
-      dependents: updatedDependents,
-    };
-  });
-};
+      medicalAidInfo: {
+        ...prev.medicalAidInfo,
+        dependents: updatedDependents,
+      },
+    }));
+  };
 
   return (
     <div className="emp-medical-aid-container">
-
       {/* HEADER */}
       <div className="emp-medical-aid-header-frame">
-
         <div className="emp-medical-aid-personal-details-heading">
           <span>Medical Aid</span>
         </div>
@@ -168,39 +183,32 @@ const MedicalAidModal = ({
         <div className="emp-medical-aid-sub">
           <span>Add dependents and select a medical plan</span>
         </div>
-
       </div>
 
       {/* CONTENT */}
       <div className="emp-medical-aid-content-frame">
-
         <div className="emp-medical-aid-form-grid">
-
           {/* DEPENDENTS */}
-          <div className="medical-section-title">
-            DEPENDENTS
-          </div>
+          <div className="medical-section-title">DEPENDENTS</div>
 
           <div className="medical-info-banner">
             <Info size={16} />
             <span>
-              Add spouse, children or other dependents before selecting a medical plan.
+              Add spouse, children or other dependents before selecting a
+              medical plan.
             </span>
           </div>
 
           {/* EMPTY STATE */}
           {dependents.length === 0 && (
-            <div className="medical-empty-state">
-              No dependents added yet.
-            </div>
+            <div className="medical-empty-state">No dependents added yet.</div>
           )}
 
-            {/* DEPENDENTS LIST */}
+          {/* DEPENDENTS LIST */}
           <div className="medical-dependent-list">
             {dependents.map((dep, index) => (
               <div className="medical-dependent-card" key={index}>
                 <div className="medical-dependent-card-inner">
-
                   {/* LEFT — name + detail line */}
                   <div className="medical-dependent-info">
                     <span className="medical-dependent-name">
@@ -220,7 +228,6 @@ const MedicalAidModal = ({
                   >
                     Remove
                   </button>
-
                 </div>
               </div>
             ))}
@@ -238,9 +245,7 @@ const MedicalAidModal = ({
           {/* =========================
               MEDICAL PLANS
           ========================= */}
-          <div className="medical-section-title">
-            MEDICAL AID PLANS
-          </div>
+          <div className="medical-section-title">MEDICAL AID PLANS</div>
 
           {loading ? (
             <div className="medical-loading-state">
@@ -252,11 +257,9 @@ const MedicalAidModal = ({
             </div>
           ) : (
             <div className="medical-category-container">
-
               {/* FLATTENED GRID — all plans share one grid so they
                   always fill 2 columns regardless of category grouping */}
               <div className="medical-plan-grid">
-
                 {filteredPlans.flatMap((category) =>
                   category.medicalOptions.map((plan) => {
                     const selected =
@@ -271,11 +274,8 @@ const MedicalAidModal = ({
                         }`}
                         onClick={() => selectPlan(plan)}
                       >
-
                         {selected && (
-                          <div className="medical-selected-badge">
-                            Selected
-                          </div>
+                          <div className="medical-selected-badge">Selected</div>
                         )}
 
                         <h4>{plan.medicalOptionName}</h4>
@@ -286,7 +286,6 @@ const MedicalAidModal = ({
                         </div>
 
                         <div className="medical-plan-pricing">
-
                           {/* PRINCIPAL */}
                           <div className="medical-price-card">
                             <div className="medical-price-content">
@@ -297,7 +296,8 @@ const MedicalAidModal = ({
                                 <span className="medical-price-amount">
                                   R{" "}
                                   {Number(
-                                    plan.totalMonthlyContributionsPrincipal || 0
+                                    plan.totalMonthlyContributionsPrincipal ||
+                                      0,
                                   ).toFixed(2)}
                                 </span>
                               </div>
@@ -307,14 +307,12 @@ const MedicalAidModal = ({
                           {/* ADULT */}
                           <div className="medical-price-card">
                             <div className="medical-price-content">
-                              <span className="medical-price-title">
-                                ADULT
-                              </span>
+                              <span className="medical-price-title">ADULT</span>
                               <div className="medical-price-amount-box">
                                 <span className="medical-price-amount">
                                   R{" "}
                                   {Number(
-                                    plan.totalMonthlyContributionsAdult || 0
+                                    plan.totalMonthlyContributionsAdult || 0,
                                   ).toFixed(2)}
                                 </span>
                               </div>
@@ -324,14 +322,12 @@ const MedicalAidModal = ({
                           {/* CHILD */}
                           <div className="medical-price-card">
                             <div className="medical-price-content">
-                              <span className="medical-price-title">
-                                CHILD
-                              </span>
+                              <span className="medical-price-title">CHILD</span>
                               <div className="medical-price-amount-box">
                                 <span className="medical-price-amount">
                                   R{" "}
                                   {Number(
-                                    plan.totalMonthlyContributionsChild || 0
+                                    plan.totalMonthlyContributionsChild || 0,
                                   ).toFixed(2)}
                                 </span>
                               </div>
@@ -348,40 +344,34 @@ const MedicalAidModal = ({
                                 <span className="medical-price-amount">
                                   R{" "}
                                   {Number(
-                                    plan.totalMonthlyContributionsSecondChild || 0
+                                    plan.totalMonthlyContributionsSecondChild ||
+                                      0,
                                   ).toFixed(2)}
                                 </span>
                               </div>
                             </div>
                           </div>
-
                         </div>
-
                       </div>
                     );
-                  })
+                  }),
                 )}
-
               </div>
-
             </div>
           )}
 
           {/* BUTTONS */}
           <div className="medical-button-row">
-
             <button className="medical-back-btn" onClick={onBack}>
               <ArrowLeft size={20} />
               Back
             </button>
 
-            <button className="medical-next-btn"onClick={onNext}>
+            <button className="medical-next-btn" onClick={onNext}>
               Next
               <ArrowRight size={20} />
             </button>
-
           </div>
-
         </div>
       </div>
 
@@ -389,30 +379,33 @@ const MedicalAidModal = ({
           DEPENDENT MODAL
       ========================= */}
       {showDependentModal && (
-        <div className="medical-dependent-modal-overlay"
-        onClick={() => setShowDependentModal(false)}>
-
-          <div className="medical-dependent-modal"
-          onClick={(e) => e.stopPropagation()} >
-
+        <div
+          className="medical-dependent-modal-overlay"
+          onClick={() => setShowDependentModal(false)}
+        >
+          <div
+            className="medical-dependent-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* HEADER */}
             <div className="medical-dependent-modal-header">
               <div className="emp-left-icon-wrapper">
-              <ShieldCheck size={24} />
+                <ShieldCheck size={24} />
               </div>
               <span>Add Dependent</span>
 
               <div className="emp-right-icon-wrapper">
-                       <X size={24} onClick={() => setShowDependentModal(false)} style={{ cursor: "pointer" }} />
-                     </div>
-
+                <X
+                  size={24}
+                  onClick={() => setShowDependentModal(false)}
+                  style={{ cursor: "pointer" }}
+                />
+              </div>
             </div>
 
             {/* BODY */}
             <div className="medical-dependent-modal-body">
-
               <div className="medical-dependent-grid">
-
                 <div className="medical-input-group">
                   <label>FIRST NAME</label>
 
@@ -457,9 +450,9 @@ const MedicalAidModal = ({
                       }))
                     }
                   >
-                   <option value="" disabled hidden>
-                        Gender
-                      </option>
+                    <option value="" disabled hidden>
+                      Gender
+                    </option>
                     {genderOptions.map((g) => (
                       <option key={g} value={g}>
                         {g}
@@ -518,11 +511,11 @@ const MedicalAidModal = ({
                       ))}
                     </select>
 
-                  <img
-                    src="/images/arrow_drop_down_circle.png"
-                    alt="Dropdown icon"
-                    className="icon-dropdown-icon"
-                  />
+                    <img
+                      src="/images/arrow_drop_down_circle.png"
+                      alt="Dropdown icon"
+                      className="icon-dropdown-icon"
+                    />
                   </div>
                 </div>
 
@@ -544,14 +537,11 @@ const MedicalAidModal = ({
                     className="date-picker-dropdown-icon"
                   />
                 </div>
-
               </div>
-
             </div>
 
             {/* FOOTER */}
             <div className="medical-dependent-modal-footer">
-
               <button
                 className="medical-btn-cancel"
                 onClick={() => setShowDependentModal(false)}
@@ -559,21 +549,14 @@ const MedicalAidModal = ({
                 Cancel
               </button>
 
-              <button
-                className="medical-btn-primary"
-                onClick={addDependent}
-              >
-                 <Plus size={18} />
+              <button className="medical-btn-primary" onClick={addDependent}>
+                <Plus size={18} />
                 Add Dependent
               </button>
-
             </div>
-
           </div>
-
         </div>
       )}
-
     </div>
   );
 };

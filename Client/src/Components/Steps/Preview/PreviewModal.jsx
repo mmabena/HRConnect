@@ -43,6 +43,8 @@ const PreviewModal = ({
 
   const isPermanent = !isContract && !isFixedTerm;
 
+  //console.log("Preview onSave:", onSave);
+
   return (
     <div className="preview-container">
 

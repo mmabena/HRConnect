@@ -48,3 +48,16 @@ export const getMedicalAidPlans = async () => {
     return [];
   }
 };
+
+export const createMedicalAidDeduction = async (employeeId, payload) => {
+  try {
+    const response = await api.post(
+      `/medical-options/deduction/${employeeId}`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error creating medical aid deduction:", error);
+    throw error;
+  }
+};

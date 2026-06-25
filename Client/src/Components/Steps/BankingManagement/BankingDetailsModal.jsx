@@ -32,13 +32,11 @@ const BankingDetailsModal = ({
     if (name === "bankName") {
       const selectedBank = bankData.find((bank) => bank.bankName === value);
 
-      const branchCode =
-        selectedBank?.branchCode || selectedBank?.BranchCode || "";
-
       setEmployee((prev) => ({
         ...prev,
         bankName: value,
         branchCode: selectedBank?.branchCode || "",
+        bankBranchCodeId: selectedBank?.bankBranchCodeId || null,
       }));
 
       return;
@@ -78,7 +76,7 @@ const BankingDetailsModal = ({
     if (!employee.paymentMethod)
       errors.paymentMethod = "Payment method is required";
 
-    if (!employee.reference) errors.reference = "Reference type is required";
+    if (!employee.referenceType) errors.referenceType = "Reference type is required";
 
     if (!employee.payFrequency)
       errors.payFrequency = "Pay frequency is required";
@@ -99,6 +97,7 @@ const BankingDetailsModal = ({
           (b) => ({
             bankName: b.bankName,
             branchCode: b.universalCode,
+            bankBranchCodeId: b.bankBranchCodeId,
           }),
         );
 
@@ -325,8 +324,8 @@ const BankingDetailsModal = ({
 
           <div className="emp-input-wrapper dropdown-wrapper">
             <select
-              name="reference"
-              value={employee.reference || ""}
+              name="referenceType"
+              value={employee.referenceType || ""}
               onChange={handleChange}
               className="emp-referenceType-input"
             >
@@ -344,8 +343,8 @@ const BankingDetailsModal = ({
               alt="Dropdown icon"
               className="dropdown-icon"
             />
-            {formErrors.reference && (
-              <span className="emp-error-message">{formErrors.reference}</span>
+            {formErrors.referenceType && (
+              <span className="emp-error-message">{formErrors.referenceType}</span>
             )}
           </div>
         </div>

@@ -23,7 +23,7 @@ namespace HRConnect.Api.Controllers
         /// This method calls the service layer to retrieve a list of all banking details records.
         /// </summary>
         /// <returns>A list of all banking details</returns>
-    
+
         [HttpGet]
         public async Task<IActionResult> GetAllBankingDetails()
         {
@@ -46,7 +46,7 @@ namespace HRConnect.Api.Controllers
         /// </summary>
         /// <param name="employeeId">The ID of the employee whose banking details are to be retrieved</param>
         /// <returns>The banking details for the specified employee</returns>
-        
+
         [HttpGet("employee/{employeeId}")]
         public async Task<IActionResult> GetBankingDetailsByEmployeeId(string employeeId)
         {
@@ -65,8 +65,20 @@ namespace HRConnect.Api.Controllers
         [HttpPost("CreateBankingDetails")]
         public async Task<IActionResult> CreateBankingDetails([FromBody] CreateBankingDetailDto dto)
         {
+            Console.WriteLine("=== CREATE BANKING DETAILS ===");
+            Console.WriteLine($"EmployeeId: {dto.EmployeeId}");
+            Console.WriteLine($"BankName: {dto.BankName}");
+            Console.WriteLine($"BankBranchCodeId: {dto.BankBranchCodeId}");
+            Console.WriteLine($"AccountNumber: {dto.AccountNumber}");
+
             var result = await _service.CreateBankingDetailsAsync(dto);
-            return Ok(result);
+
+            Console.WriteLine(result.EmployeeId);
+            return CreatedAtAction(
+                nameof(GetBankingDetailsByEmployeeId),
+                new { employeeId = result.EmployeeId },
+                result
+            );
         }
 
 
@@ -84,6 +96,6 @@ namespace HRConnect.Api.Controllers
             return Ok(result);
         }
 
-       
+
     }
 }

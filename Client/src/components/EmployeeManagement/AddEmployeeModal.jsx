@@ -8,6 +8,9 @@ import PreviewModal from "../Steps/Preview/PreviewModal.jsx";
 import PensionFundOptionsModal from "../Steps/PensionFundOptions/PensionFundOptionsModal.jsx";
 import MedicalAidModal from "../Steps/MedicalAid/MedicalAidModal.jsx";
 import { addEmployee } from "../../api/Employee";
+import { addBankingDetails } from "../../api/BankingDetail";
+import { createMedicalAidDeduction } from "../../api/MedicalAidPlan.js";
+import { getDependentCounts } from "../../utils/medicalAidHelpers";
 
 import useEmployeeForm from "../../hooks/useEmployeeForm";
 import useEmployeeData from "../../hooks/useEmployeeData";
@@ -63,7 +66,7 @@ const AddEmployeeModal = ({ closeModal }) => {
       accountType: "",
       paymentMethod: "",
       accountHolderName: "",
-      reference: "",
+      referenceType: "",
       payFrequency: "",
       payDate: "",
     });
@@ -139,14 +142,22 @@ const AddEmployeeModal = ({ closeModal }) => {
   };
 
   const handleSave = async () => {
+    console.log("SAVE CLICKED");
     const errors = validateEmployee(employee);
     setFormErrors(errors);
-    if (Object.keys(errors).length > 0) return;
+    console.log("Validation errors:", errors);
+    if (Object.keys(errors).length > 0) {
+      toast.error("Please fix validation errors before saving");
+      console.log("Validation errors:", errors);
+      return;
+    }
 
     try {
       setLoading(true);
 
-      const payload = {
+      // Employee onboarding sequence preparation
+      // 1. CREATE EMPLOYEE
+      const EmployeePayload = {
         title: employee.title,
         name: employee.name,
         surname: employee.surname,
@@ -161,6 +172,7 @@ const AddEmployeeModal = ({ closeModal }) => {
         city: employee.city,
         zipCode: employee.zipCode,
         hasDisability: employee.disability,
+        companyId: employee.companyId || "",
         disabilityDescription: employee.disabilityType,
         dateOfBirth: employee.dateOfBirth,
         startDate: employee.startDate,
@@ -172,27 +184,71 @@ const AddEmployeeModal = ({ closeModal }) => {
         employmentStatus: employee.employeeStatus,
         careerManagerID: employee.reportsTo || null,
         profileImage: employee.profileImage,
-        bankName: employee.bankName,
-        accountNumber: employee.accountNumber,
-        branchCode: employee.branchCode,
-        accountType: employee.accountType,
-        paymentMethod: employee.paymentMethod,
-        accountHolderName: employee.accountHolderName,
-        reference: employee.reference,
-        payFrequency: employee.payFrequency,
-        payDate: employee.payDate,
       };
 
       if (employee.idType === "id") {
-        payload.idNumber = employee.idNumber ?? "";
-        payload.passportNumber = "";
+        EmployeePayload.idNumber = employee.idNumber ?? "";
+        EmployeePayload.passportNumber = "";
       } else {
-        payload.passportNumber = employee.passportNumber ?? "";
-        payload.idNumber = "";
+        EmployeePayload.passportNumber = employee.passportNumber ?? "";
+        EmployeePayload.idNumber = "";
       }
 
-      await addEmployee(payload);
-      toast.success("Employee created successfully!");
+      const res = await addEmployee(EmployeePayload);
+      const employeeId = res?.employeeId;
+
+      if (!employeeId) {
+        throw new Error("Failed to create employee. No employee ID returned.");
+      }
+
+      // 2. CREATE BANKING DETAILS
+      const bankingPayload = {
+        employeeId: employeeId,
+        name: employee.accountHolderName,
+        surname: employee.surname,
+        idNumber: employee.idNumber || "",
+        passportNumber: employee.passportNumber || "",
+        bankName: employee.bankName,
+        bankBranchCodeId: employee.bankBranchCodeId,
+        accountNumber: employee.accountNumber,
+        //branchCode: employee.branchCode,
+        accountType: employee.accountType,
+        paymentMethod: employee.paymentMethod,
+        accountHolderName: employee.accountHolderName,
+        referenceType: employee.referenceType,
+        payFrequency: employee.payFrequency,
+        //payDate: employee.payDate,
+      };
+
+      console.log("FULL BANKING PAYLOAD");
+      console.log(JSON.stringify(bankingPayload, null, 2));
+
+      console.log("employee.branchCode =", employee.branchCode);
+      console.log("employee.bankBranchCodeId =", employee.bankBranchCodeId);
+
+      await addBankingDetails(bankingPayload);
+
+      // 3. OPTIONAL MODULES (based on  Employment status)
+      if (employee.employeeStatus === "Permanent") {
+        // TODO: pension + medical API calls here
+        // await addPension(...)
+        // await addMedicalAid(...)
+        const medicalInfo = employee.medicalAidInfo;
+
+        if (medicalInfo?.planId) {
+          const counts = getDependentCounts(medicalInfo.dependents || []);
+
+          const medicalPayload = {
+            medicalOptionId: medicalInfo.planId,
+            principalCount: counts.principal,
+            adultCount: counts.adult,
+            childrenCount: counts.childrenCount,
+          };
+          await createMedicalAidDeduction(employeeId, medicalPayload);
+        }
+      }
+
+      toast.success("Employee onboarding completed successfully!");
       closeModal();
     } catch (error) {
       if (error.response && error.response.data?.errors) {
@@ -869,7 +925,7 @@ const AddEmployeeModal = ({ closeModal }) => {
 
               {currentStepLabel === "Leave" && (
                 <LeaveTypesModal
-                positions={positions} 
+                  positions={positions}
                   employee={employee}
                   setEmployee={setEmployee}
                   formErrors={formErrors}
@@ -901,16 +957,13 @@ const AddEmployeeModal = ({ closeModal }) => {
                 />
               )}
 
-              {
-                currentStepLabel === "Preview" && (
-                  <PreviewModal
-                    employee={employee}
-                    onBack={prevStep}
-                    onSave={handleSave}
-                  />
-                )
-              }
-
+              {currentStepLabel === "Preview" && (
+                <PreviewModal
+                  employee={employee}
+                  onBack={prevStep}
+                  onSave={handleSave}
+                />
+              )}
             </div>
           </div>
         </div>

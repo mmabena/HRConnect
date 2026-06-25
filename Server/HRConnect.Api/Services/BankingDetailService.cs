@@ -57,8 +57,8 @@ namespace HRConnect.Api.Services
             var dtos = branchCodes.Select(b => new BankBranchCodeDto
             {
                 BankBranchCodeId = b.BankBranchCodeId,
-                BankName =b.BankName,
-                UniversalCode =  b.UniversalCode
+                BankName = b.BankName,
+                UniversalCode = b.UniversalCode
             }).ToList();
 
             return dtos;
@@ -116,7 +116,7 @@ namespace HRConnect.Api.Services
                 createBankingDetailsDto.BankName.ToString(),
                 normalized);
 
-    
+
 
             var entity = new BankingDetail
             {
@@ -133,7 +133,11 @@ namespace HRConnect.Api.Services
 
                 BankBranchCodeId = createBankingDetailsDto.BankBranchCodeId,
                 AccountType = createBankingDetailsDto.AccountType,
-        
+
+                PaymentMethod = createBankingDetailsDto.PaymentMethod,
+                PayFrequency = createBankingDetailsDto.PayFrequency,
+                ReferenceType = createBankingDetailsDto.ReferenceType,
+
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -147,15 +151,15 @@ namespace HRConnect.Api.Services
             return MapToBankingDetailDto(result);
         }
 
-       /// <summary>
-       /// Updates banking details for a given employee. 
-       /// Validates input, checks for duplicates, and ensures that the banking details are not locked before allowing updates.
-       /// </summary>
-       /// <param name="EmployeeId"> </param>
-       /// <param name="updatebankingDetailsDto"></param>
-       /// <returns></returns>
-       /// <exception cref="KeyNotFoundException"></exception>
-       /// <exception cref="ValidationException"></exception>
+        /// <summary>
+        /// Updates banking details for a given employee. 
+        /// Validates input, checks for duplicates, and ensures that the banking details are not locked before allowing updates.
+        /// </summary>
+        /// <param name="EmployeeId"> </param>
+        /// <param name="updatebankingDetailsDto"></param>
+        /// <returns></returns>
+        /// <exception cref="KeyNotFoundException"></exception>
+        /// <exception cref="ValidationException"></exception>
         public async Task<BankingDetailDto> UpdateBankingDetailsAsync(
             string EmployeeId,
             UpdateBankingDetailDto updatebankingDetailsDto)
@@ -188,7 +192,7 @@ namespace HRConnect.Api.Services
             BankDetailsValidations.ValidateBankingDetails(
                 updatebankingDetailsDto.BankName.ToString(),
                 normalized);
-            
+
 
 
             existing.BankName = updatebankingDetailsDto.BankName;
@@ -248,7 +252,9 @@ namespace HRConnect.Api.Services
         {
             return new BankingDetailDto
             {
+
                 BankingDetailsId = d.BankingDetailsId,
+                EmployeeId = d.EmployeeId,
                 Name = d.Name,
                 Surname = d.Surname,
                 IdNumber = d.IdNumber,
