@@ -244,6 +244,9 @@ const AddEmployeeModal = ({ closeModal }) => {
             adultCount: counts.adult,
             childrenCount: counts.childrenCount,
           };
+
+          console.log("FULL MEDICAL PAYLOAD");
+      console.log(JSON.stringify(medicalPayload, null, 2));
           await createMedicalAidDeduction(employeeId, medicalPayload);
         }
       }

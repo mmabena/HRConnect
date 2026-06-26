@@ -115,7 +115,7 @@ namespace HRConnect.Api.Services
     public async Task<EmployeeDto?> GetEmployeeByIdInternalAsync(string employeeId)
     {
       //Recalculate leave balances for the employee before returning the data
-      await _leaveBalanceService.RecalculateAnnualLeaveAsync(employeeId);
+      //await _leaveBalanceService.RecalculateAnnualLeaveAsync(employeeId);
 
       var employee = await _employeeRepo.GetEmployeeByIdAsync(employeeId);
 

@@ -52,7 +52,7 @@ export const getMedicalAidPlans = async () => {
 export const createMedicalAidDeduction = async (employeeId, payload) => {
   try {
     const response = await api.post(
-      `/medical-options/deduction/${employeeId}`,
+      `/medical-aid-deductions/create/employee/${employeeId}`,
       payload
     );
     return response.data;

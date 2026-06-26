@@ -23,7 +23,7 @@ const MedicalAidModal = ({
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const salary = employee?.salary || 0;
+  const salary = employee?.monthlySalary || 0;
 
   const [dependents, setDependents] = useState(employee?.dependents || []);
 
