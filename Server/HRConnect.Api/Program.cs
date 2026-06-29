@@ -221,7 +221,7 @@ builder.Services.AddScoped<IPositionRepository, PositionRepository>();
 builder.Services.AddScoped<IPositionService, PositionService>();
 builder.Services.AddScoped<ICompanyContributionRepository, CompanyContributionRepository>();
 builder.Services.AddScoped<IEmployeeCompanyContributionRepository, EmployeeCompanyContributionRepository>();
-builder.Services.AddScoped<ICompanyContributionAllocationService, CompanyContributionAllocationService>();
+builder.Services.AddScoped<ICompanyContributionAllocationService, CompanyContributionAllocationService>(); 
 builder.Services.AddScoped<ICompanyContributionRepository, CompanyContributionRepository>();
 builder.Services.AddScoped<ICompanyContributionService, CompanyContributionService>();
 builder.Services.AddScoped<IJobGradeRepository, JobGradeRepository>();
