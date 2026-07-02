@@ -18,7 +18,7 @@ import ViewPositionManagement from "./Components/ViewPositionManagement";
 import EditPositionManagement from "./Components/companyManagement/PositionManagement/EditPositionManagement.jsx";
 import AddPositionManagement from "./Components/companyManagement/PositionManagement/AddPositionManagment.jsx";
 import PositionManagement from "./Pages/CompanyManagement/PositionManagement/PositionManagement";
-import CompanyManagement from "./companyManagement.js";
+import CompanyManagement from "./CompanyManagement.js";
 import CompanyContribution from "./Components/CompanyContribution/CompanyContribution";
 import Profile from "./Components/MyProfile";
 import CompensationPlanning from "./Components/CompensationPlanning";

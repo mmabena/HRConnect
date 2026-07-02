@@ -28,7 +28,8 @@ export default function PensionFundsList({isOpen, onClose}) {
   const [description, setDescription] = useState("");
   const [formError, setFormError] = useState("");
   const [inactiveFunds, setInactiveFunds] = useState([]);
-
+const [showDeactivateModal, setShowDeactivateModal] = useState(false);
+const [selectedFund, setSelectedFund] = useState(null);
 
   // FETCH DATA 
   useEffect(() => {
@@ -205,27 +206,15 @@ return (
   </span>
 
   {/* DELETE */}
-  <span
+ <span
     className="delete-tab"
-    onClick={async () => {
-      const confirmed = window.confirm(
-        `De-activate ${f.name} and all its options?`
-      );
-      if (!confirmed) return;
-
-      try {
-        await deleteAllPensionOptions(f.pensionFundId);
-        await deletePensionFund(f.pensionFundId);
-        await fetchFunds();
-        await fetchOptions();
-      } catch (err) {
-        console.error(err);
-        alert("Failed to delete pension fund.");
-      }
+    onClick={() => {
+        setSelectedFund(f);
+        setShowDeactivateModal(true);
     }}
-  >
+>
     De-activate
-  </span>
+</span>
 </td>
 
   </tr>
@@ -507,8 +496,84 @@ Inactive
   </form>
 )}
 
+     </div>
+  </div>
+)}
+
+
+{showDeactivateModal && (
+  <div className="confirmation-overlay">
+    <div className="confirmation-modal">
+
+      <div className="warning-circle">
+        ⚠
+      </div>
+
+      <h2 className="confirmation-title">
+        Deactivate Pension Fund
+      </h2>
+
+      <p className="confirmation-text">
+        Are you sure you want to deactivate this pension fund?
+      </p>
+
+      <h3 className="confirmation-fund-name">
+        {selectedFund?.name}
+      </h3>
+
+      <div className="warning-box">
+        <h4>This action will:</h4>
+
+        <ul>
+          <li>Deactivate this pension fund.</li>
+          <li>Deactivate every pension option linked to it.</li>
+          <li>Keep existing employee records intact.</li>
+        </ul>
+      </div>
+
+      <p className="confirmation-footer">
+        This action can be reversed later by reactivating the fund.
+      </p>
+
+      <div className="confirmation-buttons">
+
+        <button
+          className="cancel-button"
+          onClick={() => {
+            setShowDeactivateModal(false);
+            setSelectedFund(null);
+          }}
+        >
+          Cancel
+        </button>
+
+        <button
+          className="deactivate-button"
+          onClick={async () => {
+            try {
+              await deleteAllPensionOptions(selectedFund.pensionFundId);
+              await deletePensionFund(selectedFund.pensionFundId);
+
+              await fetchFunds();
+              await fetchOptions();
+
+              setShowDeactivateModal(false);
+              setSelectedFund(null);
+            } catch (err) {
+              console.error(err);
+              setError("Unable to deactivate pension fund.");
+            }
+          }}
+        >
+          Deactivate
+        </button>
+
+      </div>
+
     </div>
   </div>
-  )}
-   </div>
-  )}
+)}
+
+</div>
+);
+}
