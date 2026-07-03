@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 import { getMedicalAidPlans } from "../../../api/MedicalAidPlan";
+import { populateDependentFromIdNumber } from "../../../utils/medicalAidHelpers";
 
 const MedicalAidModal = ({
   closeModal,
@@ -443,6 +444,7 @@ const MedicalAidModal = ({
 
                   <select
                     value={newDependent.gender}
+                    disabled={newDependent.idNumber.length === 13}
                     onChange={(e) =>
                       setNewDependent((prev) => ({
                         ...prev,
@@ -473,12 +475,17 @@ const MedicalAidModal = ({
                     type="text"
                     placeholder="Id Number"
                     value={newDependent.idNumber}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      const idNumber = e.target.value;
+
+                      const populated = populateDependentFromIdNumber(idNumber);
+
                       setNewDependent((prev) => ({
                         ...prev,
-                        idNumber: e.target.value,
-                      }))
-                    }
+                        idNumber,
+                        ...(idNumber.length === 13 ? populated : {}),
+                      }));
+                    }}
                   />
                 </div>
 
@@ -525,6 +532,7 @@ const MedicalAidModal = ({
                     <input
                       type="date"
                       value={newDependent.dateOfBirth}
+                      disabled={newDependent.idNumber.length === 13}
                       onChange={(e) =>
                         setNewDependent((prev) => ({
                           ...prev,
