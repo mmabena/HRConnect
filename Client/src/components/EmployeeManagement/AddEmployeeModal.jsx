@@ -266,6 +266,26 @@ const AddEmployeeModal = ({ closeModal }) => {
     }
   };
 
+  const handleNext = () => {
+    const errors = validateEmployee(employee, currentStep);
+
+    console.log("Current Step:", currentStep);
+  console.log("Errors:", errors);
+
+
+    setFormErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      
+    toast.error("Please complete all required fields.");
+    return;
+    }
+    nextStep();
+
+  };
+
+  
+
   const formatCurrency = (value) => {
     if (!value) return "";
     return new Intl.NumberFormat("en-ZA", {
@@ -901,12 +921,8 @@ const AddEmployeeModal = ({ closeModal }) => {
 
                   {/* Next Button */}
                   <button
-                    className="emp-save-button"
-                    onClick={() => {
-                      if (totalSteps > 1) {
-                        setCurrentStep(currentStep + 1);
-                      }
-                    }}
+                    className="emp-nextt-button"
+                    onClick={handleNext}
                     disabled={loading}
                   >
                     Next

@@ -4,42 +4,56 @@
 
 .emp-medical-aid-content-frame {
   display: flex;
-  flex-direction: row;
   justify-content: center;
-  align-items: center;
-
+  /*align-items: center;*/
   padding: 10px;
   gap: 10px;
-
-  width: 1092px;
-  height: 483px;
-
-  flex: none;
+  width: 100%;
+  max-width: 1092px;
+  height: 463px;
+  margin-top: -30px;
+  /* flex: none;
   order: 1;
   align-self: stretch;
-  flex-grow: 0;
+  flex-grow: 0; */
+  
+  overflow-y: auto;
+  overflow-x: hidden;
 }
+/* SCROLLBAR */
+
+.emp-medical-aid-content-frame::-webkit-scrollbar {
+  width: 8px;
+  margin-left: 110px;
+}
+
+.emp-medical-aid-content-frame::-webkit-scrollbar-thumb {
+  background: #c8d2d7;
+  border-radius: 10px;
+  margin-left: 110px;
+}
+
+.emp-medical-aid-content-frame::-webkit-scrollbar-track {
+  background: transparent;
+  margin-left: 110px;
+}
+
+
 
 /* =========================
    MAIN CONTAINER
 ========================= */
 
 .emp-medical-aid-container {
-  width: 100%;
+  width: 62%;
   display: flex;
-  justify-content: center;
+  align-items: center;
   padding: 20px;
   flex-direction: column;
-
-  max-width: 444px;
-
+  max-width: 1092px;
   gap: 17px;
+  margin: -65px auto 0;
 
-  border-radius: 5px;
-
-  margin-top: -60px;
-
-  min-height: 100px;
 }
 
 /* =========================
@@ -50,21 +64,15 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-
   padding: 0px;
-
   gap: 15px;
-
   isolation: isolate;
-
-  position: absolute;
-
-  
-  width: 471px;
+  position: relative;
+  width: 525px;
+  margin-top: -40px;
   height: 502px;
-
-  left: calc(50% - 471px / 2 - 16.5px);
-  top: calc(50% - 502px / 2);
+  /* left: calc(50% - 471px / 2 - 16.5px);
+  top: calc(50% - 502px / 2); */
 }
 
 /* =========================
@@ -73,36 +81,30 @@
 
 .emp-medical-aid-personal-details-heading {
   color: var(--primary-color, #2c5f6d);
-
   font-family: "Anek Bangla";
-
   font-size: 18px;
-
   font-weight: 600;
-
   display: flex;
-
   margin-top: 50px;
+}
 
-  margin-left: -50px;
+.emp-medical-aid-header-frame {
+  width: 100%;
+  max-width: 525px; /* same width as your form */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
 }
 
 .emp-medical-aid-sub {
   color: #006088;
-
   font-family: "Anek Bangla";
-
   font-size: 14px;
-
   font-weight: 400;
-
   display: flex;
-
   margin-top: -8px;
-
   margin-bottom: 30px;
-
-  margin-left: -50px;
 }
 
 /* =========================
@@ -175,7 +177,6 @@
   flex-direction: column;
   align-items: flex-start;
 
-  margin-left: -85px;
 
   font-size: 13px;
 
@@ -223,7 +224,6 @@
   font-weight: 500;
   font-size: 14px;
   color: #4f6e78;
-  margin-left: -45px;
   margin-top: -10px;
 }
 
@@ -326,7 +326,6 @@
 .date-picker-dropdown-icon {
   position: absolute;
   right: 34px;
-  bottom: 73px;
   transform: translateY(-50%);
   width: 20px;
   height: 20px;
@@ -431,10 +430,6 @@
   grid-template-columns: repeat(2, 1fr);
   gap: 24px;
   width: 525px;
-    max-height: 225px;
-  overflow-y: auto;
-  overflow-x: hidden;
-
 }
 
 /* =========================
@@ -506,8 +501,7 @@
 /* =========================
    PLAN STATUS
 ========================= */
-
-.medical-plan-status {
+ical-price-card .medical-plan-status {
   display: flex;
   align-items: center;
 
@@ -715,6 +709,20 @@
   flex: 1;
 }
 
+.date-input-wrapper {
+  position: relative;
+}
+
+.date-picker-dropdown-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+}
+
 /* =========================
    MODAL FOOTER
 ========================= */
@@ -754,12 +762,15 @@
 
 .medical-button-row {
   display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
   gap: 16px;
-  width: 100%;
-  margin-top: 32px;
+  /* width: 100%; */
+  width: 905px;
+  margin-top: 20px;
+  margin-left: auto;
+  margin-right: auto;
+  flex-shrink: 0;
 }
 
 .medical-btn-primary {
@@ -790,7 +801,7 @@
   opacity: 0.9;
 }
 
-.medical-back-btn {
+/* .medical-back-btn {
   box-sizing: border-box;
   display: flex;
   flex-direction: row;
@@ -798,7 +809,6 @@
   align-items: center;
   padding: 10px 10px 5px;
   color: #5c5c5c;
-  position: absolute;
   width: 187px;
   height: 47px;
   bottom: -55px;
@@ -808,6 +818,8 @@
   border: 1px solid rgba(66, 66, 66, 0.5);
   border-radius: 10px;
 }
+
+
 
 .medical-next-btn {
   position: relative;
@@ -836,4 +848,50 @@
   cursor: pointer;
   transition: background-color 0.2s ease;
   bottom: 78px;
+} */
+
+.medical-back-btn {
+  width: 187px;
+  height: 47px;
+  box-sizing: border-box;
+  flex-direction: row;
+  display: flex;
+  flex-direction: row;
+  color: #5c5c5c;
+  justify-content: center;
+  align-items: center;
+  margin-left: -220px;
+  opacity: 0.9;
+  gap: 10px;
+  border: 1px solid rgba(66, 66, 66, 0.5);
+  border-radius: 10px;
+  background: rgba(255,255,255,0.7);
+  cursor: pointer;
+}
+
+.medical-next-btn {
+  width: 187px;
+  height: 47px;
+  display: flex;
+  padding: 0 10px 0px 10px;
+  justify-content: center;
+  text-align: center;
+  font-family: "Anek Bangla", sans-serif;
+  line-height: normal;
+  letter-spacing: 0.32px;
+  font-style: normal;
+  font-weight: 400;
+  opacity: 0.9;
+  color: var(--white);
+  align-items: center;
+  margin-right: 50px;
+  gap: 10px;
+  font-size: 16px;
+  transition: background-color 0.2s ease;
+  border-radius: 10px;
+  border: 1px solid var(--light-grey);
+  background: var(--primary-color);
+  background-color: var(--primary-color);
+  color: white;
+  cursor: pointer;
 }

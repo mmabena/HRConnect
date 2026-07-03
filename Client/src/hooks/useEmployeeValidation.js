@@ -1,6 +1,8 @@
 const useEmployeeValidation = () => {
-  const validateEmployee = (employee) => {
+  const validateEmployee = (employee, step) => {
     const errors = {};
+
+    if (step === 1) {
 
     if (!employee.title) errors.title = "Title is required";
 
@@ -64,6 +66,10 @@ const useEmployeeValidation = () => {
     if (employee.disability && !employee.disabilityType?.trim())
       errors.disabilityType = "Disability description required";
 
+  };
+
+  if (step === 2) {
+
     // =========================
     // BANKING VALIDATIONS
     // =========================
@@ -109,8 +115,10 @@ const useEmployeeValidation = () => {
       errors.payDate = "Pay date is required";
     }
 
-    return errors;
+    
   };
+  return errors;
+};
 
   return { validateEmployee };
 };

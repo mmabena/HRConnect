@@ -405,7 +405,7 @@ position: relative;
   font-style: normal;
   font-weight: 400;
   left: 2%;
-  bottom:3%;
+  bottom: 4%;
 }
 
 /* ===== FORM CONTAINERS ===== */
@@ -805,8 +805,6 @@ input[type="radio" i] {
   justify-content: center;
   align-items: center;
   left:59%;
-
-
   color: var(--white);
   text-align: center;
   font-family: "Anek Bangla", sans-serif;
@@ -814,11 +812,39 @@ input[type="radio" i] {
   font-weight: 400;
   line-height: normal;
   letter-spacing: 0.32px;
-
   border: 1px solid var(--light-grey);
   opacity: 0.9;
   background: var(--primary-color);
+  background-color: var(--primary-color);
+  border-radius: 10px;
+  display: flex;
+  gap: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-top: 85px;
+}
 
+.emp-nextt-button {
+  position: relative;
+  display: flex;
+  width: 187px;
+  height: 47px;
+  top:53px;
+  padding: 0 10px 0px 10px;
+  justify-content: center;
+  align-items: center;
+  left:59%;
+  color: var(--white);
+  text-align: center;
+  font-family: "Anek Bangla", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: 0.32px;
+  border: 1px solid var(--light-grey);
+  opacity: 0.9;
+  background: var(--primary-color);
   background-color: var(--primary-color);
   border-radius: 10px;
   display: flex;
@@ -830,6 +856,10 @@ input[type="radio" i] {
 }
 
 .emp-save-button:hover {
+  background-color: var(--primary-light);
+}
+
+.emp-nextt-button:hover {
   background-color: var(--primary-light);
 }
 

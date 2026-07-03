@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./BankingDetailsModal.css";
+import { toast } from "react-toastify";
 import { getBankBranchCodes } from "../../../api/BankingDetail";
 import { ArrowRight, ArrowLeft, Upload, UserRoundPlus, X } from "lucide-react";
 
@@ -24,7 +25,6 @@ const BankingDetailsModal = ({
 
   const referenceType = ["Salary", "Other"];
 
-
   // Handle input changes for banking details
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -47,7 +47,6 @@ const BankingDetailsModal = ({
       [name]: value,
     }));
   };
-
 
   // Validate banking details before proceeding to next step
   const validateBanking = () => {
@@ -76,7 +75,8 @@ const BankingDetailsModal = ({
     if (!employee.paymentMethod)
       errors.paymentMethod = "Payment method is required";
 
-    if (!employee.referenceType) errors.referenceType = "Reference type is required";
+    if (!employee.referenceType)
+      errors.referenceType = "Reference type is required";
 
     if (!employee.payFrequency)
       errors.payFrequency = "Pay frequency is required";
@@ -85,7 +85,6 @@ const BankingDetailsModal = ({
 
     return errors;
   };
-
 
   // Fetch bank branch codes on component mount
   useEffect(() => {
@@ -140,7 +139,10 @@ const BankingDetailsModal = ({
 
     setFormErrors(errors);
 
-    if (Object.keys(errors).length > 0) return;
+    if (Object.keys(errors).length > 0) {
+      toast.error("Please complete all required fields.");
+      return;
+    }
 
     onNext();
   };
@@ -344,7 +346,9 @@ const BankingDetailsModal = ({
               className="dropdown-icon"
             />
             {formErrors.referenceType && (
-              <span className="emp-error-message">{formErrors.referenceType}</span>
+              <span className="emp-error-message">
+                {formErrors.referenceType}
+              </span>
             )}
           </div>
         </div>

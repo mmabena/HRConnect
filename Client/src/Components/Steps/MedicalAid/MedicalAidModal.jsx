@@ -359,20 +359,20 @@ const MedicalAidModal = ({
               </div>
             </div>
           )}
-
-          {/* BUTTONS */}
-          <div className="medical-button-row">
-            <button className="medical-back-btn" onClick={onBack}>
-              <ArrowLeft size={20} />
-              Back
-            </button>
-
-            <button className="medical-next-btn" onClick={onNext}>
-              Next
-              <ArrowRight size={20} />
-            </button>
-          </div>
         </div>
+      </div>
+
+      {/* BUTTONS */}
+      <div className="medical-button-row">
+        <button className="medical-back-btn" onClick={onBack}>
+          <ArrowLeft size={20} />
+          Back
+        </button>
+
+        <button className="medical-next-btn" onClick={onNext}>
+          Next
+          <ArrowRight size={20} />
+        </button>
       </div>
 
       {/* =========================
@@ -519,23 +519,25 @@ const MedicalAidModal = ({
                   </div>
                 </div>
 
-                <div className="medical-input-group">
+                <div className="medical-input-group date-input-group">
                   <label>DATE OF BIRTH</label>
-                  <input
-                    type="date"
-                    value={newDependent.dateOfBirth}
-                    onChange={(e) =>
-                      setNewDependent((prev) => ({
-                        ...prev,
-                        dateOfBirth: e.target.value,
-                      }))
-                    }
-                  />
-                  <img
-                    src="/images/calendar-range.svg"
-                    alt="Calendar icon"
-                    className="date-picker-dropdown-icon"
-                  />
+                  <div className="date-input-wrapper">
+                    <input
+                      type="date"
+                      value={newDependent.dateOfBirth}
+                      onChange={(e) =>
+                        setNewDependent((prev) => ({
+                          ...prev,
+                          dateOfBirth: e.target.value,
+                        }))
+                      }
+                    />
+                    <img
+                      src="/images/calendar-range.svg"
+                      alt="Calendar icon"
+                      className="date-picker-dropdown-icon"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
