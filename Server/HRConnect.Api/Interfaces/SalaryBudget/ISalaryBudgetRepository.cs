@@ -7,10 +7,10 @@ namespace HRConnect.Api.Interfaces.SalaryBudget
   public interface ISalaryBudgetRepository
   {
     Task<List<SalaryBudget>> GetAllBudgetsAsync();
+    Task<List<SalaryBudget>> GetBudgetsByStatusAsync(SalaryBudgetStatus status);
     Task<SalaryBudget?> GetBudgetByIdAsync(int salaryBudgetId);
     Task<SalaryBudget> CreateBudgetAsync(SalaryBudget salaryBudgetModel);
     Task<SalaryBudget> UpdateBudgetAsync(SalaryBudget salaryBudgetModel);
-    Task<bool> ArchiveBudgetAsync(int salaryBudgetId);
 
   }
 }

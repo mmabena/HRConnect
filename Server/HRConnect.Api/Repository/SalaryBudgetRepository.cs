@@ -10,63 +10,72 @@ namespace HRConnect.Api.Repository
   using Microsoft.EntityFrameworkCore;
   using HRConnect.Api.Data;
 
-   /// <summary>
-   /// Database access/communicates to the database 
-   /// </summary>
-    public class SalaryBudgetRepository : ISalaryBudgetRepository
-    {
-      private readonly ApplicationDBContext _context;
+  /// <summary>
+  /// Database access/communicates to the database 
+  /// </summary>
+  public class SalaryBudgetRepository : ISalaryBudgetRepository
+  {
+    private readonly ApplicationDBContext _context;
 
-      public SalaryBudgetRepository(ApplicationDBContext context)
+    public SalaryBudgetRepository(ApplicationDBContext context)
     {
-        _context = context;
+      _context = context;
+    }
+    /// <summary>
+    /// Retrieves all Budgets from the database.
+    /// </summary>
+    /// <returns></returns>
+    public async Task<List<SalaryBudget>> GetAllBudgetsAsync()
+    {
+      return await _context.SalaryBudgets
+             .ToListAsync();
     }
 
-     public async Task<List<SalaryBudget>> GetAllBudgetsAsync()
+    /// <summary>
+    /// Retrieves Salary Budgets by their status 
+    /// </summary>
+    /// <param name="status"></param>
+    /// <returns></returns>
+    public async Task<List<SalaryBudget>> GetBudgetsByStatusAsync(SalaryBudgetStatus status)
     {
-       return await _context.SalaryBudgets
-              .Include(sb => sb.Employees)
-              .ToListAsync();
+      return await _context.SalaryBudgets
+             .Where(sb => sb.Status == status)
+             .ToListAsync();
     }
-     public async Task<SalaryBudget?> GetBudgetByIdAsync(int salaryBudgetId)
+
+    /// <summary>
+    /// Gets Salary Budgets by their Id
+    /// </summary>
+    /// <param name="salaryBudgetId"></param>
+    /// <returns></returns>
+
+    public async Task<SalaryBudget?> GetBudgetByIdAsync(int salaryBudgetId)
     {
       return await _context.SalaryBudgets
               .Include(sb => sb.Employees)
               .FirstOrDefaultAsync(
-                sb => sb.SalaryBudgetId ==salaryBudgetId);
+                sb => sb.SalaryBudgetId == salaryBudgetId);
     }
-
+    /// <summary>
+    /// Creates a new SalaryBudget in the database.
+    /// </summary>
+    /// <param name="salaryBudgetModel"></param>
+    /// <returns></returns>
     public async Task<SalaryBudget> CreateBudgetAsync(SalaryBudget salaryBudgetModel)
     {
-        await _context.SalaryBudgets.AddAsync(salaryBudgetModel);
-        await _context.SaveChangesAsync();
-        return salaryBudgetModel;
+      await _context.SalaryBudgets.AddAsync(salaryBudgetModel);
+      await _context.SaveChangesAsync();
+      return salaryBudgetModel;
     }
 
     public async Task<SalaryBudget> UpdateBudgetAsync(SalaryBudget salaryBudgetModel)
     {
-       _context.SalaryBudgets.Update(salaryBudgetModel);
-       await _context.SaveChangesAsync();
-       return salaryBudgetModel;
+      _context.SalaryBudgets.Update(salaryBudgetModel);
+      await _context.SaveChangesAsync();
+      return salaryBudgetModel;
     }
-    
-    public async Task<bool> ArchiveBudgetAsync (int salaryBudgetId)
-    {
-      var budget = await _context.SalaryBudgets
-          .FindAsync(salaryBudgetId);
 
-        if(budget == null)
-      {
-        return false;
-      }
 
-       budget.Status = SalaryBudgetStatus.Archived;
-       budget.ArchivedDate = DateTime.UtcNow;
 
-       await _context.SaveChangesAsync();
-
-       return true;
-    }
-        
-    }
+  }
 }
