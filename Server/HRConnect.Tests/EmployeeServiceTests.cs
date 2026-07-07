@@ -173,13 +173,13 @@ namespace HRConnect.Tests
 
       _employeeService = new EmployeeService(
           _context,
+          _activeCompanyServiceMock.Object,
+          _userCompanyServiceMock.Object,
           _employeeRepoMock.Object,
           _emailServiceMock.Object,
+          _companyRepoMock.Object,
           _positionRepoMock.Object,
           _leaveBalanceServiceMock.Object,
-          _leaveProcessingServiceMock.Object,
-       
-
           _leaveProcessingServiceMock.Object,
           _passwordHasherMock.Object
       );

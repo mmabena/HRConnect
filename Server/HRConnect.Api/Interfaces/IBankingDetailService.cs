@@ -1,4 +1,4 @@
-namespace HRConnect.Api.Services
+namespace HRConnect.Api.Interfaces
 {
     using HRConnect.Api.DTOs.BankingDetails;
     using System.Collections.Generic;

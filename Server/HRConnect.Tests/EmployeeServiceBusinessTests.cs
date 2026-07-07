@@ -70,12 +70,9 @@ namespace HRConnect.Tests
       employeeRepoMock.Setup(x => x.BeginTransactionAsync())
           .ReturnsAsync(transactionMock.Object);
 
-<<<<<<< HEAD
-=======
 
 
             // 🔥 FIX 1: RETURN DATA FROM DB
->>>>>>> fa6a53bef625ffd9f8ff87369827de98ea0f3ce9
             employeeRepoMock.Setup(x => x.GetEmployeeByIdAsync(It.IsAny<string>()))
                 .ReturnsAsync((string id) => db.Employees.FirstOrDefault(e => e.EmployeeId == id));
 

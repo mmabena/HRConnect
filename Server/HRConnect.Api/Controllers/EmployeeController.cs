@@ -12,8 +12,8 @@ namespace HRConnect.Api.Controllers
   using HRConnect.Api.DTOs.Employee;
   using Microsoft.AspNetCore.Authorization;
   using HRConnect.Api.DTOs;
-    using HRConnect.Api.Hubs;
-    using Microsoft.AspNetCore.SignalR;
+  using HRConnect.Api.Hubs;
+  using Microsoft.AspNetCore.SignalR;
 
   [Route("api/employee")]
   [ApiController]
@@ -22,7 +22,7 @@ namespace HRConnect.Api.Controllers
     private readonly IEmployeeService _employeeService;
     private readonly ILeaveBalanceService _leaveBalanceService;
 
-        private readonly IHubContext<UserPositionHub> _userPositionHubContext;
+    private readonly IHubContext<UserPositionHub> _userPositionHubContext;
 
     public EmployeeController(
         IEmployeeService employeeService,
@@ -31,7 +31,7 @@ namespace HRConnect.Api.Controllers
     {
       _employeeService = employeeService;
       _leaveBalanceService = leaveBalanceService;
-            _userPositionHubContext = userPositionHubContext;
+      _userPositionHubContext = userPositionHubContext;
     }
 
     [HttpGet]
@@ -70,10 +70,10 @@ namespace HRConnect.Api.Controllers
     public async Task<IActionResult> CreateEmployee([FromBody] CreateEmployeeRequestDto employeeDto)
     {
       if (!ModelState.IsValid)
-    {
+      {
         return BadRequest(ModelState);
-    }
-    
+      }
+
       var userId = User.GetUserId();
 
       var employee = await _employeeService.CreateEmployeeAsync(userId, employeeDto);
@@ -90,13 +90,13 @@ namespace HRConnect.Api.Controllers
       if (updatedEmployee == null)
         return NotFound();
 
-                await _userPositionHubContext.Clients.All.SendAsync(
-                    "ReceivePositionUpdate", 
-                
-                    EmployeeId, updatedEmployee.EmployeeId, updatedEmployee.PositionTitle);
+      await _userPositionHubContext.Clients.All.SendAsync(
+          "ReceivePositionUpdate",
 
-            return Ok(updatedEmployee);
-        }
+          EmployeeId, updatedEmployee.EmployeeId, updatedEmployee.PositionTitle);
+
+      return Ok(updatedEmployee);
+    }
 
     // INJECTED: Update leave usage
     [HttpPut("update-used-days")]
