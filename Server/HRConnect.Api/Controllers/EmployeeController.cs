@@ -136,5 +136,18 @@ namespace HRConnect.Api.Controllers
       return Ok("Employee deleted successfully.");
     }
 
+    [HttpPost("validate")]
+    [Authorize(Roles = "SuperUser")]
+    public async Task<IActionResult> ValidateEmployee([FromBody] CreateEmployeeRequestDto employeeDto)
+    {
+
+      var userId = User.GetUserId();
+      await _employeeService.ValidateEmployeeAsync(
+        userId,
+        employeeDto);
+
+      return Ok();
+
+    }
   }
 }

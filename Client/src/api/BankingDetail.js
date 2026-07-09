@@ -93,8 +93,24 @@ export const editBankingDetails = async (employeeId, bankingDetails) => {
     }
 
     toast.error("Failed to update banking details");
-    
 
+    throw error;
+  }
+};
+
+/* =========================
+   VALIDATE BANKING DETAILS
+========================= */
+export const validateBankingDetails = async (bankingDetails) => {
+  try {
+    const response = await api.post(`${API_BASE}/validate`, bankingDetails, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    return response.data;
+  } catch (error) {
     throw error;
   }
 };

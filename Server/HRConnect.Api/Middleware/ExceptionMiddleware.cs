@@ -57,6 +57,7 @@ namespace HRConnect.Api.Middleware
 
       var response = new
       {
+        type = ex.GetType().Name,
         errors = MapMessageToField(ex.Message)
       };
 
@@ -119,6 +120,11 @@ namespace HRConnect.Api.Middleware
         errors["contactNumber"] = message;
       else if (message.Contains("Company address", StringComparison.OrdinalIgnoreCase))
         errors["companyAddress"] = message;
+      //Banking Details Validation
+      else if (message.Contains("Bank name", StringComparison.OrdinalIgnoreCase))
+        errors["bankName"] = message;
+      else if (message.Contains("Account number", StringComparison.OrdinalIgnoreCase))
+        errors["accountNumber"] = message;
       else
         errors["general"] = message;
       return errors;

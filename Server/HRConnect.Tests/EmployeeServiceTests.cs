@@ -221,7 +221,7 @@ namespace HRConnect.Tests
         StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
         ProfileImage = "profile.jpg",
         PensionOptionId = 1,
-      };
+        };
 
       _employeeRepoMock.Setup(r => r.GetEmployeeByIdAsync(managerId))
           .ReturnsAsync(manager);
@@ -298,7 +298,8 @@ namespace HRConnect.Tests
         Email = "test@singular.co.za",
         PositionId = 1,
         Position = _context.Positions.First(p => p.PositionId == 1),
-        StartDate = DateOnly.FromDateTime(DateTime.UtcNow)
+        StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
+        ProfileImage = "profile.jpg"
       };
       _context.Employees.Add(existing);
       _context.LeaveTypes.Add(new LeaveType
@@ -384,13 +385,15 @@ namespace HRConnect.Tests
     }
 
     [Fact]
-    public async Task DeleteEmployeeAsyncValidIdReturnsTrue()
+    public async Task DeleteEmployeeAsync_ValidId_ReturnsTrue()
     {
       var employee = new Employee
-      {
-        EmployeeId = "EMP001",
-        StartDate = DateOnly.FromDateTime(DateTime.UtcNow)
-      };
+{
+    EmployeeId = "EMP001",
+    CompanyId = "COMP001",
+    StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
+    ProfileImage = "profile.jpg"
+};
 
       _employeeRepoMock.Setup(r => r.GetEmployeeByIdAsync("EMP001"))
           .ReturnsAsync(employee);
@@ -408,6 +411,47 @@ namespace HRConnect.Tests
 
       await Assert.ThrowsAsync<NotFoundException>(() =>
           _employeeService.DeleteEmployeeAsync(1, "X"));
+    }
+
+    [Fact]
+    public async Task CreateEmployeeAsync_ValidInput_InitializesLeaveBalances()
+    {
+      //Arrange
+      var dto = new CreateEmployeeRequestDto
+      {
+        Name = "Recce",
+        Surname = "James",
+        Title = Title.Mr,
+        Gender = Gender.Male,
+        Email = "reccejames@singular.co.za",
+        ContactNumber = "0801234567",
+        IdNumber = "0305057589589",
+        PhysicalAddress = "123 Main Street",
+        Nationality = "South African",
+        City = "Johannesburg",
+        ZipCode = "2000",
+        Branch = Branch.Johannesburg,
+        PositionId = 6,
+        MonthlySalary = 30000,
+        EmploymentStatus = EmploymentStatus.Permanent,
+        StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
+        ProfileImage = "profile.jpg"
+      };
+
+      _passwordHasherMock
+    .Setup(x => x.HashPassword(
+        It.IsAny<User>(),
+        It.IsAny<string>()))
+    .Returns("hashedpassword");
+
+      //Act
+      var result = await _employeeService.CreateEmployeeAsync(1, dto);
+
+      //Assert
+      Assert.NotNull(result);
+      _leaveBalanceServiceMock.Verify(
+        x => x.InitializeEmployeeLeaveBalancesAsync(result.EmployeeId),
+        Times.Once);
     }
 
     public void Dispose()

@@ -3,6 +3,8 @@ namespace HRConnect.Api.Utils.BankingDetailsValidation
     using System;
     using System.Globalization;
     using System.Text.RegularExpressions;
+    using HRConnect.Api.Utils;
+    using HRConnect.Api.Services;
 
     public static partial class BankDetailsValidations
     {
@@ -59,10 +61,10 @@ namespace HRConnect.Api.Utils.BankingDetailsValidation
         public static void ValidateBankingDetails(string bankName, string accountNumber)
         {
             if (string.IsNullOrWhiteSpace(bankName))
-                throw new ArgumentException("Bank name is required");
+                throw new ValidationException("Bank name is required");
 
             if (string.IsNullOrWhiteSpace(accountNumber))
-                throw new ArgumentException("Account number is required");
+                throw new ValidationException("Account number is required");
 
             bankName = bankName.Trim()
                                .Replace(" ", "")
@@ -115,7 +117,7 @@ namespace HRConnect.Api.Utils.BankingDetailsValidation
         private static void Ensure(string value, Regex pattern, string message)
         {
             if (!pattern.IsMatch(value))
-                throw new ArgumentException(message);
+                throw new ValidationException(message);
         }
     }
 }

@@ -11,6 +11,8 @@ namespace HRConnect.Api.Services
   using HRConnect.Api.DTOs.UserCompany;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Mappers;
+  using HRConnect.Api.Hubs;
+  using Microsoft.AspNetCore.SignalR;
   using HRConnect.Api.Models;
   using HRConnect.Api.Utils;
   using Microsoft.AspNetCore.Identity;
@@ -47,6 +49,7 @@ namespace HRConnect.Api.Services
     private readonly ILeaveBalanceService _leaveBalanceService;
     private readonly ILeaveProcessingService _leaveProcessingService;
     private readonly IUserCompanyService _userCompanyService;
+    private readonly IHubContext<CompanyHub> _companyHubContext;
     private readonly IPasswordHasher<User> _passwordHasher;
     private static readonly char[] UppercaseChars = "ABCDEFGHJKLMNPQRSTUVWXYZ".ToCharArray();
     private static readonly char[] LowercaseChars = "abcdefghijkmnopqrstuvwxyz".ToCharArray();
@@ -57,7 +60,7 @@ namespace HRConnect.Api.Services
       .Concat(DigitChars)
       .Concat(SpecialChars)
       .ToArray();
-    public EmployeeService(ApplicationDBContext context, IActiveCompanyService activeCompanyService, IUserCompanyService userCompanyService, IEmployeeRepository employeeRepo, IEmailService emailService, ICompanyRepository companyRepo, IPositionRepository positionRepo, ILeaveBalanceService leaveBalanceService, ILeaveProcessingService leaveProcessingService, IPasswordHasher<User> passwordHasher)
+    public EmployeeService(ApplicationDBContext context, IActiveCompanyService activeCompanyService, IUserCompanyService userCompanyService, IEmployeeRepository employeeRepo, IEmailService emailService, ICompanyRepository companyRepo, IPositionRepository positionRepo, ILeaveBalanceService leaveBalanceService, ILeaveProcessingService leaveProcessingService, IPasswordHasher<User> passwordHasher, IHubContext<CompanyHub> companyHubContext)
     {
       _context = context;
       _employeeRepo = employeeRepo;
@@ -69,6 +72,7 @@ namespace HRConnect.Api.Services
       _leaveProcessingService = leaveProcessingService;
       _passwordHasher = passwordHasher;
       _userCompanyService = userCompanyService;
+      _companyHubContext = companyHubContext;
     }
     /// <summary>
     /// Retrieves all employees from the repository.
@@ -195,6 +199,15 @@ namespace HRConnect.Api.Services
         // Send welcome email notification
         await SendWelcomeEmail(createdEmployee);
         await transaction.CommitAsync();
+        await _companyHubContext.Clients.All.SendAsync(
+          "EmployeeCreated",
+          new
+          {
+            EmployeeId = createdEmployee.EmployeeId,
+            Name = createdEmployee.Name,
+            Surname = createdEmployee.Surname
+          });
+
         return createdEmployee.ToEmployeeDto();
       }
       catch (Exception ex)
@@ -226,9 +239,9 @@ namespace HRConnect.Api.Services
 
       var positionChanged = existingEmployee.PositionId != employeeDto.PositionId;
 
-     var position = await _context.Positions
-    .Include(p => p.JobGrade)
-    .FirstOrDefaultAsync(p => p.PositionId == employeeDto.PositionId);
+      var position = await _context.Positions
+     .Include(p => p.JobGrade)
+     .FirstOrDefaultAsync(p => p.PositionId == employeeDto.PositionId);
 
       if (position == null)
         throw new ValidationException($"Position with ID {employeeDto.PositionId} does not exist.");
@@ -305,7 +318,7 @@ namespace HRConnect.Api.Services
 
         var yearsOfService = CalculateYearsOfService(fullEmployee.StartDate);
 
-        
+
         var newRule = await _context.LeaveEntitlementRules
             .Where(r =>
                 r.LeaveTypeId == annualLeave.Id &&
@@ -390,6 +403,38 @@ namespace HRConnect.Api.Services
       }
       return await _employeeRepo.DeleteEmployeeAsync(employeeId);
     }
+
+    public async Task ValidateEmployeeAsync(int userId, CreateEmployeeRequestDto employeeDto)
+    {
+      ValidateCommonFields(employeeDto);
+
+      ValidateCreate(employeeDto);
+
+      await CheckDuplicates(employeeDto);
+
+      await ValidateCareerManagerAsync(
+          null,
+          employeeDto.CareerManagerID);
+
+      ExtractIdInfo(employeeDto);
+
+      ValidateTitleAndGender(employeeDto);
+
+      var company =
+          await _companyRepo.GetCompanyByIdAsync(
+              await _activeCompanyService.GetActiveCompanyIdAsync(userId));
+
+      if (company == null)
+        throw new ValidationException("Company does not exist.");
+
+      var position =
+          await _positionRepo.GetPositionByIdAsync(employeeDto.PositionId);
+
+      if (position == null)
+        throw new ValidationException("Position does not exist.");
+
+    }
+
     /// <summary>
     /// Generates a unique Employee ID based on surname prefix and existing IDs.
     /// Example: SMI001 for surname Smith.

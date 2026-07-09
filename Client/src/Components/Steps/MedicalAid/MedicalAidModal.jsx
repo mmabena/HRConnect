@@ -10,7 +10,10 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
-import { getMedicalAidPlans } from "../../../api/MedicalAidPlan";
+import {
+  getMedicalAidPlans,
+  getEligibleMedicalAidPlans,
+} from "../../../api/MedicalAidPlan";
 import { populateDependentFromIdNumber } from "../../../utils/medicalAidHelpers";
 
 const MedicalAidModal = ({
@@ -46,25 +49,67 @@ const MedicalAidModal = ({
   // =========================
   // LOAD DATA
   // =========================
-  useEffect(() => {
-    const loadPlans = async () => {
-      try {
-        setLoading(true);
+  // useEffect(() => {
+  //   const loadPlans = async () => {
+  //     try {
+  //       setLoading(true);
 
-        const result = await getMedicalAidPlans();
+  //       const counts = getDependentCounts(dependents);
 
-        setPlans(Array.isArray(result) ? result : []);
-        console.log("Loaded medical aid plans:", result);
-      } catch (error) {
-        console.log("Failed to load medical aid plans", error);
-        setPlans([]);
-      } finally {
-        setLoading(false);
-      }
-    };
+  //       const result = await getMedicalAidPlans();
 
-    loadPlans();
-  }, []);
+  //       const result = await getEligibleMedicalAidPlans({
+  //         salary: employee.monthlySalary,
+  //         employmentStatus: employee.employmentStatus,
+  //         employeeName: employee.firstName,
+  //         employeeSurname: employee.lastName,
+  //         numberOfPrincipals: counts.principalCount,
+  //         numberOfAdults: counts.adultCount,
+  //         numberOfChildren: counts.childrenCount,
+  //       });
+
+  //       setPlans(Array.isArray(result) ? result : []);
+  //       console.log("Loaded medical aid plans:", result);
+  //     } catch (error) {
+  //       console.log("Failed to load medical aid plans", error);
+  //       setPlans([]);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   loadPlans();
+  // }, []);
+
+  const loadEligiblePlans = async () => {
+  try {
+    setLoading(true);
+
+    const counts = getDependentCounts(dependents);
+
+    const result = await getEligibleMedicalAidPlans({
+      salary: employee.monthlySalary,
+      employmentStatus: employee.employmentStatus,
+      employeeName: employee.firstName,
+      employeeSurname: employee.lastName,
+      numberOfPrincipals: counts.principalCount,
+      numberOfAdults: counts.adultCount,
+      numberOfChildren: counts.childrenCount,
+    });
+
+    setPlans(Array.isArray(result) ? result : []);
+  } finally {
+    setLoading(false);
+  }
+};
+
+useEffect(() => {
+  loadEligiblePlans();
+}, [
+  employee.monthlySalary,
+  employee.employmentStatus,
+  dependents,
+]);
 
   // =========================
   // FILTER BY SALARY
@@ -352,7 +397,23 @@ const MedicalAidModal = ({
                               </div>
                             </div>
                           </div>
+                          
                         </div>
+                        <div className="medical-price-card medical-total-price-card">
+                          
+                            <div className="medical-price-content">
+                              <span className="medical-price-title">TOTAL</span>
+
+                              <div className="medical-price-amount-box">
+                                <span className="medical-price-amount">
+                                  R{" "}
+                                  {Number(
+                                    plan.estimatedTotalMonthlyPremium ?? 0,
+                                  ).toFixed(2)}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
                       </div>
                     );
                   }),

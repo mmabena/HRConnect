@@ -212,7 +212,7 @@ position: relative;
   display: flex;
   flex-direction: column;
   position: relative;
-  bottom: 40px;
+  bottom: 58px;
 
 }
 
@@ -394,6 +394,7 @@ position: relative;
   font-style: normal;
   font-weight: 600;
   line-height: 26px; 
+  top: 3.5%;
   left: 2%;
 }
 
@@ -405,7 +406,7 @@ position: relative;
   font-style: normal;
   font-weight: 400;
   left: 2%;
-  bottom: 4%;
+  bottom: 0%;
 }
 
 /* ===== FORM CONTAINERS ===== */
@@ -908,6 +909,8 @@ input[type="radio" i] {
   margin-top: 32px;
 }
 
+
+
 .emp-button-row .emp-save-button {
   margin-left: 0;
   margin-top: 0;
@@ -1066,8 +1069,9 @@ input[type="radio" i] {
 }
 
 .emp-error-message {
+  display: block;
+  width: 100%;
   color: red;
   font-size: 12px;
-  margin-top: 2px;
-  display: block;
+  text-align: left;
 }

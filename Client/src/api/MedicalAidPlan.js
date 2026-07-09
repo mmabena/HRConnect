@@ -53,11 +53,73 @@ export const createMedicalAidDeduction = async (employeeId, payload) => {
   try {
     const response = await api.post(
       `/medical-aid-deductions/create/employee/${employeeId}`,
-      payload
+      payload,
     );
     return response.data;
   } catch (error) {
     console.error("Error creating medical aid deduction:", error);
+    throw error;
+  }
+};
+
+export const getEligibleMedicalAidPlans = async (payload) => {
+  try {
+    const response = await api.post(
+      "/medical-aid-deductions/onboarding/eligible-options",
+      payload,
+    );
+
+    const data = Array.isArray(response.data) ? response.data : [];
+
+    const grouped = data.reduce((acc, plan) => {
+      let category = acc.find(
+        (c) => c.medicalOptionCategoryId === plan.medicalOptionCategoryId,
+      );
+
+      if (!category) {
+        category = {
+          medicalOptionCategoryId: plan.medicalOptionCategoryId,
+          medicalOptionCategoryName: plan.medicalOptionCategoryName,
+          medicalOptions: [],
+        };
+
+        acc.push(category);
+      }
+
+      category.medicalOptions.push({
+        medicalOptionId: plan.medicalOptionId,
+        medicalOptionName: plan.medicalOptionName,
+
+        medicalOptionCategoryId: plan.medicalOptionCategoryId,
+        medicalOptionCategoryName: plan.medicalOptionCategoryName,
+
+        salaryBracketMin: plan.salaryBracketMin,
+        salaryBracketMax: plan.salaryBracketMax,
+
+        totalMonthlyContributionsPrincipal:
+          plan.totalMonthlyContributionsPrincipal ?? 0,
+
+        totalMonthlyContributionsAdult:
+          plan.totalMonthlyContributionsAdult ?? 0,
+
+        totalMonthlyContributionsChild:
+          plan.totalMonthlyContributionsChild ?? 0,
+
+        totalMonthlyContributionsSecondChild:
+          plan.totalMonthlyContributionsChild2 ?? 0,
+
+        estimatedTotalMonthlyPremium: plan.estimatedTotalMonthlyPremium ?? 0,
+      });
+
+      return acc;
+    }, []);
+
+    console.log("Eligible plans:", response.data);
+    console.log("Is array?", Array.isArray(response.data));
+
+    return grouped;
+  } catch (error) {
+    console.error("Error fetching eligible medical aid plans:", error);
     throw error;
   }
 };

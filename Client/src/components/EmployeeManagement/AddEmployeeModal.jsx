@@ -7,10 +7,14 @@ import LeaveTypesModal from "../Steps/LeaveType/LeaveTypesModal.jsx";
 import PreviewModal from "../Steps/Preview/PreviewModal.jsx";
 import PensionFundOptionsModal from "../Steps/PensionFundOptions/PensionFundOptionsModal.jsx";
 import MedicalAidModal from "../Steps/MedicalAid/MedicalAidModal.jsx";
-import { addEmployee } from "../../api/Employee";
+import {
+  addEmployee,
+  validateEmployee as validateEmployeeAPI,
+} from "../../api/Employee";
 import { addBankingDetails } from "../../api/BankingDetail";
 import { createMedicalAidDeduction } from "../../api/MedicalAidPlan.js";
 import { getDependentCounts } from "../../utils/medicalAidHelpers";
+import { getJobGradeGroups } from "../../api/JobGradeGroup";
 
 import useEmployeeForm from "../../hooks/useEmployeeForm";
 import useEmployeeData from "../../hooks/useEmployeeData";
@@ -25,6 +29,8 @@ const AddEmployeeModal = ({ closeModal }) => {
   const { positions, allEmployees, loading: dataLoading } = useEmployeeData();
   const { validateEmployee } = useEmployeeValidation();
   const { uploadImage, uploading } = useImageUpload();
+  const [salaryFocused, setSalaryFocused] = useState(false);
+  const [jobGradeGroups, setJobGradeGroups] = useState([]);
   const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
 
@@ -105,6 +111,32 @@ const AddEmployeeModal = ({ closeModal }) => {
       label,
     }),
   );
+
+  useEffect(() => {
+    const fetchJobGradeGroups = async () => {
+      try {
+        const data = await getJobGradeGroups();
+
+        const apiData = Array.isArray(data) ? data : data?.data || [];
+
+        const cleaned = apiData.flatMap((group) =>
+          (group.jobGrades || []).map((grade) => ({
+            jobGradeId: String(grade.jobGradeId).trim(),
+            positionName: grade.name,
+            groupKey: String(group.groupKey || "")
+              .trim()
+              .toUpperCase(),
+          })),
+        );
+
+        setJobGradeGroups(cleaned);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchJobGradeGroups();
+  }, []);
 
   const currentStepLabel = steps[currentStep - 1]?.label || "";
 
@@ -246,45 +278,100 @@ const AddEmployeeModal = ({ closeModal }) => {
           };
 
           console.log("FULL MEDICAL PAYLOAD");
-      console.log(JSON.stringify(medicalPayload, null, 2));
+          console.log(JSON.stringify(medicalPayload, null, 2));
           await createMedicalAidDeduction(employeeId, medicalPayload);
         }
       }
 
       toast.success("Employee onboarding completed successfully!");
       closeModal();
+      window.location.reload();
     } catch (error) {
-      if (error.response && error.response.data?.errors) {
-        setFormErrors(error.response.data.errors);
+      if (error.response?.data?.errors) {
+        const errors = error.response.data.errors;
+
+        setFormErrors(errors);
+
+        const firstError = Object.values(errors)[0];
+        toast.error(firstError);
+        toast.error("Go back and fix the errors before saving.");
       } else {
         toast.error("Failed to create employee.");
       }
+
       console.error("Add employee error response data:", error.response?.data);
       console.error("Add employee error status:", error.response?.status);
+      console.error("Add employee error errors:", error.response?.data?.errors);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     const errors = validateEmployee(employee, currentStep);
 
     console.log("Current Step:", currentStep);
-  console.log("Errors:", errors);
-
+    console.log("Errors:", errors);
 
     setFormErrors(errors);
 
     if (Object.keys(errors).length > 0) {
-      
-    toast.error("Please complete all required fields.");
-    return;
+      toast.error("Please complete all required fields.");
+      return;
+    }
+
+    if (currentStep === 1) {
+      const payload = {
+        title: employee.title,
+        name: employee.name,
+        surname: employee.surname,
+        nationality: employee.nationality,
+        gender: employee.gender,
+        contactNumber: employee.contactNumber,
+        taxNumber: employee.taxNumber,
+        email: employee.email,
+        idNumber: employee.idType === "id" ? employee.idNumber : "",
+        passportNumber:
+          employee.idType === "passport" ? employee.passportNumber : "",
+        physicalAddress: employee.physicalAddress,
+        city: employee.city,
+        zipCode: employee.zipCode,
+        hasDisability: employee.disability,
+        disabilityDescription: employee.disabilityType,
+        dateOfBirth: employee.dateOfBirth,
+        startDate: employee.startDate,
+        branch: employee.branch,
+        monthlySalary: employee.monthlySalary
+          ? parseFloat(employee.monthlySalary)
+          : 0,
+        positionId: employee.jobTitle ? parseInt(employee.jobTitle) : null,
+        employmentStatus: employee.employeeStatus,
+        careerManagerID: employee.reportsTo || null,
+        profileImage: employee.profileImage,
+      };
+
+      try {
+        await validateEmployeeAPI(payload);
+        console.log("VALIDATION PAYLOAD");
+        console.log(JSON.stringify(payload, null, 2));
+      } catch (error) {
+        console.log("API validation errors:");
+        console.log(error.response?.data);
+
+        if (error.response?.data?.errors) {
+          console.log(error.response.data.errors);
+
+          setFormErrors(error.response.data.errors);
+
+          toast.error("Validation failed.");
+          return;
+        }
+        toast.error("Validation failed.");
+        return;
+      }
     }
     nextStep();
-
   };
-
-  
 
   const formatCurrency = (value) => {
     if (!value) return "";
@@ -735,25 +822,31 @@ const AddEmployeeModal = ({ closeModal }) => {
                       placeholder="Monthly Salary"
                       className={`emp-name-input ${formErrors.monthlySalary ? "emp-error-input" : ""}`}
                       name="monthlySalary"
-                      value={employee.monthlySalary}
+                      value={
+                        salaryFocused
+                          ? employee.monthlySalary
+                          : employee.monthlySalary
+                            ? formatCurrency(employee.monthlySalary)
+                            : ""
+                      }
                       onChange={(e) => {
                         let rawValue = e.target.value.replace(/[^0-9.]/g, "");
+
                         const parts = rawValue.split(".");
-                        if (parts.length > 2)
+                        if (parts.length > 2){
                           rawValue = parts[0] + "." + parts[1];
+                        }
+
                         setEmployee((prev) => ({
                           ...prev,
                           monthlySalary: rawValue,
                         }));
                       }}
-                      onBlur={(e) => {
-                        if (employee.monthlySalary)
-                          e.target.value = formatCurrency(
-                            employee.monthlySalary,
-                          );
+                      onFocus={() => {
+                        setSalaryFocused(true);
                       }}
-                      onFocus={(e) => {
-                        e.target.value = employee.monthlySalary || "";
+                      onBlur={() => {
+                        setSalaryFocused(false);
                       }}
                     />
                     {formErrors.monthlySalary && (
@@ -946,6 +1039,7 @@ const AddEmployeeModal = ({ closeModal }) => {
                 <LeaveTypesModal
                   positions={positions}
                   employee={employee}
+                  leaveOptions={jobGradeGroups}
                   setEmployee={setEmployee}
                   formErrors={formErrors}
                   setFormErrors={setFormErrors}

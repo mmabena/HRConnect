@@ -97,5 +97,17 @@ namespace HRConnect.Api.Controllers
         }
 
 
+        [HttpPost("validate")]
+        public async Task<IActionResult> ValidateBankingDetails([FromBody] CreateBankingDetailDto dto)
+        {
+            await _service.ValidateBankingDetailsAsync(dto);
+
+            return Ok(new
+            {
+                message = "Validation passed."
+            });
+        }
+
+
     }
 }

@@ -14,13 +14,17 @@ const useCompanyConnection = () => {
     };
     startConnection();
 
-    companyHubConnection.on("CompanyCreated", (data) => {
-      console.log("Company Switched:", data);
-      
-      window.location.reload();
+    companyHubConnection.on("CompanyCreated", () => {
+        window.location.reload();
     });
 
-    return () => {companyHubConnection.off("CompanyCreated")};
+    companyHubConnection.on("EmployeeCreated", () => {
+        window.location.reload();
+    });
+
+    return () => {companyHubConnection.off("CompanyCreated")
+                  companyHubConnection.off("EmployeeCreated");
+    };
   }, []);
 }
 

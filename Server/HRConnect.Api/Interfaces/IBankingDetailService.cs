@@ -11,6 +11,7 @@ namespace HRConnect.Api.Interfaces
         Task<BankingDetailDto> GetBankingDetailsByEmployeeIdAsync(string EmployeeId);
         Task<BankingDetailDto> CreateBankingDetailsAsync(CreateBankingDetailDto createBankingDetailsDto);
         Task<BankingDetailDto> UpdateBankingDetailsAsync(string EmployeeId, UpdateBankingDetailDto updatebankingDetailsDto);
+        Task ValidateBankingDetailsAsync(CreateBankingDetailDto createBankingDetailsDto);
         Task LockAllBankingDetailsAsync();
     }
 }

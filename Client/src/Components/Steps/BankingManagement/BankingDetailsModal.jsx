@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./BankingDetailsModal.css";
 import { toast } from "react-toastify";
-import { getBankBranchCodes } from "../../../api/BankingDetail";
+import { getBankBranchCodes, validateBankingDetails } from "../../../api/BankingDetail";
 import { ArrowRight, ArrowLeft, Upload, UserRoundPlus, X } from "lucide-react";
 
 const BankingDetailsModal = ({
@@ -134,7 +134,7 @@ const BankingDetailsModal = ({
   }, [employee.name, employee.surname, employee.title]);
 
   // Handle clicking the "Next" button
-  const handleNext = () => {
+  const handleNext = async() => {
     const errors = validateBanking();
 
     setFormErrors(errors);
@@ -144,7 +144,38 @@ const BankingDetailsModal = ({
       return;
     }
 
+    const payload = {
+    employeeId: "",
+    name: employee.accountHolderName,
+    surname: employee.surname,
+    idNumber: employee.idNumber || "",
+    passportNumber: employee.passportNumber || "",
+    bankName: employee.bankName,
+    bankBranchCodeId: employee.bankBranchCodeId,
+    accountNumber: employee.accountNumber,
+    accountType: employee.accountType,
+    paymentMethod: employee.paymentMethod,
+    referenceType: employee.referenceType,
+    payFrequency: employee.payFrequency,
+  };
+
+  try {
+    await validateBankingDetails(payload);
+
     onNext();
+  } catch (error) {
+    console.log(error.response?.data);
+
+    if (error.response?.data?.errors) {
+
+      setFormErrors(error.response.data.errors);
+
+      toast.error("Validation failed. Please check the form for errors.");
+      return;
+    }
+    toast.error("Validation failed.");
+  }
+
   };
 
   return (
@@ -410,13 +441,13 @@ const BankingDetailsModal = ({
         </div>
 
         {/* BUTTONS */}
-        <div className="emp-button-row">
+        <div className="emp-medical-button-row">
           <button className="emp-bank-back-button" onClick={onBack}>
             <ArrowLeft size={20} className="back-save-button-icon" />
             Back
           </button>
 
-          <button className="emp-next-button" onClick={handleNext}>
+          <button className="emp-bank-next-button" onClick={handleNext}>
             Next
             <ArrowRight size={20} className="next-save-button-icon" />
           </button>

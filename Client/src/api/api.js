@@ -33,7 +33,8 @@ api.interceptors.response.use(
     };
     console.log("API URL:", process.env.REACT_APP_API_URL);
     console.log("Interceptor caught error:", error.response?.status);
-    return Promise.reject(formattedMessage);
+    error.formattedMessage = formattedMessage;
+    return Promise.reject(error);
   },
 );
 export default api;

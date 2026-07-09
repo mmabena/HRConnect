@@ -17,7 +17,7 @@
 .employee-table-grid {
   display: grid;
   grid-template-rows: 59px 68px 68px 68px 68px 68px 68px 68px 64px 64px;
-  grid-template-columns: 137px 258px minmax(0,1fr) minmax(0,1fr) 250px 180px minmax(0,1fr) minmax(0,1fr);
+  grid-template-columns: 137px 218px minmax(0,1.5fr) minmax(0,1fr) 250px 150px minmax(0,1fr) minmax(0,1fr);
   /*1 header + 10 rows */
   width: 1441px;
   height: 550px;

@@ -52,6 +52,7 @@
   overflow-x: hidden;
   padding: 35px 45px;
   display: flex;
+  margin-bottom: 30px;
   flex-direction: column;
   align-items: center;
 }
@@ -283,7 +284,7 @@
   max-width: 1092px;
   margin: 0 auto;
   height: 70vh;
-  overflow: hidden;
+
 }
 
 .preview-section > * {
@@ -296,22 +297,25 @@
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  gap: 8px;
   width: 187px;
   height: 47px;
-  padding: 0 10px 5px;
-  background: rgba(255, 255, 255, 0.7);
+  padding: 0 10px;
+  background: transparent;
   opacity: 0.9;
-  border: 1px solid rgba(112, 112, 112, 0.5);
+  border: 1px solid var(--primary-color);
   border-radius: 10px;
   font-family: "Anek Bangla", sans-serif;
   font-style: normal;
   font-weight: 400;
+  margin-left: 20px;
+  margin-top: -28px;
   font-size: 16px;
-  line-height: 30px;
   letter-spacing: 0.02em;
-  color: #5c5c5c;
+  color: var(--primary-color);
   cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 .preview-save-button {
@@ -330,6 +334,8 @@
   font-style: normal;
   font-weight: 400;
   font-size: 16px;
+  margin-top: -25px;
+  margin-right: -64px;
   line-height: 30px;
   letter-spacing: 0.02em;
   color: #ffffff;

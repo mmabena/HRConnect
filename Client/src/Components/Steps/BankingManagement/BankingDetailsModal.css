@@ -120,16 +120,25 @@
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  padding: 10px 10px 5px;
-  color: #5c5c5c;
+  padding: 0 10px;
+  color: var(--primary-color);
+  text-align: center;
+  font-family: "Anek Bangla", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
   position: absolute;
+  letter-spacing: 0.32px;
   width: 187px;
   height: 47px;
-  margin-top: 150px;
+  flex-shrink: 0;
+  margin-top: 220px;
   left: 100px;
-  background: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  background: transparent;
+  transition: background-color 0.2s ease, color 0.2s ease;
   opacity: 0.9;
-  border: 1px solid rgba(112, 112, 112, 0.5);
+  border: 1px solid var(--primary-color);
   border-radius: 10px;
 }
 
@@ -214,14 +223,79 @@
   background-color: var(--primary-light);
 }
 
-.emp-bank-back-button,
-.emp-next-button {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 8px;
-}
-
 .emp-back-button:hover {
   background-color: rgba(255, 255, 255, 0.9);
+}
+
+.emp-bank-next-button {
+  position: relative;
+  display: flex;
+  width: 187px;
+  height: 47px;
+  padding: 0 10px 0px 10px;
+  justify-content: center;
+  align-items: center;
+  left: 213px;
+  top: 110px;
+  color: var(--white);
+  text-align: center;
+  font-family: "Anek Bangla", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: 0.32px;
+  border: 1px solid var(--light-grey);
+  opacity: 0.9;
+  background: var(--primary-color);
+  background-color: var(--primary-color);
+  border-radius: 10px;
+  display: flex;
+  gap: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.emp-bank-next-button:hover {
+  background-color: var(--primary-light);
+}
+
+
+.emp-medical-button-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  margin-top: 39px;
+}
+
+
+
+/* .emp-bank-back-button {
+  display: flex;
+  width: 187px;
+  height: 47px;
+  flex-shrink: 0;
+  padding: 0 10px;
+  margin-top: 195px;
+  justify-content: center;
+  align-items: center;
+  color: var(--primary-color);
+  text-align: center;
+  font-family: "Anek Bangla", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  letter-spacing: 0.32px;
+  border: 1px solid var(--primary-color);
+  background: transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+} */
+
+.emp-bank-back-button:hover {
+  background-color: rgba(53, 88, 103, 0.1);
 }

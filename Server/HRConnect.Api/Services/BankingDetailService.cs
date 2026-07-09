@@ -208,6 +208,26 @@ namespace HRConnect.Api.Services
             return MapToBankingDetailDto(existing);
         }
 
+        public async Task ValidateBankingDetailsAsync(CreateBankingDetailDto createBankingDetailsDto)
+        {
+            ValidateCommonFields(createBankingDetailsDto);
+
+            // Normalize and hash the account number for duplicate checking
+            var normalized = _hashingHelper.Normalize(createBankingDetailsDto.AccountNumber);
+            var searchHash = _hashingHelper.ComputeSearchHash(normalized);
+
+            // Check for duplicates across all records, excluding the current employees record (if updating)
+            var duplicate = await _bankingDetailRepo.AnyAsync(x =>
+                x.AccountNumberSearchHash == searchHash);
+
+            if (duplicate)
+                throw new ValidationException("Account number already exists for another employee");
+
+            BankDetailsValidations.ValidateBankingDetails(
+                createBankingDetailsDto.BankName.ToString(),
+                normalized);
+        }
+
         // ======================================================
         // LOCK ALL
         // ======================================================

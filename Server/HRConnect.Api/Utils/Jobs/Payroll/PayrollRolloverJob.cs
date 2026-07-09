@@ -14,8 +14,8 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
   using Microsoft.EntityFrameworkCore;
   using Microsoft.Extensions.DependencyInjection;
   using HRConnect.Api.Services;
-    
-  
+
+
 
   /// <summary>
   /// Payroll Rollover Job class to handle the locking, rolling over and 
@@ -213,7 +213,7 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
         {
           await RolloverPayrollRun(payperiod, nextRun);
         }
-        
+
         // Lock all banking details on payroll rollover to prevent changes to banking details while payroll runs are active
         await _bankingDetailService.LockAllBankingDetailsAsync();
 

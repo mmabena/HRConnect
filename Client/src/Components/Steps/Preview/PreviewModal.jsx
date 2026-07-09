@@ -43,6 +43,16 @@ const PreviewModal = ({
 
   const isPermanent = !isContract && !isFixedTerm;
 
+  const formatCurrency = (value) => {
+  if (!value) return "N/A";
+
+  return new Intl.NumberFormat("en-ZA", {
+    style: "currency",
+    currency: "ZAR",
+    minimumFractionDigits: 2,
+  }).format(Number(value));
+};
+
   //console.log("Preview onSave:", onSave);
 
   return (
@@ -120,7 +130,7 @@ const PreviewModal = ({
                 <span>MONTHLY SALARY</span>
 
                 <h4>
-                  {employee?.monthlySalary || "N/A"}
+                  {formatCurrency(employee?.monthlySalary) || "N/A"}
                 </h4>
               </div>
 

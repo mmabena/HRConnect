@@ -160,13 +160,13 @@ const PensionFundOptionsModal = ({ employee, setEmployee, onNext, onBack }) => {
         {/* FOOTER */}
         <div className="emp-button-row">
           <button className="pension-back-btn" onClick={onBack}>
-            <ArrowLeft size={18} />
+            <ArrowLeft size={20} />
             Back
           </button>
 
           <button className="pension-next-btn" onClick={onNext}>
             Next
-            <ArrowRight size={18} />
+            <ArrowRight size={20} />
           </button>
         </div>
       </div>
