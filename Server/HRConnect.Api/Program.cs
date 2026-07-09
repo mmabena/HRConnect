@@ -93,7 +93,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
     {
-      options.UseSqlServer(builder.Configuration.GetConnectionString("SomeeConnection")!);
+      options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")!);
       options.AddInterceptors(new AuditSaveChangesInterceptor());
     });
 
@@ -181,7 +181,7 @@ builder.Services.AddQuartz(q =>
   {
     store.UseSqlServer(options =>
         {
-          options.ConnectionString = builder.Configuration.GetConnectionString("SomeeConnection")!;
+          options.ConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
           options.TablePrefix = "quartz.QRTZ_";
         });
     store.UseSerializer<Quartz.Simpl.SystemTextJsonObjectSerializer>();
@@ -277,7 +277,7 @@ builder.Services.AddCors(options =>
 {
   options.AddPolicy("AllowReact",
       policy => policy
-          .WithOrigins("http://localhost:3000", "http://localhost:5147")
+          .WithOrigins("http://localhost:3000", "http://localhost:7243")
           .AllowAnyHeader()
           .AllowAnyMethod()
           .AllowCredentials());
@@ -294,12 +294,12 @@ using (var scope = app.Services.CreateScope())
   await initialiser.InitialisePayrollPeriod();
 }
 
-using (var scope = app.Services.CreateScope())
-{
-  var seeder = scope.ServiceProvider.GetRequiredService<PositionAndLeaveSeed>();
-
-  await seeder.SeedAsync();
-}
+//using (var scope = app.Services.CreateScope())
+//{
+  //var seeder = scope.ServiceProvider.GetRequiredService<PositionAndLeaveSeed>();
+//
+  //await seeder.SeedAsync();
+//}
 
 
 if (app.Environment.IsDevelopment())
