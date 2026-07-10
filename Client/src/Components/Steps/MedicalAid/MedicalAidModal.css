@@ -583,6 +583,7 @@ ical-price-card .medical-plan-status {
   font-size: 7px;
   line-height: 10px;
   letter-spacing: 0.02em;
+  margin-top: 5px;
   color: #355867;
 }
 
@@ -614,6 +615,7 @@ ical-price-card .medical-plan-status {
   font-size: 8px;
   letter-spacing: 0.00em;
   color: #4f6e78;
+  margin-top: 7px;
 }
 
 .medical-total-price-card {

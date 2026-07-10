@@ -29,7 +29,7 @@ const MedicalAidModal = ({
 
   const salary = employee?.monthlySalary || 0;
 
-  const [dependents, setDependents] = useState(employee?.dependents || []);
+  const [dependents, setDependents] = useState(employee?.medicalAidInfo?.dependents || []);
 
   const [showDependentModal, setShowDependentModal] = useState(false);
 
@@ -97,7 +97,45 @@ const MedicalAidModal = ({
       numberOfChildren: counts.childrenCount,
     });
 
-    setPlans(Array.isArray(result) ? result : []);
+    setPlans(result);
+
+    // Keep selected plan in sync
+    const selectedPlanId = employee?.medicalAidInfo?.planId;
+
+    if (selectedPlanId) {
+      const updatedPlan = result
+        .flatMap(category => category.medicalOptions)
+        .find(
+          plan =>
+            String(plan.medicalOptionId) === String(selectedPlanId)
+        );
+
+      if (updatedPlan) {
+        setEmployee(prev => ({
+          ...prev,
+          medicalAidInfo: {
+            ...prev.medicalAidInfo,
+
+            // Update all values that may have changed for the Preview step.
+            selectedPlan: updatedPlan,
+            estimatedTotalMonthlyPremium:
+              updatedPlan.estimatedTotalMonthlyPremium,
+
+            totalMonthlyContributionsPrincipal:
+              updatedPlan.totalMonthlyContributionsPrincipal,
+
+            totalMonthlyContributionsAdult:
+              updatedPlan.totalMonthlyContributionsAdult,
+
+            totalMonthlyContributionsChild:
+              updatedPlan.totalMonthlyContributionsChild,
+
+            totalMonthlyContributionsSecondChild:
+              updatedPlan.totalMonthlyContributionsSecondChild,
+          },
+        }));
+      }
+    }
   } finally {
     setLoading(false);
   }
@@ -141,6 +179,8 @@ useEffect(() => {
         planId: plan.medicalOptionId,
         medicalAidCategory: plan.medicalOptionCategoryName,
         medicalAidPlan: plan.medicalOptionName,
+        estimatedTotalMonthlyPremium:
+        plan.estimatedTotalMonthlyPremium ?? 0,
         selectedPlan: plan,
       },
     }));
