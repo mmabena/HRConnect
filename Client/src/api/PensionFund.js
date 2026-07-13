@@ -1,17 +1,16 @@
 import axios from "axios";
 
-const API_BASE = "http://localhost:5147/api/Pension";
-
 const api = axios.create({
-  baseURL: API_BASE,
+  baseURL: `${process.env.REACT_APP_API_BASE_URL}/Pension`,
 });
 
- 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("authToken");
+  const token = localStorage.getItem("token"); // <-- use the same key as login
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
   return config;
 });
 
