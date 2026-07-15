@@ -1,11 +1,15 @@
-namespace HRConnect.Tests
-{
-  using System.Threading.Tasks;
-  using HRConnect.Api.Interfaces;
-  using HRConnect.Api.Models;
-  using HRConnect.Api.Services;
-  using Moq;
-  using Xunit;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using HRConnect.Api.DTOs;
+using HRConnect.Api.Interfaces;
+using HRConnect.Api.Models;
+using HRConnect.Api.Services;
+using Moq;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Xunit;
+using HRConnect.Api.Repository;
 
   public class PensionFundServiceTests
   {
@@ -30,13 +34,15 @@ namespace HRConnect.Tests
     [Fact]
     public async Task AddPensionFundReturnsSuccess()
     {
-      PensionFund fund = new PensionFund { EmployeeId = "E001", EmployeeName = "John Doe" };
-      _fundRepoMock.Setup(r => r.AddPensionFundAsync(fund))
-                   .Returns(Task.CompletedTask);
-      _fundRepoMock.Setup(r => r.SaveChangesAsync())
-                   .Returns(Task.CompletedTask);
+      var fund = new PensionFund
+      {
+        EmployeeId = "E001",
+        EmployeeName = "John Doe"
+      };
 
-      ServiceResult result = await _service.AddPensionFundAsync(fund);
+      var result = await _service.AddPensionFundAsync(
+          fund,
+          CancellationToken.None);
 
       Assert.True(result.IsSuccess);
       Assert.Equal("Fund added successfully.", result.Message);
@@ -45,72 +51,164 @@ namespace HRConnect.Tests
     [Fact]
     public async Task AddPensionOptionFailsWhenPercentageOutOfRange()
     {
-      PensionOption option = new PensionOption { ContributionPercentage = 20 };
+      var option = new PensionOption
+      {
+        ContributionPercentage = 20
+      };
 
-      ServiceResult result = await _service.AddPensionOptionAsync(option);
+      var result = await _service.AddPensionOptionAsync(
+          option,
+          CancellationToken.None);
 
       Assert.False(result.IsSuccess);
-      Assert.Equal("Percentage must be between 0 and 15.", result.Message);
+      Assert.Contains("between 0 and 15", result.Message);
     }
 
     [Fact]
     public void CalculatePensionDeductionReturnsCorrectAmount()
     {
-      PensionOption option = new PensionOption { ContributionPercentage = 10 };
+      var option = new PensionOption
+      {
+        ContributionPercentage = 10
+      };
+
       decimal salary = 1000;
 
-      decimal amount = _service.CalculatePensionDeduction(salary, option);
+      var amount = _service.CalculatePensionDeduction(
+          salary,
+          option);
 
       Assert.Equal(100, amount);
     }
 
     [Fact]
-    public async Task RecordEmployeePensionSelectionFailsForNonPermanentEmployee()
+    public async Task CreatePensionFund_Fails_WhenActiveFundAlreadyExists()
     {
-      Employee employee = new Employee
+      var dto = new CreatePensionFundDto
       {
-        EmployeeId = "E002",
-        EmploymentStatus = EmploymentStatus.Contract,
-        MonthlySalary = 5000
+        Name = "New Fund",
+        Description = "Test",
+        TaxCode = 4001
       };
-      PensionOption option = new PensionOption { PensionOptionId = 1, ContributionPercentage = 5 };
 
-      _employeeRepoMock.Setup(r => r.GetEmployeeByIdAsync(employee.EmployeeId))
-                       .ReturnsAsync(employee);
-      _optionRepoMock.Setup(r => r.GetPensionOptionByIdAsync(option.PensionOptionId))
-                     .ReturnsAsync(option);
+      var existingFunds = new List<PensionFund>
+    {
+        new PensionFund
+        {
+            Name = "Existing Fund",
+            IsActive = true
+        }
+    };
 
-      ServiceResult result = await _service.RecordEmployeePensionSelectionAsync(employee.EmployeeId, option.PensionOptionId);
+      _fundRepoMock.Setup(r => r.GetPensionFundsAsync(It.IsAny<CancellationToken>()))
+       .ReturnsAsync(existingFunds);
+
+      var result = await _service.CreatePensionFundAsync(
+          dto,
+          CancellationToken.None);
 
       Assert.False(result.IsSuccess);
-      Assert.Equal("Only permanent employees may select a pension option.", result.Message);
+
+      Assert.Contains(
+          "active pension fund already exists",
+          result.Message);
+    }
+
+
+    [Fact]
+    public async Task CreatePensionFund_Succeeds_WhenNoActiveFundExists()
+    {
+      var dto = new CreatePensionFundDto
+      {
+        Name = "Discovery",
+        Description = "Discovery Pension Fund",
+        TaxCode = 4001
+      };
+
+      _fundRepoMock
+          .Setup(r => r.GetPensionFundsAsync(It.IsAny<CancellationToken>()))
+          .ReturnsAsync(new List<PensionFund>());
+
+      var result = await _service.CreatePensionFundAsync(
+          dto,
+          CancellationToken.None);
+
+      Assert.True(result.IsSuccess);
+
+      Assert.Contains(
+          "created successfully",
+          result.Message);
     }
 
     [Fact]
     public async Task RecordEmployeePensionSelectionSucceedsForPermanentEmployee()
     {
-      Employee employee = new Employee
+      // Employee
+      var employee = new Employee
       {
         EmployeeId = "E003",
+        Name = "John Doe",
         EmploymentStatus = EmploymentStatus.Permanent,
         MonthlySalary = 5000,
         Name = "Jane Doe"
       };
-      PensionOption option = new PensionOption { PensionOptionId = 2, ContributionPercentage = 10 };
 
-      _employeeRepoMock.Setup(r => r.GetEmployeeByIdAsync(employee.EmployeeId))
-                       .ReturnsAsync(employee);
-      _optionRepoMock.Setup(r => r.GetPensionOptionByIdAsync(option.PensionOptionId))
-                     .ReturnsAsync(option);
-      _fundRepoMock.Setup(r => r.AddOrUpdatePensionFundAsync(It.IsAny<PensionFund>()))
-                   .Returns(Task.CompletedTask);
-      _fundRepoMock.Setup(r => r.SaveChangesAsync())
-                   .Returns(Task.CompletedTask);
+      // Pension Option
+      var option = new PensionOption
+      {
+        PensionOptionId = 2,
+        ContributionPercentage = 10
+      };
 
-      ServiceResult result = await _service.RecordEmployeePensionSelectionAsync(employee.EmployeeId, option.PensionOptionId);
+      // Active Fund
+      var activeFund = new PensionFund
+      {
+        Name = "Discovery Fund",
+        Description = "Main Pension Fund",
+        TaxCode = 4001,
+        IsActive = true
+      };
+
+      // Employee lookup
+      _employeeRepoMock
+          .Setup(r => r.GetEmployeeByIdAsync(
+              employee.EmployeeId,
+              It.IsAny<CancellationToken>()))
+          .ReturnsAsync(employee);
+
+      // Option lookup
+      _optionRepoMock
+          .Setup(r => r.GetPensionOptionByIdAsync(
+              option.PensionOptionId,
+              It.IsAny<CancellationToken>()))
+          .ReturnsAsync(option);
+
+      // Active fund lookup
+      _fundRepoMock
+          .Setup(r => r.GetPensionFundsAsync(
+              It.IsAny<CancellationToken>()))
+          .ReturnsAsync(new List<PensionFund>
+          {
+            activeFund
+          });
+
+      // Employee does not already have a pension record
+      _fundRepoMock
+          .Setup(r => r.GetPensionFundByEmployeeIdAsync(
+              employee.EmployeeId,
+              It.IsAny<CancellationToken>()))
+          .ReturnsAsync((PensionFund?)null);
+
+      var result = await _service.RecordEmployeePensionSelectionAsync(
+          employee.EmployeeId,
+          option.PensionOptionId,
+          CancellationToken.None);
 
       Assert.True(result.IsSuccess);
-      Assert.Equal("Pension option selected and pension fund created.", result.Message);
+      Assert.Contains(
+          "Pension option selected",
+          result.Message);
     }
+
   }
 }

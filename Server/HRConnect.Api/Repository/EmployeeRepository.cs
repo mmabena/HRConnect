@@ -222,5 +222,12 @@ namespace HRConnect.Api.Repository
     {
       return await _context.Employees.Where(e => e.PensionOptionId != null && e.EmploymentStatus == EmploymentStatus.Permanent).ToListAsync();
     }
+
+    public async Task SaveChangesAsync(CancellationToken cancellationToken)
+    {
+      await _context.SaveChangesAsync(cancellationToken);
+    }
+
+
   }
 }

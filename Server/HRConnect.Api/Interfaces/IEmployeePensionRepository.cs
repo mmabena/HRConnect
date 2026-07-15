@@ -5,8 +5,13 @@ namespace HRConnect.Api.Interfaces
 
   public interface IEmployeePensionRepository
   {
-    Task<Employee?> GetEmployeeByIdAsync(string employeeId);
+    Task<Employee?> GetEmployeeByIdAsync(string employeeId, CancellationToken cancellationToken);
+    Task<IEnumerable<Employee>> GetEmployeesAsync(CancellationToken cancellationToken);
+    Task SaveChangesAsync(CancellationToken cancellationToken);
+    Task UpdateEmployeeAsync(Employee employee, CancellationToken cancellationToken);
 
-    Task UpdateEmployeeAsync(Employee employee);
+
+
+
   }
 }
