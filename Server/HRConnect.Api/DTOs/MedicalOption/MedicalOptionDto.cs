@@ -5,7 +5,7 @@
   ///  we need to transfer a single instance of a medical option to the client
   /// Thus will contain all details of a specific medical option will be sent to the client
   /// </summary>
-  
+
   public class MedicalOptionDto
   {
     public int MedicalOptionId { get; set; }

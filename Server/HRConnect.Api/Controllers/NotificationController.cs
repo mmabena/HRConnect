@@ -1,0 +1,65 @@
+namespace HRConnect.Api.Controllers
+{
+  using HRConnect.Api.Interfaces.Notification;
+  using HRConnect.Api.Models;
+  using Microsoft.AspNetCore.Authorization;
+  using Microsoft.AspNetCore.Mvc;
+
+  [ApiController]
+  [Route("api/notifications")]
+  public class NotificationController : ControllerBase
+  {
+    private readonly INotificationService _notificationService;
+    public NotificationController(INotificationService notificationService)
+    {
+      _notificationService = notificationService;
+    }
+
+    [Authorize(Roles = "SuperUser")]
+    [HttpGet("payroll/{userId}")]
+    public async Task<IActionResult> GetAllPayrollNotifications(int userId)
+    {
+      var notifications = await _notificationService.GetAllEmployeeNotificationsByTypeAsync(NotificationType.Payroll,
+      userId);
+
+      if (!notifications.Any())
+        return NotFound("No Notifications To Show");
+      return Ok(notifications);
+    }
+
+    [Authorize(Roles = "SuperUser")]
+    [HttpGet("tax/{userId}")]
+    public async Task<IActionResult> GetAllTaxNotifications(int userId)
+    {
+      var notifications = await _notificationService.GetAllEmployeeNotificationsByTypeAsync(NotificationType.TaxUpload
+      , userId);
+
+      if (!notifications.Any())
+        return NotFound($"No Notifications To Show");
+      return Ok(notifications);
+    }
+    [HttpPut("read/{userId}")]
+    public async Task<IActionResult> MarkAllReadByUserId(int userId)
+    {
+      await _notificationService.MarkAllAsReadByUserId(userId);
+      return Ok();
+    }
+    [HttpGet("{userId}")]
+    public async Task<IActionResult> GetEmployeeNotifications(int userId)
+    {
+      var notifications = await _notificationService.GetEmployeeNotificationsAsync(userId);
+      if (!notifications.Any())
+        return NotFound();
+      return Ok(notifications);
+    }
+
+    [HttpDelete("{userId}/{id}")]
+    public async Task<IActionResult> DeleteNotificationById(int userId, int id)
+    {
+      bool isDeleted = await _notificationService.DeleteNotificationByIdAsync(userId, id);
+      if (!isDeleted)
+      { return NotFound(); }
+      return Ok("Notification Deleted");
+    }
+  }
+}

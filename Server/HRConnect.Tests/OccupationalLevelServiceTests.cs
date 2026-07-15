@@ -1,12 +1,12 @@
 namespace HRConnect.Tests.Services
 {
-  using Moq;
-  using HRConnect.Api.Services;
+  using HRConnect.Api.DTOs.OccupationalLevel;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
-  using HRConnect.Api.DTOs.OccupationalLevel;
+  using HRConnect.Api.Services;
   using HRConnect.Api.Utils;
   using Microsoft.EntityFrameworkCore;
+  using Moq;
   public class OccupationalLevelServiceTests
   {
     private readonly Mock<IOccupationalLevelRepository> _occupationalLevelRepoMock;

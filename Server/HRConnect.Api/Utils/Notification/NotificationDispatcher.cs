@@ -5,25 +5,35 @@ namespace HRConnect.Api.Utils.Notification
 
   public class NotificationDispatcher : INotificationDispatcher
   {
-    private readonly IEnumerable<INotificationDeliveryStrategy> _deliveryStrategies;
-    public NotificationDispatcher(IEnumerable<INotificationDeliveryStrategy> deliveryStrategies)
+    private readonly IEnumerable<INotificationDeliveryChannel> _deliveryStrategies;
+    public NotificationDispatcher(IEnumerable<INotificationDeliveryChannel> deliveryStrategies)
     {
       _deliveryStrategies = deliveryStrategies;
     }
     public async Task DispatchNotificationAsync(Notification notification)
     {
-      foreach (var strategy in _deliveryStrategies)
+
+      foreach (var strategy in ResolveDeliveryStrategy(notification.DeliveryChannel))
       {
         try
         {
           await strategy.SendNotificationAsync(notification);
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
-          Console.WriteLine($"Failed To Send Notifaction Through Channel {strategy.Name}");
-          Console.WriteLine($"{ex.Message}");
+          throw new InvalidDataException($"Failed To Send/Dispatch Through Channel {ex?.Message}");
         }
       }
+    }
+
+    /// <summary>
+    /// Resolves injected dependencies to only enumerate through delivery channels that are needed for the batch of notifications going out 
+    /// </summary>
+    /// <param name="deliveryChannels">Enum annotated with [Flags] of delivery channels </param>
+    /// <returns>Resolved Channels that have notifications in the pipeline for them</returns>
+    private IEnumerable<INotificationDeliveryChannel> ResolveDeliveryStrategy(DeliveryChannel deliveryChannels)
+    {
+      return _deliveryStrategies.Where(s => (deliveryChannels & s.Channel) == s.Channel);
     }
   }
 }

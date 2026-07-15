@@ -1,4 +1,4 @@
-﻿namespace HRConnect.Api.Interfaces
+namespace HRConnect.Api.Interfaces
 {
   using HRConnect.Api.Models;
   using HRConnect.Api.DTOs;
@@ -28,7 +28,6 @@
     Task<ServiceResult> AddPensionOptionAsync(PensionOption pensionOption, CancellationToken cancellationToken);
 
     Task<ServiceResult> UpdatePensionOptionAsync(PensionOption pensionOption, CancellationToken cancellationToken);
-
     // Pension Deduction
     decimal CalculatePensionDeduction(decimal monthlySalary, PensionOption pensionOption);
 

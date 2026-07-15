@@ -1,24 +1,33 @@
 namespace HRConnect.Api.Data
 {
-  using HRConnect.Api.Models;
-  using HRConnect.Api.Models.Payroll;
-  using HRConnect.Api.Models.PayrollDeduction;
-  using HRConnect.Api.Models.CompanyContributions;
-  using HRConnect.Api.Models.Pension;
-  using Microsoft.EntityFrameworkCore;
   using AppAny.Quartz.EntityFrameworkCore.Migrations;
   using AppAny.Quartz.EntityFrameworkCore.Migrations.SqlServer;
-  public class ApplicationDBContext(DbContextOptions dbContextOptions) : DbContext(dbContextOptions)
-  {
+  using HRConnect.Api.Models;
+  using HRConnect.Api.Models.CompanyContributions;
+  using HRConnect.Api.Models.Payroll;
+  using HRConnect.Api.Models.Payroll.Earning;
+  using HRConnect.Api.Models.PayrollDeduction;
+  using HRConnect.Api.Models.Pension;
+  using Microsoft.EntityFrameworkCore;
+  using System.Collections.Generic;
+  using Microsoft.EntityFrameworkCore.ChangeTracking;
+  using Microsoft.AspNetCore.DataProtection;
+  using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+  using HRConnect.Api.Utils;
 
+  public class ApplicationDBContext(DbContextOptions dbContextOptions, IDataProtectionProvider
+  provider) : DbContext(dbContextOptions)
+  {
+    private readonly IDataProtector _protector = provider.CreateProtector("DbEncryptor");
     public DbSet<User> Users { get; set; }
     public DbSet<Employee> Employees { get; set; }
     public DbSet<Position> Positions { get; set; }
     public DbSet<JobGrade> JobGrades { get; set; }
+    public DbSet<UserCompany> UserCompanies { get; set; }
+    public DbSet<Company> Companies { get; set; }
     public DbSet<OccupationalLevel> OccupationalLevels { get; set; }
     public DbSet<PasswordResetPin> PasswordResetPins { get; set; }
     public DbSet<PasswordHistory> PasswordHistories { get; set; }
-    // Payroll (MAIN)
     public DbSet<MedicalOption> MedicalOptions { get; set; }
     public DbSet<MedicalOptionCategory> MedicalOptionCategories { get; set; }
     public DbSet<TaxTableUpload> TaxTableUploads { get; set; }
@@ -30,8 +39,8 @@ namespace HRConnect.Api.Data
     public DbSet<PayrollRun> PayrollRuns { get; set; }
     public DbSet<PayrollRecord> PayrollRecords { get; set; }
     public DbSet<PensionFund> PensionFunds { get; set; }
-        // LEAVE SYSTEM
-        public DbSet<LeaveType> LeaveTypes { get; set; }
+    // LEAVE SYSTEM
+    public DbSet<LeaveType> LeaveTypes { get; set; }
     public DbSet<LeaveEntitlementRule> LeaveEntitlementRules { get; set; }
     public DbSet<EmployeeLeaveBalance> EmployeeLeaveBalances { get; set; }
     public DbSet<LeaveApplication> LeaveApplications { get; set; }
@@ -44,6 +53,12 @@ namespace HRConnect.Api.Data
     public DbSet<EmployeeCompanyContribution> EmployeeCompanyContributions { get; set; }
     public DbSet<MedicalAidDeduction> MedicalAidDeductions { get; set; }
     public DbSet<Notification> Notifications { get; set; }
+    public DbSet<PayrollEarning> PayrollEarnings { get; set; }
+    public DbSet<EmployeePayrollEarning> EmployeePayrollEarnings { get; set; }
+    public DbSet<Deduction> Deductions { get; set; }
+    public DbSet<EmployeeDeduction> EmployeeDeductions { get; set; }
+    public DbSet<TOTPState> TOTPStates { get; set; }
+    public DbSet<MFAUserSecret> UserSecrets { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
       base.OnModelCreating(modelBuilder);
@@ -53,6 +68,29 @@ namespace HRConnect.Api.Data
         builder.UseSqlServer(schema: "quartz", prefix: "QRTZ_");
       });
 
+      // Use this to protector to convert data of your choosing (of type string) in the database
+      SecretsProtector.Init(provider.CreateProtector("DbEncryptor"));
+      var stringEncryptor = new ValueConverter<string, string>(
+        x => x == null ? string.Empty : SecretsProtector.Wrap(x),
+        x => x == null ? string.Empty : SecretsProtector.UnWrap<string>(x)
+        );
+
+#pragma warning disable CS8603
+      var byteEncryptor = new ValueConverter<byte[], byte[]>(
+        x => x == null ? null : SecretsProtector.WrapBytes(x),
+        x => x == null ? null : SecretsProtector.UnWrapBytes(x)
+        );
+#pragma warning restore CS8603
+
+      // Using data protect to encrypt notification messages
+      modelBuilder.Entity<Notification>()
+      .Property(n => n.Message)
+      .HasConversion(stringEncryptor);
+
+      modelBuilder.Entity<MFAUserSecret>()
+      .Property(m => m.EncryptedUserSecret)
+      .HasConversion(byteEncryptor);
+
       // ================= MAIN CONFIG =================
       modelBuilder.Entity<Employee>()
           .HasOne(e => e.PensionOption)
@@ -60,33 +98,24 @@ namespace HRConnect.Api.Data
           .HasForeignKey(e => e.PensionOptionId)
           .OnDelete(DeleteBehavior.Restrict);
 
-            // PensionFund -> Employee
-            modelBuilder.Entity<PensionFund>()
-                .HasOne(pf => pf.Employee)
-                .WithMany(e => e.PensionFunds)
-                .HasForeignKey(pf => pf.EmployeeId)
-                .OnDelete(DeleteBehavior.Restrict);
-            // Employee -> PensionOption relationship
-            modelBuilder.Entity<Employee>()
-                .HasOne(e => e.PensionOption)
-                .WithMany(po => po.Employees)
-                .HasForeignKey(e => e.PensionOptionId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-      // PensionFund -> PensionOption (missing piece)
+      // PensionFund -> Employee
       modelBuilder.Entity<PensionFund>()
-   .HasOne(pf => pf.PensionOptions)  
-   .WithMany()
-   .HasForeignKey(pf => pf.PensionOptionId)
-   .OnDelete(DeleteBehavior.NoAction); 
-
-
+          .HasOne(pf => pf.Employee)
+          .WithMany(e => e.PensionFunds)
+          .HasForeignKey(pf => pf.EmployeeId)
+          .OnDelete(DeleteBehavior.Restrict);
+      // Employee -> PensionOption relationship
+      modelBuilder.Entity<Employee>()
+          .HasOne(e => e.PensionOption)
+          .WithMany(po => po.Employees)
+          .HasForeignKey(e => e.PensionOptionId)
+          .OnDelete(DeleteBehavior.Restrict);
 
       // Employee -> Position
       modelBuilder.Entity<Employee>()
-          .HasOne(e => e.Position)
-          .WithMany(p => p.Employees)
-          .HasForeignKey(e => e.PositionId);
+         .HasOne(e => e.Position)
+         .WithMany(p => p.Employees)
+         .HasForeignKey(e => e.PositionId);
 
       // Employee -> CareerManager
       modelBuilder.Entity<Employee>()
@@ -105,9 +134,28 @@ namespace HRConnect.Api.Data
           .HasIndex(p => p.PositionTitle)
           .IsUnique();
 
+      modelBuilder.Entity<UserCompany>()
+          .HasKey(uc => new { uc.UserId, uc.CompanyId });
+
+      modelBuilder.Entity<UserCompany>()
+          .HasOne(uc => uc.User)
+          .WithMany()
+          .HasForeignKey(uc => uc.UserId)
+          .OnDelete(DeleteBehavior.Cascade);
+
+      modelBuilder.Entity<UserCompany>()
+          .HasOne(uc => uc.Company)
+          .WithMany()
+          .HasForeignKey(uc => uc.CompanyId)
+          .OnDelete(DeleteBehavior.Cascade);
+
       modelBuilder.Entity<OccupationalLevel>()
           .HasIndex(o => o.Description)
           .IsUnique();
+
+      modelBuilder.Entity<PayrollRecord>()
+      .HasIndex(x => new { x.PayrollRunId, x.EmployeeId })
+      .IsUnique();
 
       modelBuilder.Entity<Employee>().Property(e => e.Title).HasConversion<string>();
       modelBuilder.Entity<Employee>().Property(e => e.Gender).HasConversion<string>();
@@ -126,6 +174,28 @@ namespace HRConnect.Api.Data
           .HasForeignKey(l => l.EmployeeId)
           .OnDelete(DeleteBehavior.Cascade);
 
+      modelBuilder.Entity<Employee>()
+          .HasOne(e => e.Company)
+          .WithMany(c => c.Employees)
+          .HasForeignKey(e => e.CompanyId)
+          .OnDelete(DeleteBehavior.Restrict);
+
+      modelBuilder.Entity<Company>()
+          .HasIndex(c => c.CompanyId)
+          .IsUnique();
+
+      modelBuilder.Entity<Company>()
+          .HasIndex(c => c.RegistrationNumber)
+          .IsUnique();
+
+      modelBuilder.Entity<Company>()
+          .HasIndex(c => c.UIFNumber)
+          .IsUnique();
+
+      modelBuilder.Entity<Company>()
+          .HasIndex(c => c.VATNumber)
+          .IsUnique();
+
       modelBuilder.Entity<EmployeeLeaveBalance>()
           .HasOne(lb => lb.LeaveType)
           .WithMany()
@@ -139,8 +209,8 @@ namespace HRConnect.Api.Data
           .OnDelete(DeleteBehavior.Restrict);
 
       modelBuilder.Entity<CompanyContribution>()
-    .Property(c => c.Percentage)
-    .HasColumnType("decimal(10,6)");
+          .Property(c => c.Percentage)
+          .HasColumnType("decimal(10,6)");
 
       modelBuilder.Entity<EmployeeCompanyContribution>()
           .Property(e => e.DeathPercentage)
@@ -199,6 +269,19 @@ namespace HRConnect.Api.Data
         entity.Property(e => e.EffectiveTo);
       });
 
+      // Medical Aid Deduction Delete Behavior
+      modelBuilder.Entity<MedicalAidDeduction>()
+        .HasOne(m => m.MedicalOption)
+        .WithMany()
+        .HasForeignKey(m => m.MedicalOptionId)
+        .OnDelete(DeleteBehavior.NoAction);
+
+      modelBuilder.Entity<MedicalAidDeduction>()
+        .HasOne(m => m.MedicalOptionCategory)
+        .WithMany()
+        .HasForeignKey(m => m.MedicalCategoryId)
+        .OnDelete(DeleteBehavior.NoAction);
+
       // StatutoryContributionType defaults
       modelBuilder.Entity<StatutoryContributionType>().Property(e => e.EmployeeRate)
         .HasColumnType("decimal(18,4)")
@@ -209,7 +292,6 @@ namespace HRConnect.Api.Data
           .HasDefaultValue(0.01m);
 
       // Payroll relationships
-
       modelBuilder.Entity<PayrollPeriod>().HasMany(p => p.Runs)
       .WithOne(r => r.Period)
       .HasForeignKey(p => p.PeriodId);
@@ -238,7 +320,7 @@ namespace HRConnect.Api.Data
       modelBuilder.Entity<PayrollPeriod>().Property(p => p.IsLocked).IsConcurrencyToken();
       modelBuilder.Entity<PayrollRecord>().Property(p => p.IsLocked).IsConcurrencyToken();
 
-      // Medical Aid Deduction Delete Nehavior
+      // Medical Aid Deduction Delete Behavior
       modelBuilder.Entity<MedicalAidDeduction>()
         .HasOne(m => m.MedicalOption)
         .WithMany()
@@ -271,33 +353,116 @@ namespace HRConnect.Api.Data
         .OnDelete(DeleteBehavior.Cascade)
         .IsRequired();
 
-
       modelBuilder.Entity<EmployeePensionEnrollment>().HasOne<PayrollRun>()
       .WithMany()
       .HasForeignKey(t => t.PayrollRunId)
       .HasPrincipalKey(p => p.PayrollRunId);
 
-      //Notifaction Configurations
-      modelBuilder.Entity<Notification>().Property(n => n.Severity)
-          .HasConversion<string>();
       modelBuilder.Entity<Notification>().Property(n => n.Type)
+          .HasConversion<string>();
+
+      modelBuilder.Entity<Notification>().Property(n => n.DeliveryChannel)
       .HasConversion<string>();
+
+      modelBuilder.Entity<Employee>()
+        .HasMany(epre => epre.EmployeePayrollEarning)
+        .WithOne(e => e.Employee)
+        .HasForeignKey(e => e.EmployeeId)
+        .OnDelete(DeleteBehavior.NoAction)
+        .IsRequired();
+
+      modelBuilder.Entity<PayrollEarning>()
+        .HasMany(epre => epre.EmployeePayrollEarning)
+        .WithOne(pre => pre.PayrollEarning)
+        .HasForeignKey(pre => pre.PayrollEarningId)
+        .OnDelete(DeleteBehavior.NoAction)
+        .IsRequired();
+
+      modelBuilder.Entity<EmployeePayrollEarning>()
+        .HasOne<PayrollRun>()
+        .WithMany()
+        .HasForeignKey(epe => epe.PayrollRunId)
+        .HasPrincipalKey(p => p.PayrollRunId);
+
+      modelBuilder.Entity<PayrollEarning>().HasData(
+          new PayrollEarning
+          {
+            PayrollEarningId = "PRE001",
+            ShortDescription = "Basic salary",
+            LongDescription = "Employee monthly salary",
+            Taxable = true,
+            TaxCode = 3601,
+            TaxPercentage = 100m,
+            OvertimeHourMultiplier = null,
+            CanProRata = true,
+            IsOnGoing = true,
+            IsActive = true
+          }
+        );
+
+      modelBuilder.Entity<Deduction>().Property(d => d.InputType).HasConversion<string>();
+
+      modelBuilder.Entity<EmployeeDeduction>()
+        .HasOne<PayrollRun>()
+        .WithMany()
+        .HasForeignKey(ed => ed.PayrollRunId)
+        .HasPrincipalKey(p => p.PayrollRunId);
+
+      modelBuilder.Entity<Deduction>()
+        .HasMany(d => d.EmployeeDeduction)
+        .WithOne(ed => ed.Deduction)
+        .HasForeignKey(ed => ed.DeductionId)
+        .OnDelete(DeleteBehavior.NoAction);
+
+      modelBuilder.Entity<Employee>()
+        .HasMany(e => e.EmployeeDeduction)
+        .WithOne(ed => ed.Employee)
+        .HasForeignKey(ed => ed.EmployeeId)
+        .OnDelete(DeleteBehavior.NoAction);
+
+      modelBuilder.Entity<User>()
+      .Property(u => u.TempRole)
+      .HasConversion<string>();
+
+      modelBuilder.Entity<TOTPState>()
+      .HasIndex(u => u.UserId);
+
+      modelBuilder.Entity<TOTPState>()
+      .HasOne(t => t.User)
+      .WithOne()
+      .HasForeignKey<TOTPState>(t => t.UserId)
+      .OnDelete(DeleteBehavior.Cascade);
+
+      modelBuilder.Entity<MFAUserSecret>()
+      .HasOne(m => m.User)
+      .WithOne()
+      .HasForeignKey<MFAUserSecret>(m => m.UserId);
     }
 
     //Override 'SaveChangesAsync' for Payroll Records to enforce locked records on a payroll run 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-      var lockedRecords = ChangeTracker.Entries()
-          .Where(e =>
-              (e.State == EntityState.Modified || e.State == EntityState.Deleted) &&
-              e.Entity is PayrollRecord record &&
-              record.IsLocked);
+      //Intercept all instances of saving any changes to db
+      IEnumerable<EntityEntry> modifiedRecords = ChangeTracker.Entries()
+            .Where(e => (e.State == EntityState.Modified || e.State == EntityState.Deleted) &&
+            (
+            e.Entity is PayrollPeriod ||
+            e.Entity is PayrollRun ||
+            e.Entity is PayrollRecord ||
+            e.Entity is EmployeePensionEnrollment ||
+            e.Entity is EmployeePayrollEarning ||
+            e.Entity is EmployeeDeduction
+            ));
 
-      if (lockedRecords.Any())
+      foreach (EntityEntry e in modifiedRecords)
       {
-        throw new InvalidOperationException("One or more payroll records are locked and cannot be modified.");
+        //Any locked entity should be under a Hard Lock. Don't allow any changes
+        bool prevLockState = (bool)e.OriginalValues["IsLocked"]!;
+        if (prevLockState)
+        {
+          throw new InvalidOperationException("Record/Run under Hard Lock. Cannot be modified");
+        }
       }
-
       return await base.SaveChangesAsync(cancellationToken);
     }
   }

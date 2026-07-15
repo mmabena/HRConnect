@@ -1,12 +1,12 @@
 
 namespace HRConnect.Api.Services
 {
+  using Audit.Core;
+  using HRConnect.Api.DTOs.StatutoryContribution;
   using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Mappers;
   using HRConnect.Api.Models;
   using HRConnect.Api.Utils;
-  using HRConnect.Api.Mappers;
-  using HRConnect.Api.DTOs.StatutoryContribution;
-  using Audit.Core;
 
   public class StatutoryContributionService : IStatutoryContributionService
   {
@@ -59,8 +59,8 @@ namespace HRConnect.Api.Services
           {
             EmployeeId = employee.EmployeeId,
             MonthlySalary = employee.MonthlySalary,
-            PassportNumber = employee.PassportNumber,
-            IdNumber = employee.IdNumber,
+            PassportNumber = employee.PassportNumber ?? string.Empty,
+            IdNumber = employee.IdNumber ?? string.Empty,
             UifEmployeeAmount = employeeAmount,
             UifEmployerAmount = employerAmount,
             EmployerSdlContribution = sdlDeduction,

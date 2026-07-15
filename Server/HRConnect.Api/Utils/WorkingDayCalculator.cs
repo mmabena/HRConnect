@@ -1,40 +1,83 @@
 namespace HRConnect.Api.Utils
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
+  using System;
+  using System.Collections.Generic;
+  using System.Linq;
+  using System.Threading.Tasks;
 
-    public class WorkingDayCalculator
+  public class WorkingDayCalculator
+  {
+    /// <summary>
+    /// Calculates the number of working days (Monday to Friday) between two given dates, inclusive of the start and end dates,
+    /// by iterating through the range of dates and counting the days that are not Saturdays or Sundays, 
+    /// while returning the total count of working days between the specified start and end dates,
+    /// and returning 0 if the end date is earlier than the start date.
+    /// </summary>
+    /// <param name="start"></param>
+    /// <param name="end"></param>
+    /// <returns></returns>
+    public static int CountWorkingDays(DateOnly start, DateOnly end)
     {
-        /// <summary>
-        /// Calculates the number of working days (Monday to Friday) between two given dates, inclusive of the start and end dates,
-        /// by iterating through the range of dates and counting the days that are not Saturdays or Sundays, 
-        /// while returning the total count of working days between the specified start and end dates,
-        /// and returning 0 if the end date is earlier than the start date.
-        /// </summary>
-        /// <param name="start"></param>
-        /// <param name="end"></param>
-        /// <returns></returns>
-        public static int CountWorkingDays(DateOnly start, DateOnly end)
+      if (end < start)
+        return 0;
+
+      int totalDays = end.DayNumber - start.DayNumber + 1;
+      int workingDays = 0;
+
+      for (int i = 0; i < totalDays; i++)
+      {
+        var current = start.AddDays(i);
+        if (current.DayOfWeek != DayOfWeek.Saturday &&
+            current.DayOfWeek != DayOfWeek.Sunday)
         {
-            if (end < start)
-                return 0;
-
-            int totalDays = end.DayNumber - start.DayNumber + 1;
-            int workingDays = 0;
-
-            for (int i = 0; i < totalDays; i++)
-            {
-                var current = start.AddDays(i);
-                if (current.DayOfWeek != DayOfWeek.Saturday &&
-                    current.DayOfWeek != DayOfWeek.Sunday)
-                {
-                    workingDays++;
-                }
-            }
-
-            return workingDays;
+          workingDays++;
         }
+      }
+
+      return workingDays;
     }
+
+    public static int CountWorkingDaysForCurrentMonth()
+    {
+      DateTime today = DateTime.Today;
+      int year = today.Year;
+      int month = today.Month;
+
+      int workDays = 0;
+      int daysInMonth = DateTime.DaysInMonth(year, month);
+
+      for (int day = 1; day <= daysInMonth; day++)
+      {
+        DateTime currentDate = new(year, month, day);
+        if (currentDate.DayOfWeek is not DayOfWeek.Saturday and not DayOfWeek.Sunday)
+        {
+          workDays++;
+        }
+      }
+
+      return workDays;
+    }
+
+    public static int CountRemainingWorkingDaysForCurrentMonth()
+    {
+      DateTime today = DateTime.Today;
+      int year = today.Year;
+      int month = today.Month;
+
+      int daysInMonth = DateTime.DaysInMonth(year, month);
+      DateTime lastDay = new(year, month, daysInMonth);
+
+      int workDays = 0;
+
+      for (DateTime date = today; date <= lastDay; date = date.AddDays(1))
+      {
+        if (date.DayOfWeek is not DayOfWeek.Saturday and not DayOfWeek.Sunday)
+        {
+          workDays++;
+        }
+      }
+
+      return workDays;
+    }
+  }
 }

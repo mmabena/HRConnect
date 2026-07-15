@@ -1,10 +1,11 @@
 namespace HRConnect.Api.Repository
 {
-  using HRConnect.Api.DTOs.Payroll;
-  using HRConnect.Api.Mappers.Payroll;
+  using System.Data.Common;
   using HRConnect.Api.Data;
-  using HRConnect.Api.Models.Payroll;
+  using HRConnect.Api.DTOs.Payroll;
   using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Mappers.Payroll;
+  using HRConnect.Api.Models.Payroll;
   using Microsoft.EntityFrameworkCore;
 
   public class PayrollPeriodRepository : IPayrollPeriodRepository
@@ -21,7 +22,6 @@ namespace HRConnect.Api.Repository
         return null;
       return period.ToPayrollPeriodDto();
     }
-    /*Active period depends on the financial year. April-March*/
 
     public async Task<PayrollPeriod?> GetPeriodByDate(DateTime dateTime)
     {
@@ -29,12 +29,7 @@ namespace HRConnect.Api.Repository
          p => p.StartDate <= dateTime &&
          p.EndDate >= dateTime);
     }
-    public async Task<PayrollPeriod?> GetActivePeriod(DateTime dateTime)
-    {
-      return await _context.PayrollPeriods.FirstOrDefaultAsync(
-         p => p.StartDate <= dateTime &&
-         p.EndDate >= dateTime);
-    }
+
     public async Task<PayrollPeriodDto> CreatePeriodAsync(PayrollPeriod payrollPeriod)
     {
       await _context.PayrollPeriods.AddAsync(payrollPeriod);
@@ -44,7 +39,24 @@ namespace HRConnect.Api.Repository
 
     public async Task<IEnumerable<PayrollPeriod>> GetAllPayrollPeriod()
     {
-      return await _context.PayrollPeriods.Include(p => p.Runs).ThenInclude(r => r.Records).ToListAsync();
+      using var transaction = await _context.Database.BeginTransactionAsync();
+      try
+      {
+        var periods = await _context.PayrollPeriods
+         .Include(p => p.Runs)
+         .ThenInclude(r => r.Records)
+          .AsSplitQuery()
+         .ToListAsync();
+
+        await transaction.CommitAsync();
+        return periods;
+      }
+      catch (DbException exception)
+      {
+        await transaction.RollbackAsync();
+        Console.WriteLine($"Failed PayrollPeriod Database Transaction:{exception.InnerException?.Message}");
+        throw;
+      }
     }
     public async Task UpdateAsync(PayrollPeriod payrollPeriod)
     {
@@ -52,11 +64,30 @@ namespace HRConnect.Api.Repository
       await _context.SaveChangesAsync();
     }
 
+
     public async Task<PayrollPeriod?> GetLastPeriodAsync()
     {
-      return await _context.PayrollPeriods.Include(p => p.Runs).ThenInclude(r => r.Records).Where(p => !p.IsLocked)
-        .OrderByDescending(p => p.PayrollPeriodId)
-      .FirstOrDefaultAsync();
+      using var transaction = await _context.Database.BeginTransactionAsync();
+      try
+      {
+        var periods = await _context.PayrollPeriods
+              .Where(p => !p.IsLocked)//filter out early to prevent hogging up memory usage
+              .OrderByDescending(p => p.PayrollPeriodId)
+              .Include(p => p.Runs)
+              .ThenInclude(r =>
+                  r.Records)
+              .AsSplitQuery() //prevent what is called 'Cartesian Explosion' (we have 3 record types so far to query)
+            .FirstOrDefaultAsync();
+
+        await transaction.CommitAsync();
+        return periods;
+      }
+      catch (DbException ex)
+      {
+        await transaction.RollbackAsync();
+        Console.WriteLine($"Failed Database Transaction With InnerException:{ex.InnerException?.Message}");
+        throw;
+      }
     }
 
     public async Task<PayrollPeriod?> GetLastPeriodForRollOver()

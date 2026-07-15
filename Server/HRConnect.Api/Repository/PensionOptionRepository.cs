@@ -1,4 +1,4 @@
-﻿namespace HRConnect.Api.Repository
+namespace HRConnect.Api.Repository
 {
   using System.Threading.Tasks;
   using HRConnect.Api.Data;
@@ -34,7 +34,6 @@
     {
       _ = context.PensionOptions.Update(pensionOption);
       _ = await context.SaveChangesAsync(cancellationToken);
-
       return ServiceResult.Success("Pension option updated successfully.");
     }
 

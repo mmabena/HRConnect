@@ -1,7 +1,6 @@
-﻿namespace HRConnect.Api.Interfaces
+namespace HRConnect.Api.Interfaces
 {
   using System.Collections.Generic;
-  using System.Threading;
   using System.Threading.Tasks;
   using HRConnect.Api.Models;
 

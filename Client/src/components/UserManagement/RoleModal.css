@@ -1,0 +1,270 @@
+.roles-modal-header h3{
+color:white;
+}
+.roles-modal-header{
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 36px 32px 33px 32px;
+gap: 285px;
+height: 76px;
+background: #355867;
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+}
+
+.roles-modal-content{
+  min-height:369px;
+  max-height:80vh;
+  overflow-y:auto;
+
+display:flex;
+flex-direction:column;
+align-items: center;
+justify-content: center;
+padding:15px;
+gap:12px;
+}
+
+.close-btn{
+width: 34px;
+height: 34px;
+background: rgba(255, 255, 255, 0.15);
+border-radius: 10px;
+color:white;
+margin-left:auto;
+}
+.name-tag{
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 0px;
+gap: 16px;
+width: 210px;
+height: 52px;
+
+flex: none;
+order: 0;
+flex-grow: 0;
+}
+
+.name-tag-icon{
+width: 34px;
+height: 34px;
+
+background: rgba(255, 255, 255, 0.15);
+border-radius: 10px;
+color:white;
+flex: none;
+order: 0;
+flex-grow: 0;
+}
+
+.name-tag h3{
+width: 160px;
+height: 26px;
+font-family: 'Anek Bangla';
+font-style: normal;
+font-weight: 600;
+font-size: 20px;
+line-height: 26px;
+color: #FFFFFF; 
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+}
+
+.name-tag p{
+width: 160px;
+height: 26px;
+font-family: 'Anek Bangla';
+font-style: normal;
+font-weight: 500;
+font-size: 16px;
+line-height: 26px;
+color: #FFFFFF;
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 0;
+}
+
+.name-tag div{
+  text-align:left;
+}
+
+.roles-modal-footer{
+box-sizing: border-box;
+display: flex;
+flex-direction: row;
+justify-content:center;
+align-items:center; 
+padding: 12px 0px;
+gap: 44px;
+margin-top:auto;
+}
+
+.roles-actions{
+box-sizing: border-box;
+display: flex;
+flex-direction: row;
+justify-content:center;
+padding: 12px 0px;
+gap: 44px;
+position: relative;
+width: 506px;
+height: 71px;
+border-top: 1px solid rgba(154, 154, 154, 0.55);
+}
+
+.roles-actions-btn.cancel{
+box-sizing: border-box;
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: center;
+padding: 0px 10px 5px;
+width: 230px;
+height: 47px;
+background: rgba(255, 255, 255, 0.7);
+color:var(--color-grey-36, #5C5C5C);
+opacity: 0.9;
+border: 1px solid rgba(112, 112, 112, 0.5);
+border-radius: 10px;
+flex: none;
+order: 0;
+flex-grow: 0;
+cursor:pointer;
+}
+
+.roles-actions-btn.save{
+font-weight:400px;
+font-size:16px;
+line-height:100%;
+display: flex;
+cursor:pointer;
+flex-direction: row;
+justify-content: center;
+align-items: center;
+padding: 5px 10px;
+
+width: 230px;
+height: 47px;
+
+background: var(--primary-color);
+opacity: 0.9;
+border-radius: 10px;
+color:white;
+flex: none;
+order: 1;
+flex-grow: 0;
+}
+
+.roles-buttons.normaluser{
+border:1px solid #AFBF74;
+}
+.roles-buttons{
+position: absolute;
+display:flex;
+flex-direction:column;
+justify-content: center;
+align-items:center;
+width: 506px;
+height: 143px;
+gap:24px;
+}
+
+.roles-buttons p{
+font-family: 'Anek Bangla';
+font-style: normal;
+font-weight: 500;
+color: #4F6E78;
+align-self: flex-start;
+text-align:left;
+order: 0;
+flex-grow: 0;
+}
+
+.superuser.active{
+filter: saturate(300%) brightness(190%);
+}
+.normaluser.active{
+filter: contrast(190%);
+}
+.role-btn{
+  cursor:pointer;
+box-sizing: border-box;
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+padding: 0px;
+gap: 10px;
+width: 230px;
+height: 62px;
+border-radius: 5px;
+flex: none;
+order: 0;
+flex-grow: 0;
+}
+
+.roles-buttons-wrapper{
+position:relative;
+display:flex;
+flex-direction:row;
+justify-content:center;
+gap:44px;
+}
+
+.current-role-banner {
+  position: relative; 
+  margin-bottom: 20px;
+  justify-content: center;
+  padding: 24px 7px;
+  gap: 35px;
+  width: 505px;
+  height: 74px;
+  background: rgba(79, 110, 120, 0.1);
+  border: 1px solid rgba(79, 110, 120, 0.5);
+  border-radius: 10px;
+}
+
+.current-role-banner{
+display: flex;
+flex-direction:row;
+justify-content: center;
+align-items: center;
+}
+
+.roles-modal-content p{
+    padding: 0px 0px 0px 4px;
+font-family: 'Anek Bangla';
+font-style: normal;
+font-weight: 500;
+color: #4F6E78;
+align-self: flex-start;
+text-align:left;
+}
+
+.current-role-banner span{
+display: flex;
+gap:45px
+}
+
+.status{
+width:115px;
+margin-top: auto;
+align-items: center;
+border:none;
+background: none;
+}
+
+.status svg{
+    vertical-align: middle;
+}
+.menu-background{
+    padding: 26px 60px 50px 60px;
+}

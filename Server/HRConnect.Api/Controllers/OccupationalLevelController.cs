@@ -1,17 +1,17 @@
 namespace HRConnect.Api.Controllers
 {
   using System.Collections.Generic;
-  using Microsoft.AspNetCore.Authorization;
   using System.Runtime.ExceptionServices;
   using System.Threading.Tasks;
   using HRConnect.Api.DTOs.OccupationalLevel;
   using HRConnect.Api.Interfaces;
+  using Microsoft.AspNetCore.Authorization;
   using Microsoft.AspNetCore.Mvc;
 
   [ApiController]
   [Route("api/occupationallevels")]
   [Authorize(Roles = "SuperUser")] // Require authentication and SuperAdmin */
- 
+
   public class OccupationalLevelController : ControllerBase
   {
     private readonly IOccupationalLevelService _occupationalLevelService;
@@ -41,13 +41,13 @@ namespace HRConnect.Api.Controllers
     [HttpPost]
     public async Task<ActionResult<OccupationalLevelDto>> CreateOccupationalLevel([FromBody] CreateOccupationalLevelDto createOccupationalLevelDto)
     {
-      
-        var createdOccupationalLevel = await _occupationalLevelService.AddOccupationalLevelAsync(createOccupationalLevelDto);
-        return CreatedAtAction(
-            nameof(GetAllOccupationalLevels), 
-            new { id = createdOccupationalLevel.OccupationalLevelId }, 
-            createdOccupationalLevel);
-      
+
+      var createdOccupationalLevel = await _occupationalLevelService.AddOccupationalLevelAsync(createOccupationalLevelDto);
+      return CreatedAtAction(
+          nameof(GetAllOccupationalLevels),
+          new { id = createdOccupationalLevel.OccupationalLevelId },
+          createdOccupationalLevel);
+
     }
 
     [HttpPut("{id}")]

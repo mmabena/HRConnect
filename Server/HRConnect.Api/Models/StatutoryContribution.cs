@@ -1,9 +1,9 @@
 namespace HRConnect.Api.Models
 {
   using System.ComponentModel.DataAnnotations;
-  using Microsoft.EntityFrameworkCore;
-  using HRConnect.Api.Utils;
   using HRConnect.Api.Models.Payroll;
+  using HRConnect.Api.Utils;
+  using Microsoft.EntityFrameworkCore;
   public class StatutoryContribution : PayrollRecord
   {
     public string IdNumber { get; set; } = string.Empty;

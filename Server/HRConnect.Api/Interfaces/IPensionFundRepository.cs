@@ -1,4 +1,4 @@
-﻿namespace HRConnect.Api.Interfaces
+namespace HRConnect.Api.Interfaces
 {
   using HRConnect.Api.Models;
   using System.Collections.Generic;
@@ -15,6 +15,7 @@
     Task AddPensionFundAsync(PensionFund fund, CancellationToken cancellationToken);
 
     Task UpdatePensionFundAsync(PensionFund fund, CancellationToken cancellationToken);
+
 
 
     Task AddOrUpdatePensionFundAsync(PensionFund fund, CancellationToken cancellationToken);

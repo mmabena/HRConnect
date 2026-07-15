@@ -13,8 +13,8 @@ namespace HRConnect.Api.Services
     private static readonly decimal MAX_MONTHLYCONTRIBUTION = 29166.66M;
     private readonly float SALARYINCREASE_PERCENTAGE = 0.05f;
     private readonly float PENSIONGROWTH_PRECENTAGE = 0.06f;
-    private decimal[][]? _monthlyContributions;
-    private decimal[][]? _voluntaryContributions;
+    private decimal[][] _monthlyContributions = null!;
+    private decimal[][] _voluntaryContributions = null!;
     private decimal _totalProjectedSavings = 0.00M;
     private int _yearWhenMonthlyContributionWasCapped;
     private int _monthWhenMonthlyContributionWasCapped;
@@ -41,14 +41,14 @@ namespace HRConnect.Api.Services
 
       if (pensionProjectRequestDto.VoluntaryContribution != 0)
       {
-        if (ValidVoluntaryContribution(pensionProjectRequestDto.VoluntaryContribution, Utils.AvailablePensionOptions.GetPensionPercentage(pensionProjectRequestDto.SelectedPensionPercentage),
+        if (ValidVoluntaryContribution(pensionProjectRequestDto.VoluntaryContribution, AvailablePensionOptions.GetPensionPercentage(pensionProjectRequestDto.SelectedPensionPercentage),
           pensionProjectRequestDto.Salary) != "")
         {
           return new PensionProjectionResultDto
           {
             WarningMessage = ValidVoluntaryContribution(
                 pensionProjectRequestDto.VoluntaryContribution,
-                Utils.AvailablePensionOptions.GetPensionPercentage(pensionProjectRequestDto.SelectedPensionPercentage),
+                AvailablePensionOptions.GetPensionPercentage(pensionProjectRequestDto.SelectedPensionPercentage),
                 pensionProjectRequestDto.Salary
               )
           };
@@ -96,7 +96,7 @@ namespace HRConnect.Api.Services
 
       if (currentAge >= PENSION_PROJECTION_AGE_LIMIT)
       {
-        warningMessage += "You have reached retirement age — projections not available.";
+        warningMessage += "You have reached retirement age ï¿½ projections not available.";
       }
       if (EmploymentStatus != EmploymentStatus.Permanent)
       {
@@ -261,6 +261,11 @@ namespace HRConnect.Api.Services
       {
         for (int month = currentMonth; month <= 12; month++)
         {
+          if (_monthlyContributions == null || _voluntaryContributions == null)
+          {
+            throw new InvalidOperationException("Monthly contributions or voluntary contributions array is not initialized.");
+          }
+
           if ((month == determineWhenIsApril + today.Month) && currentMonth == today.Month)
           {
             empSalary = Math.Round(empSalary * (decimal)(SALARYINCREASE_PERCENTAGE + 1), 2);
@@ -270,11 +275,12 @@ namespace HRConnect.Api.Services
             empSalary = Math.Round(empSalary * (decimal)(SALARYINCREASE_PERCENTAGE + 1), 2);
           }
 
-          decimal monthlyContribution = Math.Round(empSalary * (decimal)Utils.AvailablePensionOptions.GetPensionPercentage(selectedPercentage), 2);
+          decimal monthlyContribution = Math.Round(empSalary * (decimal)AvailablePensionOptions.GetPensionPercentage(selectedPercentage), 2);
 
           if (voluntaryContributionFrequency == ContributionFrequency.Permanent)
           {
             decimal voluntaryContributionAfterSalaryIncrease = CalculateExcessAmountFromVoluntaryContribution(monthlyContribution, voluntaryContribution);
+
             _monthlyContributions[year][month - 1] = PensionMonthlyContributionCap(monthlyContribution + voluntaryContributionAfterSalaryIncrease);
             _voluntaryContributions[year][month - 1] = voluntaryContributionAfterSalaryIncrease;
             _totalProjectedSavings += Math.Round(PensionMonthlyContributionCap(monthlyContribution + voluntaryContribution), 2);

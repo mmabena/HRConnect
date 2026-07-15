@@ -1,15 +1,11 @@
 namespace HRConnect.Api.Utils.Payroll
 {
-  using HRConnect.Api.Models.Payroll;
-  using OfficeOpenXml;
-  using System.IO;
-
   public class PayrollUtil
   {
     /// <summary>
     /// Gets and calculate the current year's financial period
     /// <returns>
-    ///(<c>start</c>, <c><end/c>) represent the start and end of each financial year respectively. 
+    ///(<c>start</c>, <c><end/c>) represent the start and end of each financial year respectively.
     /// Current a finacial year should start on 1st of April and on 31st March
     /// <returns>
     /// <summary>
@@ -36,7 +32,7 @@ namespace HRConnect.Api.Utils.Payroll
 
     /// <summary >
     /// Helper function to get the current payroll run number based on current date
-    /// <para name="currentDate">The date used to find the desired run <param> 
+    /// <para name="currentDate">The date used to find the desired run <param>
     /// <summary >
     public static int SetPayrunNumber()
     {

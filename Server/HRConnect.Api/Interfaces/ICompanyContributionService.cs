@@ -7,9 +7,10 @@ namespace HRConnect.Api.Interfaces
     public interface ICompanyContributionService
     {
         Task<List<CompanyContributionDto>> GetAllCompanyContributionAsync();
-        Task<CompanyContributionDto?> GetCompanyContributionByIdAsync(int id);
+        Task<CompanyContributionDto?> GetCompanyContributionByIdAsync(int companyContributionId);
         Task<CompanyContributionDto> CreateCompanyContributionAsync(CompanyContribution companyContributionModel);
         Task<CompanyContributionDto> UpdateCompanyContributionAsync(CompanyContribution companyContributionModel);
-        Task DeleteAsync(int id);
+        Task DeleteCompanyContributionAsync(int companyContributionId);
+        Task<bool> FindAllocatedContribution(int payrollRunId);
     }
 }

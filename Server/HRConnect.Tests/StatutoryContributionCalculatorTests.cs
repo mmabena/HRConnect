@@ -1,7 +1,6 @@
 namespace HRConnect.Tests
 {
   using System.Reflection;
-  using FluentAssertions;
   using HRConnect.Api.Utils;
 
   public class StatutoryContributionCalculatorTests
@@ -86,9 +85,9 @@ namespace HRConnect.Tests
       Action result = () => payrollCalculator.CalculateUifEmployee(-1m);
 
       //Assert
-      result.Should().Throw<ArgumentOutOfRangeException>()
-      .WithParameterName("monthlySalary")
-      .WithMessage("Monthly salary cannot be negative value*");
+      var exception = Assert.Throws<ArgumentOutOfRangeException>(result);
+      Assert.Equal("monthlySalary", exception.ParamName);
+      Assert.StartsWith("Monthly salary cannot be negative value", exception.Message, StringComparison.Ordinal);
     }
   }
 }

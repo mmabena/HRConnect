@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using HRConnect.Api.DTOs;
 using HRConnect.Api.Interfaces;
@@ -11,8 +11,6 @@ using System.Threading.Tasks;
 using Xunit;
 using HRConnect.Api.Repository;
 
-namespace HRConnect.Tests
-{
   public class PensionFundServiceTests
   {
     private readonly Mock<IPensionFundRepository> _fundRepoMock;
@@ -214,4 +212,3 @@ namespace HRConnect.Tests
 
   }
 }
-

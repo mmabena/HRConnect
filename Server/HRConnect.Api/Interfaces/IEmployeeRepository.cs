@@ -12,6 +12,7 @@ namespace HRConnect.Api.Interfaces
     Task<Employee> CreateEmployeeAsync(Employee employeeModel);
     Task<Employee?> UpdateEmployeeAsync(Employee employeeModel);
     Task<List<string>> GetAllEmployeeIdsWithPrefix(string prefix);
+    Task<List<Employee>> GetAllEmployeeByCompanyAsync(string companyId);
     Task<bool> DeleteEmployeeAsync(string employeeId);
     Task<IDbContextTransaction> BeginTransactionAsync();
 
