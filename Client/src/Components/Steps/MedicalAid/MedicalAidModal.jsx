@@ -46,40 +46,7 @@ const MedicalAidModal = ({
 
   const genderOptions = ["Male", "Female"];
 
-  // =========================
-  // LOAD DATA
-  // =========================
-  // useEffect(() => {
-  //   const loadPlans = async () => {
-  //     try {
-  //       setLoading(true);
 
-  //       const counts = getDependentCounts(dependents);
-
-  //       const result = await getMedicalAidPlans();
-
-  //       const result = await getEligibleMedicalAidPlans({
-  //         salary: employee.monthlySalary,
-  //         employmentStatus: employee.employmentStatus,
-  //         employeeName: employee.firstName,
-  //         employeeSurname: employee.lastName,
-  //         numberOfPrincipals: counts.principalCount,
-  //         numberOfAdults: counts.adultCount,
-  //         numberOfChildren: counts.childrenCount,
-  //       });
-
-  //       setPlans(Array.isArray(result) ? result : []);
-  //       console.log("Loaded medical aid plans:", result);
-  //     } catch (error) {
-  //       console.log("Failed to load medical aid plans", error);
-  //       setPlans([]);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   loadPlans();
-  // }, []);
 
   const loadEligiblePlans = async () => {
   try {
@@ -258,6 +225,16 @@ useEffect(() => {
     }));
   };
 
+  const formatCurrency = (value) => {
+    if (!value) return "N/A";
+
+    return new Intl.NumberFormat("en-ZA", {
+      style: "currency",
+      currency: "ZAR",
+      minimumFractionDigits: 2,
+    }).format(Number(value));
+  };
+
   return (
     <div className="emp-medical-aid-container">
       {/* HEADER */}
@@ -380,11 +357,11 @@ useEffect(() => {
                               </span>
                               <div className="medical-price-amount-box">
                                 <span className="medical-price-amount">
-                                  R{" "}
-                                  {Number(
+                                  
+                                  {formatCurrency(
                                     plan.totalMonthlyContributionsPrincipal ||
-                                      0,
-                                  ).toFixed(2)}
+                                      "0.00",
+                                  )}
                                 </span>
                               </div>
                             </div>
@@ -396,10 +373,11 @@ useEffect(() => {
                               <span className="medical-price-title">ADULT</span>
                               <div className="medical-price-amount-box">
                                 <span className="medical-price-amount">
-                                  R{" "}
-                                  {Number(
-                                    plan.totalMonthlyContributionsAdult || 0,
-                                  ).toFixed(2)}
+                                  {formatCurrency(
+                                    plan.totalMonthlyContributionsAdult ||
+                                      "0.00",
+                                  )}
+                                  
                                 </span>
                               </div>
                             </div>
@@ -411,10 +389,10 @@ useEffect(() => {
                               <span className="medical-price-title">CHILD</span>
                               <div className="medical-price-amount-box">
                                 <span className="medical-price-amount">
-                                  R{" "}
-                                  {Number(
-                                    plan.totalMonthlyContributionsChild || 0,
-                                  ).toFixed(2)}
+                                  {formatCurrency(
+                                    plan.totalMonthlyContributionsChild ||
+                                      "0.00",
+                                  )}
                                 </span>
                               </div>
                             </div>
@@ -428,11 +406,10 @@ useEffect(() => {
                               </span>
                               <div className="medical-price-amount-box">
                                 <span className="medical-price-amount">
-                                  R{" "}
-                                  {Number(
-                                    plan.totalMonthlyContributionsSecondChild ||
-                                      0,
-                                  ).toFixed(2)}
+                                  {formatCurrency(
+                                    plan.totalMonthlyContributionsChild2 ?? plan.totalMonthlyContributionsChild ??
+                                      "0.00",
+                                  )}
                                 </span>
                               </div>
                             </div>
@@ -446,10 +423,10 @@ useEffect(() => {
 
                               <div className="medical-price-amount-box">
                                 <span className="medical-price-amount">
-                                  R{" "}
-                                  {Number(
-                                    plan.estimatedTotalMonthlyPremium ?? 0,
-                                  ).toFixed(2)}
+                                  {formatCurrency(
+                                    plan.estimatedTotalMonthlyPremium ||
+                                      "0.00",
+                                  )}
                                 </span>
                               </div>
                             </div>

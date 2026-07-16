@@ -88,8 +88,8 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
     Console.WriteLine("Duplicate check complete");
     Console.WriteLine("========================================================");
 
-Console.WriteLine("Checking eligibility");
-Console.WriteLine("========================================================");
+    Console.WriteLine("Checking eligibility");
+    Console.WriteLine("========================================================");
 
     if (dupFound != null)
       throw new ArgumentException("Employee already has an active medical aid deduction");
@@ -240,8 +240,8 @@ Console.WriteLine("========================================================");
     Console.WriteLine("Eligibility complete");
     Console.WriteLine("========================================================");
 
-Console.WriteLine("Adding payroll record");
-Console.WriteLine("========================================================");
+    Console.WriteLine("Adding payroll record");
+    Console.WriteLine("========================================================");
 
     // Create the deduction entity
     var deduction = new MedicalAidDeduction
@@ -281,17 +281,23 @@ Console.WriteLine("========================================================");
 
     // Save to repository
 
+    Console.WriteLine($"Current deduction Id before AddRecord: {deduction.Id}");
+    Console.WriteLine("========================================================");
+
     await _payrollRunService.AddRecordToCurrentRunAsync(deduction, employee.EmployeeId);
+
+    Console.WriteLine($"Current deduction Id after AddRecord: {deduction.Id}");
 
     Console.WriteLine("Payroll record added");
     Console.WriteLine("========================================================");
 
-Console.WriteLine("Saving deduction");
-Console.WriteLine("========================================================");
+    Console.WriteLine("Saving deduction");
+    Console.WriteLine("========================================================");
 
-    await _medicalAidDeductionRepository.AddNewMedicalAidDeductionsAsync(deduction);
+    //await _medicalAidDeductionRepository.AddNewMedicalAidDeductionsAsync(deduction);
 
     Console.WriteLine("Done");
+    Console.WriteLine($"Current deduction Id after Repository Save: {deduction.Id}");
     Console.WriteLine("========================================================");
 
     return MedicalAidDeductionMapper.MapToDto(deduction);
@@ -540,76 +546,104 @@ Console.WriteLine("========================================================");
 
   public async Task RollOverMedicalAidDeductions()
   {
-    int currentMonth = DateTime.Now.Month;
-    int currentYear = DateTime.Now.Year;
+    Console.WriteLine("########################################");
+    Console.WriteLine("### MEDICAL AID ROLLOVER WAS CALLED ###");
+    Console.WriteLine("########################################");
+    
+    Console.WriteLine("===== Starting Medical Aid Deduction Rollover =====");
 
-    // Get all deductions from the previous run
     var currentRun = await _payrollRunService.GetCurrentRunAsync();
+
     if (currentRun == null)
-      throw new InvalidDataException("No current payroll run found");
-
-    var previousPayRunNumber = currentRun.PayrollRunId - 1;
-
-    var previousDeductions =
-      await _medicalAidDeductionRepository.GetAllRecordsFromPreviousRun(previousPayRunNumber);
-
-    if (previousDeductions == null || previousDeductions.Count == 0)
-      throw new InvalidDataException("No previous Medical Aid Deductions found on the previous Run");
-
-    //Roll over the deductions
-    var filteredPreviousDeductions = previousDeductions
-      .Where(p => (p.TerminationDate == null ||
-                  (p.TerminationDate.Value.Month > currentMonth &&
-                   p.TerminationDate.Value.Year >= currentYear)) &&
-                  !p.IsActive
-                  )
-      .OrderBy(p => p.Id)
-      .ToList();
-
-    var recordsToRollover = new List<PayrollRecord>();
-    var employeeIds = new List<string>();
-
-
-
-    foreach (var previousDeduction in filteredPreviousDeductions)
     {
-      // Create a new instance
-      var newDeduction = new MedicalAidDeduction
-      {
-        EmployeeId = previousDeduction.EmployeeId,
-        Name = previousDeduction.Name,
-        Surname = previousDeduction.Surname,
-        Branch = previousDeduction.Branch,
-        Salary = previousDeduction.Salary,
-        EmployeeStartDate = previousDeduction.EmployeeStartDate,
-        EffectiveDate = previousDeduction.EffectiveDate,
-        MedicalOptionId = previousDeduction.MedicalOptionId,
-        MedicalCategoryId = previousDeduction.MedicalCategoryId,
-        PrincipalCount = previousDeduction.PrincipalCount,
-        AdultCount = previousDeduction.AdultCount,
-        ChildrenCount = previousDeduction.ChildrenCount,
-        PrincipalPremium = previousDeduction.PrincipalPremium,
-        SpousePremium = previousDeduction.SpousePremium,
-        ChildPremium = previousDeduction.ChildPremium,
-        TotalDeductionAmount = previousDeduction.TotalDeductionAmount,
-        IsActive = true,  // New records are active
-        CreatedDate = DateTime.Now,
-        TerminationDate = previousDeduction.TerminationDate,
-        TerminationReason = previousDeduction.TerminationReason,
-        UpdatedDate = previousDeduction.UpdatedDate,
-
-        OptionName = previousDeduction.OptionName,
-        OptionCategoryName = previousDeduction.OptionCategoryName,
-        PayrollRunId = currentRun.PayrollRunId  // Set to NEW run ID
-      };
-      recordsToRollover.Add(newDeduction);
+      Console.WriteLine("Current payroll run is NULL.");
+      return;
     }
 
-    await _payrollRunService.AddRecordsCollectionToRunAsync(recordsToRollover);
+    Console.WriteLine($"Current Run ID: {currentRun.PayrollRunId}");
 
+    var previousRunId = currentRun.PayrollRunId - 1;
+    Console.WriteLine($"Previous Run ID: {previousRunId}");
 
+    var previousDeductions =
+        await _medicalAidDeductionRepository
+            .GetAllRecordsFromPreviousRun(previousRunId);
 
-    await SaveChangesAsync();
+    Console.WriteLine($"Current Run: {currentRun.PayrollRunId}");
+Console.WriteLine($"Previous Run: {previousRunId}");
+
+var allMedicalAid = await _medicalAidDeductionRepository.GetAllMedicalAidDeductionsAsync();
+
+Console.WriteLine($"Total Medical Aid records: {allMedicalAid.Count}");
+
+foreach (var d in allMedicalAid.OrderByDescending(x => x.PayrollRunId))
+{
+    Console.WriteLine(
+        $"Run={d.PayrollRunId} Employee={d.EmployeeId} Active={d.IsActive}");
+}
+
+    Console.WriteLine($"Found {previousDeductions.Count} deductions in previous run.");
+
+    var activeDeductions = previousDeductions.Where(x => x.IsActive).ToList();
+
+    Console.WriteLine($"Found {activeDeductions.Count} active deductions.");
+
+    foreach (var deduction in activeDeductions)
+    {
+      Console.WriteLine("--------------------------------------");
+      Console.WriteLine($"Rolling over Employee: {deduction.EmployeeId}");
+      Console.WriteLine($"Option: {deduction.OptionName}");
+      Console.WriteLine($"IsActive: {deduction.IsActive}");
+      Console.WriteLine($"Adults: {deduction.AdultCount}");
+      Console.WriteLine($"Children: {deduction.ChildrenCount}");
+      Console.WriteLine($"Principal Premium: {deduction.PrincipalPremium}");
+      Console.WriteLine($"Total Deduction: {deduction.TotalDeductionAmount}");
+
+      var newDeduction = new MedicalAidDeduction
+      {
+        EmployeeId = deduction.EmployeeId,
+        Name = deduction.Name,
+        Surname = deduction.Surname,
+        Branch = deduction.Branch,
+
+        Salary = deduction.Salary,
+        EmployeeStartDate = deduction.EmployeeStartDate,
+        EffectiveDate = deduction.EffectiveDate,
+
+        MedicalOptionId = deduction.MedicalOptionId,
+        MedicalCategoryId = deduction.MedicalCategoryId,
+        OptionName = deduction.OptionName,
+        OptionCategoryName = deduction.OptionCategoryName,
+
+        PrincipalCount = deduction.PrincipalCount,
+        AdultCount = deduction.AdultCount,
+        ChildrenCount = deduction.ChildrenCount,
+
+        PrincipalPremium = deduction.PrincipalPremium,
+        SpousePremium = deduction.SpousePremium,
+        ChildPremium = deduction.ChildPremium,
+        TotalDeductionAmount = deduction.TotalDeductionAmount,
+
+        IsActive = deduction.IsActive,
+        CreatedDate = DateTime.Now,
+        UpdatedDate = DateTime.Now
+      };
+
+      Console.WriteLine($"Adding deduction to current payroll run ({currentRun.PayrollRunId})...");
+
+      await _payrollRunService.AddRecordToCurrentRunAsync(
+          newDeduction,
+          deduction.EmployeeId);
+
+      Console.WriteLine("Added to payroll run successfully.");
+
+      await _medicalAidDeductionRepository
+          .AddNewMedicalAidDeductionsAsync(newDeduction);
+
+      Console.WriteLine($"Saved new deduction for {deduction.EmployeeId}.");
+    }
+
+    Console.WriteLine("===== Finished Medical Aid Deduction Rollover =====");
   }
 
   public async Task SaveChangesAsync()

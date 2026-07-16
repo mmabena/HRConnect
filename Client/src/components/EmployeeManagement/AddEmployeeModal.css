@@ -540,7 +540,7 @@ position: relative;
   font-size: 14px;
   text-align: right;
   padding-top: 5.5px;
-  padding-right: 48%;
+  padding-right: 8%;
 }
 
 .emp-name-input[type="date"] {
@@ -691,7 +691,8 @@ option:checked {
 }
 
 .emp-disability-input {
-  margin-left: 26px;
+  margin-left: 47px;
+  width: 250px;
   color: var(--text-primary);
   border: 1px solid rgba(0, 96, 136, 0.60);
   outline: none;

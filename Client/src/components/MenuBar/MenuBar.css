@@ -697,7 +697,7 @@
   font-family: "Anek Bangla", sans-serif;
   font-size: 20px;
   font-weight: 400;
-  color: #002d40;
+  color: #355867;
 }
 
 .per-page-label {
@@ -1368,7 +1368,7 @@
   width: 187px;
   display: flex;
   padding: 5px 10px;
-
+  margin-right: 27px;
   justify-content: center;
   align-items: center;
   gap: 10px;
@@ -1469,7 +1469,7 @@
   position: relative;
   gap: 4px;
   flex: 1 0 0;
-  left: 215%;
+  left: 205%;
   flex-direction: row;
   width: 360px;
   height: 56px;
@@ -1501,6 +1501,7 @@
   width: 100%;
   height: 100%;
   border: none;
+  margin-right: 10px;
   background: transparent;
   font-size: 16px;
   padding: 0 8px;
@@ -1655,7 +1656,8 @@
 .pagination-container {
   display: flex;
   flex-direction: row;
-  width: 1461px;
+  width: 1481px;
+  border-top: 1px solid rgba(154, 154, 154, 0.55);
   height: 47px;
   padding: 10px 0 10px 10px;
   gap: 16px;
@@ -1663,7 +1665,7 @@
   box-sizing: border-box;
   align-items: center;
   margin-top: 20px;
-  margin-left: 20px;
+  margin-left: -20px;
 }
 
 .pagination-right-section {
@@ -1686,11 +1688,13 @@
   line-height: 100%;
   letter-spacing: 2%;
   color: #002d40;
+  margin-right: 50px;
   white-space: nowrap;
 }
 
 .pagination-controls {
   display: flex;
+  color: #006088;
   align-items: center;
   gap: 8px;
 }

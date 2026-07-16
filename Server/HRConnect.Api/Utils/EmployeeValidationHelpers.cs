@@ -247,19 +247,19 @@ namespace HRConnect.Api.Utils
     public static async Task ValidateNoDuplicatesOnCreateAsync(IEmployeeRepository repo, CreateEmployeeRequestDto employee)
     {
       if (await repo.GetEmployeeByEmailAsync(employee.Email) != null)
-        throw new BusinessRuleException("An employee with the same email already exists");
+        throw new BusinessRuleException("Email already exists");
 
       if (!string.IsNullOrWhiteSpace(employee.TaxNumber) &&
           await repo.GetEmployeeByTaxNumberAsync(employee.TaxNumber) != null)
-        throw new BusinessRuleException("An employee with the same tax number already exists");
+        throw new BusinessRuleException("Tax number already exists");
 
       if (!string.IsNullOrWhiteSpace(employee.IdNumber) &&
           await repo.GetEmployeeByIdNumberAsync(employee.IdNumber) != null)
-        throw new BusinessRuleException("An employee with the same ID number already exists");
+        throw new BusinessRuleException("ID number already exists");
 
       if (!string.IsNullOrWhiteSpace(employee.ContactNumber) &&
           await repo.GetEmployeeByContactNumberAsync(employee.ContactNumber) != null)
-        throw new BusinessRuleException("An employee with the same contact number already exists");
+        throw new BusinessRuleException("Contact number already exists");
     }
     ///<summary>
     ///Ensures that updated employee information does not conflict with existing employee records.

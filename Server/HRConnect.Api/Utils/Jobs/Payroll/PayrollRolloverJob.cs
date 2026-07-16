@@ -47,6 +47,7 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
     private static readonly int MAX_RUNS = 12;
     private readonly IEmployeePayrollEarningService _employeePayrollEarningService;
     private readonly IEmployeeDeductionService _employeeDeductionService;
+    private readonly IMedicalAidDeductionService _medicalAidDeductionService;
     //This makes mocking and using testing time-related edge cases a lot easier
     private readonly Func<DateTime> _now;
 
@@ -55,7 +56,7 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
       IReportsService reportsService, IBankingDetailService bankingDetailService, IUserService userService,
       IEmployeeService employeeService,
       IEmployeePayrollEarningService employeePayrollEarningService,
-      IEmployeeDeductionService employeeDeductionService,
+      IEmployeeDeductionService employeeDeductionService, IMedicalAidDeductionService medicalAidDeductionService,
       INotificationService notificationsService, Func<DateTime>? now = null)
     {
       _payrollRunRepo = payrollRunRepo;
@@ -66,6 +67,7 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
       _bankingDetailService = bankingDetailService;
       _userService = userService;
       _employeeService = employeeService;
+      _medicalAidDeductionService = medicalAidDeductionService;
       _employeeDeductionService = employeeDeductionService;
       _employeePayrollEarningService = employeePayrollEarningService;
       _notificationsService = notificationsService;
@@ -149,12 +151,12 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
       DateTime currentDate = DateTime.Now;
       int runId = ((currentDate.Month + 8) % 12) + 1;
 
-      if (currentDate.Date !=
-        new DateTime(currentDate.Year, currentDate.Month,
-        DateTime.DaysInMonth(currentDate.Year, currentDate.Month)))
-      {
-        return;
-      }
+      // if (currentDate.Date !=
+      //   new DateTime(currentDate.Year, currentDate.Month,
+      //   DateTime.DaysInMonth(currentDate.Year, currentDate.Month)))
+      // {
+      //   return;
+      // }
 
       try
       {
@@ -231,9 +233,18 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
         var jobException = new JobExecutionException(ex);
         throw jobException;
       }
+      Console.WriteLine("====================1====================");
       await _employeePensionEnrollmentService.RollOverEmloyeePensionEnrollmentAsync();
+      Console.WriteLine("====================2====================");
       await _employeePayrollEarningService.RollOverEmployeePayrollEarningsAsync();
+      Console.WriteLine("========== BEFORE Medical Aid Rollover ==========");
+
+      await _medicalAidDeductionService.RollOverMedicalAidDeductions();
+
+      Console.WriteLine("========== AFTER Medical Aid Rollover ==========");
+      Console.WriteLine("====================3====================");
       await _employeeDeductionService.RollOverEmployeePayrollEarningsAsync();
+      Console.WriteLine("====================4====================");
       await RolloverPensionDeductions();
     }
 

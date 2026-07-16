@@ -34,6 +34,7 @@ namespace HRConnect.Api.Data
     public DbSet<PasswordResetPin> PasswordResetPins { get; set; }
     public DbSet<PasswordHistory> PasswordHistories { get; set; }
     public DbSet<MedicalOption> MedicalOptions { get; set; }
+    public DbSet<MedicalAidDependent> MedicalAidDependents { get; set; }
     public DbSet<MedicalOptionCategory> MedicalOptionCategories { get; set; }
     public DbSet<TaxTableUpload> TaxTableUploads { get; set; }
     public DbSet<TaxDeduction> TaxDeductions { get; set; }
@@ -101,7 +102,7 @@ namespace HRConnect.Api.Data
       .Property(m => m.EncryptedUserSecret)
       .HasConversion(byteEncryptor);
 
-     
+
       // Employee Relationships
       modelBuilder.Entity<Employee>()
           .HasOne(e => e.Position)
@@ -303,6 +304,8 @@ namespace HRConnect.Api.Data
       .WithOne(r => r.Period)
       .HasForeignKey(p => p.PeriodId);
 
+
+
       //EF needs to know that PayrollRecord is a base type (abstract)
       modelBuilder.Entity<PayrollRecord>().UseTpcMappingStrategy();
 
@@ -331,6 +334,25 @@ namespace HRConnect.Api.Data
           .HasForeignKey(m => m.MedicalCategoryId)
           .OnDelete(DeleteBehavior.NoAction);
 
+      modelBuilder.Entity<MedicalAidDependent>()
+          .HasOne(d => d.Employee)
+          .WithMany(e => e.MedicalAidDependents)
+          .HasForeignKey(d => d.EmployeeId)
+          .OnDelete(DeleteBehavior.Cascade);
+
+      modelBuilder.Entity<MedicalAidDependent>()
+          .Property(d => d.Gender)
+          .HasConversion<string>();
+
+      modelBuilder.Entity<MedicalAidDependent>()
+          .Property(d => d.Relationship)
+          .HasConversion<string>();
+
+
+      modelBuilder.Entity<MedicalAidDependent>()
+          .HasIndex(d => d.IdNumber)
+          .IsUnique();
+
       // Pension Enrollment
       modelBuilder.Entity<Employee>()
           .HasMany(epe => epe.EmployeePensionEnrollment)
@@ -349,8 +371,8 @@ namespace HRConnect.Api.Data
           .WithMany(bc => bc.BankingDetails)
           .HasForeignKey(b => b.BankBranchCodeId)
           .OnDelete(DeleteBehavior.Restrict);
-      
-    
+
+
 
       modelBuilder.Entity<BankingDetail>()
     .HasIndex(b => b.AccountNumberSearchHash)
@@ -418,9 +440,9 @@ namespace HRConnect.Api.Data
         .HasForeignKey(ed => ed.EmployeeId)
         .OnDelete(DeleteBehavior.NoAction);
 
-  modelBuilder.Entity<User>()
-      .Property(u => u.TempRole)
-      .HasConversion<string>();
+      modelBuilder.Entity<User>()
+          .Property(u => u.TempRole)
+          .HasConversion<string>();
 
       modelBuilder.Entity<TOTPState>()
       .HasIndex(u => u.UserId);

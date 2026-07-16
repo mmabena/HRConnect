@@ -146,5 +146,8 @@ namespace HRConnect.Api.Models
     public ICollection<EmployeePayrollEarning> EmployeePayrollEarning { get; set; } = [];
     public ICollection<EmployeeDeduction> EmployeeDeduction { get; set; } = [];
 
+    public ICollection<MedicalAidDependent> MedicalAidDependents
+    { get; set; } = new List<MedicalAidDependent>();
+
   }
 }

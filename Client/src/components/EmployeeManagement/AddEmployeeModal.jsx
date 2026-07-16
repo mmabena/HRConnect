@@ -363,10 +363,9 @@ const AddEmployeeModal = ({ closeModal }) => {
 
           setFormErrors(error.response.data.errors);
 
-          toast.error("Validation failed.");
+          
           return;
         }
-        toast.error("Validation failed.");
         return;
       }
     }
@@ -651,7 +650,7 @@ const AddEmployeeModal = ({ closeModal }) => {
                         type="text"
                         name="disabilityType"
                         className={`emp-disability-input ${formErrors.disabilityType ? "emp-error-input" : ""}`}
-                        placeholder="Enter disability"
+                        placeholder="Capture disability"
                         value={employee.disabilityType}
                         onChange={onInputChange}
                       />

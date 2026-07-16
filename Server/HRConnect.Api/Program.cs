@@ -177,8 +177,8 @@ builder.Services.AddQuartz(q =>
   q.AddTrigger(opts => opts
   .ForJob(RolloverJobKey)
   .WithIdentity("PayrollRollover-Trigger")
-  .WithCronSchedule("0 0 0 1 * ?", x =>
-  x.WithMisfireHandlingInstructionFireAndProceed()));
+    .WithCronSchedule("0 0/1 * * * ?", x =>
+    x.WithMisfireHandlingInstructionFireAndProceed()));
 
   q.AddTrigger(opts => opts
   .ForJob(NotificationJobKey)
@@ -250,6 +250,8 @@ builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
 builder.Services.AddScoped<ICompanyService, CompanyService>();
 builder.Services.AddScoped<IActiveCompanyService, ActiveCompanyService>();
 builder.Services.AddScoped<IUserCompanyService, UserCompanyService>();
+builder.Services.AddScoped<IMedicalAidDependentService, MedicalAidDependentService>();
+builder.Services.AddScoped<IMedicalAidDependentRepository, MedicalAidDependentRepository>();
 builder.Services.AddScoped<IUserCompanyRepository, UserCompanyRepository>();
 builder.Services.AddScoped<ICompanyContributionRepository, CompanyContributionRepository>();
 builder.Services.AddScoped<IEmployeeCompanyContributionRepository, EmployeeCompanyContributionRepository>();

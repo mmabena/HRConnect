@@ -162,7 +162,7 @@ namespace HRConnect.Api.Repository
       return await _context.MedicalAidDeductions
         .Include(d => d.PayrollRun)
         .Where(d =>
-          !d.IsActive &&
+          d.IsActive &&
           d.PayrollRun != null && d.PayrollRunId == previousRunNumber &&
           d.PayrollRun.IsFinalised &&
           d.PayrollRun.IsLocked)
