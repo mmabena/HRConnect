@@ -12,7 +12,10 @@ import {
   validateEmployee as validateEmployeeAPI,
 } from "../../api/Employee";
 import { addBankingDetails } from "../../api/BankingDetail";
-import { createMedicalAidDeduction } from "../../api/MedicalAidPlan.js";
+import {
+  createMedicalAidDeduction,
+  createMedicalAidDependent,
+} from "../../api/MedicalAidPlan.js";
 import { getDependentCounts } from "../../utils/medicalAidHelpers";
 import { getJobGradeGroups } from "../../api/JobGradeGroup";
 
@@ -218,6 +221,10 @@ const AddEmployeeModal = ({ closeModal }) => {
         profileImage: employee.profileImage,
       };
 
+      console.log("FULL EMPLOYEE PAYLOAD");
+      console.log(JSON.stringify(EmployeePayload, null, 2));
+      
+
       if (employee.idType === "id") {
         EmployeePayload.idNumber = employee.idNumber ?? "";
         EmployeePayload.passportNumber = "";
@@ -279,7 +286,31 @@ const AddEmployeeModal = ({ closeModal }) => {
 
           console.log("FULL MEDICAL PAYLOAD");
           console.log(JSON.stringify(medicalPayload, null, 2));
+
           await createMedicalAidDeduction(employeeId, medicalPayload);
+
+          const dependents = medicalInfo.dependents || [];
+
+          for (const dependent of dependents) {
+            const medicalAidDependentModel = {
+              firstName: dependent.firstName,
+              lastName: dependent.lastName,
+              idNumber: dependent.idNumber || "",
+              passportNumber: dependent.passportNumber || "",
+              gender: dependent.gender,
+              dateOfBirth: dependent.dateOfBirth,
+              relationship: dependent.relationship,
+            };
+
+            console.log(
+              "MEDICAL AID DEPENDENT PAYLOAD:",
+              JSON.stringify(medicalAidDependentModel, null, 2),
+            );
+            await createMedicalAidDependent(
+              employeeId,
+              medicalAidDependentModel,
+            );
+          }
         }
       }
 
@@ -363,7 +394,6 @@ const AddEmployeeModal = ({ closeModal }) => {
 
           setFormErrors(error.response.data.errors);
 
-          
           return;
         }
         return;
@@ -832,7 +862,7 @@ const AddEmployeeModal = ({ closeModal }) => {
                         let rawValue = e.target.value.replace(/[^0-9.]/g, "");
 
                         const parts = rawValue.split(".");
-                        if (parts.length > 2){
+                        if (parts.length > 2) {
                           rawValue = parts[0] + "." + parts[1];
                         }
 

@@ -5,7 +5,7 @@ namespace HRConnect.Api.Repository
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models.PayrollDeduction;
   using Microsoft.EntityFrameworkCore;
-  
+
   public class MedicalAidDeductionRepository : IMedicalAidDeductionRepository
   {
     private readonly ApplicationDBContext _context;
@@ -50,10 +50,34 @@ namespace HRConnect.Api.Repository
       return await _context.MedicalAidDeductions
         .AsNoTracking()
         .Include(p => p.PayrollRun)
-        .Where(p => p.Id != null && p.PayrollRun!.PayrollRunId != null &&
-        !p.PayrollRun.IsFinalised && !p.PayrollRun.IsLocked)
         .ToListAsync();
     }
+
+    public async Task<List<MedicalAidDeduction>> GetActiveDeductionsFromMostRecentFinalizedRunAsync()
+    {
+      var latestFinalizedRunId =
+          await _context.MedicalAidDeductions
+              .Where(d =>
+                  d.PayrollRun != null &&
+                  d.PayrollRun.IsFinalised &&
+                  d.PayrollRun.IsLocked)
+              .OrderByDescending(d => d.PayrollRunId)
+              .Select(d => d.PayrollRunId)
+              .FirstOrDefaultAsync();
+
+      if (latestFinalizedRunId == 0)
+      {
+        return new List<MedicalAidDeduction>();
+      }
+
+      return await _context.MedicalAidDeductions
+          .AsNoTracking()
+          .Where(d =>
+              d.PayrollRunId == latestFinalizedRunId)
+          .ToListAsync();
+    }
+
+
 
     /// <summary>
     /// Adds a new medical aid deduction record to the database.
@@ -75,20 +99,20 @@ namespace HRConnect.Api.Repository
     public async Task UpdateDeductionsByEmpIdAsync(string employeeId, int payrollRunId,
       MedicalAidDeduction updatePayloadDeduction)
     {
-       var existingDeduction = await _context.MedicalAidDeductions
-         .Include(d => d.PayrollRun)
-         .FirstOrDefaultAsync(d =>
-           d.EmployeeId == employeeId &&
-           d.PayrollRunId == payrollRunId &&
-           d.PayrollRun != null &&
-           !d.PayrollRun.IsFinalised &&
-           !d.PayrollRun.IsLocked);
+      var existingDeduction = await _context.MedicalAidDeductions
+        .Include(d => d.PayrollRun)
+        .FirstOrDefaultAsync(d =>
+          d.EmployeeId == employeeId &&
+          d.PayrollRunId == payrollRunId &&
+          d.PayrollRun != null &&
+          !d.PayrollRun.IsFinalised &&
+          !d.PayrollRun.IsLocked);
 
       if (existingDeduction == null)
       {
         throw new KeyNotFoundException($"No medical aid deduction found for employee {employeeId} on the active payroll run");
       }
-      
+
       // Update mutable fields only
       existingDeduction.Name = updatePayloadDeduction.Name;
       existingDeduction.Surname = updatePayloadDeduction.Surname;
@@ -119,7 +143,7 @@ namespace HRConnect.Api.Repository
         : updatePayloadDeduction.UpdatedDate;
 
       await _context.SaveChangesAsync();
-      
+
     }
 
     /// <summary>
@@ -168,6 +192,30 @@ namespace HRConnect.Api.Repository
           d.PayrollRun.IsLocked)
         .ToListAsync();
     }
+
+    public async Task<MedicalAidDeduction?> GetMedicalAidDeductionForCurrentRunAsync(string employeeId)
+    {
+      return await _context.MedicalAidDeductions
+          .Include(d => d.PayrollRun)
+          .Where(d =>
+              d.EmployeeId == employeeId &&
+              d.PayrollRun != null &&
+              !d.PayrollRun.IsFinalised &&
+              !d.PayrollRun.IsLocked)
+          .OrderByDescending(d => d.CreatedDate)
+          .FirstOrDefaultAsync();
+    }
+
+    public async Task<List<MedicalAidDeduction>> GetActiveDeductionsByPayrollRunIdAsync(int payrollRunId)
+    {
+      return await _context.MedicalAidDeductions
+        .AsNoTracking()
+        .Where(d =>
+          d.PayrollRunId == payrollRunId &&
+          d.IsActive)
+        .ToListAsync();
+    }
+
 
     /// <summary>
     /// Saves all pending changes to the database.

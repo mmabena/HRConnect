@@ -9,6 +9,7 @@ import {
   X,
   ShieldCheck,
 } from "lucide-react";
+import { toast } from "react-toastify";
 
 import {
   getMedicalAidPlans,
@@ -29,14 +30,18 @@ const MedicalAidModal = ({
 
   const salary = employee?.monthlySalary || 0;
 
-  const [dependents, setDependents] = useState(employee?.medicalAidInfo?.dependents || []);
+  const [dependents, setDependents] = useState(
+    employee?.medicalAidInfo?.dependents || [],
+  );
 
   const [showDependentModal, setShowDependentModal] = useState(false);
 
   const [newDependent, setNewDependent] = useState({
-    fullName: "",
+    firstName: "",
     lastName: "",
+    identificationType: "idNumber",
     gender: "",
+    passportNumber: "",
     idNumber: "",
     relationship: "",
     dateOfBirth: "",
@@ -46,81 +51,76 @@ const MedicalAidModal = ({
 
   const genderOptions = ["Male", "Female"];
 
-
-
   const loadEligiblePlans = async () => {
-  try {
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const counts = getDependentCounts(dependents);
+      const counts = getDependentCounts(dependents);
 
-    const result = await getEligibleMedicalAidPlans({
-      salary: employee.monthlySalary,
-      employmentStatus: employee.employmentStatus,
-      employeeName: employee.firstName,
-      employeeSurname: employee.lastName,
-      numberOfPrincipals: counts.principalCount,
-      numberOfAdults: counts.adultCount,
-      numberOfChildren: counts.childrenCount,
-    });
+      const result = await getEligibleMedicalAidPlans({
+        salary: employee.monthlySalary,
+        employmentStatus: employee.employmentStatus,
+        employeeName: employee.firstName,
+        employeeSurname: employee.lastName,
+        numberOfPrincipals: counts.principalCount,
+        numberOfAdults: counts.adultCount,
+        numberOfChildren: counts.childrenCount,
+      });
 
-    setPlans(result);
+      setPlans(result);
 
-    // Keep selected plan in sync
-    const selectedPlanId = employee?.medicalAidInfo?.planId;
+      // Keep selected plan in sync
+      const selectedPlanId = employee?.medicalAidInfo?.planId;
 
-    if (selectedPlanId) {
-      const updatedPlan = result
-        .flatMap(category => category.medicalOptions)
-        .find(
-          plan =>
-            String(plan.medicalOptionId) === String(selectedPlanId)
-        );
+      if (selectedPlanId) {
+        const updatedPlan = result
+          .flatMap((category) => category.medicalOptions)
+          .find(
+            (plan) => String(plan.medicalOptionId) === String(selectedPlanId),
+          );
 
-      if (updatedPlan) {
-        setEmployee(prev => ({
-          ...prev,
-          medicalAidInfo: {
-            ...prev.medicalAidInfo,
+        if (updatedPlan) {
+          setEmployee((prev) => ({
+            ...prev,
+            medicalAidInfo: {
+              ...prev.medicalAidInfo,
 
-            // Update all values that may have changed for the Preview step.
-            selectedPlan: updatedPlan,
-            estimatedTotalMonthlyPremium:
-              updatedPlan.estimatedTotalMonthlyPremium,
+              // Update all values that may have changed for the Preview step.
+              selectedPlan: updatedPlan,
+              estimatedTotalMonthlyPremium:
+                updatedPlan.estimatedTotalMonthlyPremium,
 
-            totalMonthlyContributionsPrincipal:
-              updatedPlan.totalMonthlyContributionsPrincipal,
+              totalMonthlyContributionsPrincipal:
+                updatedPlan.totalMonthlyContributionsPrincipal,
 
-            totalMonthlyContributionsAdult:
-              updatedPlan.totalMonthlyContributionsAdult,
+              totalMonthlyContributionsAdult:
+                updatedPlan.totalMonthlyContributionsAdult,
 
-            totalMonthlyContributionsChild:
-              updatedPlan.totalMonthlyContributionsChild,
+              totalMonthlyContributionsChild:
+                updatedPlan.totalMonthlyContributionsChild,
 
-            totalMonthlyContributionsSecondChild:
-              updatedPlan.totalMonthlyContributionsSecondChild,
-          },
-        }));
+              totalMonthlyContributionsSecondChild:
+                updatedPlan.totalMonthlyContributionsSecondChild,
+            },
+          }));
+        }
       }
+    } finally {
+      setLoading(false);
     }
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
-useEffect(() => {
-  loadEligiblePlans();
-}, [
-  employee.monthlySalary,
-  employee.employmentStatus,
-  dependents,
-]);
+  useEffect(() => {
+    loadEligiblePlans();
+  }, [employee.monthlySalary, employee.employmentStatus, dependents]);
 
   // =========================
   // FILTER BY SALARY
   // =========================
   const filteredPlans = useMemo(() => {
     const safeSalary = Number(salary) || 0;
+
+    
 
     return plans
       .map((category) => ({
@@ -146,8 +146,7 @@ useEffect(() => {
         planId: plan.medicalOptionId,
         medicalAidCategory: plan.medicalOptionCategoryName,
         medicalAidPlan: plan.medicalOptionName,
-        estimatedTotalMonthlyPremium:
-        plan.estimatedTotalMonthlyPremium ?? 0,
+        estimatedTotalMonthlyPremium: plan.estimatedTotalMonthlyPremium ?? 0,
         selectedPlan: plan,
       },
     }));
@@ -195,8 +194,10 @@ useEffect(() => {
     }));
 
     setNewDependent({
-      fullName: "",
+      firstName: "",
       lastName: "",
+      identificationType: "idNumber",
+      passportNumber: "",
       gender: "",
       idNumber: "",
       relationship: "",
@@ -234,6 +235,18 @@ useEffect(() => {
       minimumFractionDigits: 2,
     }).format(Number(value));
   };
+
+  const handleNext = () => {
+
+    const selectedPlanId = employee?.medicalAidInfo?.planId;
+
+    if (!selectedPlanId) {
+      toast.error("Please select a medical aid plan before proceeding.");
+      return;
+    }
+
+    onNext();
+  }
 
   return (
     <div className="emp-medical-aid-container">
@@ -275,7 +288,7 @@ useEffect(() => {
                   {/* LEFT — name + detail line */}
                   <div className="medical-dependent-info">
                     <span className="medical-dependent-name">
-                      {dep.fullName} {dep.lastName}
+                      {dep.firstName} {dep.lastName}
                     </span>
                     <span className="medical-dependent-meta">
                       {[dep.relationship, dep.dateOfBirth, dep.gender]
@@ -357,7 +370,6 @@ useEffect(() => {
                               </span>
                               <div className="medical-price-amount-box">
                                 <span className="medical-price-amount">
-                                  
                                   {formatCurrency(
                                     plan.totalMonthlyContributionsPrincipal ||
                                       "0.00",
@@ -377,7 +389,6 @@ useEffect(() => {
                                     plan.totalMonthlyContributionsAdult ||
                                       "0.00",
                                   )}
-                                  
                                 </span>
                               </div>
                             </div>
@@ -407,30 +418,24 @@ useEffect(() => {
                               <div className="medical-price-amount-box">
                                 <span className="medical-price-amount">
                                   {formatCurrency(
-                                    plan.totalMonthlyContributionsChild2 ?? plan.totalMonthlyContributionsChild ??
+                                    plan.totalMonthlyContributionsChild2 ??
+                                      plan.totalMonthlyContributionsChild ??
                                       "0.00",
                                   )}
                                 </span>
                               </div>
                             </div>
                           </div>
-                          
                         </div>
-                        <div className="medical-price-card medical-total-price-card">
-                          
-                            <div className="medical-price-content">
-                              <span className="medical-price-title">TOTAL</span>
+                        <div className="medical-total-price-card">
+                          <span className="medical-price-title">TOTAL:</span>
 
-                              <div className="medical-price-amount-box">
-                                <span className="medical-price-amount">
-                                  {formatCurrency(
-                                    plan.estimatedTotalMonthlyPremium ||
-                                      "0.00",
-                                  )}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
+                          <span className="medical-price-amount">
+                            {formatCurrency(
+                              plan.estimatedTotalMonthlyPremium || "0.00",
+                            )}
+                          </span>
+                        </div>
                       </div>
                     );
                   }),
@@ -448,7 +453,7 @@ useEffect(() => {
           Back
         </button>
 
-        <button className="medical-next-btn" onClick={onNext}>
+        <button className="medical-next-btn" onClick={handleNext}>
           Next
           <ArrowRight size={20} />
         </button>
@@ -491,11 +496,11 @@ useEffect(() => {
                   <input
                     type="text"
                     placeholder="First Name"
-                    value={newDependent.fullName}
+                    value={newDependent.firstName}
                     onChange={(e) =>
                       setNewDependent((prev) => ({
                         ...prev,
-                        fullName: e.target.value,
+                        firstName: e.target.value,
                       }))
                     }
                   />
@@ -518,53 +523,108 @@ useEffect(() => {
                 </div>
 
                 <div className="medical-input-group">
-                  <label>GENDER</label>
+                  <label>ID / PASSPORT</label>
 
-                  <select
-                    value={newDependent.gender}
-                    disabled={newDependent.idNumber.length === 13}
-                    onChange={(e) =>
-                      setNewDependent((prev) => ({
-                        ...prev,
-                        gender: e.target.value,
-                      }))
-                    }
-                  >
-                    <option value="" disabled hidden>
-                      Gender
-                    </option>
-                    {genderOptions.map((g) => (
-                      <option key={g} value={g}>
-                        {g}
-                      </option>
-                    ))}
-                  </select>
-                  <img
-                    src="/images/arrow_drop_down_circle.png"
-                    alt="Dropdown icon"
-                    className="icon-dropdown-icon"
-                  />
+                  <div className="medical-select-wrapper">
+                    <select
+                      value={newDependent.identificationType}
+                      onChange={(e) => {
+                        const type = e.target.value;
+
+                        setNewDependent((prev) => ({
+                          ...prev,
+                          identificationType: type,
+                          idNumber: "",
+                          passportNumber: "",
+                          gender: "",
+                          dateOfBirth: "",
+                        }));
+                      }}
+                    >
+                      <option value="idNumber">ID Number</option>
+                      <option value="passportNumber">Passport Number</option>
+                    </select>
+
+                    <img
+                      src="/images/arrow_drop_down_circle.png"
+                      alt="Dropdown icon"
+                      className="icon-dropdown-icon"
+                    />
+                  </div>
                 </div>
-
                 <div className="medical-input-group">
-                  <label>ID NUMBER</label>
+                  <label>
+                    {newDependent.identificationType === "idNumber"
+                      ? "ID NUMBER"
+                      : "PASSPORT NUMBER"}
+                  </label>
 
                   <input
                     type="text"
-                    placeholder="Id Number"
-                    value={newDependent.idNumber}
+                    placeholder={
+                      newDependent.identificationType === "idNumber"
+                        ? "ID Number"
+                        : "Passport Number"
+                    }
+                    value={
+                      newDependent.identificationType === "idNumber"
+                        ? newDependent.idNumber
+                        : newDependent.passportNumber
+                    }
                     onChange={(e) => {
-                      const idNumber = e.target.value;
+                      const value = e.target.value;
 
-                      const populated = populateDependentFromIdNumber(idNumber);
+                      if (newDependent.identificationType === "idNumber") {
+                        const populated = populateDependentFromIdNumber(value);
 
-                      setNewDependent((prev) => ({
-                        ...prev,
-                        idNumber,
-                        ...(idNumber.length === 13 ? populated : {}),
-                      }));
+                        setNewDependent((prev) => ({
+                          ...prev,
+                          idNumber: value,
+                          ...(value.length === 13 ? populated : {}),
+                        }));
+                      } else {
+                        setNewDependent((prev) => ({
+                          ...prev,
+                          passportNumber: value,
+                        }));
+                      }
                     }}
                   />
+                </div>
+
+                <div className="medical-input-group full-width">
+                  <label>GENDER</label>
+
+                  <div
+                    className={`medical-select-wrapper ${
+                      newDependent.relationship ? "has-value" : ""
+                    }`}
+                  >
+                    <select
+                      value={newDependent.gender}
+                      disabled={newDependent.idNumber.length === 13}
+                      onChange={(e) =>
+                        setNewDependent((prev) => ({
+                          ...prev,
+                          gender: e.target.value,
+                        }))
+                      }
+                    >
+                      <option value="" disabled hidden>
+                        Gender
+                      </option>
+                      {genderOptions.map((g) => (
+                        <option key={g} value={g}>
+                          {g}
+                        </option>
+                      ))}
+                    </select>
+                    <img
+                      src="/images/arrow_drop_down_circle.png"
+                      alt="Dropdown icon"
+                      className="icon-dropdown-icon"
+                    />
+                  </div>
                 </div>
 
                 <div className="medical-input-group">
@@ -610,7 +670,10 @@ useEffect(() => {
                     <input
                       type="date"
                       value={newDependent.dateOfBirth}
-                      disabled={newDependent.idNumber.length === 13}
+                      disabled={
+                        newDependent.identificationType === "idNumber" &&
+                        newDependent.idNumber.length === 13
+                      }
                       onChange={(e) =>
                         setNewDependent((prev) => ({
                           ...prev,

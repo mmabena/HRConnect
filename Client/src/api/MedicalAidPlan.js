@@ -62,6 +62,19 @@ export const createMedicalAidDeduction = async (employeeId, payload) => {
   }
 };
 
+export const createMedicalAidDependent = async (employeeId, payload) => {
+  try {
+    const response = await api.post(
+      `/medicalDependent/employee/${employeeId}`,
+      payload,
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error creating medical aid dependent:", error);
+    throw error;
+  }
+};
+
 export const getEligibleMedicalAidPlans = async (payload) => {
   try {
     const response = await api.post(

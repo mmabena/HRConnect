@@ -270,6 +270,10 @@
   box-sizing: border-box;
 }
 
+.medical-input-group.full-width {
+  grid-column: 1 / -1;
+}
+
 /* ===== SELECT WRAPPER ===== */
 .medical-select-wrapper {
   position: relative;
@@ -531,14 +535,16 @@ ical-price-card .medical-plan-status {
 ========================= */
 
 .medical-plan-pricing {
-  display: flex;
-  
-  flex-direction: row;
-  align-items: flex-start;
-  padding: 10px 0px 0px 0px;
-  margin-left: -12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 60px;
+  row-gap: -10px;
+  padding: 2px 0 0 0;
+  margin-left: -10px;
+  margin-top: -5px;
   width: 196px;
-  height: 39px;
+  height: auto;
 }
 
 /* =========================
@@ -549,9 +555,7 @@ ical-price-card .medical-plan-status {
   display: flex;
   flex-direction: row;
   align-items: flex-start;
-
   gap: 2px;
-
   padding: 5px 9px;
 }
 
@@ -560,11 +564,11 @@ ical-price-card .medical-plan-status {
 ========================= */
 
 .medical-price-content {
-  display: flex;
+  /* display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: flex-start; */
   padding: 0px;
-  gap: 2px;
+  gap: 20px;
   width: 42px;
   height: 38px;
 }
@@ -574,13 +578,19 @@ ical-price-card .medical-plan-status {
 ========================= */
 
 .medical-price-title {
-  width: 42px;
+  width: 100px;
   height: 10px;
   position: absolute;
   font-family: "League Spartan";
   font-style: normal;
   font-weight: 600;
-  font-size: 7px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 5px 5px;
+  font-size: 9.5px;
+  margin-left: 25px;
   line-height: 10px;
   letter-spacing: 0.02em;
   margin-top: 5px;
@@ -592,13 +602,9 @@ ical-price-card .medical-plan-status {
 ========================= */
 
 .medical-price-amount-box {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
   padding: 5px 5px;
   gap: 0px;
-  width: 52px;
+  width: 102px;
   height: 30px;
   background: rgba(255, 255, 255, 0.71);
   border-radius: 3px;
@@ -611,20 +617,26 @@ ical-price-card .medical-plan-status {
 .medical-price-amount {
   font-family: "Anek Bangla";
   font-style: bold;
+  margin-left: 25px;
   font-weight: 750;
-  font-size: 8px;
+    display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  font-size: 10px;
   letter-spacing: 0.00em;
   color: #4f6e78;
   margin-top: 7px;
 }
 
 .medical-total-price-card {
-  position: absolute;
-  right: 2px;
-  bottom: 5px;
+  position: relative;
+  left: 144px;
+  bottom: 0px;
   display: flex;
-  align-items: flex-end;
-  justify-content: flex-end;
+  margin-top: 0px;
+  flex-direction: row;
+  align-items: center;
 }
 
 .medical-total-price-card .medical-price-content {
@@ -634,12 +646,10 @@ ical-price-card .medical-plan-status {
 }
 
 .medical-total-price-card .medical-price-title {
-    font-size: 10px;
+    font-size: 12px;
   font-weight: 700;
   color: #4f6e78;
-  margin-top: 2px;
-  
-  margin-right: 9px;
+  margin-left: -25px;
 }
 
 .medical-total-price-card .medical-price-amount-box {
@@ -648,6 +658,7 @@ ical-price-card .medical-plan-status {
   height: 30px;
   padding: 4px 10px;
   display: flex;
+  margin-bottom: 15px;
   justify-content: center;
   align-items: center;
   background: #dcedf1;
@@ -656,8 +667,9 @@ ical-price-card .medical-plan-status {
 }
 
 .medical-total-price-card .medical-price-amount {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
+  margin-top: 2px;
   color: #2c5f6d;
   white-space: nowrap;
 }
@@ -683,7 +695,7 @@ ical-price-card .medical-plan-status {
 .medical-dependent-modal {
   position: relative;
   width: 520px;
-  height: 350px;
+  height: 430px;
   min-height: 30px;
   border-radius: 13px;
   display: flex;
