@@ -17,15 +17,51 @@ const PensionFundOptionsModal = ({ employee, setEmployee, onNext, onBack }) => {
     const loadPensionOptions = async () => {
       try {
         const data = await fetchALLPensionOptions();
-        setPensionOptions(data);
+        setPensionOptions(Array.isArray(data) ? data : []);
         console.log("Loaded Pension Options:", data);
       } catch (err) {
         setError("Failed to load pension options");
-        console.error("Failed to load pension options:", err)
+        console.error("Failed to load pension options:", err);
       }
     };
     loadPensionOptions();
   }, []);
+
+  const handlePensionToggle = () => {
+    setEmployee((prev) => ({
+      ...prev,
+      pensionEnabled: !prev.pensionEnabled,
+    }));
+  };
+
+  const handlePercentageSelection = (option) => {
+    setEmployee((prev) => ({
+      ...prev,
+      pensionEnabled: true,
+      pensionFundName: option.pensionFundName,
+
+      pensionOptionId: option.pensionOptionId,
+
+      employeeContribution: option.contributionPercentage,
+    }));
+  };
+
+  const handleVoluntaryContributionChange = (e) => {
+    const value = e.target.value;
+
+    setEmployee((prev) => ({
+      ...prev,
+
+      voluntaryContribution: value ? parseFloat(value) : 0,
+    }));
+  };
+
+  const handleFrequencyChange = (frequency) => {
+    setEmployee((prev) => ({
+      ...prev,
+      isVoluntaryContributionPermament: frequency === "Permanent",
+    }));
+  };
 
   return (
     <div className="emp-pension-fund-container">
@@ -98,19 +134,11 @@ const PensionFundOptionsModal = ({ employee, setEmployee, onNext, onBack }) => {
                         key={option.pensionOptionId}
                         type="button"
                         className={`pension-percent-btn ${
-                          selectedPercentage === option.contributionPercentage
+                          employee?.employeeContribution === option.contributionPercentage
                             ? "active"
                             : ""
                         }`}
-                        onClick={() => {
-                          setSelectedPercentage(option.contributionPercentage);
-
-                          setEmployee((prev) => ({
-                            ...prev,
-                            employeeContribution: option.contributionPercentage,
-                            pensionOptionId: option.pensionOptionId,
-                          }));
-                        }}
+                        onClick={() => handlePercentageSelection(option)}
                       >
                         {option.contributionPercentage}%
                       </button>
@@ -125,12 +153,14 @@ const PensionFundOptionsModal = ({ employee, setEmployee, onNext, onBack }) => {
           <div className="voluntary-section-title">VOLUNTARY CONTRIBUTION</div>
 
           <div className="voluntary-options">
+
             <button
               type="button"
               className={`voluntary-btn ${
-                frequency === "Once-Off" ? "active" : ""
+                employee?.isVoluntaryContributionPermament === false ? "active"
+                : ""
               }`}
-              onClick={() => setFrequency("Once-Off")}
+              onClick={() => handleFrequencyChange("Once-Off")}
             >
               Once-Off
             </button>
@@ -138,9 +168,10 @@ const PensionFundOptionsModal = ({ employee, setEmployee, onNext, onBack }) => {
             <button
               type="button"
               className={`voluntary-btn ${
-                frequency === "Permanent" ? "active" : ""
+                employee?.isVoluntaryContributionPermament === true ? "active"
+                : ""
               }`}
-              onClick={() => setFrequency("Permanent")}
+              onClick={() => handleFrequencyChange("Permanent")}
             >
               Permanent
             </button>
@@ -153,9 +184,15 @@ const PensionFundOptionsModal = ({ employee, setEmployee, onNext, onBack }) => {
             type="number"
             placeholder="e.g 500"
             className="voluntary-input"
-            value={voluntary}
-            onChange={(e) => setVoluntary(e.target.value)}
+            value={employee?.voluntaryContribution || ""}
+            onChange={handleVoluntaryContributionChange}
           />
+
+          {error && (
+            <div className="error-message">
+              {error}
+            </div>
+          )}
         </div>
         {/* FOOTER */}
         <div className="emp-button-row">

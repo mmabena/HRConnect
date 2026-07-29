@@ -18,7 +18,7 @@ import {
 } from "../../api/MedicalAidPlan.js";
 import { getDependentCounts } from "../../utils/medicalAidHelpers";
 import { getJobGradeGroups } from "../../api/JobGradeGroup";
-
+import { selectEmployeePensionOption, enrollEmployeeInPension } from "../../api/PenstionOptions.js";
 import useEmployeeForm from "../../hooks/useEmployeeForm";
 import useEmployeeData from "../../hooks/useEmployeeData";
 import useEmployeeValidation from "../../hooks/useEmployeeValidation";
@@ -78,6 +78,13 @@ const AddEmployeeModal = ({ closeModal }) => {
       referenceType: "",
       payFrequency: "",
       payDate: "",
+
+      // Pension Fields
+      pensionEnabled: false,
+      pensionOptionId: null,
+      employeeContribution: null,
+      voluntaryContribution: 0,
+      isVoluntaryContributionPermament: false,
     });
 
   // =========================
@@ -209,6 +216,7 @@ const AddEmployeeModal = ({ closeModal }) => {
         hasDisability: employee.disability,
         companyId: employee.companyId || "",
         disabilityDescription: employee.disabilityType,
+        pensionOptionId: employee.pensionOptionId,
         dateOfBirth: employee.dateOfBirth,
         startDate: employee.startDate,
         branch: employee.branch,
@@ -272,6 +280,35 @@ const AddEmployeeModal = ({ closeModal }) => {
         // TODO: pension + medical API calls here
         // await addPension(...)
         // await addMedicalAid(...)
+
+        if ( employee.pensionEnabled && employee.pensionOptionId){
+          const pensionOptionPayload = {
+            employeeId: employeeId,
+            pensionOptionId: employee.pensionOptionId,
+          };
+
+          console.log("FULL PENSION PAYLOAD");
+          console.log(JSON.stringify(pensionOptionPayload, null, 2));
+
+          await selectEmployeePensionOption({employeeId, pensionOptionId: employee.pensionOptionId});
+
+
+
+          const pensionEnrollmentPayload = {
+            employeeId: employeeId,
+
+            effectiveDate: employee.startDate,
+
+            voluntaryContribution: employee.voluntaryContribution || 0,
+
+            isVoluntaryContributionPermament: employee.isVoluntaryContributionPermament,
+          };
+
+          console.log("FULL ENROLLMENT PAYLOAD");
+          console.log(JSON.stringify(pensionEnrollmentPayload, null, 2));
+
+          await enrollEmployeeInPension(pensionEnrollmentPayload);
+        }
         const medicalInfo = employee.medicalAidInfo;
 
         if (medicalInfo?.planId) {

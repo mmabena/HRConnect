@@ -123,8 +123,8 @@
 
 .preview-card span {
   font-family: "Anek Bangla";
-  font-weight: 800;
-  font-size: 10px;
+  font-weight: 400;
+  font-size: 15px;
   line-height: 26px;
   color: #707070;
   margin-bottom: -6px;
@@ -133,7 +133,7 @@
 .preview-card h4 {
   font-family: "Anek Bangla";
   font-weight: 520;
-  font-size: 10px;
+  font-size: 13.5px;
   line-height: 26px;
   color: #355867;
   margin: 0;

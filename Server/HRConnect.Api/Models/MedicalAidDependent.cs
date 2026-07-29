@@ -8,11 +8,8 @@ namespace HRConnect.Api.Models
     using System.ComponentModel.DataAnnotations.Schema;
     public enum Relationship
     {
-        Spouse,
         Child,
-        Parent,
-        Sibling,
-        Other
+        Adult,
     }
     public class MedicalAidDependent
     {

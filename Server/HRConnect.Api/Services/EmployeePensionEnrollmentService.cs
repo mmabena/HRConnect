@@ -48,8 +48,8 @@ namespace HRConnect.Api.Services
       }
 
       EmployeePensionEnrollment? existingEmployeePensionEnrollment = await _employeePensionEnrollmentRepository.
-        GetByEmployeeIdAndLastRunIdAsync(employeePensionEnrollmentDto.EmployeeId);
-      if (existingEmployeePensionEnrollment != null && !existingEmployeePensionEnrollment.IsLocked)
+        GetByEmployeeIdAsync(employeePensionEnrollmentDto.EmployeeId);
+      if (existingEmployeePensionEnrollment != null)
       {
         throw new InvalidOperationException("Employee pension enrollment already exists for this employee");
       }
@@ -67,7 +67,7 @@ namespace HRConnect.Api.Services
 
       EmployeePensionEnrollment addedEmployeePensionEnrollment;
       DateOnly today = DateOnly.FromDateTime(DateTime.Today);
-      if (today.Day > 15 || (employeePensionEnrollmentDto.EffectiveDate.Day > 15))
+      if (false)
       {
         DateOnly firstDayNextMonth = new DateOnly(existingEmployee.StartDate.Year, existingEmployee.StartDate.Month, 1).AddMonths(1);
         employeePensionEnrollment.EffectiveDate = firstDayNextMonth;
@@ -277,7 +277,7 @@ namespace HRConnect.Api.Services
             ValidPensionContribution(Math.Round(existingEmployee.MonthlySalary * (pensionOptionPercentage / 100)) + employeePensionEnrollment.VoluntaryContribution),
             EmailAddress = existingEmployee.Email,
             PhysicalAddress = existingEmployee.PhysicalAddress,
-            PayrollRunId = currentPayrollRunId!.PayrollRunId,
+            PayrollRunId = employeePensionEnrollment.PayrollRunId,
             CreatedDate = employeePensionEnrollment.EffectiveDate,
             IsActive = true
           };
@@ -446,52 +446,61 @@ namespace HRConnect.Api.Services
     ///</summary>
     public async Task InitializeEmployeePensionEnrollment()
     {
-      PayrollRun? currentPayRollRun = await _payrollRunRepository.GetCurrentRunAsync() ?? throw new NotFoundException("Current payroll run not found");
-      List<Employee> employeesWithPensionOption = await _employeeRepository.GetAllEmployeeWithAPensionOption();
+      PayrollRun? currentPayrollRun =
+          await _payrollRunRepository.GetCurrentRunAsync()
+          ?? throw new NotFoundException("Current payroll run not found");
+
+      List<Employee> employeesWithPensionOption =
+          await _employeeRepository.GetAllEmployeeWithAPensionOption();
 
       foreach (Employee employee in employeesWithPensionOption)
       {
         int employeeAge = CalculateAge.UsingDOB(employee.DateOfBirth);
-        DateOnly today = DateOnly.FromDateTime(DateTime.Today);
-        DateOnly firstDayNextMonth = new DateOnly(today.Year, today.Month, 1).AddMonths(1);
-        if (!employee.IsActive || (employeeAge >= 65))
+
+        if (!employee.IsActive || employeeAge >= 65)
         {
           continue;
         }
 
-        EmployeePensionEnrollment? employeeExisitingPensionEnrollment = await _employeePensionEnrollmentRepository.
-          GetByEmployeeIdAndLastRunIdAsync(employee.EmployeeId);
-        if (employeeExisitingPensionEnrollment != null &&
-          (employeeExisitingPensionEnrollment.PayrollRunId == currentPayRollRun.PayrollRunId))
+        if (employee.PensionOptionId == null)
         {
           continue;
         }
-        else
+
+        // Check whether the employee has ANY enrollment
+        EmployeePensionEnrollment? existingEnrollment =
+            await _employeePensionEnrollmentRepository
+                .GetByEmployeeIdAsync(employee.EmployeeId);
+
+        // Employee already has an enrollment.
+        // Do not create another one.
+        if (existingEnrollment != null)
         {
-          if (employee.PensionOptionId == null)
-          {
-            continue;
-          }
-
-          EmployeePensionEnrollment employeePensionEnrollment = new()
-          {
-            EmployeeId = employee.EmployeeId,
-            PayrollRunId = currentPayRollRun.PayrollRunId,
-            PensionOptionId = (int)employee.PensionOptionId!,
-            StartDate = employee.StartDate,
-            EffectiveDate = firstDayNextMonth,
-            IsLocked = false,
-          };
-
-          if (employeeExisitingPensionEnrollment != null &&
-            (employeeExisitingPensionEnrollment.PayrollRunId == employeePensionEnrollment.PayrollRunId))
-          {
-            continue;
-          }
-
-          _ = await _employeePensionEnrollmentRepository.AddAsync(employeePensionEnrollment);
-          await HandlePensionEnrollment(employeePensionEnrollment);
+          continue;
         }
+
+        DateOnly firstDayNextMonth =
+            new DateOnly(
+                DateTime.Today.Year,
+                DateTime.Today.Month,
+                1
+            ).AddMonths(1);
+
+        EmployeePensionEnrollment newEnrollment = new()
+        {
+          EmployeeId = employee.EmployeeId,
+          PayrollRunId = currentPayrollRun.PayrollRunId,
+          PensionOptionId = employee.PensionOptionId.Value,
+          StartDate = employee.StartDate,
+          EffectiveDate = firstDayNextMonth,
+          VoluntaryContribution = 0.00M,
+          IsLocked = false
+        };
+
+        await _employeePensionEnrollmentRepository
+            .AddAsync(newEnrollment);
+
+        await HandlePensionEnrollment(newEnrollment);
       }
     }
   }

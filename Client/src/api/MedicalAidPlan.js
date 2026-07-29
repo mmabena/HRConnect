@@ -74,6 +74,24 @@ export const createMedicalAidDependent = async (employeeId, payload) => {
     throw error;
   }
 };
+export const validateMedicalAidDependent = async (employeeId, payload) => {
+  try {
+    const response = await api.post(
+      `/medicalDependent/employee/${employeeId}/validate`,
+      payload,
+    );
+    return response.data || {};
+  } catch (error) {
+    if (error.response) {
+      console.error("Validate medical aid dependent error response data:", error.response.data);
+      console.error("Validate medical aid dependent error status:", error.response.status);
+    } else {
+      console.error("Validate medical aid dependent error message:", error.message);
+    }
+    throw error;
+  }
+};
+
 
 export const getEligibleMedicalAidPlans = async (payload) => {
   try {

@@ -14,6 +14,7 @@ import { toast } from "react-toastify";
 import {
   getMedicalAidPlans,
   getEligibleMedicalAidPlans,
+  validateMedicalAidDependent,
 } from "../../../api/MedicalAidPlan";
 import { populateDependentFromIdNumber } from "../../../utils/medicalAidHelpers";
 
@@ -22,6 +23,8 @@ const MedicalAidModal = ({
   onClose,
   employee,
   setEmployee,
+  formErrors,
+  setFormErrors,
   onNext,
   onBack,
 }) => {
@@ -47,7 +50,7 @@ const MedicalAidModal = ({
     dateOfBirth: "",
   });
 
-  const relationshipOptions = ["Spouse", "Child", "Parent", "Sibling", "Other"];
+  const relationshipOptions = ["Adult", "Child"];
 
   const genderOptions = ["Male", "Female"];
 
@@ -120,8 +123,6 @@ const MedicalAidModal = ({
   const filteredPlans = useMemo(() => {
     const safeSalary = Number(salary) || 0;
 
-    
-
     return plans
       .map((category) => ({
         ...category,
@@ -161,7 +162,7 @@ const MedicalAidModal = ({
     deps.forEach((d) => {
       const rel = (d.relationship || "").toLowerCase();
 
-      if (rel === "spouse" || rel === "parent" || rel === "sibling") {
+      if (rel === "adult") {
         adultCount++;
       } else if (rel === "child") {
         childrenCount++;
@@ -177,10 +178,90 @@ const MedicalAidModal = ({
     };
   };
 
+  const validateDependent = () => {
+    const errors = {};
+
+    if (!newDependent.firstName?.trim()) {
+      errors.firstName = "First name is required";
+    }
+
+    if (!newDependent.lastName?.trim()) {
+      errors.lastName = "Last name is required";
+    }
+
+    if (newDependent.identificationType === "idNumber") {
+      if (!newDependent.idNumber?.trim()) {
+        errors.idNumber = "ID number is required";
+      } else if (!/^\d{13}$/.test(newDependent.idNumber)) {
+        errors.idNumber = "ID number must be 13 digits";
+      }
+    }
+
+    if (newDependent.identificationType === "passportNumber") {
+      if (!newDependent.passportNumber?.trim()) {
+        errors.passportNumber = "Passport number is required";
+      }
+    }
+
+    if (!newDependent.gender) {
+      errors.gender = "Gender is required";
+    }
+
+    if (!newDependent.relationship) {
+      errors.relationship = "Relationship is required";
+    }
+
+    if (!newDependent.dateOfBirth) {
+      errors.dateOfBirth = "Date of birth is required";
+    }
+
+    return errors;
+  };
+
   // =========================
   // ADD DEPENDENT
   // =========================
-  const addDependent = () => {
+  const addDependent = async () => {
+    // =====================================
+    // 1. FRONTEND REQUIRED-FIELD VALIDATION
+    // =====================================
+    const errors = validateDependent();
+
+    setFormErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      toast.error("Please complete all required fields.");
+      return;
+    }
+
+    // =====================================
+    // 2. BACKEND BUSINESS VALIDATION
+    // =====================================
+    try {
+      await validateMedicalAidDependent(employee.employeeId, newDependent);
+    } catch (error) {
+      console.log(
+        "Medical aid dependent validation error:",
+        error.response?.data,
+      );
+
+      if (error.response?.data?.errors) {
+        const backendErrors = error.response.data.errors;
+
+        setFormErrors(backendErrors);
+
+        toast.error("Validation failed. Please check the dependent details.");
+
+        return;
+      }
+
+      toast.error("Validation failed.");
+      return;
+    }
+
+    // =====================================
+    // 3. ADD DEPENDENT TO FRONTEND STATE
+    // =====================================
     const updatedDependents = [...dependents, newDependent];
 
     setDependents(updatedDependents);
@@ -193,6 +274,9 @@ const MedicalAidModal = ({
       },
     }));
 
+    // =====================================
+    // 4. RESET FORM
+    // =====================================
     setNewDependent({
       firstName: "",
       lastName: "",
@@ -203,6 +287,8 @@ const MedicalAidModal = ({
       relationship: "",
       dateOfBirth: "",
     });
+
+    setFormErrors({});
 
     setShowDependentModal(false);
   };
@@ -236,8 +322,7 @@ const MedicalAidModal = ({
     }).format(Number(value));
   };
 
-  const handleNext = () => {
-
+  const handleNext = async () => {
     const selectedPlanId = employee?.medicalAidInfo?.planId;
 
     if (!selectedPlanId) {
@@ -246,7 +331,7 @@ const MedicalAidModal = ({
     }
 
     onNext();
-  }
+  };
 
   return (
     <div className="emp-medical-aid-container">
@@ -496,14 +581,28 @@ const MedicalAidModal = ({
                   <input
                     type="text"
                     placeholder="First Name"
+                    className={
+                      formErrors?.firstName ? "medical-error-input" : ""
+                    }
                     value={newDependent.firstName}
-                    onChange={(e) =>
+                    onChange={(e) => {
                       setNewDependent((prev) => ({
                         ...prev,
                         firstName: e.target.value,
-                      }))
-                    }
+                      }));
+
+                      setFormErrors((prev) => ({
+                        ...prev,
+                        firstName: "",
+                      }));
+                    }}
                   />
+
+                  {formErrors?.firstName && (
+                    <span className="medical-error-message">
+                      {formErrors.firstName}
+                    </span>
+                  )}
                 </div>
 
                 <div className="medical-input-group">
@@ -512,14 +611,28 @@ const MedicalAidModal = ({
                   <input
                     type="text"
                     placeholder="Last Name"
+                    className={
+                      formErrors?.lastName ? "medical-error-input" : ""
+                    }
                     value={newDependent.lastName}
-                    onChange={(e) =>
+                    onChange={(e) => {
                       setNewDependent((prev) => ({
                         ...prev,
                         lastName: e.target.value,
-                      }))
-                    }
+                      }));
+
+                      setFormErrors((prev) => ({
+                        ...prev,
+                        lastName: "",
+                      }));
+                    }}
                   />
+
+                  {formErrors?.lastName && (
+                    <span className="medical-error-message">
+                      {formErrors.lastName}
+                    </span>
+                  )}
                 </div>
 
                 <div className="medical-input-group">
@@ -561,6 +674,11 @@ const MedicalAidModal = ({
 
                   <input
                     type="text"
+                    className={
+                      formErrors?.idNumber || formErrors?.passportNumber
+                        ? "medical-error-input"
+                        : ""
+                    }
                     placeholder={
                       newDependent.identificationType === "idNumber"
                         ? "ID Number"
@@ -582,14 +700,38 @@ const MedicalAidModal = ({
                           idNumber: value,
                           ...(value.length === 13 ? populated : {}),
                         }));
+
+                        setFormErrors((prev) => ({
+                          ...prev,
+                          idNumber: "",
+                        }));
                       } else {
                         setNewDependent((prev) => ({
                           ...prev,
                           passportNumber: value,
                         }));
+
+                        setFormErrors((prev) => ({
+                          ...prev,
+                          passportNumber: "",
+                        }));
                       }
                     }}
                   />
+
+                  {newDependent.identificationType === "idNumber" &&
+                    formErrors?.idNumber && (
+                      <span className="medical-error-message">
+                        {formErrors.idNumber}
+                      </span>
+                    )}
+
+                  {newDependent.identificationType === "passportNumber" &&
+                    formErrors?.passportNumber && (
+                      <span className="medical-error-message">
+                        {formErrors.passportNumber}
+                      </span>
+                    )}
                 </div>
 
                 <div className="medical-input-group full-width">
@@ -601,15 +743,28 @@ const MedicalAidModal = ({
                     }`}
                   >
                     <select
+                      className={
+                        formErrors?.gender ? "medical-error-input" : ""
+                      }
                       value={newDependent.gender}
                       disabled={newDependent.idNumber.length === 13}
-                      onChange={(e) =>
+                      onChange={(e) => {
                         setNewDependent((prev) => ({
                           ...prev,
                           gender: e.target.value,
-                        }))
-                      }
+                        }));
+
+                        setFormErrors((prev) => ({
+                          ...prev,
+                          gender: "",
+                        }));
+                      }}
                     >
+                      {formErrors?.gender && (
+                        <span className="medical-error-message">
+                          {formErrors.gender}
+                        </span>
+                      )}
                       <option value="" disabled hidden>
                         Gender
                       </option>
@@ -637,14 +792,26 @@ const MedicalAidModal = ({
                   >
                     <select
                       value={newDependent.relationship || ""}
-                      onChange={(e) =>
+                      className={
+                        formErrors?.relationship ? "medical-error-input" : ""
+                      }
+                      onChange={(e) => {
                         setNewDependent((prev) => ({
                           ...prev,
                           relationship: e.target.value,
-                        }))
-                      }
-                      className="medical-relationship-input"
+                        }));
+
+                        setFormErrors((prev) => ({
+                          ...prev,
+                          relationship: "",
+                        }));
+                      }}
                     >
+                      {formErrors?.relationship && (
+                        <span className="medical-error-message">
+                          {formErrors.relationship}
+                        </span>
+                      )}
                       <option value="" disabled hidden>
                         Select Relationship
                       </option>
@@ -669,24 +836,39 @@ const MedicalAidModal = ({
                   <div className="date-input-wrapper">
                     <input
                       type="date"
+                      className={
+                        formErrors?.dateOfBirth ? "medical-error-input" : ""
+                      }
                       value={newDependent.dateOfBirth}
                       disabled={
                         newDependent.identificationType === "idNumber" &&
                         newDependent.idNumber.length === 13
                       }
-                      onChange={(e) =>
+                      onChange={(e) => {
                         setNewDependent((prev) => ({
                           ...prev,
                           dateOfBirth: e.target.value,
-                        }))
-                      }
+                        }));
+
+                        setFormErrors((prev) => ({
+                          ...prev,
+                          dateOfBirth: "",
+                        }));
+                      }}
                     />
                     <img
                       src="/images/calendar-range.svg"
                       alt="Calendar icon"
                       className="date-picker-dropdown-icon"
                     />
-                  </div>
+                    </div>
+                    {formErrors?.dateOfBirth && (
+                      <span className="medical-error-message">
+                        {formErrors.dateOfBirth}
+                      </span>
+                    )}
+                    
+                  
                 </div>
               </div>
             </div>

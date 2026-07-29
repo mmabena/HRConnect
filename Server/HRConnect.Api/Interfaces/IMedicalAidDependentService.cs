@@ -10,6 +10,7 @@ namespace HRConnect.Api.Interfaces
     {
         Task<List<MedicalAidDependentDTO>> GetAllMedicalAidDependentsAsync();
         Task<MedicalAidDependentDTO> GetMedicalAidDependentsByIdAsync(string dependentId);
+        Task<MedicalAidDependentDTO> ValidateMedicalAidDependentAsync(string employeeId, CreateMedicalAidDependentRequestDTO medicalAidDependentRequestDto);
         Task<MedicalAidDependentDTO> CreateMedicalAidDependentAsync(string employeeId, CreateMedicalAidDependentRequestDTO medicalAidDependentRequestDto);
         Task<List<MedicalAidDependentDTO>> GetMedicalAidDependentsByEmployeeIdAsync(string employeeId);
         // Task<MedicalAidDependentDTO?> UpdateMedicalAidDependent(string dependentId, UpdateMedicalAidDependentRequestDTO dto);

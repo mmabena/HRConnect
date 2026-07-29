@@ -233,8 +233,9 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
         var jobException = new JobExecutionException(ex);
         throw jobException;
       }
-      Console.WriteLine("====================1====================");
-      await _employeePensionEnrollmentService.RollOverEmloyeePensionEnrollmentAsync();
+      // Console.WriteLine("====================1====================");
+      // await _employeePensionEnrollmentService.RollOverEmloyeePensionEnrollmentAsync();
+      await RolloverPensionDeductions();
       Console.WriteLine("====================2====================");
       await _employeePayrollEarningService.RollOverEmployeePayrollEarningsAsync();
       Console.WriteLine("========== BEFORE Medical Aid Rollover ==========");
@@ -245,7 +246,7 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
       Console.WriteLine("====================3====================");
       await _employeeDeductionService.RollOverEmployeePayrollEarningsAsync();
       Console.WriteLine("====================4====================");
-      await RolloverPensionDeductions();
+      
     }
 
     private async Task AllocateCompanyContributionsIfNeeded(int payrollRunId)

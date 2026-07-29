@@ -190,7 +190,7 @@ const PreviewModal = ({ employee, positions, onBack, onSave, onClose }) => {
               <div className="preview-card">
                 <span>PENSION FUND</span>
 
-                <h4>{employee?.pensionFund || "N/A"}</h4>
+                <h4>{employee?.pensionFundName || "N/A"}</h4>
               </div>
 
               <div className="preview-card">

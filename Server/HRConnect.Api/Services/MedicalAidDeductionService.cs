@@ -587,10 +587,7 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
                   deduction.EmployeeId);
 
       int adultCount = dependents.Count(d =>
-          d.Relationship == Relationship.Spouse ||
-          d.Relationship == Relationship.Parent ||
-          d.Relationship == Relationship.Sibling ||
-          d.Relationship == Relationship.Other);
+          d.Relationship == Relationship.Adult);
 
       int childCount = dependents.Count(d =>
           d.Relationship == Relationship.Child);

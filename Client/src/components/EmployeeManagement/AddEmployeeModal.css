@@ -669,6 +669,7 @@ option:checked {
   color: var(--text-primary);
   font-family: "Anek Bangla";
   font-size: 16px;
+    padding-bottom: 10px;
   font-style: normal;
   font-weight: 400;
   line-height: 150%;
@@ -691,8 +692,8 @@ option:checked {
 }
 
 .emp-disability-input {
-  margin-left: 47px;
-  width: 250px;
+  margin-left: 94px;
+  width: 203px;
   color: var(--text-primary);
   border: 1px solid rgba(0, 96, 136, 0.60);
   outline: none;
@@ -710,7 +711,8 @@ input[type="radio" i] {
   cursor: pointer;
   appearance: auto;
   box-sizing: border-box;
-  margin: 3px 3px 0px 5px;
+
+  margin: 3px 3px 5px 5px;
   padding: initial;
   border: initial;
 }
@@ -726,6 +728,7 @@ input[type="radio" i] {
   display: flex;
   align-items: center;
   gap: 6px;
+  height: 33px;
   cursor: pointer;
 }
 

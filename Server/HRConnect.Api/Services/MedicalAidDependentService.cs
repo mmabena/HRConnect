@@ -15,6 +15,7 @@ namespace HRConnect.Api.Services
     using HRConnect.Api.Services;
     using Microsoft.EntityFrameworkCore;
     using HRConnect.Api.Mappers;
+    using System.Text.RegularExpressions;
     using HRConnect.Api.Repository;
     using System.ComponentModel.DataAnnotations;
 
@@ -61,8 +62,10 @@ namespace HRConnect.Api.Services
                 throw new ValidationException("Employee does not exist");
 
             ExtractIdInfo(medicalAidDependentRequestDto);
+            ValidateAdultAge(medicalAidDependentRequestDto);
 
             ValidateChildAge(medicalAidDependentRequestDto);
+           
 
             var dependentId = await GenerateDependentId(employeeId);
 
@@ -94,6 +97,25 @@ namespace HRConnect.Api.Services
                 .ToList();
         }
 
+        public async Task<MedicalAidDependentDTO> ValidateMedicalAidDependentAsync(string employeeId, CreateMedicalAidDependentRequestDTO medicalAidDependentRequestDto)
+        {
+            ValidateCommonFields(medicalAidDependentRequestDto);
+
+            var employee = await _employeeRepo.GetEmployeeByIdAsync(employeeId);
+
+            ExtractIdInfo(medicalAidDependentRequestDto);
+            ValidateAdultAge(medicalAidDependentRequestDto);
+
+            ValidateChildAge(medicalAidDependentRequestDto);
+
+            var newDependent =
+                medicalAidDependentRequestDto.ToMedicalAidDependentFromCreateDTO();
+
+            newDependent.EmployeeId = employeeId;
+
+            return newDependent.ToMedicalAidDependentDto();
+        }
+
         private async Task<string> GenerateDependentId(string employeeId)
         {
             var existingIds =
@@ -117,14 +139,37 @@ namespace HRConnect.Api.Services
         {
             if (medicalAidDependentRequestDto == null)
                 throw new ValidationException("Request cannot be null.");
-            if (medicalAidDependentRequestDto.IdNumber != null && medicalAidDependentRequestDto.IdNumber.Length != 13)
-                throw new ValidationException("ID Number must be 13 digits long.");
+            if (!string.IsNullOrWhiteSpace(medicalAidDependentRequestDto.IdNumber))
+            {
+                if (medicalAidDependentRequestDto.IdNumber.Length != 13)
+                {
+                    throw new ValidationException("ID Number must be 13 digits long.");
+                }
+            }
 
             if (string.IsNullOrWhiteSpace(medicalAidDependentRequestDto.FirstName))
                 throw new ValidationException("First name is required.");
 
             if (string.IsNullOrWhiteSpace(medicalAidDependentRequestDto.LastName))
                 throw new ValidationException("Last name is required.");
+
+            if (string.IsNullOrWhiteSpace(medicalAidDependentRequestDto.Relationship.ToString()))
+            {
+                throw new ValidationException(
+                    "Relationship is required.");
+            }
+            if (!string.IsNullOrWhiteSpace(medicalAidDependentRequestDto.PassportNumber))
+            {
+                string passport = medicalAidDependentRequestDto.PassportNumber.Trim();
+
+                if (passport.Length < 6 ||
+                    passport.Length > 20 ||
+                    !passport.All(char.IsLetterOrDigit))
+                {
+                    throw new ValidationException(
+                        "Passport Number must contain only letters and numbers between 6 and 20 characters.");
+                }
+            }
 
             if (string.IsNullOrWhiteSpace(medicalAidDependentRequestDto.IdNumber) &&
                 string.IsNullOrWhiteSpace(medicalAidDependentRequestDto.PassportNumber))
@@ -162,11 +207,31 @@ namespace HRConnect.Api.Services
             int age = AgeCalculator.CalculateAge(
                 DateOnly.FromDateTime(medicalAidDependentRequestDto.DateOfBirth.Value));
 
-            if (age > 21)
+            if (age >= 21)
             {
                 throw new ValidationException(
                     "A Child dependent cannot be older than 21 years.");
             }
+
+        }
+        private static void ValidateAdultAge(CreateMedicalAidDependentRequestDTO medicalAidDependentRequestDto)
+        {
+            if (medicalAidDependentRequestDto.Relationship != Relationship.Adult)
+                return;
+
+            if (!medicalAidDependentRequestDto.DateOfBirth.HasValue)
+                throw new ValidationException(
+                    "Date of birth is required.");
+
+            int age = AgeCalculator.CalculateAge(
+                DateOnly.FromDateTime(medicalAidDependentRequestDto.DateOfBirth.Value));
+
+            if (age <= 21)
+            {
+                throw new ValidationException(
+                    "A Adult dependent cannot be younger than 21 years.");
+            }
+
         }
 
         private async Task UpdateMedicalAidDeduction(string employeeId)
@@ -195,10 +260,7 @@ namespace HRConnect.Api.Services
 
             int adultCount =
             dependents.Count(d =>
-                d.Relationship == Relationship.Spouse ||
-                d.Relationship == Relationship.Parent ||
-                d.Relationship == Relationship.Sibling ||
-                d.Relationship == Relationship.Other);
+                d.Relationship == Relationship.Adult);
 
             int childCount =
               dependents.Count(d =>

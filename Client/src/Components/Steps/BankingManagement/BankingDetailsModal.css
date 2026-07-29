@@ -1,14 +1,52 @@
 .emp-banking-form-grid {
   display: flex;
-  width: 140%;
+  width: 104%;
   height: auto;
   min-height: 0;
-  margin-top: -10px;
-  margin-left: -70px;
+  margin-top: -110px;
+  margin-left: 16px;
   flex-shrink: 0;
   flex-direction: column;
   align-items: flex-start;
   gap: 17px;
+}
+
+.emp-bank-personal-details-heading {
+  position: relative;
+  color: var(--primary-color);
+  font-family: "Anek Bangla";
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 26px; 
+  top: -15.9%;
+  left: 1%;
+}
+
+.emp-bank-personal-details-sub {
+  position: relative;
+  color: var(--COLOUR-Calm-Blue, #006088);
+  font-family: "Anek Bangla";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  left: 1%;
+  bottom: 21%;
+}
+
+.bank-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #7575758c;
+  text-transform: uppercase;
+  display: flex;
+  align-items: flex-start;
+  margin-top: -70px;
+  width: 444px;
+  height: 26px;
+  border-bottom: 1px solid rgba(154, 154, 154, 0.55);
+  margin-bottom: 0px;
+  margin-left: 5px;
 }
 
 .emp-bank-name-input {
@@ -132,7 +170,7 @@
   width: 187px;
   height: 47px;
   flex-shrink: 0;
-  margin-top: 220px;
+  margin-top: 347px;
   left: 100px;
   cursor: pointer;
   background: transparent;
@@ -235,8 +273,8 @@
   padding: 0 10px 0px 10px;
   justify-content: center;
   align-items: center;
-  left: 213px;
-  top: 110px;
+  left: 288px;
+  top: 173px;
   color: var(--white);
   text-align: center;
   font-family: "Anek Bangla", sans-serif;

@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import "./BankingDetailsModal.css";
 import { toast } from "react-toastify";
-import { getBankBranchCodes, validateBankingDetails } from "../../../api/BankingDetail";
+import {
+  getBankBranchCodes,
+  validateBankingDetails,
+} from "../../../api/BankingDetail";
 import { ArrowRight, ArrowLeft, Upload, UserRoundPlus, X } from "lucide-react";
 
 const BankingDetailsModal = ({
@@ -133,8 +136,24 @@ const BankingDetailsModal = ({
     }
   }, [employee.name, employee.surname, employee.title]);
 
+  // Auto-populate pay date to the 26th of the current month
+  useEffect(() => {
+    if (!employee.payDate) {
+      const today = new Date();
+
+      const payDate = new Date(today.getFullYear(), today.getMonth(), 27);
+
+      const formattedDate = payDate.toISOString().split("T")[0];
+
+      setEmployee((prev) => ({
+        ...prev,
+        payDate: formattedDate,
+      }));
+    }
+  }, [employee.payDate, setEmployee]);
+
   // Handle clicking the "Next" button
-  const handleNext = async() => {
+  const handleNext = async () => {
     const errors = validateBanking();
 
     setFormErrors(errors);
@@ -145,49 +164,49 @@ const BankingDetailsModal = ({
     }
 
     const payload = {
-    employeeId: "",
-    name: employee.accountHolderName,
-    surname: employee.surname,
-    idNumber: employee.idNumber || "",
-    passportNumber: employee.passportNumber || "",
-    bankName: employee.bankName,
-    bankBranchCodeId: employee.bankBranchCodeId,
-    accountNumber: employee.accountNumber,
-    accountType: employee.accountType,
-    paymentMethod: employee.paymentMethod,
-    referenceType: employee.referenceType,
-    payFrequency: employee.payFrequency,
-  };
+      employeeId: "",
+      name: employee.accountHolderName,
+      surname: employee.surname,
+      idNumber: employee.idNumber || "",
+      passportNumber: employee.passportNumber || "",
+      bankName: employee.bankName,
+      bankBranchCodeId: employee.bankBranchCodeId,
+      accountNumber: employee.accountNumber,
+      accountType: employee.accountType,
+      paymentMethod: employee.paymentMethod,
+      referenceType: employee.referenceType,
+      payFrequency: employee.payFrequency,
+    };
 
-  try {
-    await validateBankingDetails(payload);
+    try {
+      await validateBankingDetails(payload);
 
-    onNext();
-  } catch (error) {
-    console.log(error.response?.data);
+      onNext();
+    } catch (error) {
+      console.log(error.response?.data);
 
-    if (error.response?.data?.errors) {
+      if (error.response?.data?.errors) {
+        setFormErrors(error.response.data.errors);
 
-      setFormErrors(error.response.data.errors);
-
-      toast.error("Validation failed. Please check the form for errors.");
-      return;
+        toast.error("Validation failed. Please check the form for errors.");
+        return;
+      }
+      toast.error("Validation failed.");
     }
-    toast.error("Validation failed.");
-  }
-
   };
 
   return (
     <div className="emp-name-surname-container">
       <div className="emp-banking-form-grid">
-        <div className="emp-personal-details-heading">
+        <div className="emp-bank-personal-details-heading">
           <span>Banking Details</span>
         </div>
 
-        <div className="emp-personal-details-sub">
+        <div className="emp-bank-personal-details-sub">
           <span>Salary payment account information</span>
         </div>
+
+        <div className="bank-section-title">Banking details</div>
 
         {/* BANK */}
         <div className="emp-full-width dropdown-wrapper emp-input-wrapper">
@@ -422,6 +441,7 @@ const BankingDetailsModal = ({
                   type="date"
                   name="payDate"
                   value={employee.payDate || ""}
+                  readOnly
                   onChange={handleChange}
                   className="emp-payDate-input"
                 />

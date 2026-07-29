@@ -57,6 +57,18 @@ namespace HRConnect.Api.Controllers
             return Ok(dependents);
         }
 
+        [HttpPost("employee/{employeeId}/validate")]
+        [Authorize(Roles = "SuperUser")]
+        public async Task<IActionResult> ValidateMedicalAidDependent(
+            string employeeId,
+            [FromBody] CreateMedicalAidDependentRequestDTO medicalAidDependentDto)
+        {
+            var validated =
+                await _medicalDependentService.ValidateMedicalAidDependentAsync(employeeId, medicalAidDependentDto);
+
+            return Ok(validated);
+        }
+
         // POST: api/MedicalAidDependent/employee/ARM001
         [HttpPost("employee/{employeeId}")]
         [Authorize(Roles = "SuperUser")]
