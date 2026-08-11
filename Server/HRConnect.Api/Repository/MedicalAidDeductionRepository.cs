@@ -234,5 +234,16 @@ namespace HRConnect.Api.Repository
         p.PayrollRun.IsFinalised && p.PayrollRun.IsLocked)
         .ToListAsync();
     }
+
+    public async Task<MedicalAidDeduction?> GetMedicalAidDeductionByEmployeeAndPayrollRunAsync(
+    string employeeId,
+    int payrollRunId)
+    {
+      return await _context.MedicalAidDeductions
+          .Include(d => d.PayrollRun)
+          .FirstOrDefaultAsync(d =>
+              d.EmployeeId == employeeId &&
+              d.PayrollRunId == payrollRunId);
+    }
   }
 }

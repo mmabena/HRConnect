@@ -34,9 +34,13 @@ namespace HRConnect.Api.Utils.Factories
       Notification newNotification = notification.ToNotificationFromCreateDto();
       newNotification.CreatedAt = DateTime.Now;
       if (notification.DeliveryChannel == DeliveryChannel.Email)
+      {
         newNotification.IsRead = true;
-
-      newNotification.IsRead = false;
+      }
+      else
+      {
+        newNotification.IsRead = false;
+      }
       await _notificationService.TryCreateAndDispatch(newNotification);
     }
   }

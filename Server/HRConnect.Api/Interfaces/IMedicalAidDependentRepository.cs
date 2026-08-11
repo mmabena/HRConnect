@@ -12,6 +12,7 @@ namespace HRConnect.Api.Interfaces
         Task<MedicalAidDependent> CreateMedicalAidDependentAsync(MedicalAidDependent medicalAidDependentModel);
         Task<List<MedicalAidDependent>> GetMedicalAidDependentsByEmployeeIdAsync(string employeeId);
         Task<MedicalAidDependent?> UpdateMedicalAidDependentAsync(MedicalAidDependent medicalAidDependentModel);
+        Task<List<MedicalAidDependent>> GetActiveChildDependentsAsync();
         Task<bool> DeleteMedicalAidDependentAsync(string dependentId);
 
 

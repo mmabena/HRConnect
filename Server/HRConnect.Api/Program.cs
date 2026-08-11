@@ -29,7 +29,6 @@ using HRConnect.Api.Utils.Settings;
 using HRConnect.Api.Utils.Jobs.Payroll;
 using HRConnect.Api.Utils.Notification;
 using HRConnect.Api.Utils.Payroll;
-
 using HRConnect.Api.Utils.Jobs.Payroll;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -42,7 +41,8 @@ using HRConnect.Api.Interfaces.Notification;
 using HRConnect.Api.Utils.Factories;
 using HRConnect.Api.Utils.Notification;
 using HRConnect.Api.Interfaces.Payroll.Earning;
-using HRConnect.Api.Interfaces.Payroll.Deduction;using System.Threading.RateLimiting;
+using HRConnect.Api.Interfaces.Payroll.Deduction;
+using System.Threading.RateLimiting;
 using HRConnect.Api.Utils.Notification.Channels;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -183,7 +183,7 @@ builder.Services.AddQuartz(q =>
   q.AddTrigger(opts => opts
   .ForJob(NotificationJobKey)
   .WithIdentity("NotificationJob-Trigger")
-  .WithCronSchedule("0 0 0 23-31 * ?", x =>
+  .WithCronSchedule("0 * * * * ?", x =>
   x.WithMisfireHandlingInstructionIgnoreMisfires()));
   //Cron Schedule for Payroll Notification Job
   // 0 -> 0 seconds
@@ -265,7 +265,6 @@ builder.Services.AddScoped<IOccupationalLevelService, OccupationalLevelService>(
 builder.Services.AddScoped<HRConnect.Api.Interfaces.IAuthService, HRConnect.Api.Services.AuthService>();
 builder.Services.AddScoped<IBankingDetailRepository, BankingDetailRepository>();
 builder.Services.AddScoped<IBankingDetailService, BankingDetailService>();
-
 // Register the encryption service as a singleton since it does not maintain any state and can be shared across the application.
 builder.Services.AddSingleton<IEncryptionService, EncryptionService>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
@@ -278,6 +277,7 @@ builder.Services.AddScoped<IPensionFundService, PensionFundService>();
 builder.Services.AddScoped<IPensionFundRepository, PensionFundRepository>();
 builder.Services.AddScoped<ILeaveTypeManagementService, LeaveTypeManagementService>();
 builder.Services.AddScoped<ILeaveApplicationService, LeaveApplicationService>();
+builder.Services.AddScoped<IMedicalAidDependentNotificationService, MedicalAidDependentNotificationService>();
 builder.Services.AddHostedService<LeaveAutomationBackgroundService>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IEmployeeCompanyContributionService, EmployeeCompanyContributionService>();

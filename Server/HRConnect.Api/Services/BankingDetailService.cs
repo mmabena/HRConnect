@@ -33,9 +33,12 @@ namespace HRConnect.Api.Services
             _hashingHelper = hashingHelper;
         }
 
-        // ======================================================
-        // GET ALL
-        // ======================================================
+        /// <summary>
+        /// Retrieves all banking details from the database.
+        /// </summary>
+        /// <returns>
+        /// A list of BankingDetailDto objects.
+        /// </returns>
         public async Task<List<BankingDetailDto>> GetAllBankingDetailsAsync()
         {
             var bankingDetails = await _bankingDetailRepo.GetAllBankingDetailsAsync();
@@ -49,7 +52,12 @@ namespace HRConnect.Api.Services
 
             return dtos;
         }
-
+        /// <summary>
+        /// Retrieves all bank branch codes from the database.
+        /// </summary>
+        /// <returns>
+        /// A list of BankBranchCodeDto objects.
+        /// </returns>
         public async Task<List<BankBranchCodeDto>> GetAllBankBranchCodesAsync()
         {
             var branchCodes = await _bankingDetailRepo.GetAllBankBranchCodesAsync();
@@ -63,10 +71,15 @@ namespace HRConnect.Api.Services
 
             return dtos;
         }
-
-        // ======================================================
-        // GET BY EMPLOYEE ID
-        // ======================================================
+        /// <summary>
+        /// Retrieves banking details associated with a specific employee.
+        /// </summary>
+        /// <param name="EmployeeId">The employee ID.</param>
+        /// <returns>
+        /// The BankingDetailDto object if found, otherwise null.
+        /// </returns>
+        /// <exception cref="ValidationException">Thrown when the employee ID is empty or null.</exception>
+        /// <exception cref="KeyNotFoundException">Thrown when banking details are not found for the employee.</exception>
         public async Task<BankingDetailDto?> GetBankingDetailsByEmployeeIdAsync(string EmployeeId)
         {
             try
@@ -89,9 +102,16 @@ namespace HRConnect.Api.Services
             }
         }
 
-        // ======================================================
-        // CREATE (FIXED LOGIC)
-        // ======================================================
+        /// <summary>
+        /// Creates new banking details for an employee.
+        /// Validates the banking details, checks for duplicate account numbers, encrypts sensitive information, and associates the banking details with the employee.
+        /// </summary>
+        /// <param name="createBankingDetailsDto">The banking details model to be created.</param>
+        /// <returns>
+        /// The created BankingDetailDto object.
+        /// </returns>
+        /// <exception cref="ValidationException">Thrown when the banking details are invalid or the account number already exists.</exception>
+        /// <exception cref="KeyNotFoundException">Thrown when the employee does not exist.</exception>
         public async Task<BankingDetailDto> CreateBankingDetailsAsync(
             CreateBankingDetailDto createBankingDetailsDto)
         {
@@ -207,7 +227,12 @@ namespace HRConnect.Api.Services
 
             return MapToBankingDetailDto(existing);
         }
-
+        /// <summary>
+        /// Validates banking details before they are created or saved.
+        /// Checks required fields, duplicate account numbers, and banking detail validation rules.
+        /// </summary>
+        /// <param name="createBankingDetailsDto">The banking details model to be validated.</param>
+        /// <exception cref="ValidationException">Thrown when the banking details are invalid or the account number already exists.</exception>
         public async Task ValidateBankingDetailsAsync(CreateBankingDetailDto createBankingDetailsDto)
         {
             ValidateCommonFields(createBankingDetailsDto);
@@ -227,10 +252,11 @@ namespace HRConnect.Api.Services
                 createBankingDetailsDto.BankName.ToString(),
                 normalized);
         }
-
-        // ======================================================
-        // LOCK ALL
-        // ======================================================
+        /// <summary>
+        /// Locks all banking details in the database.
+        /// Only banking details that are not already locked will be updated and locked.
+        /// </summary>
+        /// <returns>A task representing the asynchronous operation.</returns>
         public async Task LockAllBankingDetailsAsync()
         {
             var all = await _bankingDetailRepo.GetAllBankingDetailsAsync();
@@ -247,9 +273,11 @@ namespace HRConnect.Api.Services
             }
         }
 
-        // ====================================================== 
-        // VALIDATION
-        // ======================================================
+        /// <summary>
+        /// Validates the required banking detail fields.
+        /// </summary>
+        /// <param name="dto">The banking details model to be validated.</param>
+        /// <exception cref="ValidationException">Thrown when the request is null or a required field is missing.</exception>
         private void ValidateCommonFields(CreateBankingDetailDto dto)
         {
             if (dto == null)
@@ -265,9 +293,14 @@ namespace HRConnect.Api.Services
                 throw new ValidationException("Account number required");
         }
 
-        // ======================================================
-        // MAPPER
-        // ======================================================
+        /// <summary>
+        /// Maps a BankingDetail entity to a BankingDetailDto object.
+        /// Decrypts the account number before returning the DTO.
+        /// </summary>
+        /// <param name="d">The BankingDetail entity to be mapped.</param>
+        /// <returns>
+        /// A BankingDetailDto object containing the banking details.
+        /// </returns>
         private BankingDetailDto MapToBankingDetailDto(BankingDetail d)
         {
             return new BankingDetailDto

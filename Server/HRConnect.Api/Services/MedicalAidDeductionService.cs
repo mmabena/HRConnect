@@ -27,6 +27,7 @@ public class MedicalAidDeductionService : IMedicalAidDeductionService
       IMedicalOptionRepository medicalOptionRepository,
       IMedicalAidDependentRepository medicalAidDependentRepository,
       IEmployeeService employeeService, IPayrollRunService payrollRunService,
+
       IMedicalAidEligibilityService medicalAidEligibilityService,
       IServiceScopeFactory serviceScopeFactory)
   {

@@ -22,6 +22,8 @@ namespace HRConnect.Api.Interfaces
 
     Task SaveChangesAsync();
 
+    Task<MedicalAidDeduction?> GetMedicalAidDeductionByEmployeeAndPayrollRunAsync(string employeeId, int payrollRunId);
+
   }
 }
 

@@ -5,8 +5,9 @@ import { jwtDecode } from "jwt-decode";
 import api from "../../../src/api/api.js";
 import { toast } from "react-toastify";
 import axios from "axios";
+import { fetchAllNotifications } from "../../Pages/NotificationPage/notificationsApi.js";
 import { resolveRole } from "../../utils/roleUtils";
-import {companyHubConnection} from "../../api/signalrService.js";
+import { companyHubConnection } from "../../api/signalrService.js";
 import { ArrowLeftRight } from "lucide-react";
 import { fetchMyCompanies, switchCompany } from "../../api/UserCompany.js";
 
@@ -21,6 +22,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
   const [companySwitcherOpen, setCompanySwitcherOpen] = useState(false);
   const [leaveOpen, setLeaveOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(null);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [payOpen, setPayOpen] = useState(false);
   const [payInfoOpen, setPayInfoOpen] = useState(false);
   const [manualReportToggle, setManualReportToggle] = useState(false);
@@ -177,6 +179,26 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
     }
   }, []);
 
+  useEffect(() => {
+    const loadUnread = async () => {
+      try {
+        const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+        if (!currentUser) return;
+
+        const notifications = await fetchAllNotifications(currentUser.id);
+
+        const unread = notifications.filter((n) => !n.isRead).length;
+
+        setUnreadCount(unread);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    loadUnread();
+  }, []);
+
   const calculateAge = (dateOfBirth) => {
     let today = new Date();
     let birthDate = new Date(dateOfBirth);
@@ -206,7 +228,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
       loadCompanies();
       toast.success("Company switched successfully.");
       setTimeout(() => {
-      window.location.reload();
+        window.location.reload();
       }, 2000);
     };
 
@@ -773,11 +795,7 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
       </div>
 
       <div className="menu-footer">
-        <img
-          src="/images/setitngs_icon.png"
-          alt="Settings icon"
-          className="menu-icon"
-        />
+        
         {/* Container for user details */}
         <div className="user-details-container">
           <div
@@ -818,7 +836,30 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
               {/*Create positions endpoint*/}
               {currentUser?.role}
             </div>
+            
           </div>
+          <img
+          src="/images/setitngs_icon.png"
+          alt="Settings icon"
+          className="menu-icon"
+        />
+        <div
+          className="notification-icon-wrapper"
+          onClick={() => navigate("/notifications")}
+        >
+          <img
+            src="/images/bell.svg"
+            alt="Bell icon"
+            className=""
+            style={{ cursor: "pointer" }}
+          />
+
+          {unreadCount > 0 && (
+            <span className="notification-badge">
+              {unreadCount > 99 ? "99+" : unreadCount}
+            </span>
+          )}
+        </div>
         </div>
       </div>
     </div>

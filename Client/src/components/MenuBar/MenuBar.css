@@ -41,6 +41,36 @@
   width: 279.32px;
   height: 35.14px;
 }
+.notification-icon-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-right: 5px;
+}
+
+.notification-badge {
+    position: relative;
+    top: -15px;
+    right: 15px;
+
+    min-width: 18px;
+    height: 18px;
+
+    border-radius: 50%;
+    background: #e53935;
+    color: white;
+
+    font-size: 10px;
+    font-weight: bold;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 4px;
+}
 
 .menu-bar-logo-text-bold,
 .menu-bar-logo-text-light {
@@ -139,6 +169,7 @@
   display: flex;
   flex-direction: column;
   width: 100%;
+  margin-left: -55px;
   gap: 0;
   margin-top: auto;
   border: 10px soild #fff;
@@ -154,7 +185,7 @@
 .menu-icon-wrapper {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 5px;
   position: relative;
   left: 15px;
 }

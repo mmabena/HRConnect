@@ -173,10 +173,24 @@ namespace HRConnect.Api.Services
     ///<summary>
     private async Task<string> ResolveEmployeeId(int userId)
     {
+      Console.WriteLine("====================================");
+      Console.WriteLine($"Looking up userId: {userId}");
+
       UserRegisterDto user = await _userHttpClient.ResolveUserFromId(userId);
-      EmployeeDto? employee = await _employeeService.GetEmployeeByEmailAsync(user.Email);
+
+      Console.WriteLine($"User found");
+      Console.WriteLine($"Email: {user.Email}");
+
+      EmployeeDto? employee =
+          await _employeeService.GetEmployeeByEmailAsync(user.Email);
+
       if (employee == null)
+      {
+        Console.WriteLine($"No employee found for email: {user.Email}");
         return string.Empty;
+      }
+
+      Console.WriteLine($"Employee found: {employee.EmployeeId}");
 
       return employee.EmployeeId;
     }

@@ -21,10 +21,15 @@ namespace HRConnect.Api.Controllers
         public MedicalAidDependentController(IMedicalAidDependentService medicalDependentService)
         {
             _medicalDependentService = medicalDependentService;
-            
+
         }
 
-        // GET: api/MedicalAidDependent
+        /// <summary>
+        /// Retrieves all Medical Aid dependents from the system.
+        /// </summary>
+        /// <returns>
+        /// An IActionResult containing a list of Medical Aid dependents.
+        /// </returns>
         [HttpGet]
         [Authorize(Roles = "SuperUser")]
         public async Task<IActionResult> GetAllMedicalAidDependents()
@@ -35,7 +40,13 @@ namespace HRConnect.Api.Controllers
             return Ok(dependents);
         }
 
-        // GET: api/MedicalAidDependent/{dependentId}
+        /// <summary>
+        /// Retrieves a Medical Aid dependent by their dependent ID.
+        /// </summary>
+        /// <param name="dependentId">The dependent ID.</param>
+        /// <returns>
+        /// An IActionResult containing the Medical Aid dependent.
+        /// </returns>
         [HttpGet("{dependentId}")]
         [Authorize(Roles = "SuperUser")]
         public async Task<IActionResult> GetMedicalAidDependentById(string dependentId)
@@ -46,7 +57,13 @@ namespace HRConnect.Api.Controllers
             return Ok(dependent);
         }
 
-        // GET: api/MedicalAidDependent/employee/ARM001
+        /// <summary>
+        /// Retrieves all Medical Aid dependents associated with a specific employee.
+        /// </summary>
+        /// <param name="employeeId">The employee ID.</param>
+        /// <returns>
+        /// An IActionResult containing a list of Medical Aid dependents associated with the employee.
+        /// </returns>
         [HttpGet("employee/{employeeId}")]
         [Authorize(Roles = "SuperUser")]
         public async Task<IActionResult> GetMedicalAidDependentsByEmployeeId(string employeeId)
@@ -56,7 +73,14 @@ namespace HRConnect.Api.Controllers
 
             return Ok(dependents);
         }
-
+        /// <summary>
+        /// Validates the Medical Aid dependent information for a specific employee.
+        /// </summary>
+        /// <param name="employeeId">The employee ID associated with the dependent.</param>
+        /// <param name="medicalAidDependentDto">The Medical Aid dependent model to be validated.</param>
+        /// <returns>
+        /// An IActionResult containing the validated Medical Aid dependent information.
+        /// </returns>
         [HttpPost("employee/{employeeId}/validate")]
         [Authorize(Roles = "SuperUser")]
         public async Task<IActionResult> ValidateMedicalAidDependent(
@@ -69,7 +93,14 @@ namespace HRConnect.Api.Controllers
             return Ok(validated);
         }
 
-        // POST: api/MedicalAidDependent/employee/ARM001
+        /// <summary>
+        /// Creates a new Medical Aid dependent for a specific employee.
+        /// </summary>
+        /// <param name="employeeId">The employee ID associated with the dependent.</param>
+        /// <param name="medicalAidDependentDto">The Medical Aid dependent model containing the dependent's details.</param>
+        /// <returns>
+        /// An IActionResult containing the created Medical Aid dependent.
+        /// </returns>
         [HttpPost("employee/{employeeId}")]
         [Authorize(Roles = "SuperUser")]
         public async Task<IActionResult> CreateMedicalAidDependent(

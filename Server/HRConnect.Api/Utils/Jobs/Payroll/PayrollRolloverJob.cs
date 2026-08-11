@@ -44,6 +44,8 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
     private readonly IUserService _userService;
     private readonly IEmployeeService _employeeService;
     private readonly INotificationService _notificationsService;
+    private readonly IMedicalAidDependentService _medicalAidDependentService;
+    private readonly IMedicalAidDependentNotificationService _dependentNotificationService;
     private static readonly int MAX_RUNS = 12;
     private readonly IEmployeePayrollEarningService _employeePayrollEarningService;
     private readonly IEmployeeDeductionService _employeeDeductionService;
@@ -54,9 +56,10 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
     public PayrollRolloverJob(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService, IServiceProvider serviceProvider,
       IEmployeePensionEnrollmentService employeePensionEnrollmentService,
       IReportsService reportsService, IBankingDetailService bankingDetailService, IUserService userService,
-      IEmployeeService employeeService,
+      IEmployeeService employeeService, IMedicalAidDependentNotificationService dependentNotificationService,
       IEmployeePayrollEarningService employeePayrollEarningService,
-      IEmployeeDeductionService employeeDeductionService, IMedicalAidDeductionService medicalAidDeductionService,
+      IEmployeeDeductionService employeeDeductionService,
+      IMedicalAidDependentService medicalAidDependentService, IMedicalAidDeductionService medicalAidDeductionService,
       INotificationService notificationsService, Func<DateTime>? now = null)
     {
       _payrollRunRepo = payrollRunRepo;
@@ -66,6 +69,8 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
       _employeePensionEnrollmentService = employeePensionEnrollmentService;
       _bankingDetailService = bankingDetailService;
       _userService = userService;
+      _medicalAidDependentService = medicalAidDependentService;
+      _dependentNotificationService = dependentNotificationService;
       _employeeService = employeeService;
       _medicalAidDeductionService = medicalAidDeductionService;
       _employeeDeductionService = employeeDeductionService;
@@ -80,6 +85,9 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
     /// <returns>A new valid payroll period with atleast 1 payroll run</returns>
     public async Task<PayrollPeriod> RolloverPayrollPeriod(PayrollPeriod? oldPeriod)
     {
+      Console.WriteLine("==============================================");
+            Console.WriteLine("PAYROLLOVERJOB START");
+            Console.WriteLine("==============================================");
       if (oldPeriod != null)
       {
         oldPeriod.IsLocked = true;
@@ -207,6 +215,13 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
             await _reportsService.WriteExcelAsync(currentPayRun);
         }
 
+        Console.WriteLine("====================Checking Medical Aid notifications...====================");
+        await _dependentNotificationService.NotifyChildrenTurning21Async(currentPayRun);
+
+
+        Console.WriteLine("====================Converting Medical Aid Dependent ...====================");
+        await _medicalAidDependentService.ConvertChildrenTurning21Async(currentPayRun);
+
         if (nextRun > MAX_RUNS)
         {
           payperiod = await RolloverPayrollPeriod(payperiod);
@@ -238,7 +253,9 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
       await RolloverPensionDeductions();
       Console.WriteLine("====================2====================");
       await _employeePayrollEarningService.RollOverEmployeePayrollEarningsAsync();
+
       Console.WriteLine("========== BEFORE Medical Aid Rollover ==========");
+
 
       await _medicalAidDeductionService.RollOverMedicalAidDeductions();
 
@@ -246,7 +263,7 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
       Console.WriteLine("====================3====================");
       await _employeeDeductionService.RollOverEmployeePayrollEarningsAsync();
       Console.WriteLine("====================4====================");
-      
+
     }
 
     private async Task AllocateCompanyContributionsIfNeeded(int payrollRunId)

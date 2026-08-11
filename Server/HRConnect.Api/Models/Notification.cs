@@ -7,7 +7,7 @@ namespace HRConnect.Api.Models
   }
   public enum NotificationType
   {
-    Payroll = 0, TaxUpload, RoleUpdate, LeaveRequest, LeaveRequestResponse, General
+    Payroll = 0, TaxUpload, RoleUpdate, LeaveRequest, LeaveRequestResponse, MedicalAidDependent, General
   }
 
   [Flags]

@@ -10,6 +10,7 @@ namespace HRConnect.Api.Services
     using HRConnect.Api.Data;
     using HRConnect.Api.Models;
     using HRConnect.Api.Interfaces;
+    using HRConnect.Api.Models.Payroll;
     using HRConnect.Api.Utils;
     using Microsoft.AspNetCore.Identity;
     using HRConnect.Api.Services;
@@ -35,13 +36,26 @@ namespace HRConnect.Api.Services
             _employeeRepo = employeeRepo;
             _medicalAidDeductionService = medicalAidDeductionService;
         }
-
+        /// <summary>
+        /// Retrieves all Medical Aid dependents from the database.
+        /// </summary>
+        /// <returns>
+        /// A list of MedicalAidDependentDTO objects.
+        /// </returns>
         public async Task<List<MedicalAidDependentDTO>> GetAllMedicalAidDependentsAsync()
         {
             var dependents = await _medicalDependentRepo.GetAllMedicalAidDependentsAsync();
             return dependents.Select(d => d.ToMedicalAidDependentDto()).ToList();
 
         }
+        /// <summary>
+        /// Retrieves a Medical Aid dependent by their dependent ID.
+        /// </summary>
+        /// <param name="dependentId">The dependent ID.</param>
+        /// <returns>
+        /// The MedicalAidDependentDTO object if found.
+        /// </returns>
+        /// <exception cref="ValidationException">Thrown when the dependent does not exist.</exception>
         public async Task<MedicalAidDependentDTO> GetMedicalAidDependentsByIdAsync(string dependentId)
         {
             var dependent = await _medicalDependentRepo.GetMedicalAidDependentByIdAsync(dependentId);
@@ -52,6 +66,16 @@ namespace HRConnect.Api.Services
             return dependent?.ToMedicalAidDependentDto();
 
         }
+        /// <summary>
+        /// Creates a new Medical Aid dependent for an employee.
+        /// Validates the dependent information, generates a unique dependent ID, saves the dependent, and updates the employee's Medical Aid deduction.
+        /// </summary>
+        /// <param name="employeeId">The employee ID associated with the dependent.</param>
+        /// <param name="medicalAidDependentRequestDto">The Medical Aid dependent model containing the dependent's details.</param>
+        /// <returns>
+        /// The created MedicalAidDependentDTO object.
+        /// </returns>
+        /// <exception cref="ValidationException">Thrown when the dependent information is invalid or the employee does not exist.</exception>
         public async Task<MedicalAidDependentDTO> CreateMedicalAidDependentAsync(string employeeId, CreateMedicalAidDependentRequestDTO medicalAidDependentRequestDto)
         {
             ValidateCommonFields(medicalAidDependentRequestDto);
@@ -65,7 +89,7 @@ namespace HRConnect.Api.Services
             ValidateAdultAge(medicalAidDependentRequestDto);
 
             ValidateChildAge(medicalAidDependentRequestDto);
-           
+
 
             var dependentId = await GenerateDependentId(employeeId);
 
@@ -83,6 +107,14 @@ namespace HRConnect.Api.Services
             return createdDependent.ToMedicalAidDependentDto();
 
         }
+        /// <summary>
+        /// Retrieves all Medical Aid dependents associated with a specific employee.
+        /// </summary>
+        /// <param name="employeeId">The employee ID.</param>
+        /// <returns>
+        /// A list of MedicalAidDependentDTO objects associated with the employee.
+        /// </returns>
+        /// <exception cref="ValidationException">Thrown when the employee does not exist.</exception>
         public async Task<List<MedicalAidDependentDTO>> GetMedicalAidDependentsByEmployeeIdAsync(string employeeId)
         {
             var employee = await _employeeRepo.GetEmployeeByIdAsync(employeeId);
@@ -96,7 +128,16 @@ namespace HRConnect.Api.Services
                 .Select(d => d.ToMedicalAidDependentDto())
                 .ToList();
         }
-
+        /// <summary>
+        /// Validates the Medical Aid dependent information before creating a dependent.
+        /// Performs common field validation, ID information extraction, and age validation.
+        /// </summary>
+        /// <param name="employeeId">The employee ID associated with the dependent.</param>
+        /// <param name="medicalAidDependentRequestDto">The Medical Aid dependent model to be validated.</param>
+        /// <returns>
+        /// A MedicalAidDependentDTO object containing the validated dependent information.
+        /// </returns>
+        /// <exception cref="ValidationException">Thrown when the dependent information is invalid.</exception>
         public async Task<MedicalAidDependentDTO> ValidateMedicalAidDependentAsync(string employeeId, CreateMedicalAidDependentRequestDTO medicalAidDependentRequestDto)
         {
             ValidateCommonFields(medicalAidDependentRequestDto);
@@ -115,7 +156,13 @@ namespace HRConnect.Api.Services
 
             return newDependent.ToMedicalAidDependentDto();
         }
-
+        /// <summary>
+        /// Generates a unique dependent ID based on the employee ID and existing dependent records.
+        /// </summary>
+        /// <param name="employeeId">The employee ID associated with the dependent.</param>
+        /// <returns>
+        /// A unique dependent ID for the employee.
+        /// </returns>
         private async Task<string> GenerateDependentId(string employeeId)
         {
             var existingIds =
@@ -134,7 +181,12 @@ namespace HRConnect.Api.Services
 
             return $"{employeeId}-D{nextNumber:D3}";
         }
-
+        /// <summary>
+        /// Validates the required Medical Aid dependent fields.
+        /// Ensures the ID number or passport number is valid and that required personal information is provided.
+        /// </summary>
+        /// <param name="medicalAidDependentRequestDto">The Medical Aid dependent model to be validated.</param>
+        /// <exception cref="ValidationException">Thrown when the request is null or a required field is missing or invalid.</exception>
         private static void ValidateCommonFields(CreateMedicalAidDependentRequestDTO medicalAidDependentRequestDto)
         {
             if (medicalAidDependentRequestDto == null)
@@ -184,7 +236,10 @@ namespace HRConnect.Api.Services
                     "Only one of ID Number or Passport Number may be supplied.");
             }
         }
-
+        /// <summary>
+        /// Extracts gender and date of birth information from the dependent's ID number.
+        /// </summary>
+        /// <param name="medicalAidDependentRequestDto">The Medical Aid dependent model containing the ID number.</param>
         private static void ExtractIdInfo(CreateMedicalAidDependentRequestDTO medicalAidDependentRequestDto)
         {
             if (string.IsNullOrWhiteSpace(medicalAidDependentRequestDto.IdNumber))
@@ -195,6 +250,12 @@ namespace HRConnect.Api.Services
             medicalAidDependentRequestDto.Gender = info.Gender;
             medicalAidDependentRequestDto.DateOfBirth = info.DateOfBirth.ToDateTime(TimeOnly.MinValue);
         }
+        /// <summary>
+        /// Validates the age of a child dependent.
+        /// Ensures that the dependent has a date of birth and is younger than 21 years old.
+        /// </summary>
+        /// <param name="medicalAidDependentRequestDto">The Medical Aid dependent model to be validated.</param>
+        /// <exception cref="ValidationException">Thrown when the date of birth is missing or the child dependent is 21 years or older.</exception>
         private static void ValidateChildAge(CreateMedicalAidDependentRequestDTO medicalAidDependentRequestDto)
         {
             if (medicalAidDependentRequestDto.Relationship != Relationship.Child)
@@ -214,6 +275,12 @@ namespace HRConnect.Api.Services
             }
 
         }
+        /// <summary>
+        /// Validates the age of an adult dependent.
+        /// Ensures that the dependent has a date of birth and is older than 21 years old.
+        /// </summary>
+        /// <param name="medicalAidDependentRequestDto">The Medical Aid dependent model to be validated.</param>
+        /// <exception cref="ValidationException">Thrown when the date of birth is missing or the adult dependent is 21 years or younger.</exception>
         private static void ValidateAdultAge(CreateMedicalAidDependentRequestDTO medicalAidDependentRequestDto)
         {
             if (medicalAidDependentRequestDto.Relationship != Relationship.Adult)
@@ -233,7 +300,12 @@ namespace HRConnect.Api.Services
             }
 
         }
-
+        /// <summary>
+        /// Updates the Medical Aid deduction for an employee based on their current dependents.
+        /// Recalculates the number of adult and child dependents covered by the Medical Aid deduction.
+        /// </summary>
+        /// <param name="employeeId">The employee ID associated with the Medical Aid deduction.</param>
+        /// <returns>A task representing the asynchronous update operation.</returns>
         private async Task UpdateMedicalAidDeduction(string employeeId)
         {
 
@@ -245,6 +317,8 @@ namespace HRConnect.Api.Services
 
             if (deduction == null)
                 return;
+
+
 
             var dependents = await _medicalDependentRepo.GetMedicalAidDependentsByEmployeeIdAsync(employeeId);
 
@@ -290,6 +364,102 @@ namespace HRConnect.Api.Services
             Console.WriteLine($"ChildCount: {updateRequest.ChildrenCount}");
             await _medicalAidDeductionService
       .UpdateDeductionsByEmpIdAsync(employeeId, updateRequest);
+        }
+        /// <summary>
+        /// Converts child dependents who have reached the age of 21 to adult dependents
+        /// based on the next payroll period.
+        /// </summary>
+        /// <param name="currentRun">The current payroll run used to determine the next payroll period.</param>
+        /// <returns>A task representing the asynchronous conversion operation.</returns>
+        public async Task ConvertChildrenTurning21Async(PayrollRun currentRun)
+        {
+            Console.WriteLine("========== ConvertChildrenTurning21Async START ==========");
+
+            // Current payroll run number
+            int currentRunNumber = currentRun.PayrollRunNumber;
+
+            // Determine the next payroll run
+            int nextRunNumber = currentRunNumber == 12
+                ? 1
+                : currentRunNumber + 1;
+
+            // Convert payroll run to calendar month
+            int nextPayrollMonth = PayrollRunToCalendarMonth(nextRunNumber);
+
+            // Determine the calendar year for the next payroll
+            int nextPayrollYear;
+
+            if (nextPayrollMonth >= 4)
+            {
+                // April - December belong to the financial year's start year
+                nextPayrollYear = currentRun.Period.StartDate.Year;
+            }
+            else
+            {
+                // January - March belong to the following calendar year
+                nextPayrollYear = currentRun.Period.StartDate.Year + 1;
+            }
+
+            DateTime payrollDate = new DateTime(nextPayrollYear, nextPayrollMonth, 1);
+
+            Console.WriteLine($"Payroll Date Used: {payrollDate:d}");
+
+            var dependents = await _medicalDependentRepo.GetAllMedicalAidDependentsAsync();
+
+            foreach (var dep in dependents)
+            {
+                Console.WriteLine(
+                    $"{dep.DependentId} | {dep.FirstName} | {dep.Relationship} | {dep.DateOfBirth}");
+
+                if (dep.Relationship != Relationship.Child)
+                    continue;
+
+                if (!dep.DateOfBirth.HasValue)
+                    continue;
+
+                DateTime twentyFirstBirthday = dep.DateOfBirth.Value.AddYears(21);
+
+                Console.WriteLine($"21st Birthday : {twentyFirstBirthday:d}");
+
+                if (twentyFirstBirthday <= payrollDate)
+                {
+                    Console.WriteLine($"Converting {dep.DependentId} to Adult");
+
+                    dep.Relationship = Relationship.Adult;
+                    dep.UpdatedDate = DateTime.Now;
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            Console.WriteLine("========== ConvertChildrenTurning21Async END ==========");
+        }
+        /// <summary>
+        /// Converts a payroll run number to its corresponding calendar month.
+        /// </summary>
+        /// <param name="payrollRunNumber">The payroll run number from 1 to 12.</param>
+        /// <returns>
+        /// The calendar month associated with the payroll run number.
+        /// </returns>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when the payroll run number is outside the range of 1 to 12.</exception>
+        private int PayrollRunToCalendarMonth(int payrollRunNumber)
+        {
+            return payrollRunNumber switch
+            {
+                1 => 4,   // April
+                2 => 5,
+                3 => 6,
+                4 => 7,
+                5 => 8,
+                6 => 9,
+                7 => 10,
+                8 => 11,
+                9 => 12,
+                10 => 1, // January
+                11 => 2,
+                12 => 3, // March
+                _ => throw new ArgumentOutOfRangeException(nameof(payrollRunNumber))
+            };
         }
 
     }
