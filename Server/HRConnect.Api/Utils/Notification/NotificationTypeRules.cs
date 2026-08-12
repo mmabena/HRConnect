@@ -2,13 +2,12 @@ namespace HRConnect.Api.Utils.Notification
 {
   using HRConnect.Api.Models;
 
-  public static class NotificationTypeRules
+  public static class NotificationsRules
   {
-    public static bool ShouldPersist(NotificationType type)
+    public static bool ShouldPersist(NotificationSeverity severity)
     {
-      //using pattern instead of boolean checks
-      return type is NotificationType.Payroll or
-    NotificationType.TaxUpload;
+      //using pattern matching instead of boolean checks
+      return severity is NotificationSeverity.Critical;
     }
     public static bool RequiresAction(NotificationType type)
     {

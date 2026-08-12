@@ -1,9 +1,9 @@
-﻿namespace HRConnect.Api.Interfaces
+namespace HRConnect.Api.Interfaces
 {
   using HRConnect.Api.Models;
   using System.Collections.Generic;
-  using System.Threading.Tasks;
   using System.Threading;
+  using System.Threading.Tasks;
 
   public interface IPensionFundRepository
   {
@@ -16,8 +16,13 @@
 
     Task UpdatePensionFundAsync(PensionFund fund, CancellationToken cancellationToken);
 
+
+
     Task AddOrUpdatePensionFundAsync(PensionFund fund, CancellationToken cancellationToken);
 
     Task SaveChangesAsync(CancellationToken cancellationToken);
+
+    Task<PensionFund?> GetPensionFundByEmployeeIdAsync(string employeeId, CancellationToken cancellationToken);
+
   }
 }

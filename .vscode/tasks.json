@@ -1,0 +1,46 @@
+{
+  "version":"2.0.0",
+  "tasks":[
+    {
+        "label": "Show workspaceFolder",
+        "type": "shell",
+        "command": "echo ${workspaceFolder}",
+        "problemMatcher": [
+            "$msCompile"
+        ]
+    },
+    {
+        "type": "msbuild",
+        "problemMatcher": [
+            "$msCompile",
+        ],
+        "group": "build",
+        "label": "Build: HRConnect.Api.csproj",
+        "detail": "Build the HRConnect.Api.csproj project using dotnet build"
+    },
+    {
+        "type": "dotnet",
+        "task": "build",
+        "group": "build",
+        "problemMatcher": [],
+        "label": "dotnet: build"
+    },
+    {
+        "label": "build",
+        "command": "dotnet",
+        "type": "process",
+        "args": [
+            "build",
+            "${workspaceFolder}/Server/HRConnect.Api/HRConnect.Api.csproj"
+        ],
+        "problemMatcher": "$msCompile"
+    },
+    {
+        "type": "dotnet",
+        "task": "watch HRConnect.Api",
+        "file": "C:\\Users\\TMokhadi\\Documents\\HRConnect\\Server\\HRConnect.Api\\HRConnect.Api.csproj",
+        "problemMatcher": [],
+        "label": "dotnet: watch HRConnect.Api"
+    }
+]
+}

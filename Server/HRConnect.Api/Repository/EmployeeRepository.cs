@@ -2,10 +2,10 @@ namespace HRConnect.Api.Repository
 {
   using System.Collections.Generic;
   using System.Threading.Tasks;
-  using HRConnect.Api.Interfaces;
-  using HRConnect.Api.Models;
   using HRConnect.Api.Data;
   using HRConnect.Api.DTOs.Employee;
+  using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Models;
   using Microsoft.EntityFrameworkCore;
   using Microsoft.EntityFrameworkCore.Storage;
   /// <summary>
@@ -74,6 +74,13 @@ namespace HRConnect.Api.Repository
       return await _context.Employees
               .Where(e => e.EmployeeId.StartsWith(prefix))
               .Select(e => e.EmployeeId)
+              .ToListAsync();
+    }
+    public async Task<List<Employee>> GetAllEmployeeByCompanyAsync(string companyId)
+    {
+      return await _context.Employees
+              .Include(e => e.Position)
+              .Where(e => e.CompanyId == companyId)
               .ToListAsync();
     }
     /// <summary>
@@ -215,5 +222,12 @@ namespace HRConnect.Api.Repository
     {
       return await _context.Employees.Where(e => e.PensionOptionId != null && e.EmploymentStatus == EmploymentStatus.Permanent).ToListAsync();
     }
+
+    public async Task SaveChangesAsync(CancellationToken cancellationToken)
+    {
+      await _context.SaveChangesAsync(cancellationToken);
+    }
+
+
   }
 }

@@ -1,14 +1,14 @@
 namespace HRConnect.Tests.Services
 {
-  using Moq;
-  using HRConnect.Api.Services;
-  using HRConnect.Api.Interfaces;
-  using HRConnect.Api.Models;
-  using HRConnect.Api.DTOs.Position;
   using HRConnect.Api.DTOs.JobGrade;
   using HRConnect.Api.DTOs.OccupationalLevel;
+  using HRConnect.Api.DTOs.Position;
+  using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Models;
+  using HRConnect.Api.Services;
   using HRConnect.Api.Utils;
   using Microsoft.EntityFrameworkCore;
+  using Moq;
   public class PositionServiceTests
   {
     private readonly Mock<IPositionRepository> _positionRepoMock;
@@ -72,7 +72,7 @@ namespace HRConnect.Tests.Services
     {
       // Arrange
       _positionRepoMock.Setup(r => r.GetPositionByIdAsync(999))
-                       .ReturnsAsync((Position)null);
+                       .ReturnsAsync((Position?)null);
 
       // Act
       var result = await _positionService.GetPositionByIdAsync(999);

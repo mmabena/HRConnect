@@ -1,14 +1,19 @@
-﻿
+
 
 namespace HRConnect.Api.Repository
 {
+  using System.Collections.Generic;
+  using System.Threading;
+  using System.Threading.Tasks;
+  using HRConnect.Api.Data;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
-  using HRConnect.Api.Data;
   using Microsoft.EntityFrameworkCore;
-  using System.Collections.Generic;
-  using System.Threading.Tasks;
-  using System.Threading;
+
+
+
+  using SendGrid.Helpers.Mail;
+
   public class PensionFundRepository(ApplicationDBContext context) : IPensionFundRepository
   {
     public async Task<IEnumerable<PensionFund>> GetPensionFundsAsync(CancellationToken cancellationToken)
@@ -43,7 +48,9 @@ namespace HRConnect.Api.Repository
       {
         _ = await context.PensionFunds.AddAsync(fund, cancellationToken);
       }
+
       else
+
       {
         existingFund.PensionOptionId = fund.PensionOptionId;
         existingFund.ContributionAmount = fund.ContributionAmount;
@@ -59,5 +66,19 @@ namespace HRConnect.Api.Repository
     {
       _ = await context.SaveChangesAsync(cancellationToken);
     }
-  }
+
+    public async Task<PensionFund?> GetPensionFundByEmployeeIdAsync(string employeeId, CancellationToken cancellationToken)
+    {
+      return await context.PensionFunds
+          .FirstOrDefaultAsync(f => f.EmployeeId == employeeId, cancellationToken);
+    }
+
+    public async Task<ServiceResult> DeleteAllPensionOptionsAsync(CancellationToken cancellationToken)
+    {
+      context.PensionOptions.RemoveRange(context.PensionOptions);
+      await context.SaveChangesAsync(cancellationToken);
+
+      return ServiceResult.Success("All pension options deleted.");
+    }
+ }
 }

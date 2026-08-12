@@ -1,7 +1,9 @@
-﻿namespace HRConnect.Api.Interfaces
+namespace HRConnect.Api.Interfaces
 {
   using HRConnect.Api.Models;
+  using HRConnect.Api.DTOs;
   using System.Collections.Generic;
+  using System.Threading;
   using System.Threading.Tasks;
 
   public interface IPensionFundService
@@ -15,19 +17,24 @@
 
     Task<ServiceResult> UpdatePensionFundAsync(PensionFund fund, CancellationToken cancellationToken);
 
+    Task<ServiceResult> CreatePensionFundAsync(CreatePensionFundDto dto, CancellationToken cancellationToken);
+
+
     // Pension Options
-    Task<IEnumerable<PensionOption>> GetPensionOptionsAsync(CancellationToken cancellationToken);
+    Task<IEnumerable<PensionOptionDto>> GetPensionOptionsAsync(CancellationToken cancellationToken);
 
     Task<PensionOption?> GetPensionOptionByIdAsync(int id, CancellationToken cancellationToken);
 
     Task<ServiceResult> AddPensionOptionAsync(PensionOption pensionOption, CancellationToken cancellationToken);
 
     Task<ServiceResult> UpdatePensionOptionAsync(PensionOption pensionOption, CancellationToken cancellationToken);
-
     // Pension Deduction
     decimal CalculatePensionDeduction(decimal monthlySalary, PensionOption pensionOption);
 
     // Employee Selection
-    Task<ServiceResult> RecordEmployeePensionSelectionAsync(string employeeId, int PensionOptionId, CancellationToken cancellationToken);
+    Task<ServiceResult> RecordEmployeePensionSelectionAsync(string employeeId, int pensionOptionId, CancellationToken cancellationToken);
+
+
+    Task<ServiceResult> DeleteAllOptionsAsync(CancellationToken cancellationToken);
   }
 }

@@ -3,14 +3,12 @@
   using System.Text.Json;
   using System.Threading.Tasks;
   using Quartz;
-  using HRConnect.Api.Data;
   using HRConnect.Api.DTOs.Employee.Pension;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
   using HRConnect.Api.Models.PayrollDeduction;
   using HRConnect.Api.Models.Pension;
   using HRConnect.Api.Services;
-  using Microsoft.EntityFrameworkCore;
 
   [DisallowConcurrentExecution]
   public class EmployeePensionEnrollmentUpdateJob(IEmployeeRepository employeeRepository,
@@ -33,9 +31,9 @@
         EmployeePensionEnrollment? employeePensionEnrollment = await _employeePensionEnrollmentRepository.
         GetByEmployeeIdAndLastRunIdAsync(employeePensionEnrollmentUpdateDto.EmployeeId);
 
-        int oldPensionOptionId = (int)(employeePensionEnrollment?.PensionOptionId);
         if (employeePensionEnrollment != null)
         {
+          int oldPensionOptionId = employeePensionEnrollment.PensionOptionId;
           employeePensionEnrollment.PensionOptionId = employeePensionEnrollmentUpdateDto.PensionOptionId
           ?? employeePensionEnrollment.PensionOptionId;
           employeePensionEnrollment.VoluntaryContribution = employeePensionEnrollmentUpdateDto.VoluntaryContribution

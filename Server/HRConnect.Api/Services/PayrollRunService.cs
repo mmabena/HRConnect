@@ -1,9 +1,9 @@
 namespace HRConnect.Api.Services
 {
-  using HRConnect.Api.Interfaces;
-  using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.DTOs.Payroll;
+  using HRConnect.Api.Interfaces;
   using HRConnect.Api.Mappers.Payroll;
+  using HRConnect.Api.Models.Payroll;
 
   public class PayrollRunService : IPayrollRunService
   {
@@ -51,12 +51,6 @@ namespace HRConnect.Api.Services
     {
       var payrun = await _payrollRunRepo.GetCurrentRunAsync();
 
-      var contributionRecords =
-      await _allocationService.AllocateAsync(payrun.PayrollRunId);
-
-      if (contributionRecords.Count > 0)
-        await AddRecordsCollectionToRunAsync(contributionRecords, null);
-
       return payrun!;
     }
     /// <summary>
@@ -65,7 +59,9 @@ namespace HRConnect.Api.Services
     /// </summary>
     /// <param name="payrollRecord">Payroll Record derived type being added 
     /// to the current payroll run  </param>
-    /// <param name="employeeId">EmployeeId as a foreign for adding record for particular record</param>
+    /// <param name="employeeId">EmployeeId as a foreign for adding record for particular record
+    /// <b>Required.</b> The identifier of the employee associated with the record. Must be a valid employeeId as this function doesn't assume existence.
+    /// </param>
     /// <returns>Successfully Completed Task</returns>
     /// <exception cref="InvalidDataException">Invalid Type Expected 'PayrollRecord'
     /// </exception>
@@ -99,14 +95,22 @@ namespace HRConnect.Api.Services
       if (currentPayRun == null)
         throw new InvalidDataException("No current payroll run found or it is locked");
 
-      foreach (var record in recordsCollection
-      )
+      foreach (var record in recordsCollection)
       {
+        var empId = !string.IsNullOrWhiteSpace(employeeId)
+        ? employeeId
+        : record.EmployeeId;
+
+
+      //   var exists = currentPayRun.Records
+      //   .Any(r => r.PayrollRunId == currentPayRun.PayrollRunId
+      //  && r.EmployeeId == empId);
+
+      //   if (exists)
+      //     continue;
+          
         record.PayrollRun = currentPayRun;
-        if (!string.IsNullOrWhiteSpace(employeeId))
-        {
-          record.EmployeeId = employeeId;
-        }
+        record.EmployeeId = empId;
         currentPayRun.Records.Add(record);
       }
       await _payrollRunRepo.UpdateRun(currentPayRun);

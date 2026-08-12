@@ -1,5 +1,7 @@
 namespace HRConnect.Api.Repository
 {
+  using System.Drawing;
+
   using HRConnect.Api.Data;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models;
@@ -24,10 +26,8 @@ namespace HRConnect.Api.Repository
         IsUsed = false,
         CreatedAt = DateTime.UtcNow
       };
-
       await _context.PasswordResetPins.AddAsync(resetPin);
       await _context.SaveChangesAsync();
-
       return resetPin;
     }
 

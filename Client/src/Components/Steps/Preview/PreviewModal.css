@@ -1,0 +1,353 @@
+/* STEPPER */
+
+.preview-stepper {
+  padding: 26px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e4e7ea;
+}
+
+
+.step-wrapper {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  position: relative;
+}
+
+.step {
+  min-width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #3d6473;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.step-label {
+  margin-left: 10px;
+  font-size: 14px;
+  color: #4d6570;
+  white-space: nowrap;
+}
+
+.step-line {
+  flex: 1;
+  height: 1px;
+  background: #d7dde1;
+  margin: 0 14px;
+}
+
+/* BODY */
+
+.preview-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 35px 45px;
+  display: flex;
+  margin-bottom: 30px;
+  flex-direction: column;
+  align-items: center;
+}
+
+.preview-section-header {
+  margin-bottom: 30px;
+}
+
+.preview-section-header h3 {
+  margin: 0;
+  color: #315766;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.preview-section-header p {
+  margin-top: 6px;
+  color: #5d7a87;
+  font-size: 14px;
+}
+
+/* SECTION */
+
+.preview-section {
+  width: 100%;
+  max-width: 766px;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 40px;
+  box-sizing: border-box;
+  position: relative;
+}
+
+
+
+/*.preview-section h4 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #4f5f68;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #dfe5e8;
+}*/
+
+/* GRID */
+
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 25px;
+  width: 100%;
+  max-width: 766px;
+  box-sizing: border-box;
+}
+
+/* CARD */
+
+.preview-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 0 5px 5px;
+  height: 43px;
+  background: rgba(53, 88, 103, 0.1);
+  border-radius: 5px;
+}
+
+.preview-card span {
+  font-family: "Anek Bangla";
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 26px;
+  color: #707070;
+  margin-bottom: -6px;
+}
+
+.preview-card h4 {
+  font-family: "Anek Bangla";
+  font-weight: 520;
+  font-size: 13.5px;
+  line-height: 26px;
+  color: #355867;
+  margin: 0;
+}
+
+/* FOOTER */
+
+.preview-footer {
+  width: 100%;
+  max-width: 1068px;
+  height: 51px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0;
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
+.back-btn {
+  height: 48px;
+  min-width: 170px;
+  border-radius: 10px;
+  border: 1px solid #cfd7dc;
+  background: white;
+  color: #6a7880;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: 0.2s ease;
+}
+
+.back-btn:hover {
+  background: #f5f7f8;
+}
+
+.save-btn {
+  height: 50px;
+  min-width: 190px;
+  border: none;
+  border-radius: 10px;
+  background: #456b7b;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.save-btn:hover {
+  background: #355664;
+}
+
+/* SCROLLBAR */
+
+.preview-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.preview-body::-webkit-scrollbar-thumb {
+  background: #c8d2d7;
+  border-radius: 10px;
+}
+
+.preview-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+  .preview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .preview-stepper {
+    overflow-x: auto;
+    gap: 20px;
+  }
+
+  .step-wrapper {
+    min-width: max-content;
+  }
+
+  .preview-footer {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .back-btn,
+  .save-btn {
+    width: 100%;
+  }
+}
+
+.preview-review-heading {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  margin-left: 94px;
+  max-width: 754px;
+  height: auto; /* remove fixed height */
+  gap: 4px;
+}
+
+.preview-review-heading h3 {
+  margin: 0;
+  font-family: "Anek Bangla", sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 26px;
+  color: #355867;
+}
+
+.preview-review-heading span {
+  font-family: "Anek Bangla", sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 26px;
+  color: #006088;
+}
+
+.preview-section-title {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 766px;
+  height: 46px;
+  font-family: "Anek Bangla", sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 26px;
+  color: #707070;
+  border-bottom: 1px solid rgba(154, 154, 154, 0.55);
+  margin-bottom: 16px;
+}
+
+.preview-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 1092px;
+  margin: 0 auto;
+  height: 70vh;
+
+}
+
+.preview-section > * {
+  width: 100%;
+}
+
+.preview-back-button {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  width: 187px;
+  height: 47px;
+  padding: 0 10px;
+  background: transparent;
+  opacity: 0.9;
+  border: 1px solid var(--primary-color);
+  border-radius: 10px;
+  font-family: "Anek Bangla", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  margin-left: 20px;
+  margin-top: -28px;
+  font-size: 16px;
+  letter-spacing: 0.02em;
+  color: var(--primary-color);
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.preview-save-button {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  width: 187px;
+  height: 47px;
+  padding: 0 10px 5px;
+  background: #355867;
+  opacity: 0.9;
+  border: none;
+  border-radius: 10px;
+  font-family: "Anek Bangla", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  margin-top: -25px;
+  margin-right: -64px;
+  line-height: 30px;
+  letter-spacing: 0.02em;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.preview-save-button:hover {
+  background: #2d4c59;
+}
+
+
+/*=========================================================================*/
+
+

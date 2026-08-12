@@ -1,0 +1,1081 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* ===== OVERLAY BACKDROP ===== */
+.add-employee-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+}
+
+/* ===== MODAL CONTAINER ===== */
+.add-employee-modal-wrapper {
+  position: relative;
+  width: 80vw;
+  max-width: 1400px;
+  height: 90vh;
+  border-radius: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(
+    135deg,
+    #EEEEF1,
+    #EFF1F3,
+    #E7EAEB,
+    #D6D6D9,
+    #C4C4C5
+  );
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+  overflow-y: auto;
+  animation: modalFadeIn 0.25s ease;
+}
+
+/* Optional smooth animation */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ===== MODAL SHELL — vertical flex, fixed size ===== */
+.emp-modal-shell {
+  display: grid;
+  grid-template-rows: repeat(1, minmax(0, 1fr));
+
+
+  width: 1186px;
+  max-height: 843px;
+  height: 100%;
+
+  margin-left: 100px;
+
+  flex-shrink: 0;
+  border-radius: 10px;
+
+  background: linear-gradient(
+    135deg,
+    #EEEEF1,
+    #EFF1F3,
+    #E7EAEB,
+    #D6D6D9,
+    #C4C4C5
+  );
+
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+
+  overflow: hidden;
+  z-index: 1;
+}
+
+
+
+/* ===== HEADER ===== */
+.emp-headings-container {
+  flex-shrink: 0;
+  width: 1186px;
+  height: 76px;
+  background-color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  padding: 10px 52px;
+  gap: 20px;
+}
+
+/* ===== WIZARD ===== */
+.emp-wizard-container {
+  flex-shrink: 0;
+  width: 1186px;
+  height: 76px;
+  display: flex;
+  align-items: center;
+  padding: 0 52px;
+  border-bottom: 1px solid var(--baby-blue);
+}
+
+.emp-wizard-frame {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.emp-step-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+ 
+}
+
+.emp-line-step {
+position: relative;
+  top:48%;
+  background: rgba(154, 154, 154, 0.55);
+  width: 6%;
+  margin-left: auto;
+  margin-right: auto;
+  height: 1px;
+  border: none;
+}
+
+.emp-step-inactive{
+  width: 25px;
+  height: 25px;
+  border-radius: 100%;
+  background: rgba(154, 154, 154, 0.40);
+  color:grey ;
+  border: 1px solid var(--light-grey);
+  transition: all .2s;
+}
+
+.emp-step-active{
+  width: 25px;
+  height: 25px;
+  border-radius: 100%;
+  background:rgba(53, 88, 103, 0.23);
+  color: var(--primary-color) !important;
+  border: 1px solid var(--blue);
+}
+
+
+
+.emp-wizard-step {
+ display: flex;
+  font-family: "Anek Bangla";
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 500;
+ 
+}
+
+
+
+
+
+/* ===== CONTENT AREA — below wizard ===== */
+.emp-center-frame {
+  width: 1186px;
+  height: 691px; /* 843 - 76 (header) - 76 (wizard) */
+  flex-shrink: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: 1fr;
+  overflow: hidden;
+}
+
+/* ===== STEP 2+ FULL-WIDTH LAYOUT ===== */
+.emp-center-frame.step-2 {
+  grid-template-columns: 1fr;
+}
+
+.emp-center-frame.step-2 .emp-left-frame {
+  display: none;
+}
+
+.emp-center-frame.step-2 .emp-right-frame {
+  width: 1186px;
+  padding: 40px 80px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+
+}
+
+.emp-center-frame.step-2 .emp-right-form-container {
+  width: 960px;
+  flex-shrink: 0;
+  margin-top: 0;
+}
+
+.emp-center-frame.step-2 .emp-right-frame-content {
+  width: 100%;
+}
+
+/* ===== LEFT FRAME ===== */
+.emp-left-frame {
+  width: 100%;
+  height: 100%;
+  padding: 50px 50px 50px 100px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  bottom: 58px;
+
+}
+
+.emp-left-frame-centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  text-align: center;
+  margin: auto;
+}
+
+.emp-left-frame-bottom {
+  display: flex;
+  flex-direction: column;
+  width: 360px;
+  gap: 26px;
+  align-items: flex-start;
+}
+
+
+/* ===== RIGHT FRAME ===== */
+.emp-right-frame {
+  width: 100%;
+  height: 100%;
+  padding: 50px 40px 40px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+   position: relative;
+}
+
+.emp-right-form-container {
+ width: 444px;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  margin-top: 10px;
+}
+
+.emp-right-frame-content {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.emp-right-frame-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 5px;
+  box-sizing: border-box;
+  color: #002D40;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.emp-right-frame-bottom-text {
+  font-family: 'Instrument Sans', sans-serif;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 26px;
+  letter-spacing: 0;
+  color: #002D40;
+  margin: 0;
+  padding: 0;
+}
+
+.emp-align-right {
+  display: block;
+  text-align: right;
+  padding: 0;
+  margin-right: 80px;
+  margin-bottom: -30px;
+}
+
+.emp-align-left {
+  display: block;
+  text-align: left;
+  padding: 0;
+  margin-left: 20px;
+}
+
+/* ===== ICON WRAPPERS ===== */
+.emp-left-icon-wrapper {
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--white);
+  display: flex;
+  width: 34px;
+  height: 34px;
+  padding: 6px;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.emp-right-icon-wrapper {
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--white);
+  display: flex;
+  margin-left: auto;
+  width: 34px;
+  height: 34px;
+  padding: 6px;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+/* ===== TYPOGRAPHY ===== */
+.emp-title-wrapper {
+  display: flex;
+  flex: 1;
+  align-items: center;
+}
+
+.emp-center-logo-text {
+  color: var(--white);
+  font-family: "Anek Bangla";
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 500;
+}
+
+.emp-center-logo-text-light {
+  font-family: 'Anek Bangla', serif;
+  font-size: 40px;
+  line-height: 100%;
+  font-weight: 300;
+  color: #006088;
+}
+
+.emp-new-employee-title {
+  color: var(--text-primary);
+  text-align: center;
+  font-size: 30px;
+  font-style: normal;
+  font-weight: 700;
+  width: 360px;
+  height: 26px;
+  font-family: 'Inter', sans-serif;
+  line-height: 26px;
+  letter-spacing: 0;
+  display: flex;
+  align-items: left;
+  justify-content: left;
+  margin: 0 auto 20px auto;
+}
+
+.emp-new-employee-subtitle {
+  width: 338px;
+  height: auto;
+  font-family: 'Instrument Sans', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 21px;
+  letter-spacing: 0;
+  color: #002D40;
+  text-align: left;
+  margin-left: -20px;
+}
+
+.emp-employee-word {
+  display: block;
+  text-align: center;
+  transform: translateX(-25px);
+}
+
+.emp-personal-details-heading {
+  position: relative;
+  color: var(--primary-color);
+  font-family: "Anek Bangla";
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 26px; 
+  top: 3.5%;
+  left: 2%;
+}
+
+.emp-personal-details-sub {
+  position: relative;
+  color: var(--COLOUR-Calm-Blue, #006088);
+  font-family: "Anek Bangla";
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  left: 2%;
+  bottom: 0%;
+}
+
+/* ===== FORM CONTAINERS ===== */
+.emp-name-surname-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 444px;
+  gap: 17px;
+  border-radius: 5px;
+}
+
+.emp-form-grid {
+  display: flex;
+  height: auto;
+  min-height: 0;
+  width: 444px;
+  flex-shrink: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 17px;
+}
+
+.emp-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  width: 100%;
+  color: var(--text-primary);
+}
+
+.emp-full-width {
+  width: 100%;
+}
+
+/* ===== INPUTS ===== */
+.emp-input-wrapper {
+  position: relative;
+  width: 100%;
+  display: block;
+  height: 33px;
+  padding: 0 5px 5px 5px;
+  align-items: flex-start;
+  gap: 5px;
+  border-radius: 5px;
+  background-color: transparent;
+}
+
+.emp-input-image-wrapper {
+  position: relative;
+  width: 100%;
+  display: block;
+  height: 33px;
+  padding: 0 5px 5px 5px;
+  align-items: flex-start;
+  gap: 5px;
+  border-radius: 5px;
+  border-bottom: 1.5px solid var(--accent-blue);
+  background-color: transparent;
+}
+
+.emp-input-wrapper.full-width {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.emp-input-wrapper input,
+.emp-input-wrapper select {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.emp-name-input,
+.emp-start-date,
+.emp-surname-input,
+.emp-title-input {
+  width: 100%;
+  height: 33px;
+  color: var(--blue);
+  border: 1px solid rgba(0, 96, 136, 0.60);
+  padding-left: 5px;
+  padding-right: 5px;
+  padding-bottom: 5px;
+  font-size: 16px;
+  outline: none;
+  border-radius: 5px;
+  background-color: transparent;
+  font-family: 'Anek Bangla';
+}
+
+.emp-name-input::placeholder {
+  color: var(--blue);
+}
+
+.emp-name-input.input-error::placeholder {
+  color: red;
+}
+
+/* Date inputs */
+.emp-name-input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.emp-name-input[type="date"]::-webkit-datetime-edit {
+  color: #898989;
+  text-transform: uppercase;
+}
+
+.emp-start-date[type="date"]::-webkit-calendar-picker-indicator {
+ text-transform: uppercase;
+  color: #898989; /* text color */
+  opacity: 0;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.emp-start-date[type="date"]::-webkit-datetime-edit {
+  color: #898989;
+  text-transform: uppercase;
+}
+
+.emp-start-date[type="date"] {
+  font-size: 14px;
+  text-align: right;
+  padding-top: 5.5px;
+  padding-right: 8%;
+}
+
+.emp-name-input[type="date"] {
+  font-size: 14px;
+  text-align: right;
+  padding-top: 5.5px;
+  padding-right: 18%;
+}
+
+/* ===== DATE WRAPPER ===== */
+.date-wrapper {
+display: inline;
+  right: 6px;
+}
+
+.date-label {
+  position: absolute;
+  font-size: 16px;
+  font-family: 'Anek Bangla';
+  left: 10px;
+  top: 45%;
+  transform: translateY(-50%);
+  color: var(--blue);
+  pointer-events: none;
+ 
+}
+
+.date-input-wrapper {
+  position: relative;
+}
+
+.date-input-wrapper label {
+  position: absolute;
+  top: -8px;
+  left: 10px;
+  background: white;
+  font-size: 12px;
+  padding: 0 4px;
+}
+
+.custom-calendar-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+/* ===== DROPDOWNS ===== */
+.dropdown-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.dropdown-wrapper select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 40px;
+}
+
+.dropdown-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+}
+
+select {
+  accent-color: var(--primary-color);
+}
+
+option:checked {
+  background: var(--primary-color);
+  color: white;
+}
+
+.emp-gender-select-wrapper {
+  position: relative;
+  width: 100%;
+  height: 33px;
+}
+
+.emp-gender-select {
+  width: 100%;
+  height: 33px;
+  border: none;
+  border-bottom: 1.5px solid #006088;
+  padding-left: 5px;
+  padding-right: 30px;
+  padding-bottom: 5px;
+  font-size: 16px;
+  outline: none;
+  box-sizing: border-box;
+  background-color: transparent;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  color: black;
+}
+
+.emp-dropdown-icon {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+/* ===== DISABILITY ===== */
+.emp-disability-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.emp-disability-row {
+  height: 22px;
+  color: var(--text-primary);
+  font-family: "Anek Bangla";
+  font-size: 16px;
+    padding-bottom: 10px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 150%;
+  letter-spacing: 0.15px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.emp-disability-label {
+  font-family: "Anek Bangla";
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 150%;
+  letter-spacing: 0.15px;
+  color: var(--text-primary);
+  white-space: nowrap;
+  padding-left: 10px;
+}
+
+.emp-disability-input {
+  margin-left: 94px;
+  width: 203px;
+  color: var(--text-primary);
+  border: 1px solid rgba(0, 96, 136, 0.60);
+  outline: none;
+  font-family: 'Anek Bangla';
+  height: 33px;
+  border-radius: 5px;
+  padding-left: 5px;
+  padding-bottom: 5px;
+  font-size: 16px;
+  background: transparent;
+}
+
+input[type="radio" i] {
+  accent-color: var(--primary-color) !important;
+  cursor: pointer;
+  appearance: auto;
+  box-sizing: border-box;
+
+  margin: 3px 3px 5px 5px;
+  padding: initial;
+  border: initial;
+}
+
+/* ===== RADIO ===== */
+.emp-radio-row {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.emp-radio-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 33px;
+  cursor: pointer;
+}
+
+/* ===== FILE UPLOAD ===== */
+.hidden-file-input {
+  display: none;
+}
+
+.emp-upload-wrapper {
+  display: flex;
+  width: 444px;
+  flex-shrink: 0;
+  height: 132px;
+  padding: 0 5px 5px 5px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.upload-label {
+  font-family: 'Anek Bangla';
+  font-size: 16px;
+  color: var(--primary-color);
+  border: none;
+  outline: none;
+  box-sizing: border-box;
+  border-radius: 5px;
+}
+
+.upload-container {
+   display: flex;
+  width: 434px;
+  height: 93px;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  border-radius: 5px;
+  border: 2px dashed var(--primary-color);
+  background: rgba(53, 88, 103, 0.05);
+}
+
+.upload-icon {
+ position: absolute;
+  display: flex;
+  top: 59px;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  color: var(--primary-color);
+}
+
+.upload-text {
+  width: 187px;
+  height: 43px;
+  flex-shrink: 0;
+  color: var(--add-button);
+  font-family: "Anek Bangla";
+  font-style: normal;
+  font-weight: 400;
+  line-height: 24px; 
+  margin-top: 35px;
+  font-family: 'Anek Bangla';
+  font-size: 14px;    
+}
+
+.file-input-wrapper {
+  position: relative;
+}
+
+/* ===== BUTTONS ===== */
+.emp-save-button {
+  position: relative;
+  display: flex;
+  width: 187px;
+  height: 47px;
+  top:53px;
+  padding: 0 10px 0px 10px;
+  justify-content: center;
+  align-items: center;
+  left:59%;
+  color: var(--white);
+  text-align: center;
+  font-family: "Anek Bangla", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: 0.32px;
+  border: 1px solid var(--light-grey);
+  opacity: 0.9;
+  background: var(--primary-color);
+  background-color: var(--primary-color);
+  border-radius: 10px;
+  display: flex;
+  gap: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-top: 85px;
+}
+
+.emp-nextt-button {
+  position: relative;
+  display: flex;
+  width: 187px;
+  height: 47px;
+  top:53px;
+  padding: 0 10px 0px 10px;
+  justify-content: center;
+  align-items: center;
+  left:59%;
+  color: var(--white);
+  text-align: center;
+  font-family: "Anek Bangla", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: 0.32px;
+  border: 1px solid var(--light-grey);
+  opacity: 0.9;
+  background: var(--primary-color);
+  background-color: var(--primary-color);
+  border-radius: 10px;
+  display: flex;
+  gap: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-top: 85px;
+}
+
+.emp-save-button:hover {
+  background-color: var(--primary-light);
+}
+
+.emp-nextt-button:hover {
+  background-color: var(--primary-light);
+}
+
+.save-button-icon{
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  
+}
+
+.emp-back-button {
+  display: flex;
+  width: 187px;
+  height: 47px;
+  flex-shrink: 0;
+  padding: 0 10px;
+  justify-content: center;
+  align-items: center;
+  color: var(--primary-color);
+  text-align: center;
+  font-family: "Anek Bangla", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  letter-spacing: 0.32px;
+  border: 1px solid var(--primary-color);
+  background: transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.emp-back-button:hover {
+  background-color: rgba(53, 88, 103, 0.1);
+}
+
+/* ===== BUTTON ROW (Back + Next side by side) ===== */
+.emp-button-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  margin-top: 32px;
+}
+
+
+
+.emp-button-row .emp-save-button {
+  margin-left: 0;
+  margin-top: 0;
+}
+
+/* ===== MISC LAYOUT ===== */
+.emp-input-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.emp-city-postal-container {
+  display: flex;
+  width: 100%;
+  gap: 10px;
+}
+
+.emp-city-input,
+.emp-postal-input {
+  flex: 1;
+  height: 33px;
+  border: none;
+  border-bottom: 1.5px solid #006088;
+  padding-left: 5px;
+  color: #006088;
+  padding-right: 5px;
+  padding-bottom: 5px;
+  font-size: 16px;
+  outline: none;
+  box-sizing: border-box;
+  background-color: transparent;
+}
+
+.emp-input-label {
+  font-size: 16px;
+  color: #002D40;
+  font-weight: 400;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.emp-grey-text::placeholder {
+  color: #3D3D3D;
+  font-weight: 400;
+}
+
+.emp-blue-text::placeholder {
+  color: #002D40;
+  font-weight: 400;
+}
+
+/* ===== MENU BACKGROUND ===== */
+.emp-menu-background {
+  position: fixed;
+  top: 0;
+  left: 375px;
+  right: 0;
+  bottom: 0;
+  padding: 26px 20px 20px 20px;
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: linear-gradient(
+    135deg,
+    #EEEEF1,
+    #EFF1F3,
+    #E7EAEB,
+    #D6D6D9,
+    #C4C4C5
+  );
+  color: black;
+  box-sizing: border-box;
+  text-align: center;
+  overflow: hidden;
+  z-index: 1;
+  overflow-y: auto;
+}
+
+.emp-corner-fill-top {
+  position: fixed;
+  top: 0;
+  left: 375px;
+  width: 20px;
+  height: 20px;
+  background-color: var(--text-primary);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.emp-corner-fill-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 375px;
+  width: 20px;
+  height: 20px;
+  background-color: var(--text-primary);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ===== TOAST ===== */
+.emp-toast-confirm-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.emp-toast-confirm-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.emp-toast-confirm-btn {
+  padding: 6px 12px;
+  border: none;
+  cursor: pointer;
+  color: white;
+  font-weight: 600;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.emp-toast-confirm-btn.confirm {
+  background-color: #4caf50;
+}
+
+.emp-toast-confirm-btn.confirm:hover {
+  background-color: #45a049;
+}
+
+.emp-toast-confirm-btn.cancel {
+  background-color: #f44336;
+}
+
+.emp-toast-confirm-btn.cancel:hover {
+  background-color: #da190b;
+}
+
+/* ===== FORM LABELS ===== */
+.emp-form-label {
+  font-size: 14px;
+  color: #aaa;
+  font-weight: 400;
+  margin-bottom: 4px;
+  font-family: sans-serif;
+}
+
+/* ===== ERROR STATES ===== */
+.emp-error-input {
+  border: 1px solid red !important;
+  outline: none;
+}
+
+.emp-error-message {
+  display: block;
+  width: 100%;
+  color: red;
+  font-size: 12px;
+  text-align: left;
+}

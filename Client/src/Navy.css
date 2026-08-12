@@ -1439,7 +1439,8 @@ UserManagement Styles */
 }
 
 .role-badge {
- color: white;
+background-color:white;
+color: var(--primary-color);
   border: none;
   padding: 8px 16px;
   border-radius: 4px;
@@ -1451,7 +1452,7 @@ UserManagement Styles */
 }
 
 .role-badge.user {
-  background-color: #e5f3fa;
+  background-color: white;
   color: #6AB1D7;
 }
 
@@ -2651,3 +2652,6 @@ td .edit-button:hover {
 
 
 
+
+
+ 

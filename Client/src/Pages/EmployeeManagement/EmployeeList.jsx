@@ -26,12 +26,11 @@ const EmployeeList = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const { employees, loading, error } = useEmployees(location.key);
   const [searchQuery, setSearchQuery] = useState("");
-  
 
   const filteredEmployees = useEmployeeFilter(
     employees,
     selectedTab,
-    searchQuery
+    searchQuery,
   );
 
   /// </summary>
@@ -63,8 +62,8 @@ const EmployeeList = () => {
   };
 
   const handleAddEmployeeClick = () => {
-  setShowAddModal(true);
-};
+    setShowAddModal(true);
+  };
 
   return (
     <div className="menu-background">
@@ -81,9 +80,9 @@ const EmployeeList = () => {
                 selectedTab === tab.value ? "selected" : ""
               }`}
               onClick={() => {
-                setSelectedTab(tab.value); 
-                setActivePage(1); 
-              }} 
+                setSelectedTab(tab.value);
+                setActivePage(1);
+              }}
             >
               {tab.label}
             </div>
@@ -100,13 +99,11 @@ const EmployeeList = () => {
                   <input
                     type="text"
                     className="search-input"
-                    placeholder="Search text"
+                    placeholder="Search employees..."
                     value={searchQuery}
                     onChange={(e) => {
                       setSearchQuery(e.target.value);
-                      /// </summary>
                       setActivePage(1); /// reset page on search
-                      /// </summary>
                     }}
                   />
                 </div>
@@ -117,23 +114,19 @@ const EmployeeList = () => {
                 />
               </div>
             </div>
-            <div className= "employee-button-wrapper">
-            <button
-              className="filter-button"
-            >
-              <SlidersHorizontal size={20} />
-            
-              Filter
-            </button>
+            <div className="employee-button-wrapper">
+              <button className="filter-button">
+                <SlidersHorizontal size={20} />
+                Filter
+              </button>
 
-             <button
-              className="add-employee-button"
-              onClick={handleAddEmployeeClick}
-            >
-              <Plus size={20} />
-            
-              Add Employee
-            </button>
+              <button
+                className="add-employee-button"
+                onClick={handleAddEmployeeClick}
+              >
+                <Plus size={20} />
+                Add Employee
+              </button>
             </div>
           </div>
         </div>

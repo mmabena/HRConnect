@@ -57,12 +57,13 @@ namespace HRConnect.Api.Middleware
 
       var response = new
       {
+        type = ex.GetType().Name,
         errors = MapMessageToField(ex.Message)
       };
 
       await context.Response.WriteAsync(JsonSerializer.Serialize(response));
     }
-  ///<summary>
+    ///<summary>
     ///Maps an exception message to the corresponding API field name so that the frontend
     ///can associate the error message with the correct form input field.
     ///</summary>
@@ -80,10 +81,28 @@ namespace HRConnect.Api.Middleware
         errors["contactNumber"] = message;
       else if (message.Contains("Tax Number", StringComparison.OrdinalIgnoreCase))
         errors["taxNumber"] = message;
-      else if (message.Contains("ID Number", StringComparison.OrdinalIgnoreCase))
+      else if (
+    message.Contains("Either ID Number or Passport Number", StringComparison.OrdinalIgnoreCase)
+)
+      {
         errors["idNumber"] = message;
-      else if (message.Contains("Passport Number", StringComparison.OrdinalIgnoreCase))
         errors["passportNumber"] = message;
+      }
+      else if (
+          message.Contains("Only one of ID Number or Passport Number", StringComparison.OrdinalIgnoreCase)
+      )
+      {
+        errors["idNumber"] = message;
+        errors["passportNumber"] = message;
+      }
+      else if (message.Contains("ID Number", StringComparison.OrdinalIgnoreCase))
+      {
+        errors["idNumber"] = message;
+      }
+      else if (message.Contains("Passport Number", StringComparison.OrdinalIgnoreCase))
+      {
+        errors["passportNumber"] = message;
+      }
       else if (message.Contains("Start date", StringComparison.OrdinalIgnoreCase))
         errors["startDate"] = message;
       else if (message.Contains("Position", StringComparison.OrdinalIgnoreCase))
@@ -96,19 +115,53 @@ namespace HRConnect.Api.Middleware
         errors["reportsTo"] = message;
       else if (message.Contains("surname", StringComparison.OrdinalIgnoreCase))
         errors["lastName"] = message;
-      else if (message.Contains("name", StringComparison.OrdinalIgnoreCase))
+      else if (message.Contains("first name", StringComparison.OrdinalIgnoreCase))
         errors["firstName"] = message;
-        else if (message.Contains("zipCode", StringComparison.OrdinalIgnoreCase))
+      else if (message.Contains("zipCode", StringComparison.OrdinalIgnoreCase))
         errors["zipCode"] = message;
       else if (message.Contains("title", StringComparison.OrdinalIgnoreCase))
         errors["title"] = message;
-        else if (message.Contains("city", StringComparison.OrdinalIgnoreCase))
+      else if (message.Contains("city", StringComparison.OrdinalIgnoreCase))
         errors["city"] = message;
-        else if (message.Contains("disabilityType", StringComparison.OrdinalIgnoreCase))
+      else if (message.Contains("disabilityType", StringComparison.OrdinalIgnoreCase))
         errors["disabilityType"] = message;
+      //Company Validation
+      else if (message.Contains("Company name", StringComparison.OrdinalIgnoreCase))
+        errors["companyName"] = message;
+      else if (message.Contains("Registration number", StringComparison.OrdinalIgnoreCase))
+        errors["registrationNumber"] = message;
+      else if (message.Contains("UIF number", StringComparison.OrdinalIgnoreCase))
+        errors["uifNumber"] = message;
+      else if (message.Contains("VAT number", StringComparison.OrdinalIgnoreCase))
+        errors["vatNumber"] = message;
+      else if (message.Contains("Contact number", StringComparison.OrdinalIgnoreCase))
+        errors["contactNumber"] = message;
+      else if (message.Contains("Company address", StringComparison.OrdinalIgnoreCase))
+        errors["companyAddress"] = message;
+      //Banking Details Validation
+      else if (message.Contains("Bank name", StringComparison.OrdinalIgnoreCase))
+        errors["bankName"] = message;
+      else if (message.Contains("Account number", StringComparison.OrdinalIgnoreCase))
+        errors["accountNumber"] = message;
+      // MedicalAid dependent validations
+      else if (message.Contains("Date of birth", StringComparison.OrdinalIgnoreCase))
+        errors["dateOfBirth"] = message;
+
+      else if (message.Contains("Gender", StringComparison.OrdinalIgnoreCase))
+        errors["gender"] = message;
+
+      else if (message.Contains("Relationship", StringComparison.OrdinalIgnoreCase))
+        errors["relationship"] = message;
+      else if (message.Contains("Child dependent", StringComparison.OrdinalIgnoreCase))
+      {
+        errors["dateOfBirth"] = message;
+      }
+      else if (message.Contains("Adult dependent", StringComparison.OrdinalIgnoreCase))
+      {
+        errors["dateOfBirth"] = message;
+      }
       else
         errors["general"] = message;
-
       return errors;
     }
   }

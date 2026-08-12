@@ -1,18 +1,17 @@
 ﻿namespace HRConnect.Tests
 {
-  using Xunit;
-  using Moq;
-  using Moq.EntityFrameworkCore;
   using System.Collections.Generic;
-  using System.Threading.Tasks;
   using Api.Mappers;
   using Api.Utils.MedicalOption;
-  using HRConnect.Api.Utils.MedicalOption;
   using HRConnect.Api.DTOs.MedicalOption;
-  using HRConnect.Api.Models;
   using HRConnect.Api.Interfaces;
+  using HRConnect.Api.Models;
+  using HRConnect.Api.Utils.MedicalOption;
   using HRConnect.Api.Utils.MedicalOption.Records;
+  using Moq;
+  using Moq.EntityFrameworkCore;
   using Utils;
+  using Xunit;
 
   public class MedicalOptionValidatorTests
    {
@@ -81,20 +80,22 @@
 
      // ID Existence Tests
      [Fact]
-     public async Task ValidateAllIdsExistAsyncShouldReturnTrueForValidIds()
+     public Task ValidateAllIdsExistAsyncShouldReturnTrueForValidIds()
      {
+       try
+       {
          // Arrange
          var bulkUpdateDto = new List<UpdateMedicalOptionVariantsDto>
          {
-             new() { MedicalOptionId = 1 },
-             new() { MedicalOptionId = 2 }
+           new() { MedicalOptionId = 1 },
+           new() { MedicalOptionId = 2 }
          };
          
          var dbData = new List<MedicalOption>
          {
-             new() { MedicalOptionId = 1 },
-             new() { MedicalOptionId = 2 },
-             new() { MedicalOptionId = 3 }
+           new() { MedicalOptionId = 1 },
+           new() { MedicalOptionId = 2 },
+           new() { MedicalOptionId = 3 }
          };
          
          // Act
@@ -102,22 +103,30 @@
          
          // Assert
          Assert.True(result);
+         return Task.CompletedTask;
+       }
+       catch (Exception exception)
+       {
+         return Task.FromException(exception);
+       }
      }
 
      [Fact]
-     public async Task ValidateAllIdsExistAsyncShouldReturnFalseForInvalidIds()
+     public Task ValidateAllIdsExistAsyncShouldReturnFalseForInvalidIds()
      {
+       try
+       {
          // Arrange
          var bulkUpdateDto = new List<UpdateMedicalOptionVariantsDto>
          {
-             new() { MedicalOptionId = 1 },
-             new() { MedicalOptionId = 999 } // Invalid ID
+           new() { MedicalOptionId = 1 },
+           new() { MedicalOptionId = 999 } // Invalid ID
          };
          
          var dbData = new List<MedicalOption>
          {
-             new() { MedicalOptionId = 1 },
-             new() { MedicalOptionId = 2 }
+           new() { MedicalOptionId = 1 },
+           new() { MedicalOptionId = 2 }
          };
          
          // Act
@@ -125,25 +134,33 @@
          
          // Assert
          Assert.False(result);
+         return Task.CompletedTask;
+       }
+       catch (Exception exception)
+       {
+         return Task.FromException(exception);
+       }
      }
 
      // Category Membership Tests
      [Fact]
-     public async Task ValidateAllIdsInCategoryAsyncShouldReturnTrueForValidCategoryIds()
+     public Task ValidateAllIdsInCategoryAsyncShouldReturnTrueForValidCategoryIds()
      {
+       try
+       {
          // Arrange
          var categoryId = 1;
          var bulkUpdateDto = new List<UpdateMedicalOptionVariantsDto>
          {
-             new() { MedicalOptionId = 1 },
-             new() { MedicalOptionId = 2 }
+           new() { MedicalOptionId = 1 },
+           new() { MedicalOptionId = 2 }
          };
          
          var dbData = new List<MedicalOption>
          {
-             new() { MedicalOptionId = 1, MedicalOptionCategoryId = 1 },
-             new() { MedicalOptionId = 2, MedicalOptionCategoryId = 1 },
-             new() { MedicalOptionId = 3, MedicalOptionCategoryId = 2 }
+           new() { MedicalOptionId = 1, MedicalOptionCategoryId = 1 },
+           new() { MedicalOptionId = 2, MedicalOptionCategoryId = 1 },
+           new() { MedicalOptionId = 3, MedicalOptionCategoryId = 2 }
          };
          
          // Act
@@ -151,24 +168,32 @@
          
          // Assert
          Assert.True(result);
+         return Task.CompletedTask;
+       }
+       catch (Exception exception)
+       {
+         return Task.FromException(exception);
+       }
      }
 
      [Fact]
-     public async Task ValidateAllIdsInCategoryAsyncShouldReturnFalseForWrongCategoryIds()
+     public Task ValidateAllIdsInCategoryAsyncShouldReturnFalseForWrongCategoryIds()
      {
+       try
+       {
          // Arrange
          var categoryId = 1;
          var bulkUpdateDto = new List<UpdateMedicalOptionVariantsDto>
          {
-             new() { MedicalOptionId = 1 },
-             new() { MedicalOptionId = 3 } // Wrong category
+           new() { MedicalOptionId = 1 },
+           new() { MedicalOptionId = 3 } // Wrong category
          };
          
          var dbData = new List<MedicalOption>
          {
-             new() { MedicalOptionId = 1, MedicalOptionCategoryId = 1 },
-             new() { MedicalOptionId = 2, MedicalOptionCategoryId = 1 },
-             new() { MedicalOptionId = 3, MedicalOptionCategoryId = 2 }
+           new() { MedicalOptionId = 1, MedicalOptionCategoryId = 1 },
+           new() { MedicalOptionId = 2, MedicalOptionCategoryId = 1 },
+           new() { MedicalOptionId = 3, MedicalOptionCategoryId = 2 }
          };
          
          // Act
@@ -176,6 +201,12 @@
          
          // Assert
          Assert.False(result);
+         return Task.CompletedTask;
+       }
+       catch (Exception exception)
+       {
+         return Task.FromException(exception);
+       }
      }
 
      // Salary Bracket Restriction Tests
@@ -464,7 +495,7 @@
              new() { MedicalOptionId = 2, MedicalOptionName = "Plan B" }
            });
     
-         _mockRepository.Setup(r => r.GetAllOptionsUnderCategoryAsync(categoryId))
+         _mockRepository.Setup(r => r.GetAllOptionsUnderCategoryAsync(categoryId))!
            .ReturnsAsync(dbData.Select(option => option.ToMedicalOptionDto()).ToList());
     
          _mockRepository.Setup(r => r.BulkUpdateByCategoryIdAsync(categoryId, bulkUpdateDto))
@@ -497,7 +528,7 @@
          // Create a date within update period (Nov 15, 2024)
          var testDate = new DateTime(2024, 11, 15, 12, 0, 0);
          
-         _mockRepository.Setup(r => r.GetAllOptionsUnderCategoryAsync(categoryId))
+         _mockRepository.Setup(r => r.GetAllOptionsUnderCategoryAsync(categoryId))!
                     .ReturnsAsync(dbData.Select(option => option.ToMedicalOptionDto()).ToList());
          
          // Act

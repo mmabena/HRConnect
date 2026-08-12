@@ -1,11 +1,11 @@
 namespace HRConnect.Api.Services
 {
-  using HRConnect.Api.Interfaces;
-  using OfficeOpenXml;
-  using System.IO;
   using System.Globalization;
+  using System.IO;
   using System.Reflection;
+  using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models.Payroll;
+  using OfficeOpenXml;
   public class ReportsService : IReportsService
   {
 
@@ -95,9 +95,14 @@ namespace HRConnect.Api.Services
 
         await package.SaveAsAsync(new FileInfo(filePath));
       }
-      catch (Exception ex)
+      catch (IOException exception)
       {
-        Console.WriteLine($"FAILED TO WRITE TO PATH DIRECTORY \n{ex}");
+        throw new IOException($"Failed To Create Monthly Reports: {exception.Message}");
+      }
+      catch (Exception exception)
+      {
+        Console.WriteLine($"FAILED TO WRITE TO PATH DIRECTORY \n{exception}");
+        throw;
       }
     }
   }

@@ -5,26 +5,22 @@
 
   public static class PensionOptionMapper
   {
-    public static PensionOptionDto ToDto(PensionOption entity)
+    public static PensionOptionDto ToDto(this PensionOption entity)
     {
-      return entity == null
-          ? null
-          : new PensionOptionDto
-          {
-            PensionOptionId = entity.PensionOptionId,
-            ContributionPercentage = entity.ContributionPercentage
-          };
+      return new PensionOptionDto
+      {
+        PensionOptionId = entity.PensionOptionId,
+        ContributionPercentage = entity.ContributionPercentage
+      };
     }
 
     public static PensionOption ToEntity(PensionOptionDto dto)
     {
-      return dto == null
-          ? null
-          : new PensionOption
-          {
-            PensionOptionId = dto.PensionOptionId,
-            ContributionPercentage = dto.ContributionPercentage
-          };
+      return new PensionOption
+      {
+        PensionOptionId = dto.PensionOptionId,
+        ContributionPercentage = dto.ContributionPercentage
+      };
     }
   }
 }

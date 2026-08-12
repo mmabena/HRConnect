@@ -103,7 +103,7 @@
         }
 
         // 7. Variant-specific rules
-        var variantRulesValidation = MedicalOptionValidator.ValidateVariantSpecificBusinessRules(variantName, variantOptions, 
+        var variantRulesValidation = MedicalOptionValidator.ValidateVariantSpecificBusinessRules(variantName, variantOptions,
           dbData);
         if (!variantRulesValidation.IsValid)
         {
@@ -128,9 +128,10 @@
     private static BulkValidationResult ValidateContributionStructureWithinVariant(
       List<UpdateMedicalOptionVariantsDto> variantOptions)
     {
-      var result = new BulkValidationResult(){IsValid = true};
+      var result = new BulkValidationResult() { IsValid = true };
 
-      try {
+      try
+      {
         if (variantOptions.Count < 2) return result; // Not applicable for single option
 
         // Get first option for expected structure
@@ -140,13 +141,15 @@
         var expectedHasPrincipal = firstOption.MonthlyRiskContributionPrincipal.HasValue &&
                                    firstOption.MonthlyRiskContributionPrincipal > 0;
 
-        foreach (var option in variantOptions.Skip(1)) {
+        foreach (var option in variantOptions.Skip(1))
+        {
           var actualHasMsa = option.MonthlyMsaContributionAdult.HasValue &&
                              option.MonthlyMsaContributionAdult > 0;
           var actualHasPrincipal = option.MonthlyRiskContributionPrincipal.HasValue &&
                                    option.MonthlyRiskContributionPrincipal > 0;
 
-          if (expectedHasMsa != actualHasMsa) {
+          if (expectedHasMsa != actualHasMsa)
+          {
             result.IsValid = false;
             result.ErrorMessage = $"Inconsistent MSA structure within variant: Option " +
                                   $"{firstOption.MedicalOptionId} has MSA, but Option " +
@@ -154,7 +157,8 @@
             return result;
           }
 
-          if (expectedHasPrincipal != actualHasPrincipal) {
+          if (expectedHasPrincipal != actualHasPrincipal)
+          {
             result.IsValid = false;
             result.ErrorMessage = $"Inconsistent Principal structure within variant: Option " +
                                   $"{firstOption.MedicalOptionId} has Principal, but Option " +
@@ -163,7 +167,8 @@
           }
         }
       }
-      catch (Exception ex) {
+      catch (Exception ex)
+      {
         result.IsValid = false;
         result.ErrorMessage = $"Contribution structure validation error: {ex.Message}";
       }

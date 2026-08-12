@@ -1,7 +1,7 @@
 namespace HRConnect.Api.Repository
 {
-  using HRConnect.Api.Interfaces;
   using HRConnect.Api.Data;
+  using HRConnect.Api.Interfaces;
   using HRConnect.Api.Models.Payroll;
   using Microsoft.EntityFrameworkCore;
 
@@ -38,11 +38,14 @@ namespace HRConnect.Api.Repository
 
     public async Task<PayrollRun?> GetRunByDateAsync(int payrollRunNumber, DateTime startDate, DateTime endDate)
     {
-      var run = await _context.PayrollRuns.Include(r => r.Period).Where(r =>
+      var run = await _context.PayrollRuns
+      .Where(r =>
           (r.PayrollRunNumber == payrollRunNumber) &&
           (r.Period.EndDate >= startDate) &&
           (r.Period.StartDate <= endDate))
-        .Include(r => r.Records)//I do not know if this is necessary 
+        .Include(r => r.Period)
+        .Include(r => r.Records)
+        .AsSplitQuery()
         .FirstOrDefaultAsync();
 
 
@@ -54,19 +57,21 @@ namespace HRConnect.Api.Repository
     }
     public async Task<PayrollRun?> GetCurrentRunAsync()
     {
-      var payrun = await _context.PayrollRuns.Where(r => !r.IsLocked)
+      var payrun = await _context.PayrollRuns
+        .Where(r => !r.IsLocked)
+        .Include(r => r.Records)
         .OrderByDescending(r => r.PayrollRunNumber)
         .FirstOrDefaultAsync();
-      if (payrun != null)
-        return payrun;
-      return null;
+
+      return payrun;
     }
 
-    public Task UpdateRun(PayrollRun payrollRun)
+    public async Task UpdateRun(PayrollRun payrollRun)
     {
-      //Update the current run to be marked as Finalised 
+      //Update the current run to be marked as Finalised
       _context.PayrollRuns.Update(payrollRun);
-      return Task.CompletedTask;
+      await _context.SaveChangesAsync();
+
     }
     public async Task<PayrollRun?> GetLastPayrun()
     {

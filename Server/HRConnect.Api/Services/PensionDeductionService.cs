@@ -1,4 +1,4 @@
-﻿namespace HRConnect.Api.Services
+namespace HRConnect.Api.Services
 {
   using System.Collections.Generic;
   using System.Threading.Tasks;
@@ -13,7 +13,7 @@
   using HRConnect.Api.Utils.Pension.ValidationHelpers;
 
   public class PensionDeductionService(IPensionDeductionRepository pensionDeductionRepository,
-    IEmployeeRepository employeeRepository, IEmployeePensionEnrollmentRepository employeePensionEnrollmentRepository, 
+    IEmployeeRepository employeeRepository, IEmployeePensionEnrollmentRepository employeePensionEnrollmentRepository,
     IPensionOptionRepository pensionOptionRepository, IPayrollRunRepository payrollRunRepository, IPayrollRunService payrollRunService) : IPensionDeductionService
   {
     private readonly IPensionDeductionRepository _pensionDeductionRepository = pensionDeductionRepository;
@@ -98,9 +98,14 @@
       PensionDeduction? employeePensionDeduction = await _pensionDeductionRepository
         .GetByEmployeeIdAndIsNotLockedAsync(pensionDeductionUpdateDto.EmployeeId);
 
+      if (existingEmployee.PensionOptionId == null)
+      {
+        throw new InvalidOperationException("Employee has no pension option assigned.");
+      }
+
       decimal pensionOptionPercentage = await
         GetEmployeePensionOptionPercentageAsync(pensionDeductionUpdateDto.PensionOptionId ?? (int)existingEmployee.PensionOptionId);
-      ValidatePensionDeductionDtos.ValidateVoluntaryContribution((decimal)pensionDeductionUpdateDto.VoluntaryContribution, existingEmployee.MonthlySalary, pensionOptionPercentage);
+      ValidatePensionDeductionDtos.ValidateVoluntaryContribution(pensionDeductionUpdateDto.VoluntaryContribution ?? 0, existingEmployee.MonthlySalary, pensionOptionPercentage);
 
       if (employeePensionDeduction != null)
       {
@@ -201,7 +206,7 @@
 
       if (existingEmployee != null)
       {
-        PayrollRun? currentPayrollRunId = await _payrollRunRepository.GetCurrentRunAsync();
+        PayrollRun? currentPayrollRunId = await _payrollRunRepository.GetCurrentRunAsync() ?? throw new NotFoundException("Current payroll run not found");
 
         PensionDeduction employeesPensionDeduction = new()
         {
@@ -209,7 +214,7 @@
           FirstName = existingEmployee.Name,
           LastName = existingEmployee.Surname,
           DateJoinedCompany = existingEmployee.StartDate,
-          IdNumber = existingEmployee.IdNumber,
+          IdNumber = existingEmployee.IdNumber ?? "",
           Passport = existingEmployee.PassportNumber,
           TaxNumber = existingEmployee.TaxNumber,
           PensionableSalary = existingEmployee.MonthlySalary,
@@ -222,7 +227,7 @@
             (decimal)existEmployeesPensionEnrollment.VoluntaryContribution),
           EmailAddress = existingEmployee.Email,
           PhysicalAddress = existingEmployee.PhysicalAddress,
-          PayrollRunId = currentPayrollRunId.PayrollRunId,
+          PayrollRunId = currentPayrollRunId!.PayrollRunId,
           CreatedDate = existEmployeesPensionEnrollment.EffectiveDate,
           IsActive = true
         };
@@ -268,48 +273,95 @@
     ///</summary>
     public async Task PensionDeductionRollover()
     {
-      List<EmployeePensionEnrollment> employeePensionEnrollments = await _employeePensionEnrollmentRepository.GetEmployeePensionEnrollmentsNotLocked();
+      PayrollRun currentPayrollRun =
+          await _payrollRunRepository.GetCurrentRunAsync()
+          ?? throw new NotFoundException("Current payroll run not found");
+
+      // Prevent the payroll run from being processed twice
+      bool payrollAlreadyProcessed =
+          await _pensionDeductionRepository
+              .PayrollRunAlreadyProcessedAsync(currentPayrollRun.PayrollRunId);
+
+      if (payrollAlreadyProcessed)
+      {
+        return;
+      }
+
+      List<EmployeePensionEnrollment> employeePensionEnrollments =
+          await _employeePensionEnrollmentRepository
+              .GetLatestEnrollmentForEachEmployeeAsync();
+
+      // Load employees once instead of querying the database every iteration
+      List<Employee> employees =
+          await _employeeRepository.GetAllEmployeeWithAPensionOption();
+
+      Dictionary<string, Employee> employeeLookup =
+          employees.ToDictionary(e => e.EmployeeId);
+
+      List<PensionDeduction> deductions = new();
 
       foreach (EmployeePensionEnrollment enrollment in employeePensionEnrollments)
       {
-        Employee? employee = await _employeeRepository.GetEmployeeByIdAsync(enrollment.EmployeeId);
-        if (employee != null && employee.IsActive)
+        if (!employeeLookup.TryGetValue(enrollment.EmployeeId, out Employee? employee))
         {
-          decimal pensionCategoryPercentage = await _pensionOptionRepository.GetPensionOptionPercentageByIdAsync((int)employee.PensionOptionId);
-
-          PensionDeduction pensionDeduction = new()
-          {
-            EmployeeId = enrollment.EmployeeId,
-            FirstName = employee.Name,
-            LastName = employee.Surname,
-            DateJoinedCompany = employee.StartDate,
-            IdNumber = employee.IdNumber,
-            Passport = employee.PassportNumber,
-            TaxNumber = employee.TaxNumber,
-            PensionableSalary = employee.MonthlySalary,
-            PensionOptionId = enrollment.PensionOptionId,
-            PendsionCategoryPercentage = pensionCategoryPercentage,
-            PensionContribution = Math.Round(employee.MonthlySalary * (pensionCategoryPercentage / 100)),
-            VoluntaryContribution = enrollment.VoluntaryContribution,
-            TotalPensionContribution =
-              ValidPensionContribution(Math.Round(employee.MonthlySalary * (pensionCategoryPercentage / 100)) + enrollment.VoluntaryContribution),
-            EmailAddress = employee.Email,
-            PhysicalAddress = employee.PhysicalAddress,
-            CreatedDate = enrollment.EffectiveDate,
-            PayrollRunId = enrollment.PayrollRunId,
-            IsActive = true
-          };
-
-          PensionDeduction? existingEmployeePensionDeduction = await _pensionDeductionRepository
-            .GetByEmployeeIdAndLastRunIdAsync(pensionDeduction.EmployeeId, pensionDeduction.PayrollRunId);
-
-          if (existingEmployeePensionDeduction == null)
-          {
-            await _payrollRunService.AddRecordToCurrentRunAsync(pensionDeduction, enrollment.EmployeeId);
-            _ = await _pensionDeductionRepository.AddAsync(pensionDeduction);
-          }
+          continue;
         }
+
+        if (!employee.IsActive || employee.PensionOptionId == null)
+        {
+          continue;
+        }
+
+        decimal pensionCategoryPercentage =
+            await _pensionOptionRepository.GetPensionOptionPercentageByIdAsync(
+                enrollment.PensionOptionId);
+
+        decimal pensionContribution =
+            ValidPensionContribution(
+                Math.Round(
+                    employee.MonthlySalary *
+                    (pensionCategoryPercentage / 100)));
+
+        decimal voluntaryContribution =
+            enrollment.VoluntaryContribution;
+
+        PensionDeduction pensionDeduction = new()
+        {
+          EmployeeId = employee.EmployeeId,
+          FirstName = employee.Name,
+          LastName = employee.Surname,
+          DateJoinedCompany = employee.StartDate,
+          IdNumber = employee.IdNumber ?? "",
+          Passport = employee.PassportNumber,
+          TaxNumber = employee.TaxNumber,
+          PensionableSalary = employee.MonthlySalary,
+          PensionOptionId = enrollment.PensionOptionId,
+          PendsionCategoryPercentage = pensionCategoryPercentage,
+          PensionContribution = pensionContribution,
+          VoluntaryContribution = voluntaryContribution,
+          TotalPensionContribution =
+                ValidPensionContribution(
+                    pensionContribution + voluntaryContribution),
+          EmailAddress = employee.Email,
+          PhysicalAddress = employee.PhysicalAddress,
+          PayrollRunId = currentPayrollRun.PayrollRunId,
+          CreatedDate = DateOnly.FromDateTime(DateTime.Today),
+          IsActive = true
+        };
+
+        deductions.Add(pensionDeduction);
       }
+
+      if (deductions.Count == 0)
+      {
+        return;
+      }
+
+      await _pensionDeductionRepository.AddRangeAsync(deductions);
+
+      await _payrollRunService.AddRecordsCollectionToRunAsync(
+          deductions.Cast<PayrollRecord>().ToList(),
+          null);
     }
   }
 }
