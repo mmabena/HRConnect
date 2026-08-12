@@ -152,6 +152,7 @@ function App() {
         navigate("/companyManagement");
       } else {
         navigate("/dashboard");
+        window.location.reload();
       }
     } catch (error) {
       console.error("Login error:", error);

@@ -54,6 +54,8 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
 
   const loadCompanies = async () => {
     try {
+      
+      
       const data = await fetchMyCompanies();
 
       const list = data?.companies ?? data ?? [];
