@@ -10,6 +10,12 @@ const PreviewModal = ({ employee, positions, onBack, onSave, onClose }) => {
     (p) => String(p.positionId) === String(employee?.jobTitle),
   );
 
+  console.log("========== PREVIEW JOB DEBUG ==========");
+  console.log("employee.jobTitle:", employee?.jobTitle);
+  console.log("positions:", positions);
+  console.log("selectedPosition:", selectedPosition);
+  console.log("========================================");
+
   // =========================
   // EMPLOYEE TYPE
   // =========================
@@ -107,7 +113,7 @@ const PreviewModal = ({ employee, positions, onBack, onSave, onClose }) => {
             <div className="preview-card">
               <span>JOB TITLE</span>
 
-              <h4>{selectedPosition?.jobTitle || "Not Selected"}</h4>
+              <h4>{selectedPosition?.positionTitle || "Not Selected"}</h4>
             </div>
 
             <div className="preview-card">
@@ -214,7 +220,6 @@ const PreviewModal = ({ employee, positions, onBack, onSave, onClose }) => {
                 <span>MEDICAL AID</span>
 
                 <h4>{employee?.medicalAidInfo?.medicalAidCategory || "N/A"}</h4>
-                
               </div>
 
               <div className="preview-card">

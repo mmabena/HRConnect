@@ -148,7 +148,8 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
       };
 
       payrollPeriod.Runs.Add(newRun);
-      _ = await _payrollRunRepo.CreatePayrollRunAsync(newRun);
+      
+      await _payrollRunRepo.CreatePayrollRunAsync(newRun);
 
       await AllocateCompanyContributionsIfNeeded(newRun.PayrollRunId);
     }

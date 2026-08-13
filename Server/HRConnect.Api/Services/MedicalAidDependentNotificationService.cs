@@ -5,9 +5,11 @@ namespace HRConnect.Api.Services
     using HRConnect.Api.Interfaces;
     using HRConnect.Api.Interfaces.Notification;
     using HRConnect.Api.Models;
+    using System.Globalization;
     using HRConnect.Api.Models.Payroll;
     using HRConnect.Api.DTOs.MedicalOption;
     using HRConnect.Api.DTOs.Notification;
+    using HRConnect.Api.Utils;
     using HRConnect.Api.Models.PayrollDeduction;
     using System.Linq;
     using System.Threading.Tasks;
@@ -16,12 +18,14 @@ namespace HRConnect.Api.Services
         private readonly IMedicalAidDependentRepository _medicalDependentRepo;
         private readonly IMedicalAidDeductionRepository _medicalDeductionRepo;
         private readonly IMedicalOptionRepository _medicalOption;
+        private readonly IEmailTemplateService _emailTemplateService;
         private readonly INotificationFactory _notificationFactory;
         // private readonly IPayrollRunService _payrollRunService;
 
-        public MedicalAidDependentNotificationService(IMedicalAidDependentRepository medicalDependentRepo, INotificationFactory notificationFactory, IMedicalAidDeductionRepository medicalDeductionRepo, IMedicalOptionRepository medicalOption)
+        public MedicalAidDependentNotificationService(IMedicalAidDependentRepository medicalDependentRepo, IEmailTemplateService emailTemplateService, INotificationFactory notificationFactory, IMedicalAidDeductionRepository medicalDeductionRepo, IMedicalOptionRepository medicalOption)
         {
             _medicalDependentRepo = medicalDependentRepo;
+            _emailTemplateService = emailTemplateService;
             _notificationFactory = notificationFactory;
             _medicalDeductionRepo = medicalDeductionRepo;
             _medicalOption = medicalOption;
@@ -138,6 +142,19 @@ namespace HRConnect.Api.Services
                         - childPremium
                         + adultPremium;
 
+                    decimal premiumIncrease = adultPremium - childPremium;
+
+                    string htmlMessage =
+                    await _emailTemplateService.GetMedicalAidDependentTurning21TemplateAsync(
+                        $"{dependent.FirstName} {dependent.LastName}",
+                        deduction.OptionName,
+                            childPremium.ToString("C", CultureInfo.GetCultureInfo("en-ZA")),
+                            adultPremium.ToString("C", CultureInfo.GetCultureInfo("en-ZA")),
+                            premiumIncrease.ToString("C", CultureInfo.GetCultureInfo("en-ZA")),
+                            currentTotal.ToString("C", CultureInfo.GetCultureInfo("en-ZA")),
+                            newTotal.ToString("C", CultureInfo.GetCultureInfo("en-ZA"))
+                        );
+
 
                     CreateNotificationDto notification = new CreateNotificationDto
                     {
@@ -155,6 +172,8 @@ namespace HRConnect.Api.Services
 
                             $"Current Total Deduction: {currentTotal:C}\n" +
                             $"New Total Deduction: {newTotal:C}",
+
+                        HtmlMessage = htmlMessage,
                         Type = NotificationType.MedicalAidDependent,
                         Severity = NotificationSeverity.Warning
                     };

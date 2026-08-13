@@ -1140,6 +1140,7 @@ const AddEmployeeModal = ({ closeModal }) => {
                 <PreviewModal
                   employee={employee}
                   onBack={prevStep}
+                  positions={positions}
                   onSave={handleSave}
                 />
               )}
