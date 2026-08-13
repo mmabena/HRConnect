@@ -157,7 +157,11 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
 
     public async Task Execute(IJobExecutionContext context)
     {
-      await _employeePensionEnrollmentService.LockEmployeePensionEnrollmentsAsync();
+          Console.WriteLine("==============================================");
+    Console.WriteLine("PAYROLL ROLLOVER JOB STARTED");
+    Console.WriteLine($"Time: {_now()}");
+    Console.WriteLine("==============================================");
+      // await _employeePensionEnrollmentService.LockEmployeePensionEnrollmentsAsync();
       DateTime currentDate = DateTime.Now;
       int runId = ((currentDate.Month + 8) % 12) + 1;
 

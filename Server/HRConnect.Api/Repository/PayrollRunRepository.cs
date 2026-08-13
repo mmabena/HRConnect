@@ -24,11 +24,14 @@ namespace HRConnect.Api.Repository
       var payrun = await _context.PayrollRuns.Include(r => r.Records).FirstOrDefaultAsync(p => p.PayrollRunNumber == payrollRunNumber);
       return payrun;
     }
-    public async Task<PayrollRun?> GetPayrunByRunNumberAsync(int payrollRunNumber)
-    {
-      var payrun = await _context.PayrollRuns.Where(r => !r.IsLocked).Include(r => r.Records).FirstOrDefaultAsync(p => p.PayrollRunNumber == payrollRunNumber);
-      return payrun;
-    }
+ public async Task<PayrollRun?> GetPayrunByRunNumberAsync(int payrollRunNumber)
+{
+    var payrun = await _context.PayrollRuns
+        .Include(r => r.Records)
+        .FirstOrDefaultAsync(r => r.PayrollRunNumber == payrollRunNumber);
+
+    return payrun;
+}
     public async Task<PayrollRun> CreatePayrollRunAsync(PayrollRun payrollRun)
     {
       await _context.PayrollRuns.AddAsync(payrollRun);

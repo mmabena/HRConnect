@@ -181,7 +181,7 @@ builder.Services.AddQuartz(q =>
  q.AddTrigger(opts => opts
     .ForJob(RolloverJobKey)
     .WithIdentity("PayrollRollover-Trigger")
-    .WithCronSchedule("0/10 * * * * ?", x =>
+    .WithCronSchedule("0/30 * * * * ?", x =>
         x.WithMisfireHandlingInstructionFireAndProceed()));
         
   q.AddTrigger(opts => opts
