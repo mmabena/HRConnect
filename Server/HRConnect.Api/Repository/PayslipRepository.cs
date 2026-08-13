@@ -6,6 +6,7 @@ namespace HRConnect.Api.Repository
     using HRConnect.Api.Models.CompanyContributions;
     using HRConnect.Api.Models.Payroll;
     using HRConnect.Api.Models.PayrollDeduction;
+    using HRConnect.Api.Models.Pension;
     using Microsoft.EntityFrameworkCore;
 
     public class PayslipRepository(
@@ -27,7 +28,6 @@ namespace HRConnect.Api.Repository
                     cancellationToken);
         }
 
-
         public async Task<Employee?> GetEmployeeAsync(
             string employeeId,
             CancellationToken cancellationToken = default)
@@ -39,6 +39,15 @@ namespace HRConnect.Api.Repository
                     cancellationToken);
         }
 
+        public async Task<PensionFund?> GetPensionFundAsync(
+            string employeeId,
+            CancellationToken cancellationToken = default)
+        {
+            return await context.PensionFunds
+                .FirstOrDefaultAsync(
+                    x => x.EmployeeId == employeeId,
+                    cancellationToken);
+        }
 
         public async Task<IEnumerable<EmployeeDeduction>> GetEmployeeDeductionsAsync(
             string employeeId,
@@ -67,7 +76,6 @@ namespace HRConnect.Api.Repository
                 .ToListAsync(cancellationToken);
         }
 
-
         public async Task<IEnumerable<EmployeeCompanyContribution>> GetCompanyContributionsAsync(
             string employeeId,
             int payrollRunId,
@@ -94,6 +102,30 @@ namespace HRConnect.Api.Repository
                 .ToListAsync(cancellationToken);
         }
 
+        public async Task<IEnumerable<MedicalAidDeduction>> GetMedicalAidDeductionsAsync(
+    string employeeId,
+    int payrollRunId,
+    int payrollRunNumber,
+    CancellationToken cancellationToken = default)
+{
+    var payrollRunExists = await context.PayrollRuns
+        .AnyAsync(
+            x =>
+                x.PayrollRunId == payrollRunId &&
+                x.PayrollRunNumber == payrollRunNumber,
+            cancellationToken);
+
+    if (!payrollRunExists)
+    {
+        return Enumerable.Empty<MedicalAidDeduction>();
+    }
+
+    return await context.MedicalAidDeductions
+        .Where(x =>
+            x.EmployeeId == employeeId &&
+            x.PayrollRunId == payrollRunId)
+        .ToListAsync(cancellationToken);
+}
 
         public async Task<IEnumerable<PayrollRun>> GetPayslipHistoryAsync(
             string employeeId,
@@ -102,9 +134,8 @@ namespace HRConnect.Api.Repository
             return await context.PayrollRuns
                 .Include(x => x.Records)
                 .Where(
-                    x =>
-                        x.Records.Any(
-                            r => r.EmployeeId == employeeId))
+                    x => x.Records.Any(
+                        r => r.EmployeeId == employeeId))
                 .OrderByDescending(x => x.PeriodDate)
                 .ToListAsync(cancellationToken);
         }

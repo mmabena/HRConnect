@@ -4,6 +4,7 @@ namespace HRConnect.Api.Interfaces.Payroll
     using HRConnect.Api.Models.CompanyContributions;
     using HRConnect.Api.Models.Payroll;
     using HRConnect.Api.Models.PayrollDeduction;
+    using HRConnect.Api.Models.Pension;
 
     public interface IPayslipRepository
     {
@@ -14,6 +15,10 @@ namespace HRConnect.Api.Interfaces.Payroll
             CancellationToken cancellationToken = default);
 
         Task<Employee?> GetEmployeeAsync(
+            string employeeId,
+            CancellationToken cancellationToken = default);
+
+        Task<PensionFund?> GetPensionFundAsync(
             string employeeId,
             CancellationToken cancellationToken = default);
 
@@ -32,5 +37,14 @@ namespace HRConnect.Api.Interfaces.Payroll
         Task<IEnumerable<PayrollRun>> GetPayslipHistoryAsync(
             string employeeId,
             CancellationToken cancellationToken = default);
+
+            Task<IEnumerable<MedicalAidDeduction>> GetMedicalAidDeductionsAsync(
+    string employeeId,
+    int payrollRunId,
+    int payrollRunNumber,
+    CancellationToken cancellationToken = default);
+    
     }
-}
+
+    
+} 

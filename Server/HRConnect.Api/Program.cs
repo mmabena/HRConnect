@@ -178,12 +178,12 @@ builder.Services.AddQuartz(q =>
   // 1 -> first day of the month 
   // * -> for any/every month 
   // ? -> for all days of the week
-  q.AddTrigger(opts => opts
-  .ForJob(RolloverJobKey)
-  .WithIdentity("PayrollRollover-Trigger")
-    .WithCronSchedule("* 0/20 * * * ?", x =>
-    x.WithMisfireHandlingInstructionFireAndProceed()));
-
+ q.AddTrigger(opts => opts
+    .ForJob(RolloverJobKey)
+    .WithIdentity("PayrollRollover-Trigger")
+    .WithCronSchedule("0/10 * * * * ?", x =>
+        x.WithMisfireHandlingInstructionFireAndProceed()));
+        
   q.AddTrigger(opts => opts
   .ForJob(NotificationJobKey)
   .WithIdentity("NotificationJob-Trigger")

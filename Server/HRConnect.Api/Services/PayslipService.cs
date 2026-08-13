@@ -6,9 +6,7 @@ namespace HRConnect.Api.Services
     public class PayslipService(
         IPayslipRepository payslipRepository) : IPayslipService
     {
-        // =========================================================
-        // GET PAYSLIP
-        // =========================================================
+        
         public async Task<PayslipDto?> GetPayslipAsync(
             string employeeId,
             int payrollRunId,
@@ -16,29 +14,20 @@ namespace HRConnect.Api.Services
             CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(employeeId))
-            {
                 throw new ArgumentException(
                     "Employee ID is required.",
                     nameof(employeeId));
-            }
 
             if (payrollRunId <= 0)
-            {
                 throw new ArgumentException(
                     "Payroll run ID is invalid.",
                     nameof(payrollRunId));
-            }
 
             if (payrollRunNumber < 1 || payrollRunNumber > 12)
-            {
                 throw new ArgumentException(
                     "Payroll run number must be between 1 and 12.",
                     nameof(payrollRunNumber));
-            }
 
-            // ---------------------------------------------------------
-            // Get the payroll run
-            // ---------------------------------------------------------
             var payrollRun =
                 await payslipRepository.GetPayrollRunAsync(
                     employeeId,
@@ -47,26 +36,17 @@ namespace HRConnect.Api.Services
                     cancellationToken);
 
             if (payrollRun == null)
-            {
                 return null;
-            }
 
-            // ---------------------------------------------------------
-            // Get employee
-            // ---------------------------------------------------------
             var employee =
                 await payslipRepository.GetEmployeeAsync(
                     employeeId,
                     cancellationToken);
 
             if (employee == null)
-            {
                 return null;
-            }
 
-            // ---------------------------------------------------------
-            // Get employee deductions
-            // ---------------------------------------------------------
+          
             var deductions =
                 await payslipRepository.GetEmployeeDeductionsAsync(
                     employeeId,
@@ -74,9 +54,21 @@ namespace HRConnect.Api.Services
                     payrollRunNumber,
                     cancellationToken);
 
-            // ---------------------------------------------------------
-            // Get company contributions
-            // ---------------------------------------------------------
+ 
+            var medicalAidDeductions =
+                await payslipRepository.GetMedicalAidDeductionsAsync(
+                    employeeId,
+                    payrollRunId,
+                    payrollRunNumber,
+                    cancellationToken);
+
+            
+            var pensionFund =
+                await payslipRepository.GetPensionFundAsync(
+                    employeeId,
+                    cancellationToken);
+
+         
             var companyContributions =
                 await payslipRepository.GetCompanyContributionsAsync(
                     employeeId,
@@ -84,59 +76,59 @@ namespace HRConnect.Api.Services
                     payrollRunNumber,
                     cancellationToken);
 
-            // ---------------------------------------------------------
-            // Calculate deductions
-            // ---------------------------------------------------------
-            decimal medicalAidDeduction = deductions
-                .Where(x => x.DeductionType == "Medical Aid")
-                .Sum(x => x.CalculatedDeductionAmount);
+   
+            decimal medicalAidDeduction =
+                medicalAidDeductions.Sum(
+                    x => x.TotalDeductionAmount);
 
-            decimal pensionDeduction = deductions
-                .Where(x => x.DeductionType == "Pension")
-                .Sum(x => x.CalculatedDeductionAmount);
+    
+            decimal pensionDeduction =
+                pensionFund == null
+                    ? 0
+                    : employee.MonthlySalary *
+                      (pensionFund.ContributionPercentage / 100m);
 
-            decimal uifDeduction = deductions
-                .Where(x => x.DeductionType == "UIF")
-                .Sum(x => x.CalculatedDeductionAmount);
 
-            decimal taxDeduction = deductions
-                .Where(x => x.DeductionType == "PAYE")
-                .Sum(x => x.CalculatedDeductionAmount);
+   
+            decimal uifDeduction =
+                deductions
+                    .Where(x => x.DeductionType == "UIF")
+                    .Sum(x => x.CalculatedDeductionAmount);
 
-            // ---------------------------------------------------------
-            // Calculate company contributions
-            // ---------------------------------------------------------
+   
+            decimal taxDeduction =
+                deductions
+                    .Where(x => x.DeductionType == "PAYE")
+                    .Sum(x => x.CalculatedDeductionAmount);
+
+    
             decimal totalCompanyContributions =
-                companyContributions.Sum(x =>
-                    x.DeathAmount +
-                    x.DisabilityAmount);
+                companyContributions.Sum(
+                    x =>
+                        x.DeathAmount +
+                        x.DisabilityAmount);
 
-            // ---------------------------------------------------------
-            // Calculate total deductions
-            // ---------------------------------------------------------
             decimal totalDeductions =
                 medicalAidDeduction +
                 pensionDeduction +
                 uifDeduction +
                 taxDeduction;
 
-            // ---------------------------------------------------------
-            // Calculate net salary
-            // ---------------------------------------------------------
+  
             decimal netSalary =
                 employee.MonthlySalary -
                 totalDeductions;
 
-            // ---------------------------------------------------------
-            // Return payslip
-            // ---------------------------------------------------------
             return new PayslipDto
             {
-                EmployeeId = employee.EmployeeId,
+                EmployeeId =
+                    employee.EmployeeId,
 
-                Name = employee.Name,
+                Name =
+                    employee.Name,
 
-                Surname = employee.Surname,
+                Surname =
+                    employee.Surname,
 
                 Position =
                     employee.Position?.PositionTitle
@@ -161,13 +153,17 @@ namespace HRConnect.Api.Services
                     employee.PhysicalAddress
                     ?? string.Empty,
 
-                StartDate = employee.StartDate,
+                StartDate =
+                    employee.StartDate,
 
-                PositionId = employee.PositionId,
+                PositionId =
+                    employee.PositionId,
 
-                MonthlySalary = employee.MonthlySalary,
+                MonthlySalary =
+                    employee.MonthlySalary,
 
-                NetSalary = netSalary,
+                NetSalary =
+                    netSalary,
 
                 MedicalAidDeduction =
                     medicalAidDeduction,
@@ -187,66 +183,199 @@ namespace HRConnect.Api.Services
         }
 
 
-        // =========================================================
-        // GET PAYSLIP HISTORY
-        // =========================================================
-        public async Task<IEnumerable<PayslipHistoryDto>> GetPayslipHistoryAsync(
+        public async Task<PayslipViewDto?> GetPayslipViewAsync(
             string employeeId,
+            int payrollRunId,
+            int payrollRunNumber,
             CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(employeeId))
-            {
                 throw new ArgumentException(
                     "Employee ID is required.",
                     nameof(employeeId));
-            }
 
-            // ---------------------------------------------------------
-            // Get payroll runs for employee
-            // ---------------------------------------------------------
-            var payrollRuns =
-                await payslipRepository.GetPayslipHistoryAsync(
+            if (payrollRunId <= 0)
+                throw new ArgumentException(
+                    "Payroll run ID is invalid.",
+                    nameof(payrollRunId));
+
+            if (payrollRunNumber < 1 || payrollRunNumber > 12)
+                throw new ArgumentException(
+                    "Payroll run number must be between 1 and 12.",
+                    nameof(payrollRunNumber));
+
+            var payrollRun =
+                await payslipRepository.GetPayrollRunAsync(
+                    employeeId,
+                    payrollRunId,
+                    payrollRunNumber,
+                    cancellationToken);
+
+            if (payrollRun == null)
+                return null;
+
+            var employee =
+                await payslipRepository.GetEmployeeAsync(
                     employeeId,
                     cancellationToken);
 
-         
-            return payrollRuns.Select(payrollRun =>
+            if (employee == null)
+                return null;
+
+ 
+            var deductions =
+                await payslipRepository.GetEmployeeDeductionsAsync(
+                    employeeId,
+                    payrollRunId,
+                    payrollRunNumber,
+                    cancellationToken);
+
+      
+            var medicalAidDeductions =
+                await payslipRepository.GetMedicalAidDeductionsAsync(
+                    employeeId,
+                    payrollRunId,
+                    payrollRunNumber,
+                    cancellationToken);
+
+        
+            var pensionFund =
+                await payslipRepository.GetPensionFundAsync(
+                    employeeId,
+                    cancellationToken);
+
+            var companyContributions =
+                await payslipRepository.GetCompanyContributionsAsync(
+                    employeeId,
+                    payrollRunId,
+                    payrollRunNumber,
+                    cancellationToken);
+
+                decimal medicalAidDeduction =
+                medicalAidDeductions.Sum(
+                    x => x.TotalDeductionAmount);
+
+
+            decimal uifDeduction =
+                deductions
+                    .Where(x => x.DeductionType == "UIF")
+                    .Sum(x => x.CalculatedDeductionAmount);
+
+            
+            decimal taxDeduction =
+                deductions
+                    .Where(x => x.DeductionType == "PAYE")
+                    .Sum(x => x.CalculatedDeductionAmount);
+
+    
+            decimal pensionDeduction =
+                pensionFund == null
+                    ? 0
+                    : employee.MonthlySalary *
+                      (pensionFund.ContributionPercentage / 100m);
+
+          
+            decimal totalDeductions =
+                medicalAidDeduction +
+                pensionDeduction +
+                uifDeduction +
+                taxDeduction;
+
+
+            decimal netSalary =
+                employee.MonthlySalary -
+                totalDeductions;
+
+     
+            decimal totalCompanyContributions =
+                companyContributions.Sum(
+                    x =>
+                        x.DeathAmount +
+                        x.DisabilityAmount);
+
+      
+            return new PayslipViewDto
             {
-                int month =
-                    PayrollRunToCalendarMonth(
-                        payrollRun.PayrollRunNumber);
+                MonthlySalary =
+                    employee.MonthlySalary,
 
+                MedicalAidDeduction =
+                    medicalAidDeduction,
 
-                int year;
+                PensionDeduction =
+                    pensionDeduction,
 
-                if (month >= 4)
-                {
-                    year = payrollRun.PeriodDate.Year;
-                }
-                else
-                {
-                    year = payrollRun.PeriodDate.Year + 1;
-                }
+                UIFDeduction =
+                    uifDeduction,
 
-                return new PayslipHistoryDto
-                {
-                    PayrollRunId =
-                        payrollRun.PayrollRunId,
+                TaxDeduction =
+                    taxDeduction,
 
-                    PayrollRunNumber =
-                        payrollRun.PayrollRunNumber,
+                TotalDeductions =
+                    totalDeductions,
 
-                    Year = year,
+                NetSalary =
+                    netSalary,
 
-                    Month = month
-                };
-            });
+                TotalCompanyContributions =
+                    totalCompanyContributions
+            };
         }
 
+public async Task<IEnumerable<PayslipHistoryDto>> GetPayslipHistoryAsync(
+    string employeeId,
+    CancellationToken cancellationToken = default)
+{
+    if (string.IsNullOrWhiteSpace(employeeId))
+        throw new ArgumentException(
+            "Employee ID is required.",
+            nameof(employeeId));
 
-        // =========================================================
-        // PAYROLL RUN NUMBER -> CALENDAR MONTH
-        // =========================================================
+    var payrollRuns =
+        await payslipRepository.GetPayslipHistoryAsync(
+            employeeId,
+            cancellationToken);
+
+    var payslipHistory = payrollRuns
+        .Select(payrollRun =>
+        {
+            int month =
+                PayrollRunToCalendarMonth(
+                    payrollRun.PayrollRunNumber);
+
+            int year;
+
+            if (month >= 4)
+            {
+                year = payrollRun.PeriodDate.Year;
+            }
+            else
+            {
+                year = payrollRun.PeriodDate.Year + 1;
+            }
+
+            return new PayslipHistoryDto
+            {
+                PayrollRunId =
+                    payrollRun.PayrollRunId,
+
+                PayrollRunNumber =
+                    payrollRun.PayrollRunNumber,
+
+                Year =
+                    year,
+
+                Month =
+                    month
+            };
+        })
+        .OrderByDescending(x => x.Year)
+        .ThenByDescending(x => x.Month)
+        .ThenByDescending(x => x.PayrollRunId);
+
+    return payslipHistory;
+}
+     
         private int PayrollRunToCalendarMonth(
             int payrollRunNumber)
         {

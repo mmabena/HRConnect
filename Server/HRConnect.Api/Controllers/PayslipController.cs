@@ -1,62 +1,58 @@
 namespace HRConnect.Api.Controllers
 {
-  using HRConnect.Api.Interfaces.Payroll;
-  using Microsoft.AspNetCore.Authorization;
-  using Microsoft.AspNetCore.Mvc;
+    using HRConnect.Api.Interfaces.Payroll;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
 
-  [ApiController]
-  [Route("api/[controller]")]
-  [Authorize]
-  public class PayslipController(
-      IPayslipService payslipService) : ControllerBase
-  {
-
-    [HttpGet("history/{employeeId}")]
-    public async Task<IActionResult> GetPayslipHistory(
-        string employeeId,
-        CancellationToken cancellationToken)
+    [ApiController]
+    [Route("api/[controller]")]
+    [Authorize]
+    public class PayslipController(IPayslipService payslipService) : ControllerBase
     {
-      var history =
-          await payslipService.GetPayslipHistoryAsync(
-              employeeId,
-              cancellationToken);
-
-      if (history == null || !history.Any())
-      {
-        return NotFound(new
+        [HttpGet("history/{employeeId}")]
+        public async Task<IActionResult> GetPayslipHistory(
+            string employeeId,
+            CancellationToken cancellationToken)
         {
-          message =
-              "No payslip history found for this employee."
-        });
-      }
+            var history = await payslipService.GetPayslipHistoryAsync(
+                employeeId, cancellationToken);
 
-      return Ok(history);
-    }
+            if (history == null || !history.Any())
+                return NotFound(new { message = "No payslip history found." });
 
-    [HttpGet(
-        "{employeeId}/{payrollRunId}/{payrollRunNumber}")]
-    public async Task<IActionResult> GetPayslip(
-        string employeeId,
-        int payrollRunId,
-        int payrollRunNumber,
-        CancellationToken cancellationToken)
-    {
-      var payslip =
-          await payslipService.GetPayslipAsync(
-              employeeId,
-              payrollRunId,
-              payrollRunNumber,
-              cancellationToken);
+            return Ok(history);
+        }
 
-      if (payslip == null)
-      {
-        return NotFound(new
+        [HttpGet("{employeeId}/{payrollRunId}/{payrollRunNumber}")]
+        public async Task<IActionResult> GetPayslip(
+            string employeeId,
+            int payrollRunId,
+            int payrollRunNumber,
+            CancellationToken cancellationToken)
         {
-          message = "Payslip not found."
-        });
-      }
+            var payslip = await payslipService.GetPayslipAsync(
+                employeeId, payrollRunId, payrollRunNumber, cancellationToken);
 
-      return Ok(payslip);
+            if (payslip == null)
+                return NotFound(new { message = "Payslip not found." });
+
+            return Ok(payslip);
+        }
+
+        [HttpGet("view/{employeeId}/{payrollRunId}/{payrollRunNumber}")]
+        public async Task<IActionResult> GetPayslipView(
+            string employeeId,
+            int payrollRunId,
+            int payrollRunNumber,
+            CancellationToken cancellationToken)
+        {
+            var payslipView = await payslipService.GetPayslipViewAsync(
+                employeeId, payrollRunId, payrollRunNumber, cancellationToken);
+
+            if (payslipView == null)
+                return NotFound(new { message = "Payslip view not found." });
+
+            return Ok(payslipView);
+        }
     }
-  }
 }

@@ -13,5 +13,11 @@ namespace HRConnect.Api.Interfaces.Payroll
             int payrollRunId,
             int payrollRunNumber,
             CancellationToken cancellationToken);
+
+        Task<PayslipViewDto?> GetPayslipViewAsync(
+            string employeeId,
+            int payrollRunId,
+            int payrollRunNumber,
+            CancellationToken cancellationToken);
     }
 }
