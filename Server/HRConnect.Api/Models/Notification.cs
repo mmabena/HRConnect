@@ -1,6 +1,7 @@
 namespace HRConnect.Api.Models
 {
   using System.ComponentModel.DataAnnotations;
+  using System.ComponentModel.DataAnnotations.Schema;
   public enum NotificationSeverity
   {
     Critical = 0, Warning, Information
@@ -22,6 +23,8 @@ namespace HRConnect.Api.Models
     public int NotificationId { get; set; }
     public string IdempotencyKey { get; set; } = null!;
     public string Message { get; set; } = string.Empty;
+    [NotMapped]
+    public string? HtmlMessage { get; set; }
     public string Subject { get; set; } = string.Empty;
     public bool IsRead { get; set; }
     public NotificationType Type { get; set; } 

@@ -39,6 +39,7 @@ namespace HRConnect.Api.Mappers.Notification
       {
         Subject = dto.Subject,
         Message = dto.Message,
+        HtmlMessage = dto.HtmlMessage,
         Type = dto.Type,
         Severity = dto.Severity,
         EmployeeId = dto.EmployeeId,

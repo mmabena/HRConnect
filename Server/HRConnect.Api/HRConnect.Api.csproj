@@ -51,4 +51,10 @@
 		<Folder Include="DTOs\Employee\" />
 	</ItemGroup>
 
+  <ItemGroup>
+    <Content Include="EmailTemplates\**\*.html">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project> 
