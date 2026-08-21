@@ -16,6 +16,10 @@ namespace HRConnect.Api.Models.CompanyContributions
     public decimal Salary { get; set; }
 
     // Contribution values
+
+    public decimal BEEPercentage { get; set; }
+    [Column(TypeName = "decimal(18,2)")]
+    public decimal BEEAmount { get; set; }
     [Column(TypeName = "decimal(18,2)")]
     public decimal DeathAmount { get; set; }
     public decimal DeathPercentage { get; set; }
