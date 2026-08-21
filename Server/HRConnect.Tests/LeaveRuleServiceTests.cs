@@ -48,9 +48,15 @@ namespace HRConnect.Tests
       return new LeaveRuleService(db, email, balanceService);
     }
 
-    private static async Task<Employee> SeedEmployee(ApplicationDBContext db)
-    {
-      db.JobGrades.Add(new JobGrade { JobGradeId = 1, Name = "G1" });
+        private static async Task<Employee> SeedEmployee(ApplicationDBContext db)
+        {
+            db.JobGrades.Add(new JobGrade { JobGradeId = 1, Name = "G1" });
+
+            db.JobGradeGroupMaps.Add(new JobGradeGroupMap
+            {
+                JobGradeId = 1,
+                GroupKey = "G1"
+            });
 
       db.Positions.Add(new Position
       {
@@ -80,25 +86,24 @@ namespace HRConnect.Tests
         IsActive = true
       });
 
-      db.EmployeeLeaveBalances.Add(new EmployeeLeaveBalance
-      {
-        EmployeeId = employee.EmployeeId,
-        LeaveTypeId = 1,
-        TakenDays = 2,
-        AccruedDays = 10,
-        AvailableDays = 8
-      });
-
-      db.LeaveEntitlementRules.Add(new LeaveEntitlementRule
-      {
-        Id = 1,
-        LeaveTypeId = 1,
-        JobGradeId = 1,
-        MinYearsService = 0,
-        MaxYearsService = null,
-        DaysAllocated = 15,
-        IsActive = true
-      });
+            db.EmployeeLeaveBalances.Add(new EmployeeLeaveBalance
+            {
+                EmployeeId = employee.EmployeeId,
+                LeaveTypeId = 1,
+                TakenDays = 2,
+                AccruedDays = 10,
+                AvailableDays = 8
+            });
+            db.LeaveEntitlementRules.Add(new LeaveEntitlementRule
+            {
+                Id = 1,
+                LeaveTypeId = 1,
+                GroupKey = "G1",
+                MinYearsService = 0,
+                MaxYearsService = null,
+                DaysAllocated = 15,
+                IsActive = true
+            });
 
       db.EmployeeAccrualRateHistories.Add(new EmployeeAccrualRateHistory
       {
@@ -110,17 +115,14 @@ namespace HRConnect.Tests
         CreatedDate = DateTime.UtcNow
       });
 
-      await db.SaveChangesAsync();
-      return employee;
-    }
-
-    // ---------------- VALIDATION ----------------
-
-    [Fact]
-    public async Task ShouldThrow_WhenNegativeDays()
-    {
-      var db = GetDb();
-      var service = CreateService(db, new TrackingEmailService());
+            await db.SaveChangesAsync();
+            return employee;
+        }
+        [Fact]
+        public async Task ShouldThrow_WhenNegativeDays()
+        {
+            var db = GetDb();
+            var service = CreateService(db, new TrackingEmailService());
 
       await Assert.ThrowsAsync<InvalidOperationException>(() =>
           service.UpdateLeaveEntitlementRuleAsync(new UpdateLeaveRuleRequest
@@ -153,15 +155,14 @@ namespace HRConnect.Tests
 
       await SeedEmployee(db);
 
-      await Assert.ThrowsAsync<InvalidOperationException>(() =>
-          service.UpdateLeaveEntitlementRuleAsync(new UpdateLeaveRuleRequest
-          {
-            RuleId = 1,
-            NewDaysAllocated = 1 // less than taken = 2
-          }));
-    }
+            await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                service.UpdateLeaveEntitlementRuleAsync(new UpdateLeaveRuleRequest
+                {
+                    RuleId = 1,
+                    NewDaysAllocated = 1 
+                }));
+        }
 
-    // ---------------- SUCCESS CASE ----------------
 
     [Fact]
     public async Task ShouldUpdateRuleAndRecalculate()
@@ -181,11 +182,9 @@ namespace HRConnect.Tests
       var rule = db.LeaveEntitlementRules.First();
       var segment = db.EmployeeAccrualRateHistories.First();
 
-      Assert.Equal(20, rule.DaysAllocated);
-      Assert.Equal(20, segment.AnnualEntitlement);
-    }
-
-    // ---------------- EMAIL ----------------
+            Assert.Equal(20, rule.DaysAllocated);
+            Assert.Equal(20, segment.AnnualEntitlement);
+        }
 
     [Fact]
     public async Task ShouldSendEmails_OnRuleChange()
@@ -202,10 +201,8 @@ namespace HRConnect.Tests
         NewDaysAllocated = 20
       });
 
-      Assert.Equal(1, email.Count);
-    }
-
-    // ---------------- SERVICE FILTERING ----------------
+            Assert.Equal(1, email.Count);
+        }
 
     [Fact]
     public async Task ShouldOnlyUpdateMatchingJobGrade()
@@ -214,11 +211,15 @@ namespace HRConnect.Tests
       var email = new TrackingEmailService();
       var service = CreateService(db, email);
 
-      // Employee in correct grade
-      await SeedEmployee(db);
+            await SeedEmployee(db);
 
-      // Employee in different grade
-      db.JobGrades.Add(new JobGrade { JobGradeId = 2, Name = "G2" });
+            db.JobGrades.Add(new JobGrade { JobGradeId = 2, Name = "G2" });
+
+            db.JobGradeGroupMaps.Add(new JobGradeGroupMap
+            {
+                JobGradeId = 2,
+                GroupKey = "G2"
+            });
 
       db.Positions.Add(new Position
       {
@@ -247,9 +248,8 @@ namespace HRConnect.Tests
         NewDaysAllocated = 25
       });
 
-      // Only one employee should be affected
-      Assert.Equal(1, email.Count);
-    }
+            Assert.Equal(1, email.Count);
+        }
 
     [Fact]
     public async Task ShouldSkipEmployeesOutsideServiceRange()
@@ -260,9 +260,8 @@ namespace HRConnect.Tests
 
       var employee = await SeedEmployee(db);
 
-      // Update rule to require higher service
-      var rule = db.LeaveEntitlementRules.First();
-      rule.MinYearsService = 5;
+            var rule = db.LeaveEntitlementRules.First();
+            rule.MinYearsService = 5;
 
       await db.SaveChangesAsync();
 
@@ -272,36 +271,39 @@ namespace HRConnect.Tests
         NewDaysAllocated = 20
       });
 
-      // No emails because employee not eligible
-      Assert.Equal(0, email.Count);
-    }
-
-    // ---------------- EDGE ----------------
+            Assert.Equal(0, email.Count);
+        }
 
     [Fact]
     public async Task ShouldThrow_WhenInvalidServiceRange()
     {
       var db = GetDb();
 
-      db.LeaveTypes.Add(new LeaveType
-      {
-        Id = 1,
-        Code = "AL",
-        Name = "Annual Leave",
-        Description = "Annual Leave",
-        IsActive = true
-      });
+            db.LeaveTypes.Add(new LeaveType
+            {
+                Id = 1,
+                Code = "AL",
+                Name = "Annual Leave",
+                Description = "Annual Leave",
+                IsActive = true
+            });
 
-      db.LeaveEntitlementRules.Add(new LeaveEntitlementRule
-      {
-        Id = 1,
-        LeaveTypeId = 1,
-        JobGradeId = 1,
-        MinYearsService = 5,
-        MaxYearsService = 3,
-        DaysAllocated = 10,
-        IsActive = true
-      });
+            db.JobGradeGroupMaps.Add(new JobGradeGroupMap
+            {
+                JobGradeId = 1,
+                GroupKey = "G1"
+            });
+
+            db.LeaveEntitlementRules.Add(new LeaveEntitlementRule
+            {
+                Id = 1,
+                LeaveTypeId = 1,
+                GroupKey = "G1",
+                MinYearsService = 5,
+                MaxYearsService = 3, 
+                DaysAllocated = 10,
+                IsActive = true
+            });
 
       await db.SaveChangesAsync();
 

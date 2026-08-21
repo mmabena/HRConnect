@@ -3,7 +3,7 @@ import "./CompanyList.css";
 import { Link } from "react-router-dom";
 import { Plus } from "lucide-react";
 import { fetchAllCompanies } from "../api/Company";
-import AddCompanyModal from "../components/companyManagement/AddCompanyModal.jsx";
+import AddCompanyModal from "../Components/companyManagement/AddCompanyModal.jsx";
 
 const CompanyList = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -19,7 +19,7 @@ const CompanyList = () => {
         const data = await fetchAllCompanies();
         setCompanies(data);
       } catch (err) {
-        setError("Failed to load companies");
+        setError("Failed to load companies:", err);
       } finally {
         setLoading(false);
       }

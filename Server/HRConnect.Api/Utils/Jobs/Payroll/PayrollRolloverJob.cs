@@ -1,6 +1,7 @@
 namespace HRConnect.Api.Utils.Jobs.Payroll
 {
   using global::Quartz;
+  using HRConnect.Api.Data;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Interfaces.Notification;
   using HRConnect.Api.Interfaces.Payroll.Deduction;
@@ -9,7 +10,12 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
   using HRConnect.Api.Models;
   using HRConnect.Api.Models.Payroll;
   using HRConnect.Api.Models.PayrollDeduction;
+  using HRConnect.Api.Utils;
+  using Microsoft.EntityFrameworkCore;
   using Microsoft.Extensions.DependencyInjection;
+  using HRConnect.Api.Services;
+
+
 
   /// <summary>
   /// Payroll Rollover Job class to handle the locking, rolling over and 
@@ -33,21 +39,27 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
     private readonly IEmployeePensionEnrollmentService _employeePensionEnrollmentService;
     private readonly IServiceProvider _serviceProvider;
     private readonly IReportsService _reportsService;
+    private readonly IBankingDetailService _bankingDetailService;
+    // private readonly ICompanyContributionService contributionService;
     private readonly IUserService _userService;
     private readonly IEmployeeService _employeeService;
     private readonly INotificationService _notificationsService;
+    private readonly IMedicalAidDependentService _medicalAidDependentService;
+    private readonly IMedicalAidDependentNotificationService _dependentNotificationService;
     private static readonly int MAX_RUNS = 12;
     private readonly IEmployeePayrollEarningService _employeePayrollEarningService;
     private readonly IEmployeeDeductionService _employeeDeductionService;
+    private readonly IMedicalAidDeductionService _medicalAidDeductionService;
     //This makes mocking and using testing time-related edge cases a lot easier
     private readonly Func<DateTime> _now;
 
     public PayrollRolloverJob(IPayrollRunRepository payrollRunRepo, IPayrollPeriodService payrollPeriodService, IServiceProvider serviceProvider,
       IEmployeePensionEnrollmentService employeePensionEnrollmentService,
-      IReportsService reportsService, IUserService userService,
-      IEmployeeService employeeService,
+      IReportsService reportsService, IBankingDetailService bankingDetailService, IUserService userService,
+      IEmployeeService employeeService, IMedicalAidDependentNotificationService dependentNotificationService,
       IEmployeePayrollEarningService employeePayrollEarningService,
       IEmployeeDeductionService employeeDeductionService,
+      IMedicalAidDependentService medicalAidDependentService, IMedicalAidDeductionService medicalAidDeductionService,
       INotificationService notificationsService, Func<DateTime>? now = null)
     {
       _payrollRunRepo = payrollRunRepo;
@@ -55,8 +67,12 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
       _reportsService = reportsService;
       _serviceProvider = serviceProvider;
       _employeePensionEnrollmentService = employeePensionEnrollmentService;
+      _bankingDetailService = bankingDetailService;
       _userService = userService;
+      _medicalAidDependentService = medicalAidDependentService;
+      _dependentNotificationService = dependentNotificationService;
       _employeeService = employeeService;
+      _medicalAidDeductionService = medicalAidDeductionService;
       _employeeDeductionService = employeeDeductionService;
       _employeePayrollEarningService = employeePayrollEarningService;
       _notificationsService = notificationsService;
@@ -69,6 +85,9 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
     /// <returns>A new valid payroll period with atleast 1 payroll run</returns>
     public async Task<PayrollPeriod> RolloverPayrollPeriod(PayrollPeriod? oldPeriod)
     {
+      Console.WriteLine("==============================================");
+      Console.WriteLine("PAYROLLOVERJOB START");
+      Console.WriteLine("==============================================");
       if (oldPeriod != null)
       {
         oldPeriod.IsLocked = true;
@@ -129,100 +148,192 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
       };
 
       payrollPeriod.Runs.Add(newRun);
-      _ = await _payrollRunRepo.CreatePayrollRunAsync(newRun);
+
+      await _payrollRunRepo.CreatePayrollRunAsync(newRun);
 
       await AllocateCompanyContributionsIfNeeded(newRun.PayrollRunId);
     }
 
     public async Task Execute(IJobExecutionContext context)
     {
-      await _employeePensionEnrollmentService.LockEmployeePensionEnrollmentsAsync();
-      DateTime currentDate = DateTime.Now;
-      int runId = ((currentDate.Month + 8) % 12) + 1;
-
-      if (currentDate.Date !=
-        new DateTime(currentDate.Year, currentDate.Month,
-        DateTime.DaysInMonth(currentDate.Year, currentDate.Month)))
-      {
-        return;
-      }
-
       try
       {
+        Console.WriteLine("==============================================");
+        Console.WriteLine("PAYROLL ROLLOVER JOB START");
+        Console.WriteLine($"Current Date: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+        Console.WriteLine("==============================================");
+
+        DateTime currentDate = _now();
+
         var payperiod = await _payrollPeriodService.GetLastPeriodAsync();
 
+        // If there is no payroll period, create the first one.
         if (payperiod == null)
         {
           payperiod = await RolloverPayrollPeriod(null);
         }
 
-        var currentPayRun = payperiod.Runs.Where(r => !r.IsLocked).OrderByDescending(r => r.PayrollRunNumber).FirstOrDefault();
-        int nextRun = currentPayRun == null ? 1 : currentPayRun.PayrollRunNumber + 1;
+        // Find the current unlocked payroll run.
+        var currentPayRun = payperiod.Runs
+            .Where(r => !r.IsLocked)
+            .OrderByDescending(r => r.PayrollRunNumber)
+            .FirstOrDefault();
 
+        // ---------------------------------------------------------
+        // FIRST RUN / NO ACTIVE RUN
+        // ---------------------------------------------------------
         if (currentPayRun == null)
         {
-          await RolloverPayrollRun(payperiod, nextRun);
-          return;
+          int currentFiscalRun = GetFiscalRunNumber(currentDate);
+
+          Console.WriteLine(
+              $"No active payroll run found. Creating fiscal payroll run {currentFiscalRun}."
+          );
+
+          await RolloverPayrollRun(payperiod, currentFiscalRun);
+
+          // Fetch the newly created run.
+          currentPayRun = payperiod.Runs
+              .Where(r => !r.IsLocked)
+              .OrderByDescending(r => r.PayrollRunNumber)
+              .FirstOrDefault();
+
+          if (currentPayRun == null)
+          {
+            throw new InvalidOperationException(
+                "Payroll run was created but could not be retrieved."
+            );
+          }
         }
 
+        Console.WriteLine(
+            $"Current Payroll Run: {currentPayRun.PayrollRunNumber}"
+        );
+
+        // ---------------------------------------------------------
+        // LOCK PENSION ENROLLMENTS FOR THE ACTIVE RUN
+        // ---------------------------------------------------------
+        await _employeePensionEnrollmentService
+            .LockEmployeePensionEnrollmentsAsync();
+
+        // ---------------------------------------------------------
+        // FINALISE CURRENT RUN
+        // ---------------------------------------------------------
         if (!currentPayRun.IsFinalised && !currentPayRun.IsLocked)
         {
           currentPayRun.IsFinalised = true;
           currentPayRun.IsLocked = true;
-          currentPayRun.FinalisedDate = DateTime.Now;
+          currentPayRun.FinalisedDate = currentDate;
 
           foreach (var record in currentPayRun.Records)
           {
             record.IsLocked = true;
 
-            //By default every other record that should not be marked as inactive
-            // and  is only locked and reported
             switch (record)
             {
               case PensionDeduction p:
                 p.IsActive = false;
                 break;
+
               case MedicalAidDeduction m:
                 m.IsActive = false;
                 break;
+
               default:
-                continue;
+                break;
             }
           }
 
           await _payrollRunRepo.UpdateRun(currentPayRun);
 
           if (currentPayRun.Records.Count > 0)
+          {
             await _reportsService.WriteExcelAsync(currentPayRun);
+          }
         }
 
+        // ---------------------------------------------------------
+        // MEDICAL AID NOTIFICATIONS
+        // ---------------------------------------------------------
+        Console.WriteLine(
+            "====================Checking Medical Aid notifications...===================="
+        );
+
+        await _dependentNotificationService
+            .NotifyChildrenTurning21Async(currentPayRun);
+
+        Console.WriteLine(
+            "====================Converting Medical Aid Dependent ...===================="
+        );
+
+        await _medicalAidDependentService
+            .ConvertChildrenTurning21Async(currentPayRun);
+
+        // ---------------------------------------------------------
+        // DETERMINE NEXT RUN
+        // ---------------------------------------------------------
+        int nextRun = currentPayRun.PayrollRunNumber + 1;
+
+        Console.WriteLine($"Next Payroll Run: {nextRun}");
+
+        // ---------------------------------------------------------
+        // FISCAL YEAR ROLLOVER
+        // ---------------------------------------------------------
         if (nextRun > MAX_RUNS)
         {
+          Console.WriteLine("Maximum payroll runs reached.");
+          Console.WriteLine("Creating a new fiscal payroll period.");
+
           payperiod = await RolloverPayrollPeriod(payperiod);
         }
         else
         {
           await RolloverPayrollRun(payperiod, nextRun);
         }
-        // await ClearPayrollNotifications();
 
+        // ---------------------------------------------------------
+        // LOCK BANKING DETAILS
+        // ---------------------------------------------------------
+        await _bankingDetailService.LockAllBankingDetailsAsync();
+
+        // ---------------------------------------------------------
+        // ROLLOVER OTHER PAYROLL DATA
+        // ---------------------------------------------------------
+
+        await RolloverPensionDeductions();
+
+        Console.WriteLine("====================2====================");
+
+        await _employeePayrollEarningService
+            .RollOverEmployeePayrollEarningsAsync();
+
+        Console.WriteLine(
+            "========== BEFORE Medical Aid Rollover =========="
+        );
+
+        await _medicalAidDeductionService
+            .RollOverMedicalAidDeductions();
+
+        Console.WriteLine(
+            "========== AFTER Medical Aid Rollover =========="
+        );
+
+        Console.WriteLine("====================3====================");
+
+        await _employeeDeductionService
+            .RollOverEmployeePayrollEarningsAsync();
+
+        Console.WriteLine("====================4====================");
       }
       catch (InvalidOperationException ex)
       {
-        var jobException = new JobExecutionException(ex);
-        throw jobException;
+        throw new JobExecutionException(ex);
       }
       catch (Exception ex)
       {
-        var jobException = new JobExecutionException(ex);
-        throw jobException;
+        throw new JobExecutionException(ex);
       }
-      await _employeePensionEnrollmentService.RollOverEmloyeePensionEnrollmentAsync();
-      await _employeePayrollEarningService.RollOverEmployeePayrollEarningsAsync();
-      await _employeeDeductionService.RollOverEmployeePayrollEarningsAsync();
-      await RolloverPensionDeductions();
     }
-
     private async Task AllocateCompanyContributionsIfNeeded(int payrollRunId)
     {
       using var scope = _serviceProvider.CreateScope();
@@ -253,6 +364,29 @@ namespace HRConnect.Api.Utils.Jobs.Payroll
       ];
 
       await Task.WhenAll(tasks);
+    }
+
+    private int GetFiscalRunNumber(DateTime date)
+    {
+      return date.Month switch
+      {
+        3 => 1,   // March
+        4 => 2,   // April
+        5 => 3,   // May
+        6 => 4,   // June
+        7 => 5,   // July
+        8 => 6,   // August
+        9 => 7,   // September
+        10 => 8,  // October
+        11 => 9,  // November
+        12 => 10, // December
+        1 => 11,  // January
+        2 => 12,  // February
+        _ => throw new ArgumentOutOfRangeException(
+            nameof(date),
+            "Invalid month."
+        )
+      };
     }
   }
 }

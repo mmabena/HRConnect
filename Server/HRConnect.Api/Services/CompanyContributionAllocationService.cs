@@ -41,6 +41,7 @@ namespace HRConnect.Api.Services
           .Where(c => c.IsActive)
           .ToListAsync();
 
+      var bee = contributions.FirstOrDefault(c => c.Code == "BEE7");
       var death = contributions.FirstOrDefault(c => c.Code == "DEATHBEN");
       var disability = contributions.FirstOrDefault(c => c.Code == "DISABILITY");
 
@@ -66,6 +67,7 @@ namespace HRConnect.Api.Services
         if (age >= 65)
           continue;
 
+        var beePercentage = bee?.Percentage ?? 0;
         var deathPercentage = death?.Percentage ?? 0;
         var disabilityPercentage = disability?.Percentage ?? 0;
 
@@ -81,6 +83,9 @@ namespace HRConnect.Api.Services
           PassportNumber = emp.PassportNumber!,
           Age = age,
           Salary = salary,
+
+          BEEPercentage = beePercentage,
+          BEEAmount = salary * (beePercentage / 100m),
 
           DeathPercentage = deathPercentage,
           DeathAmount = salary * deathPercentage,

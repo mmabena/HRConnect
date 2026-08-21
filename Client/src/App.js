@@ -1,40 +1,38 @@
 import React, { useState, useEffect } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
-import SignIn from "./components/SignIn/SignIn";
-import ForgotPassword from "./components/ForgotPassword/ForgotPassword";
-import AddEmployee from "./components/EmployeeManagement/AddEmployee";
-import EditEmployee from "./components/EmployeeManagement/EditEmployee";
+import SignIn from "./Components/SignIn/SignIn";
+import ForgotPassword from "./Components/ForgotPassword/ForgotPassword";
+import AddEmployee from "./Components/EmployeeManagement/AddEmployee";
+import EditEmployee from "./Components/EmployeeManagement/EditEmployee";
 import AddCompany from "./addCompany";
-import EditCompany from "./components/companyManagement/editCompany.jsx";
+import EditCompany from "./Components/companyManagement/editCompany.jsx";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
-import "./components/MenuBar/MenuBar.css";
+import './styles/global.css';
+import "./Components/MenuBar/MenuBar.css";
 import EmployeeList from "./Pages/EmployeeManagement/EmployeeList";
-import Payslip from "./Pages/PayrollInfo/Payslip"
-import AddEmployeeModal from "./components/EmployeeManagement/AddEmployeeModal";
-import ViewPositionManagement from "./components/ViewPositionManagement";
-import TaxTableUpload from "./components/companyManagement/TaxTableManagement/TaxTableUpload.jsx";
-import EditPositionManagement from "./components/companyManagement/PositionManagement/EditPositionManagement.jsx";
-import UserManagement from "./components/UserManagement/UserManagement.jsx";
-import AddPositionManagement from "./components/companyManagement/PositionManagement/AddPositionManagment.jsx";
+import AddEmployeeModal from "./Components/EmployeeManagement/AddEmployeeModal";
+import UserManagement from "./Components/UserManagement";
+import ViewPositionManagement from "./Components/ViewPositionManagement";
+import EditPositionManagement from "./Components/companyManagement/PositionManagement/EditPositionManagement.jsx";
+import AddPositionManagement from "./Components/companyManagement/PositionManagement/AddPositionManagment.jsx";
 import PositionManagement from "./Pages/CompanyManagement/PositionManagement/PositionManagement";
-import ChangePositionManagement from "./components/companyManagement/PositionManagement/ChangePositionManagement.jsx";
-import CompanyManagement from "./companyManagement";
-import CompanyContribution from "./components/CompanyContribution/CompanyContribution";
-import Profile from "./components/MyProfile";
-import CompensationPlanning from "./components/CompensationPlanning";
-import CompanyList from "./Pages/CompanyList.jsx"
-import TaxTableManagement from "./components/companyManagement/TaxTableManagement/TaxTableManagement.jsx";
-import ChangePassword from "./components/ChangePassword";
-import MenuBar from "./components/MenuBar/MenuBar";
-import ManageUserPositions from "./Pages/CompanyManagement/PositionManagement/ManageUserPositions.jsx";
+import CompanyManagement from "./CompanyManagement.js";
+import CompanyContribution from "./Components/CompanyContribution/CompanyContribution";
+import Profile from "./Components/MyProfile";
+import CompensationPlanning from "./Components/CompensationPlanning";
+import TaxTableManagement from "./Components/companyManagement/TaxTableManagement/TaxTableManagement";
+import ChangePassword from "./Components/ChangePassword";
+import TaxTableUpload from "./Components/companyManagement/TaxTableManagement/TaxTableUpload.jsx";
+import MenuBar from "./Components/MenuBar/MenuBar";
+import ManageUserPositions from   "./Pages/CompanyManagement/PositionManagement/ManageUserPositions.jsx";
 import ProjectionCalculator from "./Pages/PayrollTools/ProjectionCalculator";
-import PersonalInformation from "./components/PersonalInformation.jsx";
-import NotificationPage from "./Pages/NotificationPage/NotificationPage.jsx";
+import PersonalInformation from "./Components/PersonalInformation.jsx";
 import api from "../src/api/api.js";
-import { resolveRole } from "./utils/roleUtils.js";
-import HomePage from "./Pages/HomePage/HomePage.jsx";
+import ChangePositionManagement from "./Components/companyManagement/PositionManagement/ChangePositionManagement.jsx";
+import PensionFund from "./Components/PensionPages/PensionFund.jsx";
+
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
@@ -47,12 +45,6 @@ function App() {
     return storedUser ? JSON.parse(storedUser) : null;
   });
   const navigate = useNavigate();
-
-  const hideMenuBarRoutes = ["/companyManagement"];
-
-  const shouldHideMenuBar = hideMenuBarRoutes.includes(
-    window.location.pathname,
-  );
 
   //Load user from localStorage on refresh
   useEffect(() => {
@@ -71,20 +63,16 @@ function App() {
         });
 
         const employee = empResp.data;
-        const resolvedRole=resolveRole(parsedUser?.User||parsedUser);
 
         const mergedUser = {
           ...parsedUser,
-          role:resolveRole.roleName||parsedUser?.role,
-          roleId:resolvedRole.roleId,
           username: `${employee.name} ${employee.surname}`,
           jobTitle: employee.positionTitle,
           employmentStatus: employee.employmentStatus,
           dateOfBirth: employee.dateOfBirth,
           profileImage: employee.profileImage,
         };
-        //Store the current employee in the localStorage 
-        localStorage.setItem("currentEmployee",JSON.stringify(employee));
+
         setCurrentUser(mergedUser);
         localStorage.setItem("currentUser", JSON.stringify(mergedUser));
       } catch (error) {
@@ -100,15 +88,16 @@ function App() {
   };
 
   const handleBackToLogin = () => {
-    navigate("/login");
+    navigate("/");
   };
 
   const handleLogout = () => {
     localStorage.removeItem("currentUser");
     setCurrentUser(null);
     setIsLoggedIn(false);
-    navigate("/login");
+    navigate("/");
   };
+
 
   // FIXED: Use backend user object directly
   const handleLoginSuccess = async (backendUserData) => {
@@ -143,13 +132,7 @@ function App() {
       localStorage.setItem("currentUser", JSON.stringify(mergedUser));
       setIsLoggedIn(true);
 
-      const role = resolveRole?.key ?? backendUserData?.role?.toLowerCase();
-
-      if (role === "superuser") {
-        navigate("/companyManagement");
-      } else {
-        navigate("/dashboard");
-      }
+      navigate("/dashboard");
     } catch (error) {
       console.error("Login error:", error);
     }
@@ -161,12 +144,6 @@ function App() {
         <Routes>
           <Route
             path="/"
-            element= {
-              <HomePage />
-            }
-          />
-          <Route
-            path="/login"
             element={
               <SignIn
                 onForgotPasswordClick={handleForgotPasswordClick}
@@ -187,13 +164,10 @@ function App() {
 
   return (
     <div className="App">
-      {!shouldHideMenuBar && (
-        <MenuBar currentUser={currentUser} onLogout={handleLogout} />
-      )}
+      <MenuBar currentUser={currentUser} onLogout={handleLogout} />
       <div>
         <ToastContainer position="top-right" autoClose={3000} />
         <Routes>
-          <Route path="/" element={<HomePage />} />
           <Route path="/dashboard" element={<div>Welcome to Dashboard</div>} />
           <Route path="/addEmployee" element={<AddEmployee />} />
           <Route path="/addEmployeeModal" element={<AddEmployeeModal />} />
@@ -212,10 +186,8 @@ function App() {
           />
           <Route path="/userManagement" element={<UserManagement />} />
           <Route path="/taxTableManagement" element={<TaxTableManagement />} />
-          <Route path="/companyManagement" element={<CompanyManagement />} />
           <Route path="/taxTableUpload" element={<TaxTableUpload />} />
           <Route path="/positionManagement" element={<PositionManagement />} />
-          <Route path="/companyList" element={<CompanyList />} />
           <Route
             path="/addPositionManagement"
             element={<AddPositionManagement />}
@@ -228,9 +200,9 @@ function App() {
             path="/viewPositionManagement/:id"
             element={<ViewPositionManagement />}
           />
-          <Route path="/changePositionManagement" element={<ChangePositionManagement />} />
+            <Route path="/changePositionManagement" element={<ChangePositionManagement />} />
           <Route path="/manageUserPosition" element={<ManageUserPositions />} />
-
+          
           <Route
             path="/company-contribution"
             element={<CompanyContribution />}
@@ -252,11 +224,9 @@ function App() {
             element={<ProjectionCalculator />}
           />
           <Route path="/changeposition" element={<ChangePositionManagement />} />
-          <Route path="/manageUserPosition" element={<ManageUserPositions />} />
+          <Route path="/manageUserPosition" element={<ManageUserPositions/>} />
           <Route path="/personal" element={<PersonalInformation />} />
-          <Route path="/payslip" element= {<Payslip/>}/>
-          <Route path="/notifications" element={<NotificationPage />} />
-          {/* <Route path="/salarybenchmark" element={<SalaryBenchmark />} /> */}
+          <Route path="/pension-management" element={<PensionFund />} />
         </Routes>
       </div>
     </div>
@@ -264,4 +234,3 @@ function App() {
 }
 
 export default App;
-

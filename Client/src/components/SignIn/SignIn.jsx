@@ -34,27 +34,31 @@ const SignIn = ({ onForgotPasswordClick, onLoginSuccess }) => {
     }
 
     setLoading(true);
-    try {
-      const responseData = await authService.login(email, password);
+  try {
+  const responseData = await authService.login(email, password);
 
-      // Store auth data in localStorage
-      localStorage.setItem('currentUser', JSON.stringify({
-        token: responseData.token,
-        user: responseData.user,
-      }));
+  // Store token separately for API calls
+  localStorage.setItem("authToken", responseData.token);
 
-      setError('');
+  // Keep currentUser for user details
+  localStorage.setItem("currentUser", JSON.stringify({
+    token: responseData.token,
+    user: responseData.user,
+  }));
 
-      // Notify parent component of successful login
-      if (typeof onLoginSuccess === 'function') {
-        onLoginSuccess(responseData.user);
-      }
-    } catch (err) {
-      setError(err.message || 'Login failed. Please try again.');
-      console.error('Login error:', err);
-    } finally {
-      setLoading(false);
-    }
+  setError("");
+
+  if (typeof onLoginSuccess === "function") {
+    onLoginSuccess(responseData.user);
+  }
+} catch (err) {
+  setError(err.message || "Login failed. Please try again.");
+  console.error("Login error:", err);
+} finally {
+  setLoading(false);
+}
+
+
   };
 
   const handleForgotPassword = () => {

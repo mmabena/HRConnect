@@ -24,7 +24,11 @@ namespace HRConnect.Api.Utils.Notification.Channels
       try
       {
 
-        await _emailService.SendEmailAsync(employeeDto.Email, notification.Subject, notification.Message);
+        string emailBody = !string.IsNullOrWhiteSpace(notification.HtmlMessage)
+        ? notification.HtmlMessage    
+        : notification.Message;
+
+        await _emailService.SendEmailAsync(employeeDto.Email, notification.Subject, emailBody);
 
         //After sending an email we should probably mark it as read
       }

@@ -1,22 +1,15 @@
 {
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "name": ".NET Core Launch (HRConnect.Api)",
-      "type": "coreclr",
-      "request": "launch",
-      "preLaunchTask": "build",
-      "program": "${workspaceFolder}/Server/HRConnect.Api/bin/Debug/net9.0/HRConnect.Api.dll",
-      "args": [],
-      "cwd": "${workspaceFolder}/Server/HRConnect.Api",
-      "console": "internalConsole",
-      "env": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "serverReadyAction": {
-        "action": "openExternally",
-        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
-      }
-    }
-  ]
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+    "type": "chrome",
+    "request": "launch",
+    "name": "Launch Chrome",
+    "url": "${env:CLIENT_URL}",
+    "webRoot": "${workspaceFolder}"
+}
+    ]
 }

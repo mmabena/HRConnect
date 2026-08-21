@@ -21,7 +21,7 @@ namespace HRConnect.Api.Interfaces
 
 
     // Pension Options
-    Task<IEnumerable<PensionOption>> GetPensionOptionsAsync(CancellationToken cancellationToken);
+    Task<IEnumerable<PensionOptionDto>> GetPensionOptionsAsync(CancellationToken cancellationToken);
 
     Task<PensionOption?> GetPensionOptionByIdAsync(int id, CancellationToken cancellationToken);
 

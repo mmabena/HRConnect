@@ -98,7 +98,10 @@ namespace HRConnect.Api.Services
             var userCompanies = await _userCompanyRepo.GetUserCompaniesByUserIdAsync(userId);
 
             if (userCompanies.Count == 1)
-                throw new InvalidOperationException("Cannot switch company: User is only linked to one company.");
+            {
+                return;
+            }
+                // throw new InvalidOperationException("Cannot switch company: User is only linked to one company.");
 
             foreach (var uc in userCompanies)
             {

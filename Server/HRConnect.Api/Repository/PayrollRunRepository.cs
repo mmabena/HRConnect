@@ -24,11 +24,14 @@ namespace HRConnect.Api.Repository
       var payrun = await _context.PayrollRuns.Include(r => r.Records).FirstOrDefaultAsync(p => p.PayrollRunNumber == payrollRunNumber);
       return payrun;
     }
-    public async Task<PayrollRun?> GetPayrunByRunNumberAsync(int payrollRunNumber)
-    {
-      var payrun = await _context.PayrollRuns.Where(r => !r.IsLocked).Include(r => r.Records).FirstOrDefaultAsync(p => p.PayrollRunNumber == payrollRunNumber);
-      return payrun;
-    }
+ public async Task<PayrollRun?> GetPayrunByRunNumberAsync(int payrollRunNumber)
+{
+    var payrun = await _context.PayrollRuns
+        .Include(r => r.Records)
+        .FirstOrDefaultAsync(r => r.PayrollRunNumber == payrollRunNumber);
+
+    return payrun;
+}
     public async Task<PayrollRun> CreatePayrollRunAsync(PayrollRun payrollRun)
     {
       await _context.PayrollRuns.AddAsync(payrollRun);
@@ -57,20 +60,21 @@ namespace HRConnect.Api.Repository
     }
     public async Task<PayrollRun?> GetCurrentRunAsync()
     {
-      var payrun = await _context.PayrollRuns.Where(r => !r.IsLocked)
+      var payrun = await _context.PayrollRuns
+        .Where(r => !r.IsLocked)
+        .Include(r => r.Records)
         .OrderByDescending(r => r.PayrollRunNumber)
         .FirstOrDefaultAsync();
-      if (payrun != null)
-        return payrun;
-      return null;
+
+      return payrun;
     }
 
-    public Task UpdateRun(PayrollRun payrollRun)
+    public async Task UpdateRun(PayrollRun payrollRun)
     {
       //Update the current run to be marked as Finalised
       _context.PayrollRuns.Update(payrollRun);
+      await _context.SaveChangesAsync();
 
-      return Task.CompletedTask;
     }
     public async Task<PayrollRun?> GetLastPayrun()
     {

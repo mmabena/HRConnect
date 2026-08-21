@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import NavBar from "../../../components/NavBar.jsx";
+import NavBar from "../../../Components/NavBar.jsx";
 
-import AddPositionManagement from "../../../components/companyManagement/PositionManagement/AddPositionManagment";
-import EditPositionManagement from "../../../components/companyManagement/PositionManagement/EditPositionManagement";
-import ChangePositionManagement from "../../../components/companyManagement/PositionManagement/ChangePositionManagement";
+import AddPositionManagement from "../../../Components/companyManagement/PositionManagement/AddPositionManagment";
+import EditPositionManagement from "../../../Components/companyManagement/PositionManagement/EditPositionManagement";
+import ChangePositionManagement from "../../../Components/companyManagement/PositionManagement/ChangePositionManagement";
 
 import usePositions from "../../../hooks/usePositions";
 import usePagination from "../../../hooks/usePagination";

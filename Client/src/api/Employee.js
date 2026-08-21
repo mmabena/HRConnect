@@ -67,6 +67,23 @@ export const editEmployee = async (employeeId, employee) => {
   }
 };
 
+export const validateEmployee = async (employee) => {
+  try{
+  const response = await api.post(`${API_BASE}/validate`, employee, {
+    headers: { "Content-Type": "application/json" },
+  });
+  return response.data || {};
+} catch (error) {
+    if (error.response) {
+      console.error("Add employee error response data:", error.response.data);
+      console.error("Add employee error status:", error.response.status);
+    } else {
+      console.error("Add employee error message:", error.message);
+    }
+    throw error;
+  }
+};
+
 export const fetchEmployeeByIdNumber = async (idNumber) => {
   try {
     const response = await api.get(

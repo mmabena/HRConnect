@@ -50,7 +50,9 @@ const CompanyManagement = () => {
 
         const defaultCompany = mappedCompanies.find((c) => c.isDefault);
 
-        if (defaultCompany) {
+        if (mappedCompanies.length === 1) {
+          setSelectedCompany(mappedCompanies[0].id);
+        } else if (defaultCompany) {
           setSelectedCompany(defaultCompany.id);
         }
       } catch (error) {
@@ -85,10 +87,17 @@ const CompanyManagement = () => {
   const navigate = useNavigate();
 
   const handleEnterDashboard = async () => {
-    if (!selectedCompany) return;
+    console.log("Selected Company:", selectedCompany);
+    console.log("Companies:", companies);
+
+    if (!selectedCompany) {
+      console.log("No company selected");
+      return;
+    }
 
     try {
       await switchCompany(selectedCompany);
+      console.log("Company switched successfully");
       navigate("/dashboard");
     } catch (error) {
       console.error("Error setting active company:", error);
@@ -217,7 +226,6 @@ const CompanyManagement = () => {
     </div>
   );
 };
-
 
 const getInitials = (name) => {
   if (!name) return "";

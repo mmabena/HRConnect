@@ -19,6 +19,8 @@ namespace HRConnect.Tests
   using System.Linq;
   using Microsoft.AspNetCore.SignalR;
   using HRConnect.Api.Hubs;
+  using Microsoft.AspNetCore.SignalR;
+  using HRConnect.Api.Hubs;
   using Microsoft.AspNetCore.Identity;
   using Microsoft.EntityFrameworkCore;
   using Microsoft.EntityFrameworkCore.Storage;
@@ -37,6 +39,8 @@ namespace HRConnect.Tests
     private readonly Mock<ICompanyRepository> _companyRepoMock;
     private readonly EmployeeService _employeeService;
 
+ 
+
 
 
     public EmployeeServiceTests()
@@ -49,7 +53,7 @@ namespace HRConnect.Tests
       _companyRepoMock = new Mock<ICompanyRepository>();
       _leaveBalanceServiceMock = new Mock<ILeaveBalanceService>();
       _leaveProcessingServiceMock = new Mock<ILeaveProcessingService>();
-
+     
       _passwordHasherMock = new Mock<IPasswordHasher<User>>();
 
       var options = new DbContextOptionsBuilder<ApplicationDBContext>()
@@ -93,11 +97,11 @@ namespace HRConnect.Tests
         JobGradeId = 1,
         Name = "Grade"
       });
-      // _context.JobGradeGroupMaps.Add(new JobGradeGroupMap
-      // {
-      //   JobGradeId = 1,
-      //   GroupKey = "G1"
-      // });
+      _context.JobGradeGroupMaps.Add(new JobGradeGroupMap
+      {
+        JobGradeId = 1,
+        GroupKey = "G1"
+      });
 
       _context.Positions.AddRange(
           new Position { PositionId = 1, JobGradeId = 1, OccupationalLevelId = 1 },
@@ -169,15 +173,15 @@ namespace HRConnect.Tests
 
       _employeeService = new EmployeeService(
           _context,
-    _activeCompanyServiceMock.Object,
-    _userCompanyServiceMock.Object,
-    _employeeRepoMock.Object,
-    _emailServiceMock.Object,
-    _companyRepoMock.Object,
-    _positionRepoMock.Object,
-    _leaveBalanceServiceMock.Object,
-    _leaveProcessingServiceMock.Object,
-    _passwordHasherMock.Object
+          _activeCompanyServiceMock.Object,
+          _userCompanyServiceMock.Object,
+          _employeeRepoMock.Object,
+          _emailServiceMock.Object,
+          _companyRepoMock.Object,
+          _positionRepoMock.Object,
+          _leaveBalanceServiceMock.Object,
+          _leaveProcessingServiceMock.Object,
+          _passwordHasherMock.Object
       );
     }
 
@@ -217,7 +221,7 @@ namespace HRConnect.Tests
         StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
         ProfileImage = "profile.jpg",
         PensionOptionId = 1,
-      };
+        };
 
       _employeeRepoMock.Setup(r => r.GetEmployeeByIdAsync(managerId))
           .ReturnsAsync(manager);
@@ -294,7 +298,8 @@ namespace HRConnect.Tests
         Email = "test@singular.co.za",
         PositionId = 1,
         Position = _context.Positions.First(p => p.PositionId == 1),
-        StartDate = DateOnly.FromDateTime(DateTime.UtcNow)
+        StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
+        ProfileImage = "profile.jpg"
       };
       _context.Employees.Add(existing);
       _context.LeaveTypes.Add(new LeaveType
@@ -305,15 +310,15 @@ namespace HRConnect.Tests
         Name = "Annual Leave",
         Description = "Annual Leave"
       });
-      // _context.JobGradeGroupMaps.Add(new JobGradeGroupMap
-      // {
-      //   JobGradeId = 1,
-      //   GroupKey = "G1"
-      // });
+      _context.JobGradeGroupMaps.Add(new JobGradeGroupMap
+      {
+        JobGradeId = 1,
+        GroupKey = "G1"
+      });
       _context.LeaveEntitlementRules.Add(new LeaveEntitlementRule
       {
         LeaveTypeId = 1,
-        // GroupKey = "G1",
+        GroupKey = "G1",
         MinYearsService = 0,
         MaxYearsService = null,
         DaysAllocated = 15,
@@ -380,13 +385,15 @@ namespace HRConnect.Tests
     }
 
     [Fact]
-    public async Task DeleteEmployeeAsyncValidIdReturnsTrue()
+    public async Task DeleteEmployeeAsync_ValidId_ReturnsTrue()
     {
       var employee = new Employee
-      {
-        EmployeeId = "EMP001",
-        StartDate = DateOnly.FromDateTime(DateTime.UtcNow)
-      };
+{
+    EmployeeId = "EMP001",
+    CompanyId = "COMP001",
+    StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
+    ProfileImage = "profile.jpg"
+};
 
       _employeeRepoMock.Setup(r => r.GetEmployeeByIdAsync("EMP001"))
           .ReturnsAsync(employee);
@@ -404,6 +411,47 @@ namespace HRConnect.Tests
 
       await Assert.ThrowsAsync<NotFoundException>(() =>
           _employeeService.DeleteEmployeeAsync(1, "X"));
+    }
+
+    [Fact]
+    public async Task CreateEmployeeAsync_ValidInput_InitializesLeaveBalances()
+    {
+      //Arrange
+      var dto = new CreateEmployeeRequestDto
+      {
+        Name = "Recce",
+        Surname = "James",
+        Title = Title.Mr,
+        Gender = Gender.Male,
+        Email = "reccejames@singular.co.za",
+        ContactNumber = "0801234567",
+        IdNumber = "0305057589589",
+        PhysicalAddress = "123 Main Street",
+        Nationality = "South African",
+        City = "Johannesburg",
+        ZipCode = "2000",
+        Branch = Branch.Johannesburg,
+        PositionId = 6,
+        MonthlySalary = 30000,
+        EmploymentStatus = EmploymentStatus.Permanent,
+        StartDate = DateOnly.FromDateTime(DateTime.UtcNow),
+        ProfileImage = "profile.jpg"
+      };
+
+      _passwordHasherMock
+    .Setup(x => x.HashPassword(
+        It.IsAny<User>(),
+        It.IsAny<string>()))
+    .Returns("hashedpassword");
+
+      //Act
+      var result = await _employeeService.CreateEmployeeAsync(1, dto);
+
+      //Assert
+      Assert.NotNull(result);
+      _leaveBalanceServiceMock.Verify(
+        x => x.InitializeEmployeeLeaveBalancesAsync(result.EmployeeId),
+        Times.Once);
     }
 
     public void Dispose()

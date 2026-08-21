@@ -25,27 +25,42 @@ namespace HRConnect.Api.Utils
 
     public async Task<UserRegisterDto> ResolveUserFromId(int userId)
     {
-      try
+      Console.WriteLine($"Calling: user/{userId}");
+
+      var userResponse = await _httpClient.GetAsync($"api/user/{userId}");
+
+      Console.WriteLine($"Status Code: {userResponse.StatusCode}");
+
+      string response = await userResponse.Content.ReadAsStringAsync();
+      Console.WriteLine($"Response Body: {response}");
+
+      if (userResponse.StatusCode == System.Net.HttpStatusCode.NotFound)
       {
-        var userResponse = await _httpClient.GetAsync($"user/{userId}");
-        if (userResponse.StatusCode == System.Net.HttpStatusCode.NotFound)
-        {
-          throw new KeyNotFoundException($"User with ID {userId} not found.");
-        }
-
-        UserRegisterDto? user = await userResponse.Content.ReadFromJsonAsync<UserRegisterDto>();
-
-        if (user == null)
-        {
-          throw new KeyNotFoundException($"User with ID {userId} not found.");
-        }
-
-        return user;
+        throw new KeyNotFoundException($"User with ID {userId} not found.");
       }
-      catch (JsonException ex)
+
+      UserRegisterDto? user =
+        JsonSerializer.Deserialize<UserRegisterDto>(
+        response, _jsonOptions);
+
+      Console.WriteLine("===== After Deserialize =====");
+      Console.WriteLine($"UserId   : {user?.UserId}");
+      Console.WriteLine($"Email    : '{user?.Email}'");
+      Console.WriteLine($"Role     : '{user?.Role}'");
+      Console.WriteLine($"TempRole : '{user?.TempRole}'");
+      Console.WriteLine("=============================");
+
+      if (user == null)
       {
-        throw new JsonException($"Error parsing response: {ex.Message}");
+        throw new KeyNotFoundException($"User with ID {userId} not found.");
       }
+
+      return user;
     }
+
+    private static readonly JsonSerializerOptions _jsonOptions = new()
+    {
+      PropertyNameCaseInsensitive = true
+    };
   }
 }

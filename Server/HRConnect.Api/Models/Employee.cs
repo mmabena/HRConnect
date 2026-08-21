@@ -104,6 +104,11 @@ namespace HRConnect.Api.Models
 
     public Position? Position { get; set; }
 
+    public int BankingDetailsId { get; set; }
+
+    [ForeignKey(nameof(BankingDetailsId))]
+    public BankingDetail? BankingDetail { get; set; }
+
     [Required]
     public EmploymentStatus EmploymentStatus { get; set; }
 
@@ -140,6 +145,9 @@ namespace HRConnect.Api.Models
     public ICollection<PensionFund>? PensionFunds { get; set; }             // navigation
     public ICollection<EmployeePayrollEarning> EmployeePayrollEarning { get; set; } = [];
     public ICollection<EmployeeDeduction> EmployeeDeduction { get; set; } = [];
+
+    public ICollection<MedicalAidDependent> MedicalAidDependents
+    { get; set; } = new List<MedicalAidDependent>();
 
   }
 }
