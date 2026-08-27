@@ -136,30 +136,30 @@ namespace HRConnect.Api.Data
 
 
 
-      modelBuilder.Entity<Position>()
-          .HasOne(p => p.OccupationalLevels)
-          .WithMany(o => o.Positions)
-          .HasForeignKey(p => p.OccupationalLevelId)
-          .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Position>()
+                .HasOne(p => p.OccupationalLevels)
+                .WithMany(o => o.Positions)
+                .HasForeignKey(p => p.OccupationalLevelId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-      modelBuilder.Entity<Position>()
-          .HasIndex(p => p.PositionTitle)
-          .IsUnique();
+            modelBuilder.Entity<Position>()
+                .HasIndex(p => p.PositionTitle)
+                .IsUnique();
 
       modelBuilder.Entity<UserCompany>()
           .HasKey(uc => new { uc.UserId, uc.CompanyId });
 
-      modelBuilder.Entity<UserCompany>()
-          .HasOne(uc => uc.User)
-          .WithMany()
-          .HasForeignKey(uc => uc.UserId)
-          .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<UserCompany>()
+                .HasOne(uc => uc.User)
+                .WithMany()
+                .HasForeignKey(uc => uc.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-      modelBuilder.Entity<UserCompany>()
-          .HasOne(uc => uc.Company)
-          .WithMany()
-          .HasForeignKey(uc => uc.CompanyId)
-          .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<UserCompany>()
+                .HasOne(uc => uc.Company)
+                .WithMany()
+                .HasForeignKey(uc => uc.CompanyId)
+                .OnDelete(DeleteBehavior.Cascade);
 
       modelBuilder.Entity<OccupationalLevel>()
           .HasIndex(o => o.Description)
@@ -183,11 +183,11 @@ namespace HRConnect.Api.Data
           .HasForeignKey(b => b.EmployeeId)
           .OnDelete(DeleteBehavior.Cascade);
 
-      modelBuilder.Entity<Employee>()
-          .HasMany(e => e.LeaveApplications)
-          .WithOne(l => l.Employee)
-          .HasForeignKey(l => l.EmployeeId)
-          .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Employee>()
+                .HasMany(e => e.LeaveApplications)
+                .WithOne(l => l.Employee)
+                .HasForeignKey(l => l.EmployeeId)
+                .OnDelete(DeleteBehavior.Cascade);
 
       modelBuilder.Entity<Employee>()
           .HasOne(e => e.Company)
@@ -195,21 +195,21 @@ namespace HRConnect.Api.Data
           .HasForeignKey(e => e.CompanyId)
           .OnDelete(DeleteBehavior.Restrict);
 
-      modelBuilder.Entity<Company>()
-          .HasIndex(c => c.CompanyId)
-          .IsUnique();
+            modelBuilder.Entity<Company>()
+                .HasIndex(c => c.CompanyId)
+                .IsUnique();
 
-      modelBuilder.Entity<Company>()
-          .HasIndex(c => c.RegistrationNumber)
-          .IsUnique();
+            modelBuilder.Entity<Company>()
+                .HasIndex(c => c.RegistrationNumber)
+                .IsUnique();
 
-      modelBuilder.Entity<Company>()
-          .HasIndex(c => c.UIFNumber)
-          .IsUnique();
+            modelBuilder.Entity<Company>()
+                .HasIndex(c => c.UIFNumber)
+                .IsUnique();
 
-      modelBuilder.Entity<Company>()
-          .HasIndex(c => c.VATNumber)
-          .IsUnique();
+            modelBuilder.Entity<Company>()
+                .HasIndex(c => c.VATNumber)
+                .IsUnique();
 
       modelBuilder.Entity<EmployeeLeaveBalance>()
           .HasOne(lb => lb.LeaveType)
@@ -223,34 +223,48 @@ namespace HRConnect.Api.Data
           .HasForeignKey(x => x.JobGradeId)
           .OnDelete(DeleteBehavior.Cascade);
 
-      modelBuilder.Entity<JobGradeGroupMap>()
-          .HasIndex(x => new { x.JobGradeId, x.GroupKey })
-          .IsUnique();
+            modelBuilder.Entity<LeaveDocument>()
+                .HasOne(d => d.LeaveApplication)
+                .WithMany(l => l.Documents)
+                .HasForeignKey(d => d.LeaveApplicationId);
 
-      modelBuilder.Entity<EmployeeCompanyContribution>()
-    .HasIndex(e => new { e.PayrollRunId, e.EmployeeId })
-    .IsUnique();
+            modelBuilder.Entity<LeaveApplication>()
+                .HasIndex(l => l.Status);
+
+            modelBuilder.Entity<LeaveApplication>()
+                .HasIndex(l => l.EmployeeId);
+
+            modelBuilder.Entity<LeaveApplication>()
+                .HasIndex(l => l.LeaveTypeId);
+
+            modelBuilder.Entity<JobGradeGroupMap>()
+                .HasIndex(x => new { x.JobGradeId, x.GroupKey })
+                .IsUnique();
+
+            modelBuilder.Entity<EmployeeCompanyContribution>()
+                .HasIndex(e => new { e.PayrollRunId, e.EmployeeId })
+                .IsUnique();
 
       // Company Contributions
       modelBuilder.Entity<CompanyContribution>()
           .Property(c => c.Percentage)
           .HasColumnType("decimal(10,6)");
 
-      modelBuilder.Entity<EmployeeCompanyContribution>()
-          .Property(e => e.DeathPercentage)
-          .HasColumnType("decimal(10,6)");
+            modelBuilder.Entity<EmployeeCompanyContribution>()
+                .Property(e => e.DeathPercentage)
+                .HasColumnType("decimal(10,6)");
 
-      modelBuilder.Entity<EmployeeCompanyContribution>()
-          .Property(e => e.DisabilityPercentage)
-          .HasColumnType("decimal(10,6)");
+            modelBuilder.Entity<EmployeeCompanyContribution>()
+                .Property(e => e.DisabilityPercentage)
+                .HasColumnType("decimal(10,6)");
 
-      modelBuilder.Entity<EmployeeCompanyContribution>()
-          .Property(e => e.DeathAmount)
-          .HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<EmployeeCompanyContribution>()
+                .Property(e => e.DeathAmount)
+                .HasColumnType("decimal(18,2)");
 
-      modelBuilder.Entity<EmployeeCompanyContribution>()
-          .Property(e => e.DisabilityAmount)
-          .HasColumnType("decimal(18,2)");
+            modelBuilder.Entity<EmployeeCompanyContribution>()
+                .Property(e => e.DisabilityAmount)
+                .HasColumnType("decimal(18,2)");
 
       // Accrual history
       modelBuilder.Entity<EmployeeAccrualRateHistory>()
@@ -259,45 +273,60 @@ namespace HRConnect.Api.Data
           .HasForeignKey(e => e.EmployeeId)
           .OnDelete(DeleteBehavior.Cascade);
 
-      modelBuilder.Entity<EmployeeAccrualRateHistory>()
-          .HasOne(e => e.Position)
-          .WithMany()
-          .HasForeignKey(e => e.PositionId)
-          .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<EmployeeAccrualRateHistory>()
+                .HasOne(e => e.Position)
+                .WithMany()
+                .HasForeignKey(e => e.PositionId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-      // Tax
-      modelBuilder.Entity<TaxDeduction>(entity =>
-      {
-        entity.HasKey(e => e.Id);
-        entity.Property(e => e.Remuneration).HasPrecision(12, 2);
-      });
+            // TaxDeduction
+            modelBuilder.Entity<TaxDeduction>(entity =>
+            {
+                entity.ToTable("TaxDeduction");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.TaxYear).IsRequired();
+                entity.Property(e => e.Remuneration).HasPrecision(12, 2).IsRequired();
+                entity.Property(e => e.AnnualEquivalent).HasPrecision(12, 2).IsRequired();
+                entity.Property(e => e.TaxUnder65).HasPrecision(12, 2).IsRequired();
+                entity.Property(e => e.Tax65To74).HasPrecision(12, 2).IsRequired();
+                entity.Property(e => e.TaxOver75).HasPrecision(12, 2).IsRequired();
+                entity.HasIndex(e => new { e.TaxYear, e.Remuneration }).IsUnique();
+            });
 
-      modelBuilder.Entity<TaxTableUpload>(entity =>
-      {
-        entity.HasKey(e => e.Id);
-      });
+            // TaxTableUpload
+            modelBuilder.Entity<TaxTableUpload>(entity =>
+            {
+                entity.ToTable("TaxTableUpload");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.TaxYear).IsRequired();
+                entity.Property(e => e.FileName).IsRequired();
+                entity.Property(e => e.FileUrl).IsRequired();
+                entity.Property(e => e.UploadedAt);
+                entity.Property(e => e.EffectiveFrom).IsRequired();
+                entity.Property(e => e.EffectiveTo);
+            });
 
-      // Medical Aid Deduction Delete Behavior
-      modelBuilder.Entity<MedicalAidDeduction>()
-        .HasOne(m => m.MedicalOption)
-        .WithMany()
-        .HasForeignKey(m => m.MedicalOptionId)
-        .OnDelete(DeleteBehavior.NoAction);
+            // Medical Aid Deduction Delete Behavior
+            modelBuilder.Entity<MedicalAidDeduction>()
+              .HasOne(m => m.MedicalOption)
+              .WithMany()
+              .HasForeignKey(m => m.MedicalOptionId)
+              .OnDelete(DeleteBehavior.NoAction);
 
-      modelBuilder.Entity<MedicalAidDeduction>()
-        .HasOne(m => m.MedicalOptionCategory)
-        .WithMany()
-        .HasForeignKey(m => m.MedicalCategoryId)
-        .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<MedicalAidDeduction>()
+              .HasOne(m => m.MedicalOptionCategory)
+              .WithMany()
+              .HasForeignKey(m => m.MedicalCategoryId)
+              .OnDelete(DeleteBehavior.NoAction);
 
-      // StatutoryContributionType defaults
-      modelBuilder.Entity<StatutoryContributionType>().Property(e => e.EmployeeRate)
-        .HasColumnType("decimal(18,4)")
-        .HasDefaultValue(0.01m);
+            // StatutoryContributionType defaults
+            modelBuilder.Entity<StatutoryContributionType>().Property(e => e.EmployeeRate)
+              .HasColumnType("decimal(18,4)")
+              .HasDefaultValue(0.01m);
 
-      modelBuilder.Entity<StatutoryContributionType>().Property(e => e.EmployerRate)
-          .HasColumnType("decimal(18,4)")
-          .HasDefaultValue(0.01m);
+            modelBuilder.Entity<StatutoryContributionType>().Property(e => e.EmployerRate)
+                .HasColumnType("decimal(18,4)")
+                .HasDefaultValue(0.01m);
 
       // Payroll relationships
       modelBuilder.Entity<PayrollPeriod>().HasMany(p => p.Runs)
@@ -306,20 +335,26 @@ namespace HRConnect.Api.Data
 
 
 
-      //EF needs to know that PayrollRecord is a base type (abstract)
-      modelBuilder.Entity<PayrollRecord>().UseTpcMappingStrategy();
+            //EF needs to know that PayrollRecord is a base type (abstract)
+            modelBuilder.Entity<PayrollRecord>().UseTpcMappingStrategy();
 
-      modelBuilder.Entity<PayrollRun>(b =>
-      {
-        b.HasKey(r => r.PayrollRunId);
-        b.HasMany(r => r.Records)
-          .WithOne(r => r.PayrollRun)
-          .HasForeignKey(r => r.PayrollRunId);
-      });
+            //EF needs to know derived types
+            modelBuilder.Entity<PensionDeduction>().ToTable("PensionDeductions");
+            modelBuilder.Entity<MedicalAidDeduction>().ToTable("MedicalAidDeductions");
+            modelBuilder.Entity<EmployeeCompanyContribution>().ToTable("EmployeeCompanyContributions");
+            modelBuilder.Entity<StatutoryContribution>().ToTable("StatutoryContributions");
 
-      modelBuilder.Entity<PayrollRun>().Property(p => p.IsLocked).IsConcurrencyToken();
-      modelBuilder.Entity<PayrollPeriod>().Property(p => p.IsLocked).IsConcurrencyToken();
-      modelBuilder.Entity<PayrollRecord>().Property(p => p.IsLocked).IsConcurrencyToken();
+            modelBuilder.Entity<PayrollRun>(b =>
+            {
+                b.HasKey(r => r.PayrollRunId);
+                b.HasMany(r => r.Records)
+            .WithOne(r => r.PayrollRun)
+            .HasForeignKey(r => r.PayrollRunId);
+            });
+
+            modelBuilder.Entity<PayrollRun>().Property(p => p.IsLocked).IsConcurrencyToken();
+            modelBuilder.Entity<PayrollPeriod>().Property(p => p.IsLocked).IsConcurrencyToken();
+            modelBuilder.Entity<PayrollRecord>().Property(p => p.IsLocked).IsConcurrencyToken();
 
       // Medical Aid Deduction Delete Behavior
       modelBuilder.Entity<MedicalAidDeduction>()
@@ -328,11 +363,11 @@ namespace HRConnect.Api.Data
           .HasForeignKey(m => m.MedicalOptionId)
           .OnDelete(DeleteBehavior.NoAction);
 
-      modelBuilder.Entity<MedicalAidDeduction>()
-          .HasOne(m => m.MedicalOptionCategory)
-          .WithMany()
-          .HasForeignKey(m => m.MedicalCategoryId)
-          .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<MedicalAidDeduction>()
+                .HasOne(m => m.MedicalOptionCategory)
+                .WithMany()
+                .HasForeignKey(m => m.MedicalCategoryId)
+                .OnDelete(DeleteBehavior.NoAction);
 
       modelBuilder.Entity<MedicalAidDependent>()
           .HasOne(d => d.Employee)
@@ -378,61 +413,63 @@ namespace HRConnect.Api.Data
     .HasIndex(b => b.AccountNumberSearchHash)
     .IsUnique();
 
-      modelBuilder.Entity<Notification>().Property(n => n.Type)
-          .HasConversion<string>();
+            //Notifaction Configurations
+            modelBuilder.Entity<Notification>().Property(n => n.Severity)
+                .HasConversion<string>();
+            modelBuilder.Entity<Notification>().Property(n => n.Type)
+            .HasConversion<string>();
 
-      modelBuilder.Entity<Notification>().Property(n => n.DeliveryChannel)
-      .HasConversion<string>();
+            modelBuilder.Entity<Employee>()
+              .HasMany(epre => epre.EmployeePayrollEarning)
+              .WithOne(e => e.Employee)
+              .HasForeignKey(e => e.EmployeeId)
+              .OnDelete(DeleteBehavior.NoAction)
+              .IsRequired();
 
-      modelBuilder.Entity<Employee>()
-        .HasMany(epre => epre.EmployeePayrollEarning)
-        .WithOne(e => e.Employee)
-        .HasForeignKey(e => e.EmployeeId)
-        .OnDelete(DeleteBehavior.NoAction)
-        .IsRequired();
+            modelBuilder.Entity<PayrollEarning>()
+              .HasMany(epre => epre.EmployeePayrollEarning)
+              .WithOne(pre => pre.PayrollEarning)
+              .HasForeignKey(pre => pre.PayrollEarningId)
+              .OnDelete(DeleteBehavior.NoAction)
+              .IsRequired();
 
-      modelBuilder.Entity<PayrollEarning>()
-        .HasMany(epre => epre.EmployeePayrollEarning)
-        .WithOne(pre => pre.PayrollEarning)
-        .HasForeignKey(pre => pre.PayrollEarningId)
-        .OnDelete(DeleteBehavior.NoAction)
-        .IsRequired();
 
-      modelBuilder.Entity<EmployeePayrollEarning>()
-        .HasOne<PayrollRun>()
-        .WithMany()
-        .HasForeignKey(epe => epe.PayrollRunId)
-        .HasPrincipalKey(p => p.PayrollRunId);
 
-      modelBuilder.Entity<PayrollEarning>().HasData(
-          new PayrollEarning
-          {
-            PayrollEarningId = "PRE001",
-            ShortDescription = "Basic salary",
-            LongDescription = "Employee monthly salary",
-            Taxable = true,
-            TaxCode = 3601,
-            TaxPercentage = 100m,
-            OvertimeHourMultiplier = null,
-            CanProRata = true,
-            IsOnGoing = true,
-            IsActive = true
-          }
-        );
+            modelBuilder.Entity<EmployeePayrollEarning>()
+              .HasOne<PayrollRun>()
+              .WithMany()
+              .HasForeignKey(epe => epe.PayrollRunId)
+              .HasPrincipalKey(p => p.PayrollRunId);
 
-      modelBuilder.Entity<Deduction>().Property(d => d.InputType).HasConversion<string>();
+            modelBuilder.Entity<PayrollEarning>().HasData(
+                new PayrollEarning
+                {
+                    PayrollEarningId = "PRE001",
+                    ShortDescription = "Basic salary",
+                    LongDescription = "Employee monthly salary",
+                    Taxable = true,
+                    TaxCode = 3601,
+                    TaxPercentage = 100m,
+                    OvertimeHourMultiplier = null,
+                    CanProRata = true,
+                    IsOnGoing = true,
+                    IsActive = true
+                }
+              );
 
-      modelBuilder.Entity<EmployeeDeduction>()
-        .HasOne<PayrollRun>()
-        .WithMany()
-        .HasForeignKey(ed => ed.PayrollRunId)
-        .HasPrincipalKey(p => p.PayrollRunId);
+            modelBuilder.Entity<Deduction>().Property(d => d.InputType).HasConversion<string>();
 
-      modelBuilder.Entity<Deduction>()
-        .HasMany(d => d.EmployeeDeduction)
-        .WithOne(ed => ed.Deduction)
-        .HasForeignKey(ed => ed.DeductionId)
-        .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<EmployeeDeduction>()
+              .HasOne<PayrollRun>()
+              .WithMany()
+              .HasForeignKey(ed => ed.PayrollRunId)
+              .HasPrincipalKey(p => p.PayrollRunId);
+
+            modelBuilder.Entity<Deduction>()
+              .HasMany(d => d.EmployeeDeduction)
+              .WithOne(ed => ed.Deduction)
+              .HasForeignKey(ed => ed.DeductionId)
+              .OnDelete(DeleteBehavior.NoAction);
 
       modelBuilder.Entity<Employee>()
         .HasMany(e => e.EmployeeDeduction)
@@ -446,18 +483,38 @@ namespace HRConnect.Api.Data
 
       modelBuilder.Entity<TOTPState>()
       .HasIndex(u => u.UserId);
+            modelBuilder.Entity<Employee>()
+              .HasMany(e => e.EmployeeDeduction)
+              .WithOne(ed => ed.Employee)
+              .HasForeignKey(ed => ed.EmployeeId)
+              .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<TOTPState>(entity =>
+            {
+                entity.HasKey(x => x.UserId);
 
-      modelBuilder.Entity<TOTPState>()
-      .HasOne(t => t.User)
-      .WithOne()
-      .HasForeignKey<TOTPState>(t => t.UserId)
-      .OnDelete(DeleteBehavior.Cascade);
+                entity.Property(x => x.UserId)
+                      .ValueGeneratedNever();
 
-      modelBuilder.Entity<MFAUserSecret>()
-      .HasOne(m => m.User)
-      .WithOne()
-      .HasForeignKey<MFAUserSecret>(m => m.UserId);
-    }
+                entity.HasOne(x => x.User)
+                      .WithOne()
+                      .HasForeignKey<TOTPState>(x => x.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<MFAUserSecret>(entity =>
+            {
+                entity.HasKey(x => x.UserId);
+
+                entity.Property(x => x.UserId)
+                      .ValueGeneratedNever();
+
+                entity.HasOne(x => x.User)
+                      .WithOne()
+                      .HasForeignKey<MFAUserSecret>(x => x.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+        }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {

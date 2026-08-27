@@ -38,8 +38,8 @@
           ?? employeePensionEnrollment.PensionOptionId;
           employeePensionEnrollment.VoluntaryContribution = employeePensionEnrollmentUpdateDto.VoluntaryContribution
             ?? employeePensionEnrollment.VoluntaryContribution;
-          employeePensionEnrollment.IsVoluntaryContributionPermament = employeePensionEnrollmentUpdateDto.IsVoluntaryContributionPermament
-            ?? employeePensionEnrollment.IsVoluntaryContributionPermament;
+          employeePensionEnrollment.IsVoluntaryContributionPermanent = employeePensionEnrollmentUpdateDto.IsVoluntaryContributionPermanent
+            ?? employeePensionEnrollment.IsVoluntaryContributionPermanent;
 
           EmployeePensionEnrollment employeeUpdatedPensionEnrollment = await _employeePensionEnrollmentRepository
           .UpdateAsync(employeePensionEnrollment);

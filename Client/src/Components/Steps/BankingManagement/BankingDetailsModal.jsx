@@ -5,7 +5,7 @@ import {
   getBankBranchCodes,
   validateBankingDetails,
 } from "../../../api/BankingDetail";
-import { ArrowRight, ArrowLeft, Upload, UserRoundPlus, X } from "lucide-react";
+import { ArrowRight, ArrowLeft } from "lucide-react";
 
 const BankingDetailsModal = ({
   employee,
@@ -16,7 +16,6 @@ const BankingDetailsModal = ({
   onBack,
 }) => {
   const [bankData, setBankData] = useState([]);
-  const [currentStep] = useState(2);
 
   const banks = Array.isArray(bankData) ? bankData : [];
 
@@ -141,9 +140,11 @@ const BankingDetailsModal = ({
     if (!employee.payDate) {
       const today = new Date();
 
-      const payDate = new Date(today.getFullYear(), today.getMonth(), 27);
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, "0");
+      const day = "26";
 
-      const formattedDate = payDate.toISOString().split("T")[0];
+      const formattedDate = `${year}-${month}-${day}`;
 
       setEmployee((prev) => ({
         ...prev,

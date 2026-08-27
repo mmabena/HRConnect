@@ -60,8 +60,8 @@ namespace HRConnect.Api.Services
       employeePensionEnrollment.StartDate = existingEmployee.StartDate;
       PayrollRun? currentPayRollRun = await _payrollRunRepository.GetCurrentRunAsync() ?? throw new NotFoundException("Current payroll run not found");
       employeePensionEnrollment.VoluntaryContribution = employeePensionEnrollmentDto.VoluntaryContribution ?? 0;
-      employeePensionEnrollment.IsVoluntaryContributionPermament = (employeePensionEnrollmentDto.VoluntaryContribution > decimal.Zero) ?
-        employeePensionEnrollmentDto.IsVoluntaryContributionPermament : null;
+      employeePensionEnrollment.IsVoluntaryContributionPermanent = (employeePensionEnrollmentDto.VoluntaryContribution > decimal.Zero) ?
+        employeePensionEnrollmentDto.IsVoluntaryContributionPermanent : null;
       employeePensionEnrollment.PayrollRunId = currentPayRollRun.PayrollRunId;
       employeePensionEnrollment.IsLocked = false;
 
@@ -173,8 +173,8 @@ namespace HRConnect.Api.Services
           ?? employeePensionEnrollment.PensionOptionId;
         employeePensionEnrollment.VoluntaryContribution = employeePensionEnrollmentUpdateDto.VoluntaryContribution
           ?? employeePensionEnrollment.VoluntaryContribution;
-        employeePensionEnrollment.IsVoluntaryContributionPermament = employeePensionEnrollmentUpdateDto.IsVoluntaryContributionPermament
-          ?? employeePensionEnrollment.IsVoluntaryContributionPermament;
+        employeePensionEnrollment.IsVoluntaryContributionPermanent = employeePensionEnrollmentUpdateDto.IsVoluntaryContributionPermanent
+          ?? employeePensionEnrollment.IsVoluntaryContributionPermanent;
 
         DateTime today = DateTime.Now;
         if (today.Day >= 26)
@@ -390,8 +390,8 @@ namespace HRConnect.Api.Services
           GetByEmployeeIdAndLastRunIdAsync(employee.EmployeeId);
         if (employeeExisitingPensionEnrollment != null && employee.PensionOptionId != null &&
           (employeeExisitingPensionEnrollment.VoluntaryContribution > decimal.Zero) &&
-          employeeExisitingPensionEnrollment.IsVoluntaryContributionPermament != null &&
-          employeeExisitingPensionEnrollment.IsVoluntaryContributionPermament == true)
+          employeeExisitingPensionEnrollment.IsVoluntaryContributionPermanent != null &&
+          employeeExisitingPensionEnrollment.IsVoluntaryContributionPermanent == true)
         {
           EmployeePensionEnrollment employeePensionEnrollment = new()
           {
@@ -400,9 +400,9 @@ namespace HRConnect.Api.Services
             PensionOptionId = (int)employee.PensionOptionId!,
             StartDate = employee.StartDate,
             EffectiveDate = firstDayNextMonth,
-            VoluntaryContribution = (bool)employeeExisitingPensionEnrollment.IsVoluntaryContributionPermament ?
+            VoluntaryContribution = (bool)employeeExisitingPensionEnrollment.IsVoluntaryContributionPermanent ?
               employeeExisitingPensionEnrollment.VoluntaryContribution : 0.00M,
-            IsVoluntaryContributionPermament = employeeExisitingPensionEnrollment.IsVoluntaryContributionPermament,
+            IsVoluntaryContributionPermanent = employeeExisitingPensionEnrollment.IsVoluntaryContributionPermanent,
             IsLocked = false,
           };
 

@@ -61,8 +61,8 @@ namespace HRConnect.Api.Repository
                 VoltunaryContribution =
                     enrollment.VoluntaryContribution,
 
-                IsVoluntaryContributionPermament =
-                    enrollment.IsVoluntaryContributionPermament,
+                IsVoluntaryContributionPermanent =
+                    enrollment.IsVoluntaryContributionPermanent,
 
                 PayrollRunId =
                     enrollment.PayrollRunId

@@ -44,6 +44,7 @@ using HRConnect.Api.Interfaces.Payroll.Earning;
 using HRConnect.Api.Interfaces.Payroll.Deduction;
 using System.Threading.RateLimiting;
 using HRConnect.Api.Utils.Notification.Channels;
+using HRConnect.Api.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -80,6 +81,7 @@ builder.Services.AddControllers()
           new System.Text.Json.Serialization.JsonStringEnumConverter()
       );
     });
+builder.Services.AddSignalR();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -177,7 +179,7 @@ builder.Services.AddQuartz(q =>
   q.AddTrigger(opts => opts
   .ForJob(RolloverJobKey)
   .WithIdentity("PayrollRollover-Trigger")
-    .WithCronSchedule("0 0/20 * * * ?", x =>
+    .WithCronSchedule("0 0/30 * * * ?", x =>
     x.WithMisfireHandlingInstructionFireAndProceed()));
 
   q.AddTrigger(opts => opts
@@ -254,6 +256,8 @@ builder.Services.AddScoped<IUserCompanyService, UserCompanyService>();
 builder.Services.AddScoped<IMedicalAidDependentService, MedicalAidDependentService>();
 builder.Services.AddScoped<IMedicalAidDependentRepository, MedicalAidDependentRepository>();
 builder.Services.AddScoped<IUserCompanyRepository, UserCompanyRepository>();
+builder.Services.AddScoped<ILeaveTypeRepository, LeaveTypeRepository>();
+builder.Services.AddScoped<IEmployeeLeaveBalanceRepository, EmployeeLeaveBalanceRepository>();
 builder.Services.AddScoped<ICompanyContributionRepository, CompanyContributionRepository>();
 builder.Services.AddScoped<IEmployeeCompanyContributionRepository, EmployeeCompanyContributionRepository>();
 builder.Services.AddScoped<ICompanyContributionAllocationService, CompanyContributionAllocationService>();
@@ -275,9 +279,13 @@ builder.Services.AddScoped<ILeaveRuleService, LeaveRuleService>();
 builder.Services.AddScoped<IPensionFundService, PensionFundService>();
 builder.Services.AddScoped<IEmployeePensionRepository, EmployeePensionRepository>();
 builder.Services.AddScoped<IPensionFundService, PensionFundService>();
+builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+
 builder.Services.AddScoped<IPensionFundRepository, PensionFundRepository>();
 builder.Services.AddScoped<ILeaveTypeManagementService, LeaveTypeManagementService>();
 builder.Services.AddScoped<ILeaveApplicationService, LeaveApplicationService>();
+builder.Services.AddScoped<IJobGradeGroupService, JobGradeGroupService>();
+
 builder.Services.AddScoped<IMedicalAidDependentNotificationService, MedicalAidDependentNotificationService>();
 builder.Services.AddHostedService<LeaveAutomationBackgroundService>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
@@ -393,6 +401,5 @@ app.UseAuthorization();
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseRateLimiter();
 app.MapControllers();
-app.MapHub<UserPositionHub>("/UserPositionHub");
 app.MapHub<CompanyHub>("/companyHub");
 app.Run();

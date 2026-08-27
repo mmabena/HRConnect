@@ -1,22 +1,16 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import "./PensionFundOptionsModal.css";
 import { ArrowRight, ArrowLeft } from "lucide-react";
-import { fetchALLPensionOptions } from "../../../api/PenstionOptions";
+import { fetchAllPensionOptions } from "../../../api/PenstionOptions";
 
 const PensionFundOptionsModal = ({ employee, setEmployee, onNext, onBack }) => {
-  const [voluntary, setVoluntary] = useState("");
-  const [frequency, setFrequency] = useState("Once-Off");
   const [pensionOptions, setPensionOptions] = useState([]);
   const [error, setError] = useState("");
-
-  const percentageOptions = [2.5, 5, 7.5, 10, 12.5, 15];
-
-  const [selectedPercentage, setSelectedPercentage] = useState(2.5);
 
   useEffect(() => {
     const loadPensionOptions = async () => {
       try {
-        const data = await fetchALLPensionOptions();
+        const data = await fetchAllPensionOptions();
         setPensionOptions(Array.isArray(data) ? data : []);
         console.log("Loaded Pension Options:", data);
       } catch (err) {
@@ -27,12 +21,6 @@ const PensionFundOptionsModal = ({ employee, setEmployee, onNext, onBack }) => {
     loadPensionOptions();
   }, []);
 
-  const handlePensionToggle = () => {
-    setEmployee((prev) => ({
-      ...prev,
-      pensionEnabled: !prev.pensionEnabled,
-    }));
-  };
 
   const handlePercentageSelection = (option) => {
     setEmployee((prev) => ({
@@ -59,7 +47,7 @@ const PensionFundOptionsModal = ({ employee, setEmployee, onNext, onBack }) => {
   const handleFrequencyChange = (frequency) => {
     setEmployee((prev) => ({
       ...prev,
-      isVoluntaryContributionPermament: frequency === "Permanent",
+      IsVoluntaryContributionPermanent: frequency === "Permanent",
     }));
   };
 
@@ -85,7 +73,7 @@ const PensionFundOptionsModal = ({ employee, setEmployee, onNext, onBack }) => {
         <div className="pension-content-group">
           {/* PENSION CARD */}
           <div className="pension-card-container">
-            <div className="pensio-section-title">
+            <div className="pension-section-title">
               PENSION FUND - SELECT ONE
             </div>
 
@@ -157,7 +145,7 @@ const PensionFundOptionsModal = ({ employee, setEmployee, onNext, onBack }) => {
             <button
               type="button"
               className={`voluntary-btn ${
-                employee?.isVoluntaryContributionPermament === false ? "active"
+                employee?.IsVoluntaryContributionPermanent=== false ? "active"
                 : ""
               }`}
               onClick={() => handleFrequencyChange("Once-Off")}
@@ -168,7 +156,7 @@ const PensionFundOptionsModal = ({ employee, setEmployee, onNext, onBack }) => {
             <button
               type="button"
               className={`voluntary-btn ${
-                employee?.isVoluntaryContributionPermament === true ? "active"
+                employee?.IsVoluntaryContributionPermanent=== true ? "active"
                 : ""
               }`}
               onClick={() => handleFrequencyChange("Permanent")}

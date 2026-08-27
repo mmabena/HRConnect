@@ -11,7 +11,7 @@
       {
         EmployeeId = employeePensionEnrollmentDto.EmployeeId,
         VoluntaryContribution = employeePensionEnrollmentDto.VoluntaryContribution ?? 0,
-        IsVoluntaryContributionPermament = employeePensionEnrollmentDto.IsVoluntaryContributionPermament,
+        IsVoluntaryContributionPermanent = employeePensionEnrollmentDto.IsVoluntaryContributionPermanent,
       };
     }
 
@@ -24,7 +24,7 @@
         StartDate = employeePensionEnrollment.StartDate,
         EffectiveDate = employeePensionEnrollment.EffectiveDate,
         VoltunaryContribution = employeePensionEnrollment.VoluntaryContribution,
-        IsVoluntaryContributionPermament = employeePensionEnrollment.IsVoluntaryContributionPermament,
+        IsVoluntaryContributionPermanent = employeePensionEnrollment.IsVoluntaryContributionPermanent,
         PayrollRunId = employeePensionEnrollment.PayrollRunId
       };
     }

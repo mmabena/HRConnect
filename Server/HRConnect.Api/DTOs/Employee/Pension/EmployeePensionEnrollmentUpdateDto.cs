@@ -5,6 +5,6 @@
     public int? PensionOptionId { get; set; }
     public string EmployeeId { get; set; } = string.Empty;
     public decimal? VoluntaryContribution { get; set; }
-    public bool? IsVoluntaryContributionPermament { get; set; }
+    public bool? IsVoluntaryContributionPermanent{ get; set; }
   }
 }

@@ -84,7 +84,7 @@ const AddEmployeeModal = ({ closeModal }) => {
       pensionOptionId: null,
       employeeContribution: null,
       voluntaryContribution: 0,
-      isVoluntaryContributionPermament: false,
+      IsVoluntaryContributionPermanent: false,
     });
 
   // =========================
@@ -113,7 +113,6 @@ const AddEmployeeModal = ({ closeModal }) => {
     "Preview",
   ];
 
-  const activeSteps = wizardConfig[employee.employeeStatus] || defaultSteps;
 
   const steps = (wizardConfig[employee.employeeStatus] || defaultSteps).map(
     (label, index) => ({
@@ -301,7 +300,7 @@ const AddEmployeeModal = ({ closeModal }) => {
 
             voluntaryContribution: employee.voluntaryContribution || 0,
 
-            isVoluntaryContributionPermament: employee.isVoluntaryContributionPermament,
+            IsVoluntaryContributionPermanent: employee.IsVoluntaryContributionPermanent,
           };
 
           console.log("FULL ENROLLMENT PAYLOAD");

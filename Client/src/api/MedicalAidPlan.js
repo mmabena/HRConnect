@@ -1,9 +1,7 @@
 // src/api/MedicalAidPlan.js
-
 import api from "./api";
 
 export const getMedicalAidPlans = async () => {
-  try {
     const response = await api.get("/medical-options/categories");
 
     const data = Array.isArray(response.data)
@@ -43,58 +41,34 @@ export const getMedicalAidPlans = async () => {
     }));
 
     return cleaned;
-  } catch (error) {
-    console.error("Error fetching medical aid plans:", error);
-    return [];
-  }
 };
 
 export const createMedicalAidDeduction = async (employeeId, payload) => {
-  try {
     const response = await api.post(
       `/medical-aid-deductions/create/employee/${employeeId}`,
       payload,
     );
     return response.data;
-  } catch (error) {
-    console.error("Error creating medical aid deduction:", error);
-    throw error;
-  }
 };
 
 export const createMedicalAidDependent = async (employeeId, payload) => {
-  try {
     const response = await api.post(
       `/medicalDependent/employee/${employeeId}`,
       payload,
     );
     return response.data;
-  } catch (error) {
-    console.error("Error creating medical aid dependent:", error);
-    throw error;
-  }
 };
+
 export const validateMedicalAidDependent = async (employeeId, payload) => {
-  try {
     const response = await api.post(
       `/medicalDependent/employee/${employeeId}/validate`,
       payload,
     );
     return response.data || {};
-  } catch (error) {
-    if (error.response) {
-      console.error("Validate medical aid dependent error response data:", error.response.data);
-      console.error("Validate medical aid dependent error status:", error.response.status);
-    } else {
-      console.error("Validate medical aid dependent error message:", error.message);
-    }
-    throw error;
-  }
 };
 
 
 export const getEligibleMedicalAidPlans = async (payload) => {
-  try {
     const response = await api.post(
       "/medical-aid-deductions/onboarding/eligible-options",
       payload,
@@ -149,8 +123,4 @@ export const getEligibleMedicalAidPlans = async (payload) => {
     console.log("Is array?", Array.isArray(response.data));
 
     return grouped;
-  } catch (error) {
-    console.error("Error fetching eligible medical aid plans:", error);
-    throw error;
-  }
 };

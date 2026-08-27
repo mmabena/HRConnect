@@ -11,15 +11,18 @@ namespace HRConnect.Api.Services
     {
         private readonly ApplicationDBContext _context;
         private readonly IEmailService _emailService;
+        private readonly ILeaveTypeRepository _leaveTypeRepo;
         private readonly ILeaveBalanceService _leaveBalanceService;
 
         public LeaveRuleService(
             ApplicationDBContext context,
             IEmailService emailService,
+            ILeaveTypeRepository leaveTypeRepo,
             ILeaveBalanceService leaveBalanceService)
         {
             _context = context;
             _emailService = emailService;
+            _leaveTypeRepo = leaveTypeRepo;
             _leaveBalanceService = leaveBalanceService;
         }
 
@@ -28,9 +31,7 @@ namespace HRConnect.Api.Services
             if (request.NewDaysAllocated < 0)
                 throw new InvalidOperationException("Days allocated cannot be negative.");
 
-            var rule = await _context.LeaveEntitlementRules
-                .Include(r => r.LeaveType)
-                .FirstOrDefaultAsync(r => r.Id == request.RuleId);
+            var rule = await _leaveTypeRepo.GetLeaveRuleWithLeaveTypeAsync(request.RuleId);
 
             if (rule == null)
                 throw new InvalidOperationException("Rule not found.");
@@ -42,26 +43,17 @@ namespace HRConnect.Api.Services
                 rule.MaxYearsService < rule.MinYearsService)
                 throw new InvalidOperationException("MaxYearsService cannot be less than MinYearsService.");
 
-            var employees = await _context.Employees
-                .Include(e => e.Position)
-                .Include(e => e.LeaveBalances)
-                .Where(e =>
-                    rule.GroupKey == "ALL" ||
-                    _context.JobGradeGroupMaps
-                    .Where(m => m.GroupKey == rule.GroupKey)
-                    .Select(m => m.JobGradeId)
-                    .Contains(e.Position.JobGradeId))
-                .ToListAsync();
+            var employees = await _leaveTypeRepo.GetEmployeesForLeaveRuleAsync(rule.GroupKey);
 
             foreach (var employee in employees)
             {
-                var years = CalculateYearsOfService(employee.StartDate);
+                var yearsOfService = CalculateYearsOfService.UsingStartDate(employee.StartDate);
 
-                if (years < rule.MinYearsService)
+                if (yearsOfService < rule.MinYearsService)
                     continue;
 
                 if (rule.MaxYearsService.HasValue &&
-                    years >= rule.MaxYearsService.Value)
+                    yearsOfService >= rule.MaxYearsService.Value)
                     continue;
 
                 var balance = employee.LeaveBalances
@@ -77,47 +69,34 @@ namespace HRConnect.Api.Services
 
             rule.DaysAllocated = request.NewDaysAllocated;
 
-            await _context.SaveChangesAsync();
+            await _leaveTypeRepo.UpdateLeaveRuleAsync(rule);
 
             await RecalculateEmployeesForRuleChangeAsync(rule.Id);
         }
 
         public async Task RecalculateEmployeesForRuleChangeAsync(int ruleId)
         {
-            var rule = await _context.LeaveEntitlementRules
-                .Include(r => r.LeaveType)
-                .FirstOrDefaultAsync(r => r.Id == ruleId);
+            var rule = await _leaveTypeRepo.GetLeaveRuleWithLeaveTypeAsync(ruleId);
 
             if (rule == null)
                 throw new InvalidOperationException("Rule not found.");
 
-            var employees = await _context.Employees
-                .Include(e => e.Position)
-                .Include(e => e.LeaveBalances)
-                .ThenInclude(lb => lb.LeaveType)
-                .Where(e =>
-                    rule.GroupKey == "ALL" ||
-                    _context.JobGradeGroupMaps
-                .Where(m => m.GroupKey == rule.GroupKey)
-                .Select(m => m.JobGradeId)
-                .Contains(e.Position.JobGradeId))
-                .ToListAsync();
+            var employees = await _leaveTypeRepo.GetEmployeesForLeaveRuleAsync(rule.GroupKey);
 
             var employeeIds = employees.Select(e => e.EmployeeId).ToList();
 
-            var segments = await _context.EmployeeAccrualRateHistories
-                .Where(x => employeeIds.Contains(x.EmployeeId) && x.EffectiveTo == null)
-                .ToListAsync();
+            var segments = await _leaveTypeRepo.GetActiveAccrualRateHistoriesAsync(employeeIds);
 
             foreach (var employee in employees)
             {
-                var years = CalculateYearsOfService(employee.StartDate);
+                var yearsOfService =
+    CalculateYearsOfService.UsingStartDate(employee.StartDate);
 
-                if (years < rule.MinYearsService)
+                if (yearsOfService < rule.MinYearsService)
                     continue;
 
                 if (rule.MaxYearsService.HasValue &&
-                    years >= rule.MaxYearsService.Value)
+                    yearsOfService >= rule.MaxYearsService.Value)
                     continue;
 
                 var balance = employee.LeaveBalances
@@ -156,17 +135,7 @@ namespace HRConnect.Api.Services
                 );
             }
 
-            await _context.SaveChangesAsync();
-        }
-        private decimal CalculateYearsOfService(DateOnly startDate)
-        {
-            var today = DateOnly.FromDateTime(DateTime.UtcNow);
-
-            if (startDate > today)
-                return 0;
-
-            var totalDays = today.DayNumber - startDate.DayNumber;
-            return Math.Round(totalDays / 365.25m, 2);
+            await _leaveTypeRepo.SaveChangesAsync();
         }
     }
 }

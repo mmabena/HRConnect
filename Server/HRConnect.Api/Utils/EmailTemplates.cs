@@ -2,114 +2,156 @@ namespace HRConnect.Api.Utils
 {
   using HRConnect.Api.Models;
 
-  public static class EmailTemplates
-  {
-    /// <summary>
-    /// Generates the HTML content for the leave approval email, 
-    /// including employee details, leave type, dates, and action links for approval or rejection.
-    /// </summary>
-    /// <param name="employee"></param>
-    /// <param name="leaveType"></param>
-    /// <param name="application"></param>
-    /// <param name="approveLink"></param>
-    /// <param name="rejectLink"></param>
-    /// <returns></returns>
-    public static string GenerateApprovalEmailHtml(
-        Employee employee,
-        LeaveType leaveType,
-        LeaveApplication application,
-        string approveLink,
-        string rejectLink)
+    public static class EmailTemplates
     {
-      return $"""
-                    <html>
-                    <body style="font-family: Arial; background:#f4f6f8; padding:20px;">
+        /// <summary>
+        /// Generates the HTML content for the leave approval email, 
+        /// including employee details, leave type, dates, and action links for approval or rejection.
+        /// </summary>
+        /// <param name="employee"></param>
+        /// <param name="leaveType"></param>
+        /// <param name="application"></param>
+        /// <param name="approveLink"></param>
+        /// <param name="rejectLink"></param>
+        /// <returns></returns>
+        public static string GenerateApprovalEmailHtml(
+    Employee employee,
+    LeaveType leaveType,
+    LeaveApplication application,
+    string approveLink,
+    string rejectLink)
+        {
+            var documentLinks = "";
 
-                    <div style="max-width:600px;background:white;padding:30px;border-radius:8px">
+            if (application.Documents != null && application.Documents.Count > 0)
+            {
+                documentLinks = $"""
+            <br>
+            <p><strong>Supporting Documents:</strong></p>
+            {string.Join("<br/>",
+                        application.Documents.Select(d =>
+                            $"<a href='{d.FileUrl}' target='_blank'>Download {d.FileName}</a>"))}
+            """;
+            }
 
-                    <h2>Leave Approval Required</h2>
+            return $"""
+            <html>
+            <body style="font-family: Arial; background:#f4f6f8; padding:20px;">
 
-                    <p><strong>Employee:</strong> {employee.Name} {employee.Surname}</p>
-                    <p><strong>Leave Type:</strong> {leaveType.Name}</p>
-                    <p><strong>Dates:</strong> {application.StartDate:dd MMM yyyy} → {application.EndDate:dd MMM yyyy}</p>
-                    <p><strong>Days Requested:</strong> {application.DaysRequested}</p>
+            <div style="max-width:600px;background:white;padding:30px;border-radius:8px">
 
-                    <br>
+            <h2>Leave Approval Required</h2>
 
-                    <a href="{approveLink}"
-                    style="background:#2ecc71;color:white;padding:12px 25px;text-decoration:none;border-radius:6px;margin-right:10px;font-weight:bold;">
-                    Approve
-                    </a>
+            <p><strong>Employee:</strong> {employee.Name} {employee.Surname}</p>
+            <p><strong>Leave Type:</strong> {leaveType.Name}</p>
+            <p><strong>Dates:</strong> {application.StartDate:dd MMM yyyy} → {application.EndDate:dd MMM yyyy}</p>
+            <p><strong>Days Requested:</strong> {application.DaysRequested}</p>
 
-                    <a href="{rejectLink}"
-                    style="background:#e74c3c;color:white;padding:12px 25px;text-decoration:none;border-radius:6px;font-weight:bold;">
-                    Reject
-                    </a>
 
-                    <br><br>
+            <br>
 
-                    <p style="color:#888;font-size:12px">
-                    HRConnect Leave Management System
-                    </p>
+            <a href="{approveLink}"
+            style="background:#2ecc71;color:white;padding:12px 25px;text-decoration:none;border-radius:6px;margin-right:10px;font-weight:bold;">
+            Approve
+            </a>
 
-                    </div>
+            <a href="{rejectLink}"
+            style="background:#e74c3c;color:white;padding:12px 25px;text-decoration:none;border-radius:6px;font-weight:bold;">
+            Reject
+            </a>
+            
+            {documentLinks}
+            
+            <br><br>
 
-                    </body>
-                    </html>
-                    """;
-    }
-    /// <summary>
-    /// Generates the HTML content for the leave decision email, 
-    /// informing the employee about the approval or rejection of their leave request, 
-    /// including details of the leave and any rejection reason if applicable.
-    /// </summary>
-    /// <param name="employee"></param>
-    /// <param name="leaveType"></param>
-    /// <param name="application"></param>
-    /// <param name="approved"></param>
-    /// <returns></returns>
-    public static string GenerateDecisionEmailHtml(
-        Employee employee,
-        LeaveType leaveType,
-        LeaveApplication application,
-        bool approved)
-    {
-      var decision = approved ? "APPROVED" : "REJECTED";
+            <p style="color:#888;font-size:12px">
+            HRConnect Leave Management System
+            </p>
 
-      return $"""
-                    <h2>Leave Application Update</h2>
+            </div>
 
-                    <p>Hello {employee.Name},</p>
+            </body>
+            </html>
+            """;
+        }
+        /// <summary>
+        /// Generates the HTML content for the leave decision email, 
+        /// informing the employee about the approval or rejection of their leave request, 
+        /// including details of the leave and any rejection reason if applicable.
+        /// </summary>
+        /// <param name="employee"></param>
+        /// <param name="leaveType"></param>
+        /// <param name="application"></param>
+        /// <param name="approved"></param>
+        /// <returns></returns>
+        public static string GenerateDecisionEmailHtml(
+    Employee employee,
+    LeaveType leaveType,
+    LeaveApplication application,
+    bool approved)
+        {
+            var decision = approved ? "APPROVED" : "REJECTED";
 
-                    <p>Your leave request has been <strong>{decision}</strong>.</p>
-                    {(approved ? "" : $"<p><strong>Reason:</strong> {application.RejectionReason}</p>")}
+            var documentLinks = "";
 
-                    <p><strong>Leave Type:</strong> {leaveType.Name}</p>
-                    <p><strong>Dates:</strong> {application.StartDate:dd MMM yyyy} to {application.EndDate:dd MMM yyyy}</p>
-                    <p><strong>Days:</strong> {application.DaysRequested}</p>
+            if (application.Documents != null && application.Documents.Count > 0)
+            {
+                documentLinks = $"""
+            <br/>
+            <p><strong>Supporting Documents:</strong></p>
+            {string.Join("<br/>",
+                        application.Documents.Select(d =>
+                            $"<a href='{d.FileUrl}' target='_blank'>Download {d.FileName}</a>"))}
+            """;
+            }
 
-                    <br/>
+            return $"""
+            <html>
+            <body style="font-family: Arial; background:#f4f6f8; padding:20px;">
 
-                    <p>Regards,<br/>HRConnect</p>
-                    """;
-    }
-    /// <summary>
-    /// Generates the HTML content for the position update email, 
-    /// notifying the employee about a change in their position and the resulting recalculation of their annual leave entitlement, 
-    /// including the new entitlement, used days, and available days.
-    /// </summary>
-    /// <param name="employee"></param>
-    /// <param name="accruedDays"></param>
-    /// <param name="takenDays"></param>
-    /// <param name="availableDays"></param>
-    /// <returns></returns>
-    public static string GeneratePositionUpdateEmail(
-Employee employee,
-decimal accruedDays,
-decimal takenDays,
-decimal availableDays)
-    {
-      return $"""
+            <div style="max-width:600px;background:white;padding:30px;border-radius:8px">
+
+            <h2>Leave Application Update</h2>
+
+            <p>Hello {employee.Name},</p>
+
+            <p>Your leave request has been <strong>{decision}</strong>.</p>
+
+            {(approved ? "" : $"<p><strong>Reason:</strong> {application.RejectionReason}</p>")}
+
+            <p><strong>Leave Type:</strong> {leaveType.Name}</p>
+            <p><strong>Dates:</strong> {application.StartDate:dd MMM yyyy} to {application.EndDate:dd MMM yyyy}</p>
+            <p><strong>Days:</strong> {application.DaysRequested}</p>
+
+            {documentLinks}
+
+            <br/>
+
+            <p>Regards,<br/>HRConnect</p>
+
+            </div>
+
+            </body>
+            </html>
+            """;
+        }
+        /// <summary>
+        /// Generates the HTML content for the position update email, 
+        /// notifying the employee about a change in their position and the resulting recalculation of their annual leave entitlement, 
+        /// including the new entitlement, used days, and available days.
+        /// </summary>
+        /// <param name="employee"></param>
+        /// <param name="accruedDays"></param>
+        /// <param name="takenDays"></param>
+        /// <param name="availableDays"></param>
+        /// <returns></returns>
+        public static string GeneratePositionUpdateEmail(
+    Employee employee,
+    decimal accruedDays,
+    decimal takenDays,
+    decimal availableDays)
+        {
+            return $"""
                     Dear {employee.Name},
                     
                     Your position has recently been updated to: {employee.Position!.PositionTitle}.

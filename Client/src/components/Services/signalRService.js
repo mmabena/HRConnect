@@ -1,6 +1,8 @@
 import * as signalR from "@microsoft/signalr";
 
 let connection = null;
+let startPromise = null;
+
 
 // Initializes and starts the SignalR connection to the UserPositionHub
 export const startSignalRConnection = async () => {
@@ -10,7 +12,7 @@ export const startSignalRConnection = async () => {
   }
 
   connection = new signalR.HubConnectionBuilder()
-    .withUrl("http://localhost:5147/userPositionHub")
+    .withUrl(process.env.REACT_APP_USER_POSITION_HUB_URL)
     .withAutomaticReconnect()
     .build();
 
@@ -38,8 +40,14 @@ export const getConnection = () => connection;
 // Optional: stop connection (logout)
 export const stopSignalRConnection = async () => {
   if (connection) {
-    await connection.stop();
-    connection = null;
-    console.log("SignalR Disconnected");
+    try {
+      await connection.stop();
+      console.log("SignalR Disconnected");
+    } catch (err) {
+      console.error("Error stopping SignalR connection:", err);
+    } finally {
+      connection = null;
+      startPromise = null;
+    }
   }
 };

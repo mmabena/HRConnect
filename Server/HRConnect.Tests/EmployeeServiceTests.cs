@@ -324,6 +324,12 @@ namespace HRConnect.Tests
         DaysAllocated = 15,
         IsActive = true
       });
+      _context.JobGradeGroupMaps.Add(
+    new JobGradeGroupMap
+    {
+      JobGradeId = 1,
+      GroupKey = "SENIOR"
+    });
       _context.EmployeeAccrualRateHistories.Add(new EmployeeAccrualRateHistory
       {
         EmployeeId = "EMP001",

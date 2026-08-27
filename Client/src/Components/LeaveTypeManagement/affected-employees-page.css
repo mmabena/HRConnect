@@ -1,0 +1,461 @@
+.lt-page-container {
+  margin-top: 30px;
+}
+.impact-top-section {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+
+  width: 1441px;
+  height: 106px;
+}
+
+.impact-tabs {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 20px;
+  width: 606px;
+  height: 50px;
+}
+.impact-tabs button {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 22px;
+  gap: 10px;
+  height: 50px;
+
+  background: rgba(154, 154, 154, 0.19);
+
+  border: 1px solid rgba(154, 154, 154, 0.55);
+  border-radius: 60px;
+
+  font-family: 'Anek Bangla', sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 30px;
+
+  text-align: center;
+  letter-spacing: 0.02em;
+
+  color: #707070;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.impact-tabs button.active {
+  background: #355867;
+  border: 1px solid #C7D9E5;
+
+  color: #FFFFFF;
+}
+
+.impact-tabs button:hover {
+  opacity: 0.9;
+}
+.confirm-impact-btn {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+  padding: 5px 10px;
+
+  width: 187px;
+  height: 47px;
+
+  background: #638549;
+  opacity: 0.9;
+
+  border: none;
+  border-radius: 10px;
+
+  font-family: 'Anek Bangla', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 37px;
+
+  text-align: center;
+  letter-spacing: 0.02em;
+
+  color: #FFFFFF;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.confirm-impact-btn:hover {
+  opacity: 1;
+}
+
+.confirm-impact-btn:active {
+  transform: scale(0.98);
+}
+.back-btn2 {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+  padding: 5px 10px;
+
+  width: 187px;
+  height: 47px;
+
+  background: #8C8C8C;
+
+  border: none;
+  border-radius: 10px;
+
+  font-family: 'Anek Bangla', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 37px;
+
+  text-align: center;
+  letter-spacing: 0.02em;
+
+  color: #FFFFFF;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.back-btn2:hover {
+  background: #7A7A7A;
+}
+
+.back-btn2:active {
+  transform: scale(0.98);
+}
+.impact-action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+.impact-table-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  padding: 20px 0px;
+  gap: 1px;
+
+  width: 1441px;
+  min-height: 547px;
+
+  border-radius: 0px 0px 10px 10px;
+}
+
+
+.impact-table-title {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  padding: 0px 16px 0px 13px;
+
+  width: 1441px;
+  height: 59px;
+
+  background: rgba(53, 88, 103, 0.15);
+
+  border-radius: 10px 10px 0px 0px;
+
+  font-family: 'Anek Bangla', sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 37px;
+  letter-spacing: 0.02em;
+
+  color: #002D40;
+}
+.impact-table {
+  width: 1441px;
+
+  border-collapse: collapse;
+
+  background: #FFFFFF;
+
+  border-radius: 0px 0px 10px 10px;
+
+  overflow: hidden;
+}
+
+.impact-table thead tr {
+  background: #355867;
+}
+
+.impact-table th {
+  padding: 18px 20px;
+
+  text-align: left;
+
+  font-family: 'Anek Bangla', sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 15px;
+  letter-spacing: -0.43px;
+
+  color: #FFFFFF;
+}
+
+.impact-table tbody tr {
+  background: #FFFFFF;
+
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+
+  transition: background 0.2s ease;
+}
+
+.impact-table tbody tr:hover {
+  background: rgba(53, 88, 103, 0.04);
+}
+
+
+.impact-table td {
+  padding: 22px 20px;
+text-align: left;
+  font-family: 'Anek Bangla', sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 18px;
+
+  color: #002D40;
+}
+.impact-pagination-shell {
+  position: sticky;
+  bottom: 0;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+
+  width: 100%;
+  height: 58px;
+
+  padding: 5px 40px 5px 25px;
+  margin-top: auto;
+
+  box-sizing: border-box;
+
+  z-index: 50;
+}
+
+
+.impact-pagination-left-section {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  gap: 16px;
+
+  flex-shrink: 0;
+}
+.impact-pagination-range-text {
+  font-family: "Anek Bangla", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 37px;
+  letter-spacing: 0.02em;
+
+  color: #355867;
+}
+
+.impact-pagination-range-bold {
+  font-weight: 700;
+}
+
+.impact-pagination-page-size-box {
+  position: relative;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+
+  width: 88px;
+  height: 37px;
+
+  padding: 0px 10px;
+
+  box-sizing: border-box;
+
+  border: 1px solid #9a9a9a;
+  border-radius: 10px;
+
+  box-shadow: inset 0px 2px 2px rgba(0, 0, 0, 0.25);
+
+  cursor: pointer;
+}
+
+.impact-pagination-page-size-number {
+  font-family: "Anek Bangla", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 37px;
+  letter-spacing: 0.02em;
+
+  color: #355867;
+}
+
+.impact-pagination-dropdown-icon {
+  width: 21px;
+  height: 21px;
+
+  object-fit: contain;
+}
+
+.impact-pagination-page-size-label {
+  font-family: "Anek Bangla", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 37px;
+  letter-spacing: 0.02em;
+
+  color: #355867;
+}
+
+.impact-pagination-dropdown-menu {
+  position: absolute;
+
+  top: 45px;
+  left: 0;
+
+  width: 100%;
+
+  margin: 0;
+  padding: 6px 0;
+
+  list-style: none;
+
+  background: #ffffff;
+
+  border: 1px solid #d9d9d9;
+  border-radius: 10px;
+
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.12);
+
+  z-index: 100;
+}
+
+.impact-pagination-dropdown-item {
+  padding: 8px 12px;
+
+  font-family: "Anek Bangla", sans-serif;
+  font-size: 18px;
+
+  color: #355867;
+
+  cursor: pointer;
+}
+
+.impact-pagination-dropdown-item:hover {
+  background: #f3f7f9;
+}
+.impact-pagination-right-section {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+
+  gap: 16px;
+
+  flex: 1;
+}
+
+.impact-pagination-page-number-group {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+
+  gap: 2px;
+
+  height: 37px;
+}
+
+.impact-pagination-arrow-button {
+  width: 24px;
+  height: 24px;
+
+  cursor: pointer;
+
+  object-fit: contain;
+}
+
+.impact-pagination-arrow-prev {
+  transform: rotate(90deg);
+}
+
+.impact-pagination-arrow-next {
+  transform: rotate(-90deg);
+}
+
+.impact-pagination-arrow-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.impact-pagination-page-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  min-width: 34px;
+  height: 37px;
+
+  padding: 4px 10px;
+
+  border: none;
+  background: transparent;
+
+  font-family: "Anek Bangla", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 37px;
+  letter-spacing: 0.02em;
+
+  color: #355867;
+
+  cursor: pointer;
+}
+
+.impact-pagination-page-button-active {
+  font-weight: 700;
+}
+
+.impact-pagination-total-info {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  margin-left: 18px;
+
+  font-family: "Anek Bangla", sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 37px;
+  letter-spacing: 0.02em;
+
+  color: #355867;
+}

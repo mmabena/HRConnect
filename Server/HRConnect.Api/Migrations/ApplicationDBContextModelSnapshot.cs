@@ -1022,6 +1022,10 @@ namespace HRConnect.Api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("EmployeeId");
@@ -1158,7 +1162,6 @@ namespace HRConnect.Api.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("EmployeeId")
@@ -1195,7 +1198,49 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("LeaveTypeId");
 
+                    b.HasIndex("Status");
+
                     b.ToTable("LeaveApplications");
+                });
+
+            modelBuilder.Entity("HRConnect.Api.Models.LeaveDocument", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("FileSize")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("FileType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("LeaveApplicationId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PublicId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UploadedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LeaveApplicationId");
+
+                    b.ToTable("LeaveDocument");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.LeaveEntitlementRule", b =>
@@ -1456,9 +1501,8 @@ namespace HRConnect.Api.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("DeliveryChannel")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("DeliveryChannel")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("DueDate")
                         .HasColumnType("datetime2");
@@ -1478,8 +1522,9 @@ namespace HRConnect.Api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Severity")
-                        .HasColumnType("int");
+                    b.Property<string>("Severity")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Subject")
                         .IsRequired()
@@ -1879,7 +1924,7 @@ namespace HRConnect.Api.Migrations
                     b.Property<bool>("IsLocked")
                         .HasColumnType("bit");
 
-                    b.Property<bool?>("IsVoluntaryContributionPermament")
+                    b.Property<bool?>("IsVoluntaryContributionPermanent")
                         .HasColumnType("bit");
 
                     b.Property<int>("PayrollRunId")
@@ -2076,7 +2121,8 @@ namespace HRConnect.Api.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("AnnualEquivalent")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(12, 2)
+                        .HasColumnType("decimal(12,2)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -2086,20 +2132,26 @@ namespace HRConnect.Api.Migrations
                         .HasColumnType("decimal(12,2)");
 
                     b.Property<decimal>("Tax65To74")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(12, 2)
+                        .HasColumnType("decimal(12,2)");
 
                     b.Property<decimal>("TaxOver75")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(12, 2)
+                        .HasColumnType("decimal(12,2)");
 
                     b.Property<decimal>("TaxUnder65")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(12, 2)
+                        .HasColumnType("decimal(12,2)");
 
                     b.Property<int>("TaxYear")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.ToTable("TaxDeductions");
+                    b.HasIndex("TaxYear", "Remuneration")
+                        .IsUnique();
+
+                    b.ToTable("TaxDeduction", (string)null);
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.TaxTableUpload", b =>
@@ -2132,7 +2184,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TaxTableUploads");
+                    b.ToTable("TaxTableUpload", (string)null);
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.User", b =>
@@ -2224,7 +2276,7 @@ namespace HRConnect.Api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.ToTable("EmployeeCompanyContributions");
+                    b.ToTable("EmployeeCompanyContributions", (string)null);
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction.MedicalAidDeduction", b =>
@@ -2306,7 +2358,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("MedicalOptionId");
 
-                    b.ToTable("MedicalAidDeductions");
+                    b.ToTable("MedicalAidDeductions", (string)null);
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.PayrollDeduction.PensionDeduction", b =>
@@ -2377,7 +2429,7 @@ namespace HRConnect.Api.Migrations
 
                     b.HasIndex("PensionOptionId");
 
-                    b.ToTable("PensionDeductions");
+                    b.ToTable("PensionDeductions", (string)null);
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.StatutoryContribution", b =>
@@ -2414,7 +2466,7 @@ namespace HRConnect.Api.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.ToTable("StatutoryContributions");
+                    b.ToTable("StatutoryContributions", (string)null);
                 });
 
             modelBuilder.Entity("AppAny.Quartz.EntityFrameworkCore.Migrations.QuartzBlobTrigger", b =>
@@ -2600,6 +2652,17 @@ namespace HRConnect.Api.Migrations
                     b.Navigation("Employee");
 
                     b.Navigation("LeaveType");
+                });
+
+            modelBuilder.Entity("HRConnect.Api.Models.LeaveDocument", b =>
+                {
+                    b.HasOne("HRConnect.Api.Models.LeaveApplication", "LeaveApplication")
+                        .WithMany("Documents")
+                        .HasForeignKey("LeaveApplicationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("LeaveApplication");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.LeaveEntitlementRule", b =>
@@ -2884,6 +2947,11 @@ namespace HRConnect.Api.Migrations
             modelBuilder.Entity("HRConnect.Api.Models.JobGrade", b =>
                 {
                     b.Navigation("Positions");
+                });
+
+            modelBuilder.Entity("HRConnect.Api.Models.LeaveApplication", b =>
+                {
+                    b.Navigation("Documents");
                 });
 
             modelBuilder.Entity("HRConnect.Api.Models.LeaveType", b =>

@@ -654,7 +654,13 @@
   margin-right: 30px; /* Optional, to balance spacing */
 }
 
+<<<<<<< HEAD:Client/src/Components/MenuBar/MenuBar.css
+
+
+/* .pagination-wrapper {
+=======
 .pagination-wrapper {
+>>>>>>> main-v0.2:Client/src/components/MenuBar/MenuBar.css
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -662,7 +668,7 @@
   margin-left: 300px;
   max-width: 1100px;
   margin-right: 50px;
-}
+} */
 
 .pagination-left {
   display: flex;
@@ -1734,14 +1740,14 @@
   width: 24px;
   height: 24px;
   transform: rotate(90deg);
-  /* rotates arrow 90 degrees */
   cursor: pointer;
 }
 
+  /* rotates arrow 90 degrees */
 .pagination-arrow.next {
   transform: rotate(-90deg);
-  /* flips for "next" direction */
-}
+  
+}/* flips for "next" direction */
 .pagination-arrow.disabled {
   opacity: 0.4;
   cursor: not-allowed;

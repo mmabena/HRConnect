@@ -42,13 +42,11 @@ namespace HRConnect.Tests
       return new ApplicationDBContext(options, mockProtector.Object);
     }
 
-    private static LeaveProcessingService CreateService(ApplicationDBContext db, FakeEmailService email)
-    {
-      var balanceService = new LeaveBalanceService(db);
-      return new LeaveProcessingService(db, email, balanceService);
-    }
-
-    // ---------------- SICK LEAVE ----------------
+        private static LeaveProcessingService CreateService(ApplicationDBContext db, FakeEmailService email)
+        {
+            var balanceService = new LeaveBalanceService(db);
+            return new LeaveProcessingService(db, email, balanceService);
+        }
 
     [Fact]
     public async Task SickLeave_ShouldAccruePerMonth_Under6Months()
@@ -165,11 +163,9 @@ namespace HRConnect.Tests
 
       var balance = db.EmployeeLeaveBalances.First();
 
-      Assert.Equal(0, balance.TakenDays);
-      Assert.Equal(30, balance.AccruedDays);
-    }
-
-    // ---------------- FAMILY RESPONSIBILITY ----------------
+            Assert.Equal(0, balance.TakenDays);
+            Assert.Equal(30, balance.AccruedDays);
+        }
 
     [Fact]
     public async Task FamilyResponsibility_ShouldCallBalanceService()
@@ -188,11 +184,8 @@ namespace HRConnect.Tests
 
       await service.RecalculateAllFamilyResponsibilityLeaveAsync();
 
-      // No exception = pass (delegation test)
-      Assert.True(true);
-    }
-
-    // ---------------- CARRYOVER EMAIL ----------------
+            Assert.True(true);
+        }
 
     [Fact]
     public async Task CarryOverNotification_ShouldSendEmails_WhenAboveThreshold()
@@ -227,20 +220,14 @@ namespace HRConnect.Tests
 
       await db.SaveChangesAsync();
 
-      // Force December 1 logic bypass by calling directly
-      await service.ProcessCarryOverNotificationAsync();
-
-      // Might be zero if not Dec 1 — valid behavior
-      Assert.True(email.EmailsSent >= 0);
-    }
-
-    // ---------------- ANNUAL RESET ----------------
-
-    [Fact]
-    public async Task AnnualReset_ShouldApplyCarryoverCap()
-    {
-      var db = GetDb();
-      var service = CreateService(db, new FakeEmailService());
+            await service.ProcessCarryOverNotificationAsync();
+            Assert.True(email.EmailsSent >= 0);
+        }
+        [Fact]
+        public async Task AnnualReset_ShouldApplyCarryoverCap()
+        {
+            var db = GetDb();
+            var service = CreateService(db, new FakeEmailService());
 
       db.LeaveTypes.Add(new LeaveType
       {
@@ -359,20 +346,17 @@ namespace HRConnect.Tests
 
       db.Employees.Add(employee);
 
-      db.EmployeeLeaveBalances.Add(new EmployeeLeaveBalance
-      {
-        EmployeeId = employee.EmployeeId,
-        LeaveTypeId = 1,
-        CarryoverDays = 2,
-        AccruedDays = 10,
-        TakenDays = 2
-      });
-
-      await db.SaveChangesAsync();
-
-      await service.ProcessAnnualResetAsync(2025);
-
-      Assert.Single(db.AnnualLeaveAccrualHistories);
+            db.EmployeeLeaveBalances.Add(new EmployeeLeaveBalance
+            {
+                EmployeeId = employee.EmployeeId,
+                LeaveTypeId = 1,
+                CarryoverDays = 2,
+                AccruedDays = 10,
+                TakenDays = 2
+            });
+            await db.SaveChangesAsync();
+            await service.ProcessAnnualResetAsync(2025);
+            Assert.Single(db.AnnualLeaveAccrualHistories);
+        }
     }
-  }
 }

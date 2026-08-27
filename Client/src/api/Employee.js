@@ -1,146 +1,50 @@
 import api from "./api.js";
 import { toast } from "react-toastify";
 
-const API_BASE = "http://localhost:5147/api/employee";
-
-/// </summary>
-/// Add a response interceptor to handle empty responses gracefully
-/// </summary>
-api.interceptors.response.use(
-  (response) => {
-    /// </summary>
-    /// If response data is an empty string, replace it with null to avoid JSON parse errors
-    /// </summary>
-    if (response.data === "") {
-      response.data = null;
-    }
-    return response;
-  },
-  (error) => {
-    return Promise.reject(error);
-  },
-);
-
 /// </summary>
 /// --- API HANDLERS ---
 //  /// </summary>
 
 export const addEmployee = async (employee) => {
-  try {
-    const response = await api.post(`${API_BASE}`, employee, {
-      headers: { "Content-Type": "application/json" },
-    });
-
-    /// </summary>
-    /// Defensive fallback: ensures the function returns an object even if its empty if the response.data is null or undefined
-    /// </summary>
+    const response = await api.post(`employee`, employee);
     return response.data || {};
-  } catch (error) {
-    if (error.response) {
-      console.error("Add employee error response data:", error.response.data);
-      console.error("Add employee error status:", error.response.status);
-    } else {
-      console.error("Add employee error message:", error.message);
-    }
-    throw error;
-  }
 };
 
 export const editEmployee = async (employeeId, employee) => {
-  try {
     const response = await api.put(
-      `${API_BASE}/${employeeId}`,
-      employee,
-      {
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+      `employee/${employeeId}`,
+      employee);
     return response.data || {};
-  } catch (error) {
-    if (error.response) {
-      console.error("Edit employee error response data:", error.response.data);
-      console.error("Edit employee error status:", error.response.status);
-    } else {
-      console.error("Edit employee error message:", error.message);
-    }
-    throw error;
-  }
 };
 
 export const validateEmployee = async (employee) => {
-  try{
-  const response = await api.post(`${API_BASE}/validate`, employee, {
-    headers: { "Content-Type": "application/json" },
-  });
+
+  const response = await api.post(`employee/validate`, employee);
   return response.data || {};
-} catch (error) {
-    if (error.response) {
-      console.error("Add employee error response data:", error.response.data);
-      console.error("Add employee error status:", error.response.status);
-    } else {
-      console.error("Add employee error message:", error.message);
-    }
-    throw error;
-  }
 };
 
 export const fetchEmployeeByIdNumber = async (idNumber) => {
-  try {
+
     const response = await api.get(
-      `${API_BASE}/by-idnumber/${encodeURIComponent(idNumber)}`
+      `employee/by-idnumber/${encodeURIComponent(idNumber)}`
     );
 
     /// </summary>
     /// Defensive fallback,returns empty object if response data is null
     /// </summary>
     return response.data || {};
-  } catch (error) {
-    if (error.response) {
-      console.error(
-        "Fetch employee by ID number error response data:",
-        error.response.data,
-      );
-      console.error(
-        "Fetch employee by ID number error status:",
-        error.response.status,
-      );
-    } else {
-      console.error(
-        "Fetch employee by ID number error message:",
-        error.message,
-      );
-    }
-    throw error;
-  }
 };
 
 export const GetEmployeeByEmployeeNumberAsync = async (employeeId) => {
-  try {
+
     const encoded = encodeURIComponent(employeeId);
-    const response = await api.get(`${API_BASE}/${encoded}`);
+    const response = await api.get(`employee/${encoded}`);
     return response.data || {};
-  } catch (error) {
-    console.error("Fetch employee by employee number error:", error);
-    throw error;
-  }
 };
 
 export const fetchAllEmployees = async () => {
-  try {
-    const response = await api.get(`${API_BASE}`);
+    const response = await api.get(`employee`);
     return response.data || [];
-  } catch (error) {
-    if (error.response) {
-      console.error(
-        "Fetch employees error response data:",
-        error.response.data,
-      );
-      console.error("Fetch employees error status:", error.response.status);
-    } else {
-      console.error("Fetch employees error message:", error.message);
-    }
-    throw error;
-  }
 };
 
 /// </summary>

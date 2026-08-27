@@ -393,7 +393,6 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
         </div>
 
         <ul className="menu-list">
-          {/* ✅ Personal - Static, no toggle */}
           <li>
             <div className="menu-item-wrapper">
               <img
@@ -740,18 +739,11 @@ const MenuBar = ({ currentUser, onAccessDenied, onLogout }) => {
                       Leave Application
                     </span>
                   </li>
+
                   <li>
                     <span
                       className="menu-subitem"
-                      onClick={() => handleSubmenuClick("/leave-balance")}
-                    >
-                      Leave Balance
-                    </span>
-                  </li>
-                  <li>
-                    <span
-                      className="menu-subitem"
-                      onClick={() => handleSubmenuClick("/history")}
+                      onClick={() => handleSubmenuClick("/leave-history")}
                     >
                       History
                     </span>

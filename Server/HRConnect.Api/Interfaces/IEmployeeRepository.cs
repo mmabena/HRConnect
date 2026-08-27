@@ -27,7 +27,13 @@ namespace HRConnect.Api.Interfaces
     Task<Employee?> GetEmployeeByContactNumberAsync(string contactNumber);
     Task<Employee?> GetEmployeeByContactNumberAsync(string contactNumber, string employeeId);
     Task<List<Employee>> GetAllEmployeeWithAPensionOption();
+    Task<List<Employee>> GetAllEmployeeswithLeaveAsync();
+    Task<Employee?> GetEmployeeWithLeaveByIdAsync(string employeeId);
 
     Task SaveChangesAsync(CancellationToken cancellationToken);
+    Task<List<Employee>> GetEmployeesWithSickLeaveAsync();
+    Task<List<Employee>> GetEmployeesWithFamilyResponsibilityLeaveAsync();
+    Task<Employee?> GetEmployeeWithLeaveBalancesAsync(string employeeId);
+    Task<List<Employee>> GetEmployeesWithPositionsAsync();
   }
 }

@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { FaTimes, FaEdit } from "react-icons/fa";
-import { resolveRole } from "../../utils/roleUtils";
-import { fetchRoles, updateUserRole } from "../../api/UserManagement";
-import "./RoleModal.css"
+import { resolveRole } from "../../utils/roleUtils.js";
+import { fetchRoles, updateUserRole } from "../../api/UserManagement.js";
+import "./RoleModal.css";
 import { fetchAllEmployees } from "../../api/Employee.js";
 import { Check, UserRound, UserLock, ArrowRight } from "lucide-react";
 
 const RolesModal = ({ isOpen, onClose, user, onSuccess }) => {
   const [roles, setRoles] = useState([]);
-  const [isClicked,setIsClicked]=useState(false);
+  const [isClicked, setIsClicked] = useState(false);
   const [selectedRole, setSelectedRole] = useState(0);
   const [showDropdowns, setShowDropdowns] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [loadedUser, setLoadedUser] = useState({
     firstName: "",
-    lastName: ""
+    lastName: "",
   });
 
   // Fetch roles when modal opens
@@ -44,35 +44,36 @@ const RolesModal = ({ isOpen, onClose, user, onSuccess }) => {
   useEffect(() => {
     if (user) {
       const normalizedUserRole = resolveRole(user);
-      setSelectedRole(normalizedUserRole.roleId != null ? normalizedUserRole.roleId : "",);
+      setSelectedRole(
+        normalizedUserRole.roleId != null ? normalizedUserRole.roleId : "",
+      );
       // Backend expects 0 or 1 exactly; coerce here safely
       console.log(`Noramlised User Role ${normalizedUserRole.roleName}`);
       setShowDropdowns(false);
     }
   }, [user]);
 
-  const returnCurrentRole=(roleSelected)=>{
-    return roles[roleSelected].name
-  }
+  const returnCurrentRole = (roleSelected) => {
+    return roles[roleSelected].name;
+  };
 
   const loadUserFromEmployeeData = async () => {
     try {
-      const employees = await fetchAllEmployees()
+      const employees = await fetchAllEmployees();
       console.log(employees);
 
-      const employee = employees.find(e => e.email == user.email);
+      const employee = employees.find((e) => e.email == user.email);
       setLoadedUser({
         firstName: employee?.name || "Unknown User",
-        lastName: employee?.surname || "Uknown User"
-      })
+        lastName: employee?.surname || "Uknown User",
+      });
+    } catch (error) {
+      console.log(`Failed To Load User From Employee Data ${error}`);
     }
-    catch (error) {
-      console.log(`Failed To Load User From Employee Data ${error}`)
-    }
-  }
+  };
   useEffect(() => {
     loadUserFromEmployeeData();
-  }, [user])
+  }, [user]);
 
   const handleSave = async () => {
     if (!user?.userId) {
@@ -88,12 +89,15 @@ const RolesModal = ({ isOpen, onClose, user, onSuccess }) => {
     setIsSaving(true);
 
     try {
-      const updatedUser = await updateUserRole(user.userId, Number(selectedRole));
+      const updatedUser = await updateUserRole(
+        user.userId,
+        Number(selectedRole),
+      );
 
       if (onSuccess) onSuccess(updatedUser);
       onClose();
     } catch (error) {
-      console.log(error)
+      console.log(error);
       alert(`Error updating user: ${error.message}`);
     } finally {
       setIsSaving(false);
@@ -119,46 +123,43 @@ const RolesModal = ({ isOpen, onClose, user, onSuccess }) => {
             <FaTimes />
           </button>
         </div>
-            
+
         <div className="roles-modal-content">
-            <div >
-                <p>CURRENT ROLE</p>
-                <div className="current-role-banner">
-                    <span>
-                <p className={`status ${user.roleId}}`}>
-                    {user.role}
-                </p>
+          <div>
+            <p>CURRENT ROLE</p>
+            <div className="current-role-banner">
+              <span>
+                <p className={`status ${user.roleId}}`}>{user.role}</p>
                 <p className="status">
-                    Change To  <ArrowRight/> 
+                  Change To <ArrowRight />
                 </p>
-                {user.roleId===1 ?
-                 <p className="status normaluser">
-                    Normal User
-                 </p>
-                 :
-                  <p className="status superuser">
-                    Super User
-                  </p>
-                 }
-                    </span>
-                </div>
+                {user.roleId === 1 ? (
+                  <p className="status normaluser">Normal User</p>
+                ) : (
+                  <p className="status superuser">Super User</p>
+                )}
+              </span>
             </div>
+          </div>
           <div className="roles-buttons">
             <p>SELECT NEW ROLE</p>
             <div className="roles-buttons-wrapper">
               <button
                 className={`role-btn superuser ${selectedRole === 1 ? "active" : ""}`}
                 onClick={() => {
-                  setSelectedRole(1)
-                }}>
+                  setSelectedRole(1);
+                }}
+              >
                 <UserLock />
                 Super User
               </button>
 
-              <button className={`role-btn normaluser ${selectedRole === 0 ? "active" : ""}`}
+              <button
+                className={`role-btn normaluser ${selectedRole === 0 ? "active" : ""}`}
                 onClick={() => {
-                  setSelectedRole(0)
-                }}>
+                  setSelectedRole(0);
+                }}
+              >
                 <UserLock />
                 Normal User
               </button>
@@ -167,19 +168,19 @@ const RolesModal = ({ isOpen, onClose, user, onSuccess }) => {
 
           <div className="roles-modal-footer">
             <div className="roles-actions">
-              <button className="roles-actions-btn cancel"
-                onClick={onClose}>
+              <button className="roles-actions-btn cancel" onClick={onClose}>
                 Cancel
               </button>
-              <button className="roles-actions-btn save"
+              <button
+                className="roles-actions-btn save"
                 onClick={handleSave}
-                disabled={isSaving}>
+                disabled={isSaving}
+              >
                 <Check />
                 {isSaving ? "Saving..." : "Save Changes"}
               </button>
             </div>
           </div>
-
         </div>
       </div>
     </div>

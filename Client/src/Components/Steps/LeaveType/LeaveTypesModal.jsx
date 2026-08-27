@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useEffect } from "react";
 import "./LeaveTypesModal.css";
-import { ArrowRight, ArrowLeft, check } from "lucide-react";
-import { getJobGradeGroups } from "../../../api/JobGradeGroup";
+import { ArrowRight, ArrowLeft} from "lucide-react";
 
 const LeaveTypesModal = ({
   employee,
@@ -110,14 +109,6 @@ const LeaveTypesModal = ({
       default:
         return "No leave data available";
     }
-  };
-
-  const handleSelect = (option) => {
-    setEmployee((prev) => ({
-      ...prev,
-      leaveType: option.groupKey,
-      leaveTypeName: getGroupTitle(option.groupKey),
-    }));
   };
 
   // =========================

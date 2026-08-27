@@ -98,23 +98,23 @@ namespace HRConnect.Api.Controllers
       return Ok(updatedEmployee);
     }
 
-    // INJECTED: Update leave usage
-    [HttpPut("update-used-days")]
-    [Authorize(Roles = "SuperUser")]
-    public async Task<IActionResult> UpdateTakenDays([FromBody] UpdateTakenDaysRequest request)
-    {
-      await _leaveBalanceService.UpdateTakenDaysAsync(request);
-      return Ok("Used days updated successfully.");
-    }
+        // Update leave usage
+        [HttpPut("update-used-days")]
+        [Authorize(Roles = "SuperUser")]
+        public async Task<IActionResult> UpdateTakenDays([FromBody] UpdateTakenDaysRequest request)
+        {
+            await _leaveBalanceService.UpdateTakenDaysAsync(request);
+            return Ok("Used days updated successfully.");
+        }
 
-    // INJECTED: Leave projection
-    [HttpGet("project-annual-leave")]
-    [Authorize(Roles = "SuperUser")]
-    public async Task<IActionResult> ProjectAnnualLeave(string employeeId, DateOnly projectionDate)
-    {
-      var result = await _leaveBalanceService.ProjectAnnualLeaveAsync(employeeId, projectionDate);
-      return Ok(result);
-    }
+        // Leave projection
+        [HttpGet("project-annual-leave")]
+        [Authorize(Roles = "SuperUser")]
+        public async Task<IActionResult> ProjectAnnualLeave(string employeeId, DateOnly projectionDate)
+        {
+            var result = await _leaveBalanceService.ProjectAnnualLeaveAsync(employeeId, projectionDate);
+            return Ok(result);
+        }
 
 
     /// <summary>

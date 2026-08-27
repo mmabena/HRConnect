@@ -471,7 +471,6 @@ const PersonalInformation = () => {
                 onChange={handleInputChange}
                 disabled={!isEditable}
               >
-                
                 <option value="">Select Title</option>
                 {titles.map((t) => (
                   <option key={t} value={t}>
@@ -479,7 +478,6 @@ const PersonalInformation = () => {
                   </option>
                 ))}
               </select>
-            
             </div>
 
             <div className="emp-field">
@@ -527,7 +525,7 @@ const PersonalInformation = () => {
                 <input
                   className="emp-field-input"
                   id={id}
-                  value={employeeData[id] || ""}   
+                  value={employeeData[id] || ""}
                   readOnly
                 />
               </div>
@@ -728,7 +726,6 @@ const PersonalInformation = () => {
                 ))}
               </select>
               <div className="emp-error-text">{formErrors.reportsTo}</div>
-              
             </div>
           </div>
         </div>

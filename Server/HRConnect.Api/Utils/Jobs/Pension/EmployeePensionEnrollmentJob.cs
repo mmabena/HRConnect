@@ -50,8 +50,8 @@
             PayrollRunId = currentPayRollRun.PayrollRunId,
             VoluntaryContribution = (employeePensionEnrollment.VoluntaryContribution > decimal.Zero) ?
             employeePensionEnrollment.VoluntaryContribution : decimal.Zero,
-            IsVoluntaryContributionPermament = (employeePensionEnrollment.VoluntaryContribution > decimal.Zero) ?
-            employeePensionEnrollment.IsVoluntaryContributionPermament : null,
+            IsVoluntaryContributionPermanent = (employeePensionEnrollment.VoluntaryContribution > decimal.Zero) ?
+            employeePensionEnrollment.IsVoluntaryContributionPermanent : null,
             IsLocked = false
           };
 

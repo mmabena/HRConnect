@@ -3,13 +3,12 @@ namespace HRConnect.Api.Utils
   using SendGrid;
   using SendGrid.Helpers.Mail;
 
-
   public interface IEmailService
   {
     Task SendEmailAsync(string recipientEmail, string subject, string body);
   }
 
-  public class EmailService : IEmailService
+  public partial class EmailService : IEmailService
   {
     private readonly SendGridClient _client;
     private readonly string _fromEmail;
@@ -18,8 +17,8 @@ namespace HRConnect.Api.Utils
     public EmailService(IConfiguration configuration)
     {
       string? sendGridApiKey = configuration["SendGrid:ApiKey"];
-      _fromEmail = configuration["SendGrid:FromEmail"] ?? "noreply@hrconnect.com";
-      _fromName = configuration["SendGrid:FromName"] ?? "HRConnect Team";
+      _fromEmail = configuration["SendGrid:FromEmail"] ?? "ochimerema@gmail.com";
+      _fromName = configuration["SendGrid:FromName"] ?? "HRConnect";
 
       if (string.IsNullOrWhiteSpace(sendGridApiKey))
       {
@@ -31,12 +30,23 @@ namespace HRConnect.Api.Utils
 
     public async Task SendEmailAsync(string recipientEmail, string subject, string body)
     {
+      if (string.IsNullOrWhiteSpace(recipientEmail))
+        throw new ArgumentException("Recipient email is required.");
+
+      if (string.IsNullOrWhiteSpace(subject))
+        throw new ArgumentException("Email subject is required.");
+
+      if (string.IsNullOrWhiteSpace(body))
+        throw new ArgumentException("Email body is required.");
+
       var msg = new SendGridMessage()
       {
         From = new EmailAddress(_fromEmail, _fromName),
         Subject = subject,
-        HtmlContent = body
+        HtmlContent = body,
+        PlainTextContent = StripHtml(body)
       };
+
       msg.AddTo(new EmailAddress(recipientEmail));
 
       var response = await _client.SendEmailAsync(msg);
@@ -47,12 +57,17 @@ namespace HRConnect.Api.Utils
 
       if (!response.IsSuccessStatusCode)
       {
+        var errorBody = await response.Body.ReadAsStringAsync();
         throw new InvalidOperationException(
-            $"Failed to send email. StatusCode: {response.StatusCode}, Body: {responseBody}"
-        );
+            $"Failed to send email to {recipientEmail}. StatusCode: {response.StatusCode}. Response: {errorBody}");
       }
+    }
+    // fallback for email clients that don't support HTML
+    [System.Text.RegularExpressions.GeneratedRegex("<.*?>")]
+    private static partial System.Text.RegularExpressions.Regex HtmlRegex();
+    private static string StripHtml(string html)
+    {
+      return HtmlRegex().Replace(html, string.Empty);
     }
   }
 }
-
-

@@ -8,6 +8,8 @@ namespace HRConnect.Api.Controllers
     using HRConnect.Api.DTOs;
     using HRConnect.Api.Interfaces;
     using HRConnect.Api.Data;
+    using HRConnect.Api.Models;
+    using Microsoft.AspNetCore.Authorization;
 
     [ApiController]
     [Route("api/leave-types")]
@@ -82,7 +84,25 @@ namespace HRConnect.Api.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        [HttpPost("preview-entitlement-impact")]
+        public async Task<IActionResult> PreviewEntitlementImpact(
+    [FromBody] UpdateLeaveTypeRequest request)
+        {
+            if (request == null || request.Rules == null)
+                return BadRequest("Invalid request.");
 
+            try
+            {
+                var result = await _service
+                    .PreviewEntitlementImpactAsync(request);
+
+                return Ok(result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateLeaveTypeRequest request)
         {

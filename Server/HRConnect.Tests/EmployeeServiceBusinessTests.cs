@@ -70,11 +70,8 @@ namespace HRConnect.Tests
       employeeRepoMock.Setup(x => x.BeginTransactionAsync())
           .ReturnsAsync(transactionMock.Object);
 
-
-
-            // 🔥 FIX 1: RETURN DATA FROM DB
-            employeeRepoMock.Setup(x => x.GetEmployeeByIdAsync(It.IsAny<string>()))
-                .ReturnsAsync((string id) => db.Employees.FirstOrDefault(e => e.EmployeeId == id));
+      employeeRepoMock.Setup(x => x.GetEmployeeByIdAsync(It.IsAny<string>()))
+          .ReturnsAsync((string id) => db.Employees.FirstOrDefault(e => e.EmployeeId == id));
 
       employeeRepoMock.Setup(x => x.UpdateEmployeeAsync(It.IsAny<Employee>()))
           .ReturnsAsync((Employee e) => e);
@@ -90,8 +87,8 @@ namespace HRConnect.Tests
       employeeRepoMock.Setup(x => x.GetAllEmployeeIdsWithPrefix(It.IsAny<string>()))
           .ReturnsAsync(new List<string>());
 
-            employeeRepoMock.Setup(x => x.GetEmployeeByEmailAsync(It.IsAny<string>()))
-                .ReturnsAsync((Employee?)null);
+      employeeRepoMock.Setup(x => x.GetEmployeeByEmailAsync(It.IsAny<string>()))
+          .ReturnsAsync((Employee?)null);
 
       employeeRepoMock.Setup(x => x.GetEmployeeByTaxNumberAsync(It.IsAny<string>()))
           .ReturnsAsync((Employee?)null);
@@ -102,37 +99,19 @@ namespace HRConnect.Tests
       employeeRepoMock.Setup(x => x.GetEmployeeByContactNumberAsync(It.IsAny<string>()))
           .ReturnsAsync((Employee?)null);
 
-            positionRepoMock.Setup(x => x.GetPositionByIdAsync(It.IsAny<int>()))
-                .ReturnsAsync((int id) => db.Positions.FirstOrDefault(p => p.PositionId == id));
-            if (!db.JobGradeGroupMaps.Any())
-            {
-                db.JobGradeGroupMaps.Add(new JobGradeGroupMap
-                {
-                    JobGradeId = 1,
-                    GroupKey = "G1"
-                });
+      positionRepoMock.Setup(x => x.GetPositionByIdAsync(It.IsAny<int>()))
+          .ReturnsAsync((int id) => db.Positions.FirstOrDefault(p => p.PositionId == id));
 
-                db.SaveChanges();
-            }
-
-            companyRepoMock
-                .Setup(x => x.GetCompanyByIdAsync(It.IsAny<string>()))
-                .ReturnsAsync(new Company { CompanyId = "COMP001" });
-
-            return new EmployeeService(
-                db,
-                activeCompanyService.Object,
-                userCompanyService.Object,
-                employeeRepoMock.Object,
-                email,
-                companyRepoMock.Object,
-                positionRepoMock.Object,
-                GetBalanceService(db),
-                GetProcessingService(db),
-                new PasswordHasher<User>()
-            );
-        }
-
+      return new EmployeeService(
+          db,
+          employeeRepoMock.Object,
+          email,
+          positionRepoMock.Object,
+          GetBalanceService(db),
+          GetProcessingService(db),
+          passwordHasherMock.Object
+      );
+    }
 
     [Fact]
     public async Task CreateEmployee_ShouldInitializeLeaveBalances()
@@ -141,16 +120,15 @@ namespace HRConnect.Tests
       var email = new FakeEmailService();
       var service = GetService(db, email);
 
-            db.JobGrades.Add(new JobGrade { JobGradeId = 1, Name = "G1" });
-
-            db.JobGradeGroupMaps.Add(new JobGradeGroupMap
-            {
-                JobGradeId = 1,
-                GroupKey = "G1"
-            });
-
-            db.OccupationalLevels.Add(new OccupationalLevel { OccupationalLevelId = 1, Description = "Level 1" });
-            db.Positions.Add(new Position { PositionId = 1, JobGradeId = 1, OccupationalLevelId = 1 });
+      db.JobGrades.Add(new JobGrade { JobGradeId = 1, Name = "G1" });
+      db.JobGradeGroupMaps.Add(
+        new JobGradeGroupMap
+        {
+          JobGradeId = 1,
+          GroupKey = "GROUP_A"
+        });
+      db.OccupationalLevels.Add(new OccupationalLevel { OccupationalLevelId = 1, Description = "Level 1" });
+      db.Positions.Add(new Position { PositionId = 1, JobGradeId = 1, OccupationalLevelId = 1 });
 
       db.LeaveTypes.Add(new LeaveType
       {
@@ -161,17 +139,18 @@ namespace HRConnect.Tests
         IsActive = true
       });
 
-            db.LeaveEntitlementRules.Add(new LeaveEntitlementRule
-            {
-                Id = 1,
-                LeaveTypeId = 1,
-                GroupKey = "G1",
-                DaysAllocated = 15,
-                MinYearsService = 0,
-                IsActive = true
-            });
-
-            await db.SaveChangesAsync();
+      db.LeaveEntitlementRules.Add(new LeaveEntitlementRule
+      {
+        Id = 1,
+        LeaveTypeId = 1,
+        GroupKey = "GROUP_A",
+        DaysAllocated = 15,
+        MinYearsService = 0,
+        IsActive = true
+      });
+      db.Users.Add(
+        new User { UserId = 1, Email = "test@singular.co.za" });
+      await db.SaveChangesAsync();
 
             var result = await service.CreateEmployeeAsync(1, new CreateEmployeeRequestDto
             {
@@ -198,7 +177,6 @@ namespace HRConnect.Tests
       Assert.Single(db.EmployeeLeaveBalances);
     }
 
-
     [Fact]
     public async Task UpdatePosition_ShouldCreateNewAccrualSegment()
     {
@@ -209,42 +187,36 @@ namespace HRConnect.Tests
       db.JobGrades.AddRange(
           new JobGrade { JobGradeId = 1, Name = "G1" },
           new JobGrade { JobGradeId = 2, Name = "G2" });
+      db.JobGradeGroupMaps.AddRange(
+          new JobGradeGroupMap
+          {
+            JobGradeId = 1,
+            GroupKey = "GROUP_A"
+          },
+          new JobGradeGroupMap
+          {
+            JobGradeId = 2,
+            GroupKey = "SENIOR"
+          });
 
-            db.JobGradeGroupMaps.AddRange(
-                new JobGradeGroupMap { JobGradeId = 1, GroupKey = "G1" },
-                new JobGradeGroupMap { JobGradeId = 2, GroupKey = "G2" }
-            );
       db.OccupationalLevels.Add(new OccupationalLevel { OccupationalLevelId = 1, Description = "Level 1" });
 
       db.Positions.AddRange(
           new Position { PositionId = 1, JobGradeId = 1, OccupationalLevelId = 1 },
           new Position { PositionId = 2, JobGradeId = 2, OccupationalLevelId = 1 });
 
-            db.LeaveTypes.Add(new LeaveType
-            {
-                Id = 1,
-                Code = "AL",
-                Name = "Annual Leave",
-                Description = "Annual Leave",
-                IsActive = true
-            });
-            db.LeaveEntitlementRules.AddRange(
-                new LeaveEntitlementRule
-                {
-                    Id = 1,
-                    LeaveTypeId = 1,
-                    GroupKey = "G1",
-                    DaysAllocated = 15,
-                    IsActive = true
-                },
-                new LeaveEntitlementRule
-                {
-                    Id = 2,
-                    LeaveTypeId = 1,
-                    GroupKey = "G2",
-                    DaysAllocated = 20,
-                    IsActive = true
-                });
+      db.LeaveTypes.Add(new LeaveType
+      {
+        Id = 1,
+        Code = "AL",
+        Name = "Annual Leave",
+        Description = "Annual Leave",
+        IsActive = true
+      });
+
+      db.LeaveEntitlementRules.AddRange(
+          new LeaveEntitlementRule { Id = 1, LeaveTypeId = 1, GroupKey = "GROUP_A", DaysAllocated = 15, IsActive = true },
+          new LeaveEntitlementRule { Id = 2, LeaveTypeId = 1, GroupKey = "SENIOR", DaysAllocated = 20, IsActive = true });
 
       db.Users.Add(
               new User { UserId = 1, Email = "test@singular.co.za", PasswordHash = "dummy" }
@@ -288,7 +260,6 @@ namespace HRConnect.Tests
 
       Assert.Equal(2, db.EmployeeAccrualRateHistories.Count());
     }
-
 
     [Fact]
     public async Task UpdatePosition_ShouldThrowIfEmployeeNotFound()

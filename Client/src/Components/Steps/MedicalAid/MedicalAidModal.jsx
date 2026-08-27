@@ -12,15 +12,12 @@ import {
 import { toast } from "react-toastify";
 
 import {
-  getMedicalAidPlans,
   getEligibleMedicalAidPlans,
   validateMedicalAidDependent,
 } from "../../../api/MedicalAidPlan";
 import { populateDependentFromIdNumber } from "../../../utils/medicalAidHelpers";
 
 const MedicalAidModal = ({
-  closeModal,
-  onClose,
   employee,
   setEmployee,
   formErrors,
@@ -115,26 +112,9 @@ const MedicalAidModal = ({
 
   useEffect(() => {
     loadEligiblePlans();
-  }, [employee.monthlySalary, employee.employmentStatus, dependents]);
+  }, [employee?.monthlySalary, employee?.employmentStatus, dependents.length]);
 
-  // =========================
-  // FILTER BY SALARY
-  // =========================
-  const filteredPlans = useMemo(() => {
-    const safeSalary = Number(salary) || 0;
 
-    return plans
-      .map((category) => ({
-        ...category,
-        medicalOptions: (category.medicalOptions || []).filter((opt) => {
-          const min = Number(opt.salaryBracketMin ?? 0);
-          const max = Number(opt.salaryBracketMax ?? Infinity);
-
-          return safeSalary >= min && safeSalary <= max;
-        }),
-      }))
-      .filter((category) => category.medicalOptions.length > 0);
-  }, [plans, salary]);
 
   // =========================
   // SELECT PLAN
@@ -412,7 +392,7 @@ const MedicalAidModal = ({
             <div className="medical-loading-state">
               Loading medical aid plans...
             </div>
-          ) : filteredPlans.length === 0 ? (
+          ) : plans.length === 0 ? (
             <div className="medical-empty-state">
               No plans available for your salary
             </div>
@@ -421,7 +401,7 @@ const MedicalAidModal = ({
               {/* FLATTENED GRID — all plans share one grid so they
                   always fill 2 columns regardless of category grouping */}
               <div className="medical-plan-grid">
-                {filteredPlans.flatMap((category) =>
+                {plans.flatMap((category) =>
                   category.medicalOptions.map((plan) => {
                     const selected =
                       String(employee?.medicalAidInfo?.planId) ===
@@ -451,7 +431,7 @@ const MedicalAidModal = ({
                           <div className="medical-price-card">
                             <div className="medical-price-content">
                               <span className="medical-price-title">
-                                PRINCIPLE
+                                PRINCIPAL
                               </span>
                               <div className="medical-price-amount-box">
                                 <span className="medical-price-amount">

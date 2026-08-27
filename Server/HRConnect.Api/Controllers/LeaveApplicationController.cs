@@ -1,106 +1,140 @@
 namespace HRConnect.Api.Controllers
 {
-    using System;
-    using System.Threading.Tasks;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.EntityFrameworkCore;
+    using HRConnect.Api.Data;
     using HRConnect.Api.DTOs;
+    using HRConnect.Api.Models;
     using HRConnect.Api.Interfaces;
 
-  [ApiController]
-  [Route("api/[controller]")]
-  public class LeaveApplicationController : ControllerBase
-  {
-    private readonly ILeaveApplicationService _service;
+    [ApiController]
+    [Route("api/LeaveApplications")]
+    public class LeaveApplicationsController : ControllerBase
+    {
+        private readonly ILeaveApplicationService _service;
+        public LeaveApplicationsController(
+    ILeaveApplicationService service)
+        {
+            _service = service;
+        }
 
-    public LeaveApplicationController(ILeaveApplicationService service)
-    {
-      _service = service;
-    }
-    /// <summary>
-    /// Handles the HTTP POST request to apply for leave, accepting a CreateApplicationRequest DTO in the request body,
-    /// which contains the necessary information for the leave application, 
-    /// and then calls the ApplyForLeaveAsync method of the ILeaveApplicationService to process the leave application,
-    /// returning the result of the leave application process in the response body, 
-    /// allowing employees to submit their leave requests through the API and receive feedback on the status of their applications.
-    /// </summary>
-    /// <param name="request"></param>
-    /// <returns></returns>
-    [HttpPost]
-    public async Task<IActionResult> ApplyForLeave([FromBody] CreateApplicationRequest request)
-    {
-      var result = await _service.ApplyForLeaveAsync(request);
-      return Ok(result);
-    }
-    /// <summary>
-    /// Handles the HTTP GET request to approve a leave application, 
-    /// accepting the leave application ID as a route parameter and a token as a query parameter,
-    /// which is used to verify the authenticity of the approval request.
-    /// </summary>
-    /// <param name="id"></param>
-    /// <param name="token"></param>
-    /// <returns></returns>
-    [HttpPost("{id}/approve")]
-    public async Task<IActionResult> ApproveLeave(int id, [FromQuery] Guid token)
-    {
-      await _service.ApproveLeaveAsync(id, token);
+        [HttpPost]
+        public async Task<IActionResult> ApplyForLeave(
+    [FromForm] CreateApplicationRequest request)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.EmployeeId))
+                return BadRequest("Invalid request");
+            try
+            {
+                var result = await _service.ApplyForLeaveAsync(request);
+                return Ok(result);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            try
+            {
+                var data = await _service.GetAllAsync();
 
-      return Ok(new
-      {
-        message = "Leave approved successfully."
-      });
-    }
-    /// <summary>
-    /// Handles the HTTP POST request to reject a leave application,
-    /// accepting the leave application ID as a route parameter, a token as a query parameter,
-    /// and the rejection reason in the request body.
-    /// </summary>
-    /// <param name="id"></param>
-    /// <param name="token"></param>
-    /// <param name="request"></param>
-    /// <returns></returns>
-    [HttpPost("{id}/reject")]
-    public async Task<IActionResult> RejectLeave(
-        int id,
-        [FromQuery] Guid token)
-    {
-      await _service.RejectLeaveAsync(id, token, "Rejected by manager");
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet("by-employee-id/{employeeId}")]
+        public async Task<IActionResult> GetByEmployeeId(string employeeId)
+        {
+            if (string.IsNullOrWhiteSpace(employeeId))
+                return BadRequest("EmployeeId is required.");
 
-      return Ok(new
-      {
-        message = "Leave rejected successfully."
-      });
-    }
+            try
+            {
+                var data = await _service.GetByEmployeeIdAsync(employeeId);
 
-    [HttpGet("{id}/approve")]
-    public async Task<IActionResult> ApproveFromEmail(
-int id,
-[FromQuery] Guid token)
-    {
-      // Internally call the POST logic
-      await _service.ApproveLeaveAsync(id, token);
+                return Ok(data);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet("{id}/approve")]
+        public async Task<IActionResult> Approve(
+     int id,
+     [FromQuery] Guid token)
+        {
+            try
+            {
+                await _service.ApproveLeaveAsync(id, token);
+                return Ok("Leave application approved successfully");
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
-      return Content("Leave approved successfully.");
-    }
-    [HttpGet("{id}/reject")]
-    public async Task<IActionResult> RejectFromEmail(
-int id,
-[FromQuery] Guid token)
-    {
-      await _service.RejectLeaveAsync(id, token, "Rejected by manager");
+        [HttpGet("{id}/reject")]
+        public async Task<IActionResult> Reject(
+      int id,
+      [FromQuery] Guid token,
+      [FromQuery] string? reason)
+        {
+            try
+            {
+                await _service.RejectLeaveAsync(id, token, reason);
+                var applications = await _service.GetAllAsync();
+                return Ok("Leave application rejected successfully");
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
-      return Content("Leave rejected successfully.");
+        [HttpPatch("{id}/approve-admin")]
+        public async Task<IActionResult> ApproveByAdmin(int id)
+        {
+            try
+            {
+                return Ok(new { message = "Approved successfully" });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpPatch("{id}/reject-admin")]
+        public async Task<IActionResult> RejectByAdmin(
+            int id,
+            [FromBody] DecisionRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request?.Reason))
+                return BadRequest("Rejection reason is required");
+
+            try
+            {
+                return Ok(new { message = "Rejected successfully" });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
-    [HttpPost("{id}/approve-internal")]
-    public async Task<IActionResult> ApproveInternal(int id)
-    {
-      await _service.ApproveLeaveInternalAsync(id);
-      return Ok("Approved internally");
-    }
-    [HttpPost("{id}/reject-internal")]
-    public async Task<IActionResult> RejectInternal(int id, [FromBody] string reason)
-    {
-      await _service.RejectLeaveInternalAsync(id, reason);
-      return Ok("Rejected internally");
-    }
-  }
 }

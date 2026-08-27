@@ -46,4 +46,15 @@ namespace HRConnect.Api.DTOs
     public decimal? MaxYearsService { get; set; }
     public decimal DaysAllocated { get; set; }
   }
+
+  public class EntitlementImpactPreviewDto
+  {
+    public string EmployeeId { get; set; } = string.Empty;
+    public string EmployeeName { get; set; } = string.Empty;
+    public string Position { get; set; } = string.Empty;
+    public string GroupKey { get; set; } = string.Empty;
+    public decimal YearsOfService { get; set; }
+    public decimal PreviousEntitlement { get; set; } 
+    public decimal NewEntitlement { get; set; } 
+  }
 }

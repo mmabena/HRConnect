@@ -34,15 +34,14 @@ using HRConnect.Api.Repository;
     [Fact]
     public async Task AddPensionFundReturnsSuccess()
     {
-      var fund = new PensionFund
-      {
-        EmployeeId = "E001",
-        EmployeeName = "John Doe"
-      };
+      var cancellationToken = new CancellationToken();
+      PensionFund fund = new PensionFund { EmployeeId = "E001", EmployeeName = "John Doe" };
+      _fundRepoMock.Setup(r => r.AddPensionFundAsync(fund))
+                   .Returns(Task.CompletedTask);
+      _fundRepoMock.Setup(r => r.SaveChangesAsync())
+                   .Returns(Task.CompletedTask);
 
-      var result = await _service.AddPensionFundAsync(
-          fund,
-          CancellationToken.None);
+      ServiceResult result = await _service.AddPensionFundAsync(fund);
 
       Assert.True(result.IsSuccess);
       Assert.Equal("Fund added successfully.", result.Message);
@@ -84,24 +83,19 @@ using HRConnect.Api.Repository;
     [Fact]
     public async Task CreatePensionFund_Fails_WhenActiveFundAlreadyExists()
     {
-      var dto = new CreatePensionFundDto
+      Employee employee = new Employee
       {
-        Name = "New Fund",
-        Description = "Test",
-        TaxCode = 4001
+        EmployeeId = "E002",
+        EmploymentStatus = EmploymentStatus.Contract,
+        MonthlySalary = 5000
       };
+      PensionOption option = new PensionOption { PensionOptionId = 1, ContributionPercentage = 5 };
+      var cancellationToken = new CancellationToken();
 
-      var existingFunds = new List<PensionFund>
-    {
-        new PensionFund
-        {
-            Name = "Existing Fund",
-            IsActive = true
-        }
-    };
-
-      _fundRepoMock.Setup(r => r.GetPensionFundsAsync(It.IsAny<CancellationToken>()))
-       .ReturnsAsync(existingFunds);
+      _employeeRepoMock.Setup(r => r.GetEmployeeByIdAsync(employee.EmployeeId))
+                       .ReturnsAsync(employee);
+      _optionRepoMock.Setup(r => r.GetPensionOptionByIdAsync(option.PensionOptionId))
+                     .ReturnsAsync(option);
 
       var result = await _service.CreatePensionFundAsync(
           dto,
@@ -211,4 +205,3 @@ using HRConnect.Api.Repository;
     }
 
   }
-}

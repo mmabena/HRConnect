@@ -240,7 +240,6 @@ namespace HRConnect.Tests
     );
       var serviceProvider = services.BuildServiceProvider();
 
-
       var currentRun = new PayrollRun
       {
         PayrollRunNumber = 1,
@@ -255,20 +254,26 @@ namespace HRConnect.Tests
 
       _payrollPeriodService.Setup(period => period.GetLastPeriodAsync())
       .ReturnsAsync(period);
+      var period = new PayrollPeriod
+      {
+        Runs = new List<PayrollRun> { currentRun }
+      };
+
+      _payrollPeriodService.Setup(period => period.GetLastPeriodAsync())
+      .ReturnsAsync(period);
 
       var job = new PayrollRolloverJob(
-          _payrollRunRepo.Object,
-          _payrollPeriodService.Object,
-          _serviceProvider.Object,
-          _employeePensionEnrollmentService.Object,
-          _reportsService.Object,
-          _bankingDetailService.Object,
-          _userService.Object,
-          _employeeService.Object,
-          _earningServiceMock.Object,
-          _deductionServiceMock.Object,
-          _notificationsService.Object,
-          _now
+      _payrollRunRepo.Object,
+      _payrollPeriodService.Object,
+      serviceProvider,
+      _employeePensionEnrollmentService.Object,
+      _reportsService.Object,
+      _userService.Object,
+      _employeeService.Object,
+      _employeePayrollEarningService.Object,
+      _employeeDeductionService.Object,
+      _notificationsService.Object,
+        _now
       );
 
       await job.Execute(null!);
@@ -329,7 +334,6 @@ namespace HRConnect.Tests
       Assert.False(currentRun.IsFinalised);
       Assert.False(currentRun.IsLocked);
     }
-
 
     [Fact]
     public async Task RolloverJobCallsRolloverPayrollDeductions()

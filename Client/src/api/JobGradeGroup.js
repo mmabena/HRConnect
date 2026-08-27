@@ -1,69 +1,24 @@
-import axios from "axios";
-
-const BASE_URL = "http://localhost:5147/api/job-grade-groups";
+import api from "./api.js";
 
 export const getJobGradeGroups = async () => {
-    try {
-        const response = await axios.get(BASE_URL, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`
-            }
-        });
+        const response = await api.get(`job-grade-groups`);
         return response.data;
-
-    }catch (error) {
-        console.error("Error fetching job grade groups:", error);
-        return [];
-    }
 };
 
 export const createJobGradeGroups = async (data) => {
-    try {
-        const response = await axios.post(BASE_URL, data, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-                "Content-type": "application/json"
-            }
-        });
+        const response = await api.post(`job-grade-groups`, data);
         return response.data
-    }catch(error){
-        console.error("Error creating job grade groups:", error);
-        throw error;
-    }
 }
 
 export const updateJobGradeGroups = async (data) => {
-    try{
-        const response = await axios.put(`${BASE_URL}/move`, data, {
-           headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+        const response = await api.put(`job-grade-groups/job-grades`, data);
 
     return response.data;
-  } catch (error) {
-    console.error("Error updating job grade groups:", error);
-    throw error;
-  }
 };
 
 export const deleteJobGradeGroup = async (id) => {
-  try {
-    const response = await axios.delete(
-      `${BASE_URL}?id=${id}`,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+
+    const response = await api.delete(`job-grade-groups?id=${id}`);
 
     return response.data;
-  } catch (error) {
-    console.error("Error deleting job grade group:", error);
-    throw error;
-  }
 };

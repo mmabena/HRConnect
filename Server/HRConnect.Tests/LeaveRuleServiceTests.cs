@@ -51,11 +51,10 @@ namespace HRConnect.Tests
         private static async Task<Employee> SeedEmployee(ApplicationDBContext db)
         {
             db.JobGrades.Add(new JobGrade { JobGradeId = 1, Name = "G1" });
-
             db.JobGradeGroupMaps.Add(new JobGradeGroupMap
             {
                 JobGradeId = 1,
-                GroupKey = "G1"
+                GroupKey = "GROUP_A"
             });
 
       db.Positions.Add(new Position
@@ -86,19 +85,20 @@ namespace HRConnect.Tests
         IsActive = true
       });
 
-            db.EmployeeLeaveBalances.Add(new EmployeeLeaveBalance
-            {
-                EmployeeId = employee.EmployeeId,
-                LeaveTypeId = 1,
-                TakenDays = 2,
-                AccruedDays = 10,
-                AvailableDays = 8
-            });
+      db.EmployeeLeaveBalances.Add(new EmployeeLeaveBalance
+      {
+        EmployeeId = employee.EmployeeId,
+        LeaveTypeId = 1,
+        TakenDays = 2,
+        AccruedDays = 10,
+        AvailableDays = 8
+      });
+
             db.LeaveEntitlementRules.Add(new LeaveEntitlementRule
             {
                 Id = 1,
                 LeaveTypeId = 1,
-                GroupKey = "G1",
+                GroupKey = "GROUP_A",
                 MinYearsService = 0,
                 MaxYearsService = null,
                 DaysAllocated = 15,
@@ -118,11 +118,12 @@ namespace HRConnect.Tests
             await db.SaveChangesAsync();
             return employee;
         }
-        [Fact]
-        public async Task ShouldThrow_WhenNegativeDays()
-        {
-            var db = GetDb();
-            var service = CreateService(db, new TrackingEmailService());
+
+    [Fact]
+    public async Task ShouldThrow_WhenNegativeDays()
+    {
+      var db = GetDb();
+      var service = CreateService(db, new TrackingEmailService());
 
       await Assert.ThrowsAsync<InvalidOperationException>(() =>
           service.UpdateLeaveEntitlementRuleAsync(new UpdateLeaveRuleRequest
@@ -163,7 +164,6 @@ namespace HRConnect.Tests
                 }));
         }
 
-
     [Fact]
     public async Task ShouldUpdateRuleAndRecalculate()
     {
@@ -185,13 +185,12 @@ namespace HRConnect.Tests
             Assert.Equal(20, rule.DaysAllocated);
             Assert.Equal(20, segment.AnnualEntitlement);
         }
-
-    [Fact]
-    public async Task ShouldSendEmails_OnRuleChange()
-    {
-      var db = GetDb();
-      var email = new TrackingEmailService();
-      var service = CreateService(db, email);
+        [Fact]
+        public async Task ShouldSendEmails_OnRuleChange()
+        {
+            var db = GetDb();
+            var email = new TrackingEmailService();
+            var service = CreateService(db, email);
 
       await SeedEmployee(db);
 
@@ -214,11 +213,10 @@ namespace HRConnect.Tests
             await SeedEmployee(db);
 
             db.JobGrades.Add(new JobGrade { JobGradeId = 2, Name = "G2" });
-
             db.JobGradeGroupMaps.Add(new JobGradeGroupMap
             {
                 JobGradeId = 2,
-                GroupKey = "G2"
+                GroupKey = "SENIOR"
             });
 
       db.Positions.Add(new Position
@@ -279,28 +277,22 @@ namespace HRConnect.Tests
     {
       var db = GetDb();
 
-            db.LeaveTypes.Add(new LeaveType
-            {
-                Id = 1,
-                Code = "AL",
-                Name = "Annual Leave",
-                Description = "Annual Leave",
-                IsActive = true
-            });
-
-            db.JobGradeGroupMaps.Add(new JobGradeGroupMap
-            {
-                JobGradeId = 1,
-                GroupKey = "G1"
-            });
+      db.LeaveTypes.Add(new LeaveType
+      {
+        Id = 1,
+        Code = "AL",
+        Name = "Annual Leave",
+        Description = "Annual Leave",
+        IsActive = true
+      });
 
             db.LeaveEntitlementRules.Add(new LeaveEntitlementRule
             {
                 Id = 1,
                 LeaveTypeId = 1,
-                GroupKey = "G1",
+                GroupKey = "GROUP_A",
                 MinYearsService = 5,
-                MaxYearsService = 3, 
+                MaxYearsService = 3,
                 DaysAllocated = 10,
                 IsActive = true
             });

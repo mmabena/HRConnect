@@ -10,6 +10,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 import "./Components/MenuBar/MenuBar.css";
+import LeaveHistory from "./Components/LeaveApplicationManagement/LeaveHistory.jsx";
 import EmployeeList from "./Pages/EmployeeManagement/EmployeeList";
 import Payslip from "./Pages/PayrollInfo/Payslip"
 import AddEmployeeModal from "./Components/EmployeeManagement/AddEmployeeModal";
@@ -34,8 +35,10 @@ import ProjectionCalculator from "./Pages/PayrollTools/ProjectionCalculator";
 import PersonalInformation from "./Components/PersonalInformation.jsx";
 import NotificationPage from "./Pages/NotificationPage/NotificationPage.jsx";
 import api from "../src/api/api.js";
-import LeaveTables from "./Components/LeaveTypeManagement/LeaveTables";
+import LeaveTables from "./Components/LeaveTypeManagement/LeaveTables.jsx";
+import ApplyLeave from "./Components/LeaveApplicationManagement/ApplyLeave.jsx";
 import { resolveRole } from "./utils/roleUtils.js";
+import AffectedEmployeesPage from "./Components/LeaveTypeManagement/AffectedEmployeesPage.jsx";
 import BankingDetailsModal from "./Components/Steps/BankingManagement/BankingDetailsModal.jsx";
 import HomePage from "./Pages/HomePage/HomePage.jsx";
 
@@ -221,6 +224,9 @@ function App() {
           <Route path="/leaveManagement" element={<LeaveTables />} />
           <Route path="/companyManagement" element={<CompanyManagement />} />
           <Route path="/taxTableUpload" element={<TaxTableUpload />} />
+          <Route path="/leave-application" element={<ApplyLeave />} />
+          <Route path="/leave-history" element={<LeaveHistory />} />
+          <Route path="/affected-employees" element={<AffectedEmployeesPage />}/>
           <Route path="/positionManagement" element={<PositionManagement />} />
           <Route path="/companyList" element={<CompanyList />} />
           <Route

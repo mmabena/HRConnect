@@ -3,22 +3,24 @@ import "./add-leave-type-modal.css";
 import { createLeaveType } from "../../api/leaveTypeApi";
 
 const AddLeaveTypeModal = ({ isOpen, onClose, onSuccess }) => {
-  const [form, setForm] = useState({
+  const initialForm = {
     name: "",
     code: "",
     description: "",
     femaleOnly: false,
-    days: ""
-  });
+    days: "",
+  };
 
   const [errors, setErrors] = useState({});
+  const [form, setForm] = useState(initialForm);
   const [apiError, setApiError] = useState("");
   useEffect(() => {
-  if (isOpen) {
-    setErrors({});
-    setApiError("");
-  }
-}, [isOpen]);
+    if (isOpen) {
+      setForm(initialForm);
+      setErrors({});
+      setApiError("");
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -27,7 +29,7 @@ const AddLeaveTypeModal = ({ isOpen, onClose, onSuccess }) => {
 
     setForm({
       ...form,
-      [name]: type === "checkbox" ? checked : value
+      [name]: type === "checkbox" ? checked : value,
     });
   };
 
@@ -74,9 +76,9 @@ const AddLeaveTypeModal = ({ isOpen, onClose, onSuccess }) => {
             groupKey: "ALL",
             minYearsService: 0,
             maxYearsService: null,
-            daysAllocated: parseFloat(form.days)
-          }
-        ]
+            daysAllocated: parseFloat(form.days),
+          },
+        ],
       };
 
       await createLeaveType(payload);
@@ -86,38 +88,26 @@ const AddLeaveTypeModal = ({ isOpen, onClose, onSuccess }) => {
         code: "",
         description: "",
         femaleOnly: false,
-        days: ""
+        days: "",
       });
 
       onSuccess();
       onClose();
-
     } catch (err) {
       console.error(err);
 
-      if (err.response?.data) {
-  let message = err.response.data;
+      const responseData = err.response?.data;
 
-  if (typeof message === "object") {
-    message = message.title || JSON.stringify(message);
-  }
-
-  message = message.toLowerCase();
-
-  if (message.includes("code")) {
-    setErrors(prev => ({ ...prev, code: "Code already exists" }));
-    setApiError("");
-  } 
-  else if (message.includes("name")) {
-    setErrors(prev => ({ ...prev, name: "Name already exists" }));
-    setApiError("");
-  } 
-  else {
-    setApiError(message);
-  }
-} else {
-  setApiError("Failed to create leave type");
-}
+      if (responseData?.errors) {
+        setErrors(responseData.errors);
+        setApiError("");
+      } else {
+        setApiError(
+          responseData?.title ||
+            responseData?.message ||
+            "Failed to create leave type",
+        );
+      }
     }
   };
 
@@ -126,12 +116,12 @@ const AddLeaveTypeModal = ({ isOpen, onClose, onSuccess }) => {
       className="modal-overlay"
       onClick={() => {
         setErrors({});
+        setForm(initialForm);
         setApiError("");
         onClose();
       }}
     >
       <div className="modal-card" onClick={(e) => e.stopPropagation()}>
-
         <div className="logo-container">
           <span className="logo-bold">singular</span>
           <span className="logo-light">express</span>
@@ -195,7 +185,6 @@ const AddLeaveTypeModal = ({ isOpen, onClose, onSuccess }) => {
             Copyright © 2026 Singular Systems. All rights reserved.
           </span>
         </p>
-
       </div>
     </div>
   );

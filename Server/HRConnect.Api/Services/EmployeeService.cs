@@ -285,26 +285,11 @@ namespace HRConnect.Api.Services
 
       if (positionChanged)
       {
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
-
-        var currentSegment = await _context.EmployeeAccrualRateHistories
-            .Where(x => x.EmployeeId == employeeId && x.EffectiveTo == null)
-            .FirstOrDefaultAsync();
-
-        if (currentSegment != null)
-        {
-          if (currentSegment.EffectiveFrom == today)
-            _context.EmployeeAccrualRateHistories.Remove(currentSegment);
-          else
-            currentSegment.EffectiveTo = today.AddDays(-1);
-        }
-
         var fullEmployee = await _context.Employees
             .Include(e => e.Position)
-                .ThenInclude(p => p.JobGrade)
-            .FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
+                .ThenInclude(p => p!.JobGrade)
+            .FirstAsync(e => e.EmployeeId == employeeId);
 
-        // GET GROUP KEY 
         var groupKey = await _context.JobGradeGroupMaps
             .Where(x => x.JobGradeId == fullEmployee.Position.JobGradeId)
             .Select(x => x.GroupKey)
@@ -316,44 +301,42 @@ namespace HRConnect.Api.Services
         var annualLeave = await _context.LeaveTypes
             .FirstAsync(l => l.Code == "AL" && l.IsActive);
 
-        var yearsOfService = CalculateYearsOfService(fullEmployee.StartDate);
-
+        var yearsOfService =
+            CalculateYearsOfService.UsingStartDate(fullEmployee.StartDate);
 
         var newRule = await _context.LeaveEntitlementRules
             .Where(r =>
                 r.LeaveTypeId == annualLeave.Id &&
                 r.GroupKey == groupKey &&
                 r.MinYearsService <= yearsOfService &&
-                (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
+                (r.MaxYearsService == null ||
+                 r.MaxYearsService >= yearsOfService) &&
                 r.IsActive)
             .OrderByDescending(r => r.MinYearsService)
             .FirstAsync();
 
-        await _context.EmployeeAccrualRateHistories.AddAsync(
-            new EmployeeAccrualRateHistory
-            {
-              EmployeeId = employeeId,
-              PositionId = fullEmployee.PositionId,
-              PositionName = fullEmployee.Position!.PositionTitle,
-              AnnualEntitlement = newRule.DaysAllocated,
-              DailyRate = (newRule.DaysAllocated / 12m) / 21.67m,
-              EffectiveFrom = today,
-              CreatedDate = DateTime.UtcNow
-            });
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
-        await _context.SaveChangesAsync();
+        await _leaveBalanceService.CreateAccrualSegmentAsync(
+            fullEmployee,
+            newRule.DaysAllocated,
+            "Position Change",
+            today);
 
         await _leaveBalanceService.RecalculateAnnualLeaveAsync(employeeId);
+
         await _leaveProcessingService.RecalculateAllSickLeaveAsync();
-        await _leaveProcessingService.RecalculateAllFamilyResponsibilityLeaveAsync();
+
+        await _leaveProcessingService
+            .RecalculateAllFamilyResponsibilityLeaveAsync();
 
         var employeeWithBalances = await _context.Employees
             .Include(e => e.LeaveBalances)
             .ThenInclude(lb => lb.LeaveType)
             .FirstAsync(e => e.EmployeeId == employeeId);
 
-        var annualBalance = employeeWithBalances?.LeaveBalances
-        ?.FirstOrDefault(lb => lb.LeaveType.Code == "AL");
+        var annualBalance = employeeWithBalances.LeaveBalances
+            .FirstOrDefault(lb => lb.LeaveType.Code == "AL");
 
         try
         {
@@ -375,7 +358,6 @@ namespace HRConnect.Api.Services
           Console.WriteLine($"Error sending email: {ex.Message}");
         }
       }
-
       return updatedEmployee?.ToEmployeeDto();
     }
     /// <summary>
@@ -643,16 +625,6 @@ namespace HRConnect.Api.Services
     private async Task ValidateCareerManagerAsync(string employeeId, string? careerManagerId)
     {
       await EmployeeValidationHelpers.ValidateCareerManagerAsync(_employeeRepo, employeeId, careerManagerId);
-    }
-    private decimal CalculateYearsOfService(DateOnly startDate)
-    {
-      var today = DateOnly.FromDateTime(DateTime.UtcNow);
-
-      if (startDate > today)
-        return 0;
-
-      var totalDays = today.DayNumber - startDate.DayNumber;
-      return Math.Round(totalDays / 365.25m, 2);
     }
 
     private static string GenerateTemporaryPassword()

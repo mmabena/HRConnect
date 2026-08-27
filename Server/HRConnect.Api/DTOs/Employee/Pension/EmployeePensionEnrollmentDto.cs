@@ -7,7 +7,7 @@
     public DateOnly? StartDate { get; set; }
     public DateOnly? EffectiveDate { get; set; }
     public decimal? VoltunaryContribution { get; set; }
-    public bool? IsVoluntaryContributionPermament { get; set; }
+    public bool? IsVoluntaryContributionPermanent{ get; set; }
     public int PayrollRunId { get; set; }
     public string? WarningMessage { get; set; }
   }

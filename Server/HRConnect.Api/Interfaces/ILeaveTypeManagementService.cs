@@ -12,5 +12,6 @@ namespace HRConnect.Api.Interfaces
     Task<LeaveTypeResponse> UpdateLeaveTypeAsync(int id, UpdateLeaveTypeRequest request);
     Task<List<EmployeeWithLeaveDto>> GetAllEmployeesWithLeaveAsync();
     Task<EmployeeWithLeaveDto?> GetEmployeeWithLeaveByIdAsync(string employeeId);
+    Task<List<EntitlementImpactPreviewDto>> PreviewEntitlementImpactAsync(UpdateLeaveTypeRequest request);
   }
 }
