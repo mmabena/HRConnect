@@ -36,6 +36,7 @@ import PersonalInformation from "./Components/PersonalInformation.jsx";
 import NotificationPage from "./Pages/NotificationPage/NotificationPage.jsx";
 import api from "../src/api/api.js";
 import LeaveTables from "./Components/LeaveTypeManagement/LeaveTables.jsx";
+import AnnualLeaveModal from "./Components/LeaveTypeManagement/AnnualLeaveModal.jsx";
 import ApplyLeave from "./Components/LeaveApplicationManagement/ApplyLeave.jsx";
 import { resolveRole } from "./utils/roleUtils.js";
 import AffectedEmployeesPage from "./Components/LeaveTypeManagement/AffectedEmployeesPage.jsx";
@@ -222,6 +223,7 @@ function App() {
           <Route path="/userManagement" element={<UserManagement />} />
           <Route path="/taxTableManagement" element={<TaxTableManagement />} />
           <Route path="/leaveManagement" element={<LeaveTables />} />
+          <Route path="/annualLeaveModal" element={<AnnualLeaveModal />}/>
           <Route path="/companyManagement" element={<CompanyManagement />} />
           <Route path="/taxTableUpload" element={<TaxTableUpload />} />
           <Route path="/leave-application" element={<ApplyLeave />} />

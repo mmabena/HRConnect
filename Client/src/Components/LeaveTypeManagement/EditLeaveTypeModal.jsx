@@ -169,7 +169,7 @@ const validate = () => {
 
         <div className="logo-container">
           <span className="logo-bold">singular</span>
-          <span className="logo-light">express</span>
+          <span className="logo-light">exess</span>
         </div>
 
         <h2 className="modal-title">

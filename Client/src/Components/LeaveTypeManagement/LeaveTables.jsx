@@ -4,6 +4,7 @@ import "./leave-tables.css";
 import "../MenuBar/MenuBar.css";
 import NavBar from "../NavBar";
 import AddLeaveTypeModal from "./AddLeaveTypeModal";
+import AnnualLeaveModal from "./AnnualLeaveModal";
 import EditLeaveTypeModal from "./EditLeaveTypeModal";
 import { toggleLeaveTypeStatus } from "../../api/leaveTypeApi";
 import ConfirmStatusModal from "./ConfirmStatusModal";
@@ -14,6 +15,7 @@ const LeaveTables = () => {
   const [active, setActive] = useState([]);
   const [inactive, setInactive] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [showAnnualModal, setShowAnnualModal] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [selectedLeaveId, setSelectedLeaveId] = useState("");
   const [isViewMode, setIsViewMode] = useState(false);
@@ -68,6 +70,28 @@ const LeaveTables = () => {
       return `${uniqueDays[0]} Days`;
     }
     return "-";
+  };
+
+  const handleViewClick = (item) => {
+    setSelectedLeaveId(item.id);
+    setIsViewMode(true);
+
+    if (item.code === "AL") {
+      setShowAnnualModal(true);
+    } else {
+      setShowEdit(true);
+    }
+  };
+
+  const handleEditClick = (item) => {
+    setSelectedLeaveId(item.id);
+    setIsViewMode(false);
+
+    if (item.code === "AL") {
+      setShowAnnualModal(true);
+    } else {
+      setShowEdit(true);
+    }
   };
 
   return (
@@ -127,25 +151,13 @@ const LeaveTables = () => {
                     </td>
 
                     <td className="lt-actions">
-                      <span
-                        onClick={() => {
-                          setSelectedLeaveId(item.id);
-                          setIsViewMode(true);
-                          setShowEdit(true);
-                        }}
-                      >
-                        View
-                      </span>
+                      <span onClick={() => handleViewClick(item)}>View</span>
 
                       <span className="divider">|</span>
 
                       <span
                         className="edit-table-actions"
-                        onClick={() => {
-                          setSelectedLeaveId(item.id);
-                          setIsViewMode(false);
-                          setShowEdit(true);
-                        }}
+                        onClick={() => handleEditClick(item)}
                       >
                         Edit
                       </span>
@@ -205,6 +217,15 @@ const LeaveTables = () => {
           onSuccess={fetchData}
         />
 
+        <AnnualLeaveModal
+          isOpen={showAnnualModal}
+          onClose={() => setShowAnnualModal(false)}
+          leaveTypes={[...active, ...inactive]}
+          selectedId={selectedLeaveId}
+          onSuccess={fetchData}
+          isViewMode={isViewMode}
+        />
+
         <EditLeaveTypeModal
           isOpen={showEdit}
           onClose={() => setShowEdit(false)}
@@ -213,6 +234,7 @@ const LeaveTables = () => {
           onSuccess={fetchData}
           isViewMode={isViewMode}
         />
+
         <ConfirmStatusModal
           isOpen={confirmOpen}
           onClose={() => setConfirmOpen(false)}
