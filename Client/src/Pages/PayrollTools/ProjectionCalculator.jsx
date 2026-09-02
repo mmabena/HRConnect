@@ -6,7 +6,7 @@ import axios from "axios";
 import "./ProjectionCalculator.css";
 import Box from "@mui/material/Box";
 import Slider from "@mui/material/Slider";
-import ProjectionCalculatorHeader from "../../components/PayrollTools/projectionCalculatorHeader";
+import ProjectionCalculatorHeader from "../../Components/PayrollTools/projectionCalculatorHeader";
 
 const ProjectionCalculator = () => {
     const [employeeDetails, setEmployeeDetails] = useState(null);

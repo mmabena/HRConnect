@@ -10,7 +10,7 @@
     public DateOnly EffectiveDate { get; set; }
     [Column(TypeName = "decimal(18,2)")]
     public decimal VoluntaryContribution { get; set; } = decimal.Zero;
-    public bool? IsVoluntaryContributionPermament { get; set; }
+    public bool? IsVoluntaryContributionPermanent { get; set; }
     public int PayrollRunId { get; set; }
     public bool IsLocked { get; set; }
     public int PensionOptionId { get; set; }

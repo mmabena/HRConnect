@@ -1,5 +1,5 @@
-import React, {  useState } from "react";
-import { addCompany } from "../../api/Company";
+import React, { useState } from "react";
+import { addCompany } from "../../api/Company.js";
 import { toast } from "react-toastify";
 import "./AddCompanyModal.css";
 import connection from "../../api/signalrService.js";

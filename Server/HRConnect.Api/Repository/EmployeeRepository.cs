@@ -222,10 +222,66 @@ namespace HRConnect.Api.Repository
     {
       return await _context.Employees.Where(e => e.PensionOptionId != null && e.EmploymentStatus == EmploymentStatus.Permanent).ToListAsync();
     }
+    public async Task<List<Employee>> GetAllEmployeeswithLeaveAsync()
+    {
+      return await _context.Employees
+              .Include(e => e.Position)
+              .Include(e => e.LeaveBalances)
+                  .ThenInclude(lb => lb.LeaveType)
+                  .ThenInclude(lt => lt.EntitlementRules)
+              .ToListAsync();
+    }
+
+    public async Task<Employee?> GetEmployeeWithLeaveByIdAsync(string employeeId)
+    {
+      return await _context.Employees
+          .Include(e => e.Position)
+          .Include(e => e.LeaveBalances)
+              .ThenInclude(lb => lb.LeaveType)
+          .FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
+    }
 
     public async Task SaveChangesAsync(CancellationToken cancellationToken)
     {
       await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<List<Employee>> GetEmployeesWithSickLeaveAsync()
+    {
+      return await _context.Employees
+          .Include(e => e.LeaveBalances)
+              .ThenInclude(lb => lb.LeaveType)
+          .Where(e =>
+              e.LeaveBalances.Any(lb =>
+                  lb.LeaveType.Code == "SL"))
+          .ToListAsync();
+    }
+
+    public async Task<List<Employee>> GetEmployeesWithFamilyResponsibilityLeaveAsync()
+    {
+      return await _context.Employees
+          .Include(e => e.LeaveBalances)
+              .ThenInclude(lb => lb.LeaveType)
+          .Where(e =>
+              e.LeaveBalances.Any(lb =>
+                  lb.LeaveType.Code == "FRL"))
+          .ToListAsync();
+    }
+    public async Task<Employee?> GetEmployeeWithLeaveBalancesAsync(string employeeId)
+    {
+      return await _context.Employees
+          .Include(e => e.Position)
+              .ThenInclude(p => p.JobGrade)
+          .Include(e => e.LeaveBalances)
+          .FirstOrDefaultAsync(e => e.EmployeeId == employeeId);
+    }
+
+    public async Task<List<Employee>> GetEmployeesWithPositionsAsync()
+    {
+      return await _context.Employees
+          .Include(e => e.Position)
+              .ThenInclude(p => p.JobGrade)
+          .ToListAsync();
     }
 
 

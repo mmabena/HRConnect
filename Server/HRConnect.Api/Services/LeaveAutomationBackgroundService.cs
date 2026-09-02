@@ -4,7 +4,8 @@ namespace HRConnect.Api.Services
   using Microsoft.Extensions.DependencyInjection;
   using Microsoft.Extensions.Hosting;
   using Microsoft.Extensions.Logging;
-
+  using Microsoft.EntityFrameworkCore;
+  using HRConnect.Api.Data;
   public class LeaveAutomationBackgroundService : BackgroundService
   {
     private readonly IServiceScopeFactory _scopeFactory;
@@ -75,6 +76,22 @@ namespace HRConnect.Api.Services
 
           await leaveProcessingService.ProcessCarryOverNotificationAsync();
           await leaveProcessingService.ProcessAnnualResetAsync();
+          await leaveProcessingService.ProcessExpiredPendingLeaveApplicationsAsync();
+
+          var leaveBalanceService = scope.ServiceProvider
+          .GetRequiredService<ILeaveBalanceService>();
+
+          var employeeIds = await scope.ServiceProvider
+            .GetRequiredService<ApplicationDBContext>()
+            .Employees
+            .Select(e => e.EmployeeId)
+            .ToListAsync(stoppingToken);
+
+          foreach (var employeeId in employeeIds)
+          {
+            await leaveBalanceService
+                .CheckYearsOfServiceAccrualChangeAsync(employeeId);
+          }
         }
         catch (Exception ex)
         {
@@ -82,8 +99,13 @@ namespace HRConnect.Api.Services
         }
 
         // Run once every 24 hours (Midnight precise)
-        var nextRun = DateTime.Now.Date.AddDays(1);
-        var delay = nextRun - DateTime.Now;
+        var now = DateTime.UtcNow;
+        var nextRun = now.Date.AddDays(1);
+        var delay = nextRun - now;
+
+        if (delay < TimeSpan.Zero)
+          delay = TimeSpan.FromHours(24);
+
 
         await Task.Delay(delay, stoppingToken);
 

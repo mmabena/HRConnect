@@ -11,6 +11,8 @@ namespace HRConnect.Api.Services
   using HRConnect.Api.DTOs.UserCompany;
   using HRConnect.Api.Interfaces;
   using HRConnect.Api.Mappers;
+  using HRConnect.Api.Hubs;
+  using Microsoft.AspNetCore.SignalR;
   using HRConnect.Api.Models;
   using HRConnect.Api.Utils;
   using Microsoft.AspNetCore.Identity;
@@ -47,6 +49,7 @@ namespace HRConnect.Api.Services
     private readonly ILeaveBalanceService _leaveBalanceService;
     private readonly ILeaveProcessingService _leaveProcessingService;
     private readonly IUserCompanyService _userCompanyService;
+    private readonly IHubContext<CompanyHub> _companyHubContext;
     private readonly IPasswordHasher<User> _passwordHasher;
     private static readonly char[] UppercaseChars = "ABCDEFGHJKLMNPQRSTUVWXYZ".ToCharArray();
     private static readonly char[] LowercaseChars = "abcdefghijkmnopqrstuvwxyz".ToCharArray();
@@ -57,7 +60,7 @@ namespace HRConnect.Api.Services
       .Concat(DigitChars)
       .Concat(SpecialChars)
       .ToArray();
-    public EmployeeService(ApplicationDBContext context, IActiveCompanyService activeCompanyService, IUserCompanyService userCompanyService, IEmployeeRepository employeeRepo, IEmailService emailService, ICompanyRepository companyRepo, IPositionRepository positionRepo, ILeaveBalanceService leaveBalanceService, ILeaveProcessingService leaveProcessingService, IPasswordHasher<User> passwordHasher)
+    public EmployeeService(ApplicationDBContext context, IActiveCompanyService activeCompanyService, IUserCompanyService userCompanyService, IEmployeeRepository employeeRepo, IEmailService emailService, ICompanyRepository companyRepo, IPositionRepository positionRepo, ILeaveBalanceService leaveBalanceService, ILeaveProcessingService leaveProcessingService, IPasswordHasher<User> passwordHasher, IHubContext<CompanyHub> companyHubContext)
     {
       _context = context;
       _employeeRepo = employeeRepo;
@@ -69,6 +72,7 @@ namespace HRConnect.Api.Services
       _leaveProcessingService = leaveProcessingService;
       _passwordHasher = passwordHasher;
       _userCompanyService = userCompanyService;
+      _companyHubContext = companyHubContext;
     }
     /// <summary>
     /// Retrieves all employees from the repository.
@@ -115,7 +119,7 @@ namespace HRConnect.Api.Services
     public async Task<EmployeeDto?> GetEmployeeByIdInternalAsync(string employeeId)
     {
       //Recalculate leave balances for the employee before returning the data
-      await _leaveBalanceService.RecalculateAnnualLeaveAsync(employeeId);
+      //await _leaveBalanceService.RecalculateAnnualLeaveAsync(employeeId);
 
       var employee = await _employeeRepo.GetEmployeeByIdAsync(employeeId);
 
@@ -195,6 +199,15 @@ namespace HRConnect.Api.Services
         // Send welcome email notification
         await SendWelcomeEmail(createdEmployee);
         await transaction.CommitAsync();
+        await _companyHubContext.Clients.All.SendAsync(
+          "EmployeeCreated",
+          new
+          {
+            EmployeeId = createdEmployee.EmployeeId,
+            Name = createdEmployee.Name,
+            Surname = createdEmployee.Surname
+          });
+
         return createdEmployee.ToEmployeeDto();
       }
       catch (Exception ex)
@@ -226,7 +239,10 @@ namespace HRConnect.Api.Services
 
       var positionChanged = existingEmployee.PositionId != employeeDto.PositionId;
 
-      var position = await _positionRepo.GetPositionByIdAsync(employeeDto.PositionId);
+      var position = await _context.Positions
+     .Include(p => p.JobGrade)
+     .FirstOrDefaultAsync(p => p.PositionId == employeeDto.PositionId);
+
       if (position == null)
         throw new ValidationException($"Position with ID {employeeDto.PositionId} does not exist.");
 
@@ -238,7 +254,6 @@ namespace HRConnect.Api.Services
 
       existingEmployee.PositionId = position.PositionId;
       existingEmployee.Position = position;
-
       existingEmployee.CompanyId = company.CompanyId;
       existingEmployee.Company = company;
 
@@ -255,7 +270,6 @@ namespace HRConnect.Api.Services
       existingEmployee.City = employeeDto.City;
       existingEmployee.ZipCode = employeeDto.ZipCode;
       existingEmployee.Branch = employeeDto.Branch;
-      existingEmployee.PositionId = employeeDto.PositionId;
       existingEmployee.MonthlySalary = employeeDto.MonthlySalary;
       existingEmployee.CareerManagerID = employeeDto.CareerManagerID;
       existingEmployee.EmploymentStatus = employeeDto.EmploymentStatus;
@@ -268,90 +282,73 @@ namespace HRConnect.Api.Services
       var updatedEmployee = await _employeeRepo.UpdateEmployeeAsync(existingEmployee);
 
       // Position change requires recalculation of leave balances and notification email
+
       if (positionChanged)
       {
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
-
-        // GET CURRENT ACTIVE SEGMENT
-        var currentSegment = await _context.EmployeeAccrualRateHistories
-            .Where(x => x.EmployeeId == employeeId && x.EffectiveTo == null)
-            .FirstOrDefaultAsync();
-
-        if (currentSegment != null)
-        {
-          if (currentSegment.EffectiveFrom == today)
-          {
-            _context.EmployeeAccrualRateHistories.Remove(currentSegment);
-          }
-          else
-          {
-            currentSegment.EffectiveTo = today.AddDays(-1);
-          }
-        }
-
-        // LOAD FULL EMPLOYEE WITH POSITION + JOBGRADE
         var fullEmployee = await _context.Employees
             .Include(e => e.Position)
                 .ThenInclude(p => p!.JobGrade)
             .FirstAsync(e => e.EmployeeId == employeeId);
 
-        // GET ANNUAL LEAVE TYPE
+        var groupKey = await _context.JobGradeGroupMaps
+            .Where(x => x.JobGradeId == fullEmployee.Position.JobGradeId)
+            .Select(x => x.GroupKey)
+            .FirstOrDefaultAsync();
+
+        if (groupKey == null)
+          throw new InvalidOperationException("JobGrade not mapped to any group.");
+
         var annualLeave = await _context.LeaveTypes
             .FirstAsync(l => l.Code == "AL" && l.IsActive);
 
-        // CALCULATE YEARS OF SERVICE
-        var yearsOfService = CalculateYearsOfService(fullEmployee.StartDate);
+        var yearsOfService =
+            CalculateYearsOfService.UsingStartDate(fullEmployee.StartDate);
 
-        //GET ENTITLEMENT RULE
         var newRule = await _context.LeaveEntitlementRules
-     .Where(r =>
-         r.LeaveTypeId == annualLeave.Id &&
-         r.JobGradeId == fullEmployee.Position!.JobGradeId &&
-         r.MinYearsService <= yearsOfService &&
-         (r.MaxYearsService == null || r.MaxYearsService >= yearsOfService) &&
-         r.IsActive)
-     .OrderByDescending(r => r.MinYearsService)
-     .FirstAsync();
+            .Where(r =>
+                r.LeaveTypeId == annualLeave.Id &&
+                r.GroupKey == groupKey &&
+                r.MinYearsService <= yearsOfService &&
+                (r.MaxYearsService == null ||
+                 r.MaxYearsService >= yearsOfService) &&
+                r.IsActive)
+            .OrderByDescending(r => r.MinYearsService)
+            .FirstAsync();
 
-        // INSERT NEW ACCRUAL HISTORY RECORD
-        await _context.EmployeeAccrualRateHistories.AddAsync(
-            new EmployeeAccrualRateHistory
-            {
-              EmployeeId = employeeId,
-              PositionId = fullEmployee.PositionId,
-              PositionName = fullEmployee.Position!.PositionTitle,
-              AnnualEntitlement = newRule.DaysAllocated,
-              DailyRate = (newRule.DaysAllocated / 12m) / 21.67m,
-              EffectiveFrom = today,
-              EffectiveTo = null,
-              CreatedDate = DateTime.UtcNow
-            });
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
-        await _context.SaveChangesAsync(); // IMPORTANT
+        await _leaveBalanceService.CreateAccrualSegmentAsync(
+            fullEmployee,
+            newRule.DaysAllocated,
+            "Position Change",
+            today);
 
-        // KEEP YOUR EXISTING LOGIC
         await _leaveBalanceService.RecalculateAnnualLeaveAsync(employeeId);
+
         await _leaveProcessingService.RecalculateAllSickLeaveAsync();
-        await _leaveProcessingService.RecalculateAllFamilyResponsibilityLeaveAsync();
+
+        await _leaveProcessingService
+            .RecalculateAllFamilyResponsibilityLeaveAsync();
 
         var employeeWithBalances = await _context.Employees
             .Include(e => e.LeaveBalances)
             .ThenInclude(lb => lb.LeaveType)
             .FirstAsync(e => e.EmployeeId == employeeId);
-        var annualBalance = employeeWithBalances?.LeaveBalances
-        ?.FirstOrDefault(lb => lb.LeaveType.Code == "AL");
+
+        var annualBalance = employeeWithBalances.LeaveBalances
+            .FirstOrDefault(lb => lb.LeaveType.Code == "AL");
 
         try
         {
           var emailBody = EmailTemplates.GeneratePositionUpdateEmail(
-              employeeWithBalances!,
+              employeeWithBalances,
               annualBalance?.AccruedDays ?? 0,
               annualBalance?.TakenDays ?? 0,
               annualBalance?.AvailableDays ?? 0
           );
 
           await _emailService.SendEmailAsync(
-              employeeWithBalances!.Email,
+              employeeWithBalances.Email,
               "Annual Leave Recalculated Due to Position Change",
               emailBody
           );
@@ -361,7 +358,6 @@ namespace HRConnect.Api.Services
           Console.WriteLine($"Error sending email: {ex.Message}");
         }
       }
-
       return updatedEmployee?.ToEmployeeDto();
     }
     /// <summary>
@@ -389,6 +385,38 @@ namespace HRConnect.Api.Services
       }
       return await _employeeRepo.DeleteEmployeeAsync(employeeId);
     }
+
+    public async Task ValidateEmployeeAsync(int userId, CreateEmployeeRequestDto employeeDto)
+    {
+      ValidateCommonFields(employeeDto);
+
+      ValidateCreate(employeeDto);
+
+      await CheckDuplicates(employeeDto);
+
+      await ValidateCareerManagerAsync(
+          null,
+          employeeDto.CareerManagerID);
+
+      ExtractIdInfo(employeeDto);
+
+      ValidateTitleAndGender(employeeDto);
+
+      var company =
+          await _companyRepo.GetCompanyByIdAsync(
+              await _activeCompanyService.GetActiveCompanyIdAsync(userId));
+
+      if (company == null)
+        throw new ValidationException("Company does not exist.");
+
+      var position =
+          await _positionRepo.GetPositionByIdAsync(employeeDto.PositionId);
+
+      if (position == null)
+        throw new ValidationException("Position does not exist.");
+
+    }
+
     /// <summary>
     /// Generates a unique Employee ID based on surname prefix and existing IDs.
     /// Example: SMI001 for surname Smith.
@@ -597,16 +625,6 @@ namespace HRConnect.Api.Services
     private async Task ValidateCareerManagerAsync(string employeeId, string? careerManagerId)
     {
       await EmployeeValidationHelpers.ValidateCareerManagerAsync(_employeeRepo, employeeId, careerManagerId);
-    }
-    private decimal CalculateYearsOfService(DateOnly startDate)
-    {
-      var today = DateOnly.FromDateTime(DateTime.UtcNow);
-
-      if (startDate > today)
-        return 0;
-
-      var totalDays = today.DayNumber - startDate.DayNumber;
-      return Math.Round(totalDays / 365.25m, 2);
     }
 
     private static string GenerateTemporaryPassword()

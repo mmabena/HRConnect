@@ -4,10 +4,12 @@ namespace HRConnect.Tests
     using System.Security.Claims;
     using System.Threading.Tasks;
     using HRConnect.Api.Controllers;
-    using HRConnect.Api.DTOs.Employee; 
+    using HRConnect.Api.DTOs.Employee;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Moq;
+    using HRConnect.Api.Hubs;
+    using Microsoft.AspNetCore.SignalR;
     using Xunit;
     using System.Collections.Generic;
     using HRConnect.Api.Interfaces;
@@ -28,10 +30,11 @@ namespace HRConnect.Tests
         {
             var controller = new EmployeeController(
                 serviceMock.Object,
-                new Mock<ILeaveBalanceService>().Object
+                new Mock<ILeaveBalanceService>().Object,
+                new Mock<IHubContext<UserPositionHub>>().Object
             );
 
-            
+
 
             controller.ControllerContext = new ControllerContext
             {

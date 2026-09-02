@@ -1,6 +1,8 @@
 ﻿namespace HRConnect.Api.Interfaces
 {
   using HRConnect.Api.DTOs;
+  using System;
+  using HRConnect.Api.Models;
 
   /// <summary>
   /// Defines the contract for medical aid eligibility operations.
@@ -20,5 +22,12 @@
 
     Task<bool> isEligibleAsync(string employeeId,
       int medicalOptionId, int principalCount, int adultCount, int childCount);
+
+    Task<IReadOnlyList<ResponseEligibileOptionsDto>> GetEligibleMedicalOptionsForOnboardingAsync(
+   decimal salary,
+   EmploymentStatus employmentStatus,
+   string employeeName,
+   string employeeSurname,
+   RequestEligibileOptionsDto request);
   }
 }

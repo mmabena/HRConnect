@@ -78,7 +78,7 @@ public class MedicalAidEligibilityService : IMedicalAidEligibilityService
                     //check if total contribution is greater than salary
                     if (employee.MonthlySalary >= responseDto.EstimatedTotalMonthlyPremium)
                     {
-                      eligibleOptions.Add(responseDto);
+                        eligibleOptions.Add(responseDto);
                     }
                     //else do not add
 
@@ -89,37 +89,66 @@ public class MedicalAidEligibilityService : IMedicalAidEligibilityService
         return eligibleOptions.AsReadOnly();
     }
 
+    public async Task<IReadOnlyList<ResponseEligibileOptionsDto>> GetEligibleMedicalOptionsForOnboardingAsync(
+        decimal salary,
+        EmploymentStatus employmentStatus,
+        string employeeName,
+        string employeeSurname,
+        RequestEligibileOptionsDto request)
+    {
+        if (employmentStatus != EmploymentStatus.Permanent)
+        {
+            throw new ArgumentException("Medical aid eligibility only available to permanent employees");
+        }
+
+        var employee = new EmployeeDto
+        {
+            Name = employeeName,
+            Surname = employeeSurname,
+            MonthlySalary = salary,
+            EmploymentStatus = employmentStatus
+        };
+
+        return await CalculateEligibleMedicalOptionsAsync(employee, request);
+    }
+
+
+
+
+
+
     public async Task<bool> isEligibleAsync(string employeeId,
-      int medicalOptionId, int principalCount, int adultCount, int childCount){
-      //get emp info
-      var empData = await _employeeService.GetEmployeeByIdInternalAsync(employeeId);
-      
-      if (empData == null) throw new ArgumentException("Employee not found");
-      
-      // else get salary bracket, and query eligibity Service
-      var queryMedicalOption =
-        await _medicalOptionRepository.GetMedicalOptionByIdAsync(medicalOptionId);
-      
-      //check medical option
-      if (queryMedicalOption == null) throw new ArgumentException("Medical option not found");
-      
-      //check if employee is eligible
-      var medicalOption = queryMedicalOption.ToMedicalOption();
-      
-      decimal salary = empData.MonthlySalary;
-      
-      decimal principalTotal = CalculatePrincipalPremium(medicalOption);
-      decimal adultTotal = CalculateAdultPremium(medicalOption,adultCount);
-      decimal childTotal = CalculateChildPremium(medicalOption,childCount);
-      
-      // 2 ways to validate, first check they belong in that salary bracket
-      if (salary < medicalOption.SalaryBracketMin || salary > medicalOption.SalaryBracketMax) return false;
-      
-      // check if total contribution is greater than salary
-      decimal totalContribution = principalTotal + adultTotal + childTotal;
-      if (totalContribution > salary) return false;
-      
-      return true;
+      int medicalOptionId, int principalCount, int adultCount, int childCount)
+    {
+        //get emp info
+        var empData = await _employeeService.GetEmployeeByIdInternalAsync(employeeId);
+
+        if (empData == null) throw new ArgumentException("Employee not found");
+
+        // else get salary bracket, and query eligibity Service
+        var queryMedicalOption =
+          await _medicalOptionRepository.GetMedicalOptionByIdAsync(medicalOptionId);
+
+        //check medical option
+        if (queryMedicalOption == null) throw new ArgumentException("Medical option not found");
+
+        //check if employee is eligible
+        var medicalOption = queryMedicalOption.ToMedicalOption();
+
+        decimal salary = empData.MonthlySalary;
+
+        decimal principalTotal = CalculatePrincipalPremium(medicalOption);
+        decimal adultTotal = CalculateAdultPremium(medicalOption, adultCount);
+        decimal childTotal = CalculateChildPremium(medicalOption, childCount);
+
+        // 2 ways to validate, first check they belong in that salary bracket
+        if (salary < medicalOption.SalaryBracketMin || salary > medicalOption.SalaryBracketMax) return false;
+
+        // check if total contribution is greater than salary
+        decimal totalContribution = principalTotal + adultTotal + childTotal;
+        if (totalContribution > salary) return false;
+
+        return true;
     }
 
     /// <summary>
@@ -139,6 +168,42 @@ public class MedicalAidEligibilityService : IMedicalAidEligibilityService
 
         return withinMinBracket && withinMaxBracket;
     }
+
+    private async Task<IReadOnlyList<ResponseEligibileOptionsDto>>
+    CalculateEligibleMedicalOptionsAsync(
+        EmployeeDto employee,
+        RequestEligibileOptionsDto request)
+{
+    int totalDependents =
+        request.NumberOfPrincipals +
+        request.NumberOfAdults +
+        request.NumberOfChildren;
+
+    var groupedOptions =
+        await _medicalOptionRepository.GetGroupedMedicalOptionsAsync();
+
+    var eligibleOptions =
+        new List<ResponseEligibileOptionsDto>();
+
+    foreach (var group in groupedOptions)
+    {
+        foreach (var option in group)
+        {
+            if (!IsEmployeeEligibleForOption(employee, option))
+                continue;
+
+            var response =
+                MapToResponseDto(employee, option, request, totalDependents);
+
+            if (employee.MonthlySalary >= response.EstimatedTotalMonthlyPremium)
+            {
+                eligibleOptions.Add(response);
+            }
+        }
+    }
+
+    return eligibleOptions.AsReadOnly();
+}
 
     /// <summary>
     /// Maps medical option and employee data to a response DTO with calculated premiums.
@@ -204,7 +269,7 @@ public class MedicalAidEligibilityService : IMedicalAidEligibilityService
     /// </summary>
     private static decimal CalculatePrincipalPremium(MedicalOption option)
     {
-        return option.TotalMonthlyContributionsPrincipal ?? option.TotalMonthlyContributionsAdult ;
+        return option.TotalMonthlyContributionsPrincipal ?? option.TotalMonthlyContributionsAdult;
     }
 
     /// <summary>
@@ -227,9 +292,9 @@ public class MedicalAidEligibilityService : IMedicalAidEligibilityService
 
         decimal childContribution = option.TotalMonthlyContributionsChild;
         if (option.MedicalOptionName.ToString().Contains("Network") &&
-            (int.TryParse(option.MedicalOptionName[^1].ToString(),out int indexVar) && indexVar > 0 && indexVar < 4))
+            (int.TryParse(option.MedicalOptionName[^1].ToString(), out int indexVar) && indexVar > 0 && indexVar < 4))
         {
-          return childContribution;
+            return childContribution;
         }
         return childContribution * numberOfChildren;
     }

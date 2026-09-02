@@ -300,7 +300,7 @@
         PensionOptionId = 1,
         EffectiveDate = DateOnly.FromDateTime(DateTime.Now),
         VoluntaryContribution = 100.00M,
-        IsVoluntaryContributionPermament = false,
+        IsVoluntaryContributionPermanent= false,
       };
 
       PensionDeduction updatedPensionDeduction = new()

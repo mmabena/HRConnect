@@ -4,6 +4,7 @@ namespace HRConnect.Api.DTOs.Notification
   public class CreateNotificationDto
   {
     public string Message { get; set; } = string.Empty;
+    public string? HtmlMessage { get; set; }
     public string Subject { get; set; } = string.Empty;
     public NotificationType Type { get; set; } // Leave, Tax, Payroll
     public NotificationSeverity Severity { get; set; }

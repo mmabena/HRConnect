@@ -55,7 +55,7 @@
         EmployeeId = "EMP001",
         EffectiveDate = effectiveDate,
         VoluntaryContribution = 200M,
-        IsVoluntaryContributionPermament = false
+        IsVoluntaryContributionPermanent = false
       };
 
       PensionOption pensionOption = new()
@@ -84,7 +84,7 @@
         PensionOptionId = 1,
         EffectiveDate = employeePensionEnrollmentAddDto.EffectiveDate,
         VoluntaryContribution = employeePensionEnrollmentAddDto.VoluntaryContribution ?? 0M,
-        IsVoluntaryContributionPermament = employeePensionEnrollmentAddDto.IsVoluntaryContributionPermament,
+        IsVoluntaryContributionPermanent = employeePensionEnrollmentAddDto.IsVoluntaryContributionPermanent,
         IsLocked = true
       };
 
@@ -163,7 +163,7 @@
           PensionOptionId = 1,
           EffectiveDate = DateOnly.FromDateTime(DateTime.UtcNow),
           VoluntaryContribution = 200M,
-          IsVoluntaryContributionPermament = false,
+          IsVoluntaryContributionPermanent = false,
           IsLocked = false
         },
         new EmployeePensionEnrollment
@@ -172,7 +172,7 @@
           PensionOptionId = 1,
           EffectiveDate = DateOnly.FromDateTime(DateTime.UtcNow),
           VoluntaryContribution = 300M,
-          IsVoluntaryContributionPermament = true,
+          IsVoluntaryContributionPermanent = true,
           IsLocked = false
         }
       ];
@@ -201,7 +201,7 @@
         PensionOptionId = 1,
         EffectiveDate = DateOnly.FromDateTime(DateTime.UtcNow),
         VoluntaryContribution = 200M,
-        IsVoluntaryContributionPermament = false,
+        IsVoluntaryContributionPermanent = false,
         IsLocked = false
       };
 
@@ -232,7 +232,7 @@
           PensionOptionId = 1,
           EffectiveDate = DateOnly.FromDateTime(DateTime.UtcNow),
           VoluntaryContribution = 200M,
-          IsVoluntaryContributionPermament = false,
+          IsVoluntaryContributionPermanent = false,
           IsLocked = true,
           PayrollRunId = 1
         },
@@ -242,7 +242,7 @@
           PensionOptionId = 1,
           EffectiveDate = DateOnly.FromDateTime(DateTime.UtcNow),
           VoluntaryContribution = 300M,
-          IsVoluntaryContributionPermament = true,
+          IsVoluntaryContributionPermanent = true,
           IsLocked = true,
           PayrollRunId = 1
         },
@@ -252,7 +252,7 @@
           PensionOptionId = 1,
           EffectiveDate = DateOnly.FromDateTime(DateTime.UtcNow),
           VoluntaryContribution = 300M,
-          IsVoluntaryContributionPermament = true,
+          IsVoluntaryContributionPermanent = true,
           IsLocked = false,
           PayrollRunId = 2 //Different PayrollRunId 
         }
@@ -286,7 +286,7 @@
           PensionOptionId = 1,
           EffectiveDate = DateOnly.FromDateTime(DateTime.UtcNow),
           VoluntaryContribution = 200M,
-          IsVoluntaryContributionPermament = false,
+          IsVoluntaryContributionPermanent = false,
           IsLocked = true,
           PayrollRunId = 1
         },
@@ -296,7 +296,7 @@
           PensionOptionId = 1,
           EffectiveDate = DateOnly.FromDateTime(DateTime.UtcNow),
           VoluntaryContribution = 300M,
-          IsVoluntaryContributionPermament = true,
+          IsVoluntaryContributionPermanent = true,
           IsLocked = true,
           PayrollRunId = 1
         },
@@ -306,7 +306,7 @@
           PensionOptionId = 1,
           EffectiveDate = DateOnly.FromDateTime(DateTime.UtcNow),
           VoluntaryContribution = 300M,
-          IsVoluntaryContributionPermament = true,
+          IsVoluntaryContributionPermanent = true,
           IsLocked = false,
           PayrollRunId = 2 //Different PayrollRunId 
         },
@@ -316,7 +316,7 @@
           PensionOptionId = 1,
           EffectiveDate = DateOnly.FromDateTime(DateTime.UtcNow),
           VoluntaryContribution = 300M,
-          IsVoluntaryContributionPermament = true,
+          IsVoluntaryContributionPermanent = true,
           IsLocked = false,
           PayrollRunId = 2 //Different PayrollRunId
         }
@@ -348,7 +348,7 @@
         EmployeeId = "EMP001",
         PensionOptionId = 1,
         VoluntaryContribution = 300M,
-        IsVoluntaryContributionPermament = true,
+        IsVoluntaryContributionPermanent = true,
       };
 
       EmployeePensionEnrollment employeePensionEnrollment = new()
@@ -357,7 +357,7 @@
         PensionOptionId = 1,
         EffectiveDate = DateOnly.FromDateTime(DateTime.UtcNow),
         VoluntaryContribution = employeePensionEnrollmentUpdateDto.VoluntaryContribution ?? 0M,
-        IsVoluntaryContributionPermament = employeePensionEnrollmentUpdateDto.IsVoluntaryContributionPermament,
+        IsVoluntaryContributionPermanent = employeePensionEnrollmentUpdateDto.IsVoluntaryContributionPermanent,
         IsLocked = false
       };
 
@@ -407,7 +407,7 @@
       Assert.Equal(employeePensionEnrollmentUpdateDto.EmployeeId, result.EmployeeId);
       Assert.Equal(employeePensionEnrollmentUpdateDto.PensionOptionId, result.PensionOptionId);
       Assert.Equal(employeePensionEnrollmentUpdateDto.VoluntaryContribution, result.VoltunaryContribution);
-      Assert.Equal(employeePensionEnrollmentUpdateDto.IsVoluntaryContributionPermament, result.IsVoluntaryContributionPermament);
+      Assert.Equal(employeePensionEnrollmentUpdateDto.IsVoluntaryContributionPermanent, result.IsVoluntaryContributionPermanent);
     }
   }
 }

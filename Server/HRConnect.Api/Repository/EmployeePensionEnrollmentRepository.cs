@@ -48,6 +48,23 @@
       return _context.EmployeePensionEnrollments
         .FirstOrDefaultAsync(epe => epe.EmployeeId == employeeId && !epe.IsLocked);
     }
+    public async Task<EmployeePensionEnrollment?> GetByEmployeeIdAsync(string employeeId)
+    {
+      return await _context.EmployeePensionEnrollments
+          .FirstOrDefaultAsync(epe => epe.EmployeeId == employeeId);
+    }
+
+    public async Task<List<EmployeePensionEnrollment>> GetLatestEnrollmentForEachEmployeeAsync()
+    {
+      return await _context.EmployeePensionEnrollments
+        .AsNoTracking()
+        .GroupBy(e => e.EmployeeId)
+        .Select(g => g
+            .OrderByDescending(e => e.EmployeePensionEnrollmentId)
+            .First())
+        .ToListAsync();
+
+    }
 
     ///<summary>
     ///Add employee pension enrollment to the database

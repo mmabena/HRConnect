@@ -48,6 +48,10 @@ namespace HRConnect.Api.Utils.Jobs.Notification
 
     public async Task Execute(IJobExecutionContext context)
     {
+      Console.WriteLine("===========================");
+      Console.WriteLine("Notification Job Running");
+      Console.WriteLine(DateTime.Now);
+      Console.WriteLine("===========================");
       DateTimeOffset? payrollExecutionDate = await _jobScheduleService.GetNextJobScheduleAsync("PayrollRolloverJob");
 
       if (payrollExecutionDate == null)

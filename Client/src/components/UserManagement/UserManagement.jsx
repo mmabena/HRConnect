@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
-import RolesModal from "./RoleModal.jsx"; 
-import { fetchUsersAndRoles, updateUserRole } from "../../api/UserManagement";
-import { fetchAllEmployees } from '../../api/Employee.js'
-import { getStoredUserRole } from "../../utils/roleUtils";
-import useInitialColors from "../../hooks/useInitialColors";
+import RolesModal from "./RoleModal.jsx";
+import {
+  fetchUsersAndRoles,
+  updateUserRole,
+} from "../../api/UserManagement.js";
+import { fetchAllEmployees } from "../../api/Employee.js";
+import { getStoredUserRole } from "../../utils/roleUtils.js";
+import useInitialColors from "../../hooks/useInitialColors.js";
 import { resolveRole } from "../../utils/roleUtils.js";
-import { SlidersHorizontal, SearchIcon } from "lucide-react"
-import {toast} from "react-toastify";
+import { SlidersHorizontal, SearchIcon } from "lucide-react";
+import { toast } from "react-toastify";
 import {
   FaUser,
   FaUsers,
@@ -19,9 +22,8 @@ import {
 } from "react-icons/fa";
 import "./UserManagement.css";
 import usePagination from "../../hooks/useEmpPagination.js";
-import useDropdown from "../../hooks/useDropdown";
+import useDropdown from "../../hooks/useDropdown.js";
 import FilterTable from "../FilterTable.jsx";
-
 
 const USER_STATUS = {
   ACTIVE: 1,
@@ -48,9 +50,9 @@ const UserManagement = () => {
     storedCurrentUserParsed?.user || storedCurrentUserParsed;
   const currentUserEmail = currentUserFromStorage?.email?.toLowerCase();
 
-  const [filteredUsers,setFilteredUsers]=useState([])
-  const [isFilterOpen,setIsFilterOpen]=useState(false)
-  const [filters,setFilters]=useState(null)
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [filters, setFilters] = useState(null);
   const { COLORS } = useInitialColors();
 
   const loadData = async () => {
@@ -65,7 +67,7 @@ const UserManagement = () => {
 
       const mappedUsers = (users || []).map((user) => {
         const employee = employees.find(
-          (e) => e.email?.toLowerCase() === user.email?.toLowerCase()
+          (e) => e.email?.toLowerCase() === user.email?.toLowerCase(),
         );
 
         if (
@@ -93,13 +95,13 @@ const UserManagement = () => {
       if (currentEmployeeMatch) {
         localStorage.setItem(
           "currentEmployee",
-          JSON.stringify(currentEmployeeMatch)
+          JSON.stringify(currentEmployeeMatch),
         );
 
         if (storedCurrentUserParsed?.user) {
           localStorage.setItem(
             "currentUser",
-            JSON.stringify(storedCurrentUserParsed.user)
+            JSON.stringify(storedCurrentUserParsed.user),
           );
         }
       }
@@ -115,37 +117,35 @@ const UserManagement = () => {
     }
   };
   useEffect(() => {
-      loadData();
-    }, []);
+    loadData();
+  }, []);
 
-    //Transform loaded data for a single layer of filter and searching
-    const transformData=(loadedData,filter,search)=>{
-        let result=[...loadedData]
+  //Transform loaded data for a single layer of filter and searching
+  const transformData = (loadedData, filter, search) => {
+    let result = [...loadedData];
 
-        //Apply filters before searching 
-        //returns all the keys of the object passed in 
-            if(filter)
-                result=result.filter(i=>i.branch===filter)
-        
-        
-        //Search the filtered results. If no filter is applied Search should 
-        //search the original loadedData
-        if(search.trim() !== ""){
-        const searchLower = searchTerm.toLowerCase();
-        result=result.filter(item=>
-            item.name.toLowerCase().includes(searchLower) ||
-            item.email.toLowerCase().includes(searchLower)
-            );
-        }
-        return result;
+    //Apply filters before searching
+    //returns all the keys of the object passed in
+    if (filter) result = result.filter((i) => i.branch === filter);
+
+    //Search the filtered results. If no filter is applied Search should
+    //search the original loadedData
+    if (search.trim() !== "") {
+      const searchLower = searchTerm.toLowerCase();
+      result = result.filter(
+        (item) =>
+          item.name.toLowerCase().includes(searchLower) ||
+          item.email.toLowerCase().includes(searchLower),
+      );
     }
+    return result;
+  };
 
-    useEffect(()=>{
-        const finalResult=transformData(users,filters,searchTerm);
-        setFilteredUsers(finalResult);
-    },[users,filters,searchTerm])
+  useEffect(() => {
+    const finalResult = transformData(users, filters, searchTerm);
+    setFilteredUsers(finalResult);
+  }, [users, filters, searchTerm]);
 
-    
   const hasAdminRights = (role) => ["Admin", "SuperUser"].includes(role || "");
 
   const handleShowActions = (userIndex) => {
@@ -156,10 +156,7 @@ const UserManagement = () => {
 
     const user = users[userIndex];
 
-    if (
-      currentUserEmail &&
-      user?.email?.toLowerCase() === currentUserEmail
-    ) {
+    if (currentUserEmail && user?.email?.toLowerCase() === currentUserEmail) {
       toast.error("You Cannot Change Your Own Role");
       return;
     }
@@ -182,7 +179,7 @@ const UserManagement = () => {
       const normalizedEditRole = resolveRole(editRole);
 
       const selectedRole = roles.find(
-        (r) => Number(r.roleId) === normalizedEditRole.roleId
+        (r) => Number(r.roleId) === normalizedEditRole.roleId,
       );
 
       await updateUserRole(user.userId, selectedRole.roleId);
@@ -212,9 +209,9 @@ const UserManagement = () => {
     }
   };
 
-  const handleFilter=(val)=>{
-    setFilters(val)
-  }
+  const handleFilter = (val) => {
+    setFilters(val);
+  };
 
   const {
     activePage,
@@ -224,12 +221,12 @@ const UserManagement = () => {
     totalPages,
     indexOfFirstItem,
     indexOfLastItem,
-    currentItems
+    currentItems,
   } = usePagination(users);
 
   const { dropdownOpen, toggleDropdown, closeDropdown } = useDropdown();
 
-    const filterUsers = users.filter((user) => {
+  const filterUsers = users.filter((user) => {
     const searchLower = searchTerm.toLowerCase();
     return (
       (user.name || "").toLowerCase().includes(searchLower) ||
@@ -254,26 +251,25 @@ const UserManagement = () => {
     setActivePage(1);
   };
 
-
   return (
     <div className="menu-background">
       <div className="top-bar">
         <h2>User Management</h2>
         <button
           className="filter-btn"
-          onClick={()=>setIsFilterOpen(prev=>!prev)}
+          onClick={() => setIsFilterOpen((prev) => !prev)}
         >
           <SlidersHorizontal size={20} />
           Filter
           <FilterTable
-          data={users}
-          filterKey="branch"
-          onFilter={handleFilter}
-          isOpen={isFilterOpen}
-          onClose={()=>setIsFilterOpen(false)}
+            data={users}
+            filterKey="branch"
+            onFilter={handleFilter}
+            isOpen={isFilterOpen}
+            onClose={() => setIsFilterOpen(false)}
           />
         </button>
-        <div className="search-bar" >
+        <div className="search-bar">
           <input
             type="text"
             placeholder=" Search users..."
@@ -281,234 +277,241 @@ const UserManagement = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
 
-        <SearchIcon/>
+          <SearchIcon />
         </div>
       </div>
 
-          {/*Card on top of the table*/}
-          <div className="payslip-card">
-            <div className="payslip-ribbon">
-              <span className="card-title">
-                User Profile
-              </span>
-            </div>
-            <table className="styled-table">
-              <thead>
-                <tr className="heading">
-                  <th>User</th>
-                  <th>Email</th>
-                  <th>Branch</th>
-                  <th>Role</th>
-                  <th className="action-col">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredUsers.map((user, idx) => (
-                  <tr key={idx}>
-                    <td>
-                      <div className="user-info">
-                        <div className={`initials-circle
+      {/*Card on top of the table*/}
+      <div className="payslip-card">
+        <div className="payslip-ribbon">
+          <span className="card-title">User Profile</span>
+        </div>
+        <table className="styled-table">
+          <thead>
+            <tr className="heading">
+              <th>User</th>
+              <th>Email</th>
+              <th>Branch</th>
+              <th>Role</th>
+              <th className="action-col">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredUsers.map((user, idx) => (
+              <tr key={idx}>
+                <td>
+                  <div className="user-info">
+                    <div
+                      className={`initials-circle
                         ${COLORS[idx % COLORS.length]}
-                      `}>
-                          {(`${(user.name[0] || "").charAt(0)}
-                          ${(user.name[1] || "").charAt(0)}`)}</div>
-                        <span className="user-name">{user.name || "Unknown User"}</span>
-                      </div>
-                    </td>
-                    <td>{user.email || "No email"}</td>
-                    <td>{user.branch}</td>
-                    <td>
-                      <span className={`role-badge ${(user.role || "").toLowerCase()}`}>
-                        <FaUserLock /> {user.role || "Unknown Role"}
-                      </span>
-                    </td>
-
-
-                    <td className="action-buttons">
-                      <button
-                        className="actions-trigger-btn"
-                        onClick={() => {
-                          const userIndex = users.findIndex(
-                            (u) => u.userId === user.userId
-                          );
-                          handleShowActions(userIndex);
-                        }}
-                      >
-                        <FaEllipsisV />
-                        Actions
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <RolesModal
-            isOpen={selectedUserIndex !== null}
-            onClose={handleCloseActions}
-            user={selectedUserIndex !== null ? users[selectedUserIndex] : null}
-            onSuccess={() => {
-              loadData();
-              handleCloseActions();
-              toast.success("Employee Role Update Successful")
-              loadData();
-            }}
-          />
-
-          {showEditEmployeeModal && selectedUserIndex !== null && (
-            <div
-              className="actions-modal-overlay"
-              onClick={() => setShowEditEmployeeModal(false)}>
-              <div className="actions-modal" onClick={(e) => e.stopPropagation()}>
-                <div className="actions-modal-header">
-                  <h3>Edit {users[selectedUserIndex].name}</h3>
-                  <button
-                    className="close-btn"
-                    onClick={() => setShowEditEmployeeModal(false)}
+                      `}
+                    >
+                      {`${(user.name[0] || "").charAt(0)}
+                          ${(user.name[1] || "").charAt(0)}`}
+                    </div>
+                    <span className="user-name">
+                      {user.name || "Unknown User"}
+                    </span>
+                  </div>
+                </td>
+                <td>{user.email || "No email"}</td>
+                <td>{user.branch}</td>
+                <td>
+                  <span
+                    className={`role-badge ${(user.role || "").toLowerCase()}`}
                   >
-                    <FaTimes />
+                    <FaUserLock /> {user.role || "Unknown Role"}
+                  </span>
+                </td>
+
+                <td className="action-buttons">
+                  <button
+                    className="actions-trigger-btn"
+                    onClick={() => {
+                      const userIndex = users.findIndex(
+                        (u) => u.userId === user.userId,
+                      );
+                      handleShowActions(userIndex);
+                    }}
+                  >
+                    <FaEllipsisV />
+                    Actions
                   </button>
-                </div>
-                <div className="actions-modal-content">
-                  <div className="form-group">
-                    <label>Role</label>
-                    <select
-                      value={editRole}
-                      onChange={(e) => setEditRole(Number(e.target.value))}
-                      disabled={!hasAdminRights(currentUserRole)}
-                    >
-                      {/* Use roleId as value */}
-                      {roles.map((role) => (
-                        <option key={role.roleId} value={role.roleId}>
-                          {role.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label>Status</label>
-                    <select
-                      value={editStatus}
-                      onChange={(e) => setEditStatus(Number(e.target.value))}
-                      disabled={!hasAdminRights(currentUserRole)}
-                    >
-                      <option value={USER_STATUS.ACTIVE}>Active</option>
-                      <option value={USER_STATUS.INACTIVE}>Inactive</option>
-                    </select>
-                  </div>
-                  <div className="form-actions">
-                    <button className="save-btn" onClick={saveEmployeeDetails}>
-                      Save Changes
-                    </button>
-                    <button
-                      className="cancel-btn"
-                      onClick={() => setShowEditEmployeeModal(false)}
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <RolesModal
+        isOpen={selectedUserIndex !== null}
+        onClose={handleCloseActions}
+        user={selectedUserIndex !== null ? users[selectedUserIndex] : null}
+        onSuccess={() => {
+          loadData();
+          handleCloseActions();
+          toast.success("Employee Role Update Successful");
+          loadData();
+        }}
+      />
+
+      {showEditEmployeeModal && selectedUserIndex !== null && (
+        <div
+          className="actions-modal-overlay"
+          onClick={() => setShowEditEmployeeModal(false)}
+        >
+          <div className="actions-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="actions-modal-header">
+              <h3>Edit {users[selectedUserIndex].name}</h3>
+              <button
+                className="close-btn"
+                onClick={() => setShowEditEmployeeModal(false)}
+              >
+                <FaTimes />
+              </button>
             </div>
-          )}
-
-          <div className="pagination-container">
-            <div className="pagination-left-section">
-              <span className="pagination-range">
-                <strong className="range-bold">
-                  {indexOfFirstItem + 1} -{" "}
-                  {Math.min(indexOfLastItem, filteredUsers.length)}
-                </strong>{" "}
-                of {filteredUsers.length}
-              </span>
-
-              <div className="per-page-box" onClick={toggleDropdown}>
-                <span className="per-page-number">{itemsPerPage}</span>
-                <img
-                  src="/images/arrow_drop_down_circle.png"
-                  alt="Dropdown"
-                  className="dropdown-icon"
-                />
-                {dropdownOpen && (
-                  <div className="dropdown-options">
-                    {[10].map((option) => (
-                      <div
-                        key={option}
-                        className="dropdown-option"
-                        onClick={() => handleItemsPerPageChange(option)}
-                      >
-                        {option}
-                      </div>
-                    ))}
-                  </div>
-                )}
+            <div className="actions-modal-content">
+              <div className="form-group">
+                <label>Role</label>
+                <select
+                  value={editRole}
+                  onChange={(e) => setEditRole(Number(e.target.value))}
+                  disabled={!hasAdminRights(currentUserRole)}
+                >
+                  {/* Use roleId as value */}
+                  {roles.map((role) => (
+                    <option key={role.roleId} value={role.roleId}>
+                      {role.name}
+                    </option>
+                  ))}
+                </select>
               </div>
-
-              <span className="per-page-label">Per page</span>
-            </div>
-
-            <div className="pagination-right-section">
-              <div className="pagination-controls">
-                {/* Go to First Page */}
-                <img
-                  src="/images/arrow_drop_down_circle.png"
-                  alt="First"
-                  className={`pagination-arrow ${activePage === 1 ? "disabled" : ""}`}
-                  onClick={() => activePage > 1 && setActivePage(1)}
-                />
-
-                {/* Go to Previous Page */}
-                <img
-                  src="/images/arrow_drop_down_circle.png"
-                  alt="Previous"
-                  className={`pagination-arrow ${activePage === 1 ? "disabled" : ""}`}
-                  onClick={() => activePage > 1 && setActivePage(activePage - 1)}
-                />
-
-                {/* Page numbers remain the same */}
-                <div className="page-count">
-                  {Array.from({ length: totalPages || 1 }, (_, i) => {
-                    const pageNum = i + 1;
-                    return (
-                      <button
-                        key={pageNum}
-                        onClick={() => setActivePage(pageNum)}
-                        className={`page-number ${activePage === pageNum ? "active" : ""}`}
-                      >
-                        {pageNum}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Go to Next Page */}
-                <img
-                  src="/images/arrow_drop_down_circle.png"
-                  alt="Next"
-                  className={`pagination-arrow next ${activePage === totalPages ? "disabled" : ""
-                    }`}
-                  onClick={() =>
-                    activePage < totalPages && setActivePage(activePage + 1)
-                  }
-                />
-
-                {/* Go to Last Page */}
-                <img
-                  src="/images/arrow_drop_down_circle.png"
-                  alt="Last"
-                  className={`pagination-arrow next ${activePage === totalPages ? "disabled" : ""
-                    }`}
-                  onClick={() =>
-                    activePage < totalPages && setActivePage(totalPages)
-                  }
-                />
+              <div className="form-group">
+                <label>Status</label>
+                <select
+                  value={editStatus}
+                  onChange={(e) => setEditStatus(Number(e.target.value))}
+                  disabled={!hasAdminRights(currentUserRole)}
+                >
+                  <option value={USER_STATUS.ACTIVE}>Active</option>
+                  <option value={USER_STATUS.INACTIVE}>Inactive</option>
+                </select>
               </div>
-              <div className="employee-count">
-                {`${filteredUsers.length} Admins @ Singular`}
+              <div className="form-actions">
+                <button className="save-btn" onClick={saveEmployeeDetails}>
+                  Save Changes
+                </button>
+                <button
+                  className="cancel-btn"
+                  onClick={() => setShowEditEmployeeModal(false)}
+                >
+                  Cancel
+                </button>
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      <div className="pagination-container">
+        <div className="pagination-left-section">
+          <span className="pagination-range">
+            <strong className="range-bold">
+              {indexOfFirstItem + 1} -{" "}
+              {Math.min(indexOfLastItem, filteredUsers.length)}
+            </strong>{" "}
+            of {filteredUsers.length}
+          </span>
+
+          <div className="per-page-box" onClick={toggleDropdown}>
+            <span className="per-page-number">{itemsPerPage}</span>
+            <img
+              src="/images/arrow_drop_down_circle.png"
+              alt="Dropdown"
+              className="dropdown-icon"
+            />
+            {dropdownOpen && (
+              <div className="dropdown-options">
+                {[10].map((option) => (
+                  <div
+                    key={option}
+                    className="dropdown-option"
+                    onClick={() => handleItemsPerPageChange(option)}
+                  >
+                    {option}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <span className="per-page-label">Per page</span>
+        </div>
+
+        <div className="pagination-right-section">
+          <div className="pagination-controls">
+            {/* Go to First Page */}
+            <img
+              src="/images/arrow_drop_down_circle.png"
+              alt="First"
+              className={`pagination-arrow ${activePage === 1 ? "disabled" : ""}`}
+              onClick={() => activePage > 1 && setActivePage(1)}
+            />
+
+            {/* Go to Previous Page */}
+            <img
+              src="/images/arrow_drop_down_circle.png"
+              alt="Previous"
+              className={`pagination-arrow ${activePage === 1 ? "disabled" : ""}`}
+              onClick={() => activePage > 1 && setActivePage(activePage - 1)}
+            />
+
+            {/* Page numbers remain the same */}
+            <div className="page-count">
+              {Array.from({ length: totalPages || 1 }, (_, i) => {
+                const pageNum = i + 1;
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => setActivePage(pageNum)}
+                    className={`page-number ${activePage === pageNum ? "active" : ""}`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Go to Next Page */}
+            <img
+              src="/images/arrow_drop_down_circle.png"
+              alt="Next"
+              className={`pagination-arrow next ${
+                activePage === totalPages ? "disabled" : ""
+              }`}
+              onClick={() =>
+                activePage < totalPages && setActivePage(activePage + 1)
+              }
+            />
+
+            {/* Go to Last Page */}
+            <img
+              src="/images/arrow_drop_down_circle.png"
+              alt="Last"
+              className={`pagination-arrow next ${
+                activePage === totalPages ? "disabled" : ""
+              }`}
+              onClick={() =>
+                activePage < totalPages && setActivePage(totalPages)
+              }
+            />
+          </div>
+          <div className="employee-count">
+            {`${filteredUsers.length} Admins @ Singular`}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

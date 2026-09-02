@@ -1,0 +1,277 @@
+/* =========================
+   ANNUAL LEAVE MODAL
+========================= */
+
+.annual-modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 1000;
+}
+
+.annual-modal-card {
+  position: relative;
+  width: 674px;
+  height: 828px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0;
+
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #e0e0e0 100%,
+    #999999 100%
+  );
+
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.annual-modal-header {
+  width: 674px;
+  height: 84px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+  background: #355867;
+}
+
+.annual-modal-header-content {
+  position: relative;
+  width: 628px;
+  height: 34px;
+  margin-left: 21px;
+  margin-top: 23px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+/* =========================
+   TITLE
+========================= */
+
+.annual-modal-title {
+  position: absolute;
+  width: 106px;
+  height: 26px;
+  left: 0;
+  top: 2px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  font-family: "Inter", sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 26px;
+  color: #ffffff;
+}
+
+/* =========================
+   CLOSE BUTTON
+========================= */
+
+.annual-modal-close {
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  left: 594px;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  border-radius: 10px;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.annual-modal-close svg {
+  width: 22px;
+  height: 22px;
+  stroke-width: 2;
+}
+
+.annual-modal-close:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* ================================
+   ANNUAL LEAVE MODAL - MIDDLE
+================================ */
+
+.annual-modal-middle {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 36px 0 0;
+  gap: 37px;
+  width: 674px;
+  height: 667px;
+  border-bottom: 1px solid rgba(154, 154, 154, 0.55);
+  flex: none;
+  order: 1;
+  align-self: stretch;
+  flex-grow: 0;
+}
+
+/* Leave Type Code + Leave Type Name row */
+
+.annual-leave-fields {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0;
+  gap: 38px;
+  width: 638px;
+  height: 66px;
+  flex: none;
+}
+
+/* Individual field */
+
+.annual-leave-field {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 0 5px 5px 10px;
+  width: 300px;
+  height: 66px;
+  background: rgba(53, 88, 103, 0.1);
+  border-radius: 5px;
+  flex: none;
+}
+
+/* Label + value container */
+
+.annual-leave-field-text {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  padding: 0;
+  gap: 10px;
+  min-width: 61px;
+  height: 30px;
+  flex: none;
+}
+
+/* Label */
+
+.annual-leave-label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0;
+  gap: 5px;
+  height: 26px;
+  font-family: "Anek Bangla", sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 26px;
+  color: #707070;
+  white-space: nowrap;
+}
+
+/* Database value */
+
+.annual-leave-value {
+  height: 26px;
+  font-family: "Anek Bangla", sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 26px;
+  color: #355867;
+  white-space: nowrap;
+}
+
+/* Annual Leave name has regular font weight */
+
+.annual-leave-name {
+  font-weight: 400;
+}
+
+/* ================================
+   ANNUAL LEAVE DESCRIPTION
+================================ */
+
+.annual-description-section {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 0;
+  gap: 38px;
+  width: 638px;
+  height: 95px;
+  flex: none;
+  order: 1;
+}
+
+/* Description field */
+
+.annual-description-field {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 0 5px 5px 10px;
+  width: 638px;
+  height: 95px;
+  background: rgba(53, 88, 103, 0.1);
+  border-radius: 5px;
+  flex: none;
+}
+
+/* Description heading */
+
+.annual-description-label {
+  height: 26px;
+  font-family: "Anek Bangla", sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 26px;
+  color: #707070;
+  white-space: nowrap;
+}
+
+/* Description value */
+
+.annual-description-value {
+  width: 623px;
+  min-height: 34px;
+  font-family: "Anek Bangla", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+display: flex;
+  line-height: 26px;
+  color: #355867;
+  overflow-wrap: break-word;
+}
+
+
+/*=======================================================================================*/
+
+
+

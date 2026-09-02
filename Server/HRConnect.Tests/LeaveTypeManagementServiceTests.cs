@@ -40,10 +40,10 @@ namespace HRConnect.Tests
     {
       var context = GetInMemoryDb();
 
-      context.LeaveTypes.AddRange(
-new LeaveType { Id = 1, Name = "Annual", Code = "AL", Description = "Annual Leave", IsActive = true },
-new LeaveType { Id = 2, Name = "Sick", Code = "SL", Description = "Sick Leave", IsActive = true }
-);
+            context.LeaveTypes.AddRange(
+            new LeaveType { Id = 1, Name = "Annual", Code = "AL", Description = "Annual Leave", IsActive = true },
+            new LeaveType { Id = 2, Name = "Sick", Code = "SL", Description = "Sick Leave", IsActive = true }
+        );
 
       await context.SaveChangesAsync();
 
@@ -81,12 +81,19 @@ new LeaveType { Id = 2, Name = "Sick", Code = "SL", Description = "Sick Leave", 
           service.GetLeaveTypeByIdAsync(99));
     }
 
-    [Fact]
-    public async Task CreateLeaveTypeShouldCreateSuccessfully()
-    {
-      var context = GetInMemoryDb();
+        [Fact]
+        public async Task CreateLeaveTypeShouldCreateSuccessfully()
+        {
+            var context = GetInMemoryDb();
+            context.JobGradeGroupMaps.Add(
+                new JobGradeGroupMap
+                {
+                    JobGradeId = 1,
+                    GroupKey = "GROUP_A"
+                });
 
-      var service = CreateService(context);
+            await context.SaveChangesAsync();
+            var service = CreateService(context);
 
       var request = new CreateLeaveTypeRequest
       {
@@ -98,7 +105,7 @@ new LeaveType { Id = 2, Name = "Sick", Code = "SL", Description = "Sick Leave", 
                 {
                     new LeaveEntitlementRuleRequest
                     {
-                        JobGradeId = 1,
+                        GroupKey = "GROUP_A",
                         MinYearsService = 0,
                         MaxYearsService = null,
                         DaysAllocated = 15
@@ -117,14 +124,14 @@ new LeaveType { Id = 2, Name = "Sick", Code = "SL", Description = "Sick Leave", 
     {
       var context = GetInMemoryDb();
 
-      context.LeaveTypes.Add(new LeaveType
-      {
-        Id = 1,
-        Name = "Annual",
-        Code = "AL",
-        Description = "Annual Leave",
-        IsActive = true
-      });
+            context.LeaveTypes.Add(new LeaveType
+            {
+                Id = 1,
+                Name = "Annual",
+                Code = "AL",
+                Description = "Annual Leave",
+                IsActive = true
+            });
 
       await context.SaveChangesAsync();
 
@@ -138,7 +145,7 @@ new LeaveType { Id = 2, Name = "Sick", Code = "SL", Description = "Sick Leave", 
                 {
                     new LeaveEntitlementRuleRequest
                     {
-                        JobGradeId = 1,
+                        GroupKey = "GROUP_A",
                         MinYearsService = 0,
                         DaysAllocated = 15
                     }
@@ -174,7 +181,7 @@ new LeaveType { Id = 2, Name = "Sick", Code = "SL", Description = "Sick Leave", 
                 {
                     new LeaveEntitlementRuleRequest
                     {
-                        JobGradeId = 1,
+                        GroupKey = "GROUP_A",
                         MinYearsService = 0,
                         DaysAllocated = 15
                     }
@@ -199,9 +206,16 @@ new LeaveType { Id = 2, Name = "Sick", Code = "SL", Description = "Sick Leave", 
         IsActive = true
       });
 
-      await context.SaveChangesAsync();
+            await context.SaveChangesAsync();
+            context.JobGradeGroupMaps.Add(
+                new JobGradeGroupMap
+                {
+                    JobGradeId = 1,
+                    GroupKey = "GROUP_A"
+                });
 
-      var service = CreateService(context);
+            await context.SaveChangesAsync();
+            var service = CreateService(context);
 
       var request = new UpdateLeaveTypeRequest
       {
@@ -210,7 +224,7 @@ new LeaveType { Id = 2, Name = "Sick", Code = "SL", Description = "Sick Leave", 
                 {
                     new LeaveEntitlementRuleRequest
                     {
-                        JobGradeId = 1,
+                        GroupKey = "GROUP_A",
                         MinYearsService = 0,
                         DaysAllocated = 20
                     }
@@ -245,7 +259,7 @@ new LeaveType { Id = 2, Name = "Sick", Code = "SL", Description = "Sick Leave", 
             {
                 new LeaveEntitlementRuleRequest
                 {
-                    JobGradeId = 1,
+                    GroupKey = "GROUP_A",
                     MinYearsService = -1,
                     DaysAllocated = 10
                 }
@@ -262,14 +276,14 @@ new LeaveType { Id = 2, Name = "Sick", Code = "SL", Description = "Sick Leave", 
             {
                 new LeaveEntitlementRuleRequest
                 {
-                    JobGradeId = 1,
+                    GroupKey = "GROUP_A",
                     MinYearsService = 0,
                     MaxYearsService = 3,
                     DaysAllocated = 10
                 },
                 new LeaveEntitlementRuleRequest
                 {
-                    JobGradeId = 1,
+                    GroupKey = "GROUP_A",
                     MinYearsService = 2,
                     MaxYearsService = 5,
                     DaysAllocated = 15

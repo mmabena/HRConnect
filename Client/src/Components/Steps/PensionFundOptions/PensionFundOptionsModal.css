@@ -1,0 +1,441 @@
+/* =========================
+   PENSION FUND MODAL
+========================= */
+
+.emp-pension-fund-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  flex-direction: column;
+  max-width: 444px;
+  gap: 17px;
+  border-radius: 5px;
+  margin-top: -550px;
+}
+
+.emp-pension-fund-form-grid {
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* =========================
+   HEADINGS
+========================= */
+
+.emp-pension-fund-personal-details-heading {
+  color: var(--primary-color, #2c5f6d);
+  font-family: "Anek Bangla";
+  font-size: 17px;
+  font-weight: 550;
+  display: flex;
+}
+
+.emp-pension-fund-sub {
+  color: #006088;
+  font-family: "Anek Bangla";
+  font-size: 14px;
+  font-weight: 400;
+  display: flex;
+  margin-top: -10px;
+  margin-bottom: 0px;
+}
+
+/* =========================
+   SECTION TITLES
+========================= */
+
+.pension-section-title,
+.voluntary-section-title,
+.amount-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #7575758c;
+  text-transform: uppercase;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 18px;
+  padding: 0px 5px 10px 0px;
+
+  width: 434px;
+  height: 26px;
+
+  border-bottom: 1px solid rgba(154, 154, 154, 0.55);
+  margin-bottom: 20px;
+}
+
+.emp-leave-type-line {
+  position: relative;
+  margin-top: 5px;
+  margin-bottom: 20px;
+  background: #7474748c;
+  width: 110%;
+  margin-left: auto;
+  margin-right: auto;
+  height: 1px;
+  border: none;
+}
+
+/* =========================
+   CARD CONTAINER
+========================= */
+.pension-content-group {
+  position: absolute;
+}
+
+.pension-card-container {
+  /* THIS CONTROLS EXPANSION */
+  min-height: 70px;
+
+  transition: min-height 0.2s ease;
+}
+
+/* =========================
+   EXPANDED CONTENT
+========================= */
+
+.pension-card-content {
+  margin-top: 20px;
+  width: 100%;
+}
+/* =========================
+   PENSION CARD
+========================= */
+
+.pension-card {
+  width: 444px;
+  height: 70px;
+  background: #1e5c6e1a;
+  border-radius: 5px;
+  cursor: pointer;
+  padding: 10px 10px 10px;
+  transition: 0.2s ease;
+  border: 1px solid rgba(79, 110, 120, 0.2);
+}
+
+.pension-card.active {
+  box-sizing: border-box;
+
+  width: 444px;
+  height: 171px;
+
+  background: rgba(30, 92, 110, 0.1);
+  border: 1px solid rgba(79, 110, 120, 0.2);
+  border-radius: 5px;
+}
+
+.pension-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.pension-card-header input[type="checkbox"] {
+  width: 15px;
+  height: 18px;
+  background-color: #4f6e7833;
+  accent-color: #496d7d;
+  margin-top: 2px;
+  margin-right: -10px;
+
+  cursor: pointer;
+}
+
+.pension-header-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.pension-title {
+  font-family: Anek Bangla;
+  font-weight: 500;
+  font-style: Regular;
+  font-size: 16px;
+  color: #002d40;
+  line-height: 150%;
+  margin-right: 200px;
+  letter-spacing: 0.15px;
+}
+
+.pension-subtitle {
+  font-size: 12px;
+  color: #2c5f6d;
+  margin-top: -2px;
+  margin-right: 78px;
+  transition: 0.2s ease;
+}
+
+.pension-subtitle.active {
+  color: #7fa36a;
+}
+
+/* =========================
+   CONTRIBUTION SECTION
+========================= */
+
+.contribution-label {
+  margin-top: 22px;
+  margin-right: 230px;
+  width: 424px;
+  height: 24px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 0px;
+  align-items: flex-start;
+  font-size: 11px;
+  font-weight: 600;
+  color: #919191;
+  text-transform: uppercase;
+  border-bottom: 0.5px solid rgba(154, 154, 154, 0.55);
+  border-radius: 0px;
+
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+/* =========================
+   PERCENTAGE BUTTONS
+========================= */
+
+.pension-percentages {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px;
+  gap: 6px;
+  position: absolute;
+  width: 425px;
+  height: 20px;
+}
+
+.pension-percent-btn {
+  min-width: 66px;
+  height: 22px;
+  border-radius: 3px;
+  border: 1px solid #7f98a5;
+  background: white;
+  color: #4f6b78;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.pension-percent-btn:hover {
+  background: #edf3f5;
+}
+
+.pension-percent-btn.active {
+  background: #4f6f7e;
+  color: white;
+  border: 1px solid #4f6f7e;
+}
+
+/* =========================
+   VOLUNTARY BUTTONS
+========================= */
+
+.voluntary-options {
+  display: flex;
+  gap: 32px;
+}
+
+.voluntary-btn {
+  flex: 1;
+  width: 205px;
+  height: 35px;
+  border-radius: 6px;
+  border: 1px solid #9cb1ba;
+  background: white;
+  color: #4d6977;
+  font: Anek Bangla;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s ease;
+  flex: none;
+  order: 1;
+  flex-grow: 0;
+}
+
+.voluntary-btn.active {
+  background: #edf5e8;
+  border: 1px solid #97ac8b;
+  color: #6c8a54;
+}
+
+/* =========================
+   INPUT
+========================= */
+
+.voluntary-input {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  width: 445px;
+  height: 37px;
+  border-radius: 5px;
+  border: 1px solid #cfcfcf;
+  padding: 0px 5px 0px 7px;
+  font-size: 15px;
+  color: #5a5a5a;
+  outline: none;
+  background: rgba(255, 255, 255, 0.5);
+  border: 0.5px solid rgba(53, 88, 103, 0.5);
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.voluntary-input::placeholder {
+  color: #d1d1d1;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+
+.pension-footer {
+  position: absolute;
+  width: 1068px;
+  height: 51px;
+  display: flex;
+  position: absolute;
+  justify-content: space-between;
+  margin-top: 500px;
+}
+
+.pension-back-btn {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 0 10px;
+  color: var(--primary-color);
+  position: absolute;
+  text-align: center;
+  font-family: "Anek Bangla", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  width: 187px;
+  height: 47px;
+  margin-bottom: -1055px;
+  left: 100px;
+  background: transparent;
+  opacity: 0.9;
+  border: 1px solid var(--primary-color);
+  border-radius: 10px;
+}
+
+/* .emp-leave-back-button {
+  display: flex;
+  width: 187px;
+  height: 47px;
+  flex-shrink: 0;
+  flex-direction: row;
+  position: absolute;
+  padding: 0 10px;
+  margin-left: 51px;
+  margin-bottom: -18px;
+  justify-content: center;
+  align-items: center;
+  color: var(--primary-color);
+  text-align: center;
+  font-family: "Anek Bangla", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  letter-spacing: 0.32px;
+  border: 1px solid var(--primary-color);
+  background: transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+} */
+
+.pension-next-btn {
+  position: relative;
+  display: flex;
+  width: 187px;
+  height: 47px;
+  top: 53px;
+  padding: 0 10px 0px 10px;
+  justify-content: center;
+  align-items: center;
+  left: 360px;
+  color: var(--white);
+  text-align: center;
+  font-family: "Anek Bangla", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: 0.32px;
+  border: 1px solid var(--light-grey);
+  opacity: 0.9;
+  background: var(--primary-color);
+  background-color: var(--primary-color);
+  border-radius: 10px;
+  display: flex;
+  gap: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-bottom: -940px;
+}
+
+.pension-next-btn {
+  background: #4f6f7e;
+  color: white;
+}
+
+.pension-next-btn:hover {
+  opacity: 0.95;
+}
+
+
+
+
+.pension-next-btn {
+  position: relative;
+  display: flex;
+  width: 187px;
+  height: 47px;
+  top: 108px;
+  padding: 0 10px 0px 10px;
+  justify-content: center;
+  align-items: center;
+  left: 341px;
+  color: var(--white);
+  text-align: center;
+  font-family: "Anek Bangla", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: 0.32px;
+  border: 1px solid var(--light-grey);
+  opacity: 0.9;
+  background: var(--primary-color);
+  background-color: var(--primary-color);
+  border-radius: 10px;
+  display: flex;
+  gap: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-top: -100px;
+}
+
+.emp-leave-next-button:hover {
+  background-color: var(--primary-light);
+}

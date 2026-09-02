@@ -57,20 +57,21 @@ namespace HRConnect.Api.Repository
     }
     public async Task<PayrollRun?> GetCurrentRunAsync()
     {
-      var payrun = await _context.PayrollRuns.Where(r => !r.IsLocked)
+      var payrun = await _context.PayrollRuns
+        .Where(r => !r.IsLocked)
+        .Include(r => r.Records)
         .OrderByDescending(r => r.PayrollRunNumber)
         .FirstOrDefaultAsync();
-      if (payrun != null)
-        return payrun;
-      return null;
+
+      return payrun;
     }
 
-    public Task UpdateRun(PayrollRun payrollRun)
+    public async Task UpdateRun(PayrollRun payrollRun)
     {
       //Update the current run to be marked as Finalised
       _context.PayrollRuns.Update(payrollRun);
+      await _context.SaveChangesAsync();
 
-      return Task.CompletedTask;
     }
     public async Task<PayrollRun?> GetLastPayrun()
     {

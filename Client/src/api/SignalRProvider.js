@@ -1,12 +1,12 @@
 import { useEffect } from "react";
-import connection from "./signalrService.js";
+import {companyHubConnection} from "./signalrService.js";
 
 const SignalRProvider = ({ children }) => {
   useEffect(() => {
     const startConnection = async () => {
       try {
-        if (connection.state === "Disconnected") {
-          await connection.start();
+        if (companyHubConnection.state === "Disconnected") {
+          await companyHubConnection.start();
           console.log("SignalR connected");
         }
       } catch (err) {

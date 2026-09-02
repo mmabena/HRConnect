@@ -1,0 +1,959 @@
+/* =========================
+   FRAME 46376 - CONTENT WRAPPER
+========================= */
+
+.emp-medical-aid-content-frame {
+  display: flex;
+  justify-content: center;
+  /*align-items: center;*/
+  padding: 10px;
+  gap: 10px;
+  width: 100%;
+  max-width: 1092px;
+  height: 463px;
+  margin-top: -30px;
+  margin-left: 129px;
+  /* flex: none;
+  order: 1;
+  align-self: stretch;
+  flex-grow: 0; */
+  
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+/* SCROLLBAR */
+
+.emp-medical-aid-content-frame::-webkit-scrollbar {
+  width: 8px;
+  margin-left: 110px;
+}
+
+.emp-medical-aid-content-frame::-webkit-scrollbar-thumb {
+  background: #c8d2d7;
+  border-radius: 10px;
+  margin-left: 110px;
+}
+
+.emp-medical-aid-content-frame::-webkit-scrollbar-track {
+  background: transparent;
+  margin-left: 110px;
+}
+
+
+
+/* =========================
+   MAIN CONTAINER
+========================= */
+
+.emp-medical-aid-container {
+  width: 62%;
+  display: flex;
+  align-items: center;
+  padding: 20px;
+  flex-direction: column;
+  max-width: 1092px;
+  gap: 17px;
+  margin: -65px auto 0;
+
+}
+
+/* =========================
+   INNER WRAPPER
+========================= */
+
+.emp-medical-aid-form-grid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0px;
+  gap: 15px;
+  isolation: isolate;
+  position: relative;
+  width: 525px;
+  margin-top: -40px;
+  height: 502px;
+  /* left: calc(50% - 471px / 2 - 16.5px);
+  top: calc(50% - 502px / 2); */
+}
+
+/* =========================
+   HEADINGS
+========================= */
+
+.emp-medical-aid-personal-details-heading {
+  color: var(--primary-color, #2c5f6d);
+  font-family: "Anek Bangla";
+  font-size: 18px;
+  font-weight: 600;
+  display: flex;
+  margin-top: 50px;
+}
+
+.emp-medical-aid-header-frame {
+  width: 100%;
+  max-width: 525px; /* same width as your form */
+  display: flex;
+  margin-left: 110px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.emp-medical-aid-sub {
+  color: #006088;
+  font-family: "Anek Bangla";
+  font-size: 14px;
+  font-weight: 400;
+  display: flex;
+  margin-top: -8px;
+  margin-bottom: 30px;
+}
+
+/* =========================
+   SECTION TITLES
+========================= */
+
+.medical-section-title {
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  padding: 0px 5px 5px;
+
+  font-size: 14px;
+
+  width: 525px;
+  height: 43px;
+
+  margin-top: 30px;
+
+  border-bottom: 1px solid rgba(154, 154, 154, 0.55);
+}
+
+/* =========================
+   INFO BANNER
+========================= */
+
+.medical-info-banner {
+  font-family: "Anek Bangla";
+
+  font-style: normal;
+  font-weight: 400;
+
+  line-height: 26px;
+
+  color: #4f6e78;
+
+  font-size: 14px;
+
+  border-radius: 6px;
+
+  flex-direction: row;
+
+  display: flex;
+
+  align-items: center;
+
+  width: 525px;
+  height: 43px;
+
+  padding: 10px 10px 10px 9px;
+
+  gap: 5px;
+
+  margin-bottom: 5px;
+
+  background: rgba(35, 65, 72, 0.1);
+
+  border: 0.5px solid rgba(53, 88, 103, 0.71);
+}
+
+/* =========================
+   EMPTY STATE
+========================= */
+
+.medical-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+
+  font-size: 13px;
+
+  width: 434px;
+  height: 26px;
+
+  line-height: 26px;
+}
+
+/* =========================
+   DEPENDENTS
+========================= */
+
+.medical-dependent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.medical-dependent-card {
+  border: 1px solid #e8e8e8;
+  border-radius: 10px;
+  padding: 12px;
+  background: rgba(79, 110, 120, 0.1);
+  width: 525px;
+}
+
+.medical-dependent-card-inner {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.medical-dependent-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.medical-dependent-name {
+  font-family: "Anek Bangla";
+  font-style: normal;
+  font-weight: 500;
+  font-size: 14px;
+  color: #4f6e78;
+  margin-top: -10px;
+}
+
+.medical-dependent-meta {
+  font-family: "Anek Bangla", sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: #6b7280;
+  margin-top: -10px;
+}
+
+.medical-dependent-remove-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 14px;
+  height: 25px;
+  background: rgba(226, 33, 33, 0.33);
+  color: #d31212;
+  font-family: "Anek Bangla", sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  border: 0.5px solid #eb1f1f;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  white-space: nowrap;
+}
+
+.medical-dependent-remove-btn:hover {
+  background: #a93226;
+  border: 0.5px solid #a93226;
+  color: #fff;
+}
+.medical-dependent-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 20px;
+  width: 100%;
+  padding: 0px 0 20px 0;
+  border-bottom: 1px solid rgba(154, 154, 154, 0.55);
+
+  box-sizing: border-box;
+}
+
+.medical-input-group.full-width {
+  grid-column: 1 / -1;
+}
+
+/* ===== SELECT WRAPPER ===== */
+.medical-select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.medical-select-wrapper .icon-dropdown-icon {
+  position: absolute;
+  right: 8px; /* sits at the right edge of the select */
+  top: 50%;
+  left: unset; /* override the hardcoded left: 230px */
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+}
+
+/* =========================
+   INPUT GROUP
+========================= */
+
+.medical-input-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.medical-input-group label {
+  width: 51px;
+  height: 26px;
+  font-family: "Anek Bangla";
+  font-style: normal;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 26px;
+  color: #4f6e78;
+  white-space: nowrap;
+}
+
+/* ===== DROPDOWNS ===== */
+
+.icon-dropdown-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.icon-dropdown-icon {
+  position: absolute;
+  left: 225px;
+  top: 185px;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+}
+
+.medical-input-group input,
+.medical-input-group select {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px 8px;
+  gap: 5px;
+  font-size: 12px;
+  width: 100%;
+  height: 32px;
+  background: transparent;
+  color: #5c5c5c;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  border: 1px solid rgba(154, 154, 154, 0.55);
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+.medical-input-group select:invalid {
+  color: #9ca3af;
+}
+
+/* =========================
+   ADD DEPENDENT BUTTON
+========================= */
+
+.medical-add-dependent-button {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  gap: 9px;
+
+  width: 525px;
+  height: 43px;
+
+  padding: 10px;
+
+  border-radius: 4px;
+
+  border: 0.8px dashed #638549;
+
+  background: rgba(255, 255, 255, 0.4);
+
+  font-family: "Anek Bangla";
+
+  font-weight: 400;
+
+  font-size: 13px;
+
+  line-height: 24px;
+
+  letter-spacing: 0.02em;
+
+  color: #4f6e78;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.medical-add-dependent-button:hover {
+  background: rgba(99, 133, 73, 0.05);
+}
+
+/* =========================
+   CATEGORY WRAPPER
+========================= */
+
+.medical-category-container {
+  display: grid;
+  gap: 28px;
+}
+
+.medical-category-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.medical-category-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #2c5f6d;
+  margin: 0;
+}
+
+/* =========================
+   PLAN GRID
+========================= */
+
+.medical-plan-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  width: 525px;
+}
+
+/* =========================
+   PLAN CARD
+========================= */
+
+.medical-plan-card {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 10px;
+  position: relative;
+  gap: 2px;
+  width: 100%;
+  min-height: 150px;
+  height: auto;
+  background: rgba(255, 255, 255, 0.41);
+  border: 0.5px solid rgba(17, 114, 154, 0.62);
+  border-radius: 5px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.medical-plan-card:hover {
+  border-color: #2c5f6d;
+  transform: translateY(-2px);
+}
+
+.medical-plan-card.selected {
+  border: 2px solid #2c5f6d;
+  background: #f2fbfd;
+}
+
+/* =========================
+   PLAN TITLE
+========================= */
+
+.medical-plan-card h4 {
+  margin: 0;
+  font-family: "Anek Bangla";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 24px;
+  letter-spacing: 0.02em;
+  color: #006088;
+}
+
+/* =========================
+   SELECTED BADGE
+========================= */
+
+.medical-selected-badge {
+  position: absolute;
+  top: 5px;
+  left: 183px;
+  font-size: 11px;
+  background: #2c5f6d;
+  color: white;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+/* =========================
+   PLAN STATUS
+========================= */
+ical-price-card .medical-plan-status {
+  display: flex;
+  align-items: center;
+
+  gap: 5px;
+
+  width: 100px;
+  height: 19px;
+
+  margin-top: 5px;
+  margin-left: 0px;
+
+  font-family: "Anek Bangla";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 19px;
+
+  letter-spacing: 0.02em;
+
+  color: #355867;
+}
+
+.medical-plan-status span {
+  white-space: nowrap;
+}
+
+/* =========================
+   PLAN PRICING CONTAINER
+========================= */
+
+.medical-plan-pricing {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 60px;
+  row-gap: -10px;
+  padding: 2px 0 0 0;
+  margin-left: -10px;
+  margin-top: -5px;
+  width: 196px;
+  height: auto;
+}
+
+/* =========================
+   PRICE CARD
+========================= */
+
+.medical-price-card {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 5px 9px;
+}
+
+/* =========================
+   PRICE CONTENT
+========================= */
+
+.medical-price-content {
+  /* display: flex;
+  flex-direction: column;
+  align-items: flex-start; */
+  padding: 0px;
+  gap: 20px;
+  width: 42px;
+  height: 38px;
+}
+
+/* =========================
+   PRICE TITLE
+========================= */
+
+.medical-price-title {
+  width: 100px;
+  height: 10px;
+  position: absolute;
+  font-family: "League Spartan";
+  font-style: normal;
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 5px 5px;
+  font-size: 9.5px;
+  margin-left: 25px;
+  line-height: 10px;
+  letter-spacing: 0.02em;
+  margin-top: 5px;
+  color: #355867;
+}
+
+/* =========================
+   AMOUNT BOX
+========================= */
+
+.medical-price-amount-box {
+  padding: 5px 5px;
+  gap: 0px;
+  width: 102px;
+  height: 30px;
+  background: rgba(255, 255, 255, 0.71);
+  border-radius: 3px;
+}
+
+/* =========================
+   AMOUNT TEXT
+========================= */
+
+.medical-price-amount {
+  font-family: "Anek Bangla";
+  font-style: bold;
+  margin-left: 25px;
+  font-weight: 750;
+    display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  font-size: 10px;
+  letter-spacing: 0.00em;
+  color: #4f6e78;
+  margin-top: 7px;
+}
+
+.medical-total-price-card {
+  position: relative;
+  left: 144px;
+  bottom: 0px;
+  display: flex;
+  margin-top: 0px;
+  flex-direction: row;
+  align-items: center;
+}
+
+.medical-total-price-card .medical-price-content {
+  width: auto;
+  height: auto;
+  align-items: flex-end;
+}
+
+.medical-total-price-card .medical-price-title {
+    font-size: 12px;
+  font-weight: 700;
+  color: #4f6e78;
+  margin-left: -25px;
+}
+
+.medical-total-price-card .medical-price-amount-box {
+  width: auto;
+  min-width: 80px;
+  height: 30px;
+  padding: 4px 10px;
+  display: flex;
+  margin-bottom: 15px;
+  justify-content: center;
+  align-items: center;
+  background: #dcedf1;
+  border: 1px solid #2c5f6d;
+  border-radius: 6px;
+}
+
+.medical-total-price-card .medical-price-amount {
+  font-size: 13px;
+  font-weight: 700;
+  margin-top: 2px;
+  color: #2c5f6d;
+  white-space: nowrap;
+}
+
+/* =========================
+   MODAL OVERLAY
+========================= */
+
+.medical-dependent-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+}
+
+/* =========================
+   MODAL
+========================= */
+
+.medical-dependent-modal {
+  position: relative;
+  width: 520px;
+  height: 450px;
+
+  border-radius: 13px;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(
+    135deg,
+    #eeeef1,
+    #eff1f3,
+    #e7eaeb,
+    #d6d6d9,
+    #c4c4c5
+  );
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+  animation: modalFadeIn 0.25s ease;
+  overflow: hidden;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* =========================
+   MODAL HEADER
+========================= */
+
+.medical-dependent-modal-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0px 26px;
+  left: 0px;
+  font: Anek Bangla;
+  font-size: 18px;
+  font-weight: 600;
+  width: 100%;
+  color: #fff;
+  height: 54px;
+  background: #355867;
+  border-radius: 13px 13px 0px 0px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.medical-dependent-modal-header span {
+  margin-left: 12px;
+}
+/* =========================
+   MODAL BODY
+========================= */
+
+.medical-dependent-modal-body {
+  display: flex;
+  flex-direction: column;
+  padding: 14px 24px 16px;
+  gap: 0;
+  flex: 1;
+}
+
+.date-input-wrapper {
+  position: relative;
+}
+
+.date-picker-dropdown-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+}
+
+/* =========================
+   MODAL FOOTER
+========================= */
+
+.medical-dependent-modal-footer {
+  width: 289px;
+  height: 28px;
+}
+
+/* =========================
+   MODAL BUTTONS
+========================= */
+
+.medical-btn-cancel {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 5px;
+  margin-top: -20px;
+  margin-left: 190px;
+  color: #5c5c5c;
+  font-size: 14px;
+  font-family: "Anek Bangla", sans-serif;
+  width: 140px;
+  height: 35px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(112, 112, 112, 0.5);
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.medical-btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.medical-button-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  /* width: 100%; */
+  width: 905px;
+  margin-top: 20px;
+  margin-left: auto;
+  margin-right: auto;
+  flex-shrink: 0;
+}
+
+.medical-btn-primary {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  margin-top: -36px;
+  margin-left: 358px;
+  width: 140px;
+  height: 35px;
+  padding: 0px;
+  color: #fff;
+  font-family: "Anek Bangla", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  letter-spacing: 0.32px;
+  background: var(--primary-color);
+  border: 1px solid var(--primary-color);
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.medical-btn-primary:hover {
+  opacity: 0.9;
+}
+
+
+
+.medical-back-btn {
+  width: 187px;
+  height: 47px;
+  flex-direction: row;
+  display: flex;
+  color: var(--primary-color);
+  text-align: center;
+  font-family: "Anek Bangla", sans-serif;
+  font-style: normal;
+  padding: 0 10px;
+  font-weight: 400;
+  font-size: 16px;
+  letter-spacing: 0.32px;
+  justify-content: center;
+  align-items: center;
+  margin-left: -182px;
+  margin-top: 0px;
+  border: 1px solid var(--primary-color);
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.medical-back-btn:hover {
+  background-color: rgba(53, 88, 103, 0.1);
+}
+
+
+.medical-next-btn {
+  width: 187px;
+  height: 47px;
+  display: flex;
+  padding: 0 10px 0px 10px;
+  justify-content: center;
+  text-align: center;
+  font-family: "Anek Bangla", sans-serif;
+  line-height: normal;
+  letter-spacing: 0.32px;
+  font-style: normal;
+  font-weight: 400;
+  opacity: 0.9;
+  color: var(--white);
+  align-items: center;
+  margin-right: 84px;
+  gap: 10px;
+  font-size: 16px;
+  transition: background-color 0.2s ease;
+  border-radius: 10px;
+  border: 1px solid var(--light-grey);
+  background: var(--primary-color);
+  background-color: var(--primary-color);
+  color: white;
+  cursor: pointer;
+}
+
+.emp-b1ank-next-button {
+  position: relative;
+  display: flex;
+  width: 187px;
+  height: 47px;
+  top:53px;
+  padding: 0 10px 0px 10px;
+  justify-content: center;
+  align-items: center;
+  left: 225px;
+  color: var(--white);
+  text-align: center;
+  font-family: "Anek Bangla", sans-serif;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  letter-spacing: 0.32px;
+  border: 1px solid var(--light-grey);
+  opacity: 0.9;
+  background: var(--primary-color);
+  background-color: var(--primary-color);
+  border-radius: 10px;
+  display: flex;
+  gap: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-top: 85px;
+}
+
+.medical-next-btn:hover {
+  background-color: var(--primary-light);
+}
+
+.medical-error-message {
+  display: block;
+  width: 100%;
+  color: red;
+  font-size: 12px;
+  text-align: left;
+  margin-bottom: -10px;
+
+}
+
+.medical-error-input {
+  border: 1px solid red !important;
+  outline: none;
+}

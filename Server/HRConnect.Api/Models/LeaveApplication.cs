@@ -12,7 +12,7 @@ namespace HRConnect.Api.Models
     public int LeaveTypeId { get; set; }
     public LeaveType LeaveType { get; set; } = null!;
 
-    public string Description { get; set; } = null!;
+        public string? Description { get; set; }
 
     public DateOnly StartDate { get; set; }
 
@@ -37,9 +37,10 @@ namespace HRConnect.Api.Models
     public string? RejectionReason { get; set; }
     public Guid ApprovalToken { get; set; } = Guid.NewGuid();
 
-    public DateTime TokenExpiry { get; set; } = DateTime.UtcNow.AddDays(2);
-    [Timestamp]
-    public byte[] RowVersion { get; set; } = Array.Empty<byte>();
+        public DateTime TokenExpiry { get; set; } = DateTime.UtcNow.AddDays(2);
+        [Timestamp]
+        public byte[] RowVersion { get; set; } = Array.Empty<byte>();
+        public ICollection<LeaveDocument> Documents { get; set; } = new List<LeaveDocument>();
 
   }
 

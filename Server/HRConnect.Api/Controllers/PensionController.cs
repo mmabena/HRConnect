@@ -40,7 +40,7 @@
     public async Task<ActionResult<IEnumerable<PensionOption>>> GetPensionOptions(
         CancellationToken cancellationToken)
     {
-      IEnumerable<PensionOption> options =
+      IEnumerable<PensionOptionDto> options =
           await pensionFundService.GetPensionOptionsAsync(cancellationToken);
 
       return Ok(options);

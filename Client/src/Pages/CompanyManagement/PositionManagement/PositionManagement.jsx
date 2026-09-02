@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import NavBar from "../../../components/NavBar.jsx";
+import NavBar from "../../../Components/NavBar.jsx";
 
-import AddPositionManagement from "../../../components/companyManagement/PositionManagement/AddPositionManagment";
-import EditPositionManagement from "../../../components/companyManagement/PositionManagement/EditPositionManagement";
-import ChangePositionManagement from "../../../components/companyManagement/PositionManagement/ChangePositionManagement";
+import AddPositionManagement from "../../../Components/companyManagement/PositionManagement/AddPositionManagment";
+import EditPositionManagement from "../../../Components/companyManagement/PositionManagement/EditPositionManagement";
+import ChangePositionManagement from "../../../Components/companyManagement/PositionManagement/ChangePositionManagement";
 
 import usePositions from "../../../hooks/usePositions";
 import usePagination from "../../../hooks/usePagination";
@@ -41,8 +41,6 @@ const PositionManagement = ({ title }) => {
 
   const pageOptions = [10, 15, 20, 25];
 
-
-
   const tabWidths = [168, 133, 122, 134, 154, 125, 120];
 
   // -------------------
@@ -62,16 +60,14 @@ const PositionManagement = ({ title }) => {
   if (!hasAccess) return <h2>Access Denied. SuperUser only.</h2>;
 
   return (
-   <div className="menu-background custom-scrollbar">
-        <div className="wrap-container">
-          <div className="heading-container">
-            Comapany Management
-          </div>
-        </div>
-        <div className="navbar-with-button">
-          <NavBar />
-        </div>
-        {/* <div className="cmn-header-right-section">
+    <div className="menu-background custom-scrollbar">
+      <div className="wrap-container">
+        <div className="heading-container">Comapany Management</div>
+      </div>
+      <div className="navbar-with-button">
+        <NavBar />
+      </div>
+      {/* <div className="cmn-header-right-section">
           <div className="cmn-datetime-wrapper">
             <div className="cmn-datetime-date-container">
               <span className="cmn-datetime-month">{currentDate}</span>
@@ -82,170 +78,167 @@ const PositionManagement = ({ title }) => {
           </div>
         </div> */}
 
-        {/* Navigation & Add Button */}
-        <div className="nav-bar-with-buttons">
+      {/* Navigation & Add Button */}
+      <div className="nav-bar-with-buttons">
+        {activeTab === "Position Management" && (
+          <button
+            className="add-positions-button"
+            onClick={() => setShowAddModal(true)}
+          >
+            Add New Position
+          </button>
+        )}
+      </div>
 
-          {activeTab === "Position Management" && (
-            <button
-              className="add-positions-button"
-              onClick={() => setShowAddModal(true)}
-            >
-              Add New Position
-            </button>
-          )}
-        </div>
+      {/* Positions Table */}
+      <div className="manage-positions">
+        <table className="positions-table">
+          <thead>
+            <tr>
+              <th>Position Title</th>
+              <th>Position Grade</th>
+              <th>Occupational Description</th>
+              <th>Effective Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
 
-        {/* Positions Table */}
-        <div className="manage-positions">
-          <table className="positions-table">
-            <thead>
+          <tbody>
+            {currentPositions.length === 0 ? (
               <tr>
-                <th>Position Title</th>
-                <th>Position Grade</th>
-                <th>Occupational Description</th>
-                <th>Effective Date</th>
-                <th>Actions</th>
+                <td colSpan={5}>No positions found.</td>
               </tr>
-            </thead>
+            ) : (
+              currentPositions.map((position) => (
+                <tr key={position.positionId}>
+                  <td>{position.positionTitle}</td>
+                  <td>{position.jobGrade?.name || "N/A"}</td>
 
-            <tbody>
-              {currentPositions.length === 0 ? (
-                <tr>
-                  <td colSpan={5}>No positions found.</td>
+                  <td title={position.occupationalLevel?.description || "N/A"}>
+                    {position.occupationalLevel?.description || "N/A"}
+                  </td>
+
+                  <td>
+                    {new Date(position.createdDate).toLocaleDateString(
+                      "en-GB",
+                      {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      },
+                    )}
+                  </td>
+
+                  <td>
+                    <div className="edit-button-group">
+                      <button
+                        className="text-button"
+                        onClick={() => {
+                          setSelectedPositionId(position.positionId);
+                          setShowEditModal(true);
+                        }}
+                      >
+                        Edit
+                      </button>
+                    </div>
+                  </td>
                 </tr>
-              ) : (
-                currentPositions.map((position) => (
-                  <tr key={position.positionId}>
-                    <td>{position.positionTitle}</td>
-                    <td>{position.jobGrade?.name || "N/A"}</td>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
 
-                    <td
-                      title={position.occupationalLevel?.description || "N/A"}
-                    >
-                      {position.occupationalLevel?.description || "N/A"}
-                    </td>
+      {/* Pagination */}
+      <div className="pagination-wrapper">
+        <div className="position-pagination-right">
+          <img
+            src="/images/arrow_drop_down_circle.png"
+            alt="Previous"
+            className="pagination-arrow-prev"
+            onClick={handlePrev}
+            style={{
+              transform: "rotate(90deg)",
+              cursor: currentPage > 1 ? "pointer" : "not-allowed",
+              opacity: currentPage > 1 ? 1 : 0.4,
+            }}
+          />
+          <div className="position-page-numbers">
+            {Array.from({ length: 10 }, (_, i) => {
+              const startPage = Math.floor((currentPage - 1) / 10) * 10;
+              const pageNumber = startPage + i + 1;
 
-                    <td>
-                      {new Date(position.createdDate).toLocaleDateString(
-                        "en-GB",
-                        {
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                        },
-                      )}
-                    </td>
-
-                    <td>
-                      <div className="edit-button-group">
-                        <button
-                          className="text-button"
-                          onClick={() => {
-                            setSelectedPositionId(position.positionId);
-                            setShowEditModal(true);
-                          }}
-                        >
-                          Edit
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        <div className="pagination-wrapper">
-          <div className="position-pagination-right">
-            <img
-              src="/images/arrow_drop_down_circle.png"
-              alt="Previous"
-              className="pagination-arrow-prev"
-              onClick={handlePrev}
-              style={{
-                transform: "rotate(90deg)",
-                cursor: currentPage > 1 ? "pointer" : "not-allowed",
-                opacity: currentPage > 1 ? 1 : 0.4,
-              }}
-            />
-            <div className="position-page-numbers">
-              {Array.from({ length: 10 }, (_, i) => {
-                const startPage = Math.floor((currentPage - 1) / 10) * 10;
-                const pageNumber = startPage + i + 1;
-
-                if (pageNumber > totalPages) {
-                  return (
-                    <button
-                      key={`empty-${i}`}
-                      className="page-number placeholder"
-                      disabled
-                    >
-                      {/* empty placeholder */}
-                    </button>
-                  );
-                }
-
+              if (pageNumber > totalPages) {
                 return (
                   <button
-                    key={pageNumber}
-                    className={`page-number ${
-                      currentPage === pageNumber ? "active-page" : ""
-                    }`}
-                    onClick={() => handlePageClick(pageNumber)}
+                    key={`empty-${i}`}
+                    className="page-number placeholder"
+                    disabled
                   >
-                    {pageNumber}
+                    {/* empty placeholder */}
                   </button>
                 );
-              })}
-            </div>
+              }
 
-            <img
-              src="/images/arrow_drop_down_circle.png"
-              alt="Next"
-              className="pagination-arrow next"
-              onClick={handleNext}
-              style={{
-                transform: "rotate(-90deg)",
-                cursor: currentPage < totalPages ? "pointer" : "not-allowed",
-                opacity: currentPage < totalPages ? 1 : 0.4,
-              }}
-            />
-
-            <div className="pagination-info">
-              {positions.length} Positions @ {COMPANY_NAME}
-            </div>
+              return (
+                <button
+                  key={pageNumber}
+                  className={`page-number ${
+                    currentPage === pageNumber ? "active-page" : ""
+                  }`}
+                  onClick={() => handlePageClick(pageNumber)}
+                >
+                  {pageNumber}
+                </button>
+              );
+            })}
           </div>
 
-          {/* Modals */}
-          {showAddModal && (
-            <AddPositionManagement
-              isOpen={showAddModal}
-              onClose={() => setShowAddModal(false)}
-            />
-          )}
+          <img
+            src="/images/arrow_drop_down_circle.png"
+            alt="Next"
+            className="pagination-arrow next"
+            onClick={handleNext}
+            style={{
+              transform: "rotate(-90deg)",
+              cursor: currentPage < totalPages ? "pointer" : "not-allowed",
+              opacity: currentPage < totalPages ? 1 : 0.4,
+            }}
+          />
 
-          {showEditModal && (
-            <EditPositionManagement
-              id={selectedPositionId}
-              isOpen={showEditModal}
-              onClose={() => setShowEditModal(false)}
-              onOpenChangeModal={openChangeModal}
-            />
-          )}
-
-          {changeModalData && (
-            <ChangePositionManagement
-              isOpen
-              onClose={closeChangeModal}
-              currentPosition={currentPosition}
-              linkedEmployeesCount={linkedEmployeesCount}
-              attemptedTitle={attemptedTitle}
-            />
-          )}
+          <div className="pagination-info">
+            {positions.length} Positions @ {COMPANY_NAME}
+          </div>
         </div>
+
+        {/* Modals */}
+        {showAddModal && (
+          <AddPositionManagement
+            isOpen={showAddModal}
+            onClose={() => setShowAddModal(false)}
+          />
+        )}
+
+        {showEditModal && (
+          <EditPositionManagement
+            id={selectedPositionId}
+            isOpen={showEditModal}
+            onClose={() => setShowEditModal(false)}
+            onOpenChangeModal={openChangeModal}
+          />
+        )}
+
+        {changeModalData && (
+          <ChangePositionManagement
+            isOpen
+            onClose={closeChangeModal}
+            currentPosition={currentPosition}
+            linkedEmployeesCount={linkedEmployeesCount}
+            attemptedTitle={attemptedTitle}
+          />
+        )}
       </div>
+    </div>
   );
 };
 

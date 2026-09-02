@@ -66,6 +66,19 @@
 
       return existingPensionDeduction;
     }
+    public async Task AddRangeAsync(List<PensionDeduction> deductions)
+    {
+      await _context.PensionDeductions.AddRangeAsync(deductions);
+      await _context.SaveChangesAsync();
+    }
+
+    public async Task<bool> PayrollRunAlreadyProcessedAsync(int payrollRunId)
+    {
+      return await _context.PensionDeductions
+          .AnyAsync(x => x.PayrollRunId == payrollRunId);
+    }
+
+
 
     ///<summary>
     ///Get employee latest pension deduction by employee id from the database

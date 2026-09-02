@@ -8,7 +8,7 @@ const AddPositionManagement = () => {
     effectiveDate: "",
     jobGradeId: "",
     occupationalLevelId: "",
-    occupationalLevel: ""
+    occupationalLevel: "",
   });
 
   const [jobGrades, setJobGrades] = useState([]);
@@ -25,7 +25,9 @@ const AddPositionManagement = () => {
     fetch("http://localhost:5037/api/OccupationalLevels")
       .then((res) => res.json())
       .then((data) => setOccupationalLevels(data))
-      .catch((error) => console.error("Failed to fetch occupational levels:", error));
+      .catch((error) =>
+        console.error("Failed to fetch occupational levels:", error),
+      );
   }, []);
 
   const handleChange = (e) => {
@@ -33,16 +35,17 @@ const AddPositionManagement = () => {
 
     if (name === "occupationalLevel") {
       const matches = occupationalLevels.filter((level) =>
-        level.occupationalLevelName.toLowerCase().includes(value.toLowerCase())
+        level.occupationalLevelName.toLowerCase().includes(value.toLowerCase()),
       );
       const selected = occupationalLevels.find(
-        (level) => level.occupationalLevelName.toLowerCase() === value.toLowerCase()
+        (level) =>
+          level.occupationalLevelName.toLowerCase() === value.toLowerCase(),
       );
 
       setFormData((prev) => ({
         ...prev,
         occupationalLevel: value,
-        occupationalLevelId: selected ? selected.occupationalLevelId : ""
+        occupationalLevelId: selected ? selected.occupationalLevelId : "",
       }));
 
       setFilteredLevels(matches);
@@ -54,12 +57,12 @@ const AddPositionManagement = () => {
 
   const handleSuggestionClick = (selectedValue) => {
     const selected = occupationalLevels.find(
-      (level) => level.occupationalLevelName === selectedValue
+      (level) => level.occupationalLevelName === selectedValue,
     );
     setFormData((prev) => ({
       ...prev,
       occupationalLevel: selectedValue,
-      occupationalLevelId: selected?.occupationalLevelId || ""
+      occupationalLevelId: selected?.occupationalLevelId || "",
     }));
     setShowSuggestions(false);
   };
@@ -67,8 +70,14 @@ const AddPositionManagement = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { positionTitle, effectiveDate, occupationalLevelId, jobGradeId } = formData;
-    if (!positionTitle || !effectiveDate || !occupationalLevelId || !jobGradeId) {
+    const { positionTitle, effectiveDate, occupationalLevelId, jobGradeId } =
+      formData;
+    if (
+      !positionTitle ||
+      !effectiveDate ||
+      !occupationalLevelId ||
+      !jobGradeId
+    ) {
       alert("All fields are required");
       return;
     }
@@ -100,122 +109,122 @@ const AddPositionManagement = () => {
 
   return (
     <div className="menu-background custom-scrollbar">
-
       <div className="center-frame">
         <div className="left-frame">
           <div className="left-frame-centered">
             <div className="headings-container">
-     <div className="apm-logo">
-              <span className="apm-logo-bold">singular</span>
-              <span className="apm-logo-light">express</span>
+              <div className="apm-logo">
+                <span className="apm-logo-bold">singular</span>
+                <span className="apm-logo-light">express</span>
+              </div>
+              <h2 className="apm-title">Position Details</h2>
+              <p className="apm-subtitle">
+                Please complete the form below to add a
+                <br />
+                <span className="apm-highlight">new Position</span>
+              </p>
             </div>
-            <h2 className="apm-title">Position Details</h2>
-            <p className="apm-subtitle">
-              Please complete the form below to add a
-              <br />
-              <span className="apm-highlight">new Position</span>
-            </p>
+
+            <form onSubmit={handleSubmit} className="apm-form">
+              <div className="apm-input-group">
+                <input
+                  type="text"
+                  name="positionTitle"
+                  placeholder="Position title"
+                  className="apm-input"
+                  value={formData.positionTitle}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="apm-input-group">
+                <input
+                  type="date"
+                  name="effectiveDate"
+                  className="apm-input"
+                  value={formData.effectiveDate}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="apm-input-group apm-dropdown-wrapper">
+                <select
+                  name="jobGradeId"
+                  className="apm-input select-dropdown"
+                  value={formData.jobGradeId}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Grade</option>
+                  {jobGrades.map((grade) => (
+                    <option key={grade.jobGradeId} value={grade.jobGradeId}>
+                      {grade.jobGradeName}
+                    </option>
+                  ))}
+                </select>
+                <img
+                  src="/images/arrow_drop_down_circle.png"
+                  alt="Dropdown Icon"
+                  className="apm-dropdown-icon"
+                />
+              </div>
+
+              {/* Custom Occupational Level Input */}
+              <div className="apm-input-group">
+                <div className="apm-dropdown-wrapper custom-autocomplete">
+                  <input
+                    type="text"
+                    name="occupationalLevel"
+                    placeholder="Occupational Level"
+                    className="apm-input"
+                    value={formData.occupationalLevel}
+                    onChange={handleChange}
+                    onFocus={() => {
+                      if (formData.occupationalLevel) {
+                        setShowSuggestions(true);
+                      }
+                    }}
+                    onBlur={() =>
+                      setTimeout(() => setShowSuggestions(false), 100)
+                    }
+                    autoComplete="off"
+                    required
+                  />
+
+                  {showSuggestions && filteredLevels.length > 0 && (
+                    <ul className="autocomplete-list">
+                      {filteredLevels.map((level, index) => (
+                        <li
+                          key={index}
+                          className="autocomplete-item"
+                          onClick={() =>
+                            handleSuggestionClick(level.occupationalLevelName)
+                          }
+                        >
+                          {level.occupationalLevelName}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
+
+              <button type="submit" className="apm-save-button">
+                Save
+              </button>
+
+              <div className="apm-footer">
+                <p>Privacy Policy &nbsp; | &nbsp; Terms & Conditions</p>
+                <p>Copyright © 2025 Singular Systems. All rights reserved.</p>
+              </div>
+            </form>
           </div>
-
-          <form onSubmit={handleSubmit} className="apm-form">
-            <div className="apm-input-group">
-              <input
-                type="text"
-                name="positionTitle"
-                placeholder="Position title"
-                className="apm-input"
-                value={formData.positionTitle}
-                onChange={handleChange}
-                required
-              />
-            </div>
-<div className="apm-input-group">
-  <input
-    type="date"
-    name="effectiveDate"
-    className="apm-input"
-    value={formData.effectiveDate}
-    onChange={handleChange}
-    required
-  />
-</div>
-
-
-            <div className="apm-input-group apm-dropdown-wrapper">
-              <select
-                name="jobGradeId"
-                className="apm-input select-dropdown"
-                value={formData.jobGradeId}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Grade</option>
-                {jobGrades.map((grade) => (
-                  <option key={grade.jobGradeId} value={grade.jobGradeId}>
-                    {grade.jobGradeName}
-                  </option>
-                ))}
-              </select>
-              <img
-                src="/images/arrow_drop_down_circle.png"
-                alt="Dropdown Icon"
-                className="apm-dropdown-icon"
-              />
-            </div>
-
-            {/* Custom Occupational Level Input */}
-            <div className="apm-input-group">
-  <div className="apm-dropdown-wrapper custom-autocomplete">
-    <input
-      type="text"
-      name="occupationalLevel"
-      placeholder="Occupational Level"
-      className="apm-input"
-      value={formData.occupationalLevel}
-      onChange={handleChange}
-      onFocus={() => {
-        if (formData.occupationalLevel) {
-          setShowSuggestions(true);
-        }
-      }}
-      onBlur={() => setTimeout(() => setShowSuggestions(false), 100)}
-      autoComplete="off"
-      required
-    />
-
-    {showSuggestions && filteredLevels.length > 0 && (
-      <ul className="autocomplete-list">
-        {filteredLevels.map((level, index) => (
-          <li
-            key={index}
-            className="autocomplete-item"
-            onClick={() => handleSuggestionClick(level.occupationalLevelName)}
-          >
-            {level.occupationalLevelName}
-          </li>
-        ))}
-      </ul>
-    )}
-  </div>
-</div>
-
-
-            <button type="submit" className="apm-save-button">
-              Save
-            </button>
-
-
-             <div className="apm-footer">
-              <p>Privacy Policy &nbsp; | &nbsp; Terms & Conditions</p>
-              <p>Copyright © 2025 Singular Systems. All rights reserved.</p>
-            </div>
-          </form>
-        </div>
         </div>
 
         <div className="right-frame">
-  <div className="apm-ellipse-wrapper">        
-       <div className="apm-ellipse-background"></div>
+          <div className="apm-ellipse-wrapper">
+            <div className="apm-ellipse-background"></div>
           </div>
           <div className="image-wrapper">
             <img

@@ -17,16 +17,45 @@ namespace HRConnect.Api.Controllers
       _leaveRuleService = leaveRuleService;
     }
 
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateRule(
-        int id,
-        [FromBody] UpdateLeaveRuleRequest request)
-    {
-      request.RuleId = id;
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateRule(
+            int id,
+            [FromBody] UpdateLeaveRuleRequest request)
+        {
+            // BASIC VALIDATION
+            if (request == null)
+                return BadRequest("Request body is required.");
 
-      await _leaveRuleService.UpdateLeaveEntitlementRuleAsync(request);
+            if (request.NewDaysAllocated < 0)
+                return BadRequest("Days allocated cannot be negative.");
 
-      return Ok("Rule updated and employees recalculated.");
+            if (id <= 0)
+                return BadRequest("Invalid RuleId.");
+
+            request.RuleId = id;
+
+            try
+            {
+                await _leaveRuleService.UpdateLeaveEntitlementRuleAsync(request);
+
+                return Ok(new
+                {
+                    Message = "Rule updated successfully.",
+                    RuleId = id
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound("Rule not found.");
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An unexpected error occurred.");
+            }
+        }
     }
-  }
 }

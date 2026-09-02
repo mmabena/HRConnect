@@ -41,7 +41,6 @@ namespace HRConnect.Tests
       return new ApplicationDBContext(options, mockProtector.Object);
     }
 
-    // 🔥 IMPORTANT: return CONCRETE types (fixes CA1859)
     private static LeaveBalanceService CreateLeaveBalanceService(ApplicationDBContext context)
         => new LeaveBalanceService(context);
 
@@ -84,7 +83,6 @@ namespace HRConnect.Tests
       );
     }
 
-    // ---------------- BASIC TEST ----------------
 
     [Fact]
     public async Task Initialize_ShouldCreateBalance()
@@ -92,57 +90,11 @@ namespace HRConnect.Tests
       var context = GetDb();
 
       context.JobGrades.Add(new JobGrade { JobGradeId = 1, Name = "G1" });
-      context.Positions.AddRange(
-new Position { PositionId = 1, JobGradeId = 1, OccupationalLevelId = 1 },
-new Position { PositionId = 2, JobGradeId = 1, OccupationalLevelId = 1 }
-      );
-
-      var employee = new Employee
+      context.JobGradeGroupMaps.Add(new JobGradeGroupMap
       {
-        EmployeeId = Guid.NewGuid().ToString(),
-        PositionId = 1,
-        Gender = Gender.Male,
-        StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1))
-      };
-
-      context.Employees.Add(employee);
-
-      context.LeaveTypes.Add(new LeaveType
-      {
-        Id = 1,
-        Code = "AL",
-        Name = "Annual Leave",
-        Description = "Annual Leave",
-        IsActive = true
-      });
-
-      context.LeaveEntitlementRules.Add(new LeaveEntitlementRule
-      {
-        Id = 1,
-        LeaveTypeId = 1,
         JobGradeId = 1,
-        MinYearsService = 0,
-        DaysAllocated = 15,
-        IsActive = true
+        GroupKey = "GROUP_A"
       });
-
-      await context.SaveChangesAsync();
-
-      var service = CreateLeaveBalanceService(context);
-
-      await service.InitializeEmployeeLeaveBalancesAsync(employee.EmployeeId);
-
-      Assert.Single(context.EmployeeLeaveBalances);
-    }
-
-    // ---------------- DUPLICATE PROTECTION ----------------
-
-    [Fact]
-    public async Task Initialize_ShouldNotDuplicate()
-    {
-      var context = GetDb();
-
-      context.JobGrades.Add(new JobGrade { JobGradeId = 1, Name = "G1" });
       context.Positions.AddRange(
           new Position { PositionId = 1, JobGradeId = 1, OccupationalLevelId = 1 },
           new Position { PositionId = 2, JobGradeId = 1, OccupationalLevelId = 1 }
@@ -171,7 +123,62 @@ new Position { PositionId = 2, JobGradeId = 1, OccupationalLevelId = 1 }
       {
         Id = 1,
         LeaveTypeId = 1,
-        JobGradeId = 1,
+        GroupKey = "GROUP_A",
+        MinYearsService = 0,
+        DaysAllocated = 15,
+        IsActive = true
+      });
+
+      await context.SaveChangesAsync();
+
+      var service = CreateLeaveBalanceService(context);
+
+      await service.InitializeEmployeeLeaveBalancesAsync(employee.EmployeeId);
+
+      Assert.Single(context.EmployeeLeaveBalances);
+    }
+
+    [Fact]
+    public async Task Initialize_ShouldNotDuplicate()
+    {
+      var context = GetDb();
+
+      context.JobGrades.Add(new JobGrade { JobGradeId = 1, Name = "G1" });
+      context.JobGradeGroupMaps.AddRange(
+    new JobGradeGroupMap
+    {
+      JobGradeId = 1,
+      GroupKey = "GROUP_A"
+    });
+      context.Positions.AddRange(
+          new Position { PositionId = 1, JobGradeId = 1, OccupationalLevelId = 1 },
+          new Position { PositionId = 2, JobGradeId = 1, OccupationalLevelId = 1 }
+      );
+
+      var employee = new Employee
+      {
+        EmployeeId = Guid.NewGuid().ToString(),
+        PositionId = 1,
+        Gender = Gender.Male,
+        StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1))
+      };
+
+      context.Employees.Add(employee);
+
+      context.LeaveTypes.Add(new LeaveType
+      {
+        Id = 1,
+        Code = "AL",
+        Name = "Annual Leave",
+        Description = "Annual Leave",
+        IsActive = true
+      });
+
+      context.LeaveEntitlementRules.Add(new LeaveEntitlementRule
+      {
+        Id = 1,
+        LeaveTypeId = 1,
+        GroupKey = "GROUP_A",
         MinYearsService = 0,
         DaysAllocated = 15,
         IsActive = true
@@ -187,7 +194,6 @@ new Position { PositionId = 2, JobGradeId = 1, OccupationalLevelId = 1 }
       Assert.Single(context.EmployeeLeaveBalances);
     }
 
-    // ---------------- PROMOTION ----------------
 
     [Fact]
     public async Task Promotion_ShouldPreserveTakenDays()
@@ -197,6 +203,17 @@ new Position { PositionId = 2, JobGradeId = 1, OccupationalLevelId = 1 }
       context.JobGrades.AddRange(
           new JobGrade { JobGradeId = 1, Name = "G1" },
           new JobGrade { JobGradeId = 2, Name = "G2" });
+      context.JobGradeGroupMaps.AddRange(
+          new JobGradeGroupMap
+          {
+            JobGradeId = 1,
+            GroupKey = "GROUP_A"
+          },
+          new JobGradeGroupMap
+          {
+            JobGradeId = 2,
+            GroupKey = "SENIOR"
+          });
 
       context.OccupationalLevels.Add(new OccupationalLevel { OccupationalLevelId = 1, Description = "Level 1" });
 
@@ -236,7 +253,7 @@ new Position { PositionId = 2, JobGradeId = 1, OccupationalLevelId = 1 }
           {
             Id = 1,
             LeaveTypeId = 1,
-            JobGradeId = 1,
+            GroupKey = "GROUP_A",
             DaysAllocated = 15,
             IsActive = true
           },
@@ -244,7 +261,7 @@ new Position { PositionId = 2, JobGradeId = 1, OccupationalLevelId = 1 }
           {
             Id = 2,
             LeaveTypeId = 1,
-            JobGradeId = 2,
+            GroupKey = "SENIOR",
             DaysAllocated = 20,
             IsActive = true
           });
@@ -282,7 +299,6 @@ new Position { PositionId = 2, JobGradeId = 1, OccupationalLevelId = 1 }
       Assert.Equal(5, context.EmployeeLeaveBalances.First().TakenDays);
     }
 
-    // ---------------- RESET ----------------
 
     [Fact]
     public async Task Reset_ShouldCapCarryoverAtFive()
@@ -290,6 +306,11 @@ new Position { PositionId = 2, JobGradeId = 1, OccupationalLevelId = 1 }
       var context = GetDb();
 
       context.JobGrades.Add(new JobGrade { JobGradeId = 1, Name = "G1" });
+      context.JobGradeGroupMaps.Add(new JobGradeGroupMap
+      {
+        JobGradeId = 1,
+        GroupKey = "GROUP_A"
+      });
       context.OccupationalLevels.Add(new OccupationalLevel { OccupationalLevelId = 1, Description = "Level 1" });
       context.Positions.AddRange(
           new Position { PositionId = 1, JobGradeId = 1, OccupationalLevelId = 1 },
@@ -319,7 +340,7 @@ new Position { PositionId = 2, JobGradeId = 1, OccupationalLevelId = 1 }
       {
         Id = 1,
         LeaveTypeId = 1,
-        JobGradeId = 1,
+        GroupKey = "GROUP_A",
         DaysAllocated = 15,
         IsActive = true
       });
@@ -341,7 +362,6 @@ new Position { PositionId = 2, JobGradeId = 1, OccupationalLevelId = 1 }
       Assert.Equal(5, context.EmployeeLeaveBalances.First().CarryoverDays);
     }
 
-    // ---------------- VALIDATION ----------------
 
     [Fact]
     public async Task Initialize_ShouldThrowIfEmployeeNotFound()

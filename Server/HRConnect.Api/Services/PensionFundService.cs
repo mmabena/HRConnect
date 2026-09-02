@@ -42,7 +42,7 @@
     }
 
     // Pension Options
-    public async Task<IEnumerable<PensionOption>> GetPensionOptionsAsync(CancellationToken cancellationToken)
+    public async Task<IEnumerable<PensionOptionDto>> GetPensionOptionsAsync(CancellationToken cancellationToken)
     {
       return await optionRepo.GetPensionOptionsAsync(cancellationToken);
     }
@@ -59,9 +59,9 @@
         return ServiceResult.Failure("Percentage must be between 0 and 15.");
       }
 
-      IEnumerable<PensionOption> existingOptions = await optionRepo.GetPensionOptionsAsync(cancellationToken);
+      IEnumerable<PensionOptionDto> existingOptions = await optionRepo.GetPensionOptionsAsync(cancellationToken);
 
-      foreach (PensionOption option in existingOptions)
+      foreach (PensionOptionDto option in existingOptions)
       {
         if (option.ContributionPercentage == pensionOption.ContributionPercentage)
         {

@@ -19,7 +19,7 @@
       }
 
       if (employeePensionEnrollmentAddDto.VoluntaryContribution != null && employeePensionEnrollmentAddDto.VoluntaryContribution > decimal.Zero
-        && employeePensionEnrollmentAddDto.IsVoluntaryContributionPermament is null)
+        && employeePensionEnrollmentAddDto.IsVoluntaryContributionPermanent is null)
       {
         throw new ValidationException("Voluntary contribution has to be permament or once-off");
       }
@@ -54,7 +54,7 @@
       }
 
       if (employeePensionEnrollmentUpdateDto.VoluntaryContribution != null && employeePensionEnrollmentUpdateDto.VoluntaryContribution > decimal.Zero
-        && employeePensionEnrollmentUpdateDto.IsVoluntaryContributionPermament is null)
+        && employeePensionEnrollmentUpdateDto.IsVoluntaryContributionPermanent is null)
       {
         throw new ValidationException("Voluntary contribution has to be permament or once-off");
       }

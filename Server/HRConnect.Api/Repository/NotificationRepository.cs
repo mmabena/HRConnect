@@ -29,13 +29,26 @@ namespace HRConnect.Api.Repository
 
     public async Task<IEnumerable<Notification>> GetEmployeeNotificationsAsync(string employeeId)
     {
+      Console.WriteLine("========== Notification Repository ==========");
+      Console.WriteLine($"EmployeeId received: '{employeeId}'");
+
       List<Notification> notifications = await _context.Notifications.AsNoTracking().Where(n =>
         (n.EmployeeId == employeeId) &&
         (n.DeliveryChannel == DeliveryChannel.InApp))
         .OrderBy(n => n.Severity)
         .ToListAsync();
-      if (notifications == null)
-        return [];
+
+      Console.WriteLine($"Notifications found: {notifications.Count}");
+      foreach (var notification in notifications)
+      {
+        Console.WriteLine(
+            $"Id: {notification.NotificationId} | " +
+            $"Employee: {notification.EmployeeId} | " +
+            $"Channel: {notification.DeliveryChannel} | " +
+            $"Subject: {notification.Subject}");
+      }
+
+      Console.WriteLine("============================================");
       return notifications;
     }
     /// <summary>
@@ -95,7 +108,7 @@ namespace HRConnect.Api.Repository
     {
       await _context.Notifications.Where(n =>
       (n.EmployeeId == employeeId) &&
-      !new[] { NotificationType.Payroll, NotificationType.TaxUpload }.Contains(n.Type)
+      !new[] { /*NotificationType.Payroll,*/ NotificationType.TaxUpload }.Contains(n.Type)
       ).ExecuteUpdateAsync(s => s.SetProperty(n => n.IsRead,
       n => true));
 
@@ -126,15 +139,33 @@ namespace HRConnect.Api.Repository
     public async Task<Notification?> TryCreateUnreadAsync(Notification notification)
     {
       using var tsx = await _context.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
-
+      Console.WriteLine("========== TryCreateUnread ==========");
+      Console.WriteLine($"Notification Type : {notification.Type}");
+      Console.WriteLine($"EmployeeId        : {notification.EmployeeId}");
+      Console.WriteLine($"Message           : {notification.Message}");
+      Console.WriteLine($"Idempotency Key   : {notification.IdempotencyKey}");
       var existsUnread = await TryAndAquireAsync(notification.IdempotencyKey);
       if (existsUnread != null)
+      {
+        Console.WriteLine("Duplicate notification found.");
+        Console.WriteLine($"Existing NotificationId : {existsUnread.NotificationId}");
+        Console.WriteLine($"Existing CreatedAt      : {existsUnread.CreatedAt}");
+        Console.WriteLine($"Existing IsRead         : {existsUnread.IsRead}");
+        Console.WriteLine("Returning existing notification.");
+        Console.WriteLine("====================================");
+
         return existsUnread;
+
+      }
+      Console.WriteLine("No duplicate found.");
+      Console.WriteLine("Creating new notification...");
 
       _ = await _context.Notifications.AddAsync(notification);
       _ = await _context.SaveChangesAsync();
 
       await tsx.CommitAsync();
+      Console.WriteLine($"Created NotificationId : {notification.NotificationId}");
+      Console.WriteLine("====================================");
       return notification;
     }
     public async Task<bool> DeleteAllReadAsync()
