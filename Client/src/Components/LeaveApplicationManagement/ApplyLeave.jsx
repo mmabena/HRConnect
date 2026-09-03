@@ -217,15 +217,15 @@ const ApplyLeave = () => {
           </p>
         </div>
 
-        <button className="back-btn" onClick={() => setShowHistory(true)}>
-          <ArrowLeft className="back-icon" />
+        <button className="apply-leave-back-btn" onClick={() => setShowHistory(true)}>
+          <ArrowLeft className="apply-leave-back-icon" />
           Back to History
         </button>
       </div>
 
       <div className="apply-grid">
         <div className="apply-left">
-          <div className="section">
+          <div className="apply-leave-section">
             {successMessage && (
               <div className="success-message">{successMessage}</div>
             )}
@@ -233,12 +233,12 @@ const ApplyLeave = () => {
             {errors.submit && (
               <div className="submit-error-message">{errors.submit}</div>
             )}
-            <p className="section-title">LEAVE DETAILS</p>
+            <p className="apply-leave-section-title">LEAVE DETAILS</p>
 
-            <div className="form-group">
+            <div className="apply-leave-form-group">
               <label>Leave Type</label>
               <select
-                className="input"
+                className="apply-leave-input"
                 onChange={(e) => setSelectedLeaveId(e.target.value)}
               >
                 <option value="">Leave Type</option>
@@ -255,13 +255,13 @@ const ApplyLeave = () => {
             </div>
 
             <div className="row date-row">
-              <div className="form-group">
+              <div className="apply-leave-form-group">
                 <label>Start Date</label>
 
                 <div className="date-wrapper">
                   <input
                     type="date"
-                    className="input date-input"
+                    className="apply-leave-input apply-leave-date-input"
                     value={startDate}
                     onChange={(e) => {
                       const selected = e.target.value;
@@ -296,13 +296,13 @@ const ApplyLeave = () => {
                 </div>
               </div>
 
-              <div className="form-group">
+              <div className="apply-leave-form-group">
                 <label>End Date</label>
 
                 <div className="date-wrapper">
                   <input
                     type="date"
-                    className="input date-input"
+                    className="apply-leave-input apply-leave-date-input"
                     value={endDate}
                     onChange={(e) => {
                       const selected = e.target.value;
@@ -343,21 +343,21 @@ const ApplyLeave = () => {
               <span className="error-text2">{errors.endDate}</span>
             )}
             <div className="row">
-              <div className="form-group">
+              <div className="apply-leave-form-group">
                 <label>Number of Days</label>
                 <input
                   type="text"
-                  className="input disabled"
+                  className="apply-leave-input disabled"
                   value={requestedDays > 0 ? `${requestedDays} Days` : ""}
                   disabled
                 />
               </div>
 
-              <div className="form-group">
+              <div className="apply-leave-form-group">
                 <label>Leave balance</label>
                 <input
                   type="text"
-                  className="input disabled"
+                  className="apply-leave-input disabled"
                   value={
                     remainingBalance !== null
                       ? `${safeRemaining} Days remaining`
@@ -372,10 +372,10 @@ const ApplyLeave = () => {
               <span className="error-text">{errors.leaveBalance}</span>
             )}
           </div>
-          <div className="section">
-            <p className="section-title">SUPPORTING INFORMATION</p>
+          <div className="apply-leave-section">
+            <p className="apply-leave-section-title">SUPPORTING INFORMATION</p>
 
-            <div className="form-group">
+            <div className="apply-leave-form-group">
               <label>Description / Reason</label>
               <textarea
                 className="textarea"
@@ -388,7 +388,7 @@ const ApplyLeave = () => {
               )}
             </div>
 
-            <div className="form-group">
+            <div className="apply-leave-form-group">
               <label>Attach Supporting Document</label>
 
               <div
@@ -411,7 +411,7 @@ const ApplyLeave = () => {
                 <div className="upload-content">
                   {files.length === 0 ? (
                     <>
-                      <Upload className="leaveUpload-icon" />
+                      <Upload className="apply-leave-Upload-icon" />
 
                       <p>Click to upload or drag a file here</p>
 
@@ -541,7 +541,7 @@ const ApplyLeave = () => {
           </div>
         </div>
       </div>
-      <div className="form-actions">
+      <div className="apply-leave-form-actions">
         <button
           className="submit-btn"
           onClick={handleSubmit}

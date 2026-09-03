@@ -2,16 +2,13 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-
   padding: 0px;
-  gap: 800px;
-
+  gap: 720px;
   width: 1430px;
   height: 80px;
-
   position: relative;
   top: 15px;
-  left: 50px;
+  left: 0px;
 }
 
 .apply-header > div {
@@ -83,22 +80,18 @@
   margin: 0;
 }
 
-.back-btn {
+.apply-leave-back-btn {
   display: flex;
   justify-content: center;
   align-items: center;
   position: relative;
   left: 90px;
-
   padding: 5px 10px;
-
   width: 187px;              
   height: 47px;
-
   background: #355867;
   opacity: 0.9;
   border-radius: 10px;
-
   color: #ffffff;
   font-family: 'Anek Bangla';
   font-size: 20px;           
@@ -107,7 +100,7 @@
   cursor: pointer;
   gap: 8px;
 }
-.back-icon {
+.apply-leave-back-icon {
   width: 24px;
   height: 24px;
 
@@ -116,15 +109,12 @@
 }
 .apply-grid {
   box-sizing: border-box;
-
   display: flex;
   align-items: flex-start;
-  gap: 40px;
-
+  gap: 0px;
   position: relative;
-  left: 100px;
-  top: 20px;
-
+  left: 50px;
+  top: 5px;
   width: calc(100% - 55px);
   max-width: 1450px;
 }
@@ -141,39 +131,33 @@
   box-sizing: border-box;
 }
 
-.section {
+.apply-leave-section {
   width: 100%;
   box-sizing: border-box;
   margin-bottom: 24px;
 }
-.section-title {
+.apply-leave-section-title {
   box-sizing: border-box;
-
   width: 100%;
   height: 48px;
-
   border-bottom: 1px solid #C3BEBE;
-
   font-family: 'Anek Bangla';
   font-weight: 400;
   font-size: 16px;
   line-height: 26px;
-
   color: #4F6E78;
-
   display: flex;
   align-items: center;
-
   padding-left: 0;
   margin: 0;
 }
-.form-group {
+.apply-leave-form-group {
   width: 100%;
   max-width: 764px;
   margin-top: 15px;
   box-sizing: border-box;
 }
-.form-group label {
+.apply-leave-form-group label {
   font-family: 'Anek Bangla';
   font-size: 16px;
   line-height: 26px;
@@ -182,7 +166,7 @@
   display: block;
   margin-bottom: 5px;
 }
-.input {
+.apply-leave-input {
   box-sizing: border-box;
 
   width: 100%;
@@ -253,9 +237,7 @@
   font-family: 'Anek Bangla';
   font-size: 16px;
   line-height: 26px;
-
   color: #707070;
-
   margin: 0;
 }
 
@@ -265,16 +247,15 @@
 
   color: #707070;
 }
-.form-actions {
+.apply-leave-form-actions {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-start;
   align-items: center;
-
   gap: 470px;
-
+  margin-left: -50px;
   width: 100%;          
-  margin-top: 35px;    
+  margin-top: 0px;    
 }
 .submit-btn {
   display: flex;
@@ -353,21 +334,16 @@
 }
 .apply-right {
   width: 501px;
-
   display: flex;
   flex-direction: column;
-
   gap: 50px;
-
   position: relative;
-  left: 100px;
+  left: 60px;
   top: 0;
 }
 .card {
   width: 100%;
-
   padding: 16px;
-
   background: rgba(255, 255, 255, 0.8);
   border: 1px solid rgba(0, 0, 0, 0.25);
   border-radius: 10px;
@@ -376,11 +352,8 @@
   font-family: 'Anek Bangla';
   font-size: 16px;
   color: #4F6E78;
-
   position: relative;
-
   margin: 0 0 15px 0;
-
   text-align: left;
   align-self: flex-start;
 }
@@ -388,11 +361,9 @@
 .progress-item {
   display: flex;
   flex-direction: column;
-
   width: 100%;
   padding-bottom: 10px;
   margin-bottom: 10px;
-
   border-bottom: 1px solid #C3BEBE;
 }
 .progress-item span {
@@ -545,7 +516,7 @@
 .progress-bar.orange {
   background: #f59e0b;
 }
-select.input {
+select.apply-leave-input {
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -559,23 +530,17 @@ select.input {
   width: 355px;
 }
 
-.date-input {
-  width: 355px;
+.apply-leave-date-input {
+  width: 347px;
   height: 40px;
-
   box-sizing: border-box;
-
   position: relative;
   z-index: 2;
-
   color: #002D40;
-
   font-family: 'Anek Bangla';
   font-size: 16px;
-
   padding-right: 45px;
   padding-left: 12px;
-
   background: transparent;
 }
 .calendar-icon {
@@ -606,27 +571,20 @@ select.input {
   display: flex;
   align-items: flex-start;
   justify-content: flex-start;
-
   gap: 67px;
-
-  width: 787px;
-
+  width: 347px;
   margin-top: 15px;
 }
+
 .formatted-date {
   position: absolute;
   left: 12px;
   top: 50%;
-
   transform: translateY(-50%);
-
   font-family: 'Anek Bangla';
   font-size: 16px;
-
   color: #002D40;
-
   pointer-events: none;
-
   z-index: 1;
 }
 .date-input::-webkit-datetime-edit,
@@ -750,11 +708,11 @@ input:disabled {
 .upload-box {
   position: relative;
 }
-.leaveUpload-icon {
+.apply-leave-Upload-icon {
   position: absolute;
   width: 24px;
   height: 24px;
-  margin-top: -30px;
+  margin-top: -10px;
   left: 365px;
   top: 15px;
   color: #707070;
