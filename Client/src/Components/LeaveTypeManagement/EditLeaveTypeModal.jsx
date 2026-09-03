@@ -214,25 +214,25 @@ const validate = () => {
       </>
     )}
 
-    <div className="actions">
+    <div className="edit-leave-actions">
       {!isEditing ? (
         <>
-          <button className="cancel" onClick={onClose}>
+          <button className="edit-leave-cancel" onClick={onClose}>
             Back
           </button>
 
-          <button className="next" onClick={() => setIsEditing(true)}>
+          <button className="edit-leave-next" onClick={() => setIsEditing(true)}>
             Edit
           </button>
         </>
       ) : (
         <>
-          <button className="cancel" onClick={onClose}>
+          <button className="edit-leave-cancel" onClick={onClose}>
             Cancel
           </button>
 
           <button
-            className="next"
+            className="edit-leave-next"
             onClick={handleSubmit}
             disabled={!hasChanges}
           >

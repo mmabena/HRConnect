@@ -141,19 +141,17 @@
 .impact-action-buttons {
   display: flex;
   align-items: center;
+  margin-right: 92px;
   gap: 30px;
 }
 .impact-table-wrapper {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-
   padding: 20px 0px;
   gap: 1px;
-
-  width: 1441px;
+  width: 1350px;
   min-height: 547px;
-
   border-radius: 0px 0px 10px 10px;
 }
 
@@ -165,7 +163,7 @@
 
   padding: 0px 16px 0px 13px;
 
-  width: 1441px;
+  width: 1350px;
   height: 59px;
 
   background: rgba(53, 88, 103, 0.15);
@@ -182,14 +180,10 @@
   color: #002D40;
 }
 .impact-table {
-  width: 1441px;
-
+  width: 1350px;
   border-collapse: collapse;
-
   background: #FFFFFF;
-
   border-radius: 0px 0px 10px 10px;
-
   overflow: hidden;
 }
 

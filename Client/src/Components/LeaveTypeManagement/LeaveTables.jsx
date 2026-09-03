@@ -219,7 +219,9 @@ const LeaveTables = () => {
 
         <AnnualLeaveModal
           isOpen={showAnnualModal}
-          onClose={() => setShowAnnualModal(false)}
+          onClose={() => { setShowAnnualModal(false);
+            setIsViewMode(true);
+          }}
           leaveTypes={[...active, ...inactive]}
           selectedId={selectedLeaveId}
           onSuccess={fetchData}

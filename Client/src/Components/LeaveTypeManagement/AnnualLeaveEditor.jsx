@@ -414,7 +414,7 @@ const AnnualLeaveEditor = ({
         ) : (
           <>
             <div className="impact-change-line">
-              <span className="impact-change-text">You modified</span>
+              <span className="impact-change-text">You modified </span>
 
               <span className="impact-employee-count">{totalChangedRules}</span>
 
@@ -438,25 +438,25 @@ const AnnualLeaveEditor = ({
           </>
         )}
       </div>
-      <div className="actions">
+      <div className="annual-leave-actions">
         {!isEditing ? (
           <>
-            <button className="cancel" onClick={onClose}>
+            <button className="annual-leave-cancel" onClick={onClose}>
               Back
             </button>
 
-            <button className="next" onClick={() => setIsEditing(true)}>
+            <button className="annual-leave-next" onClick={() => setIsEditing(true)}>
               Edit
             </button>
           </>
         ) : (
           <>
-            <button className="cancel" onClick={onClose}>
+            <button className="annual-leave-cancel" onClick={onClose}>
               Cancel
             </button>
 
             <button
-              className="next"
+              className="annual-leave-next"
               disabled={!hasChanges}
               onClick={async () => {
                 setIsCheckingImpact(true);

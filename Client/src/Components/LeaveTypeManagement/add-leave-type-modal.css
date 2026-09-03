@@ -198,20 +198,20 @@ position: relative;
   outline: none;
   background: transparent;
 }
-.actions {
+.edit-leave-actions {
   display: flex;
   justify-content: center;
   gap: 15px; 
   margin-top: 20px;
 }
-.cancel {
+.edit-leave-cancel {
   box-sizing: border-box;
 
   display: flex;
   justify-content: center;
   align-items: center;
 
-  width: 193px;
+  width: 200px;
   height: 37px;
 
   background: rgba(0, 0, 0, 0.1);
@@ -221,12 +221,12 @@ position: relative;
   color: #002D40;
   cursor: pointer;
 }
-/* .next {
+.edit-leave-next {
   display: flex;
   justify-content: center;
   align-items: center;
 
-  width: 250px;
+  width: 200px;
   height: 37px;
 
   background: #355867;
@@ -235,7 +235,7 @@ position: relative;
 
   color: white;
   cursor: pointer;
-} */
+}
 .femaleOnly {
   position: relative;
   top: -22px;

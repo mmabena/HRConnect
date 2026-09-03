@@ -2,101 +2,131 @@
 .annual-wrapper {
   width: 100%;
   max-width: 100%;
-  margin: 0 auto;
+  margin: 85px auto 0;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 20px;
   position: relative;
 }
 
 .tabs {
   box-sizing: border-box;
-
+  width: 612px;
+  height: 57px;
   display: flex;
+  flex-direction: row;
   justify-content: center;
   align-items: center;
-  height: 57px;
-
+  padding: 0;
+  gap: 42px;
   border: 1px solid rgba(53, 88, 103, 0.39);
   border-radius: 5px;
-
   overflow: hidden;
+  flex: none;
 }
 
 .tabs button {
-  flex: 1;
-
-  height: 100%;
-
+  box-sizing: border-box;
+  width: 176px;
+  height: 55px;
+  flex: none;
   border: none;
+  border-radius: 0;
   background: #ffffff;
-
-  font-size: 14px;
+  font-family: "Anek Bangla", sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 26px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
   color: #355867;
-
   cursor: pointer;
 }
 
 .tabs button.active {
-  background: rgba(53, 88, 103, 0.15);
-  font-weight: 600;
+  background: rgba(53, 88, 103, 0.35);
+  font-weight: 500;
 }
 
 
 .rule-box {
-  border: 1px solid #cfd8dc;
-  border-radius: 10px;
-  background: #fafafa;
-  width: 100%;
   box-sizing: border-box;
-  padding: 15px;
-  min-height: 250px;           
+  width: 612px;
+  height: 275px;
+  border: 1px solid rgba(53, 88, 103, 0.39);
+  border-radius: 5px;
+  background: #ffffff;
   display: flex;
   flex-direction: column;
+  position: relative;
+  overflow: hidden;
 }
 
 .rule-header {
+  box-sizing: border-box;
+  width: 100%;
+  height: 55px;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  font-weight: 600;
+  grid-template-columns: 150px 150px 150px;
+  column-gap: 54px;
+  align-items: center;
+  padding: 0 27px;
+  margin: 0;
+  flex: none;
+}
+
+.rule-header span {
+  font-family: "Anek Bangla", sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
-  margin-bottom: 10px;
-  font-size: 13px;
   color: #355867;
 }
 
 .rule-row {
+  box-sizing: border-box;
+  width: 100%;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 40px;
+  grid-template-columns: 150px 150px 150px;
+  column-gap: 54px;
+  flex: none;
 }
 
 .rule-row input {
   box-sizing: border-box;
-
-  width: 100%;
+  width: 150px;
   height: 40px;
-
   padding: 10px;
-
   border: 1px solid rgba(53, 88, 103, 0.37);
   border-radius: 5px;
-
   background: #ffffff;
-
-  font-size: 14px;
-  color: #002D40;
-
-  text-align: center;
+  font-family: "Anek Bangla", sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 26px;
+  color: #355867;
+  text-align: left;
+  outline: none;
 }
+
 .rule-body {
-  height: 220px;
-  overflow-y: scroll;
-  padding: 10px 10px 8px;
   box-sizing: border-box;
-
-  scrollbar-gutter: stable both-edges;
-
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 21.24px;
+  padding: 16.88px 27px 10px;
+  overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: rgba(53, 88, 103, 0.35) transparent;
 }
@@ -126,11 +156,18 @@
   cursor: pointer;
   font-size: 12px;
 }
+
 .days-edit {
+  width: 150px;
+  height: 40px;
   display: flex;
   align-items: center;
   gap: 6px;
-  width: 100%;
+}
+
+.days-edit input {
+  flex: 1;
+  min-width: 0;
 }
 
 .diff {
@@ -142,7 +179,7 @@
 
 
 .add-range {
-  margin-top: 6px;
+  margin-top: 4px;
   background: transparent;
   border: none;
   color: #355867;
@@ -152,59 +189,86 @@
 }
 
 .impact-box {
+  box-sizing: border-box;
+  width: 612px;
+  height: 103px;
   border: 1px solid rgba(53, 88, 103, 0.35);
-  border-radius: 8px;
-  padding: 20px 24px;
-  margin-top: 16px;
-
-  background: #f9fbfb;
-
+  border-radius: 10px;
+  background: #ffffff;
+  margin-top: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  position: relative;
+  overflow: hidden;
 }
+
+
 .impact-change-line {
+  box-sizing: border-box;
+  height: 26px;
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-
-  font-family: 'Instrument Sans', sans-serif;
-  font-size: 14px;
+  font-family: "Instrument Sans", sans-serif;
+  font-style: normal;
   font-weight: 500;
+  font-size: 14px;
+  line-height: 26px;
+  color: #355867;
+  white-space: nowrap;
+}
+
+.impact-change-line:first-child {
+  position: absolute;
+  left: 33px;
+  top: 16.86px;
+}
+
+.impact-change-line:nth-child(2) {
+  position: absolute;
+
+  left: 33px;
+  top: 42.86px;
+
+  height: 26px;
+
+  font-family: "Instrument Sans", sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 26px;
+
   color: #355867;
 }
 
 .impact-employee-line {
-  font-family: 'Instrument Sans', sans-serif;
-  font-size: 14px;
+  position: absolute;
+  left: 33px;
+  top: 65.86px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  font-family: "Instrument Sans", sans-serif;
+  font-style: normal;
   font-weight: 500;
+  font-size: 14px;
+  line-height: 26px;
   color: #355867;
-  text-align: left;
+  white-space: nowrap;
 }
 
 .impact-change-text {
+  font-family: "Instrument Sans", sans-serif;
   font-weight: 500;
   color: #355867;
 }
 
 .impact-employee-count {
+  font-family: "Instrument Sans", sans-serif;
+  font-weight: 500;
   color: #D9534F;
-  font-weight: 700;
 }
 
-.impact-old-days,
-.impact-new-days {
-  font-weight: 700;
-  color: #002D40;
-}
-
-.impact-arrow {
-  width: 20px;
-  height: 20px;
-  color: #355867;
-  flex-shrink: 0;
-}
 
 .impact-no-change {
   font-family: 'Instrument Sans', sans-serif;
@@ -214,38 +278,80 @@
 }
 
 
-.actions {
+.annual-leave-actions {
+  box-sizing: border-box;
+  position: static;
+  width: 674px;
+  height: 37px;
   display: flex;
-  justify-content: space-between;
-  margin-top: 15px;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-end;
+  padding: 0 49px;
+  gap: 165px;
+  margin-top: 25px;
 }
 
-.cancel {
-  background: #e0e0e0;
-  border: none;
-  padding: 8px 18px;
-  border-radius: 6px;
+.annual-leave-cancel {
+  box-sizing: border-box;
+  width: 193px;
+  height: 37px;
+  position: static;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 0 50px;
+  gap: 5px;
+  background: rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(154, 154, 154, 0.55);
+  border-radius: 5px;
+  font-family: "Instrument Sans", sans-serif;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 26px;
+  color: #5C5C5C;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
-/* .next {
+.annual-leave-next {
+  box-sizing: border-box;
+  width: 250px;
+  height: 37px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 0 ;
+  gap: 3.5px;
   background: #355867;
-  color: white;
   border: none;
-  padding: 8px 18px;
-  border-radius: 6px;
+  border-radius: 5px;
+  font-family: "Instrument Sans", sans-serif;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 26px;
+  color: #FFFFFF;
   cursor: pointer;
-} */
+  flex-shrink: 0;
+}
+
+
 .message-text {
   position: absolute;
   top: -58px;
   left: 50%;
   transform: translateX(-50%);
-
   padding: 10px 18px;
   border-radius: 6px;
+  font-family: "Instrument Sans", sans-serif;
   font-size: 12px;
+  white-space: nowrap;
 }
+
 .message-text.error {
   color: #eb1111;
 }
@@ -256,9 +362,18 @@
 .next:disabled {
   background: rgba(0, 0, 0, 0.1);
   color: #355867;
+  border: 1px solid rgba(154, 154, 154, 0.55);
   cursor: not-allowed;
 }
+
+
 .input-error {
   border: 1px solid #e83131 !important;
   background-color: rgba(232, 49, 49, 0.05);
 }
+
+
+
+/*=======================================================================================*/
+
+
